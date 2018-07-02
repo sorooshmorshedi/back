@@ -1,3 +1,3 @@
-from django.shortcuts import render
+from accounts.costCenter.views import *
+from accounts.accounts.views import *
 
-# Create your views here.
