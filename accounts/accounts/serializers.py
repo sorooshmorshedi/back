@@ -24,6 +24,12 @@ class AccountTypeSerializer(serializers.ModelSerializer):
         fields = ('pk', 'name', 'type', 'explanation')
 
 
+class IndependentAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IndependentAccount
+        fields = ('pk', 'name', 'explanation')
+
+
 class AccountSerializer(serializers.ModelSerializer):
     children = serializers.ListSerializer(read_only=True, child=RecursiveField())
     title = serializers.SerializerMethodField()

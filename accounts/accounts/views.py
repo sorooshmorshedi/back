@@ -33,6 +33,18 @@ class FloatAccountGroupDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FloatAccountGroupSerializer
 
 
+class IndependentAccountDetail(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    queryset = IndependentAccount.objects.all()
+    serializer_class = IndependentAccountSerializer
+
+
+class IndependentAccountListCreate(generics.ListCreateAPIView):
+    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    queryset = IndependentAccount.objects.all()
+    serializer_class = IndependentAccountSerializer
+
+
 # ChangeIt to list
 class AccountTypeListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, AccountListCreate,)
