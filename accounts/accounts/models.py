@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.costCenter.models import CostCenter
+from accounts.costCenter.models import CostCenter, CostCenterGroup
 
 ACCOUNT_LEVELS = (
     (0, 'group'),
@@ -77,7 +77,7 @@ class Account(models.Model):
     level = models.IntegerField(choices=ACCOUNT_LEVELS)
 
     type = models.ForeignKey(AccountType, on_delete=models.SET_NULL, related_name='accounts', blank=True, null=True)
-    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
+    costCenterGroup = models.ForeignKey(CostCenterGroup, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 

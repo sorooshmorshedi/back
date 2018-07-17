@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
 from accounts.accounts.models import *
+from accounts.costCenter.serializers import CostCenterGroupSerializer
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
@@ -53,7 +54,7 @@ class AccountSerializer(serializers.ModelSerializer):
             'updated_at',
             'level',
             'type',
-            'costCenter',
+            'costCenterGroup',
             'parent',
             'title',
             'floatAccountGroup',
@@ -79,8 +80,8 @@ class AccountSerializer(serializers.ModelSerializer):
         if 'floatAccountGroup' in data.keys() and data['floatAccountGroup'] is not None and data['level'] != 3:
             raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
 
-        if 'costCenter' in data.keys() and data['costCenter'] is not None and data['level'] != 3:
-            raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای مرکز هزینه باشد")
+        if 'costCenterGroup' in data.keys() and data['costCenterGroup'] is not None and data['level'] != 3:
+            raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
 
         return data
 
@@ -95,6 +96,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class AccountListRetrieveSerializer(AccountSerializer):
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
+    costCenterGroup = CostCenterGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
 
 
