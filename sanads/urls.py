@@ -5,6 +5,7 @@ from .views import *
 
 
 urlpatterns = [
-    url(r'^$', CompanyListCreate.as_view(), name='companies'),
-    url(r'^(?P<pk>[0-9]+)$', CompanyDetail.as_view(), name='companyDetail'),
+
+    url(r'^RPTypes$', RPTypeListCreate.as_view(), name='companies'),
+    url(r'^RPTypes/(?P<pk>[0-9]+)$', RPTypeDetail.as_view(), name='companyDetail'),
 ]
