@@ -92,6 +92,46 @@ class Account(models.Model):
         ordering = ['code', ]
 
 
+class Person(models.Model):
+
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
+
+    phone1 = models.CharField(max_length=20, null=True, blank=True)
+    phone2 = models.CharField(max_length=20, null=True, blank=True)
+    mobile = models.CharField(max_length=20, null=True, blank=True)
+    website = models.URLField(null=True, blank=True)
+    fax = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+
+    address1 = models.CharField(max_length=255, null=True, blank=True)
+    address2 = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
+    province = models.CharField(max_length=255, null=True, blank=True)
+    postalCode = models.CharField(max_length=20, null=True, blank=True)
+    accountNumber1 = models.CharField(max_length=50, null=True, blank=True)
+    accountNumber2 = models.CharField(max_length=50, null=True, blank=True)
+    eghtesadiCode = models.CharField(max_length=50, null=True, blank=True)
+
+    type = models.CharField(choices=(('buyer', 'buyer'), ('seller', 'seller')), max_length=10)
+
+    file = models.FileField(null=True, blank=True)
+
+    def __str__(self):
+        return "{0} - {1}".format(self.account.code, self.account.name)
 
 
+class Bank(models.Model):
 
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
+
+    name = models.CharField(max_length=100, null=True, blank=True)
+    branch = models.CharField(max_length=100, null=True, blank=True)
+    branchCode = models.CharField(max_length=20, null=True, blank=True)
+    accountNumber = models.CharField(max_length=50, null=True, blank=True)
+    sheba = models.CharField(max_length=50, null=True, blank=True)
+    phone = models.CharField(max_length=30, null=True, blank=True)
+
+    file = models.FileField(null=True, blank=True)
+
+    def __str__(self):
+        return "{0} - {1}".format(self.account.code, self.account.name)

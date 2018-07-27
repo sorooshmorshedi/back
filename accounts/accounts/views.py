@@ -74,3 +74,26 @@ class AccountDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = AccountListRetrieveSerializer(account)
         return Response(serializer.data)
 
+
+class PersonListCreate(generics.ListCreateAPIView):
+    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+
+
+class PersonDetail(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    queryset = Person.objects.all()
+    serializer_class = PersonSerializer
+
+
+class BankListCreate(generics.ListCreateAPIView):
+    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    queryset = Bank.objects.all()
+    serializer_class = BankSerializer
+
+
+class BankDetail(generics.RetrieveUpdateDestroyAPIView):
+    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    queryset = Bank.objects.all()
+    serializer_class = BankSerializer

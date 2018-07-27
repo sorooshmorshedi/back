@@ -7,7 +7,7 @@ from sanads.models import RPType
 class RPTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = RPType
-        fields = ('pk', 'name', 'exp', 'account', 'usage')
+        fields = ('id', 'name', 'exp', 'account', 'usage')
 
     def validate(self, data):
         if data['account'].level != 3:

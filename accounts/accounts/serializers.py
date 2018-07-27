@@ -8,7 +8,7 @@ from accounts.costCenter.serializers import CostCenterGroupSerializer
 class FloatAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloatAccount
-        fields = ('pk', 'name', 'explanation', 'max_bed', 'max_bes', 'max_bed_with_sanad', 'max_bes_with_sanad', 'floatAccountGroup')
+        fields = ('id', 'name', 'explanation', 'max_bed', 'max_bes', 'max_bed_with_sanad', 'max_bes_with_sanad', 'floatAccountGroup')
 
 
 class FloatAccountGroupSerializer(serializers.ModelSerializer):
@@ -16,19 +16,19 @@ class FloatAccountGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FloatAccountGroup
-        fields = ('pk', 'name', 'explanation', 'floatAccounts')
+        fields = ('id', 'name', 'explanation', 'floatAccounts')
 
 
 class AccountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountType
-        fields = ('pk', 'name', 'type', 'explanation')
+        fields = ('id', 'name', 'type', 'explanation')
 
 
 class IndependentAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndependentAccount
-        fields = ('pk', 'name', 'explanation')
+        fields = ('id', 'name', 'explanation')
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -40,26 +40,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = (
-            'pk',
-            'name',
-            'code',
-            'explanation',
-            'is_disabled',
-            'max_bed',
-            'max_bes',
-            'max_bed_with_sanad',
-            'max_bes_with_sanad',
-            'created_at',
-            'updated_at',
-            'level',
-            'type',
-            'costCenterGroup',
-            'parent',
-            'title',
-            'floatAccountGroup',
-            'children',
-        )
+        fields = '__all__'
 
     def validate(self, data):
         CODE_LENGTHS = [1, 3, 5, 9]
@@ -91,14 +72,41 @@ class AccountSerializer(serializers.ModelSerializer):
             data['type'] = data['parent'].type
 
         return Account.objects.create(**data)
-        return super(AccountSerializer, self).create(**data)
+        # return super(AccountSerializer, self).create(**data)
+
+
+class PersonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Person
+        fields = '__all__'
+
+    def validate(self, data):
+        if data['account'].level != 3:
+            raise serializers.ValidationError("حساب اشخاص باید سطح آخر باشد")
+
+        return data
+
+
+class BankSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bank
+        fields = '__all__'
+
+    def validate(self, data):
+        if data['account'].level != 3:
+            raise serializers.ValidationError("حساب بانک باید سطح آخر باشد")
+
+        return data
 
 
 class AccountListRetrieveSerializer(AccountSerializer):
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
     costCenterGroup = CostCenterGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
+    person = PersonSerializer(read_only=True, many=False)
+    bank = BankSerializer(read_only=True, many=False)
 
-
+    class Meta(AccountSerializer.Meta):
+        pass
 
 

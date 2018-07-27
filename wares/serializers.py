@@ -8,22 +8,22 @@ class UnitSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
-        return str(obj.pk) + ' - ' + obj.name
+        return str(obj.id) + ' - ' + obj.name
 
     class Meta:
         model = Unit
-        fields = ('pk', 'name', 'explanation', 'title')
+        fields = ('id', 'name', 'explanation', 'title')
 
 
 class WareHouseSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
-        return str(obj.pk) + ' - ' + obj.name
+        return str(obj.id) + ' - ' + obj.name
 
     class Meta:
         model = WareHouse
-        fields = ('pk', 'name', 'explanation', 'title')
+        fields = ('id', 'name', 'explanation', 'title')
 
 
 class WareSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class WareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ware
         fields = (
-            'pk',
+            'id',
             'name',
             'price',
             'code',
@@ -77,7 +77,7 @@ class WareLevelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WareLevel
-        fields = ('pk', 'code', 'name', 'explanation', 'children', 'title', 'parent', 'level')
+        fields = ('id', 'code', 'name', 'explanation', 'children', 'title', 'parent', 'level')
 
 
 

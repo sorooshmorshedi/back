@@ -59,13 +59,13 @@ class CompanyModelTests(TestCase):
 
     def test_get_detail(self):
         self.createCompany()
-        res = self.client.get(reverse('companyDetail', kwargs={'pk': 1}))
+        res = self.client.get(reverse('companyDetail', kwargs={'id': 1}))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_update_company(self):
         self.createCompany()
         res = self.client.put(
-            reverse('companyDetail', kwargs={'pk': 1}),
+            reverse('companyDetail', kwargs={'id': 1}),
             # '/companies/1',
             content_type='application/json',
             data=json.dumps({
