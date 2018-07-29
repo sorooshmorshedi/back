@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.costCenter.models import CostCenter, CostCenterGroup
+from accounts.costCenters.models import CostCenter, CostCenterGroup
 
 
 class CostCenterSerializer(serializers.ModelSerializer):

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
 from accounts.accounts.models import *
-from accounts.costCenter.serializers import CostCenterGroupSerializer
+from accounts.costCenters.serializers import CostCenterGroupSerializer
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):

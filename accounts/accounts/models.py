@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.costCenter.models import CostCenter, CostCenterGroup
+from accounts.costCenters.models import CostCenter, CostCenterGroup
 
 ACCOUNT_LEVELS = (
     (0, 'group'),
@@ -32,6 +32,9 @@ class FloatAccount(models.Model):
     is_disabled = models.BooleanField(default=False)
 
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='floatAccounts')
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         default_permissions = ()

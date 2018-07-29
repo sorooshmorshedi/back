@@ -1,3 +1,3 @@
-from accounts.costCenter.views import *
+from accounts.costCenters.views import *
 from accounts.accounts.views import *
 

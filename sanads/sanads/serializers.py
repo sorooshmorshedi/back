@@ -1,0 +1,51 @@
+from rest_framework import serializers
+from accounts.accounts.serializers import AccountListRetrieveSerializer
+
+from sanads.sanads.models import *
+
+
+class SanadItemSerializer(serializers.ModelSerializer):
+
+    def __init__(self, *args, **kwargs):
+        many = kwargs.pop('many', True)
+        super(SanadItemSerializer, self).__init__(many=many, *args, **kwargs)
+
+    class Meta:
+        model = SanadItem
+        fields = '__all__'
+
+    def validate(self, data):
+        if data['account'].level != 3:
+            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
+        if data['account'].floatAccountGroup:
+            if 'floatAccount' not in data:
+                raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
+            if data['floatAccount'].floatAccountGroup != data['account'].floatAccountGroup:
+                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+
+        if 'costCenter' in data and data['costCenter']:
+            if data['costCenter'].costCenterGroup != data['account'].costCenterGroup:
+                raise serializers.ValidationError("مرکز هزینه انتخاب شده باید مطعلق به گروه مرکز هزینه حساب باشد")
+
+        return data
+
+
+class SanadItemListRetrieveSerializer(SanadItemSerializer):
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
+
+    class Meta(SanadItemSerializer.Meta):
+        pass
+
+
+class SanadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sanad
+        fields = '__all__'
+
+
+class SanadListRetrieveSerializer(SanadSerializer):
+    items = SanadItemSerializer(read_only=True, many=True)
+
+    class Meta(SanadSerializer.Meta):
+        pass
+

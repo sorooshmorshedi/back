@@ -1,2 +1,2 @@
-from .costCenter.serializers import *
+from .costCenters.serializers import *
 from .accounts.serializers import *
