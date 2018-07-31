@@ -1,10 +1,11 @@
 from django.db import models
+from django_jalali.db import models as jmodels
 
 
 class Company(models.Model):
     name = models.CharField(unique=True, max_length=150)
-    fiscal_year_start = models.DateField()
-    fiscal_year_end = models.DateField()
+    fiscal_year_start = jmodels.jDateField()
+    fiscal_year_end = jmodels.jDateField()
     address1 = models.CharField(max_length=255, blank=True, null=True)
     address2 = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)

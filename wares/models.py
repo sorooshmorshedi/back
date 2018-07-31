@@ -1,5 +1,5 @@
 from django.db import models
-
+from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
 
 WARE_LEVELS = (
@@ -65,8 +65,8 @@ class Ware(models.Model):
     min_inventory = models.IntegerField(blank=True, null=True)
     max_inventory = models.IntegerField(blank=True, null=True)
 
-    created_at = models.DateField(auto_now=True)
-    updated_at = models.DateField(auto_now_add=True)
+    created_at = jmodels.jDateField(auto_now=True)
+    updated_at = jmodels.jDateField(auto_now_add=True)
 
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
     wareHouse = models.ForeignKey(WareHouse, on_delete=models.PROTECT, related_name='wares')

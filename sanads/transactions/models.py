@@ -18,7 +18,7 @@ class Transaction(models.Model):
     code = models.IntegerField(unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactions')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True, null=True)
-    date = jmodels.jDateField(blank=True)
+    date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True)
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='transaction', blank=True, null=True)
 
