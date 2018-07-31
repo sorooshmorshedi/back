@@ -15,4 +15,7 @@ class RPType(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='RPType',)
     usage = models.CharField(choices=USAGES, max_length=20)
 
+    def __str__(self):
+        return self.name
+
 

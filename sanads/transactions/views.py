@@ -1,4 +1,3 @@
-from django.template.backends import django
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -8,41 +7,39 @@ from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from sanads.models import *
-from sanads.sanads.serializers import *
+from sanads.transactions.serializers import *
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class SanadListCreate(generics.ListCreateAPIView):
+class TransactionListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, RPTypeListCreate,)
-    queryset = Sanad.objects.all()
-    serializer_class = SanadSerializer
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
 
     def list(self, request, *ergs, **kwargs):
-        queryset = Sanad.objects.all()
-        serializer = SanadListRetrieveSerializer(queryset, many=True)
+        queryset = Transaction.objects.all()
+        serializer = TransactionListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
-class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
+class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, RPTypeDetail,)
-    queryset = Sanad.objects.all()
-    serializer_class = SanadSerializer
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
 
     def retrieve(self, request, pk=None):
-        queryset = Sanad.objects.all()
+        queryset = Transaction.objects.all()
         sanad = get_object_or_404(queryset, pk=pk)
-        serializer = SanadListRetrieveSerializer(sanad)
+        serializer = TransactionListRetrieveSerializer(sanad)
         return Response(serializer.data)
 
 
-class SanadItemListCreate(viewsets.ModelViewSet):
+class TransactionItemListCreate(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated, RPTypeListCreate,)
-    queryset = SanadItem.objects.all()
-    serializer_class = SanadItemSerializer
+    queryset = TransactionItem.objects.all()
+    serializer_class = TransactionItemSerializer
 
     def create(self, request):
-
         if type(request.data) is not list:
             return super().create(request)
         serialized = self.serializer_class(data=request.data, many=True)
@@ -52,18 +49,13 @@ class SanadItemListCreate(viewsets.ModelViewSet):
         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request, *ergs, **kwargs):
-        queryset = SanadItem.objects.all()
-        serializer = SanadItemListRetrieveSerializer(queryset, many=True)
+        queryset = TransactionItem.objects.all()
+        serializer = TransactionItemListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
-
-
-class SanadItemDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeDetail,)
-    queryset = SanadItem.objects.all()
-    serializer_class = SanadItemSerializer
 
     def retrieve(self, request, pk=None):
-        queryset = SanadItem.objects.all()
+        queryset = TransactionItem.objects.all()
         sanadItem = get_object_or_404(queryset, pk=pk)
-        serializer = SanadItemListRetrieveSerializer(sanadItem)
+        serializer = TransactionItemListRetrieveSerializer(sanadItem)
         return Response(serializer.data)
+
