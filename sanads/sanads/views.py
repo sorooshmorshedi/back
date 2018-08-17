@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from sanads.models import *
 from sanads.sanads.serializers import *
@@ -42,7 +43,6 @@ class SanadItemListCreate(viewsets.ModelViewSet):
     serializer_class = SanadItemSerializer
 
     def create(self, request):
-
         if type(request.data) is not list:
             return super().create(request)
         serialized = self.serializer_class(data=request.data, many=True)
@@ -55,6 +55,26 @@ class SanadItemListCreate(viewsets.ModelViewSet):
         queryset = SanadItem.objects.all()
         serializer = SanadItemListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class SanadItemMass(APIView):
+    serializer_class = SanadItemSerializer
+
+    def put(self, request):
+        for item in request.data:
+            instance = SanadItem.objects.get(id=item['id'])
+            serialized = SanadItemSerializer(instance, data=item)
+            if serialized.is_valid():
+                serialized.save()
+            else:
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serialized.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        for itemId in request.data:
+            instance = SanadItem.objects.get(id=itemId)
+            instance.delete()
+        return Response([], status=status.HTTP_200_OK)
 
 
 class SanadItemDetail(generics.RetrieveUpdateDestroyAPIView):

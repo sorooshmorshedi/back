@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer
-from sanads.RPTypes.models import RPType
+from accounts.defaultAccounts.models import DefaultAccount
 
 
-class RPTypeSerializer(serializers.ModelSerializer):
+class DefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RPType
-        fields = ('id', 'name', 'exp', 'account', 'usage')
+        model = DefaultAccount
+        fields = ('id', 'name', 'explanation', 'account', 'usage')
 
     def validate(self, data):
         if data['account'].level != 3:
@@ -16,8 +16,11 @@ class RPTypeSerializer(serializers.ModelSerializer):
         return data
 
 
-class RPTypeListRetrieveSerializer(RPTypeSerializer):
+class DefaultAccountListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True)
 
+    class Meta:
+        model = DefaultAccount
+        fields = '__all__'
 
 

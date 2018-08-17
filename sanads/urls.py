@@ -9,16 +9,17 @@ from .views import *
 
 router = DefaultRouter()
 router.register(r'sanadItems', SanadItemListCreate)
-router.register(r'transactionItems', TransactionItemListCreate)
+router.register(r'transactionItems', TransactionItemModelView)
 
 urlpatterns = router.urls + [
 
-    url(r'^RPTypes$', RPTypeListCreate.as_view(), name='companies'),
-    url(r'^RPTypes/(?P<pk>[0-9]+)$', RPTypeDetail.as_view(), name='companyDetail'),
 
-    url(r'^sanads$', SanadListCreate.as_view(), name='companies'),
-    url(r'^sanads/(?P<pk>[0-9]+)$', SanadDetail.as_view(), name='companyDetail'),
+    url(r'^sanads$', SanadListCreate.as_view(), name=''),
+    url(r'^sanads/(?P<pk>[0-9]+)$', SanadDetail.as_view(), name=''),
 
-    url(r'^transactions$', TransactionListCreate.as_view(), name='companies'),
-    url(r'^transactions/(?P<pk>[0-9]+)$', TransactionDetail.as_view(), name='companyDetail'),
+    url(r'^sanadItems/mass$', SanadItemMass.as_view(), name=''),
+
+    url(r'^transactions$', TransactionListCreate.as_view(), name=''),
+    url(r'^transactions/(?P<pk>[0-9]+)$', TransactionDetail.as_view(), name=''),
+    url(r'^transactionItems/mass$', TransactionItemMass.as_view(), name=''),
 ]

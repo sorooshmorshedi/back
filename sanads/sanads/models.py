@@ -1,14 +1,17 @@
-from datetime import datetime
+from django.db.models import signals
 from django.db import models
-
 from accounts.accounts.models import Account, FloatAccount
 from accounts.costCenters.models import CostCenter
-from sanads.RPTypes.models import RPType
 from django_jalali.db import models as jmodels
 
 SANAD_TYPES = (
     ('temporary', 'temporary'),
     ('definite', 'definite'),
+)
+
+SANAD_CREATE_TYPES = (
+    ('auto', 'auto'),
+    ('manual', 'manual')
 )
 
 
@@ -19,6 +22,10 @@ class Sanad(models.Model):
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
     type = models.CharField(max_length=20, choices=SANAD_TYPES)
+    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default='manual')
+
+    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
 
     permissions = (
         ('get_sanad', 'Can get sanads')
@@ -28,7 +35,7 @@ class Sanad(models.Model):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
     class Meta:
-        ordering = ['code', ]
+        ordering = ['-code', ]
 
 
 class SanadItem(models.Model):
@@ -37,7 +44,6 @@ class SanadItem(models.Model):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='floatAccount', blank=True, null=True)
     costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True)
 
-    type = models.ForeignKey(RPType, on_delete=models.PROTECT, blank=True, null=True)
     value = models.DecimalField(max_digits=24, decimal_places=0)
     valueType = models.CharField(max_length=3, choices=(('bed', 'bed'), ('bes', 'bes')))
     explanation = models.CharField(max_length=255, blank=True)
@@ -47,5 +53,37 @@ class SanadItem(models.Model):
     )
 
     def __str__(self):
-        return "{0} - {1}".format(self.code, self.explanation[0:30])
+        return "{0} - {1}".format(self.sanad.code, self.explanation[0:30])
 
+
+def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
+
+    subValue = 0
+    addValue = instance.value
+    newType = instance.valueType
+    oldType = newType
+    if instance.id:
+        obj = SanadItem.objects.get(pk=instance.id)
+        subValue = obj.value
+        oldType = obj.valueType
+
+    sanad = instance.sanad
+
+    if oldType == 'bed':
+        sanad.bed -= subValue
+    else:
+        sanad.bes -= subValue
+
+    if newType == 'bed':
+        sanad.bed += addValue
+    else:
+        sanad.bes += addValue
+
+    sanad.save()
+
+signals.pre_save.connect(receiver=updateSanadValues, sender=SanadItem)
+
+
+def clearSanad(sanad):
+    for item in sanad.items.all():
+        item.delete()

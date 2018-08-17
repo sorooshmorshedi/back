@@ -7,6 +7,7 @@ def updateSanad(sender, instance, created, **kwargs):
     t = instance
     sanad = instance.sanad
 
+
     if t.type == 'receive':
         rowsType = 'bed'
         lastRowType = 'bes'
@@ -16,8 +17,6 @@ def updateSanad(sender, instance, created, **kwargs):
         lastRowType = 'bed'
         rp = 'پرداخت'
 
-    print(t.sanad)
-    print(sanad)
     sanad.explanation = "{0} - {1}".format(t.code, t.explanation)
     sanad.date = t.date
     sanad.type = 'temporary'
@@ -36,10 +35,9 @@ def updateSanad(sender, instance, created, **kwargs):
         sanad.items.create(
             value=item.value,
             valueType=rowsType,
-            explanation="بابت {0} {1} به شماره مستند {2} به تاریخ {3}".format(rp, item.type.name, item.documentNumber, item.date),
+            explanation="بابت {0} {1} به شماره مستند {2} به تاریخ {3}".format(rp, item.type.name, item.documentNumber, str(item.date)),
             account=item.account,
             floatAccount=item.floatAccount,
-            type=item.type,
         )
 
     if len(t.items.all()) != 0:
@@ -48,12 +46,11 @@ def updateSanad(sender, instance, created, **kwargs):
             valueType=lastRowType,
             explanation="بابت {0} {1} طی {0} شماره {2}".format(rp, ', '.join(typeNames), t.code),
             account=t.account,
-            # floatAccount=t.floatAccount, ???
+            floatAccount=t.floatAccount
         )
 
 
 def updateSanadItems(sender, instance, created=None, **kwargs):
-    print(instance.transaction.id)
     t = instance.transaction
     updateSanad(sender='updateSanadItems', instance=t, created=None)
 

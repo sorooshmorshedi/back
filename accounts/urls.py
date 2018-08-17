@@ -1,6 +1,7 @@
 from django.conf.urls import url, include
 from django.urls import path
 
+from accounts.defaultAccounts.views import DefaultAccountListCreate, DefaultAccountDetail
 from .views import *
 
 
@@ -29,4 +30,7 @@ urlpatterns = [
 
     url(r'^banks$', BankListCreate.as_view()),
     url(r'^banks/(?P<pk>[0-9]+)$', BankDetail.as_view()),
+
+    url(r'^defaultAccounts$', DefaultAccountListCreate.as_view(), name=''),
+    url(r'^defaultAccounts/(?P<pk>[0-9]+)$', DefaultAccountDetail.as_view(), name=''),
 ]

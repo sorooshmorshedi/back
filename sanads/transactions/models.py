@@ -1,11 +1,9 @@
-from datetime import datetime
 from django.db import models
 from django.db.models import signals
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
-from sanads.RPTypes.models import RPType
-from sanads.sanads.models import Sanad
+from accounts.defaultAccounts.models import DefaultAccount
 from sanads.transactions.autoSanad import *
 
 TYPES = (
@@ -43,7 +41,7 @@ class TransactionItem(models.Model):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems', blank=True, null=True)
 
-    type = models.ForeignKey(RPType, on_delete=models.PROTECT)
+    type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT)
 
     value = models.DecimalField(max_digits=24, decimal_places=0)
 
@@ -60,7 +58,7 @@ class TransactionItem(models.Model):
     )
 
     def __str__(self):
-        return self.explanation[0:30]
+        return "{0} - {1}".format(self.transaction.code, self.explanation[0:30])
 
 
 signals.post_save.connect(receiver=updateSanad, sender=Transaction)

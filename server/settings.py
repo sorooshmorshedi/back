@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'accounts',
     'wares',
     'sanads',
+    'cheques',
+    'factors'
 
 ]
 
@@ -62,6 +64,9 @@ MIDDLEWARE = [
 
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    'server.middleware.ExceptionMiddleware'
+
 ]
 
 ROOT_URLCONF = 'server.urls'
