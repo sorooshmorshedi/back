@@ -63,7 +63,6 @@ class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 class ChequeSerializer(serializers.ModelSerializer):
     # title = serializers.SerializerMethodField()
     #

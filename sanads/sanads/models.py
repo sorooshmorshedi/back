@@ -81,7 +81,17 @@ def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
 
     sanad.save()
 
+
+def updateSanadValuesOnDelete(sender, instance, using, **kwargs):
+    sanad = instance.sanad
+    if instance.valueType == 'bed':
+        sanad.bed -= instance.value
+    else:
+        sanad.bes -= instance.value
+    sanad.save()
+
 signals.pre_save.connect(receiver=updateSanadValues, sender=SanadItem)
+signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
 
 
 def clearSanad(sanad):

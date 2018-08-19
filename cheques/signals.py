@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from sanads.sanads.models import clearSanad
+
 
 def createCheques(sender, instance, created, **kwargs):
     if created:
@@ -42,7 +44,10 @@ def statusChangeSanad(sender, instance, created, **kwargs):
     value = instance.cheque.value
     cheque = instance.cheque
     sanad = instance.sanad
+    if not created:
+        clearSanad(sanad)
     sanad.explanation = cheque.explanation
+    sanad.date = cheque.date
 
     if cheque.type == 'paid':
         chequeType = 'پرداخت'

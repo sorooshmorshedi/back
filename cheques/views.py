@@ -43,6 +43,13 @@ class ChequeModelView(viewsets.ModelViewSet):
         serializer = ChequeListRetrieveSerializer(cheque)
         return Response(serializer.data)
 
+    def perform_destroy(self, instance):
+        if instance.type == 'paid':
+            return Response(['چک پرداختی غیر قابل حذف می باشد'], status=status.HTTP_400_BAD_REQUEST)
+        if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
+            return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'], status=status.HTTP_400_BAD_REQUEST)
+        return super(ChequeModelView, self).perform_destroy(instance)
+
 
 class ChangeChequeStatus(APIView):
     # submit cheque
@@ -50,17 +57,18 @@ class ChangeChequeStatus(APIView):
         queryset = Cheque.objects.all()
         cheque = get_object_or_404(queryset, pk=pk)
 
-        if cheque.status != 'blank':
-            return Response(['وضعیت چک برای ثبت باید سفید باشد'], status=status.HTTP_400_BAD_REQUEST)
+        statusChangesCount = cheque.statusChanges.count()
+        if statusChangesCount != 0 and statusChangesCount != 1:
+            return Response(['برای ویرایش چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'], status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data['cheque']
-        data['serial'] = cheque.serial
 
         if cheque.type == 'paid':
             bank = cheque.chequebook.account.bank
             data['bankName'] = bank.name
             data['branchName'] = bank.branch
             data['accountNumber'] = bank.accountNumber
+            data['serial'] = cheque.serial
 
         serialized = ChequeSerializer(cheque, data=data)
         if serialized.is_valid():
@@ -91,7 +99,11 @@ class ChangeChequeStatus(APIView):
         data['fromStatus'] = 'blank'
         data['toStatus'] = 'notPassed'
 
-        serialized = StatusChangeSerializer(data=data)
+        if 'update' in request.data and request.data['update']:
+            serialized = StatusChangeSerializer(cheque.statusChanges.first(), data=data)
+        else:
+            serialized = StatusChangeSerializer(data=data)
+
         if serialized.is_valid():
             serialized.save()
         else:
