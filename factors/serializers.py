@@ -6,9 +6,9 @@ from sanads.sanads.models import Sanad
 from wares.serializers import WareListRetrieveSerializer, WareHouseSerializer
 
 
-class FactorExpenseSerializer(serializers.ModelSerializer):
+class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FactorExpense
+        model = Expense
         fields = '__all__'
 
     def validate(self, data):
@@ -16,13 +16,21 @@ class FactorExpenseSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
 
 
-class FactorExpenseListRetrieveSerializer(FactorExpenseSerializer):
+class ExpenseListRetrieveSerializer(ExpenseSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
 
-    class Meta(FactorExpenseSerializer.Meta):
+    class Meta(ExpenseSerializer.Meta):
         pass
 
 
+class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    expense = ExpenseListRetrieveSerializer(read_only=True, many=False)
+
+    class Meta:
+        models = FactorExpense
+        fields = '__all__'
 
 
 class FactorSerializer(serializers.ModelSerializer):
@@ -52,6 +60,7 @@ class FactorSerializer(serializers.ModelSerializer):
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    expenses = ExpenseSerializer
 
     class Meta:
         model = Factor

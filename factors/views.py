@@ -7,20 +7,20 @@ from rest_framework.views import APIView
 from .serializers import *
 
 
-class FactorExpenseModelView(viewsets.ModelViewSet):
+class ExpenseModelView(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated, RPTypeListCreate,)
-    queryset = FactorExpense.objects.all()
-    serializer_class = FactorExpenseSerializer
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseSerializer
 
     def list(self, request, *ergs, **kwargs):
-        queryset = Factor.objects.all()
-        serialized = FactorExpenseListRetrieveSerializer(queryset, many=True)
+        queryset = Expense.objects.all()
+        serialized = ExpenseListRetrieveSerializer(queryset, many=True)
         return Response(serialized.data)
 
     def retrieve(self, request, pk=None):
-        queryset = Factor.objects.all()
+        queryset = Expense.objects.all()
         instance = get_object_or_404(queryset, pk=pk)
-        serialized = FactorExpenseListRetrieveSerializer(instance)
+        serialized = ExpenseListRetrieveSerializer(instance)
         return Response(serialized.data)
 
 

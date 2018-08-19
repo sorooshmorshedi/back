@@ -5,7 +5,7 @@ from accounts.accounts.models import Account, FloatAccount
 from wares.models import Ware, WareHouse
 
 
-class FactorExpense(models.Model):
+class Expense(models.Model):
     name = models.CharField(max_length=100, unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpense')
     explanation = models.CharField(max_length=255, blank=True)
@@ -27,6 +27,14 @@ class Factor(models.Model):
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     taxValue = models.IntegerField(default=0, null=True, blank=True)
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
+
+
+class FactorExpense(models.Model):
+    expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
+    factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='expenses')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpenses')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenses', blank=True, null=True)
+    value = models.IntegerField()
 
 
 class FactorItem(models.Model):
