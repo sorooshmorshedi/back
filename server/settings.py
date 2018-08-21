@@ -53,6 +53,8 @@ INSTALLED_APPS = [
 
 ]
 
+ALLOWED_HOSTS = ['mmdmst.ir', 'localhost', '127.0.0.1']
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
