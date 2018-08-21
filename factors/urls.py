@@ -9,4 +9,5 @@ router.register(r'factors', FactorModelView)
 
 urlpatterns = router.urls + [
     url(r'^items/mass$', FactorItemMass.as_view(), name=''),
+    url(r'^factorExpenses/mass$', FactorExpenseMass.as_view(), name=''),
 ]

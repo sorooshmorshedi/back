@@ -48,11 +48,11 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
-        sanad.save()
-        validated_data['sanad'] = sanad
-        res = super(StatusChangeSerializer, self).create(validated_data)
-        return res
+        if 'data' not in validated_data and not validated_data['sanad']:
+            sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
+            sanad.save()
+            validated_data['sanad'] = sanad
+        return super(StatusChangeSerializer, self).create(validated_data)
 
 
 class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):

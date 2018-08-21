@@ -14,6 +14,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['account'].level != 3:
             raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
+        return data
 
 
 class ExpenseListRetrieveSerializer(ExpenseSerializer):
@@ -23,13 +24,19 @@ class ExpenseListRetrieveSerializer(ExpenseSerializer):
         pass
 
 
+class FactorExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FactorExpense
+        fields = '__all__'
+
+
 class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     expense = ExpenseListRetrieveSerializer(read_only=True, many=False)
 
     class Meta:
-        models = FactorExpense
+        model = FactorExpense
         fields = '__all__'
 
 
@@ -57,16 +64,6 @@ class FactorSerializer(serializers.ModelSerializer):
         return res
 
 
-class FactorListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
-    floatAccount = FloatAccountSerializer(read_only=True, many=False)
-    expenses = ExpenseSerializer
-
-    class Meta:
-        model = Factor
-        fields = '__all__'
-
-
 class FactorItemSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -77,11 +74,21 @@ class FactorItemSerializer(serializers.ModelSerializer):
         return data
 
 
-class SanadItemListRetrieveSerializer(FactorItemSerializer):
+class FactorItemListRetrieveSerializer(FactorItemSerializer):
     ware = WareListRetrieveSerializer(read_only=True, many=False)
     wareHouse = WareHouseSerializer(read_only=True, many=False)
 
     class Meta(FactorItemSerializer.Meta):
         pass
 
+
+class FactorListRetrieveSerializer(serializers.ModelSerializer):
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
+    items = FactorItemListRetrieveSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Factor
+        fields = '__all__'
 

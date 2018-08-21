@@ -66,3 +66,31 @@ class FactorItemMass(APIView):
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
 
+
+class FactorExpenseMass(APIView):
+    serializer_class = FactorExpenseListRetrieveSerializer
+    model = FactorExpense
+
+    def post(self, request):
+        print(request.data)
+        serialized = FactorExpenseSerializer(data=request.data, many=True)
+        if serialized.is_valid():
+            serialized.save()
+            return Response(serialized.data, status=status.HTTP_201_CREATED)
+        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        for item in request.data:
+            instance = self.model.objects.get(id=item['id'])
+            serialized = self.serializer_class(instance, data=item)
+            if serialized.is_valid():
+                serialized.save()
+            else:
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serialized.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        for itemId in request.data:
+            instance = self.model.objects.get(id=itemId)
+            instance.delete()
+        return Response([], status=status.HTTP_200_OK)
