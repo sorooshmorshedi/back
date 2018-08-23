@@ -27,7 +27,7 @@ class Unit(models.Model):
         return str(self.pk) + ' - ' + self.name
 
 
-class WareHouse(models.Model):
+class Warehouse(models.Model):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -69,7 +69,7 @@ class Ware(models.Model):
     updated_at = jmodels.jDateField(auto_now_add=True)
 
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
-    wareHouse = models.ForeignKey(WareHouse, on_delete=models.PROTECT, related_name='wares')
+    wareHouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True)
 
@@ -78,8 +78,5 @@ class Ware(models.Model):
 
     class Meta:
         ordering = ['code', ]
-
-
-
 
 

@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('discountValue', models.IntegerField(blank=True, default=0, null=True)),
                 ('discountPercent', models.IntegerField(blank=True, default=0, null=True)),
                 ('ware', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorItems', to='wares.Ware')),
-                ('wareHouse', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorItems', to='wares.WareHouse')),
+                ('wareHouse', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorItems', to='wares.Warehouse')),
             ],
         ),
     ]

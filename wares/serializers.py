@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
-from wares.models import Unit, WareHouse, WareLevel, Ware
+from wares.models import Unit, Warehouse, WareLevel, Ware
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -15,14 +15,14 @@ class UnitSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'explanation', 'title')
 
 
-class WareHouseSerializer(serializers.ModelSerializer):
+class WarehouseSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
         return str(obj.id) + ' - ' + obj.name
 
     class Meta:
-        model = WareHouse
+        model = Warehouse
         fields = ('id', 'name', 'explanation', 'title')
 
 
@@ -61,7 +61,7 @@ class WareSerializer(serializers.ModelSerializer):
 
 class WareListRetrieveSerializer(WareSerializer):
     unit = UnitSerializer(read_only=True)
-    wareHouse = WareHouseSerializer(read_only=True)
+    wareHouse = WarehouseSerializer(read_only=True)
 
     class Meta(WareSerializer.Meta):
         pass

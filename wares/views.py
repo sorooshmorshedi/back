@@ -9,16 +9,16 @@ from wares.serializers import *
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class WareHouseListCreate(generics.ListCreateAPIView):
+class WarehouseListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, WareListCreate,)
-    queryset = WareHouse.objects.all()
-    serializer_class = WareHouseSerializer
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
 
 
-class WareHouseDetail(generics.RetrieveUpdateDestroyAPIView):
+class WarehouseDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)
-    queryset = WareHouse.objects.all()
-    serializer_class = WareHouseSerializer
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
 
 
 class UnitDetail(generics.RetrieveUpdateDestroyAPIView):

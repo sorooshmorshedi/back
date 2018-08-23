@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='WareHouse',
+            name='Warehouse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=100, unique=True)),
@@ -82,6 +82,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ware',
             name='wareHouse',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='wares', to='wares.WareHouse'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='wares', to='wares.Warehouse'),
         ),
     ]

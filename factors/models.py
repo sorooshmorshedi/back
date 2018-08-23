@@ -5,7 +5,7 @@ from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
 from factors.signals import clearFactorSanad
 from sanads.sanads.models import Sanad
-from wares.models import Ware, WareHouse
+from wares.models import Ware, Warehouse
 
 EXPENSE_TYPES = (
     ('buy', 'خرید'),
@@ -90,7 +90,7 @@ class FactorExpense(models.Model):
 class FactorItem(models.Model):
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
-    wareHouse = models.ForeignKey(WareHouse, on_delete=models.PROTECT, related_name='factorItems')
+    wareHouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')
 
     count = models.IntegerField()
     fee = models.DecimalField(max_digits=24, decimal_places=0)

@@ -2,13 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="kjkj">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db.sqlite3" afterPath="$PROJECT_DIR$/db.sqlite3" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/factors/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/migrations/0009_auto_20180821_1252.py" afterPath="$PROJECT_DIR$/factors/migrations/0009_auto_20180821_1252.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py" afterPath="$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/models.py" afterPath="$PROJECT_DIR$/factors/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/signals.py" afterPath="$PROJECT_DIR$/factors/signals.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/sanads/models.py" afterPath="$PROJECT_DIR$/sanads/sanads/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/autoSanad.py" afterPath="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/models.py" afterPath="$PROJECT_DIR$/sanads/transactions/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/serializers.py" afterPath="$PROJECT_DIR$/factors/serializers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/wares/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/migrations/0003_auto_20180714_1452.py" afterPath="$PROJECT_DIR$/wares/migrations/0003_auto_20180714_1452.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/models.py" afterPath="$PROJECT_DIR$/wares/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/serializers.py" afterPath="$PROJECT_DIR$/wares/serializers.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/urls.py" afterPath="$PROJECT_DIR$/wares/urls.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/views.py" afterPath="$PROJECT_DIR$/wares/views.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -22,94 +26,7 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/factors/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1060">
-              <caret line="83" column="53" lean-forward="false" selection-start-line="83" selection-start-column="53" selection-end-line="83" selection-end-column="53" />
-              <folding>
-                <element signature="e#0#28#0" expanded="true" />
-                <element signature="e#3241#4048#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="signals.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/signals.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="serializers.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/serializers.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="729">
-              <caret line="65" column="0" lean-forward="false" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
-              <folding>
-                <element signature="e#342#582#0" expanded="false" />
-                <element signature="e#645#766#0" expanded="false" />
-                <element signature="e#2383#2499#0" expanded="false" />
-                <element signature="e#2568#2750#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/sanads/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="430">
-              <caret line="99" column="4" lean-forward="false" selection-start-line="99" selection-start-column="4" selection-end-line="99" selection-end-column="4" />
-              <folding>
-                <element signature="e#0#27#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/transactions/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="648">
-              <caret line="65" column="37" lean-forward="false" selection-start-line="65" selection-start-column="37" selection-end-line="65" selection-end-column="37" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="110" column="31" lean-forward="false" selection-start-line="110" selection-start-column="31" selection-end-line="110" selection-end-column="31" />
-              <folding>
-                <element signature="e#0#54#0" expanded="true" />
-                <element signature="e#386#964#0" expanded="false" />
-                <element signature="e#1017#1525#0" expanded="false" />
-                <element signature="e#1563#2571#0" expanded="false" />
-                <element signature="e#2612#3692#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="243">
-              <caret line="12" column="18" lean-forward="false" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="375" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -135,7 +52,12 @@
       <find>RPType</find>
       <find>mass</find>
       <find>kjk</find>
+      <find>WareHouse</find>
     </findStrings>
+    <replaceStrings>
+      <replace />
+      <replace>Warehouse</replace>
+    </replaceStrings>
     <dirStrings>
       <dir>C:\Users\MMD\Desktop\sobhanHesab\server\sanads</dir>
       <dir>C:\Users\MMD\Desktop\sobhanHesab\server\accounts</dir>
@@ -147,19 +69,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/sanads/sanad/serializers.py" />
-        <option value="$PROJECT_DIR$/sanads/models.py" />
-        <option value="$PROJECT_DIR$/sanads/serializers.py" />
-        <option value="$PROJECT_DIR$/sanads/RPTypes/views.py" />
-        <option value="$PROJECT_DIR$/sanads/views.py" />
-        <option value="$PROJECT_DIR$/sanads/RPTypes/serializers.py" />
-        <option value="$PROJECT_DIR$/sanads/sanad/views.py" />
-        <option value="$PROJECT_DIR$/sanads/sanad/models.py" />
         <option value="$PROJECT_DIR$/sanads/receivePayment/models.py" />
         <option value="$PROJECT_DIR$/sanads/RPTypes/models.py" />
         <option value="$PROJECT_DIR$/sanads/migrations/0006_transactionitem_date.py" />
         <option value="$PROJECT_DIR$/companies/models.py" />
-        <option value="$PROJECT_DIR$/wares/models.py" />
         <option value="$PROJECT_DIR$/checks/urls.py" />
         <option value="$PROJECT_DIR$/checks/models.py" />
         <option value="$PROJECT_DIR$/checks/serializers.py" />
@@ -192,12 +105,21 @@
         <option value="$PROJECT_DIR$/accounts/defaultAccounts/models.py" />
         <option value="$PROJECT_DIR$/factors/urls.py" />
         <option value="$PROJECT_DIR$/factors/views.py" />
-        <option value="$PROJECT_DIR$/factors/serializers.py" />
         <option value="$PROJECT_DIR$/sanads/transactions/models.py" />
         <option value="$PROJECT_DIR$/factors/signals.py" />
-        <option value="$PROJECT_DIR$/factors/models.py" />
         <option value="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
         <option value="$PROJECT_DIR$/sanads/sanads/models.py" />
+        <option value="$PROJECT_DIR$/factors/migrations/0001_initial.py" />
+        <option value="$PROJECT_DIR$/factors/migrations/0009_auto_20180821_1252.py" />
+        <option value="$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py" />
+        <option value="$PROJECT_DIR$/factors/models.py" />
+        <option value="$PROJECT_DIR$/factors/serializers.py" />
+        <option value="$PROJECT_DIR$/wares/migrations/0001_initial.py" />
+        <option value="$PROJECT_DIR$/wares/migrations/0003_auto_20180714_1452.py" />
+        <option value="$PROJECT_DIR$/wares/serializers.py" />
+        <option value="$PROJECT_DIR$/wares/urls.py" />
+        <option value="$PROJECT_DIR$/wares/views.py" />
+        <option value="$PROJECT_DIR$/wares/models.py" />
       </list>
     </option>
   </component>
@@ -255,6 +177,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wares" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -442,14 +378,14 @@
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17874141" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17874141" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.50396615" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960339" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29647058" sideWeight="0.49603385" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29647058" sideWeight="0.49603385" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -471,69 +407,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sanads/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/costCenters/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-54">
-          <caret line="4" column="16" lean-forward="false" selection-start-line="4" selection-start-column="16" selection-end-line="4" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/migrations/0006_transactionitem_date.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="15" column="51" lean-forward="false" selection-start-line="15" selection-start-column="51" selection-end-line="15" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wares/migrations/0001_initial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
-          <caret line="39" column="38" lean-forward="false" selection-start-line="39" selection-start-column="38" selection-end-line="39" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/companies/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wares/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
-          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wares/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="14" column="22" lean-forward="false" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/migrations/0001_initial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/costCenters/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="7" column="40" lean-forward="false" selection-start-line="7" selection-start-column="40" selection-end-line="7" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sanads/tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -857,10 +730,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/factors/signals.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factors/migrations/0001_initial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="53" column="131" lean-forward="false" selection-start-line="53" selection-start-column="131" selection-end-line="53" selection-end-column="131" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factors/migrations/0009_auto_20180821_1252.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="16" column="113" lean-forward="false" selection-start-line="16" selection-start-column="113" selection-end-line="16" selection-end-column="113" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="22" column="119" lean-forward="false" selection-start-line="22" selection-start-column="119" selection-end-line="22" selection-end-column="119" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factors/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="31" lean-forward="false" selection-start-line="7" selection-start-column="31" selection-end-line="7" selection-end-column="31" />
+          <folding>
+            <element signature="e#3241#4048#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/factors/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="729">
-          <caret line="65" column="0" lean-forward="false" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
+        <state relative-caret-position="135">
+          <caret line="5" column="58" lean-forward="false" selection-start-line="5" selection-start-column="58" selection-end-line="5" selection-end-column="58" />
           <folding>
             <element signature="e#342#582#0" expanded="false" />
             <element signature="e#645#766#0" expanded="false" />
@@ -870,21 +785,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/factors/signals.py">
+    <entry file="file://$PROJECT_DIR$/wares/migrations/0001_initial.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="4" column="22" lean-forward="false" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+        <state relative-caret-position="422">
+          <caret line="47" column="18" lean-forward="false" selection-start-line="47" selection-start-column="18" selection-end-line="47" selection-end-column="18" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/factors/models.py">
+    <entry file="file://$PROJECT_DIR$/wares/migrations/0003_auto_20180714_1452.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1060">
-          <caret line="83" column="53" lean-forward="false" selection-start-line="83" selection-start-column="53" selection-end-line="83" selection-end-column="53" />
+        <state relative-caret-position="179">
+          <caret line="38" column="113" lean-forward="false" selection-start-line="38" selection-start-column="113" selection-end-line="38" selection-end-column="113" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="3" column="31" lean-forward="false" selection-start-line="3" selection-start-column="31" selection-end-line="3" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="16" column="25" lean-forward="false" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="19" column="24" lean-forward="true" selection-start-line="19" selection-start-column="24" selection-end-line="19" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="80" column="0" lean-forward="false" selection-start-line="80" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
-            <element signature="e#3241#4048#0" expanded="false" />
+            <element signature="e#327#575#0" expanded="false" />
+            <element signature="e#899#1369#0" expanded="false" />
+            <element signature="e#1402#2657#0" expanded="false" />
           </folding>
         </state>
       </provider>
