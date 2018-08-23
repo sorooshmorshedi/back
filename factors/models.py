@@ -3,6 +3,7 @@ from django.db.models import signals
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
+from factors.signals import clearFactorSanad
 from sanads.sanads.models import Sanad
 from wares.models import Ware, WareHouse
 
@@ -106,4 +107,7 @@ class FactorItem(models.Model):
             return self.value * self.discountPercent / 100
         else:
             return self.discountValue
+
+
+signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
 

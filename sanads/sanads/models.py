@@ -96,5 +96,7 @@ signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
 
 
 def clearSanad(sanad):
+    sanad.explanation = ''
+    sanad.save()
     for item in sanad.items.all():
         item.delete()

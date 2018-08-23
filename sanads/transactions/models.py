@@ -63,6 +63,6 @@ class TransactionItem(models.Model):
 
 signals.post_save.connect(receiver=updateSanad, sender=Transaction)
 signals.post_save.connect(receiver=updateSanadItems, sender=TransactionItem)
-signals.post_delete.connect(receiver=clearSanad, sender=Transaction)
+signals.post_delete.connect(receiver=clearTransactionSanad, sender=Transaction)
 signals.post_delete.connect(receiver=updateSanadItems, sender=TransactionItem)
 

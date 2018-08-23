@@ -1,6 +1,6 @@
 from django.db.models import Max
 
-from sanads.sanads.models import Sanad, SanadItem
+from sanads.sanads.models import Sanad, SanadItem, clearSanad
 
 
 def updateSanad(sender, instance, created, **kwargs):
@@ -55,6 +55,6 @@ def updateSanadItems(sender, instance, created=None, **kwargs):
     updateSanad(sender='updateSanadItems', instance=t, created=None)
 
 
-def clearSanad(sender, instance, created=None, **kwargs):
-    for item in instance.items.all():
-        item.delete()
+def clearTransactionSanad(sender, instance, created=None, **kwargs):
+    clearSanad(instance.sanad)
+
