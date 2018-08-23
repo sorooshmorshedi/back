@@ -10,4 +10,5 @@ router.register(r'factors', FactorModelView)
 urlpatterns = router.urls + [
     url(r'^items/mass$', FactorItemMass.as_view(), name=''),
     url(r'^factorExpenses/mass$', FactorExpenseMass.as_view(), name=''),
+    url(r'^factors/updateSanad/(?P<pk>[0-9]+)$', FactorSanadUpdate.as_view(), name=''),
 ]

@@ -53,5 +53,75 @@
       "usage": "both",
       "programingName": "cash"
     }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 6,
+    "fields": {
+      "name": "خرید",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "buy"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 7,
+    "fields": {
+      "name": "برگشت از خرید",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "backFromBuy"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 8,
+    "fields": {
+      "name": "تخفیف خرید",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "buyDiscount"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 9,
+    "fields": {
+      "name": "فروش",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "sale"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 10,
+    "fields": {
+      "name": "برگشت از فروش",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "backFromSale"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 11,
+    "fields": {
+      "name": "تخفیف فروش",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "saleDiscount"
+    }
+  }, {
+    "model": "accounts.DefaultAccount",
+    "pk": 12,
+    "fields": {
+      "name": "مالیات",
+      "explanation": "",
+      "account": 11,
+      "usage": "factor",
+      "programingName": "tax"
+    }
   }
 ]

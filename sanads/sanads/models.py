@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db.models import signals
 from django.db import models
 from accounts.accounts.models import Account, FloatAccount
@@ -75,9 +76,9 @@ def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
         sanad.bes -= subValue
 
     if newType == 'bed':
-        sanad.bed += addValue
+        sanad.bed += Decimal(addValue)
     else:
-        sanad.bes += addValue
+        sanad.bes += Decimal(addValue)
 
     sanad.save()
 

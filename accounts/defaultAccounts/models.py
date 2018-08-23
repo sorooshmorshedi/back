@@ -3,9 +3,10 @@ from django.db import models
 from accounts.accounts.models import Account
 
 USAGES = (
-    ('receive', 'receive'),
-    ('payment', 'payment'),
-    ('both', 'both')
+    ('receive', 'دریافت'),
+    ('payment', 'پرداخت'),
+    ('receiveAndPayment', 'دریافت و پرداخت'),
+    ('factor', 'فاکتور'),
 )
 
 

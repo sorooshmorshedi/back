@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.defaultAccounts.models import getDA
+from sanads.sanads.models import clearSanad
 from .serializers import *
 
 
@@ -94,3 +96,102 @@ class FactorExpenseMass(APIView):
             instance = self.model.objects.get(id=itemId)
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
+
+
+class FactorSanadUpdate(APIView):
+    def put(self, request, pk):
+        queryset = Factor.objects.all()
+        factor = get_object_or_404(queryset, pk=pk)
+        sanad = factor.sanad
+        clearSanad(sanad)
+
+        sanad.explanation = factor.explanation
+        sanad.date = factor.date
+        sanad.type = 'temporary'
+        sanad.createType = 'auto'
+        sanad.save()
+
+        if factor.type in ('sale', 'backFromBuy'):
+            rowTypeOne = 'bed'
+            rowTypeTwo = 'bes'
+            if factor.type == 'sale':
+                account = 'sale'
+            else:
+                account = 'backFromBuy'
+        else:
+            rowTypeOne = 'bes'
+            rowTypeTwo = 'bed'
+            if factor.type == 'buy':
+                account = 'buy'
+            else:
+                account = 'backFromSale'
+
+        # Factor Sum
+        sanad.items.create(
+            account=factor.account,
+            floatAccount=factor.floatAccount,
+            value=factor.sum,
+            valueType=rowTypeOne,
+            explanation="",
+        )
+        sanad.items.create(
+            account=getDA(account).account,
+            # floatAccount=factor.floatAccount,
+            value=factor.sum,
+            valueType=rowTypeTwo,
+            explanation="",
+        )
+
+        # Factor Discount Sum
+        sanad.items.create(
+            account=getDA(account).account,
+            # floatAccount=factor.floatAccount,
+            value=factor.discountSum,
+            valueType=rowTypeOne,
+            explanation="",
+        )
+        sanad.items.create(
+            account=factor.account,
+            floatAccount=factor.floatAccount,
+            value=factor.discountSum,
+            valueType=rowTypeTwo,
+            explanation="",
+        )
+
+        # Factor Tax Sum
+        sanad.items.create(
+            account=factor.account,
+            floatAccount=factor.floatAccount,
+            value=factor.taxSum,
+            valueType=rowTypeOne,
+            explanation="",
+        )
+        sanad.items.create(
+            account=getDA('tax').account,
+            # floatAccount=factor.floatAccount,
+            value=factor.taxSum,
+            valueType=rowTypeTwo,
+            explanation="",
+        )
+
+        # Factor Expenses
+        for e in factor.expenses.all():
+            sanad.items.create(
+                account=e.expense.account,
+                # floatAccount=factor.floatAccount,
+                value=e.value,
+                valueType='bed',
+                explanation="",
+            )
+            sanad.items.create(
+                account=e.account,
+                floatAccount=e.floatAccount,
+                value=e.value,
+                valueType='bes',
+                explanation="",
+            )
+
+
+        return Response([])
+
+
