@@ -14,7 +14,9 @@ urlpatterns = [
     url(r'^units$', UnitListCreate.as_view(), name='units'),
     url(r'^units/(?P<pk>[0-9]+)$', UnitDetail.as_view(), name='unitDetail'),
 
-    url(r'^wareHouses$', WarehouseListCreate.as_view(), name='wareHouse'),
-    url(r'^wareHouses/(?P<pk>[0-9]+)$', WarehouseDetail.as_view(), name='floatWareDetail'),
+    url(r'^warehouses$', WarehouseListCreate.as_view(), name='warehouse'),
+    url(r'^warehouses/(?P<pk>[0-9]+)$', WarehouseDetail.as_view(), name='floatWareDetail'),
+
+    url(r'^inventory/check$', WarehouseInventoryView.as_view(), name=''),
 
 ]

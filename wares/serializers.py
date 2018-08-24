@@ -49,7 +49,7 @@ class WareSerializer(serializers.ModelSerializer):
             'updated_at',
             'category',
             'title',
-            'wareHouse',
+            'warehouse',
             'unit',
             'supplier',
             'pricing_type',
@@ -61,7 +61,7 @@ class WareSerializer(serializers.ModelSerializer):
 
 class WareListRetrieveSerializer(WareSerializer):
     unit = UnitSerializer(read_only=True)
-    wareHouse = WarehouseSerializer(read_only=True)
+    warehouse = WarehouseSerializer(read_only=True)
 
     class Meta(WareSerializer.Meta):
         pass

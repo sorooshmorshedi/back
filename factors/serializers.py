@@ -3,6 +3,7 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from factors.models import *
 from sanads.sanads.models import Sanad
+from wares.models import WarehouseInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
 
@@ -76,7 +77,7 @@ class FactorItemSerializer(serializers.ModelSerializer):
 
 class FactorItemListRetrieveSerializer(FactorItemSerializer):
     ware = WareListRetrieveSerializer(read_only=True, many=False)
-    wareHouse = WarehouseSerializer(read_only=True, many=False)
+    warehouse = WarehouseSerializer(read_only=True, many=False)
 
     class Meta(FactorItemSerializer.Meta):
         pass
@@ -91,4 +92,11 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
+
+
+class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WarehouseInventory
+        fields = '__all__'
+
 

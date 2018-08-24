@@ -69,7 +69,7 @@ class Ware(models.Model):
     updated_at = jmodels.jDateField(auto_now_add=True)
 
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
-    wareHouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True)
 
@@ -80,3 +80,49 @@ class Ware(models.Model):
         ordering = ['code', ]
 
 
+class WarehouseInventory(models.Model):
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
+    count = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('warehouse', 'ware')
+
+    def __str__(self):
+        return "{0} -> {1} : {2}".format(self.warehouse.name, self.ware.name, self.count)
+
+
+def getInventoryCount(warehouse, ware):
+    inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
+    res = 0
+    if len(inventory):
+        res = inventory[0].count
+    else:
+        try:
+            inventory = WarehouseInventory(
+                warehouse=Warehouse.objects.get(pk=warehouse),
+                ware=Ware.objects.get(pk=ware),
+                count=0,
+            )
+        except:
+            raise {'error': 'invalid ware or warehouse'}
+        inventory.save()
+    return res
+
+
+def updateInventory(warehouse, ware, count):
+    inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
+    if len(inventory):
+        inventory = inventory[0]
+        inventory.count += count
+    else:
+        try:
+            inventory = WarehouseInventory(
+                warehouse=Warehouse.objects.get(pk=warehouse),
+                ware=Ware.objects.get(pk=ware),
+                count=count,
+            )
+        except:
+            raise {'error': 'invalid ware or warehouse'}
+    inventory.save()
+    return inventory.count

@@ -1,8 +1,10 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
+from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from wares.models import *
 from wares.serializers import *
@@ -73,3 +75,16 @@ class WareLevelListCreate(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
+class WarehouseInventoryView(APIView):
+    def post(self, request):
+        res = []
+        data = request.data
+        for o in data:
+            if 'warehouse' not in o or 'ware' not in o:
+                return Response(['لطفا کالا و انبار را انتخاب کنید'], status.HTTP_400_BAD_REQUEST)
+            warehouse = o['warehouse']
+            ware = o['ware']
+
+            res.append(getInventoryCount(warehouse, ware))
+
+        return Response(res, status.HTTP_200_OK)

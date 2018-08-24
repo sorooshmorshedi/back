@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='factoritem',
-            name='wareHouse',
+            name='warehouse',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorItems', to='wares.Warehouse'),
         ),
     ]

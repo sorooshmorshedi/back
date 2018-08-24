@@ -5,7 +5,7 @@ from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
 from factors.signals import clearFactorSanad
 from sanads.sanads.models import Sanad
-from wares.models import Ware, Warehouse
+from wares.models import Ware, Warehouse, updateInventory
 
 EXPENSE_TYPES = (
     ('buy', 'خرید'),
@@ -90,7 +90,7 @@ class FactorExpense(models.Model):
 class FactorItem(models.Model):
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
-    wareHouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')
 
     count = models.IntegerField()
     fee = models.DecimalField(max_digits=24, decimal_places=0)
@@ -109,5 +109,23 @@ class FactorItem(models.Model):
             return self.discountValue
 
 
-signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
+def updateFactorInventoryOnUpdate(sender, instance, raw, using, update_fields, **kwargs):
+    if instance.id:
+        oldCount = FactorItem.objects.get(pk=instance.id).count
+    else:
+        oldCount = 0
+    count = instance.count - oldCount
+    factor = instance.factor
 
+    if factor.type in ('sale', 'backFromBuy'):
+        count = -count
+    updateInventory(instance.warehouse.id, instance.ware.id, count)
+
+
+def updateFactorInventoryOnDelete(sender, instance, using, **kwargs):
+    updateInventory(instance.warehouse.id, instance.ware.id, -instance.count)
+
+
+signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
+signals.pre_save.connect(receiver=updateFactorInventoryOnUpdate, sender=FactorItem)
+signals.pre_delete.connect(receiver=updateFactorInventoryOnDelete, sender=FactorItem)
