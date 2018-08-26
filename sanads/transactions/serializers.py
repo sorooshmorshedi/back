@@ -60,7 +60,6 @@ class TransactionSerializer(serializers.ModelSerializer):
 class TransactionListRetrieveSerializer(TransactionSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
-    sanad = SanadSerializer(read_only=True)
 
     class Meta(TransactionSerializer.Meta):
         pass

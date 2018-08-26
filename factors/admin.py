@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from factors.models import Receipt, Factor
+
+admin.site.register(Receipt)
+admin.site.register(Factor)

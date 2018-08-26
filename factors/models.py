@@ -20,6 +20,16 @@ FACTOR_TYPES = (
 
 )
 
+RAR_TYPES = (
+    ('receipt', 'رسید'),
+    ('remittance', 'حواله')
+)
+
+RECEIPT_CREATE_TYPES = (
+    ('auto', 'auto'),
+    ('manual', 'manual')
+)
+
 
 class Expense(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -28,9 +38,29 @@ class Expense(models.Model):
     explanation = models.CharField(max_length=255, blank=True)
 
 
+class Receipt(models.Model):
+    code = models.IntegerField()
+    type = models.CharField(max_length=15, choices=RAR_TYPES)
+    createType = models.CharField(max_length=20, choices=RECEIPT_CREATE_TYPES, default='manual')
+    date = jmodels.jDateField()
+    time = models.TimeField(blank=True, null=True)
+    explanation = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return "{0} - {1}".format(self.code, self.type)
+
+
+class ReceiptItem(models.Model):
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='items')
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='receiptItems')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='receiptItems')
+    count = models.IntegerField()
+
+
 class Factor(models.Model):
     code = models.IntegerField()
     sanad = models.ForeignKey(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
+    receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
@@ -109,23 +139,30 @@ class FactorItem(models.Model):
             return self.discountValue
 
 
-def updateFactorInventoryOnUpdate(sender, instance, raw, using, update_fields, **kwargs):
+def updateInventoryOnReceiptItemSave(sender, instance, raw, using, update_fields, **kwargs):
     if instance.id:
-        oldCount = FactorItem.objects.get(pk=instance.id).count
+        oldCount = ReceiptItem.objects.get(pk=instance.id).count
     else:
         oldCount = 0
     count = instance.count - oldCount
-    factor = instance.factor
+    receipt = instance.receipt
 
-    if factor.type in ('sale', 'backFromBuy'):
+    if receipt.type == 'remittance':
         count = -count
     updateInventory(instance.warehouse.id, instance.ware.id, count)
 
 
-def updateFactorInventoryOnDelete(sender, instance, using, **kwargs):
+def updateInventoryOnReceiptItemDelete(sender, instance, using, **kwargs):
     updateInventory(instance.warehouse.id, instance.ware.id, -instance.count)
 
 
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
-signals.pre_save.connect(receiver=updateFactorInventoryOnUpdate, sender=FactorItem)
-signals.pre_delete.connect(receiver=updateFactorInventoryOnDelete, sender=FactorItem)
+signals.pre_save.connect(receiver=updateInventoryOnReceiptItemSave, sender=ReceiptItem)
+signals.pre_delete.connect(receiver=updateInventoryOnReceiptItemDelete, sender=ReceiptItem)
+
+
+def clearReceipt(receipt):
+    receipt.explanation = ''
+    receipt.save()
+    for item in receipt.items.all():
+        item.delete()

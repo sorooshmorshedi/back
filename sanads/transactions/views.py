@@ -65,7 +65,7 @@ class TransactionItemMass(APIView):
 
     def put(self, request):
         for item in request.data:
-            instance = TransaItem.objects.get(id=item['id'])
+            instance = TransactionItem.objects.get(id=item['id'])
             serialized = TransactionItemSerializer(instance, data=item)
             if serialized.is_valid():
                 serialized.save()

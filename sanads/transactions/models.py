@@ -6,6 +6,8 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from sanads.transactions.autoSanad import *
 
+from cheques.models import Cheque
+
 TYPES = (
     ('receive', 'receive'),
     ('payment', 'payment'),
@@ -13,7 +15,7 @@ TYPES = (
 
 
 class Transaction(models.Model):
-    code = models.IntegerField(unique=True)
+    code = models.IntegerField()
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactions')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True, null=True)
     date = jmodels.jDateField()
@@ -34,21 +36,21 @@ class Transaction(models.Model):
 
     class Meta:
         ordering = ['code', ]
+        unique_together = ('code', 'type')
 
 
 class TransactionItem(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems', blank=True, null=True)
+    cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='transactionItem', blank=True, null=True)
 
     type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT)
-
     value = models.DecimalField(max_digits=24, decimal_places=0)
-
     date = jmodels.jDateField()
-
+    due = jmodels.jDateField(null=True, blank=True)
     documentNumber = models.CharField(max_length=50, blank=True)
-
+    bankName = models.CharField(max_length=255, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
 
     file = models.FileField(blank=True, null=True)

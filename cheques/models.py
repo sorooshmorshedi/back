@@ -50,7 +50,6 @@ class Cheque(models.Model):
     chequebook = models.ForeignKey(Chequebook, on_delete=models.CASCADE, related_name='cheques', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='receivedCheques', blank=True, null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='receivedCheques', blank=True, null=True)
-    sanadItem = models.ForeignKey(SanadItem, on_delete=models.PROTECT, related_name='cheque', blank=True, null=True)
 
     value = models.DecimalField(max_digits=24, decimal_places=0, blank=True, null=True)
     due = jmodels.jDateField(blank=True, null=True)
@@ -74,7 +73,10 @@ class Cheque(models.Model):
     )
 
     def __str__(self):
-        return "{0} - {1}".format(self.serial, self.explanation[0:30])
+        if self.chequebook:
+            return "{0} - {1}".format(self.chequebook.explanation[0:50], self.serial)
+        else:
+            return "{0} - {1}".format(self.explanation[0:50], self.serial)
 
     class Meta:
         ordering = ['serial', ]
@@ -121,9 +123,26 @@ signals.post_save.connect(receiver=statusChangeSanad, sender=StatusChange)
 def deleteStatusChange(sender, instance, using, **kwargs):
     cheque = instance.cheque
     lastStatusChangeId = StatusChange.objects.filter(cheque=cheque).latest('id').id
+
     if instance.id != lastStatusChangeId:
         raise serializers.ValidationError("ابتدا تغییرات جلوتر را پاک کنید")
-    clearSanad(instance.sanad)
+
+    if cheque.statusChanges.count() == 1:
+        if instance.cheque.type == 'received':
+            raise serializers.ValidationError("این وضعیت غیر قابل حذف می باشد")
+        else:
+            cheque.account = None
+            cheque.floatAccount = None
+            cheque.value = None
+            cheque.due = None
+            cheque.date = None
+            cheque.explanation = ''
+            cheque.lastAccount = None
+            cheque.lastFloatAccount = None
+
+    if not cheque.transactionItem.all():
+        clearSanad(instance.sanad)
+
     cheque.status = instance.fromStatus
     cheque.save()
 

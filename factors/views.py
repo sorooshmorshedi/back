@@ -98,10 +98,11 @@ class FactorExpenseMass(APIView):
         return Response([], status=status.HTTP_200_OK)
 
 
-class FactorSanadUpdate(APIView):
+class FactorSanadAndReceiptUpdate(APIView):
     def put(self, request, pk):
         queryset = Factor.objects.all()
         factor = get_object_or_404(queryset, pk=pk)
+        sanad = factor.sanad
         sanad = factor.sanad
         clearSanad(sanad)
 
@@ -191,7 +192,58 @@ class FactorSanadUpdate(APIView):
                 explanation="",
             )
 
+        # Receipt
+        receipt = factor.receipt
+        clearReceipt(receipt)
+
+        for item in factor.items.all():
+            receipt.items.create(
+                ware=item.ware,
+                warehouse=item.warehouse,
+                count=item.count
+            )
 
         return Response([])
 
 
+class ReceiptModelView(viewsets.ModelViewSet):
+    queryset = Receipt.objects.all()
+    serializer_class = ReceiptSerializer
+
+    def list(self, request, *ergs, **kwargs):
+        queryset = Receipt.objects.all()
+        serialized = ReceiptListRetrieveSerializer(queryset, many=True)
+        return Response(serialized.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = Receipt.objects.all()
+        instance = get_object_or_404(queryset, pk=pk)
+        serialized = ReceiptListRetrieveSerializer(instance)
+        return Response(serialized.data)
+
+
+class ReceiptItemMass(APIView):
+    serializer_class = ReceiptItemSerializer
+
+    def post(self, request):
+        serialized = self.serializer_class(data=request.data, many=True)
+        if serialized.is_valid():
+            serialized.save()
+            return Response(serialized.data, status=status.HTTP_201_CREATED)
+        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        for item in request.data:
+            instance = ReceiptItem.objects.get(id=item['id'])
+            serialized = ReceiptItemSerializer(instance, data=item)
+            if serialized.is_valid():
+                serialized.save()
+            else:
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serialized.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        for itemId in request.data:
+            instance = ReceiptItem.objects.get(id=itemId)
+            instance.delete()
+        return Response([], status=status.HTTP_200_OK)

@@ -5,11 +5,15 @@ from sanads.sanads.models import clearSanad
 
 def createCheques(sender, instance, created, **kwargs):
     if created:
+        bank = instance.account.bank
         for i in range(instance.serial_from, instance.serial_to + 1):
             instance.cheques.create(
                 serial=i,
                 status='blank',
                 type='paid',
+                bankName=bank.name,
+                branchName=bank.branch,
+                accountNumber=bank.accountNumber,
             )
     else:
         for cheque in instance.cheques.all():

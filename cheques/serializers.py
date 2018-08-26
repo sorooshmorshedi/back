@@ -48,7 +48,7 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        if 'data' not in validated_data and not validated_data['sanad']:
+        if 'sanad' not in validated_data or not validated_data['sanad']:
             sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
             sanad.save()
             validated_data['sanad'] = sanad
@@ -64,14 +64,10 @@ class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class ChequeSerializer(serializers.ModelSerializer):
-    # title = serializers.SerializerMethodField()
-    #
-    # def get_title(self, obj):
-    #     return obj.ser+ ' - ' + obj.name
 
     class Meta:
         model = Cheque
-        fields = ('id', 'serial', 'account', 'floatAccount', 'sanadItem', 'value', 'due', 'date', 'explanation')
+        fields = ('id', 'serial', 'account', 'floatAccount', 'value', 'due', 'date', 'explanation')
 
     def validate(self, data):
         if 'account' not in data or not data['account']:
@@ -97,6 +93,14 @@ class ChequeListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     statusChanges = StatusChangeListRetrieveSerializer(read_only=True, many=True)
+
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj):
+        if obj.chequebook:
+            return "{0} - {1}".format(obj.chequebook.explanation[0:50], obj.serial)
+        else:
+            return "{0} - {1}".format(obj.explanation[0:50], obj.serial)
 
     class Meta:
         model = Cheque

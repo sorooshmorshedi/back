@@ -7,7 +7,6 @@ def updateSanad(sender, instance, created, **kwargs):
     t = instance
     sanad = instance.sanad
 
-
     if t.type == 'receive':
         rowsType = 'bed'
         lastRowType = 'bes'
@@ -22,7 +21,7 @@ def updateSanad(sender, instance, created, **kwargs):
     sanad.type = 'temporary'
     sanad.save()
 
-    clearSanad(sender='updateSanad', instance=sanad, created=None)
+    clearSanad(sanad)
 
     typeNames = []
     totalValue = 0

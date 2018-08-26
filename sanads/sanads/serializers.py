@@ -30,6 +30,10 @@ class SanadItemSerializer(serializers.ModelSerializer):
 
         return data
 
+    def update(self, instance, validated_data):
+        if instance.sanad.createType == 'auto':
+            raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
+
 
 class SanadItemListRetrieveSerializer(SanadItemSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
@@ -45,10 +49,15 @@ class SanadSerializer(serializers.ModelSerializer):
         model = Sanad
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        if instance.createType == 'auto':
+            raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
+
 
 class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
 
     class Meta(SanadSerializer.Meta):
         pass
+
 

@@ -61,6 +61,21 @@ class FactorSerializer(serializers.ModelSerializer):
         sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
         sanad.save()
         validated_data['sanad'] = sanad
+
+        if validated_data['type'] in ('sale', 'backFromBuy'):
+            receiptType = 'remittance'
+        else:
+            receiptType = 'receipt'
+        receipt = Receipt(
+            code=Receipt.objects.latest('code').code + 1,
+            date=validated_data['date'],
+            time=validated_data['time'],
+            createType='auto',
+            type=receiptType
+        )
+        receipt.save()
+        validated_data['receipt'] = receipt
+
         res = super(FactorSerializer, self).create(validated_data)
         return res
 
@@ -99,4 +114,40 @@ class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
         model = WarehouseInventory
         fields = '__all__'
 
+
+class ReceiptItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReceiptItem
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        if instance.receipt.createType == 'auto':
+            raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
+
+
+class ReceiptItemListRetrieveSerializer(ReceiptItemSerializer):
+    ware = WareListRetrieveSerializer(read_only=True, many=False)
+    warehouse = WarehouseSerializer(read_only=True, many=False)
+
+    class Meta:
+        model = ReceiptItem
+        fields = '__all__'
+
+
+class ReceiptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        if instance.createType == 'auto':
+            raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
+
+
+class ReceiptListRetrieveSerializer(ReceiptSerializer):
+    items = ReceiptItemListRetrieveSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Receipt
+        fields = '__all__'
 
