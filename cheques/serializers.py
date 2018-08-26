@@ -67,7 +67,7 @@ class ChequeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cheque
-        fields = ('id', 'serial', 'account', 'floatAccount', 'value', 'due', 'date', 'explanation')
+        fields = ('id', 'serial', 'account', 'floatAccount', 'value', 'due', 'date', 'explanation', 'bankName', 'branchName', 'accountNumber')
 
     def validate(self, data):
         if 'account' not in data or not data['account']:

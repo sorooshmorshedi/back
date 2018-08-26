@@ -3,22 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="kjkj">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/accounts/admin.py" afterPath="$PROJECT_DIR$/accounts/admin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cheques/models.py" afterPath="$PROJECT_DIR$/cheques/models.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cheques/serializers.py" afterPath="$PROJECT_DIR$/cheques/serializers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cheques/signals.py" afterPath="$PROJECT_DIR$/cheques/signals.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cheques/views.py" afterPath="$PROJECT_DIR$/cheques/views.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db.sqlite3" afterPath="$PROJECT_DIR$/db.sqlite3" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/admin.py" afterPath="$PROJECT_DIR$/factors/admin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/models.py" afterPath="$PROJECT_DIR$/factors/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/serializers.py" afterPath="$PROJECT_DIR$/factors/serializers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/urls.py" afterPath="$PROJECT_DIR$/factors/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/views.py" afterPath="$PROJECT_DIR$/factors/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/sanads/serializers.py" afterPath="$PROJECT_DIR$/sanads/sanads/serializers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/autoSanad.py" afterPath="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/models.py" afterPath="$PROJECT_DIR$/sanads/transactions/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/serializers.py" afterPath="$PROJECT_DIR$/sanads/transactions/serializers.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/views.py" afterPath="$PROJECT_DIR$/sanads/transactions/views.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -34,95 +20,45 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/models.py">
+        <entry file="file://$PROJECT_DIR$/cheques/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="243">
-              <caret line="40" column="27" lean-forward="false" selection-start-line="40" selection-start-column="27" selection-end-line="40" selection-end-column="27" />
+            <state relative-caret-position="405">
+              <caret line="66" column="11" lean-forward="false" selection-start-line="66" selection-start-column="11" selection-end-line="66" selection-end-column="11" />
               <folding>
-                <element signature="e#0#28#0" expanded="true" />
-                <element signature="e#4313#5120#0" expanded="false" />
+                <element signature="e#663#1273#0" expanded="false" />
+                <element signature="e#3072#4439#0" expanded="false" />
+                <element signature="e#4802#5633#0" expanded="false" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="serializers.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/factors/serializers.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="146" column="52" lean-forward="false" selection-start-line="146" selection-start-column="52" selection-end-line="146" selection-end-column="52" />
-              <folding>
-                <element signature="e#0#38#0" expanded="true" />
-                <element signature="e#386#626#0" expanded="false" />
-                <element signature="e#689#810#0" expanded="false" />
-                <element signature="e#877#945#0" expanded="false" />
-                <element signature="e#1024#1307#0" expanded="false" />
-                <element signature="e#1368#2819#0" expanded="false" />
-                <element signature="e#2884#3000#0" expanded="false" />
-                <element signature="e#3069#3251#0" expanded="false" />
-                <element signature="e#3323#3677#0" expanded="false" />
-                <element signature="e#3761#3834#0" expanded="false" />
-                <element signature="e#4226#4423#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="459">
-              <caret line="199" column="12" lean-forward="false" selection-start-line="199" selection-start-column="12" selection-end-line="199" selection-end-column="12" />
-              <folding>
-                <element signature="e#0#54#0" expanded="true" />
-                <element signature="e#386#964#0" expanded="false" />
-                <element signature="e#1017#1525#0" expanded="false" />
-                <element signature="e#1563#2571#0" expanded="false" />
-                <element signature="e#2612#3692#0" expanded="false" />
-                <element signature="e#6850#7364#0" expanded="false" />
-                <element signature="e#7403#8415#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/sanads/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="324">
-              <caret line="66" column="36" lean-forward="false" selection-start-line="66" selection-start-column="36" selection-end-line="66" selection-end-column="36" />
-              <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="serializers.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/sanads/serializers.py">
+        <entry file="file://$PROJECT_DIR$/cheques/serializers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="27">
-              <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/urls.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="13" column="86" lean-forward="false" selection-start-line="13" selection-start-column="86" selection-end-line="13" selection-end-column="86" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="admin.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/admin.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="27">
-              <caret line="5" column="27" lean-forward="false" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
+            <state relative-caret-position="268">
+              <caret line="69" column="139" lean-forward="false" selection-start-line="69" selection-start-column="139" selection-end-line="69" selection-end-column="139" />
               <folding>
-                <element signature="e#0#32#0" expanded="true" />
+                <element signature="e#257#2942#0" expanded="false" />
+                <element signature="e#364#2569#0" expanded="false" />
+                <element signature="e#3020#3156#0" expanded="false" />
+                <element signature="e#4443#5007#0" expanded="false" />
+                <element signature="e#5072#5743#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cheques/views.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="72" column="0" lean-forward="false" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+              <folding>
+                <element signature="e#434#1034#0" expanded="false" />
+                <element signature="e#1087#2130#0" expanded="false" />
+                <element signature="e#4857#7089#0" expanded="false" />
+                <element signature="e#7306#8970#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -207,7 +143,6 @@
         <option value="$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py" />
         <option value="$PROJECT_DIR$/wares/models.py" />
         <option value="$PROJECT_DIR$/wares/views.py" />
-        <option value="$PROJECT_DIR$/cheques/views.py" />
         <option value="$PROJECT_DIR$/../../code/selenium/sess/project/sess.py" />
         <option value="$PROJECT_DIR$/cheques/signals.py" />
         <option value="$PROJECT_DIR$/server/middleware.py" />
@@ -217,13 +152,14 @@
         <option value="$PROJECT_DIR$/sanads/transactions/views.py" />
         <option value="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
         <option value="$PROJECT_DIR$/cheques/models.py" />
-        <option value="$PROJECT_DIR$/cheques/serializers.py" />
         <option value="$PROJECT_DIR$/factors/urls.py" />
         <option value="$PROJECT_DIR$/factors/admin.py" />
         <option value="$PROJECT_DIR$/factors/models.py" />
         <option value="$PROJECT_DIR$/factors/views.py" />
         <option value="$PROJECT_DIR$/sanads/sanads/serializers.py" />
         <option value="$PROJECT_DIR$/factors/serializers.py" />
+        <option value="$PROJECT_DIR$/cheques/serializers.py" />
+        <option value="$PROJECT_DIR$/cheques/views.py" />
       </list>
     </option>
   </component>
@@ -293,7 +229,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="factors" />
+              <option name="myItemId" value="cheques" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -777,55 +713,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="69" column="61" lean-forward="false" selection-start-line="69" selection-start-column="61" selection-end-line="69" selection-end-column="61" />
-          <folding>
-            <element signature="e#364#2569#0" expanded="false" />
-            <element signature="e#3020#3156#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/signals.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="38" column="14" lean-forward="true" selection-start-line="38" selection-start-column="14" selection-end-line="38" selection-end-column="14" />
-          <folding>
-            <element signature="e#146#820#0" expanded="false" />
-            <element signature="e#912#1344#0" expanded="false" />
-            <element signature="e#1432#1641#0" expanded="false" />
-            <element signature="e#1708#3308#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="53" column="24" lean-forward="false" selection-start-line="53" selection-start-column="24" selection-end-line="53" selection-end-column="24" />
-          <folding>
-            <element signature="e#434#1034#0" expanded="false" />
-            <element signature="e#1087#2130#0" expanded="false" />
-            <element signature="e#2172#7089#0" expanded="false" />
-            <element signature="e#4857#7089#0" expanded="false" />
-            <element signature="e#7306#8970#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="529">
-          <caret line="143" column="8" lean-forward="true" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#28#0" expanded="false" />
-            <element signature="e#3072#4439#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sanads/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -863,7 +750,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/factors/admin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27">
+        <state relative-caret-position="135">
           <caret line="5" column="27" lean-forward="false" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
@@ -930,6 +817,59 @@
             <element signature="e#3323#3677#0" expanded="false" />
             <element signature="e#3761#3834#0" expanded="false" />
             <element signature="e#4226#4423#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheques/signals.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="5" column="12" lean-forward="true" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
+          <folding>
+            <element signature="e#146#820#0" expanded="false" />
+            <element signature="e#166#528#0" expanded="false" />
+            <element signature="e#912#1344#0" expanded="false" />
+            <element signature="e#1432#1641#0" expanded="false" />
+            <element signature="e#1708#3308#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheques/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="66" column="11" lean-forward="false" selection-start-line="66" selection-start-column="11" selection-end-line="66" selection-end-column="11" />
+          <folding>
+            <element signature="e#663#1273#0" expanded="false" />
+            <element signature="e#3072#4439#0" expanded="false" />
+            <element signature="e#4802#5633#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheques/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="268">
+          <caret line="69" column="139" lean-forward="false" selection-start-line="69" selection-start-column="139" selection-end-line="69" selection-end-column="139" />
+          <folding>
+            <element signature="e#257#2942#0" expanded="false" />
+            <element signature="e#364#2569#0" expanded="false" />
+            <element signature="e#3020#3156#0" expanded="false" />
+            <element signature="e#4443#5007#0" expanded="false" />
+            <element signature="e#5072#5743#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheques/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="72" column="0" lean-forward="false" selection-start-line="72" selection-start-column="0" selection-end-line="72" selection-end-column="0" />
+          <folding>
+            <element signature="e#434#1034#0" expanded="false" />
+            <element signature="e#1087#2130#0" expanded="false" />
+            <element signature="e#4857#7089#0" expanded="false" />
+            <element signature="e#7306#8970#0" expanded="false" />
           </folding>
         </state>
       </provider>
