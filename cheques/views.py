@@ -144,11 +144,13 @@ class ChangeChequeStatus(APIView):
             data['bedAccount'] = cheque.lastAccount.id
             if cheque.lastFloatAccount:
                 data['bedFloatAccount'] = cheque.lastFloatAccount.id
+
             if data['toStatus'] == 'revoked' or data['toStatus'] == 'bounced':
                 data['besAccount'] = cheque.account.id
                 if cheque.floatAccount:
                     data['besFloatAccount'] = cheque.floatAccount.id
-            if data['type'] == 'paid' and data['toStatus'] == 'passed':
+
+            if cheque.type == 'paid' and data['toStatus'] == 'passed':
                 data['besAccount'] = cheque.chequebook.account.id
                 if cheque.chequebook.floatAccount:
                     data['besFloatAccount'] = cheque.chequebook.floatAccount.id
