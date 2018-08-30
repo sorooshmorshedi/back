@@ -155,3 +155,6 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=60*60*24)
 }
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+
