@@ -1,0 +1,3084 @@
+[{
+    "model": "accounts.Account",
+    "pk": 1,
+    "fields": {
+      "code": 1,
+      "level": 0,
+      "name": "دارایی های جاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 2,
+    "fields": {
+      "code": 2,
+      "level": 0,
+      "name": "دارایی های غیرجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 3,
+    "fields": {
+      "code": 3,
+      "level": 0,
+      "name": "بدهی های جاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 4,
+    "fields": {
+      "code": 4,
+      "level": 0,
+      "name": "بدهی های بلندمت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 5,
+    "fields": {
+      "code": 5,
+      "level": 0,
+      "name": "حقوق صاحبان سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 6,
+    "fields": {
+      "code": 6,
+      "level": 0,
+      "name": "درامدها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 7,
+    "fields": {
+      "code": 7,
+      "level": 0,
+      "name": "بهای تمام شده کالای فروش رفته وخدمات ارائه شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 8,
+    "fields": {
+      "code": 8,
+      "level": 0,
+      "name": "هزینه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 9,
+    "fields": {
+      "code": 9,
+      "level": 0,
+      "name": "حساب های انتظامی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 10,
+    "fields": {
+      "code": 110,
+      "parent": 1,
+      "level": 1,
+      "name": "موجودی نقد"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 11,
+    "fields": {
+      "code": 111,
+      "parent": 1,
+      "level": 1,
+      "name": "سرمایه گذاری های کوتاه مدت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 12,
+    "fields": {
+      "code": 112,
+      "parent": 1,
+      "level": 1,
+      "name": "حساب واسناددریافتنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 13,
+    "fields": {
+      "code": 113,
+      "parent": 1,
+      "level": 1,
+      "name": "سایرحسابها واسناددریافتنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 14,
+    "fields": {
+      "code": 114,
+      "parent": 1,
+      "level": 1,
+      "name": "موجودی موادوکالا"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 15,
+    "fields": {
+      "code": 115,
+      "parent": 1,
+      "level": 1,
+      "name": "سفارشات وپیش پرداخت ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 16,
+    "fields": {
+      "code": 116,
+      "parent": 1,
+      "level": 1,
+      "name": "دارایی های جاری نگهداری شده برای فروش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 17,
+    "fields": {
+      "code": 210,
+      "parent": 2,
+      "level": 1,
+      "name": "دارایی های ثابت مشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 18,
+    "fields": {
+      "code": 211,
+      "parent": 2,
+      "level": 1,
+      "name": "استهلاک انباشته دارایی ثابت مشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 19,
+    "fields": {
+      "code": 212,
+      "parent": 2,
+      "level": 1,
+      "name": "دارایی های نامشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 20,
+    "fields": {
+      "code": 213,
+      "parent": 2,
+      "level": 1,
+      "name": "سرمایه گذاری های بلندمدت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 21,
+    "fields": {
+      "code": 214,
+      "parent": 2,
+      "level": 1,
+      "name": "سایر داراییها غیرجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 22,
+    "fields": {
+      "code": 310,
+      "parent": 3,
+      "level": 1,
+      "name": "حساب ها واسناد پرداختنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 23,
+    "fields": {
+      "code": 311,
+      "parent": 3,
+      "level": 1,
+      "name": "سایر حسابها واسنادپرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 24,
+    "fields": {
+      "code": 312,
+      "parent": 3,
+      "level": 1,
+      "name": "سفارشات پیش دریافتها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 25,
+    "fields": {
+      "code": 313,
+      "parent": 3,
+      "level": 1,
+      "name": "ذخیره مالیات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 26,
+    "fields": {
+      "code": 314,
+      "parent": 3,
+      "level": 1,
+      "name": "سپرده های پرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 27,
+    "fields": {
+      "code": 315,
+      "parent": 3,
+      "level": 1,
+      "name": "تسهیلات و اعتبارات مالی دریافتی کوتاه مدت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 28,
+    "fields": {
+      "code": 316,
+      "parent": 3,
+      "level": 1,
+      "name": "ذخایر"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 29,
+    "fields": {
+      "code": 410,
+      "parent": 4,
+      "level": 1,
+      "name": "حساب واسناد پرداختنی بلندمدت تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 30,
+    "fields": {
+      "code": 411,
+      "parent": 4,
+      "level": 1,
+      "name": "تسهیلات واعتبارات مالی دریافتی بلندمدت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 31,
+    "fields": {
+      "code": 412,
+      "parent": 4,
+      "level": 1,
+      "name": "ذخیره مزایای پایان خدمت کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 32,
+    "fields": {
+      "code": 413,
+      "parent": 4,
+      "level": 1,
+      "name": "درامدهای انتقالی به دوره های اتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 33,
+    "fields": {
+      "code": 510,
+      "parent": 5,
+      "level": 1,
+      "name": "سرمایه پرداخت شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 34,
+    "fields": {
+      "code": 511,
+      "parent": 5,
+      "level": 1,
+      "name": "اندوخته  قانونی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 35,
+    "fields": {
+      "code": 512,
+      "parent": 5,
+      "level": 1,
+      "name": "سایراندوخته ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 36,
+    "fields": {
+      "code": 513,
+      "parent": 5,
+      "level": 1,
+      "name": "مازاد تجدیدارزیابی دارایی ثابت مشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 37,
+    "fields": {
+      "code": 514,
+      "parent": 5,
+      "level": 1,
+      "name": "سودوزیان انباشته"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 38,
+    "fields": {
+      "code": 610,
+      "parent": 6,
+      "level": 1,
+      "name": "فروش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 39,
+    "fields": {
+      "code": 611,
+      "parent": 6,
+      "level": 1,
+      "name": "درامدحاصل از ازایه خدمات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 40,
+    "fields": {
+      "code": 612,
+      "parent": 6,
+      "level": 1,
+      "name": "سایر درامد های عملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 41,
+    "fields": {
+      "code": 613,
+      "parent": 6,
+      "level": 1,
+      "name": "سایردرامدهای غیرعملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 42,
+    "fields": {
+      "code": 710,
+      "parent": 7,
+      "level": 1,
+      "name": "بهای تمام شده کالای فروش رفته داخلی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 43,
+    "fields": {
+      "code": 711,
+      "parent": 7,
+      "level": 1,
+      "name": "بهای تمام شده کالای فروش رفته  وخدمات ارایه شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 44,
+    "fields": {
+      "code": 810,
+      "parent": 8,
+      "level": 1,
+      "name": "حقوق ودستمزد مستمر"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 45,
+    "fields": {
+      "code": 811,
+      "parent": 8,
+      "level": 1,
+      "name": "حقوق دستمزد غیرمستمر"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 46,
+    "fields": {
+      "code": 812,
+      "parent": 8,
+      "level": 1,
+      "name": "حق بیمه سهم کارفرما"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 47,
+    "fields": {
+      "code": 813,
+      "parent": 8,
+      "level": 1,
+      "name": "هزینه عملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 48,
+    "fields": {
+      "code": 814,
+      "parent": 8,
+      "level": 1,
+      "name": "هزینه اداری وتشکیلاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 49,
+    "fields": {
+      "code": 815,
+      "parent": 8,
+      "level": 1,
+      "name": "هزینه توزیع وفروش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 50,
+    "fields": {
+      "code": 816,
+      "parent": 8,
+      "level": 1,
+      "name": "زیان ناشی از کاهش ارزش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 51,
+    "fields": {
+      "code": 817,
+      "parent": 8,
+      "level": 1,
+      "name": "هزینه سود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 52,
+    "fields": {
+      "code": 910,
+      "parent": 9,
+      "level": 1,
+      "name": "حساب انتظامی به نفع شرکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 53,
+    "fields": {
+      "code": 911,
+      "parent": 9,
+      "level": 1,
+      "name": "حساب انتظامی به عهده شرکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 54,
+    "fields": {
+      "code": 912,
+      "parent": 9,
+      "level": 1,
+      "name": "ترازافتتاحیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 55,
+    "fields": {
+      "code": 913,
+      "parent": 9,
+      "level": 1,
+      "name": "ترازاختتامیه"
+    }
+  },
+
+  {
+    "model": "accounts.Account",
+    "pk": 56,
+    "fields": {
+      "code": 11001,
+      "parent": 10,
+      "level": 2,
+      "name": "موجودی نزد بانک ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 57,
+    "fields": {
+      "code": 11002,
+      "parent": 10,
+      "level": 2,
+      "name": "موجودی  نزد صندوق"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 58,
+    "fields": {
+      "code": 11003,
+      "parent": 10,
+      "level": 2,
+      "name": "موجودی نزد تنخواه گردان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 59,
+    "fields": {
+      "code": 11004,
+      "parent": 10,
+      "level": 2,
+      "name": "اسناد واوراق بهادار نزد صندوق"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 60,
+    "fields": {
+      "code": 11005,
+      "parent": 10,
+      "level": 2,
+      "name": "وجوه در راه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 61,
+    "fields": {
+      "code": 11006,
+      "parent": 10,
+      "level": 2,
+      "name": "موجودی واریزی  نامه های ارزی "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 62,
+    "fields": {
+      "code": 11007,
+      "parent": 11,
+      "level": 2,
+      "name": "مسکوکات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 63,
+    "fields": {
+      "code": 11101,
+      "parent": 11,
+      "level": 2,
+      "name": "سپرده سرمایه گذاری "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 64,
+    "fields": {
+      "code": 11102,
+      "parent": 11,
+      "level": 2,
+      "name": "سرمایه گذاری در سهام "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 65,
+    "fields": {
+      "code": 11103,
+      "parent": 11,
+      "level": 2,
+      "name": "سرمایه گذاری در اوراق مشارکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 66,
+    "fields": {
+      "code": 11201,
+      "parent": 12,
+      "level": 2,
+      "name": "حساب های دریافتنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 67,
+    "fields": {
+      "code": 11202,
+      "parent": 12,
+      "level": 2,
+      "name": "اسناددریافتنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 68,
+    "fields": {
+      "code": 11301,
+      "parent": 13,
+      "level": 2,
+      "name": "سایرحسابهای دریافتنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 69,
+    "fields": {
+      "code": 11302,
+      "parent": 13,
+      "level": 2,
+      "name": "حق العمل کاران"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 70,
+    "fields": {
+      "code": 11303,
+      "parent": 13,
+      "level": 2,
+      "name": "ترخیص کاران گمرکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 71,
+    "fields": {
+      "code": 11304,
+      "parent": 13,
+      "level": 2,
+      "name": "وام ضروری کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 72,
+    "fields": {
+      "code": 11305,
+      "parent": 13,
+      "level": 2,
+      "name": "مساعده کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 73,
+    "fields": {
+      "code": 11306,
+      "parent": 13,
+      "level": 2,
+      "name": "سپرده های موقت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 74,
+    "fields": {
+      "code": 11307,
+      "parent": 13,
+      "level": 2,
+      "name": "مالیات برارزش افزوده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 75,
+    "fields": {
+      "code": 11308,
+      "parent": 13,
+      "level": 2,
+      "name": "طلب از سایراشخاص وابسته"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 76,
+    "fields": {
+      "code": 11309,
+      "parent": 13,
+      "level": 2,
+      "name": "خسارات قابل دریافت از بیمه "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 77,
+    "fields": {
+      "code": 11310,
+      "parent": 13,
+      "level": 2,
+      "name": "سایراسناددریافتنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 78,
+    "fields": {
+      "code": 11401,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی مواداولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 79,
+    "fields": {
+      "code": 11402,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی مواد کمکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 80,
+    "fields": {
+      "code": 11403,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی کالای درجریان ساخت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 81,
+    "fields": {
+      "code": 11404,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی محصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 82,
+    "fields": {
+      "code": 11405,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی انبارقطعات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 83,
+    "fields": {
+      "code": 11406,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی موادمصرفی ویدکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 84,
+    "fields": {
+      "code": 11407,
+      "parent": 14,
+      "level": 2,
+      "name": "کرایه حمل موجودی ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 85,
+    "fields": {
+      "code": 11408,
+      "parent": 14,
+      "level": 2,
+      "name": "موجودی انبارمتفرقه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 86,
+    "fields": {
+      "code": 11501,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت خریدقطعات و لوازم یدکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 87,
+    "fields": {
+      "code": 11502,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت مالیات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 88,
+    "fields": {
+      "code": 11503,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت اجاره"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 89,
+    "fields": {
+      "code": 11504,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت هزینه سود وکارمزد وام ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 90,
+    "fields": {
+      "code": 11505,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت بیمه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 91,
+    "fields": {
+      "code": 11506,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت خدمات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 92,
+    "fields": {
+      "code": 11507,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداحت حسن انجام کار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 93,
+    "fields": {
+      "code": 11508,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت خرید مواداولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 94,
+    "fields": {
+      "code": 11509,
+      "parent": 15,
+      "level": 2,
+      "name": "پیش پرداخت خریداموال ماشین الات وتجهیزات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 95,
+    "fields": {
+      "code": 21001,
+      "parent": 17,
+      "level": 2,
+      "name": "زمین"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 96,
+    "fields": {
+      "code": 21002,
+      "parent": 17,
+      "level": 2,
+      "name": "ساختمان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 97,
+    "fields": {
+      "code": 21003,
+      "parent": 17,
+      "level": 2,
+      "name": "تاسیسات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 98,
+    "fields": {
+      "code": 21004,
+      "parent": 17,
+      "level": 2,
+      "name": "ماشین الات وتجهیزات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 99,
+    "fields": {
+      "code": 21005,
+      "parent": 17,
+      "level": 2,
+      "name": "ابزارالات وقالبها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 100,
+    "fields": {
+      "code": 21006,
+      "parent": 17,
+      "level": 2,
+      "name": "وسایط نقلیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 101,
+    "fields": {
+      "code": 21007,
+      "parent": 17,
+      "level": 2,
+      "name": "اثاثیه ومنصوبات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 102,
+    "fields": {
+      "code": 21008,
+      "parent": 17,
+      "level": 2,
+      "name": "دارایی در جریان تکمیل"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 103,
+    "fields": {
+      "code": 21101,
+      "parent": 18,
+      "level": 2,
+      "name": "استهلاک انباشته ساختمان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 104,
+    "fields": {
+      "code": 21102,
+      "parent": 18,
+      "level": 2,
+      "name": "استهلاک انباشته ماشین الات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 105,
+    "fields": {
+      "code": 21103,
+      "parent": 18,
+      "level": 2,
+      "name": "استهلاک انباشته ابزارالات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 106,
+    "fields": {
+      "code": 21104,
+      "parent": 18,
+      "level": 2,
+      "name": "استهلاک انباشته تاسیسات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 107,
+    "fields": {
+      "code": 21105,
+      "parent": 18,
+      "level": 2,
+      "name": "استهلاک انباشته وسایط نقلیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 108,
+    "fields": {
+      "code": 21201,
+      "parent": 19,
+      "level": 2,
+      "name": "حق الامتیازات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 109,
+    "fields": {
+      "code": 21202,
+      "parent": 19,
+      "level": 2,
+      "name": "حق استفاده ازخدمات عمومی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 110,
+    "fields": {
+      "code": 21203,
+      "parent": 19,
+      "level": 2,
+      "name": "سرقفلی محل کسب"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 111,
+    "fields": {
+      "code": 21204,
+      "parent": 19,
+      "level": 2,
+      "name": "نرم افزارها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 112,
+    "fields": {
+      "code": 21301,
+      "parent": 20,
+      "level": 2,
+      "name": "سرمایه گذاری در سهام شرکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 113,
+    "fields": {
+      "code": 21302,
+      "parent": 20,
+      "level": 2,
+      "name": "سرمایه گذاری در اوراق مشارکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 114,
+    "fields": {
+      "code": 21303,
+      "parent": 20,
+      "level": 2,
+      "name": "سپرده های بانکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 115,
+    "fields": {
+      "code": 21304,
+      "parent": 20,
+      "level": 2,
+      "name": "وام های اعطایی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 116,
+    "fields": {
+      "code": 21401,
+      "parent": 21,
+      "level": 2,
+      "name": "نرم افزار مالی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 117,
+    "fields": {
+      "code": 31001,
+      "parent": 22,
+      "level": 2,
+      "name": "حساب های پرداختنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 700,
+    "fields": {
+      "code": 31002,
+      "parent": 22,
+      "level": 2,
+      "name": "اسنادپرداختنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 118,
+    "fields": {
+      "code": 31101,
+      "parent": 23,
+      "level": 2,
+      "name": "سایرحسابها واسنادپرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 119,
+    "fields": {
+      "code": 31102,
+      "parent": 23,
+      "level": 2,
+      "name": "حقوق پرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 120,
+    "fields": {
+      "code": 31103,
+      "parent": 23,
+      "level": 2,
+      "name": "مالیات های تکلیفی وپرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 121,
+    "fields": {
+      "code": 31104,
+      "parent": 23,
+      "level": 2,
+      "name": "مالیات بردرامد شرکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 122,
+    "fields": {
+      "code": 31105,
+      "parent": 23,
+      "level": 2,
+      "name": "حق بیمه پرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 123,
+    "fields": {
+      "code": 31106,
+      "parent": 23,
+      "level": 2,
+      "name": "عوارض شهرداری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 124,
+    "fields": {
+      "code": 31107,
+      "parent": 23,
+      "level": 2,
+      "name": "جاری شرکا"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 125,
+    "fields": {
+      "code": 31108,
+      "parent": 23,
+      "level": 2,
+      "name": "ذخیره هزینه های معوق پرداخت نشده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 126,
+    "fields": {
+      "code": 31201,
+      "parent": 24,
+      "level": 2,
+      "name": "پیش دریافت فروش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 127,
+    "fields": {
+      "code": 31202,
+      "parent": 24,
+      "level": 2,
+      "name": "پیش دریافت ارایه خدمات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 128,
+    "fields": {
+      "code": 31203,
+      "parent": 24,
+      "level": 2,
+      "name": "سایرپیش دریافتها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 129,
+    "fields": {
+      "code": 31301,
+      "parent": 25,
+      "level": 2,
+      "name": "ذخیره مالیات بردرامد شرکتها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 130,
+    "fields": {
+      "code": 31401,
+      "parent": 26,
+      "level": 2,
+      "name": "سپرده  حسن انجام کار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 131,
+    "fields": {
+      "code": 31402,
+      "parent": 26,
+      "level": 2,
+      "name": "سپرده حسن اجرای تعهدات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 132,
+    "fields": {
+      "code": 31403,
+      "parent": 26,
+      "level": 2,
+      "name": "سپرده دریافتی مناقصه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 133,
+    "fields": {
+      "code": 31404,
+      "parent": 26,
+      "level": 2,
+      "name": "سایرسپرده های دریافتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 134,
+    "fields": {
+      "code": 31501,
+      "parent": 27,
+      "level": 2,
+      "name": "فروش اقساطی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 135,
+    "fields": {
+      "code": 31502,
+      "parent": 27,
+      "level": 2,
+      "name": "مشارکت مدنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 136,
+    "fields": {
+      "code": 31503,
+      "parent": 27,
+      "level": 2,
+      "name": "مضاربه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 137,
+    "fields": {
+      "code": 31601,
+      "parent": 28,
+      "level": 2,
+      "name": "ذخیره مطالبات مشکوک الوصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 138,
+    "fields": {
+      "code": 31602,
+      "parent": 28,
+      "level": 2,
+      "name": "ذخیره کاهش ارزش موجودی مواد"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 139,
+    "fields": {
+      "code": 31603,
+      "parent": 28,
+      "level": 2,
+      "name": "ذخیره کاهش ارزش موجودی کالا"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 140,
+    "fields": {
+      "code": 41001,
+      "parent": 29,
+      "level": 2,
+      "name": "حساب های پرداختنی بلندمدت تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 141,
+    "fields": {
+      "code": 41002,
+      "parent": 29,
+      "level": 2,
+      "name": "حساب پرداختنی بلندمدت غیرتجاریب"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 142,
+    "fields": {
+      "code": 41101,
+      "parent": 30,
+      "level": 2,
+      "name": "فروش اقساطی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 143,
+    "fields": {
+      "code": 41102,
+      "parent": 30,
+      "level": 2,
+      "name": "مضاربه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 144,
+    "fields": {
+      "code": 41103,
+      "parent": 30,
+      "level": 2,
+      "name": "مشارکت مدنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 145,
+    "fields": {
+      "code": 41201,
+      "parent": 31,
+      "level": 2,
+      "name": "ذخیره مزایا پایان خدمت کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 146,
+    "fields": {
+      "code": 41301,
+      "parent": 32,
+      "level": 2,
+      "name": "سود ناشی از تسعیربدهی های بلندمدت ارزی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 147,
+    "fields": {
+      "code": 41302,
+      "parent": 32,
+      "level": 2,
+      "name": "دارایی های اهدایی از طرف اشخاص"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 148,
+    "fields": {
+      "code": 51001,
+      "parent": 33,
+      "level": 2,
+      "name": "سرمایه سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 149,
+    "fields": {
+      "code": 51002,
+      "parent": 33,
+      "level": 2,
+      "name": "صرف"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 150,
+    "fields": {
+      "code": 51003,
+      "parent": 33,
+      "level": 2,
+      "name": "سرمایه سهام عادی تعهد شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 151,
+    "fields": {
+      "code": 51004,
+      "parent": 33,
+      "level": 2,
+      "name": "سرمایه اهدایی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 152,
+    "fields": {
+      "code": 51005,
+      "parent": 33,
+      "level": 2,
+      "name": "سهام خزانه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 153,
+    "fields": {
+      "code": 51006,
+      "parent": 33,
+      "level": 2,
+      "name": "سودسهمی قابل توزیع"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 154,
+    "fields": {
+      "code": 51007,
+      "parent": 33,
+      "level": 2,
+      "name": "سرمایه پرداخت شده ناشی از تهعدپرداخت شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 155,
+    "fields": {
+      "code": 51008,
+      "parent": 33,
+      "level": 2,
+      "name": "حق تقدم خرید سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 156,
+    "fields": {
+      "code": 51101,
+      "parent": 34,
+      "level": 2,
+      "name": "اندوخته قانونی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 157,
+    "fields": {
+      "code": 51201,
+      "parent": 35,
+      "level": 2,
+      "name": "اندوخته احتیاطی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 158,
+    "fields": {
+      "code": 51202,
+      "parent": 35,
+      "level": 2,
+      "name": "اندوخته توسعه وتکمیل"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 159,
+    "fields": {
+      "code": 51203,
+      "parent": 35,
+      "level": 2,
+      "name": "اندوخته عمومی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 160,
+    "fields": {
+      "code": 51204,
+      "parent": 35,
+      "level": 2,
+      "name": "سایراندوخته ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 161,
+    "fields": {
+      "code": 51301,
+      "parent": 36,
+      "level": 2,
+      "name": "زمین"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 162,
+    "fields": {
+      "code": 51302,
+      "parent": 36,
+      "level": 2,
+      "name": "ساختمان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 163,
+    "fields": {
+      "code": 51303,
+      "parent": 36,
+      "level": 2,
+      "name": "تاسیسات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 164,
+    "fields": {
+      "code": 51304,
+      "parent": 36,
+      "level": 2,
+      "name": "ماشین الات وتجهیزات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 165,
+    "fields": {
+      "code": 51305,
+      "parent": 36,
+      "level": 2,
+      "name": "ابزارالات وقالبها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 166,
+    "fields": {
+      "code": 51306,
+      "parent": 36,
+      "level": 2,
+      "name": "وسایط نقلیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 167,
+    "fields": {
+      "code": 51307,
+      "parent": 36,
+      "level": 2,
+      "name": "دارایی سرمایه ای موجوددرانبار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 168,
+    "fields": {
+      "code": 51308,
+      "parent": 36,
+      "level": 2,
+      "name": "سرمایه گذاری درسهام شرکت وابسته"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 169,
+    "fields": {
+      "code": 51309,
+      "parent": 36,
+      "level": 2,
+      "name": "سرمایه گذاری درسهام شرکت تابعه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 170,
+    "fields": {
+      "code": 51310,
+      "parent": 36,
+      "level": 2,
+      "name": "سرمایه گذاری در اوراق مشارکت  سایرشرکتها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 171,
+    "fields": {
+      "code": 51311,
+      "parent": 36,
+      "level": 2,
+      "name": "سودزیان انباشته"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 172,
+    "fields": {
+      "code": 51312,
+      "parent": 36,
+      "level": 2,
+      "name": "سودزیان سال جاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 173,
+    "fields": {
+      "code": 51313,
+      "parent": 36,
+      "level": 2,
+      "name": "تعدیلات سنواتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 174,
+    "fields": {
+      "code": 61001,
+      "parent": 38,
+      "level": 2,
+      "name": "فروش کالا داخلی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 175,
+    "fields": {
+      "code": 61002,
+      "parent": 38,
+      "level": 2,
+      "name": "برگشت ازفروش تخفیفات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 176,
+    "fields": {
+      "code": 61003,
+      "parent": 38,
+      "level": 2,
+      "name": "تخفیفات نقدی فروش "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 177,
+    "fields": {
+      "code": 61004,
+      "parent": 38,
+      "level": 2,
+      "name": "فروش کالا صادراتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 178,
+    "fields": {
+      "code": 61005,
+      "parent": 38,
+      "level": 2,
+      "name": "برگشت ازفروش کالاصادراتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 179,
+    "fields": {
+      "code": 61006,
+      "parent": 38,
+      "level": 2,
+      "name": "تخفیفات نقدی فروش صادراتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 180,
+    "fields": {
+      "code": 61101,
+      "parent": 39,
+      "level": 2,
+      "name": "درامدحاصل از ارایه خدمات داخلی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 181,
+    "fields": {
+      "code": 61201,
+      "parent": 40,
+      "level": 2,
+      "name": "فروش  ضایعات عادی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 182,
+    "fields": {
+      "code": 61202,
+      "parent": 40,
+      "level": 2,
+      "name": "سودحاصل از فروش مواد اولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 183,
+    "fields": {
+      "code": 61203,
+      "parent": 40,
+      "level": 2,
+      "name": "سودناشی از تسعیر دارایی وبدهی های عملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 184,
+    "fields": {
+      "code": 61301,
+      "parent": 43,
+      "level": 2,
+      "name": "سودحاصل از فروش دارایی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 185,
+    "fields": {
+      "code": 61302,
+      "parent": 43,
+      "level": 2,
+      "name": "سود حاصل از سرمایه گذاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 186,
+    "fields": {
+      "code": 61303,
+      "parent": 43,
+      "level": 2,
+      "name": "سودناشی از فروش سزمایه گذاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 187,
+    "fields": {
+      "code": 61304,
+      "parent": 43,
+      "level": 2,
+      "name": "سود ناشی ازتسعیر دارایی وبدهی های غیرعملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 188,
+    "fields": {
+      "code": 61305,
+      "parent": 43,
+      "level": 2,
+      "name": "سایردرامدهای غیرعملیاتی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 189,
+    "fields": {
+      "code": 71001,
+      "parent": 42,
+      "level": 2,
+      "name": "بهای تمام شده کالای فروش رفته داخلی درون گروه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 190,
+    "fields": {
+      "code": 71002,
+      "parent": 42,
+      "level": 2,
+      "name": "بهای تمام شده کالای فروش رفته داخلی خارج از گروه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 191,
+    "fields": {
+      "code": 71101,
+      "parent": 43,
+      "level": 2,
+      "name": "بهای تمام شده خدمات ارایه شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 192,
+    "fields": {
+      "code": 81001,
+      "parent": 44,
+      "level": 2,
+      "name": "حقوق پایه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 193,
+    "fields": {
+      "code": 81002,
+      "parent": 44,
+      "level": 2,
+      "name": "ایاب وذهاب"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 194,
+    "fields": {
+      "code": 81003,
+      "parent": 44,
+      "level": 2,
+      "name": "پاداش "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 195,
+    "fields": {
+      "code": 81004,
+      "parent": 44,
+      "level": 2,
+      "name": "عیدی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 196,
+    "fields": {
+      "code": 81101,
+      "parent": 45,
+      "level": 2,
+      "name": "عیدی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 197,
+    "fields": {
+      "code": 81102,
+      "parent": 45,
+      "level": 2,
+      "name": "پاداش "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 198,
+    "fields": {
+      "code": 81103,
+      "parent": 45,
+      "level": 2,
+      "name": "اموزش "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 199,
+    "fields": {
+      "code": 81104,
+      "parent": 45,
+      "level": 2,
+      "name": "اضافه کاری غیرمستمر"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 200,
+    "fields": {
+      "code": 81201,
+      "parent": 46,
+      "level": 2,
+      "name": "بیمه سهم کارفرما"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 201,
+    "fields": {
+      "code": 81202,
+      "parent": 46,
+      "level": 2,
+      "name": "بیمه بیکاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 202,
+    "fields": {
+      "code": 81301,
+      "parent": 47,
+      "level": 2,
+      "name": "هزینه تعمیر"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 203,
+    "fields": {
+      "code": 81302,
+      "parent": 47,
+      "level": 2,
+      "name": "هزینه سوخت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 204,
+    "fields": {
+      "code": 81303,
+      "parent": 47,
+      "level": 2,
+      "name": "هزینه بیمه موجودی ها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 205,
+    "fields": {
+      "code": 81304,
+      "parent": 47,
+      "level": 2,
+      "name": "هزینه ملزومات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 206,
+    "fields": {
+      "code": 81305,
+      "parent": 47,
+      "level": 2,
+      "name": "هزینه پست"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 207,
+    "fields": {
+      "code": 81306,
+      "parent": 47,
+      "level": 2,
+      "name": " هزینه اجاره "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 208,
+    "fields": {
+      "code": 81407,
+      "parent": 48,
+      "level": 2,
+      "name": "هزینه حق الزحمه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 209,
+    "fields": {
+      "code": 81408,
+      "parent": 48,
+      "level": 2,
+      "name": "هزینه پذیرایی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 210,
+    "fields": {
+      "code": 81409,
+      "parent": 48,
+      "level": 2,
+      "name": "هزینه کارمزدخدمات بانکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 211,
+    "fields": {
+      "code": 81510,
+      "parent": 49,
+      "level": 2,
+      "name": "هزینه اگهی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 212,
+    "fields": {
+      "code": 81511,
+      "parent": 49,
+      "level": 2,
+      "name": "هزینه سوخت مطالبات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 213,
+    "fields": {
+      "code": 81512,
+      "parent": 49,
+      "level": 2,
+      "name": "هزینه حمل کالای فروش رفته"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 214,
+    "fields": {
+      "code": 81513,
+      "parent": 49,
+      "level": 2,
+      "name": "هزینه مطالبات مشکوک الوصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 215,
+    "fields": {
+      "code": 81601,
+      "parent": 50,
+      "level": 2,
+      "name": "موجودی مواداولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 216,
+    "fields": {
+      "code": 91001,
+      "parent": 52,
+      "level": 2,
+      "name": "ضمانت نامه شرکت در مناقصه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 217,
+    "fields": {
+      "code": 91002,
+      "parent": 52,
+      "level": 2,
+      "name": "ضمانت نامه حسن انجام کار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 218,
+    "fields": {
+      "code": 91003,
+      "parent": 52,
+      "level": 2,
+      "name": "ضمانت نامه پیش ئپرداخت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 219,
+    "fields": {
+      "code": 91004,
+      "parent": 52,
+      "level": 2,
+      "name": "کالای امانی ما نزددیگران"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 220,
+    "fields": {
+      "code": 91101,
+      "parent": 53,
+      "level": 2,
+      "name": "ضمانت نامه شرکت در مناقصه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 221,
+    "fields": {
+      "code": 91102,
+      "parent": 53,
+      "level": 2,
+      "name": "ضمانت نامه بانکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 222,
+    "fields": {
+      "code": 91103,
+      "parent": 53,
+      "level": 2,
+      "name": "کالای مانی دیگران نزد ما"
+    }
+  },
+
+  {
+    "model": "accounts.Account",
+    "pk": 223,
+    "fields": {
+      "code": 110010000,
+      "parent": 56,
+      "level": 3,
+      "name": "بانک.."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 224,
+    "fields": {
+      "code": 110020001,
+      "parent": 57,
+      "level": 3,
+      "name": "موجودی نزد صندوق"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 225,
+    "fields": {
+      "code": 110030000,
+      "parent": 58,
+      "level": 3,
+      "name": "تنخواه گردان اقا/خانم...."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 226,
+    "fields": {
+      "code": 112020001,
+      "parent": 67,
+      "level": 3,
+      "name": "اسناددریافتنی نزد صندوق"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 227,
+    "fields": {
+      "code": 112020002,
+      "parent": 67,
+      "level": 3,
+      "name": "اسناددریافتنی در جریان وصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 228,
+    "fields": {
+      "code": 113010000,
+      "parent": 68,
+      "level": 3,
+      "name": "حساب دریافتنی خانم/اقای.."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 229,
+    "fields": {
+      "code": 113050000,
+      "parent": 72,
+      "level": 3,
+      "name": "مساعده حقوق اقا/خانم..."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 230,
+    "fields": {
+      "code": 114010001,
+      "parent": 78,
+      "level": 3,
+      "name": "موجودی مواد اولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 231,
+    "fields": {
+      "code": 114020001,
+      "parent": 79,
+      "level": 3,
+      "name": "موجودی مواد کمکی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 232,
+    "fields": {
+      "code": 114030001,
+      "parent": 80,
+      "level": 3,
+      "name": "موجودی کالای درجریان ساخت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 233,
+    "fields": {
+      "code": 114040001,
+      "parent": 81,
+      "level": 3,
+      "name": "موجودی کالای ساخته شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 234,
+    "fields": {
+      "code": 114040002,
+      "parent": 81,
+      "level": 3,
+      "name": "موجودی ضایعات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 235,
+    "fields": {
+      "code": 115020001,
+      "parent": 87,
+      "level": 3,
+      "name": "پیش پرداخت مالیات برارزش افزوده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 236,
+    "fields": {
+      "code": 115020002,
+      "parent": 87,
+      "level": 3,
+      "name": "پیش پرداخت عوارض شهرداری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 237,
+    "fields": {
+      "code": 210070000,
+      "parent": 101,
+      "level": 3,
+      "name": "اثاثه اداری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 238,
+    "fields": {
+      "code": 212010001,
+      "parent": 108,
+      "level": 3,
+      "name": "حق تالیف"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 239,
+    "fields": {
+      "code": 212010002,
+      "parent": 108,
+      "level": 3,
+      "name": "حق اختراع"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 240,
+    "fields": {
+      "code": 212010003,
+      "parent": 108,
+      "level": 3,
+      "name": "حق انحصاری تولید"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 241,
+    "fields": {
+      "code": 212010004,
+      "parent": 108,
+      "level": 3,
+      "name": "حق انحصاری توزیع"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 242,
+    "fields": {
+      "code": 212020001,
+      "parent": 109,
+      "level": 3,
+      "name": "حق الامتیاز برق"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 243,
+    "fields": {
+      "code": 212020002,
+      "parent": 109,
+      "level": 3,
+      "name": "حق الامتیاز تلفن"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 244,
+    "fields": {
+      "code": 212020003,
+      "parent": 109,
+      "level": 3,
+      "name": "حق الامتیازگاز"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 245,
+    "fields": {
+      "code": 212020004,
+      "parent": 109,
+      "level": 3,
+      "name": "حق الامتیازاب"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 246,
+    "fields": {
+      "code": 212030001,
+      "parent": 110,
+      "level": 3,
+      "name": "سرقفلی محل کسب"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 247,
+    "fields": {
+      "code": 212040001,
+      "parent": 111,
+      "level": 3,
+      "name": "نرم افزار حسابداری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 248,
+    "fields": {
+      "code": 212040002,
+      "parent": 111,
+      "level": 3,
+      "name": "نرم افزارهای فنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 249,
+    "fields": {
+      "code": 212040003,
+      "parent": 111,
+      "level": 3,
+      "name": "نرم ارفزار های اداری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 250,
+    "fields": {
+      "code": 214010001,
+      "parent": 116,
+      "level": 3,
+      "name": "نرم افزار مالی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 261,
+    "fields": {
+      "code": 310010001,
+      "parent": 117,
+      "level": 3,
+      "name": "ذخیره هزینه حمل وباربری فروش"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 262,
+    "fields": {
+      "code": 310020001,
+      "parent": 700,
+      "level": 3,
+      "name": "اسناد پرداختنی تجاری"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 263,
+    "fields": {
+      "code": 311010000,
+      "parent": 118,
+      "level": 3,
+      "name": "هزینه اجاره"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 264,
+    "fields": {
+      "code": 311010001,
+      "parent": 118,
+      "level": 3,
+      "name": "اجاره پرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 265,
+    "fields": {
+      "code": 311010002,
+      "parent": 118,
+      "level": 3,
+      "name": "حساب پرداختنی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 266,
+    "fields": {
+      "code": 311020000,
+      "parent": 119,
+      "level": 3,
+      "name": "حقوق پرداختنی اقا/خانم..."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 267,
+    "fields": {
+      "code": 311030000,
+      "parent": 120,
+      "level": 3,
+      "name": "مالیات برسودسهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 268,
+    "fields": {
+      "code": 311030001,
+      "parent": 120,
+      "level": 3,
+      "name": "مالیات برحقوق کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 269,
+    "fields": {
+      "code": 311030002,
+      "parent": 120,
+      "level": 3,
+      "name": "مالیات برارزش افزوده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 270,
+    "fields": {
+      "code": 311040000,
+      "parent": 121,
+      "level": 3,
+      "name": "مالیات بر درامد شرکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 271,
+    "fields": {
+      "code": 311050000,
+      "parent": 122,
+      "level": 3,
+      "name": "حق بیمه سهم کارفرما"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 272,
+    "fields": {
+      "code": 311050001,
+      "parent": 122,
+      "level": 3,
+      "name": "حق بیمه سهم کارکنان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 273,
+    "fields": {
+      "code": 311050002,
+      "parent": 122,
+      "level": 3,
+      "name": "حق بیمه ترانزیت اشخاص ثالث"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 274,
+    "fields": {
+      "code": 311050003,
+      "parent": 122,
+      "level": 3,
+      "name": "بیمه عمر وحوادث"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 275,
+    "fields": {
+      "code": 311070000,
+      "parent": 124,
+      "level": 3,
+      "name": "جاری اقا/خانم..."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 276,
+    "fields": {
+      "code": 311080000,
+      "parent": 125,
+      "level": 3,
+      "name": "ذخیره هزینه....."
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 277,
+    "fields": {
+      "code": 316010001,
+      "parent": 137,
+      "level": 3,
+      "name": "ذخیره مطالبات تجاری مشکوک الوصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 278,
+    "fields": {
+      "code": 316010002,
+      "parent": 137,
+      "level": 3,
+      "name": "ذخیره مطالبات غیرتجاری مشکوک الوصول"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 279,
+    "fields": {
+      "code": 316020001,
+      "parent": 138,
+      "level": 3,
+      "name": "مواد اولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 280,
+    "fields": {
+      "code": 316020002,
+      "parent": 138,
+      "level": 3,
+      "name": "مواد کمکی وبسته بندی"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 281,
+    "fields": {
+      "code": 316030001,
+      "parent": 139,
+      "level": 3,
+      "name": "کالای درجریان ساخت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 282,
+    "fields": {
+      "code": 316030002,
+      "parent": 139,
+      "level": 3,
+      "name": "کالای ساخته شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 283,
+    "fields": {
+      "code": 316030003,
+      "parent": 139,
+      "level": 3,
+      "name": "کالای در راه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 284,
+    "fields": {
+      "code": 510010001,
+      "parent": 148,
+      "level": 3,
+      "name": "سهام عادی "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 285,
+    "fields": {
+      "code": 510010002,
+      "parent": 148,
+      "level": 3,
+      "name": "سهام ممتاز"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 286,
+    "fields": {
+      "code": 510020001,
+      "parent": 149,
+      "level": 3,
+      "name": "سهام عادی "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 287,
+    "fields": {
+      "code": 510020002,
+      "parent": 149,
+      "level": 3,
+      "name": " سهام ممتاز"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 288,
+    "fields": {
+      "code": 510030001,
+      "parent": 150,
+      "level": 3,
+      "name": "سرمایه سهام عادی پذیره نویسی شده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 289,
+    "fields": {
+      "code": 510030002,
+      "parent": 150,
+      "level": 3,
+      "name": "تعهدصاحبان سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 290,
+    "fields": {
+      "code": 510040000,
+      "parent": 151,
+      "level": 3,
+      "name": "اهدایی از دولت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 291,
+    "fields": {
+      "code": 510050001,
+      "parent": 152,
+      "level": 3,
+      "name": "سهام خزانه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 292,
+    "fields": {
+      "code": 510050002,
+      "parent": 152,
+      "level": 3,
+      "name": "مازادحاصل ازمبادلات سهام خزانه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 293,
+    "fields": {
+      "code": 510070001,
+      "parent": 154,
+      "level": 3,
+      "name": "سرمایه پرداخت شده ناشی از تعهدپرداخت نشده"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 294,
+    "fields": {
+      "code": 510070002,
+      "parent": 154,
+      "level": 3,
+      "name": "ناشی از انقضای مهلت پاره سهم"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 295,
+    "fields": {
+      "code": 510070003,
+      "parent": 154,
+      "level": 3,
+      "name": "ناشی از انقضای حق خرید سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 296,
+    "fields": {
+      "code": 510080000,
+      "parent": 155,
+      "level": 3,
+      "name": "درقبال دریافت خدمات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 297,
+    "fields": {
+      "code": 512040000,
+      "parent": 160,
+      "level": 3,
+      "name": "زمین"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 298,
+    "fields": {
+      "code": 513010000,
+      "parent": 161,
+      "level": 3,
+      "name": "ساختمان"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 299,
+    "fields": {
+      "code": 513020000,
+      "parent": 162,
+      "level": 3,
+      "name": " نوع تاسیسات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 300,
+    "fields": {
+      "code": 513030000,
+      "parent": 163,
+      "level": 3,
+      "name": " نوع ماشین الات وقالبها"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 301,
+    "fields": {
+      "code": 513040000,
+      "parent": 164,
+      "level": 3,
+      "name": "نوع ابزارالات"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 302,
+    "fields": {
+      "code": 513050000,
+      "parent": 165,
+      "level": 3,
+      "name": "نوع وسایط نقلیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 303,
+    "fields": {
+      "code": 612010000,
+      "parent": 181,
+      "level": 3,
+      "name": "مواد اولیه"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 304,
+    "fields": {
+      "code": 613010001,
+      "parent": 184,
+      "level": 3,
+      "name": "دارایی  ثابت مشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 305,
+    "fields": {
+      "code": 613010002,
+      "parent": 184,
+      "level": 3,
+      "name": "دارایی ثابت نامشهود"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 306,
+    "fields": {
+      "code": 613020001,
+      "parent": 185,
+      "level": 3,
+      "name": "سپرده گذاری کوتاه مدت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 307,
+    "fields": {
+      "code": 613020002,
+      "parent": 185,
+      "level": 3,
+      "name": "اوراق مشارکت"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 308,
+    "fields": {
+      "code": 613020003,
+      "parent": 185,
+      "level": 3,
+      "name": "سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 309,
+    "fields": {
+      "code": 613030001,
+      "parent": 186,
+      "level": 3,
+      "name": "اوراق مشارکت "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 310,
+    "fields": {
+      "code": 613030002,
+      "parent": 186,
+      "level": 3,
+      "name": "سهام"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 311,
+    "fields": {
+      "code": 710010001,
+      "parent": 189,
+      "level": 3,
+      "name": "موادمستقیم "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 312,
+    "fields": {
+      "code": 710010002,
+      "parent": 189,
+      "level": 3,
+      "name": "دستمزد مستقیم"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 313,
+    "fields": {
+      "code": 710010003,
+      "parent": 189,
+      "level": 3,
+      "name": "سربار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 314,
+    "fields": {
+      "code": 710020001,
+      "parent": 190,
+      "level": 3,
+      "name": "موادمستقیم "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 315,
+    "fields": {
+      "code": 710020002,
+      "parent": 190,
+      "level": 3,
+      "name": "دستمزد مستقیم"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 316,
+    "fields": {
+      "code": 710020003,
+      "parent": 190,
+      "level": 3,
+      "name": "سربار"
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 317,
+    "fields": {
+      "code": 711010001,
+      "parent": 191,
+      "level": 3,
+      "name": "دستمزدمستقیم "
+    }
+  },
+  {
+    "model": "accounts.Account",
+    "pk": 318,
+    "fields": {
+      "code": 711010002,
+      "parent": 191,
+      "level": 3,
+      "name": "سربار"
+    }
+  }
+]

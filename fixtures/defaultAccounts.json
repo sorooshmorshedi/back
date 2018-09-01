@@ -5,7 +5,7 @@
     "fields": {
       "name": "چک دریافتی",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "receive",
       "programingName": "receivedCheque"
 
@@ -16,7 +16,7 @@
     "fields": {
       "name": "چک پرداختی",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "payment",
       "programingName": "paidCheque"
 
@@ -27,7 +27,7 @@
     "fields": {
       "name": "اسناد در جریان وصول",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "receive",
       "programingName": "inFlowDocuments"
 
@@ -38,7 +38,7 @@
     "fields": {
       "name": "بانک",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "receive",
       "programingName": "bank"
 
@@ -49,7 +49,7 @@
     "fields": {
       "name": "نقدی",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "both",
       "programingName": "cash"
     }
@@ -59,7 +59,7 @@
     "fields": {
       "name": "خرید",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "buy"
     }
@@ -69,7 +69,7 @@
     "fields": {
       "name": "برگشت از خرید",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "backFromBuy"
     }
@@ -79,7 +79,7 @@
     "fields": {
       "name": "تخفیف خرید",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "buyDiscount"
     }
@@ -89,7 +89,7 @@
     "fields": {
       "name": "فروش",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "sale"
     }
@@ -99,7 +99,7 @@
     "fields": {
       "name": "برگشت از فروش",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "backFromSale"
     }
@@ -109,7 +109,7 @@
     "fields": {
       "name": "تخفیف فروش",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "saleDiscount"
     }
@@ -119,7 +119,7 @@
     "fields": {
       "name": "مالیات",
       "explanation": "",
-      "account": 11,
+      "account": 315,
       "usage": "factor",
       "programingName": "tax"
     }

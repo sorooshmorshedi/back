@@ -2,8 +2,161 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="kjkj">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/uwsgi.ini" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0002_auto_20180615_1054.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0003_auto_20180615_1118.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0004_auto_20180615_1127.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0005_auto_20180615_1420.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0006_auto_20180616_1118.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0007_auto_20180616_1151.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0008_independentaccount.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0009_auto_20180714_1452.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0010_auto_20180716_1853.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0011_person.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0012_auto_20180718_1055.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0013_auto_20180718_1126.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0014_auto_20180718_1406.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0015_auto_20180725_1446.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0016_auto_20180725_1501.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0017_bank.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0018_defaultaccount.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/accounts/migrations/0019_auto_20180822_1953.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0002_remove_cheque_transactionitem.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0003_auto_20180811_1816.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0004_auto_20180812_0901.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0005_auto_20180812_0903.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0006_auto_20180813_0914.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0007_auto_20180814_1403.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0008_auto_20180815_1127.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0009_auto_20180816_0915.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0010_statuschange_sanad.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0011_auto_20180816_1009.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0012_auto_20180816_1015.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0013_auto_20180817_1554.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/cheques/migrations/0014_remove_cheque_sanaditem.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/companies/migrations/0002_auto_20180731_0914.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/db.sqlite3" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0002_auto_20180818_1108.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0003_auto_20180820_1204.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0004_factorexpense_explanation.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0005_auto_20180821_1229.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0006_auto_20180821_1236.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0007_factor_sanad.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0008_auto_20180821_1244.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0009_auto_20180821_1252.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0010_auto_20180821_1257.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0011_auto_20180822_1953.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0012_auto_20180822_2007.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0013_factor_type.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0014_auto_20180823_1247.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0015_auto_20180826_1043.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0016_receipt_createtype.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/factors/migrations/0017_auto_20180826_1228.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fixtures/companyFixture.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0002_sanad_sanaditems.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0003_auto_20180727_1938.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0004_auto_20180729_1248.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0005_auto_20180729_1454.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0006_transactionitem_date.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0007_auto_20180730_1619.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0008_transactionitem_documentnumber.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0009_auto_20180730_1756.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0010_auto_20180730_1800.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0011_auto_20180731_0914.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0012_sanad_createtype.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0013_auto_20180809_1606.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0014_auto_20180811_1155.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0015_auto_20180814_1213.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0016_auto_20180814_1403.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0017_auto_20180817_1554.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0018_auto_20180817_1647.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0019_transactionitem_cheque.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0020_auto_20180824_1156.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0021_transactionitem_bankname.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0022_auto_20180825_1434.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/sanads/migrations/0023_auto_20180825_1503.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0001_initial.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0002_auto_20180710_1759.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0003_auto_20180714_1452.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0004_auto_20180714_1523.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0005_auto_20180716_1853.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0006_auto_20180717_1143.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0007_auto_20180718_1052.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0008_auto_20180718_1055.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0009_auto_20180718_1126.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0010_auto_20180718_1406.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0011_auto_20180725_1446.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0012_auto_20180725_1501.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0013_auto_20180727_1802.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0014_auto_20180727_1938.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0015_auto_20180729_1248.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0016_auto_20180729_1454.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0017_auto_20180730_0934.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0018_auto_20180730_1619.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0019_auto_20180730_1729.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0020_auto_20180730_1756.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0021_auto_20180730_1800.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0022_auto_20180731_0914.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0023_auto_20180731_1018.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0024_auto_20180731_1042.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0025_auto_20180731_1055.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0026_auto_20180731_1703.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0027_auto_20180731_1713.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0028_auto_20180731_1738.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0029_auto_20180805_0930.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0030_auto_20180809_1544.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0031_auto_20180809_1606.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0032_auto_20180811_1155.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0033_auto_20180811_1420.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0034_auto_20180811_1816.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0035_auto_20180812_0901.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0036_auto_20180812_0903.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0037_auto_20180813_0914.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0038_auto_20180814_1213.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0039_auto_20180814_1403.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0040_auto_20180815_1009.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0041_auto_20180816_0915.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0042_auto_20180816_1002.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0043_auto_20180816_1009.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0044_auto_20180816_1015.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0045_auto_20180817_1554.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0046_auto_20180817_1600.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0047_auto_20180817_1647.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0048_auto_20180818_1108.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0049_auto_20180820_1204.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0050_auto_20180820_1248.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0051_auto_20180821_1222.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0052_auto_20180821_1229.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0053_auto_20180821_1236.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0054_auto_20180821_1243.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0055_auto_20180821_1244.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0056_auto_20180821_1252.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0057_auto_20180821_1257.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0058_auto_20180822_1953.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0059_auto_20180822_2007.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0060_auto_20180822_2106.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0061_auto_20180823_1247.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0062_auto_20180823_1628.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0063_auto_20180823_1643.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0064_auto_20180823_1644.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0065_auto_20180824_0938.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0066_auto_20180824_1133.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0067_auto_20180824_1156.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0068_auto_20180824_1156.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0069_auto_20180825_1348.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0070_auto_20180825_1434.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0071_auto_20180825_1503.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0072_auto_20180825_1754.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0073_auto_20180826_1043.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0074_auto_20180826_1043.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0075_auto_20180826_1222.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wares/migrations/0076_auto_20180826_1228.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/accounts/accounts/models.py" afterPath="$PROJECT_DIR$/accounts/accounts/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/accounts/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cheques/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/cheques/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/companies/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/companies/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/factors/migrations/0001_initial.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/sanads/migrations/0001_initial.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,31 +171,51 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="settings.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/server/settings.py">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="158" column="0" lean-forward="false" selection-start-line="158" selection-start-column="0" selection-end-line="158" selection-end-column="0" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="uwsgi.ini" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/uwsgi.ini">
+      <file leaf-file-name="accounts.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fixtures/accounts.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="15" column="16" lean-forward="false" selection-start-line="15" selection-start-column="16" selection-end-line="15" selection-end-column="16" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="wsgi.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/server/wsgi.py">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/companies/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+            <state relative-caret-position="135">
+              <caret line="6" column="4" lean-forward="false" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="4" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="defaultAccounts.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fixtures/defaultAccounts.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="7" column="18" lean-forward="false" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="companies.json" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/fixtures/companies.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="7" column="34" lean-forward="false" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -93,12 +266,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/checks/urls.py" />
-        <option value="$PROJECT_DIR$/checks/models.py" />
-        <option value="$PROJECT_DIR$/checks/serializers.py" />
-        <option value="$PROJECT_DIR$/checks/views.py" />
-        <option value="$PROJECT_DIR$/accounts/accounts/models.py" />
-        <option value="$PROJECT_DIR$/sanads/sanads/views.py" />
         <option value="$PROJECT_DIR$/cheques/migrations/signals.py" />
         <option value="$PROJECT_DIR$/sanads/defaultAccounts/views.py" />
         <option value="$PROJECT_DIR$/sanads/fixtures/defaultAccounts.json" />
@@ -144,6 +311,12 @@
         <option value="$PROJECT_DIR$/cheques/views.py" />
         <option value="$PROJECT_DIR$/server/settings.py" />
         <option value="$PROJECT_DIR$/uwsgi.ini" />
+        <option value="$PROJECT_DIR$/accounts/accounts/models.py" />
+        <option value="$PROJECT_DIR$/db.sqlite3" />
+        <option value="$PROJECT_DIR$/fixtures/companyFixture.json" />
+        <option value="$PROJECT_DIR$/fixtures/accounts.json" />
+        <option value="$PROJECT_DIR$/fixtures/defaultAccounts.json" />
+        <option value="$PROJECT_DIR$/fixtures/companies.json" />
       </list>
     </option>
   </component>
@@ -204,6 +377,34 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fixtures" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="companies" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -214,19 +415,19 @@
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/sanads/sanads/serializers.py" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\accounts" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\cheques" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\wares" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\companies" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server" />
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\factors" />
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\checks" />
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\" />
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\sanads" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\sanads\" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\fixtures" />
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\accounts" />
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\cheques" />
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\wares" />
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\companies" />
     </key>
   </component>
   <component name="RunManager">
@@ -388,13 +589,13 @@
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17874141" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.17874141" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.50396615" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32941177" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960339" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29647058" sideWeight="0.49603385" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29411766" sideWeight="0.49603385" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -419,50 +620,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sanads/fixtures/defaultAccounts.json" />
-    <entry file="file://$PROJECT_DIR$/accounts/defaultAccounts/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="464">
-          <caret line="38" column="0" lean-forward="true" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/t.json" />
-    <entry file="file://$PROJECT_DIR$/sanads/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="31" lean-forward="false" selection-start-line="0" selection-start-column="31" selection-end-line="0" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="5" column="32" lean-forward="false" selection-start-line="5" selection-start-column="32" selection-end-line="5" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/companies/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="27" column="35" lean-forward="false" selection-start-line="27" selection-start-column="35" selection-end-line="27" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="34" column="45" lean-forward="false" selection-start-line="34" selection-start-column="45" selection-end-line="34" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sanads/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="405">
@@ -484,31 +641,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manage.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fixture.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="447">
-          <caret line="117" column="12" lean-forward="false" selection-start-line="117" selection-start-column="12" selection-end-line="117" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/rest_framework/generics.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="14" column="4" lean-forward="false" selection-start-line="14" selection-start-column="4" selection-end-line="14" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wares/migrations/0001_initial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
-          <caret line="47" column="18" lean-forward="false" selection-start-line="47" selection-start-column="18" selection-end-line="47" selection-end-column="18" />
         </state>
       </provider>
     </entry>
@@ -568,24 +704,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wares/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="403">
-          <caret line="93" column="0" lean-forward="true" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../code/selenium/sess/project/sess.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
           <caret line="2" column="18" lean-forward="false" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="132" column="4" lean-forward="false" selection-start-line="132" selection-start-column="4" selection-end-line="132" selection-end-column="4" />
         </state>
       </provider>
     </entry>
@@ -751,6 +873,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/uwsgi.ini">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/server/settings.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="432">
@@ -759,10 +889,109 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/uwsgi.ini">
+    <entry file="file://$PROJECT_DIR$/wares/migrations/0001_initial.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="15" column="16" lean-forward="false" selection-start-line="15" selection-start-column="16" selection-end-line="15" selection-end-column="16" />
+        <state relative-caret-position="422">
+          <caret line="47" column="18" lean-forward="false" selection-start-line="47" selection-start-column="18" selection-end-line="47" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/migrations/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/db.sqlite3">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/accountLevel1Fixture.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="4" lean-forward="false" selection-start-line="6" selection-start-column="31" selection-end-line="7" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/fixture.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="2" column="9" lean-forward="false" selection-start-line="2" selection-start-column="9" selection-end-line="2" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/companyFixture.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="243">
+          <caret line="11" column="15" lean-forward="false" selection-start-line="11" selection-start-column="15" selection-end-line="11" selection-end-column="15" />
+          <folding>
+            <element signature="e#3152#3627#0" expanded="false" />
+            <marker date="1535088864661" expanded="true" signature="2699:2991" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/accounts.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/companies/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="6" column="4" lean-forward="false" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/defaultAccounts.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="18" lean-forward="false" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/companies.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="34" lean-forward="false" selection-start-line="7" selection-start-column="34" selection-end-line="7" selection-end-column="34" />
           <folding />
         </state>
       </provider>

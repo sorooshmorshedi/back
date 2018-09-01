@@ -74,8 +74,8 @@ class Account(models.Model):
     max_bed_with_sanad = models.IntegerField(blank=True, null=True)
     max_bes_with_sanad = models.IntegerField(blank=True, null=True)
 
-    created_at = models.DateField(auto_now=True)
-    updated_at = models.DateField(auto_now_add=True)
+    created_at = models.DateField(auto_now=True, null=True)
+    updated_at = models.DateField(auto_now_add=True, null=True)
 
     level = models.IntegerField(choices=ACCOUNT_LEVELS)
 

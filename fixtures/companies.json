@@ -1,0 +1,11 @@
+[
+ {
+    "model": "companies.company",
+    "pk": 1,
+    "fields": {
+      "name": "نام شرکت",
+      "fiscal_year_start": "1397-1-1",
+      "fiscal_year_end": "1398-1-1"
+    }
+  }
+]
