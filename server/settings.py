@@ -27,9 +27,6 @@ SECRET_KEY = '$+%$*+x%$g#+@4%a*0^)oew9rewz)n-&=cd&-yh0fzjh2=vh(d'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,7 +50,7 @@ INSTALLED_APPS = [
 
 ]
 
-ALLOWED_HOSTS = ['mmdmst.ir', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['api.sh.mmdmst.ir', 'localhost', '127.0.0.1']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
