@@ -4,11 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from sanads.transactions.serializers import *
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TransactionListCreate(generics.ListCreateAPIView):
@@ -78,3 +80,16 @@ class TransactionItemMass(APIView):
             instance = TransactionItem.objects.get(id=itemId)
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
+
+
+@api_view(['get'])
+def newCodeForTransaction(request):
+    if 'type' not in request.GET:
+        return Response(['لطفا نوع را مشخص کنید'], status=status.HTTP_400_BAD_REQUEST)
+    else:
+        type = request.GET['type']
+    try:
+        code = Transaction.objects.filter(type=type).latest('code').code + 1
+    except:
+        code = 1
+    return Response(code)

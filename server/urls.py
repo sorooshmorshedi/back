@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^sanads/', include('sanads.urls')),
     url(r'^cheques/', include('cheques.urls')),
     url(r'^factors/', include('factors.urls')),
+    url(r'^reports/', include('reports.urls')),
 
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),

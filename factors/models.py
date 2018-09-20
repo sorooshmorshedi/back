@@ -166,3 +166,10 @@ def clearReceipt(receipt):
     receipt.save()
     for item in receipt.items.all():
         item.delete()
+
+
+def newReceiptCode():
+    try:
+        return Receipt.objects.latest('code').code + 1
+    except:
+        return 1

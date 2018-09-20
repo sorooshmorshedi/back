@@ -21,6 +21,7 @@ CHECK_STATUSES = (
     ('cashed', 'cashed'),
     ('revoked', 'revoked'),
     ('transferred', 'transferred'),
+    ('', 'any'),
 )
 
 

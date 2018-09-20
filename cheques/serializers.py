@@ -1,5 +1,6 @@
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from cheques.models import *
+from sanads.sanads.models import newSanadCode
 from sanads.sanads.serializers import SanadListRetrieveSerializer
 
 
@@ -49,7 +50,7 @@ class StatusChangeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if 'sanad' not in validated_data or not validated_data['sanad']:
-            sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
+            sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
             sanad.save()
             validated_data['sanad'] = sanad
         return super(StatusChangeSerializer, self).create(validated_data)

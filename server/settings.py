@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
 
     'corsheaders',
+    'django_filters',
 
     'rest_framework',
     'companies',
@@ -46,7 +47,8 @@ INSTALLED_APPS = [
     'wares',
     'sanads',
     'cheques',
-    'factors'
+    'factors',
+    'reports'
 
 ]
 
@@ -141,12 +143,19 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
+    # 'EXCEPTION_HANDLER': 'server.utils.exceptionHandler',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    'PAGE_SIZE': 30,
+
 }
 
 JWT_AUTH = {

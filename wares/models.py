@@ -12,7 +12,7 @@ PRICING_TYPES = {
     (0, 'fifo'),
     (1, 'lifo'),
     (2, 'avg'),
-    (3, 'special_value'),
+    (3, 'special_value')
 }
 
 
@@ -39,7 +39,7 @@ class Warehouse(models.Model):
 
 
 class WareLevel(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
@@ -47,6 +47,7 @@ class WareLevel(models.Model):
 
     class Meta:
         default_permissions = ()
+        unique_together = ('name', 'level')
 
     def __str__(self):
         return str(self.pk) + ' - ' + self.name

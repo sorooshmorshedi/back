@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -247,3 +248,27 @@ class ReceiptItemMass(APIView):
             instance = ReceiptItem.objects.get(id=itemId)
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
+
+
+@api_view(['get'])
+def newCodesForFactor(request):
+    res = {}
+    types = ['buy', 'sale', 'backFromBuy', 'backFromSale']
+    for t in types:
+        try:
+            res[t] = Factor.objects.filter(type=t).latest('code').code + 1
+        except:
+            res[t] = 1
+    return Response(res)
+
+
+@api_view(['get'])
+def newCodesForReceipt(request):
+    res = {}
+    types = ['receipt', 'remittance']
+    for t in types:
+        try:
+            res[t] = Receipt.objects.filter(type=t).latest('code').code + 1
+        except:
+            res[t] = 1
+    return Response(res)

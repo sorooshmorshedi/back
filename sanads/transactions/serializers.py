@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
+from sanads.sanads.models import newSanadCode
 from sanads.sanads.serializers import SanadSerializer
 from sanads.transactions.models import *
 
@@ -50,7 +51,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
+        sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
         sanad.save()
         validated_data['sanad'] = sanad
         res = super(TransactionSerializer, self).create(validated_data)

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from factors.models import *
-from sanads.sanads.models import Sanad
+from sanads.sanads.models import Sanad, newSanadCode
 from wares.models import WarehouseInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
@@ -43,6 +43,11 @@ class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
 
 class FactorSerializer(serializers.ModelSerializer):
 
+    hasTax = serializers.SerializerMethodField()
+
+    def get_hasTax(self, obj):
+        return obj.taxValue != 0 or obj.taxPercent != 0
+
     class Meta:
         model = Factor
         fields = '__all__'
@@ -58,7 +63,7 @@ class FactorSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        sanad = Sanad(code=Sanad.objects.latest('code').code + 1, date=validated_data['date'], createType='auto')
+        sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
         sanad.save()
         validated_data['sanad'] = sanad
 
@@ -67,7 +72,7 @@ class FactorSerializer(serializers.ModelSerializer):
         else:
             receiptType = 'receipt'
         receipt = Receipt(
-            code=Receipt.objects.latest('code').code + 1,
+            code=newReceiptCode(),
             date=validated_data['date'],
             time=validated_data['time'],
             createType='auto',
