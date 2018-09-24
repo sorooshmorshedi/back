@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
 
+    'import_export',
+
     'rest_framework',
     'companies',
     'accounts',

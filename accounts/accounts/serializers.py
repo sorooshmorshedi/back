@@ -22,7 +22,7 @@ class FloatAccountGroupSerializer(serializers.ModelSerializer):
 class AccountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountType
-        fields = ('id', 'name', 'type', 'explanation')
+        fields = '__all__'
 
 
 class IndependentAccountSerializer(serializers.ModelSerializer):

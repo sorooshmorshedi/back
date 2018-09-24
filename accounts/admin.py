@@ -6,3 +6,4 @@ from .accounts.models import *
 admin.site.register(Account)
 admin.site.register(FloatAccount)
 admin.site.register(DefaultAccount)
+admin.site.register(AccountType)

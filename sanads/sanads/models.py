@@ -6,27 +6,27 @@ from accounts.costCenters.models import CostCenter
 from django_jalali.db import models as jmodels
 
 SANAD_TYPES = (
-    ('temporary', 'temporary'),
-    ('definite', 'definite'),
+    ('temporary', 'موقت'),
+    ('definite', 'قطعی'),
 )
 
 SANAD_CREATE_TYPES = (
-    ('auto', 'auto'),
-    ('manual', 'manual')
+    ('auto', 'خودکار'),
+    ('manual', 'دستی')
 )
 
 
 class Sanad(models.Model):
-    code = models.IntegerField(unique=True)
-    explanation = models.CharField(max_length=255, blank=True)
-    date = jmodels.jDateField()
+    code = models.IntegerField(unique=True, verbose_name="شماره سند")
+    explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
+    date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
     type = models.CharField(max_length=20, choices=SANAD_TYPES)
-    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default='manual')
+    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default='manual', verbose_name="نوع ثبت")
 
-    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
-    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بدهکار")
+    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
 
     permissions = (
         ('get_sanad', 'Can get sanads')
@@ -40,14 +40,14 @@ class Sanad(models.Model):
 
 
 class SanadItem(models.Model):
-    sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items')
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems')
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='floatAccount', blank=True, null=True)
-    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True)
+    sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='floatAccount', blank=True, null=True, verbose_name='حساب شناور')
+    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True, verbose_name='مرکز هزینه')
 
     value = models.DecimalField(max_digits=24, decimal_places=0)
     valueType = models.CharField(max_length=3, choices=(('bed', 'bed'), ('bes', 'bes')))
-    explanation = models.CharField(max_length=255, blank=True)
+    explanation = models.CharField(max_length=255, blank=True, verbose_name='توضیحات')
 
     permissions = (
         ('get_sanad', 'Can get sanads')

@@ -1,0 +1,118 @@
+[{
+    "model": "accounts.AccountType",
+    "pk": 1,
+    "fields": {
+      "name": "فروش",
+      "programingName": "sale",
+      "nature": "bes"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 2,
+    "fields": {
+      "name": "برگشت از فروش و تخفیفات",
+      "programingName": "backFromSaleAndDiscounts",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 3,
+    "fields": {
+      "name": "درآمد های عملیاتی",
+      "programingName": "operatingIncomes",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 4,
+    "fields": {
+      "name": "بهای تمام شده کالای فروش رفته",
+      "programingName": "soldProductValue",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 5,
+    "fields": {
+      "name": "مواد مستقیم",
+      "programingName": "directMaterials",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 6,
+    "fields": {
+      "name": "دستمزد مستقیم",
+      "programingName": "directWage",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 7,
+    "fields": {
+      "name": "سربار ساخت",
+      "programingName": "manufacturingOverhead",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 8,
+    "fields": {
+      "name": "کالای در جریان ساخت",
+      "programingName": "inProcessGoods",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 9,
+    "fields": {
+      "name": "بهای تمام شده کالای ساخته شده و خریداری شده",
+      "programingName": "costOfGoods",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 10,
+    "fields": {
+      "name": "سایر درآمد های عملیاتی",
+      "programingName": "otherOperatingIncomes",
+      "nature": "bes"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 11,
+    "fields": {
+      "name": "هزینه های عملیاتی",
+      "programingName": "operatingCosts",
+      "nature": "bed"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 12,
+    "fields": {
+      "name": "درآمد غیر عملیاتی",
+      "programingName": "nonOperatingIncomes",
+      "nature": "bes"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 13,
+    "fields": {
+      "name": "هزینه های غیر عملیاتی",
+      "programingName": "nonOperatingCosts",
+      "nature": "bed"
+    }
+  }
+]

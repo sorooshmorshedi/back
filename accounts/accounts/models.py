@@ -42,8 +42,8 @@ class FloatAccount(models.Model):
 
 class AccountType(models.Model):
     name = models.CharField(max_length=100)
-    explanation = models.CharField(max_length=255, blank=True, null=True)
-    type = models.CharField(max_length=3, choices=(('BED', 'bedehkar'),('BES', 'bestankar')))
+    programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار')))
 
     class Meta:
         default_permissions = ()
@@ -64,8 +64,8 @@ class IndependentAccount(models.Model):
 
 
 class Account(models.Model):
-    name = models.CharField(max_length=150)
-    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=150, verbose_name='نام حساب')
+    code = models.CharField(max_length=50, unique=True, verbose_name='کد حساب')
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
