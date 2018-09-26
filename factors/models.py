@@ -5,6 +5,7 @@ from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
 from factors.signals import clearFactorSanad
 from sanads.sanads.models import Sanad
+from sanads.transactions.models import Transaction
 from wares.models import Ware, Warehouse, updateInventory
 
 EXPENSE_TYPES = (
@@ -65,6 +66,7 @@ class Factor(models.Model):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
+    isPaid = models.BooleanField(default=False)
 
     date = jmodels.jDateField()
     time = models.TimeField(blank=True)
@@ -107,6 +109,14 @@ class Factor(models.Model):
             taxSum = self.taxValue
         return taxSum
 
+    @property
+    def paidValue(self):
+        value = 0
+        for p in self.payments.all():
+            print(p)
+            value += p.value
+        return value
+
 
 class FactorExpense(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
@@ -115,6 +125,12 @@ class FactorExpense(models.Model):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenses', blank=True, null=True)
     value = models.DecimalField(max_digits=24, decimal_places=0)
     explanation = models.CharField(max_length=255, blank=True)
+
+
+class FactorPayment(models.Model):
+    factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='payments')
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='payments')
+    value = models.DecimalField(max_digits=24, decimal_places=0)
 
 
 class FactorItem(models.Model):

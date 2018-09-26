@@ -43,6 +43,11 @@ class FactorListSerializer(FactorSerializer):
     sanad = SanadSerializer(read_only=True, many=False)
     account = AccountSimpleSerializer(read_only=True, many=False)
 
+    paidValue = serializers.SerializerMethodField()
+
+    def get_paidValue(self, obj):
+        return obj.paidValue
+
     class Meta:
         model = Factor
         fields = '__all__'

@@ -86,12 +86,13 @@ class FactorFilter(filters.FilterSet):
         model = Factor
         fields = {
             'code': ['icontains'],
+            'isPaid': ['exact'],
             'date': ['gte', 'lte'],
             'time': ['gte', 'lte'],
             'account__name': ['icontains'],
             'explanation': ['icontains'],
             'sanad__bed': ['icontains'],
-            'type': ['exact'],
+            'type': ['exact', 'in'],
         }
         filter_overrides = {
             jmodels.jDateField: {

@@ -26,13 +26,42 @@ def getRemain(accountType, allAccounts):
 def getSerialized(pName, allAccounts):
     at = getType(pName)
     remain = getRemain(at, allAccounts)
+
+    subPrefix = (
+        'backFromSaleAndDiscounts',
+        'soldProductValue',
+        'operatingCosts',
+        'nonOperatingCosts',
+    )
+
+    addPrefix = (
+        'otherOperatingIncomes',
+        'nonOperatingIncomes',
+    )
+
+    hasPrefix = False
+    prefix = None
+    prefixColor = None
+
+    if at.programingName in subPrefix:
+        hasPrefix = True
+        prefix = 'کسر می شود:'
+        prefixColor = 'red'
+
+    if at.programingName in addPrefix:
+        hasPrefix = True
+        prefix = 'اضافه می شود:'
+        prefixColor = 'blue'
+
     return {
         'type': {
             'name': at.name,
-            'pName': at.programingName
+            'hasPrefix': hasPrefix,
+            'pName': at.programingName,
+            'prefix': prefix,
+            'prefixColor': prefixColor
         },
         'remain': remain,
-        'sum': None,
     }
 
 
@@ -61,9 +90,7 @@ def incomeStatementView(request):
     usingTypes = (
         'sale',
         'backFromSaleAndDiscounts',
-
         'soldProductValue',
-
         'otherOperatingIncomes',
         'operatingCosts',
         'nonOperatingIncomes',
@@ -76,7 +103,6 @@ def incomeStatementView(request):
 
     t = getSerialized('backFromSaleAndDiscounts', allAccounts)
     res.append(t)
-    print(t)
     backFromSaleAndDiscounts = t['remain']
 
     netSales = sale - backFromSaleAndDiscounts
@@ -85,8 +111,7 @@ def incomeStatementView(request):
             'name': 'فروش خالص',
             'pName': None
         },
-        'remain': None,
-        'sum': netSales,
+        'remain': netSales,
     })
     res.append(t)
 
@@ -100,8 +125,7 @@ def incomeStatementView(request):
             'name': 'سود (زیان) ناخالص',
             'pName': None
         },
-        'remain': None,
-        'sum': grossIncome,
+        'remain': grossIncome,
     })
     res.append(t)
 
@@ -123,8 +147,7 @@ def incomeStatementView(request):
             'name': 'سود (زیان) عملیاتی',
             'pName': None
         },
-        'remain': None,
-        'sum': operatingIncome
+        'remain': operatingIncome
     })
     res.append(t)
 
@@ -144,8 +167,7 @@ def incomeStatementView(request):
             'name': 'سود (زیان) ویژه',
             'pName': None
         },
-        'remain': None,
-        'sum': specialIncome
+        'remain': specialIncome
     })
     res.append(t)
 
