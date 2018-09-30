@@ -1,3 +1,4 @@
+from django.db import connection
 from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from rest_framework import generics
@@ -8,14 +9,14 @@ from accounts.accounts.models import AccountType, Account
 
 
 def getType(pName):
-    return AccountType.objects.get(programingName=pName)
+    return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
+getType.accountTypes = AccountType.objects.all()
 
 
 def getRemain(accountType, allAccounts):
-    accounts = allAccounts.filter(type=accountType)
+    accounts = filter(lambda acc: acc.type_id == accountType.id, allAccounts)
     remain = 0
     for acc in accounts:
-        print(acc.bes)
         if accountType.nature == 'bed':
             remain += acc.remain
         else:
@@ -67,6 +68,7 @@ def getSerialized(pName, allAccounts):
 
 @api_view(['get'])
 def incomeStatementView(request):
+
     res = []
     data = request.GET
     dateFilter = Q()
@@ -81,11 +83,11 @@ def incomeStatementView(request):
     if 'codes' in data:
         dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
 
-    allAccounts = Account.objects \
+    allAccounts = list(Account.objects \
         .annotate(remain=
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0) -
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)
-        ).order_by('code')
+        ).order_by('code'))
 
     usingTypes = (
         'sale',

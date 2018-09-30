@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
 from reports.balance.views import accountBalanceView
+from reports.balanceSheet.views import balanceSheetView
 from reports.incomeStatement.views import incomeStatementView
 from reports.journal.views import JournalListView
 from reports.ledger.views import LedgerListView
@@ -25,4 +26,6 @@ urlpatterns = [
     url(r'^export$', exportTest, name=''),
 
     url(r'^incomeStatement$', incomeStatementView, name=''),
+
+    url(r'^balanceSheet$', balanceSheetView, name=''),
 ]

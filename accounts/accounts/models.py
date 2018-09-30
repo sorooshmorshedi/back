@@ -9,6 +9,11 @@ ACCOUNT_LEVELS = (
     (3, 'tafzili'),
 )
 
+ACCOUNT_TYPE_USAGES = (
+    ('incomeStatement', 'سود و زیان'),
+    ('balanceSheet', 'ترازنامه'),
+)
+
 
 class FloatAccountGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -44,6 +49,7 @@ class AccountType(models.Model):
     name = models.CharField(max_length=100)
     programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار')))
+    usage = models.CharField(max_length=30, choices=ACCOUNT_TYPE_USAGES, blank=True)
 
     class Meta:
         default_permissions = ()
