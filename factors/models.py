@@ -66,7 +66,7 @@ class Factor(models.Model):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
-    isPaid = models.BooleanField(default=False)
+    paidValue = models.DecimalField(default=0, max_digits=24, decimal_places=0)
 
     date = jmodels.jDateField()
     time = models.TimeField(blank=True)
@@ -109,14 +109,6 @@ class Factor(models.Model):
             taxSum = self.taxValue
         return taxSum
 
-    @property
-    def paidValue(self):
-        value = 0
-        for p in self.payments.all():
-            print(p)
-            value += p.value
-        return value
-
 
 class FactorExpense(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
@@ -131,6 +123,9 @@ class FactorPayment(models.Model):
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='payments')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='payments')
     value = models.DecimalField(max_digits=24, decimal_places=0)
+
+    class Meta:
+        unique_together = ('factor', 'transaction')
 
 
 class FactorItem(models.Model):

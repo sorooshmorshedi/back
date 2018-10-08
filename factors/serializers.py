@@ -3,6 +3,7 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from factors.models import *
 from sanads.sanads.models import Sanad, newSanadCode
+from sanads.sanads.serializers import SanadSerializer
 from wares.models import WarehouseInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
@@ -44,6 +45,10 @@ class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
 class FactorSerializer(serializers.ModelSerializer):
 
     hasTax = serializers.SerializerMethodField()
+    isPaid = serializers.SerializerMethodField()
+
+    def get_isPaid(self, obj):
+        return obj.paidValue == obj.sanad.bed
 
     def get_hasTax(self, obj):
         return obj.taxValue != 0 or obj.taxPercent != 0
@@ -108,6 +113,24 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
     items = FactorItemListRetrieveSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Factor
+        fields = '__all__'
+
+
+class FactorPaymentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FactorPayment
+        fields = '__all__'
+
+
+class FactorWithPayments(FactorSerializer):
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    sanad = SanadSerializer(read_only=True, many=False)
+    payments = FactorPaymentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Factor

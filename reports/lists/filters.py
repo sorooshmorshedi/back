@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import F
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
@@ -82,6 +83,9 @@ class SanadFilter(filters.FilterSet):
 
 
 class FactorFilter(filters.FilterSet):
+
+    isPaid = filters.BooleanFilter(method='filterIsPaid')
+
     class Meta:
         model = Factor
         fields = {
@@ -99,6 +103,12 @@ class FactorFilter(filters.FilterSet):
                 'filter_class': django_filters.DateFilter,
             },
         }
+
+    def filterIsPaid(self, queryset, name, value):
+        if value:
+            return queryset.filter(sanad__bed=F('paidValue'))
+        else:
+            return queryset
 
 
 class ReceiptFilter(filters.FilterSet):

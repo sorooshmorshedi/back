@@ -1,3 +1,5 @@
+from django.db.models import F
+from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
@@ -250,6 +252,42 @@ class ReceiptItemMass(APIView):
         return Response([], status=status.HTTP_200_OK)
 
 
+class FactorPaymentMass(APIView):
+    serializer_class = FactorPaymentSerializer
+
+    def post(self, request):
+        serialized = self.serializer_class(data=request.data, many=True)
+        if serialized.is_valid():
+            serialized.save()
+            self.updateFactorPaidValue(request.data)
+            return Response(serialized.data, status=status.HTTP_201_CREATED)
+        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        for item in request.data:
+            instance = FactorPayment.objects.get(id=item['id'])
+            if int(item['value']) == 0:
+                instance.delete()
+                continue
+            serialized = self.serializer_class(instance, data=item)
+            if serialized.is_valid():
+                serialized.save()
+            else:
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.updateFactorPaidValue(request.data)
+        return Response([], status=status.HTTP_200_OK)
+
+    def updateFactorPaidValue(self, items):
+        factorIds = []
+        for item in items:
+            factorIds.append(item['factor'])
+        factors = Factor.objects.filter(pk__in=factorIds)
+        for factor in factors:
+            paidValue = FactorPayment.objects.filter(factor=factor).aggregate(Sum('value'))['value__sum']
+            factor.paidValue = paidValue
+            factor.save()
+
+
 @api_view(['get'])
 def newCodesForFactor(request):
     res = {}
@@ -272,3 +310,29 @@ def newCodesForReceipt(request):
         except:
             res[t] = 1
     return Response(res)
+
+
+@api_view(['get'])
+def getNotPaidFactors(request):
+    filters = Q()
+
+    if 'transactionType' not in request.GET:
+        return Response([], status=status.HTTP_400_BAD_REQUEST)
+    tType = request.GET['transactionType']
+
+    if 'transactionId' in request.GET:
+        tId = request.GET['transactionId']
+        filters &= (~Q(sanad__bed=F('paidValue')) | Q(payments__transaction_id=tId))
+    else:
+        filters &= ~Q(sanad__bed=F('paidValue'))
+
+    if tType == 'receive':
+        filters &= Q(type__in=("sale", "backFromBuy"))
+    else:
+        filters &= Q(type__in=("buy", "backFromSale"))
+
+    qs = Factor.objects\
+        .filter()\
+        .exclude(sanad__bed=0)\
+        .filter(filters)
+    return Response(FactorWithPayments(qs, many=True).data)
