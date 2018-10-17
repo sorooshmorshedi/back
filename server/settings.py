@@ -56,7 +56,7 @@ INSTALLED_APPS = [
 
 ]
 
-ALLOWED_HOSTS = ['api.sh.mmdmst.ir', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
