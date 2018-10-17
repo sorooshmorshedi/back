@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     'import_export',
+    'wkhtmltopdf',
 
     'rest_framework',
     'companies',
@@ -50,7 +51,8 @@ INSTALLED_APPS = [
     'sanads',
     'cheques',
     'factors',
-    'reports'
+    'reports',
+    'users'
 
 ]
 

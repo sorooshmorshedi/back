@@ -20,6 +20,19 @@ class FloatAccountGroupSerializer(serializers.ModelSerializer):
 
 
 class AccountTypeSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj):
+        res = obj.name\
+            + ' - '\
+            + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')\
+
+        usage = [u for u in ACCOUNT_TYPE_USAGES if u[0] == obj.usage]
+        if len(usage) != 0:
+            res += ' - ' + usage[0][1]
+
+        return res
+
     class Meta:
         model = AccountType
         fields = '__all__'

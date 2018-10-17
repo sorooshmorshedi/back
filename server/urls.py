@@ -20,6 +20,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 
 urlpatterns = [
     url(r'^login$', obtain_jwt_token, name='login'),
+    url(r'^users/', include('users.urls')),
     url(r'^companies/', include('companies.urls')),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^wares/', include('wares.urls')),
