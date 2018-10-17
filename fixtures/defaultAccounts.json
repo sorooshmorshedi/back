@@ -50,7 +50,7 @@
       "name": "نقدی",
       "explanation": "",
       "account": 315,
-      "usage": "both",
+      "usage": "receiveAndPayment",
       "programingName": "cash"
     }
   }, {
