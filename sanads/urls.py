@@ -17,6 +17,7 @@ urlpatterns = router.urls + [
     url(r'^sanads$', SanadListCreate.as_view(), name=''),
     url(r'^sanads/(?P<pk>[0-9]+)$', SanadDetail.as_view(), name=''),
     url(r'^sanads/newCode$', newCodeForSanad, name=''),
+    url(r'^sanads/getSanadByCode$', getSanadByCode, name=''),
 
     url(r'^sanadItems/mass$', SanadItemMass.as_view(), name=''),
 

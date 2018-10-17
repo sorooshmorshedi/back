@@ -93,3 +93,16 @@ class SanadItemDetail(generics.RetrieveUpdateDestroyAPIView):
 @api_view(['get'])
 def newCodeForSanad(request):
     return Response(newSanadCode())
+
+
+@api_view(['get'])
+def getSanadByCode(request):
+    if 'code' not in request.GET:
+        return Response(['کد سند وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+
+    code = request.GET['code']
+    queryset = Sanad.objects.all()
+    sanad = get_object_or_404(queryset, code=code)
+    serializer = SanadListRetrieveSerializer(sanad)
+    return Response(serializer.data)
+
