@@ -86,7 +86,7 @@ class Cheque(models.Model):
 class StatusChange(models.Model):
 
     cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='statusChanges')
-    sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)
+    sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)
 
     bedAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBedAccount')
     bedFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBesAccount', blank=True, null=True)

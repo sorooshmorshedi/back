@@ -151,6 +151,7 @@ class ReceiptItemSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if instance.receipt.createType == 'auto':
             raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
+        super(ReceiptItemSerializer, self).update(instance, validated_data)
 
 
 class ReceiptItemListRetrieveSerializer(ReceiptItemSerializer):
@@ -170,6 +171,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if instance.createType == 'auto':
             raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
+        return super(ReceiptSerializer, self).update(instance, validated_data)
 
 
 class ReceiptListRetrieveSerializer(ReceiptSerializer):

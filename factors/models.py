@@ -60,7 +60,7 @@ class ReceiptItem(models.Model):
 
 class Factor(models.Model):
     code = models.IntegerField()
-    sanad = models.ForeignKey(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)

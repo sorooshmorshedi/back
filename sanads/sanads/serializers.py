@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from accounts.costCenters.serializers import CostCenterSerializer
+from factors.models import Factor
 
 from sanads.sanads.models import *
+from sanads.transactions.models import Transaction
 
 
 class SanadItemSerializer(serializers.ModelSerializer):
@@ -33,6 +35,7 @@ class SanadItemSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if instance.sanad.createType == 'auto':
             raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
+        return super(SanadItemSerializer, self).update(instance, validated_data)
 
 
 class SanadItemListRetrieveSerializer(SanadItemSerializer):
@@ -52,12 +55,43 @@ class SanadSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if instance.createType == 'auto':
             raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
+        return super(SanadSerializer, self).update(instance, validated_data)
+
+
+class FactorWithTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Factor
+        fields = ('id', 'type')
+
+
+class TransactionWithTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Transaction
+        fields = ('id', 'type')
 
 
 class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
+    factor = FactorWithTypeSerializer(read_only=True, many=False)
+    transaction = TransactionWithTypeSerializer(read_only=True, many=False)
 
     class Meta(SanadSerializer.Meta):
-        pass
+        fields = (
+            "id",
+            "code",
+            "explanation",
+            "date",
+            "created_at",
+            "updated_at",
+            "type",
+            "createType",
+            "bed",
+            "bes",
+            "factor",
+            "transaction",
+            "items",
+        )
 
 

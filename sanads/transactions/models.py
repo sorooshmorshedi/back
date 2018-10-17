@@ -20,7 +20,7 @@ class Transaction(models.Model):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True, null=True)
     date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True)
-    sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='transaction', blank=True, null=True)
+    sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='transaction', blank=True, null=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
