@@ -335,4 +335,4 @@ def getNotPaidFactors(request):
         .filter()\
         .exclude(sanad__bed=0)\
         .filter(filters)
-    return Response(FactorWithPayments(qs, many=True).data)
+    return Response(NotPaidFactorsSerializer(qs, many=True).data)
