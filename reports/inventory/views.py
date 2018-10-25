@@ -25,17 +25,31 @@ class InventoryListView(generics.ListAPIView):
             .select_related('factor__sanad')\
             .order_by('-factor__date', '-factor__time')
 
+        ware = Ware.objects.get(pk=data['ware'])
         outputFees = []
-        for r in rows:
-            if r.factor.type in ('buy', 'backFromSale'):
-                outputFees.append(
-                    {
-                        'fee': r.fee,
-                        'count': r.count
-                    }
-                )
+        if ware.pricingType == 0: #fifo
+            for r in rows:
+                if r.factor.type in ('buy', 'backFromSale'):
+                    outputFees.append(
+                        {
+                            'fee': r.fee,
+                            'count': r.count
+                        }
+                    )
+        elif ware.pricingType == 1: #avg
+            valueSum = 0
+            countSum = 0
+            for r in rows:
+                if r.factor.type in ('buy', 'backFromSale'):
+                    valueSum += r.fee * r.count
+                    countSum += r.count
+            outputFees.append({
+                'fee': valueSum/countSum,
+                'count': countSum
+            })
 
         remainCount = 0
+        remainTotal = 0
         remainFee = 0
         for r in rows:
             r.input = None
@@ -48,7 +62,9 @@ class InventoryListView(generics.ListAPIView):
                     'fee': r.fee,
                     'total': r.count * r.fee
                 }
+                remainTotal += r.input['total']
             else:
+                remainCount -= r.count
                 total = 0
                 count = r.count
                 while count != 0:
@@ -64,16 +80,17 @@ class InventoryListView(generics.ListAPIView):
                     else:
                         total += of['count'] * of['fee']
                         count -= of['count']
-
                 r.output = {
                     'count': r.count,
                     'fee': r.fee,
                     'total': r.count * r.fee
                 }
+                remainTotal -= r.output['total']
+
             r.remain = {
                 'count': remainCount,
-                'fee': remainFee,
-                'total': remainCount * remainFee
+                'fee': remainTotal / remainCount,
+                'total': remainTotal
             }
 
         res = FactorItemInventorySerializer(rows, many=True).data

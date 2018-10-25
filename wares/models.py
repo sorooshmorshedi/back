@@ -10,9 +10,7 @@ WARE_LEVELS = (
 
 PRICING_TYPES = {
     (0, 'fifo'),
-    (1, 'lifo'),
-    (2, 'avg'),
-    (3, 'special_value')
+    (1, 'avg'),
 }
 
 
@@ -58,13 +56,13 @@ class Ware(models.Model):
     code = models.CharField(max_length=50, unique=True)
     barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
-    is_disabled = models.BooleanField(default=False)
+    isDisabled = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=24, decimal_places=0)
-    pricing_type = models.IntegerField(choices=PRICING_TYPES)
-    min_sale = models.IntegerField(blank=True, null=True)
-    max_sale = models.IntegerField(blank=True, null=True)
-    min_inventory = models.IntegerField(blank=True, null=True)
-    max_inventory = models.IntegerField(blank=True, null=True)
+    pricingType = models.IntegerField(choices=PRICING_TYPES)
+    minSale = models.IntegerField(blank=True, null=True)
+    maxSale = models.IntegerField(blank=True, null=True)
+    minInventory = models.IntegerField(blank=True, null=True)
+    maxInventory = models.IntegerField(blank=True, null=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
@@ -72,7 +70,7 @@ class Ware(models.Model):
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
-    supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True)
+    supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.name)

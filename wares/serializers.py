@@ -34,26 +34,7 @@ class WareSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ware
-        fields = (
-            'id',
-            'name',
-            'price',
-            'code',
-            'explanation',
-            'is_disabled',
-            'min_sale',
-            'max_sale',
-            'min_inventory',
-            'max_inventory',
-            'created_at',
-            'updated_at',
-            'category',
-            'title',
-            'warehouse',
-            'unit',
-            'supplier',
-            'pricing_type',
-        )
+        fields = '__all__'
 
     def validate(self, data):
         return data
