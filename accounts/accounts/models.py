@@ -108,6 +108,8 @@ class Person(models.Model):
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
+    personType = models.CharField(choices=(('real', 'حقیقی'), ('legal', 'حقوقی')), max_length=5)
+
     phone1 = models.CharField(max_length=20, null=True, blank=True)
     phone2 = models.CharField(max_length=20, null=True, blank=True)
     mobile = models.CharField(max_length=20, null=True, blank=True)
