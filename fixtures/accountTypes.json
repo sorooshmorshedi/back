@@ -40,51 +40,6 @@
   },
   {
     "model": "accounts.AccountType",
-    "pk": 5,
-    "fields": {
-      "name": "مواد مستقیم",
-      "programingName": "directMaterials",
-      "nature": "bed"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 6,
-    "fields": {
-      "name": "دستمزد مستقیم",
-      "programingName": "directWage",
-      "nature": "bed"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 7,
-    "fields": {
-      "name": "سربار ساخت",
-      "programingName": "manufacturingOverhead",
-      "nature": "bed"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 8,
-    "fields": {
-      "name": "کالای در جریان ساخت",
-      "programingName": "inProcessGoods",
-      "nature": "bed"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 9,
-    "fields": {
-      "name": "بهای تمام شده کالای ساخته شده و خریداری شده",
-      "programingName": "costOfGoods",
-      "nature": "bed"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
     "pk": 10,
     "fields": {
       "name": "سایر درآمد های عملیاتی",
@@ -281,7 +236,7 @@
     "model": "accounts.AccountType",
     "pk": 29,
     "fields": {
-      "name": "تسهیلات مالی دریافتنی",
+      "name": "تسهیلات مالی پرداختنی",
       "programingName": "receivableFunds",
       "nature": "bes",
       "usage": "balanceSheet"
@@ -301,7 +256,7 @@
     "model": "accounts.AccountType",
     "pk": 31,
     "fields": {
-      "name": "تسهیلات مالی دریافتنی بلند مدت",
+      "name": "تسهیلات مالی پرداختنی بلند مدت",
       "programingName": "longtermReceivableFunds",
       "nature": "bes",
       "usage": "balanceSheet"
