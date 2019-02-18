@@ -1,0 +1,21 @@
+* {
+    font-family: IRANSans !important;
+}
+
+/* Helpers -------------------------------------------- */
+.ltr {
+    direction: ltr !important;
+    text-align: left !important;
+}
+.break-after {
+    page-break-after: always;
+}
+/* /Helpers -------------------------------------------- */
+
+.form-header {
+    /* font-weight: bold; */
+}
+.form-header span {
+    font-weight: normal;
+    text-align: justify;
+}

@@ -11,6 +11,7 @@ from reports.views import exportTest
 
 
 urlpatterns = [
+    url(r'^lists/test$', TestView.as_view(), name=''),
     url(r'^lists/transactions$', TransactionListView.as_view(), name=''),
     url(r'^lists/cheques$', ChequeListView.as_view(), name=''),
     url(r'^lists/chequebooks$', ChequebookListView.as_view(), name=''),

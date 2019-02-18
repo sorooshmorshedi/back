@@ -167,4 +167,8 @@ JWT_AUTH = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+STATIC_URL = '/static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "static/media/")
+MEDIA_URL = '/static/media/'
 

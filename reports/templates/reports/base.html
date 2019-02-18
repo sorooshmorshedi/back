@@ -1,0 +1,27 @@
+{% load static %}
+<html>
+
+  <head>
+    {% load staticfiles %}
+    <title>MMD page</title>
+    <link rel="stylesheet"
+          href="{% static 'styles/print.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'styles/bootstrap-rtl.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'styles/fontiran.css' %}">
+
+    <meta charset="UTF-8">
+
+  </head>
+
+  <body>
+    <div class="container-fluid rtl">
+
+      {% block content %}
+      {% endblock %}
+
+    </div>
+  </body>
+
+</html>
