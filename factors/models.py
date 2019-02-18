@@ -67,6 +67,7 @@ class Factor(models.Model):
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
     paidValue = models.DecimalField(default=0, max_digits=24, decimal_places=0)
+    bijak = models.IntegerField(null=True, blank=True)
 
     date = jmodels.jDateField()
     time = models.TimeField(blank=True)
