@@ -113,6 +113,7 @@ class Person(models.Model):
     phone1 = models.CharField(max_length=20, null=True, blank=True)
     phone2 = models.CharField(max_length=20, null=True, blank=True)
     mobile = models.CharField(max_length=20, null=True, blank=True)
+    meli_code = models.CharField(max_length=20, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     fax = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)

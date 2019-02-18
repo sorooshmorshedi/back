@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="kjkjj">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db.sqlite3" afterPath="$PROJECT_DIR$/db.sqlite3" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/models.py" afterPath="$PROJECT_DIR$/factors/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/accounts/accounts/models.py" afterPath="$PROJECT_DIR$/accounts/accounts/models.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -19,36 +17,25 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="77" column="18" lean-forward="false" selection-start-line="77" selection-start-column="18" selection-end-line="77" selection-end-column="18" />
+            <state relative-caret-position="189">
+              <caret line="115" column="44" lean-forward="false" selection-start-line="115" selection-start-column="44" selection-end-line="115" selection-end-column="44" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/models.py">
+      <file leaf-file-name="serializers.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/accounts/accounts/serializers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="70" column="0" lean-forward="true" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="serializers.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/factors/serializers.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="324">
-              <caret line="60" column="37" lean-forward="false" selection-start-line="60" selection-start-column="37" selection-end-line="60" selection-end-column="37" />
+            <state relative-caret-position="405">
+              <caret line="94" column="0" lean-forward="false" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
               <folding>
-                <element signature="e#0#38#0" expanded="true" />
-                <element signature="e#3171#3287#0" expanded="false" />
-                <element signature="e#3356#3538#0" expanded="false" />
-                <element signature="e#5018#5091#0" expanded="false" />
+                <element signature="e#764#1178#0" expanded="false" />
+                <element signature="e#1711#3039#0" expanded="false" />
+                <element signature="e#3087#3387#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -145,7 +132,6 @@
         <option value="$PROJECT_DIR$/wares/serializers.py" />
         <option value="$PROJECT_DIR$/reports/inventory/views.py" />
         <option value="$PROJECT_DIR$/fixtures/accounts.json" />
-        <option value="$PROJECT_DIR$/accounts/accounts/models.py" />
         <option value="$PROJECT_DIR$/accounts/accounts/views.py" />
         <option value="$PROJECT_DIR$/fixtures/accountTypes.json" />
         <option value="$PROJECT_DIR$/static/styles/print.css" />
@@ -158,6 +144,7 @@
         <option value="$PROJECT_DIR$/wares/models.py" />
         <option value="$PROJECT_DIR$/accounts/accounts/serializers.py" />
         <option value="$PROJECT_DIR$/factors/models.py" />
+        <option value="$PROJECT_DIR$/accounts/accounts/models.py" />
       </list>
     </option>
   </component>
@@ -226,7 +213,25 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="factors" />
+              <option name="myItemId" value="accounts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sh-server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="accounts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="accounts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -239,7 +244,7 @@
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$USER_HOME$/Envs/SH/Scripts/python.exe" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-    <property name="SearchEverywhereHistoryKey" value="factorseri&#9;null&#9;null&#10;factor&#9;null&#9;null&#10;Ware&#9;null&#9;null&#10;sett&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;pricingType&#9;null&#9;null&#10;update&#9;null&#9;null&#10;permissionmixin&#9;null&#9;null&#10;BaseUser&#9;null&#9;null" />
+    <property name="SearchEverywhereHistoryKey" value="person&#9;null&#9;null&#10;factorseri&#9;null&#9;null&#10;factor&#9;null&#9;null&#10;Ware&#9;null&#9;null&#10;sett&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;pricingType&#9;null&#9;null&#10;update&#9;null&#9;null&#10;permissionmixin&#9;null&#9;null&#10;BaseUser&#9;null&#9;null" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -450,13 +455,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/server/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cheques/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="540">
@@ -796,26 +794,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/accounts/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="47" column="19" lean-forward="false" selection-start-line="47" selection-start-column="19" selection-end-line="47" selection-end-column="19" />
-          <folding>
-            <element signature="e#764#1178#0" expanded="false" />
-            <element signature="e#1711#3039#0" expanded="false" />
-            <element signature="e#3087#3387#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="77" column="18" lean-forward="false" selection-start-line="77" selection-start-column="18" selection-end-line="77" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/factors/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
@@ -834,6 +812,36 @@
             <element signature="e#3356#3538#0" expanded="false" />
             <element signature="e#5018#5091#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/accounts/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="94" column="0" lean-forward="false" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
+          <folding>
+            <element signature="e#764#1178#0" expanded="false" />
+            <element signature="e#1711#3039#0" expanded="false" />
+            <element signature="e#3087#3387#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="115" column="44" lean-forward="false" selection-start-line="115" selection-start-column="44" selection-end-line="115" selection-end-column="44" />
+          <folding />
         </state>
       </provider>
     </entry>
