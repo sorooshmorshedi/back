@@ -1,10 +1,13 @@
 from django.conf.urls import url, include
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from .views import *
 
 
-urlpatterns = [
-    url(r'^$', CompanyListCreate.as_view(), name='companies'),
-    url(r'^(?P<pk>[0-9]+)$', CompanyDetail.as_view(), name='companyDetail'),
-]
+router = DefaultRouter()
+router.register('financialYears', FinancialYearModelView)
+router.register('', CompanyModelView)
+
+urlpatterns = router.urls
+

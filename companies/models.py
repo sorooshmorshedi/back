@@ -4,8 +4,6 @@ from django_jalali.db import models as jmodels
 
 class Company(models.Model):
     name = models.CharField(unique=True, max_length=150)
-    fiscal_year_start = jmodels.jDateField()
-    fiscal_year_end = jmodels.jDateField()
     address1 = models.CharField(max_length=255, blank=True, null=True)
     address2 = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
@@ -24,3 +22,13 @@ class Company(models.Model):
     )
 
 
+class FinancialYear(models.Model):
+    name = models.CharField(unique=True, max_length=150)
+    start = jmodels.jDateField()
+    end = jmodels.jDateField()
+    is_active = models.BooleanField(default=0)
+    explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
+
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')
+
+    objects = models.Manager()
