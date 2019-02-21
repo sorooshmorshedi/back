@@ -1,11 +1,14 @@
+from django.db import connection
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from accounts.accounts.models import Account
-from reports.balance.serializers import AccountBalanceSerializer
+from accounts.accounts.models import Account, FloatAccount
+from accounts.accounts.serializers import BankSerializer, PersonSerializer
+from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
+    BalanceFloatAccountGroupSerializer
 
 
 @api_view(['get'])
@@ -27,7 +30,8 @@ def accountBalanceView(request):
 
     accounts = Account.objects\
         .annotate(bed_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0))\
-        .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)) \
+        .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0))\
+        .prefetch_related('bank').prefetch_related('person').prefetch_related('floatAccountGroup')\
         .order_by('code')
 
     for account in accounts:
@@ -47,4 +51,37 @@ def accountBalanceView(request):
             account.bes_remain = -remain
             account.bed_remain = 0
 
-    return Response(AccountBalanceSerializer(accounts, many=True).data)
+        if hasattr(account, 'bank'):
+            account._bank = BankSerializer(account.bank).data
+        if hasattr(account, 'person'):
+            account._person = PersonSerializer(account.person).data
+        if account.floatAccountGroup:
+            account._floatAccountGroup = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
+
+        account._floatAccounts = []
+        if account.floatAccountGroup:
+            floatAccounts = FloatAccount.objects \
+                .filter(floatAccountGroup=account.floatAccountGroup)\
+                .annotate(bed_sum=Coalesce(Sum('sanadItems__value',
+                                               filter=Q(sanadItems__valueType='bed') &
+                                                      Q(sanadItems__account=account) &
+                                                      dateFilter), 0)) \
+                .annotate(bes_sum=Coalesce(Sum('sanadItems__value',
+                                               filter=Q(sanadItems__valueType='bes') &
+                                                      Q(sanadItems__account=account) &
+                                                      dateFilter), 0)) \
+                .prefetch_related('floatAccountGroup')
+
+            for floatAccount in floatAccounts:
+                remain = floatAccount.bed_sum - floatAccount.bes_sum
+                if remain > 0:
+                    floatAccount.bed_remain = remain
+                    floatAccount.bes_remain = 0
+                else:
+                    floatAccount.bes_remain = -remain
+                    floatAccount.bed_remain = 0
+                account._floatAccounts.append(BalanceFloatAccountSerializer(floatAccount).data)
+
+    res = Response(BalanceAccountSerializer(accounts, many=True).data)
+    print(len(connection.queries))
+    return res
