@@ -42,7 +42,7 @@ class Sanad(models.Model):
 class SanadItem(models.Model):
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='floatAccount', blank=True, null=True, verbose_name='حساب شناور')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True, null=True, verbose_name='حساب شناور')
     costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True, verbose_name='مرکز هزینه')
 
     value = models.DecimalField(max_digits=24, decimal_places=0)
