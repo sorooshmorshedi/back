@@ -110,6 +110,14 @@ class Factor(models.Model):
             taxSum = self.taxValue
         return taxSum
 
+    @property
+    def sumAfterDiscount(self):
+        return self.sum - self.discountSum
+
+    @property
+    def totalSum(self):
+        return self.sum - self.discountSum + self.taxSum
+
 
 class FactorExpense(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
@@ -149,6 +157,10 @@ class FactorItem(models.Model):
             return self.value * self.discountPercent / 100
         else:
             return self.discountValue
+
+    @property
+    def totalValue(self):
+        return self.value - self.discount
 
 
 def updateInventoryOnReceiptItemSave(sender, instance, raw, using, update_fields, **kwargs):
