@@ -21,6 +21,9 @@ class Company(models.Model):
         ('get_company', 'Can get company')
     )
 
+    def get_financial_year(self):
+        return self.financial_years.get(is_active=True)
+
 
 class FinancialYear(models.Model):
     name = models.CharField(unique=True, max_length=150)
