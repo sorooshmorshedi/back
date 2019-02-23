@@ -68,7 +68,7 @@ class SanadFilter(filters.FilterSet):
     class Meta:
         model = Sanad
         fields = {
-            'code': ['icontains'],
+            'code': ['exact', 'icontains'],
             'bed': ['icontains'],
             'bes': ['icontains'],
             'explanation': ['icontains'],
