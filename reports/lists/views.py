@@ -36,14 +36,6 @@ class SanadListView(generics.ListAPIView):
     filterset_class = SanadFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
-    template = 'reports/sanads.html'
-
-    def get(self, request, *args, **kwargs):
-        pdf = request.GET.get('pdf', None)
-        if pdf:
-            pass
-        else:
-            return super(SanadListView, self).get(request, *args, **kwargs)
 
 
 class FactorListView(generics.ListAPIView):
