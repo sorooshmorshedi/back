@@ -1,0 +1,152 @@
+{% extends 'reports/base.html' %}
+{% load report_filters %}
+
+{% block content %}
+{% for factor in forms %}
+
+{% if forloop.last %}
+<div>
+    {% else %}
+    <div class="break-after">
+        {% endif %}
+
+        <div class="row form-header">
+            <div class="col-xs-12 text-left">
+                <span>شماره : </span>
+                <span> {{ factor.code }} </span>
+            </div>
+            <div class="col-xs-12 text-left">
+                <span>تاریخ : </span>
+                <span dir="ltr"> {{ factor.date }} </span>
+            </div>
+            <div class="col-xs-12 text-left">
+                <span>ساعت : </span>
+                <span dir="ltr"> {{ factor.time | date:"G:i"}} </span>
+            </div>
+
+        </div>
+
+        <div class="row buyer">
+            <div class="col-xs-4">
+                <span>فروشنده: </span>
+                <span> {{ company.name }} </span>
+            </div>
+            <div class="col-xs-4">
+                <span> کد اقتصادی: </span>
+                <span> {{ company.eghtesadiCode | default:'-' }} </span>
+            </div>
+            <div class="col-xs-4">
+                <span> شماره ملی: </span>
+                <span> {{ company.meli_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-4">
+                <span>آدرس: </span>
+                <span> {{ company.address1 | default:'-' }} </span>
+            </div>
+            <div class="col-xs-4">
+                <span>کد پستی: </span>
+                <span> {{ company.postal_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-4">
+                <span>تلفن: </span>
+                <span> {{ company.phone1 | default:'-' }} </span>
+            </div>
+        </div>
+
+        <div class="row seller">
+            <div class="col-xs-3">
+                <span> فروشنده: </span>
+                <span> {{ factor.account }} </span>
+            </div>
+            {% if factor.floatAccount %}
+            <div class="col-xs-3">
+                <span> حساب شناور: </span>
+                <span> {{ factor.account }} </span>
+            </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span> کد اقتصادی: </span>
+                <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span> شماره ملی: </span>
+                <span> {{ factor.account.person.meli_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span>بیجک: </span>
+                <span> {{ factor.bijak | default:'-' }} </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 ">
+                <div class="row">
+                    <span class="col-xs-2">توضیحات : </span>
+                    <span class="col-xs-10"> {{ factor.explanation | default:'-' }} </span>
+                </div>
+            </div>
+        </div>
+        <div class="row"
+             style="margin-top: 15px;">
+            <div class="col-xs-12">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>کالا</th>
+                            <th>انبار</th>
+                            <th>تعداد</th>
+                            <th>واحد</th>
+                            <th>قیمت واحد</th>
+                            <th>جمع</th>
+                            <th>تخفیف (مبلغ)</th>
+                            <th>تخفیف درصد</th>
+                            <th>جمع کل پس از تخفیف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in factor.items.all %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.ware }}</td>
+                            <td>{{ item.warehouse.name | default:'-' }}</td>
+                            <td>{{ item.count }}</td>
+                            <td>{{ item.ware.unit.name }}</td>
+                            <td>{{ item.fee | money }}</td>
+                            <td>{{ item.value | money }}</td>
+                            <td>{{ item.discountValue | money }}</td>
+                            <td>{{ item.discountPercent }}</td>
+                            <td>{{ item.totalValue | money }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xs-6 col-xs-6-offset">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <tr>
+                            <th>جمع</th>
+                            <td>{{ factor.sum | money }}</td>
+                        </tr>
+                        <tr>
+                            <th>تخفیف</th>
+                            <td>{{ factor.discountSum | money }}</td>
+                        </tr>
+                        <tr>
+                            <th>مبلغ فاکتور پس از تخفیف</th>
+                            <td>{{ factor.sumAfterDiscount | money }}</td>
+                        </tr>
+                        <tr>
+                            <th>مبلغ کل فاکتور</th>
+                            <td>{{ factor.totalSum | money }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    {% endfor %}
+    {% endblock %}
