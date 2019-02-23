@@ -1,74 +1,75 @@
 {% extends 'reports/base.html' %}
+{% load report_filters %}
 {% block content %}
-{% for sanad in sanads %}
+{% for sanad in forms %}
 
-	{% if forloop.last %}
-		<div>
+{% if forloop.last %}
+<div>
 	{% else %}
-		<div class="break-after">
-	{% endif %}
+	<div class="break-after">
+		{% endif %}
 
-			<div class="row form-header">
-				<div class="col-sm-2">
-					<span>شماره سند: </span>
-					<span> {{ sanad.code }} </span>
-				</div>
-				<div class="col-sm-2">
-					<span>تاریخ سند: </span>
-					<span dir="ltr"> {{ sanad.date }} </span>
-				</div>
-
-				<div class="col-8">
-					<div class="row">
-						<span class="col-2">توضیحات سند: </span>
-						<span class="col-10"> {{ sanad.explanation | default:'-' }} </span>
-
-					</div>
-				</div>
+		<div class="row form-header">
+			<div class="col-sm-12">
+				<span>شماره سند: </span>
+				<span> {{ sanad.code }} </span>
 			</div>
-			<div class="row">
-				<div class="col-12">
-					<table class="table table-bordered table-striped">
-						<thead>
-							<tr>
-								<th>#</th>
-								<th>شماره - نام حساب</th>
-								<th>توضیحات</th>
-								<th>تفضیلی شناور</th>
-								<th>مرکز هزینه</th>
-								<th>بدهکار</th>
-								<th>بستانکار</th>
-							</tr>
-						</thead>
-						<tbody>
-							{% for item in sanad.items.all %}
-							<tr>
-								<td>{{ forloop.counter }}</td>
-								<td>{{ item.account }}</td>
-								<td>{{ item.explanation | default:'-' }}</td>
-								<td>{{ item.floatAccount | default:'-' }}</td>
-								<td>{{ item.costCenter | default:'-' }}</td>
-								{% if item.valueType == 'bed' %}
-								<td>{{ item.value }}</td>
-								<td>{{ 0 }}</td>
-								{% else %}
-								<td>{{ 0 }}</td>
-								<td>{{ item.value }}</td>
-								{% endif %}
-							</tr>
-							{% endfor %}
-							<tr>
-								<td colspan="4"></td>
-								<td>مجموع</td>
-								<td>{{ sanad.bed }}</td>
-								<td>{{ sanad.bes }}</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<div class="col-sm-12">
+				<span>تاریخ سند: </span>
+				<span dir="ltr"> {{ sanad.date }} </span>
 			</div>
 
+			<div class="col-sm-12">
+				<div class="row">
+					<span class="col-sm-2">توضیحات سند: </span>
+					<span class="col-sm-10"> {{ sanad.explanation | default:'-' }} </span>
+				</div>
+			</div>
+			<br>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>شماره - نام حساب</th>
+							<th>توضیحات</th>
+							<th>تفضیلی شناور</th>
+							<th>مرکز هزینه</th>
+							<th>بدهکار</th>
+							<th>بستانکار</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for item in sanad.items.all %}
+						<tr>
+							<td>{{ forloop.counter }}</td>
+							<td>{{ item.account }}</td>
+							<td>{{ item.explanation | default:'-' }}</td>
+							<td>{{ item.floatAccount | default:'-' }}</td>
+							<td>{{ item.costCenter | default:'-' }}</td>
+							{% if item.valueType == 'bed' %}
+							<td>{{ item.value | money }}</td>
+							<td>{{ 0 }}</td>
+							{% else %}
+							<td>{{ 0 }}</td>
+							<td>{{ item.value | money }}</td>
+							{% endif %}
+						</tr>
+						{% endfor %}
+						<tr>
+							<td colspan="5"
+							    class="text-left">مجموع</td>
+							<td>{{ sanad.bed | money }}</td>
+							<td>{{ sanad.bes | money }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 
-{% endfor %}
-{% endblock %}
+	</div>
+
+	{% endfor %}
+	{% endblock %}
