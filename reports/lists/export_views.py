@@ -58,7 +58,7 @@ class SanadExportView(SanadListView, BaseExportView):
 
 class FactorExportView(FactorListView, BaseExportView):
     filename = 'factors.pdf'
-    template_name = 'reports/factors/buy.html'
+    template_name = 'reports/factors.html'
     context = {}
     pagination_class = None
 
