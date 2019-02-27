@@ -8,7 +8,7 @@ from accounts.costCenters.serializers import CostCenterGroupSerializer
 class FloatAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloatAccount
-        fields = ('id', 'name', 'explanation', 'max_bed', 'max_bes', 'max_bed_with_sanad', 'max_bes_with_sanad', 'floatAccountGroup')
+        fields = '__all__'
 
 
 class FloatAccountGroupSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class FloatAccountGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FloatAccountGroup
-        fields = ('id', 'name', 'explanation', 'floatAccounts')
+        fields = '__all__'
 
 
 class AccountTypeSerializer(serializers.ModelSerializer):
