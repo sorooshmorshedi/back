@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
 from accounts.accounts.serializers import BankSerializer, PersonSerializer, AccountTypeSerializer
 from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
-    BalanceFloatAccountGroupSerializer
+    BalanceFloatAccountGroupSerializer, FloatBalanceSerializer
 
 
 @api_view(['get'])
@@ -64,7 +64,7 @@ def accountBalanceView(request):
         account._floatAccounts = []
         if account.floatAccountGroup:
             floatAccounts = FloatAccount.objects \
-                .filter(floatAccountGroup=account.floatAccountGroup)\
+                .filter(floatAccountGroups__in=[account.floatAccountGroup])\
                 .annotate(bed_sum=Coalesce(Sum('sanadItems__value',
                                                filter=Q(sanadItems__valueType='bed') &
                                                       Q(sanadItems__account=account) &
@@ -73,7 +73,7 @@ def accountBalanceView(request):
                                                filter=Q(sanadItems__valueType='bes') &
                                                       Q(sanadItems__account=account) &
                                                       dateFilter), 0)) \
-                .prefetch_related('floatAccountGroup')
+                .prefetch_related('floatAccountGroups')
 
             for floatAccount in floatAccounts:
                 remain = floatAccount.bed_sum - floatAccount.bes_sum
@@ -90,7 +90,6 @@ def accountBalanceView(request):
     return res
 
 
-"""
 @api_view(['get'])
 def floatAccountBalanceView(request):
 
@@ -110,66 +109,36 @@ def floatAccountBalanceView(request):
 
     floatAccounts = FloatAccount.objects \
         .annotate(bed_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0)) \
-        .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0))
-        # .prefetch_related('bank').prefetch_related('person').prefetch_related('floatAccountGroup') \
-        # .prefetch_related('type') \
-        # .order_by('code')
+        .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)) \
+        .prefetch_related('floatAccountGroups')
 
-    floatAccountGroups = FloatAccountGroup.objects.all()
+    floatAccountGroups = FloatAccountGroup.objects.prefetch_related('floatAccounts').all()
 
-    for floatAccount in floatAccounts:
+    res = []
 
+    for floatAccountGroup in floatAccountGroups:
+        floatAccountGroup.group_name = floatAccountGroup.name
+        floatAccountGroup.float_account_name = ''
+        floatAccountGroup.bed_sum = 0
+        floatAccountGroup.bes_sum = 0
+        res.append(floatAccountGroup)
+        for floatAccount in floatAccounts:
+            floatAccount.float_account_name = floatAccount.name
+            floatAccount.group_name = ''
+            if floatAccountGroup in floatAccount.floatAccountGroups.all():
+                floatAccountGroup.bed_sum += floatAccount.bed_sum
+                floatAccountGroup.bes_sum += floatAccount.bes_sum
+                res.append(floatAccount)
 
-        # if account.level != 3:
-        #     for acc in accounts:
-        #         if acc == account or acc.level != 3:
-        #             continue
-        #         if acc.code.find(account.code) == 0:
-        #             account.bed_sum += acc.bed_sum
-        #             account.bes_sum += acc.bes_sum
-        #
-        # remain = account.bed_sum - account.bes_sum
-        # if remain > 0:
-        #     account.bed_remain = remain
-        #     account.bes_remain = 0
-        # else:
-        #     account.bes_remain = -remain
-        #     account.bed_remain = 0
+    for account in res:
+        remain = account.bed_sum - account.bes_sum
+        if remain > 0:
+            account.bed_remain = remain
+            account.bes_remain = 0
+        else:
+            account.bes_remain = -remain
+            account.bed_remain = 0
 
-        # if hasattr(account, 'type'):
-        #     account._type = AccountTypeSerializer(account.type).data
-        # if hasattr(account, 'bank'):
-        #     account._bank = BankSerializer(account.bank).data
-        # if hasattr(account, 'person'):
-        #     account._person = PersonSerializer(account.person).data
-        # if account.floatAccountGroup:
-        #     account._floatAccountGroup = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
-
-        account._floatAccounts = []
-        if account.floatAccountGroup:
-            floatAccounts = FloatAccount.objects \
-                .filter(floatAccountGroup=account.floatAccountGroup) \
-                .annotate(bed_sum=Coalesce(Sum('sanadItems__value',
-                                               filter=Q(sanadItems__valueType='bed') &
-                                                      Q(sanadItems__account=account) &
-                                                      dateFilter), 0)) \
-                .annotate(bes_sum=Coalesce(Sum('sanadItems__value',
-                                               filter=Q(sanadItems__valueType='bes') &
-                                                      Q(sanadItems__account=account) &
-                                                      dateFilter), 0)) \
-                .prefetch_related('floatAccountGroup')
-
-            for floatAccount in floatAccounts:
-                remain = floatAccount.bed_sum - floatAccount.bes_sum
-                if remain > 0:
-                    floatAccount.bed_remain = remain
-                    floatAccount.bes_remain = 0
-                else:
-                    floatAccount.bes_remain = -remain
-                    floatAccount.bed_remain = 0
-                account._floatAccounts.append(BalanceFloatAccountSerializer(floatAccount).data)
-
-    res = Response(BalanceAccountSerializer(accounts, many=True).data)
+    res = Response(FloatBalanceSerializer(res, many=True).data)
     print(len(connection.queries))
     return res
-"""

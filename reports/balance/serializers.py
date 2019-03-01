@@ -42,3 +42,19 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
                   '_person',
                   '_floatAccounts')
 
+
+class FloatBalanceSerializer(serializers.Serializer):
+    bed_sum = serializers.IntegerField()
+    bes_sum = serializers.IntegerField()
+    bed_remain = serializers.IntegerField()
+    bes_remain = serializers.IntegerField()
+
+    group_name = serializers.CharField()
+    float_account_name = serializers.CharField()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+

@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.urls import path
 
-from reports.balance.views import accountBalanceView
+from reports.balance.views import accountBalanceView, floatAccountBalanceView
 from reports.balanceSheet.views import balanceSheetView
 from reports.incomeStatement.views import incomeStatementView
 from reports.inventory.views import InventoryListView
@@ -31,6 +31,7 @@ urlpatterns += [
 # Reports
 urlpatterns += [
     url(r'^balance$', accountBalanceView, name=''),
+    url(r'^balance/floats$', floatAccountBalanceView, name=''),
     url(r'^ledger$', LedgerListView.as_view(), name=''),
     url(r'^journal$', JournalListView.as_view(), name=''),
     url(r'^export$', exportTest, name=''),
