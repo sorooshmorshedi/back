@@ -36,7 +36,6 @@ class FloatAccount(models.Model):
     max_bes_with_sanad = models.CharField(max_length=20, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
-    # floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='floatAccounts')
     floatAccountGroups = models.ManyToManyField(FloatAccountGroup, related_name='floatAccounts')
 
     def __str__(self):
