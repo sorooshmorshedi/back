@@ -1,10 +1,13 @@
 from django.http import HttpResponse
 from import_export import fields
 from import_export import resources
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
+from reports.models import ExportVerifier
+from reports.serializers import ExportVerifierSerializer
 from sanads.sanads.models import Sanad
+
 
 
 class ModelResource(resources.ModelResource):
@@ -30,3 +33,8 @@ def exportTest(request):
     response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="persons.xls"'
     return response
+
+
+class ExportVerifiersModelView(viewsets.ModelViewSet):
+    queryset = ExportVerifier.objects.all()
+    serializer_class = ExportVerifierSerializer

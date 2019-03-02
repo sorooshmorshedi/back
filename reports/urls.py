@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
 from reports.balance.views import accountBalanceView, floatAccountBalanceView
 from reports.balanceSheet.views import balanceSheetView
@@ -9,8 +9,7 @@ from reports.journal.views import JournalListView
 from reports.ledger.views import LedgerListView
 from reports.lists.export_views import SanadExportView, FactorExportView
 from reports.lists.views import *
-from reports.views import exportTest
-
+from reports.views import exportTest, ExportVerifiersModelView
 
 # Lists
 urlpatterns = [
@@ -18,6 +17,8 @@ urlpatterns = [
     url(r'^lists/cheques$', ChequeListView.as_view(), name=''),
     url(r'^lists/chequebooks$', ChequebookListView.as_view(), name=''),
     url(r'^lists/sanads$', SanadListView.as_view(), name=''),
+    url(r'^lists/sanads/unbalanced$', UnbalancedSanadListView.as_view(), name=''),
+    url(r'^lists/sanads/empty$', EmptySanadListView.as_view(), name=''),
     url(r'^lists/factors$', FactorListView.as_view(), name=''),
     url(r'^lists/receipts$', ReceiptListView.as_view(), name=''),
 ]
@@ -39,3 +40,9 @@ urlpatterns += [
     url(r'^balanceSheet$', balanceSheetView, name=''),
     url(r'^inventory$', InventoryListView.as_view(), name=''),
 ]
+
+
+# Other
+router = DefaultRouter()
+router.register('exportVerifiers', ExportVerifiersModelView)
+urlpatterns += router.urls
