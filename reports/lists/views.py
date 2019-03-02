@@ -1,3 +1,4 @@
+from django.db.models import Q, Count
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 from factors.serializers import ReceiptSerializer
@@ -36,6 +37,14 @@ class SanadListView(generics.ListAPIView):
     filterset_class = SanadFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
+
+
+class UnbalancedSanadListView(SanadListView):
+    queryset = Sanad.objects.filter(~Q(bed=F('bes')))
+
+
+class EmptySanadListView(SanadListView):
+    queryset = Sanad.objects.annotate(items_count=Count('items')).filter(items_count=0)
 
 
 class FactorListView(generics.ListAPIView):
