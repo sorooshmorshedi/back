@@ -85,7 +85,11 @@ class AccountSerializer(serializers.ModelSerializer):
             data['type'] = data['parent'].type
 
         return Account.objects.create(**data)
-        # return super(AccountSerializer, self).create(**data)
+
+    def update(self, instance, validated_data):
+        res = super().update(instance, validated_data)
+        Account.objects.filter(code__startswith=instance.code).update(type=instance.type)
+        return res
 
 
 class PersonSerializer(serializers.ModelSerializer):
