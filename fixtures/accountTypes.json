@@ -311,5 +311,15 @@
       "nature": "bes",
       "usage": "balanceSheet"
     }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 37,
+    "fields": {
+      "name": "بدون نوع",
+      "programingName": "noType",
+      "nature": "bes",
+      "usage": "none"
+    }
   }
 ]
