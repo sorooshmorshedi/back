@@ -20,12 +20,12 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         if 'bedAccount' in data and data['bedAccount'].floatAccountGroup:
             if 'bedFloatAccount' not in data:
                 raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['bedFloatAccount'].floatAccountGroup != data['bedAccount'].floatAccountGroup:
+            if data['bedAccount'].floatAccountGroup not in list(data['bedFloatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
         if 'besAccount' in data and data['besAccount'].floatAccountGroup:
             if 'besFloatAccount' not in data:
                 raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['besFloatAccount'].floatAccountGroup != data['besAccount'].floatAccountGroup:
+            if data['bedAccount'].floatAccountGroup not in list(data['bedFloatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
 
         if data['bedAccount'] == data['besAccount']:
@@ -78,15 +78,16 @@ class ChequeSerializer(serializers.ModelSerializer):
         if data['account'].floatAccountGroup:
             if 'floatAccount' not in data:
                 raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['floatAccount'].floatAccountGroup != data['account'].floatAccountGroup:
+            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+        print('ha')
 
         return data
 
     def create(self, validated_data):
         data = validated_data.copy()
         data['status'] = 'blank'
-        data['type'] = 'received'
+        data['received_or_paid'] = Cheque.RECEIVED
         return super(ChequeSerializer, self).create(validated_data=data)
 
 

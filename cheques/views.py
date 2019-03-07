@@ -1,3 +1,4 @@
+from django.db import connection
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
@@ -33,7 +34,7 @@ class ChequeModelView(viewsets.ModelViewSet):
     serializer_class = ChequeSerializer
 
     def list(self, request, *ergs, **kwargs):
-        queryset = Cheque.objects.filter(type='received')
+        queryset = Cheque.objects.filter(received_or_paid=Cheque.RECEIVED)
         serializer = ChequeListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -44,7 +45,7 @@ class ChequeModelView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_destroy(self, instance):
-        if instance.type == 'paid':
+        if instance.received_or_paid == Cheque.PAID:
             return Response(['چک پرداختی غیر قابل حذف می باشد'], status=status.HTTP_400_BAD_REQUEST)
         if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
             return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'], status=status.HTTP_400_BAD_REQUEST)
@@ -63,7 +64,7 @@ class ChangeChequeStatus(APIView):
 
         data = request.data['cheque']
 
-        if cheque.type == 'paid':
+        if cheque.received_or_paid == Cheque.PAID:
             bank = cheque.chequebook.account.bank
             data['bankName'] = bank.name
             data['branchName'] = bank.branch
@@ -77,7 +78,7 @@ class ChangeChequeStatus(APIView):
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data['statusChange']
-        if cheque.type == 'received':
+        if cheque.received_or_paid == Cheque.RECEIVED:
             acc = getDA('receivedCheque').account
             data['bedAccount'] = acc.id
             cheque.lastAccount = acc
@@ -130,7 +131,7 @@ class ChangeChequeStatus(APIView):
         cheque = get_object_or_404(queryset, pk=pk)
         data['fromStatus'] = cheque.status
 
-        if cheque.type == 'received':
+        if cheque.received_or_paid == Cheque.RECEIVED:
             data['besAccount'] = cheque.lastAccount.id
             if cheque.lastFloatAccount:
                 data['besFloatAccount'] = cheque.lastFloatAccount.id
@@ -150,14 +151,14 @@ class ChangeChequeStatus(APIView):
                 if cheque.floatAccount:
                     data['besFloatAccount'] = cheque.floatAccount.id
 
-            if cheque.type == 'paid' and data['toStatus'] == 'passed':
+            if cheque.received_or_paid == Cheque.PAID and data['toStatus'] == 'passed':
                 data['besAccount'] = cheque.chequebook.account.id
                 if cheque.chequebook.floatAccount:
                     data['besFloatAccount'] = cheque.chequebook.floatAccount.id
 
         serialized = StatusChangeSerializer(data=data)
         if serialized.is_valid():
-            if cheque.type == 'received':
+            if cheque.received_or_paid == Cheque.RECEIVED:
                 cheque.lastAccount = Account.objects.get(pk=data['bedAccount'])
                 if 'bedFloatAccount' in data:
                     cheque.lastFloatAccount = FloatAccount.objects.get(pk=data['bedFloatAccount'])
@@ -201,7 +202,7 @@ def revertChequeInFlowStatus(request, pk):
 
     serialized = StatusChangeSerializer(data=data)
     if serialized.is_valid():
-        if cheque.type == 'received':
+        if cheque.received_or_paid == Cheque.RECEIVED:
             cheque.lastAccount = Account.objects.get(pk=data['bedAccount'])
             if 'bedFloatAccount' in data:
                 cheque.lastFloatAccount = FloatAccount.objects.get(pk=data['bedFloatAccount'])
