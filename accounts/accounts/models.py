@@ -104,6 +104,9 @@ class Account(models.Model):
     class Meta:
         ordering = ['code', ]
 
+    def can_delete(self):
+        return self.sanadItems.count() == 0
+
 
 class Person(models.Model):
 

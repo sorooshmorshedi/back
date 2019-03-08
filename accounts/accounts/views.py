@@ -1,6 +1,7 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
+from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
@@ -73,6 +74,14 @@ class AccountDetail(generics.RetrieveUpdateDestroyAPIView):
         account = get_object_or_404(queryset, pk=pk)
         serializer = AccountListRetrieveSerializer(account)
         return Response(serializer.data)
+
+    def destroy(self, request, pk, *args, **kwargs):
+        account = get_object_or_404(Account, pk=pk)
+        if account.can_delete():
+            return super().destroy(self, request, *args, **kwargs)
+
+        return Response(['حساب های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonListCreate(generics.ListCreateAPIView):

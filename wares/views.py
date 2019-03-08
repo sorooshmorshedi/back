@@ -57,6 +57,14 @@ class WareDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = WareListRetrieveSerializer(ware)
         return Response(serializer.data)
 
+    def destroy(self, request, pk, *args, **kwargs):
+        ware = get_object_or_404(Ware, pk=pk)
+        if ware.has_factorItem():
+            return super().destroy(self, request, *args, **kwargs)
+
+        return Response(['کالا های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
+                        status=status.HTTP_400_BAD_REQUEST)
+
 
 class WareLevelDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)

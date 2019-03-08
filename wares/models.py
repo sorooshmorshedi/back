@@ -78,6 +78,13 @@ class Ware(models.Model):
     class Meta:
         ordering = ['code', ]
 
+    def has_factorItem(self):
+        print(self.factorItems.count())
+        return self.factorItems.count() == 0
+
+    def has_inventory(self):
+        pass
+
 
 class WarehouseInventory(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
