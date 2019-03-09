@@ -120,7 +120,7 @@ class ChequebookSerializer(serializers.ModelSerializer):
         if data['account'].floatAccountGroup:
             if 'floatAccount' not in data:
                 raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['floatAccount'].floatAccountGroup != data['account'].floatAccountGroup:
+            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
 
         return data
