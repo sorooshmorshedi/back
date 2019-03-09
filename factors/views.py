@@ -77,7 +77,7 @@ class FactorExpenseMass(APIView):
     model = FactorExpense
 
     def post(self, request):
-        print(request.data)
+        # print(request.data)
         serialized = FactorExpenseSerializer(data=request.data, many=True)
         if serialized.is_valid():
             serialized.save()

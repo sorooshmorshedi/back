@@ -16,7 +16,7 @@ def getRemain(accountType, allAccounts):
     accounts = allAccounts.filter(type=accountType)
     remain = 0
     for acc in accounts:
-        print(acc.bes)
+        # print(acc.bes)
         if accountType.nature == 'bed':
             remain += acc.remain
         else:
@@ -26,7 +26,7 @@ def getRemain(accountType, allAccounts):
 
 @api_view(['get'])
 def balanceSheetView(request):
-    print(len(connection.queries))
+    # print(len(connection.queries))
     res = {}
     data = request.GET
     dateFilter = Q()
@@ -123,7 +123,7 @@ def balanceSheetView(request):
         'name': 'جمع بدهی ها و حقوق صاحبان سهام',
         'remain': remain
     }
-    print(len(connection.queries))
+    # print(len(connection.queries))
 
     return Response(res)
 

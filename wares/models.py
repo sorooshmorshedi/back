@@ -79,7 +79,7 @@ class Ware(models.Model):
         ordering = ['code', ]
 
     def has_factorItem(self):
-        print(self.factorItems.count())
+        # print(self.factorItems.count())
         return self.factorItems.count() == 0
 
     def has_inventory(self):

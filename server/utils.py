@@ -2,7 +2,6 @@ from rest_framework.views import exception_handler
 
 
 def exceptionHandler(exc, context):
-    print('ha')
     # Call REST framework's default exception handler first,
     # to get the standard error response.
     response = exception_handler(exc, context)
