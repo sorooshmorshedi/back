@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^floatAccountGroups/(?P<pk>[0-9]+)$', FloatAccountGroupDetail.as_view(), name='floatAccountGroupDetail'),
 
     # ChangeIt to list
-    url(r'^accountTypes$', AccountTypeListCreate.as_view(), name='accountTypes'),
+    url(r'^accountTypes$', AccountTypeList.as_view(), name='accountTypes'),
 
     url(r'^accounts$', AccountListCreate.as_view(), name='Accounts'),
     url(r'^accounts/(?P<pk>[0-9]+)$', AccountDetail.as_view(), name='AccountDetail'),

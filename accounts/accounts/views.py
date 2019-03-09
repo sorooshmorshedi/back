@@ -46,8 +46,7 @@ class IndependentAccountListCreate(generics.ListCreateAPIView):
     serializer_class = IndependentAccountSerializer
 
 
-# ChangeIt to list
-class AccountTypeListCreate(generics.ListCreateAPIView):
+class AccountTypeList(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, AccountListCreate,)
     queryset = AccountType.objects.all()
     serializer_class = AccountTypeSerializer
