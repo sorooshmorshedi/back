@@ -55,11 +55,12 @@ class AccountTypeListCreate(generics.ListCreateAPIView):
 
 class AccountListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, AccountListCreate,)
-    queryset = Account.objects.all()
+    queryset = Account.objects.order_by('code')
     serializer_class = AccountSerializer
 
     def list(self, request, *ergs, **kwargs):
-        queryset = Account.objects.filter(level=0)
+        # queryset = Account.objects.filter(level=0)
+        queryset = Account.objects.filter()
         serializer = AccountListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
