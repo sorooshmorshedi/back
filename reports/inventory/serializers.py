@@ -1,10 +1,8 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
-from accounts.accounts.serializers import AccountSerializer
 from factors.models import FactorItem, Factor
 from factors.serializers import FactorSerializer
-from sanads.sanads.models import SanadItem, Sanad
 
 
 class AccountInventorySerializer(serializers.ModelSerializer):
