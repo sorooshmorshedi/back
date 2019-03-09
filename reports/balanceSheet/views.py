@@ -86,7 +86,7 @@ def balanceSheetView(request):
     remain = res['businessAccountsAndPayableDocuments']['remain'] \
         + res['otherAccountsAndPayableDocuments']['remain'] \
         + res['prepayments']['remain'] \
-        + res['taxSave']['remain'] \
+        + res['saveTypes']['remain'] \
         + res['paidDividends']['remain'] \
         + res['receivableFunds']['remain']
     res['totalCurrentDebt'] = {
@@ -110,8 +110,7 @@ def balanceSheetView(request):
     }
 
     remain = res['fund']['remain'] \
-        + res['legalSaving']['remain'] \
-        + res['otherSavings']['remain'] \
+        + res['savings']['remain'] \
         + res['accumulatedProfit']['remain']
     res['equitiesSum'] = {
         'name': 'جمع حقوق صاحبان سهام',

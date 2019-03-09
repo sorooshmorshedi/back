@@ -24,7 +24,7 @@
     "fields": {
       "name": "درآمد های عملیاتی",
       "programingName": "operatingIncomes",
-      "nature": "bed",
+      "nature": "bes",
       "usage": "incomeStatement"
     }
   },
@@ -32,19 +32,9 @@
     "model": "accounts.AccountType",
     "pk": 4,
     "fields": {
-      "name": "بهای تمام شده کالای فروش رفته",
+      "name": "بهای تمام شده کالای فروش رفته و خدمات ارائه شده",
       "programingName": "soldProductValue",
       "nature": "bed",
-      "usage": "incomeStatement"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 10,
-    "fields": {
-      "name": "سایر درآمد های عملیاتی",
-      "programingName": "otherOperatingIncomes",
-      "nature": "bes",
       "usage": "incomeStatement"
     }
   },
@@ -216,8 +206,8 @@
     "model": "accounts.AccountType",
     "pk": 27,
     "fields": {
-      "name": "ذخیره مالیات",
-      "programingName": "taxSave",
+      "name": "انواع ذخیره ها",
+      "programingName": "saveTypes",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -286,18 +276,8 @@
     "model": "accounts.AccountType",
     "pk": 34,
     "fields": {
-      "name": "اندوخته قانونی",
-      "programingName": "legalSaving",
-      "nature": "bes",
-      "usage": "balanceSheet"
-    }
-  },
-  {
-    "model": "accounts.AccountType",
-    "pk": 35,
-    "fields": {
-      "name": "سایر اندوخته ها",
-      "programingName": "otherSavings",
+      "name": "اندوخته ها",
+      "programingName": "savings",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -318,8 +298,29 @@
     "fields": {
       "name": "بدون نوع",
       "programingName": "noType",
-      "nature": "bes",
+      "nature": "non",
       "usage": "none"
     }
-  }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 38,
+    "fields": {
+      "name": "استهلاک انباشته",
+      "programingName": "accumulatedDepreciation",
+      "nature": "bes",
+      "usage": "balanceSheet"
+    }
+  },
+  {
+    "model": "accounts.AccountType",
+    "pk": 38,
+    "fields": {
+      "name": "حسابهای انتظامی و کنترلی-خنثی",
+      "programingName": "accumulatedDepreciation",
+      "nature": "non",
+      "usage": "none"
+    }
+  },
+
 ]
