@@ -68,8 +68,6 @@
       "usage": "incomeStatement"
     }
   },
-
-
   {
     "model": "accounts.AccountType",
     "pk": 14,
@@ -321,6 +319,5 @@
       "nature": "non",
       "usage": "none"
     }
-  },
-
+  }
 ]
