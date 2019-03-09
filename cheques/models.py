@@ -183,7 +183,6 @@ def statusChangeSanad(sender, instance, created, **kwargs):
         explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} به {3}".format(received_or_paid, cheque.serial, str(cheque.due), cheque.account.name)
     else:
         newStatus = instance.toStatus
-        print(instance.fromStatus, newStatus)
         if instance.fromStatus == 'inFlow' and newStatus in ('notPassed', 'bounced'):
             newStatus = 'revokeInFlow'
         statuses = {
