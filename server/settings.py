@@ -38,13 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
 
+    'rest_framework',
     'corsheaders',
     'django_filters',
-
     'import_export',
     'wkhtmltopdf',
+    'reset_migrations',
 
-    'rest_framework',
     'companies',
     'accounts',
     'wares',
