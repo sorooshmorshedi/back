@@ -53,7 +53,7 @@ class Cheque(models.Model):
         (OTHER_COMPANY, 'شرکت سایرین')
     )
 
-    serial = models.IntegerField()
+    serial = models.CharField(max_length=255)
     chequebook = models.ForeignKey(Chequebook, on_delete=models.CASCADE, related_name='cheques', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='receivedCheques', blank=True, null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='receivedCheques', blank=True, null=True)
