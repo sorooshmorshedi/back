@@ -127,3 +127,10 @@ class AccountListRetrieveSerializer(AccountSerializer):
         pass
 
 
+# Other
+class IncomeStatementAccountSerializer(AccountSerializer):
+    remain = serializers.IntegerField()
+
+    class Meta(AccountSerializer.Meta):
+        fields = ('id', 'title', 'remain')
+

@@ -1,11 +1,10 @@
-from django.db import connection
 from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
-from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from accounts.accounts.models import AccountType, Account
+from accounts.accounts.serializers import IncomeStatementAccountSerializer
 
 
 def getType(pName):
@@ -13,8 +12,12 @@ def getType(pName):
 getType.accountTypes = AccountType.objects.all()
 
 
+def getAccounts(accountType, allAccounts):
+    return filter(lambda acc: acc.type_id == accountType.id, allAccounts)
+
+
 def getRemain(accountType, allAccounts):
-    accounts = filter(lambda acc: acc.type_id == accountType.id, allAccounts)
+    accounts = getAccounts(accountType, allAccounts)
     remain = 0
     for acc in accounts:
         if accountType.nature == 'bed':
@@ -36,7 +39,6 @@ def getSerialized(pName, allAccounts):
     )
 
     addPrefix = (
-        'otherOperatingIncomes',
         'nonOperatingIncomes',
     )
 
@@ -63,6 +65,7 @@ def getSerialized(pName, allAccounts):
             'prefixColor': prefixColor
         },
         'remain': remain,
+        'accounts': IncomeStatementAccountSerializer(getAccounts(at, allAccounts), many=True).data
     }
 
 
@@ -87,13 +90,12 @@ def incomeStatementView(request):
         .annotate(remain=
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0) -
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)
-        ).order_by('code'))
+        ).filter(level=3).order_by('code'))
 
     usingTypes = (
         'sale',
         'backFromSaleAndDiscounts',
         'soldProductValue',
-        'otherOperatingIncomes',
         'operatingCosts',
         'nonOperatingIncomes',
         'nonOperatingCosts',
@@ -131,10 +133,6 @@ def incomeStatementView(request):
     })
     res.append(t)
 
-    t = getSerialized('otherOperatingIncomes', allAccounts)
-    otherOperatingIncomes = t['remain']
-    res.append(t)
-
     t = getSerialized('operatingCosts', allAccounts)
     operatingCosts = t['remain']
     res.append(t)
@@ -142,7 +140,6 @@ def incomeStatementView(request):
     operatingIncome = netSales \
         - soldProductValue\
         + grossIncome\
-        + otherOperatingIncomes\
         - operatingCosts
     t = ({
         'type': {
@@ -173,6 +170,7 @@ def incomeStatementView(request):
     })
     res.append(t)
 
-    return Response(res)
+    res = Response(res)
+    return res
 
 
