@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django_jalali.db import models as jmodels
 
@@ -22,7 +23,10 @@ class Company(models.Model):
     )
 
     def get_financial_year(self):
-        return self.financial_years.get(is_active=True)
+        try:
+            return self.financial_years.get(is_active=True)
+        except ObjectDoesNotExist:
+            return None
 
 
 class FinancialYear(models.Model):

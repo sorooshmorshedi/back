@@ -23,5 +23,6 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_financial_year(self, company):
-        return FinancialYearSerializer(company.get_financial_year()).data
+        financial_year = company.get_financial_year()
+        return FinancialYearSerializer(financial_year).data
 
