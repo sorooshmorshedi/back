@@ -1,9 +1,0 @@
-{
-    "model": "accounts.Account",
-    "pk": 1,
-    "fields": {
-      "code": 1,
-      "level": 0,
-      "name": "دارایی های جاری"
-    }
-  }
