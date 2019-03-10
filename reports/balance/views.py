@@ -52,7 +52,7 @@ def accountBalanceView(request):
             account.bes_remain = -remain
             account.bed_remain = 0
 
-        if hasattr(account, 'type'):
+        if account.type:
             account._type = AccountTypeSerializer(account.type).data
         if hasattr(account, 'bank'):
             account._bank = BankSerializer(account.bank).data

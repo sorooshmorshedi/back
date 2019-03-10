@@ -33,6 +33,7 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
     _floatAccounts = serializers.ReadOnlyField()
     _bank = serializers.ReadOnlyField()
     _person = serializers.ReadOnlyField()
+    _type= serializers.ReadOnlyField()
 
     class Meta:
         model = Account
@@ -40,7 +41,8 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
                   '_floatAccountGroup',
                   '_bank',
                   '_person',
-                  '_floatAccounts')
+                  '_floatAccounts',
+                  '_type')
 
 
 class FloatBalanceSerializer(serializers.Serializer):
