@@ -1,5 +1,8 @@
 from django.apps import AppConfig
 
 
-class ChecksConfig(AppConfig):
-    name = 'checks'
+class ChequesConfig(AppConfig):
+    name = 'cheques'
+
+    def ready(self):
+        import cheques.signals
