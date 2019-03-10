@@ -60,7 +60,7 @@ def statusChangeSanad(sender, instance, created, **kwargs):
         received_or_paid = 'دریافت'
 
     if instance.toStatus == 'notPassed' and instance.fromStatus != 'inFlow':
-        explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} به {3}".format(received_or_paid, cheque.serial, str(cheque.due), cheque.account.name)
+        explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} از {3}".format(received_or_paid, cheque.serial, str(cheque.due), cheque.account.name)
     else:
         newStatus = instance.toStatus
         if instance.fromStatus == 'inFlow' and newStatus in ('notPassed', 'bounced'):
