@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django_filters',
     'import_export',
     'wkhtmltopdf',
-    'reset_migrations',
 
     'companies',
     'accounts',
