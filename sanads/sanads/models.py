@@ -108,6 +108,7 @@ signals.pre_delete.connect(receiver=updateSanadAndAccountValuesOnDelete, sender=
 
 def clearSanad(sanad):
     sanad.explanation = ''
+    sanad.type = 'manual'
     sanad.save()
     for item in sanad.items.all():
         item.delete()
