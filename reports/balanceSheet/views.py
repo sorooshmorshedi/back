@@ -1,22 +1,26 @@
 from django.db import connection
 from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
-from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from accounts.accounts.models import AccountType, Account
+from accounts.accounts.serializers import TypeReportAccountSerializer
 
 
 def getType(pName):
-    return AccountType.objects.get(programingName=pName)
+    return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
+getType.accountTypes = AccountType.objects.all()
+
+
+def getAccounts(accountType, allAccounts):
+    return filter(lambda acc: acc.type_id == accountType.id, allAccounts)
 
 
 def getRemain(accountType, allAccounts):
-    accounts = allAccounts.filter(type=accountType)
+    accounts = getAccounts(accountType, allAccounts)
     remain = 0
     for acc in accounts:
-        # print(acc.bes)
         if accountType.nature == 'bed':
             remain += acc.remain
         else:
@@ -45,7 +49,7 @@ def balanceSheetView(request):
         .annotate(remain=
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0) -
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)
-        ).order_by('code')
+        ).filter(level=3).order_by('code')
 
     accountTypes = AccountType.objects.filter(usage='balanceSheet')
 
@@ -53,7 +57,8 @@ def balanceSheetView(request):
         remain = getRemain(at, allAccounts)
         res[at.programingName] = {
             'name': at.name,
-            'remain': remain
+            'remain': remain,
+            'accounts': TypeReportAccountSerializer(getAccounts(at, allAccounts), many=True).data
         }
 
     remain = res['cacheAndBank']['remain']\
@@ -123,7 +128,7 @@ def balanceSheetView(request):
         'name': 'جمع بدهی ها و حقوق صاحبان سهام',
         'remain': remain
     }
-    # print(len(connection.queries))
+    print(len(connection.queries))
 
     return Response(res)
 
