@@ -1,3 +1,4 @@
+from django.db import connection
 from django.db.models import F
 from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
@@ -77,7 +78,6 @@ class FactorExpenseMass(APIView):
     model = FactorExpense
 
     def post(self, request):
-        # print(request.data)
         serialized = FactorExpenseSerializer(data=request.data, many=True)
         if serialized.is_valid():
             serialized.save()
@@ -336,3 +336,16 @@ def getNotPaidFactors(request):
         .exclude(sanad__bed=0)\
         .filter(filters)
     return Response(NotPaidFactorsSerializer(qs, many=True).data)
+
+
+@api_view(['get'])
+def getFactorByCode(request):
+    if 'code' not in request.GET:
+        return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+
+    code = request.GET['code']
+    queryset = Factor.objects.all()
+    factor = get_object_or_404(queryset, code=code)
+    serializer = FactorListRetrieveSerializer(factor)
+    return Response(serializer.data)
+

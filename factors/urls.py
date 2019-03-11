@@ -10,6 +10,7 @@ router.register(r'receipts', ReceiptModelView)
 
 urlpatterns = router.urls + [
     url(r'^items/mass$', FactorItemMass.as_view(), name=''),
+    url(r'^getFactorByCode$', getFactorByCode, name=''),
     url(r'^factorExpenses/mass$', FactorExpenseMass.as_view(), name=''),
     url(r'^factors/updateSanadAndReceipt/(?P<pk>[0-9]+)$', FactorSanadAndReceiptUpdate.as_view(), name=''),
     url(r'^notPaidFactors$', getNotPaidFactors, name=''),
