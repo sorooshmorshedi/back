@@ -24,5 +24,6 @@ urlpatterns = router.urls + [
     url(r'^transactions$', TransactionListCreate.as_view(), name=''),
     url(r'^transactions/(?P<pk>[0-9]+)$', TransactionDetail.as_view(), name=''),
     url(r'^transactions/newCode$', newCodeForTransaction, name=''),
+    url(r'^transactions/getTransactionByCode$', getTransactionByCode, name=''),
     url(r'^transactionItems/mass$', TransactionItemMass.as_view(), name=''),
 ]

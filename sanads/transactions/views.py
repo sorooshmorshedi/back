@@ -93,3 +93,15 @@ def newCodeForTransaction(request):
     except:
         code = 1
     return Response(code)
+
+
+@api_view(['get'])
+def getTransactionByCode(request):
+    if 'code' not in request.GET:
+        return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+
+    code = request.GET['code']
+    queryset = Transaction.objects.all()
+    transaction = get_object_or_404(queryset, code=code)
+    serializer = TransactionListRetrieveSerializer(transaction)
+    return Response(serializer.data)
