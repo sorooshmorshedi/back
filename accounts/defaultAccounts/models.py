@@ -7,6 +7,7 @@ USAGES = (
     ('payment', 'پرداخت'),
     ('receiveAndPayment', 'دریافت و پرداخت'),
     ('factor', 'فاکتور'),
+    ('none', 'هیچ کدام')
 )
 
 
