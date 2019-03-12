@@ -40,38 +40,38 @@
         <!-- seller in sale factor -->
         {% if factor.type == 'sale' or factor.type == 'backFromBuy' %}
         <div class="row company part">
-            <div class="col-xs-4">
+            <div class="col-xs-12">
                 <span>فروشنده: </span>
                 <span> {{ company.name }} </span>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-3">
                 <span> کد اقتصادی: </span>
                 <span> {{ company.eghtesadiCode | default:'-' }} </span>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-3">
                 <span> شماره ملی: </span>
                 <span> {{ company.meli_code | default:'-' }} </span>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-3">
                 <span>آدرس: </span>
                 <span> {{ company.address1 | default:'-' }} </span>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-3">
                 <span>کد پستی: </span>
                 <span> {{ company.postal_code | default:'-' }} </span>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-3">
                 <span>تلفن: </span>
                 <span> {{ company.phone1 | default:'-' }} </span>
             </div>
         </div>
         <div class="row buyer part">
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 <span> خریدار: </span>
                 <span> {{ factor.account }} </span>
             </div>
             {% if factor.floatAccount %}
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 <span> حساب شناور: </span>
                 <span> {{ factor.account }} </span>
             </div>
@@ -102,12 +102,12 @@
         <!-- seller in buy factor -->
         {% if factor.type == 'buy' or factor.type == 'backFromSale' %}
         <div class="row seller">
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 <span> فروشنده: </span>
                 <span> {{ factor.account }} </span>
             </div>
             {% if factor.floatAccount %}
-            <div class="col-xs-3">
+            <div class="col-xs-6">
                 <span> حساب شناور: </span>
                 <span> {{ factor.account }} </span>
             </div>
