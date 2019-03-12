@@ -88,7 +88,8 @@ class AccountSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         res = super().update(instance, validated_data)
-        Account.objects.filter(code__startswith=instance.code).update(type=instance.type)
+        if instance.level != 0:
+            Account.objects.filter(code__startswith=instance.code).update(type=instance.type)
         return res
 
 
