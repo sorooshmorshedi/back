@@ -23,12 +23,13 @@ class AccountTypeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
-        res = obj.name\
-            + ' - '\
-            + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')\
+        res = obj.name
+        if obj.nature != 'non':
+            res += ' - '\
+                + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')
 
         usage = [u for u in ACCOUNT_TYPE_USAGES if u[0] == obj.usage]
-        if len(usage) != 0:
+        if len(usage) != 0 and usage[0][0] != 'none':
             res += ' - ' + usage[0][1]
 
         return res
