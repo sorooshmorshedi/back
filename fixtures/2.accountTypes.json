@@ -315,7 +315,7 @@
     "pk": 39,
     "fields": {
       "name": "حسابهای انتظامی و کنترلی",
-      "programingName": "accumulatedDepreciation",
+      "programingName": "controlAccounts",
       "nature": "non",
       "usage": "none"
     }
