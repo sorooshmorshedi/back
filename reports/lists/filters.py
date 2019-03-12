@@ -13,6 +13,7 @@ class TransactionFilter(filters.FilterSet):
     class Meta:
         model = Transaction
         fields = {
+            'id': ['exact'],
             'code': ['icontains'],
             'account__name': ['exact', 'icontains'],
             'sanad__bed': ['icontains'],
@@ -31,6 +32,7 @@ class ChequeFilter(filters.FilterSet):
     class Meta:
         model = Cheque
         fields = {
+            'id': ['exact'],
             'serial': ['icontains'],
             'explanation': ['icontains'],
             'date': ['gte', 'lte'],
@@ -51,6 +53,7 @@ class ChequebookFilter(filters.FilterSet):
     class Meta:
         model = Chequebook
         fields = {
+            'id': ['exact'],
             'account__name': ['icontains'],
             'code': ['icontains'],
             'serial_from': ['icontains'],
@@ -68,6 +71,7 @@ class SanadFilter(filters.FilterSet):
     class Meta:
         model = Sanad
         fields = {
+            'id': ['exact'],
             'code': ['exact', 'icontains'],
             'bed': ['icontains'],
             'bes': ['icontains'],
@@ -89,6 +93,7 @@ class FactorFilter(filters.FilterSet):
     class Meta:
         model = Factor
         fields = {
+            'id': ['exact'],
             'code': ['icontains'],
             'isPaid': ['exact'],
             'date': ['gte', 'lte'],
@@ -115,6 +120,7 @@ class ReceiptFilter(filters.FilterSet):
     class Meta:
         model = Receipt
         fields = {
+            'id': ['exact'],
             'code': ['icontains'],
             'date': ['gte', 'lte'],
             'time': ['gte', 'lte'],
