@@ -312,9 +312,9 @@
   },
   {
     "model": "accounts.AccountType",
-    "pk": 38,
+    "pk": 39,
     "fields": {
-      "name": "حسابهای انتظامی و کنترلی-خنثی",
+      "name": "حسابهای انتظامی و کنترلی",
       "programingName": "accumulatedDepreciation",
       "nature": "non",
       "usage": "none"

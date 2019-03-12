@@ -49,7 +49,7 @@ class FloatAccount(models.Model):
 class AccountType(models.Model):
     name = models.CharField(max_length=100)
     programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
-    nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'هیچ کدام')))
+    nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
     usage = models.CharField(max_length=30, choices=ACCOUNT_TYPE_USAGES, blank=True)
 
     class Meta:
