@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import signals
+from django.db.models import signals, Sum
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
@@ -117,6 +117,10 @@ class Factor(models.Model):
     @property
     def totalSum(self):
         return self.sum - self.discountSum + self.taxSum
+
+    @property
+    def expensesSum(self):
+        return FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum']
 
 
 class FactorExpense(models.Model):

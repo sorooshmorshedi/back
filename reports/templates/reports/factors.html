@@ -15,11 +15,11 @@
                 {{ company.name }}
             </h3>
         </div>
-		<div class="row">
-			<div class="col-xs-12 text-center">
-				{{ form_name }}
-			</div>
-		</div>
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                {{ form_name }}
+            </div>
+        </div>
 
         <div class="row form-header">
             <div class="col-xs-12 text-left">
@@ -200,8 +200,8 @@
             </div>
         </div>
 
+    {% if factor.expenses.all %}
         <div class="break-after"></div>
-
 
         <div class="row form-header">
             <div class="col-xs-12 text-center">
@@ -219,7 +219,6 @@
                 <span>ساعت : </span>
                 <span dir="ltr"> {{ factor.time | date:"G:i"}} </span>
             </div>
-
         </div>
 
         <div class="row"
@@ -243,15 +242,22 @@
                             <td>{{ item.expense.name }}</td>
                             <td>{{ item.value | money }}</td>
                             <td>{{ item.account }}</td>
-                            <td>{{ item.floatAccount }}</td>
+                            <td>{{ item.floatAccount | default:'-' }}</td>
                             <td>{{ item.explanation }}</td>
                         </tr>
                         {% endfor %}
+                        <tr>
+                            <td colspan="2">مجموع</td>
+                            <td>{{ factor.expensesSum | money }}</td>
+                            <td colspan="3"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+    {% endif %}
 
+    
     </div>
 
     {% endfor %}
