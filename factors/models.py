@@ -146,6 +146,7 @@ class FactorItem(models.Model):
     fee = models.DecimalField(max_digits=24, decimal_places=0)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
+    explanation = models.CharField(max_length=255, blank=True)
 
     @property
     def value(self):
