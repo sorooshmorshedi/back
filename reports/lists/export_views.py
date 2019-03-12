@@ -24,14 +24,14 @@ class BaseExportView(PDFTemplateView):
     filterset_class = None
     context = {}
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, print_document=False, **kwargs):
         context = super().get_context_data(**kwargs)
         company = Company.objects.first()
         context['forms'] = self.get_queryset()
         context['company'] = company
         context['financial_year'] = company.get_financial_year()
+        context['print_document'] = print_document
         context.update(self.context)
-        # print(context)
         return context
 
     def export(self, request, export_type, *args, **kwargs):
@@ -40,7 +40,7 @@ class BaseExportView(PDFTemplateView):
         if pdf:
             return super().get(request, *args, **kwargs)
         else:
-            return render(request, self.template_name, context=self.get_context_data())
+            return render(request, self.template_name, context=self.get_context_data(print_document=True))
 
 
 class SanadExportView(SanadListView, BaseExportView):
