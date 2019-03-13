@@ -7,9 +7,10 @@ from wkhtmltopdf.views import PDFTemplateView
 from companies.models import Company
 from factors.models import Factor
 from reports.lists.filters import SanadFilter
-from reports.lists.views import SanadListView, FactorListView
+from reports.lists.views import SanadListView, FactorListView, TransactionListView
 from sanads.sanads.models import Sanad
 from sanads.sanads.serializers import SanadSerializer
+from sanads.transactions.models import Transaction
 
 
 class BaseExportView(PDFTemplateView):
@@ -77,3 +78,23 @@ class FactorExportView(FactorListView, BaseExportView):
             'show_warehouse': factorType != 'sale',
         }
         return self.export(request, export_type, *args, **kwargs)
+
+
+class TransactionExportView(TransactionListView, BaseExportView):
+    filename = 'transactions.pdf'
+    template_name = 'reports/transactions.html'
+    context = {}
+    pagination_class = None
+
+    def get(self, request, export_type, *args, **kwargs):
+        transactionType = request.GET.get('type', None)
+        if not transactionType:
+            return Response(["No transaction type specified"], status=status.HTTP_400_BAD_REQUEST)
+        formName = [t for t in Transaction.TYPES if transactionType in t]
+        if not formName:
+            return Response(["Invalid type"], status=status.HTTP_400_BAD_REQUEST)
+        self.context = {
+            'form_name': formName[0][1],
+        }
+        return self.export(request, export_type, *args, **kwargs)
+
