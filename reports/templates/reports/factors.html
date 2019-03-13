@@ -144,7 +144,9 @@
                         <tr>
                             <th>#</th>
                             <th>کالا</th>
+                            {% if show_warehouse %}
                             <th>انبار</th>
+                            {% endif %}
                             <th>تعداد</th>
                             <th>واحد</th>
                             <th>قیمت واحد</th>
@@ -159,7 +161,9 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ item.ware }}</td>
+                            {% if show_warehouse %}
                             <td>{{ item.warehouse.name | default:'-' }}</td>
+                            {% endif %}
                             <td>{{ item.count }}</td>
                             <td>{{ item.ware.unit.name }}</td>
                             <td>{{ item.fee | money }}</td>
@@ -200,7 +204,7 @@
             </div>
         </div>
 
-    {% if factor.expenses.all %}
+        {% if factor.expenses.all %}
         <div class="break-after"></div>
 
         <div class="row form-header">
@@ -255,9 +259,9 @@
                 </table>
             </div>
         </div>
-    {% endif %}
+        {% endif %}
 
-    
+
     </div>
 
     {% endfor %}

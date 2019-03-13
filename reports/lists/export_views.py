@@ -73,6 +73,7 @@ class FactorExportView(FactorListView, BaseExportView):
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
-            'form_name': formNames[factorType]
+            'form_name': formNames[factorType],
+            'show_warehouse': factorType != 'sale',
         }
         return self.export(request, export_type, *args, **kwargs)
