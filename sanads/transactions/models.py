@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import signals
+from django.db.models import signals, Sum
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
@@ -8,13 +8,15 @@ from sanads.transactions.autoSanad import *
 
 from cheques.models import Cheque
 
-TYPES = (
-    ('receive', 'receive'),
-    ('payment', 'payment'),
-)
-
 
 class Transaction(models.Model):
+    RECEIVE = 'receive'
+    PAYMENT = 'payment'
+    TYPES = (
+        (RECEIVE, 'دریافت'),
+        (PAYMENT, 'پرداخت'),
+    )
+
     code = models.IntegerField()
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactions')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True, null=True)
@@ -37,6 +39,10 @@ class Transaction(models.Model):
     class Meta:
         ordering = ['code', ]
         unique_together = ('code', 'type')
+
+    @property
+    def sum(self):
+        return TransactionItem.objects.filter(transaction=self).aggregate(Sum('value'))['value__sum']
 
 
 class TransactionItem(models.Model):
