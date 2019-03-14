@@ -53,12 +53,12 @@
                 <span> {{ company.meli_code | default:'-' }} </span>
             </div>
             <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ company.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
                 <span>کد پستی: </span>
                 <span> {{ company.postal_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span>آدرس: </span>
+                <span> {{ company.address1 | default:'-' }} </span>
             </div>
             <div class="col-xs-3">
                 <span>تلفن: </span>
@@ -66,16 +66,15 @@
             </div>
         </div>
         <div class="row buyer part">
-            <div class="col-xs-6">
+            <div class="col-xs-12">
                 <span> خریدار: </span>
                 <span> {{ factor.account }} </span>
-            </div>
-            {% if factor.floatAccount %}
-            <div class="col-xs-6">
+                {% if factor.floatAccount %}
+                <span> - </span>
                 <span> حساب شناور: </span>
                 <span> {{ factor.account }} </span>
+                {% endif %}
             </div>
-            {% endif %}
             <div class="col-xs-3">
                 <span> کد اقتصادی: </span>
                 <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
@@ -85,12 +84,12 @@
                 <span> {{ factor.account.person.meli_code | default:'-' }} </span>
             </div>
             <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ factor.account.person.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
                 <span>کد پستی: </span>
                 <span> {{ factor.account.person.postalCode | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span>آدرس: </span>
+                <span> {{ factor.account.person.address1 | default:'-' }} </span>
             </div>
             <div class="col-xs-3">
                 <span>تلفن: </span>
@@ -143,7 +142,7 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>کالا</th>
+                            <th>شرح</th>
                             {% if show_warehouse %}
                             <th>انبار</th>
                             {% endif %}

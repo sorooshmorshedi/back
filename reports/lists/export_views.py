@@ -31,7 +31,7 @@ class BaseExportView(PDFTemplateView):
         context['forms'] = self.get_queryset()
         context['company'] = company
         context['financial_year'] = company.get_financial_year()
-        context['print_document'] = print_document
+        # context['print_document'] = print_document
         context.update(self.context)
         return context
 
