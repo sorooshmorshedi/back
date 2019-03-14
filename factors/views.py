@@ -342,10 +342,13 @@ def getNotPaidFactors(request):
 def getFactorByCode(request):
     if 'code' not in request.GET:
         return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+    if 'type' not in request.GET:
+        return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
 
     code = request.GET['code']
+    type = request.GET['type']
     queryset = Factor.objects.all()
-    factor = get_object_or_404(queryset, code=code)
+    factor = get_object_or_404(queryset, code=code, type=type)
     serializer = FactorListRetrieveSerializer(factor)
     return Response(serializer.data)
 
