@@ -16,7 +16,7 @@
 .text-right {
     text-align: right !important;
 }
-/* /Helpers -------------------------------------------- */
+/* End Helpers -------------------------------------------- */
 
 .form-header {
     /* font-weight: bold; */
@@ -24,4 +24,8 @@
 .form-header span {
     font-weight: normal;
     text-align: justify;
+}
+
+.part {
+    margin-bottom: 15px;
 }
