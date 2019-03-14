@@ -8,6 +8,7 @@ from companies.models import Company
 from factors.models import Factor
 from reports.lists.filters import SanadFilter
 from reports.lists.views import SanadListView, FactorListView, TransactionListView
+from reports.models import ExportVerifier
 from sanads.sanads.models import Sanad
 from sanads.sanads.serializers import SanadSerializer
 from sanads.transactions.models import Transaction
@@ -31,7 +32,7 @@ class BaseExportView(PDFTemplateView):
         context['forms'] = self.get_queryset()
         context['company'] = company
         context['financial_year'] = company.get_financial_year()
-        context['print_document'] = print_document
+        # context['print_document'] = print_document
         context.update(self.context)
         return context
 
@@ -49,6 +50,7 @@ class SanadExportView(SanadListView, BaseExportView):
     template_name = 'reports/sanads.html'
     context = {
         'form_name': 'سند حسابداری',
+        'verifier_form_name': ExportVerifier.SANAD
     }
     pagination_class = None
     queryset = Sanad.objects.order_by('code')
@@ -64,18 +66,31 @@ class FactorExportView(FactorListView, BaseExportView):
     pagination_class = None
 
     def get(self, request, export_type, *args, **kwargs):
-        formNames = {
-            'buy': 'فاکتور خرید',
-            'sale': 'فاکتور فروش',
-            'backFromBuy': 'فاکتور برگشت از خرید',
-            'backFromSale': 'فاکتور برگشت از فروش',
+        names = {
+            'buy': {
+                'title': 'فاکتور خرید',
+                'verifier_form_name': ExportVerifier.FACTOR_BUY
+            },
+            'sale':{
+                'title':  'فاکتور فروش',
+                'verifier_form_name': ExportVerifier.FACTOR_SALE
+            },
+            'backFromBuy':{
+                'title':  'فاکتور برگشت از خرید',
+                'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_BUY
+            },
+            'backFromSale':{
+                'title' : 'فاکتور برگشت از فروش',
+                'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
+            }
         }
         factorType = request.GET.get('type', None)
         summarized = request.GET.get('summarized', None)
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
-            'form_name': formNames[factorType],
+            'form_name': names[factorType]['title'],
+            'verifier_form_name': names[factorType]['verifier_form_name'],
             'show_warehouse': factorType != 'sale',
             'summarized': summarized
         }
@@ -92,11 +107,18 @@ class TransactionExportView(TransactionListView, BaseExportView):
         transactionType = request.GET.get('type', None)
         if not transactionType:
             return Response(["No transaction type specified"], status=status.HTTP_400_BAD_REQUEST)
+
         formName = [t for t in Transaction.TYPES if transactionType in t]
+        if transactionType == Transaction.RECEIVE:
+            verifier_form_name = ExportVerifier.TRANSACTION_RECEIVE
+        else:
+            verifier_form_name = ExportVerifier.TRANSACTION_PAYMENT
+
         if not formName:
             return Response(["Invalid type"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
             'form_name': formName[0][1],
+            'verifier_form_name': verifier_form_name
         }
         return self.export(request, export_type, *args, **kwargs)
 

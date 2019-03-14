@@ -1,5 +1,7 @@
 {% extends 'reports/base.html' %}
 {% load report_filters %}
+{% load export_verifiers %}
+
 {% block content %}
 {% for sanad in forms %}
 
@@ -85,7 +87,11 @@
 			</div>
 		</div>
 
+
 	</div>
 
 	{% endfor %}
+
+	{% show_verifiers verifier_form_name %}
+
 	{% endblock %}
