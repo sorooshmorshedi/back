@@ -44,6 +44,7 @@
                 <span>فروشنده: </span>
                 <span> {{ company.name }} </span>
             </div>
+            {% if not summarized %}
             <div class="col-xs-3">
                 <span> کد اقتصادی: </span>
                 <span> {{ company.eghtesadiCode | default:'-' }} </span>
@@ -56,6 +57,7 @@
                 <span>کد پستی: </span>
                 <span> {{ company.postal_code | default:'-' }} </span>
             </div>
+            {% endif %}
             <div class="col-xs-3">
                 <span>آدرس: </span>
                 <span> {{ company.address1 | default:'-' }} </span>
@@ -75,6 +77,7 @@
                 <span> {{ factor.account }} </span>
                 {% endif %}
             </div>
+            {% if not summarized %}
             <div class="col-xs-3">
                 <span> کد اقتصادی: </span>
                 <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
@@ -87,6 +90,7 @@
                 <span>کد پستی: </span>
                 <span> {{ factor.account.person.postalCode | default:'-' }} </span>
             </div>
+            {% endif %}
             <div class="col-xs-3">
                 <span>آدرس: </span>
                 <span> {{ factor.account.person.address1 | default:'-' }} </span>

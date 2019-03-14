@@ -31,7 +31,7 @@ class BaseExportView(PDFTemplateView):
         context['forms'] = self.get_queryset()
         context['company'] = company
         context['financial_year'] = company.get_financial_year()
-        # context['print_document'] = print_document
+        context['print_document'] = print_document
         context.update(self.context)
         return context
 
@@ -71,11 +71,13 @@ class FactorExportView(FactorListView, BaseExportView):
             'backFromSale': 'فاکتور برگشت از فروش',
         }
         factorType = request.GET.get('type', None)
+        summarized = request.GET.get('summarized', None)
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
             'form_name': formNames[factorType],
             'show_warehouse': factorType != 'sale',
+            'summarized': summarized
         }
         return self.export(request, export_type, *args, **kwargs)
 
