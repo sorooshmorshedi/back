@@ -120,10 +120,7 @@ class Factor(models.Model):
 
     @property
     def expensesSum(self):
-        sum = 0
-        for e in self.factorExpenses.all():
-            sum += e.value
-        return sum
+        return FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum']
 
 
 class FactorExpense(models.Model):
