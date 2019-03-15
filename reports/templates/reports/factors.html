@@ -5,12 +5,13 @@
 {% block content %}
 {% for factor in forms %}
 
-{% if forloop.last %}
-<div>
-    {% else %}
-    <div class="break-after">
+        {% if forloop.last %}
+            <div>
+        {% else %}
+            <div class="break-after">
         {% endif %}
 
+        {% if not hide_factor %}
         <div class="text-center">
             <h3>
                 {{ company.name }}
@@ -207,8 +208,9 @@
                 </table>
             </div>
         </div>
+        {% endif %}
 
-        {% if factor.expenses.all %}
+        {% if not hide_expenses and factor.expenses.all %}
         <div class="break-after"></div>
 
         <div class="row form-header">
