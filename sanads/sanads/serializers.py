@@ -78,20 +78,6 @@ class SanadListRetrieveSerializer(SanadSerializer):
     transaction = TransactionWithTypeSerializer(read_only=True, many=False)
 
     class Meta(SanadSerializer.Meta):
-        fields = (
-            "id",
-            "code",
-            "explanation",
-            "date",
-            "created_at",
-            "updated_at",
-            "type",
-            "createType",
-            "bed",
-            "bes",
-            "factor",
-            "transaction",
-            "items",
-        )
+        fields = '__all__'
 
 
