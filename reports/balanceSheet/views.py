@@ -128,7 +128,7 @@ def balanceSheetView(request):
         'name': 'جمع بدهی ها و حقوق صاحبان سهام',
         'remain': remain
     }
-    print(len(connection.queries))
+    # print(len(connection.queries))
 
     return Response(res)
 
