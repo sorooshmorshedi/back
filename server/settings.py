@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'cheques',
     'factors',
     'reports',
-    'users'
+    'users',
+    'user_management'
 
 ]
 
@@ -157,7 +158,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
-    'PAGE_SIZE': 30,
 
 }
 
@@ -170,4 +170,6 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "static/media/")
 MEDIA_URL = '/static/media/'
+
+AUTH_USER_MODEL = 'user_management.User'
 
