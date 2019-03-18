@@ -3,57 +3,58 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.accounts.models import *
 from accounts.accounts.serializers import *
+from helpers.auth import BasicCRUDPermission
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FloatAccountListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = FloatAccount.objects.all()
     serializer_class = FloatAccountSerializer
 
 
 class FloatAccountDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = FloatAccount.objects.all()
     serializer_class = FloatAccountSerializer
 
 
 class FloatAccountGroupListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = FloatAccountGroup.objects.all()
     serializer_class = FloatAccountGroupSerializer
 
 
 class FloatAccountGroupDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = FloatAccountGroup.objects.all()
     serializer_class = FloatAccountGroupSerializer
 
 
 class IndependentAccountDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = IndependentAccount.objects.all()
     serializer_class = IndependentAccountSerializer
 
 
 class IndependentAccountListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = IndependentAccount.objects.all()
     serializer_class = IndependentAccountSerializer
 
 
 class AccountTypeList(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = AccountType.objects.all()
     serializer_class = AccountTypeSerializer
 
 
 class AccountListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Account.objects.order_by('code')
     serializer_class = AccountSerializer
 
@@ -65,7 +66,7 @@ class AccountListCreate(generics.ListCreateAPIView):
 
 
 class AccountDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
 
@@ -85,24 +86,24 @@ class AccountDetail(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PersonListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
 
 class PersonDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Person.objects.all()
     serializer_class = PersonSerializer
 
 
 class BankListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, AccountListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Bank.objects.all()
     serializer_class = BankSerializer
 
 
 class BankDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, AccountListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Bank.objects.all()
     serializer_class = BankSerializer

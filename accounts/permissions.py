@@ -18,3 +18,4 @@ class AccountDetail(BasePermission):
         if request.method == 'GET':
             return request.user.has_perm('accounts.get_account')
 
+

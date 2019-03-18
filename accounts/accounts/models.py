@@ -1,6 +1,7 @@
 from django.db import models
 
 from accounts.costCenters.models import CostCenter, CostCenterGroup
+from helpers.models import BaseModel
 
 ACCOUNT_LEVELS = (
     (0, 'group'),
@@ -16,18 +17,18 @@ ACCOUNT_TYPE_USAGES = (
 )
 
 
-class FloatAccountGroup(models.Model):
+class FloatAccountGroup(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        verbose_name = 'گروه حساب شناور'
 
     def __str__(self):
         return str(self.pk) + ' - ' + self.name
 
 
-class FloatAccount(models.Model):
+class FloatAccount(BaseModel):
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -42,35 +43,35 @@ class FloatAccount(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        verbose_name = 'حساب شناور'
 
 
-class AccountType(models.Model):
+class AccountType(BaseModel):
     name = models.CharField(max_length=100)
     programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
     usage = models.CharField(max_length=30, choices=ACCOUNT_TYPE_USAGES, blank=True)
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        verbose_name = 'نوع حساب'
 
     def __str__(self):
         return self.name
 
 
-class IndependentAccount(models.Model):
+class IndependentAccount(BaseModel):
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        verbose_name = 'حساب مستقل'
 
     def __str__(self):
         return self.name
 
 
-class Account(models.Model):
+class Account(BaseModel):
     name = models.CharField(max_length=150, verbose_name='نام حساب')
     code = models.CharField(max_length=50, unique=True, verbose_name='کد حساب')
     explanation = models.CharField(max_length=255, blank=True, null=True)
@@ -94,21 +95,18 @@ class Account(models.Model):
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
-    permissions = (
-        ('get_account', 'Can get accounts')
-    )
-
     def __str__(self):
         return "{0} - {1}".format(self.code, self.name)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         ordering = ['code', ]
+        verbose_name = 'حساب'
 
     def can_delete(self):
         return self.sanadItems.count() == 0
 
 
-class Person(models.Model):
+class Person(BaseModel):
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
@@ -138,8 +136,11 @@ class Person(models.Model):
     def __str__(self):
         return "{0} - {1}".format(self.account.code, self.account.name)
 
+    class Meta(BaseModel.Meta):
+        verbose_name = 'حساب اشخاص'
 
-class Bank(models.Model):
+
+class Bank(BaseModel):
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
 
@@ -154,3 +155,6 @@ class Bank(models.Model):
 
     def __str__(self):
         return "{0} - {1}".format(self.account.code, self.account.name)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'حساب بانک'
