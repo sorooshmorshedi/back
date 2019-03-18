@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'factors',
     'reports',
     'users',
-    'user_management'
 
 ]
 
@@ -152,7 +151,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'helpers.auth.TokenAuthSupportQueryString',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -171,5 +170,5 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "static/media/")
 MEDIA_URL = '/static/media/'
 
-AUTH_USER_MODEL = 'user_management.User'
+AUTH_USER_MODEL = 'users.User'
 
