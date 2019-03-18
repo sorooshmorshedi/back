@@ -1,26 +1,27 @@
 from django.db import models
 
+from helpers.models import BaseModel
 
-class CostCenterGroup(models.Model):
+
+class CostCenterGroup(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        verbose_name = 'گروه مرکز هزینه'
 
     def __str__(self):
         return self.name
 
 
-class CostCenter(models.Model):
+class CostCenter(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     group = models.ForeignKey(CostCenterGroup, on_delete=models.PROTECT, related_name='costCenters')
 
-    permissions = (
-        ('get_costCenter', 'Can get cost centers')
-    )
+    class Meta(BaseModel.Meta):
+        verbose_name = 'مرکز هزینه'
 
     def __str__(self):
-        return self.name;
+        return self.name
 

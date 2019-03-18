@@ -101,6 +101,13 @@ class Account(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
         verbose_name = 'حساب'
+        verbose_name_plural = 'حساب ها'
+        permissions = (
+            ('create_account', 'تعریف حساب'),
+            ('retrieve_account', 'مشاهده حساب'),
+            ('update_account', 'ویرایش حساب'),
+            ('delete_account', 'حذف حساب'),
+        )
 
     def can_delete(self):
         return self.sanadItems.count() == 0
@@ -138,6 +145,13 @@ class Person(BaseModel):
 
     class Meta(BaseModel.Meta):
         verbose_name = 'حساب اشخاص'
+        verbose_name_plural = 'حساب های اشخاص'
+        permissions = (
+            ('create_buyer', 'تعریف حساب خریدار'),
+            ('retrieve_buyer', 'مشاهده حساب خریدار'),
+            ('update_buyer', 'ویرایش حساب خریدار'),
+            ('delete_buyer', 'حذف حساب خریدار'),
+        )
 
 
 class Bank(BaseModel):

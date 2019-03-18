@@ -1,6 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
+from helpers.models import BaseModel
 from sanads.sanads.models import Sanad
 
 CHECK_STATUSES = (
@@ -16,7 +17,7 @@ CHECK_STATUSES = (
 )
 
 
-class Chequebook(models.Model):
+class Chequebook(BaseModel):
 
     code = models.IntegerField(unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequebook')
@@ -32,11 +33,12 @@ class Chequebook(models.Model):
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
-    class Meta:
+    class Meta(BaseModel.Meta):
+        verbose_name = 'دفتر چک'
         ordering = ['code', ]
 
 
-class Cheque(models.Model):
+class Cheque(BaseModel):
 
     RECEIVED = 'r'
     PAID = 'p'
@@ -52,7 +54,6 @@ class Cheque(models.Model):
         (COMPANY, 'شرکت'),
         (OTHER_COMPANY, 'شرکت سایرین')
     )
-
     serial = models.CharField(max_length=255)
     chequebook = models.ForeignKey(Chequebook, on_delete=models.CASCADE, related_name='cheques', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='receivedCheques', blank=True, null=True)
@@ -86,11 +87,12 @@ class Cheque(models.Model):
         else:
             return "{} - {} - {}".format(self.received_or_paid, self.explanation[0:50], self.serial)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
+        verbose_name = 'چک'
         ordering = ['serial', ]
 
 
-class StatusChange(models.Model):
+class StatusChange(BaseModel):
 
     cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='statusChanges')
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)
@@ -117,6 +119,7 @@ class StatusChange(models.Model):
     # def __str__(self):
     #     return "{0} - {1}".format(self.serial, self.explanation[0:30])
 
-    class Meta:
+    class Meta(BaseModel.Meta):
+        verbose_name = 'تغییر وضعیت'
         ordering = ['id', ]
 

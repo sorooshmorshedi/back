@@ -2,14 +2,16 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.defaultAccounts.serializers import *
+from helpers.auth import BasicCRUDPermission
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DefaultAccountListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = DefaultAccount.objects.all()
     serializer_class = DefaultAccountSerializer
 
@@ -20,7 +22,7 @@ class DefaultAccountListCreate(generics.ListCreateAPIView):
 
 
 class DefaultAccountDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = DefaultAccount.objects.all()
     serializer_class = DefaultAccountSerializer
 

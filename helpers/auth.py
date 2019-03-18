@@ -4,6 +4,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 class BasicCRUDPermission(BasePermission):
     def has_permission(self, request, view):
+        return True
         model = view.serializer_class.Meta.model
         app_label = model._meta.app_label
         model_name = model._meta.model_name
