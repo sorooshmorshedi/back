@@ -1,5 +1,18 @@
+/* Body ----------------------------------------------- */
+body {
+    background-color: white !important;
+    color: black !important;
+}
+
+/* Fonts ---------------------------------------------- */
 * {
     font-family: IRANSans !important;
+}
+
+th, td {
+    font-size: 12px !important;
+    padding: 5px !important;
+    vertical-align: middle !important;
 }
 
 /* Helpers -------------------------------------------- */
@@ -16,8 +29,8 @@
 .text-right {
     text-align: right !important;
 }
-/* End Helpers -------------------------------------------- */
 
+/* Other-------------------------------------------- */
 .form-header {
     /* font-weight: bold; */
 }
