@@ -106,7 +106,6 @@ class FactorSanadAndReceiptUpdate(APIView):
         queryset = Factor.objects.all()
         factor = get_object_or_404(queryset, pk=pk)
         sanad = factor.sanad
-        sanad = factor.sanad
         clearSanad(sanad)
 
         sanad.explanation = factor.explanation
@@ -131,80 +130,83 @@ class FactorSanadAndReceiptUpdate(APIView):
                 account = 'backFromSale'
 
         # Factor Sum
-        sanad.items.create(
-            account=factor.account,
-            floatAccount=factor.floatAccount,
-            value=factor.sum,
-            valueType=rowTypeOne,
-            explanation="",
-        )
-        sanad.items.create(
-            account=getDA(account).account,
-            # floatAccount=factor.floatAccount,
-            value=factor.sum,
-            valueType=rowTypeTwo,
-            explanation="",
-        )
+        if factor.sum:
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.sum,
+                valueType=rowTypeOne,
+                explanation="",
+            )
+            sanad.items.create(
+                account=getDA(account).account,
+                # floatAccount=factor.floatAccount,
+                value=factor.sum,
+                valueType=rowTypeTwo,
+                explanation="",
+            )
 
         # Factor Discount Sum
-        sanad.items.create(
-            account=getDA(account).account,
-            # floatAccount=factor.floatAccount,
-            value=factor.discountSum,
-            valueType=rowTypeOne,
-            explanation="",
-        )
-        sanad.items.create(
-            account=factor.account,
-            floatAccount=factor.floatAccount,
-            value=factor.discountSum,
-            valueType=rowTypeTwo,
-            explanation="",
-        )
+        if factor.discountSum:
+            sanad.items.create(
+                account=getDA(account).account,
+                # floatAccount=factor.floatAccount,
+                value=factor.discountSum,
+                valueType=rowTypeOne,
+                explanation="",
+            )
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.discountSum,
+                valueType=rowTypeTwo,
+                explanation="",
+            )
 
         # Factor Tax Sum
-        sanad.items.create(
-            account=factor.account,
-            floatAccount=factor.floatAccount,
-            value=factor.taxSum,
-            valueType=rowTypeOne,
-            explanation="",
-        )
-        sanad.items.create(
-            account=getDA('tax').account,
-            # floatAccount=factor.floatAccount,
-            value=factor.taxSum,
-            valueType=rowTypeTwo,
-            explanation="",
-        )
+        if factor.taxSum:
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.taxSum,
+                valueType=rowTypeOne,
+                explanation="",
+            )
+            sanad.items.create(
+                account=getDA('tax').account,
+                # floatAccount=factor.floatAccount,
+                value=factor.taxSum,
+                valueType=rowTypeTwo,
+                explanation="",
+            )
 
         # Factor Expenses
         for e in factor.expenses.all():
-            sanad.items.create(
-                account=e.expense.account,
-                # floatAccount=factor.floatAccount,
-                value=e.value,
-                valueType='bed',
-                explanation="",
-            )
-            sanad.items.create(
-                account=e.account,
-                floatAccount=e.floatAccount,
-                value=e.value,
-                valueType='bes',
-                explanation="",
-            )
+            if e.value:
+                sanad.items.create(
+                    account=e.expense.account,
+                    # floatAccount=factor.floatAccount,
+                    value=e.value,
+                    valueType='bed',
+                    explanation="",
+                )
+                sanad.items.create(
+                    account=e.account,
+                    floatAccount=e.floatAccount,
+                    value=e.value,
+                    valueType='bes',
+                    explanation="",
+                )
 
         # Receipt
-        receipt = factor.receipt
-        clearReceipt(receipt)
-
-        for item in factor.items.all():
-            receipt.items.create(
-                ware=item.ware,
-                warehouse=item.warehouse,
-                count=item.count
-            )
+        # receipt = factor.receipt
+        # clearReceipt(receipt)
+        #
+        # for item in factor.items.all():
+        #     receipt.items.create(
+        #         ware=item.ware,
+        #         warehouse=item.warehouse,
+        #         count=item.count
 
         return Response([])
 
