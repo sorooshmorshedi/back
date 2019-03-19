@@ -45,6 +45,13 @@ class FactorModelView(viewsets.ModelViewSet):
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
 
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs['pk']
+        factor = get_object_or_404(Factor, pk=pk)
+        clearSanad(factor.sanad)
+        res = super().destroy(request, *args, **kwargs)
+        return res
+
 
 class FactorItemMass(APIView):
     serializer_class = FactorItemSerializer
