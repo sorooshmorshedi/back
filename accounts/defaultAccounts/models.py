@@ -8,7 +8,7 @@ class DefaultAccount(BaseModel):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     RECEIVE_AND_PAYMENT = 'receiveAndPayment'
-    FACTOR = 'factor',
+    FACTOR = 'factor'
     NONE = 'none'
     USAGES = (
         (RECEIVE, 'دریافت'),
