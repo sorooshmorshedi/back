@@ -64,7 +64,6 @@ class AccountListCreate(generics.ListCreateAPIView):
         queryset = AccountListRetrieveSerializer.setup_eager_loading(queryset)
         serializer = AccountListRetrieveSerializer(queryset, many=True)
         res = Response(serializer.data)
-        print(len(connection.queries))
         return res
 
 
