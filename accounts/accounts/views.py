@@ -1,3 +1,4 @@
+from django.db import connection
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
@@ -54,15 +55,17 @@ class AccountTypeList(generics.ListCreateAPIView):
 
 
 class AccountListCreate(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    # permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Account.objects.order_by('code')
     serializer_class = AccountSerializer
 
     def list(self, request, *ergs, **kwargs):
-        # queryset = Account.objects.filter(level=0)
-        queryset = Account.objects.filter()
+        queryset = self.get_queryset()
+        queryset = AccountListRetrieveSerializer.setup_eager_loading(queryset)
         serializer = AccountListRetrieveSerializer(queryset, many=True)
-        return Response(serializer.data)
+        res = Response(serializer.data)
+        print(len(connection.queries))
+        return res
 
 
 class AccountDetail(generics.RetrieveUpdateDestroyAPIView):

@@ -125,6 +125,16 @@ class AccountListRetrieveSerializer(AccountSerializer):
     person = PersonSerializer(read_only=True, many=False)
     bank = BankSerializer(read_only=True, many=False)
 
+    @staticmethod
+    def setup_eager_loading(queryset):
+        queryset = queryset\
+            .prefetch_related('floatAccountGroup')\
+            .prefetch_related('costCenterGroup')\
+            .prefetch_related('type')\
+            .prefetch_related('person')\
+            .prefetch_related('bank')
+        return queryset
+
     class Meta(AccountSerializer.Meta):
         pass
 
