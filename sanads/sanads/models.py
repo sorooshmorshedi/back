@@ -57,7 +57,7 @@ class SanadItem(models.Model):
         return "{0} - {1}".format(self.sanad.code, self.explanation[0:30])
 
 
-def updateSanadAndAccountValues(sender, instance, raw, using, update_fields, **kwargs):
+def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
 
     subValue = 0
     addValue = instance.value
@@ -69,41 +69,31 @@ def updateSanadAndAccountValues(sender, instance, raw, using, update_fields, **k
         oldType = obj.valueType
 
     sanad = instance.sanad
-    account = instance.account
 
     if oldType == 'bed':
         sanad.bed -= subValue
-        account.bed -= subValue
     else:
         sanad.bes -= subValue
-        account.bes -= subValue
 
     if newType == 'bed':
         sanad.bed += Decimal(addValue)
-        account.bed += Decimal(addValue)
     else:
         sanad.bes += Decimal(addValue)
-        account.bes += Decimal(addValue)
 
     sanad.save()
-    account.save()
 
 
-def updateSanadAndAccountValuesOnDelete(sender, instance, using, **kwargs):
+def updateSanadValuesOnDelete(sender, instance, using, **kwargs):
     sanad = instance.sanad
-    account = instance.account
     if instance.valueType == 'bed':
         sanad.bed -= instance.value
-        account.bed -= instance.value
     else:
         sanad.bes -= instance.value
-        account.bes -= instance.value
 
     sanad.save()
-    account.save()
 
-signals.pre_save.connect(receiver=updateSanadAndAccountValues, sender=SanadItem)
-signals.pre_delete.connect(receiver=updateSanadAndAccountValuesOnDelete, sender=SanadItem)
+signals.pre_save.connect(receiver=updateSanadValues, sender=SanadItem)
+signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
 
 
 def clearSanad(sanad):

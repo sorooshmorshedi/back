@@ -55,7 +55,7 @@ class AccountTypeList(generics.ListCreateAPIView):
 
 
 class AccountListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Account.objects.order_by('code')
     serializer_class = AccountSerializer
 

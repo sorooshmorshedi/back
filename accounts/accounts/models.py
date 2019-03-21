@@ -77,9 +77,6 @@ class Account(BaseModel):
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
-    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
-    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
-
     max_bed = models.IntegerField(blank=True, null=True)
     max_bes = models.IntegerField( blank=True, null=True)
     max_bed_with_sanad = models.IntegerField(blank=True, null=True)
