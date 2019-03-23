@@ -87,8 +87,8 @@ class Ware(models.Model):
 
 
 class WarehouseInventory(models.Model):
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
-    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='inventory')
+    ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='inventory')
     count = models.IntegerField(default=0)
 
     class Meta:
