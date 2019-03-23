@@ -98,24 +98,6 @@ class WarehouseInventory(models.Model):
         return "{0} -> {1} : {2}".format(self.warehouse.name, self.ware.name, self.count)
 
 
-def getInventoryCount(warehouse, ware):
-    inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
-    res = 0
-    if len(inventory):
-        res = inventory[0].count
-    else:
-        try:
-            inventory = WarehouseInventory(
-                warehouse=Warehouse.objects.get(pk=warehouse),
-                ware=Ware.objects.get(pk=ware),
-                count=0,
-            )
-        except:
-            raise {'error': 'invalid ware or warehouse'}
-        inventory.save()
-    return res
-
-
 def updateInventory(warehouse, ware, count):
     inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
     if len(inventory):

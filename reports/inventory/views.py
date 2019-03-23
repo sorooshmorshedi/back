@@ -19,7 +19,7 @@ class InventoryListView(generics.ListAPIView):
 
         data = request.GET
 
-        rows = self.queryset\
+        factorItems = self.queryset\
             .filter(ware=data['ware'], warehouse=data['warehouse'])\
             .select_related('factor__account') \
             .select_related('factor__sanad')\
@@ -28,21 +28,21 @@ class InventoryListView(generics.ListAPIView):
         ware = Ware.objects.get(pk=data['ware'])
         outputFees = []
         if ware.pricingType == 0: #fifo
-            for r in rows:
-                if r.factor.type in ('buy', 'backFromSale'):
+            for factorItem in factorItems:
+                if factorItem.factor.type in ('buy', 'backFromSale'):
                     outputFees.append(
                         {
-                            'fee': r.fee,
-                            'count': r.count
+                            'fee': factorItem.fee,
+                            'count': factorItem.count
                         }
                     )
         elif ware.pricingType == 1: #avg
             valueSum = 0
             countSum = 0
-            for r in rows:
-                if r.factor.type in ('buy', 'backFromSale'):
-                    valueSum += r.fee * r.count
-                    countSum += r.count
+            for factorItem in factorItems:
+                if factorItem.factor.type in ('buy', 'backFromSale'):
+                    valueSum += factorItem.fee * factorItem.count
+                    countSum += factorItem.count
             outputFees.append({
                 'fee': valueSum/countSum,
                 'count': countSum
@@ -51,23 +51,23 @@ class InventoryListView(generics.ListAPIView):
         remainCount = 0
         remainTotal = 0
         remainFee = 0
-        for r in rows:
-            r.input = None
-            r.output = None
-            r.remain = None
-            if r.factor.type in ('buy', 'backFromSale'):
-                remainCount += r.count
-                r.input = {
-                    'count': r.count,
-                    'fee': r.fee,
-                    'total': r.count * r.fee
+        for factorItem in factorItems:
+            factorItem.input = None
+            factorItem.output = None
+            factorItem.remain = None
+            if factorItem.factor.type in ('buy', 'backFromSale'):
+                remainCount += factorItem.count
+                factorItem.input = {
+                    'count': factorItem.count,
+                    'fee': factorItem.fee,
+                    'total': factorItem.count * factorItem.fee
                 }
-                remainTotal += r.input['total']
+                remainTotal += factorItem.input['total']
             else:
-                remainCount -= r.count
+                remainCount -= factorItem.count
                 total = 0
-                count = r.count
-                while count != 0:
+                count = factorItem.count
+                while count != 0 and len(outputFees):
                     of = outputFees.pop()
                     if of['count'] == count:
                         total += count * of['fee']
@@ -80,19 +80,19 @@ class InventoryListView(generics.ListAPIView):
                     else:
                         total += of['count'] * of['fee']
                         count -= of['count']
-                r.output = {
-                    'count': r.count,
-                    'fee': r.fee,
-                    'total': r.count * r.fee
+                factorItem.output = {
+                    'count': factorItem.count,
+                    'fee': factorItem.fee,
+                    'total': factorItem.count * factorItem.fee
                 }
-                remainTotal -= r.output['total']
+                remainTotal -= factorItem.output['total']
 
-            r.remain = {
+            factorItem.remain = {
                 'count': remainCount,
                 'fee': remainTotal / remainCount,
                 'total': remainTotal
             }
 
-        res = FactorItemInventorySerializer(rows, many=True).data
+        res = FactorItemInventorySerializer(factorItems, many=True).data
         return Response(res, status.HTTP_200_OK)
 
