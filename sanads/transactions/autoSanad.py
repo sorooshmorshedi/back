@@ -16,12 +16,12 @@ def updateSanad(sender, instance, created, **kwargs):
         lastRowType = 'bed'
         rp = 'پرداخت'
 
-    sanad.explanation = "{0} - {1}".format(t.code, t.explanation)
+    clearSanad(sanad)
+
+    sanad.explanation = t.explanation
     sanad.date = t.date
     sanad.type = 'temporary'
     sanad.save()
-
-    clearSanad(sanad)
 
     typeNames = []
     totalValue = 0
