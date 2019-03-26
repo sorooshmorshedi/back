@@ -22,7 +22,7 @@ class Unit(models.Model):
         default_permissions = ()
 
     def __str__(self):
-        return str(self.pk) + ' - ' + self.name
+        return self.name
 
 
 class Warehouse(models.Model):
@@ -73,7 +73,7 @@ class Ware(models.Model):
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
-        return "{0} - {1}".format(self.code, self.name)
+        return self.name
 
     class Meta:
         ordering = ['code', ]
