@@ -36,6 +36,7 @@ class Transaction(models.Model):
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
+
     class Meta:
         ordering = ['code', ]
         unique_together = ('code', 'type')
@@ -43,6 +44,10 @@ class Transaction(models.Model):
     @property
     def sum(self):
         return TransactionItem.objects.filter(transaction=self).aggregate(Sum('value'))['value__sum']
+
+    @property
+    def label(self):
+        return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
 
 class TransactionItem(models.Model):

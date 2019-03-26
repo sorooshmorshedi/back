@@ -122,6 +122,10 @@ class Factor(models.Model):
     def expensesSum(self):
         return FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum']
 
+    @property
+    def label(self):
+        return "فاکتور {}".format([t[1] for t in FACTOR_TYPES if t[0] == self.type][0])
+
 
 class FactorExpense(models.Model):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
