@@ -327,6 +327,7 @@ def getNotPaidFactors(request):
 
     if 'transactionType' not in request.GET:
         return Response([], status=status.HTTP_400_BAD_REQUEST)
+
     tType = request.GET['transactionType']
 
     if 'transactionId' in request.GET:
@@ -340,11 +341,20 @@ def getNotPaidFactors(request):
     else:
         filters &= Q(type__in=("buy", "backFromSale"))
 
+    if 'accountId' in request.GET:
+        account_id = request.GET['accountId']
+        filters &= Q(account=account_id)
+
     qs = Factor.objects\
-        .filter()\
         .exclude(sanad__bed=0)\
-        .filter(filters)
-    return Response(NotPaidFactorsSerializer(qs, many=True).data)
+        .filter(filters)\
+        .distinct() \
+        .prefetch_related('items') \
+        .prefetch_related('payments') \
+        .prefetch_related('account') \
+        .prefetch_related('floatAccount')
+    res = Response(NotPaidFactorsSerializer(qs, many=True).data)
+    return res
 
 
 @api_view(['get'])

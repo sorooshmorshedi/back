@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer, AccountSerializer
 from factors.models import *
 from sanads.sanads.models import Sanad, newSanadCode
 from sanads.sanads.serializers import SanadSerializer
@@ -48,7 +48,7 @@ class FactorSerializer(serializers.ModelSerializer):
     isPaid = serializers.SerializerMethodField()
 
     def get_isPaid(self, obj):
-        return obj.paidValue == obj.sanad.bed
+        return obj.paidValue == obj.totalSum
 
     def get_hasTax(self, obj):
         return obj.taxValue != 0 or obj.taxPercent != 0
@@ -142,10 +142,13 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
 
 
 class NotPaidFactorsSerializer(FactorSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
-    sanad = SanadSerializer(read_only=True, many=False)
     payments = FactorPaymentSerializer(read_only=True, many=True)
+    sum = serializers.SerializerMethodField()
+
+    def get_sum(self, obj):
+        return obj.totalSum
 
     class Meta:
         model = Factor
