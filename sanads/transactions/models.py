@@ -54,7 +54,7 @@ class TransactionItem(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems', blank=True, null=True)
-    cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='transactionItem', blank=True, null=True)
+    cheque = models.OneToOneField(Cheque, on_delete=models.CASCADE, related_name='transactionItem', blank=True, null=True)
 
     type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT)
     value = models.DecimalField(max_digits=24, decimal_places=0)

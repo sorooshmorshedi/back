@@ -48,6 +48,8 @@ def validateChequeUpdate(sender, instance, raw, using, update_fields, **kwargs):
 def statusChangeSanad(sender, instance, created, **kwargs):
     value = instance.cheque.value
     cheque = instance.cheque
+    if cheque.has_transaction and instance.fromStatus == 'blank':
+        return
     sanad = instance.sanad
     if not created:
         clearSanad(sanad)
@@ -112,7 +114,7 @@ def deleteStatusChange(sender, instance, using, **kwargs):
             cheque.lastAccount = None
             cheque.lastFloatAccount = None
 
-    if not cheque.transactionItem.all():
+    if not cheque.has_transaction:
         clearSanad(instance.sanad)
 
     cheque.status = instance.fromStatus
@@ -130,11 +132,30 @@ def deleteStatusChange(sender, instance, using, **kwargs):
     cheque.save()
 
 
-signals.post_save.connect(receiver=createCheques, sender=Chequebook)
+def saveCheque(sender, instance, created, **kwargs):
+    cheque = instance
+    if not created:
+        if cheque.has_transaction:
+            from sanads.transactions.models import TransactionItem
+            try:
+                ti = TransactionItem.objects.get(cheque=cheque)
+            except TransactionItem.DoesNotExist:
+                return
+            ti.documentNumber = cheque.serial
+            ti.date = cheque.date
+            ti.due = cheque.due
+            ti.explanation = cheque.explanation
+            ti.value = cheque.value
+            ti.save()
+
 signals.pre_save.connect(receiver=validateChequebookUpdate, sender=Chequebook)
+signals.post_save.connect(receiver=createCheques, sender=Chequebook)
+
 signals.pre_save.connect(receiver=validateChequeUpdate, sender=Cheque)
-signals.post_save.connect(receiver=statusChangeSanad, sender=StatusChange)
+signals.post_save.connect(receiver=saveCheque, sender=Cheque)
+
 signals.pre_delete.connect(receiver=deleteStatusChange, sender=StatusChange)
+signals.post_save.connect(receiver=statusChangeSanad, sender=StatusChange)
 
 
 

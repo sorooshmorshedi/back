@@ -113,15 +113,6 @@ class ChangeChequeStatus(APIView):
         cheque.status = 'notPassed'
         cheque.save()
 
-        if cheque.transactionItem.all():
-            ti = cheque.transactionItem.get()
-            ti.documentNumber = cheque.serial
-            ti.date = cheque.date
-            ti.due = cheque.due
-            ti.explanation = cheque.explanation
-            ti.value = cheque.value
-            ti.save()
-
         return Response(serialized.data, status=status.HTTP_200_OK)
 
     # change cheque status

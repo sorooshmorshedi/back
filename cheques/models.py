@@ -77,6 +77,8 @@ class Cheque(BaseModel):
     branchName = models.CharField(max_length=100, null=True, blank=True)
     accountNumber = models.CharField(max_length=50, null=True, blank=True)
 
+    has_transaction = models.BooleanField(default=False)
+
     permissions = (
         ('get_cheque', 'Can get cheques')
     )
