@@ -136,6 +136,8 @@ class FactorSanadAndReceiptUpdate(APIView):
             else:
                 account = 'backFromSale'
 
+        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} {}".format(factor.code, str(factor.date), factor.explanation)
+
         # Factor Sum
         if factor.sum:
             sanad.items.create(
@@ -143,14 +145,14 @@ class FactorSanadAndReceiptUpdate(APIView):
                 floatAccount=factor.floatAccount,
                 value=factor.sum,
                 valueType=rowTypeOne,
-                explanation="",
+                explanation=explanation
             )
             sanad.items.create(
                 account=getDA(account).account,
                 # floatAccount=factor.floatAccount,
                 value=factor.sum,
                 valueType=rowTypeTwo,
-                explanation="",
+                explanation=explanation
             )
 
         # Factor Discount Sum
@@ -160,14 +162,14 @@ class FactorSanadAndReceiptUpdate(APIView):
                 # floatAccount=factor.floatAccount,
                 value=factor.discountSum,
                 valueType=rowTypeOne,
-                explanation="",
+                explanation=explanation
             )
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
                 value=factor.discountSum,
                 valueType=rowTypeTwo,
-                explanation="",
+                explanation=explanation
             )
 
         # Factor Tax Sum
@@ -177,14 +179,14 @@ class FactorSanadAndReceiptUpdate(APIView):
                 floatAccount=factor.floatAccount,
                 value=factor.taxSum,
                 valueType=rowTypeOne,
-                explanation="",
+                explanation=explanation
             )
             sanad.items.create(
                 account=getDA('tax').account,
                 # floatAccount=factor.floatAccount,
                 value=factor.taxSum,
                 valueType=rowTypeTwo,
-                explanation="",
+                explanation=explanation
             )
 
         # Factor Expenses
@@ -195,14 +197,14 @@ class FactorSanadAndReceiptUpdate(APIView):
                     # floatAccount=factor.floatAccount,
                     value=e.value,
                     valueType='bed',
-                    explanation="",
+                    explanation=explanation
                 )
                 sanad.items.create(
                     account=e.account,
                     floatAccount=e.floatAccount,
                     value=e.value,
                     valueType='bes',
-                    explanation="",
+                    explanation=explanation
                 )
 
         # Receipt
