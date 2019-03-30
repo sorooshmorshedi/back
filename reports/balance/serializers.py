@@ -37,7 +37,7 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ('id', 'code', 'name', 'level', 'bed', 'bes', 'bed_sum', 'bes_sum', 'bed_remain', 'bes_remain',
+        fields = ('id', 'code', 'name', 'level', 'bed_sum', 'bes_sum', 'bed_remain', 'bes_remain',
                   '_floatAccountGroup',
                   '_bank',
                   '_person',
