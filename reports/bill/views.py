@@ -90,7 +90,7 @@ class BillListView(APIView):
                 'type': factor.type,
                 'date': str(factor.date),
                 'sanad': sanad.id,
-                'explanation': "{} {} {} {} {} {}".format(item.ware, item.count, item.ware.unit,
+                'explanation': "نام کالا: {}, تعداد: {} {}, قیمت واحد: {}, تخفیف: {}, توضیحات: {}".format(item.ware, item.count, item.ware.unit,
                                                           item.fee, item.discount, item.explanation),
                 'bed': bed,
                 'bes': bes
@@ -120,9 +120,9 @@ class BillListView(APIView):
                 'bes': bes
             }
             if item.cheque:
-                row['explanation'] = "{} {} {}".format(item.cheque.serial, item.cheque.due, item.explanation)
+                row['explanation'] = "شماره چک: {}, تاریخ سررسید: {}, توضیحات: {}".format(item.cheque.serial, item.cheque.due, item.explanation)
             else:
-                row['explanation'] = "{} {} {} {}".format(item.type, item.date, item.documentNumber, item.explanation)
+                row['explanation'] = "نوع: {}, تاریخ: {}, شماره مستند: {}, توضیحات: {}".format(item.type, item.date, item.documentNumber, item.explanation)
             # serialized = self.serializer_class(data=row)
             # serialized.is_valid()
             # data.append(serialized.data)
