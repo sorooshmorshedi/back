@@ -107,7 +107,7 @@ class Account(BaseModel):
         )
 
     def can_delete(self):
-        return self.sanadItems.count() == 0
+        return self.level != 0 and self.sanadItems.count() == 0
 
 
 class Person(BaseModel):
