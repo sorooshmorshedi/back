@@ -52,9 +52,12 @@ class StatusChangeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if 'sanad' not in validated_data or not validated_data['sanad']:
-            sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
-            sanad.save()
-            validated_data['sanad'] = sanad
+            cheque = validated_data['cheque']
+            fromStatus = validated_data['fromStatus']
+            if not cheque.has_transaction or not fromStatus == 'blank':
+                sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
+                sanad.save()
+                validated_data['sanad'] = sanad
         return super(StatusChangeSerializer, self).create(validated_data)
 
 
