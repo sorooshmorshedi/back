@@ -1,3 +1,4 @@
+from django.db import connection
 from django.db.models import Q, Count
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
@@ -48,7 +49,7 @@ class EmptySanadListView(SanadListView):
 
 
 class FactorListView(generics.ListAPIView):
-    queryset = Factor.objects.all()
+    queryset = Factor.objects.prefetch_related('items').prefetch_related('account').all()
     serializer_class = FactorListSerializer
     filterset_class = FactorFilter
     ordering_fields = '__all__'

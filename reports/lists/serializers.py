@@ -40,8 +40,11 @@ class ChequebookListSerializer(serializers.ModelSerializer):
 
 
 class FactorListSerializer(FactorSerializer):
-    sanad = SanadSerializer(read_only=True, many=False)
     account = AccountSimpleSerializer(read_only=True, many=False)
+    total_sum = serializers.SerializerMethodField()
+
+    def get_total_sum(self, obj):
+        return obj.totalSum
 
     class Meta:
         model = Factor
