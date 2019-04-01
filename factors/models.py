@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import signals, Sum
 from django_jalali.db import models as jmodels
@@ -88,7 +89,7 @@ class Factor(models.Model):
         sum = 0
         for i in self.items.all():
             sum += i.fee * i.count
-        return sum
+        return Decimal(sum)
 
     @property
     def discountSum(self):
@@ -99,7 +100,7 @@ class Factor(models.Model):
             discountSum = self.discountValue
         for i in self.items.all():
             discountSum += i.discount
-        return discountSum
+        return Decimal(discountSum)
 
     @property
     def taxSum(self):
@@ -108,19 +109,19 @@ class Factor(models.Model):
             taxSum = self.taxPercent * (self.sum - self.discountSum) / 100
         else:
             taxSum = self.taxValue
-        return taxSum
+        return Decimal(taxSum)
 
     @property
     def sumAfterDiscount(self):
-        return self.sum - self.discountSum
+        return Decimal(self.sum - self.discountSum)
 
     @property
     def totalSum(self):
-        return self.sum - self.discountSum + self.taxSum
+        return Decimal(self.sum - self.discountSum + self.taxSum)
 
     @property
     def expensesSum(self):
-        return FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum']
+        return Decimal(FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum'])
 
     @property
     def label(self):
