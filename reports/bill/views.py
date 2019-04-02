@@ -52,7 +52,11 @@ class BillListView(APIView):
                 remain_type = BES
             data[0]['remain'] = remain
             data[0]['remain_type'] = remain_type
+            bed_sum = 0
+            bes_sum = 0
             for i in range(1, len(data)):
+                bed_sum += data[i]['bed']
+                bes_sum += data[i]['bes']
                 if data[i-1]['remain_type'] == BED:
                     if data[i]['bed'] != 0:
                         data[i]['remain'] = data[i-1]['remain'] + data[i]['bed']
@@ -69,6 +73,13 @@ class BillListView(APIView):
                 else:
                     data[i]['remain_type'] = data[i-1]['remain_type']
 
+            data.append({
+                'bed': bed_sum,
+                'bes': bes_sum,
+                'remain': data[-1]['remain'],
+                'explanation': 'جمع'
+            })
+
         return Response(data=data, status=status.HTTP_200_OK)
 
     def append_factor_items(self, data, sanad, account_id):
@@ -77,7 +88,7 @@ class BillListView(APIView):
             return
         for item in factor.items.all():
             value = item.totalValue
-            valueType = 'bes' if factor.type in ('buy', 'backFromSale') else 'bed'
+            valueType = 'bed' if factor.type in ('buy', 'backFromSale') else 'bes'
             bed = bes = 0
             if valueType == 'bed':
                 bed = value
@@ -104,7 +115,7 @@ class BillListView(APIView):
             return
         for item in transaction.items.all():
             value = item.value
-            valueType = 'bes' if transaction.type == 'received' else 'bed'
+            valueType = 'bed' if transaction.type == 'receive' else 'bes'
             bed = bes = 0
             if valueType == 'bed':
                 bed = value
