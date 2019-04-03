@@ -14,14 +14,6 @@ EXPENSE_TYPES = (
     ('sale', 'فروش')
 )
 
-FACTOR_TYPES = (
-    ('buy', 'خرید'),
-    ('sale', 'فروش'),
-    ('backFromBuy', 'بازگشت از خرید'),
-    ('backFromSale', 'بازگشت از فروش'),
-
-)
-
 RAR_TYPES = (
     ('receipt', 'رسید'),
     ('remittance', 'حواله')
@@ -60,6 +52,22 @@ class ReceiptItem(models.Model):
 
 
 class Factor(models.Model):
+
+    BUY = 'buy'
+    SALE = 'sale'
+    BACK_FROM_BUY = 'backFromBuy'
+    BACK_FROM_SALE = 'backFromSale'
+    FIRST_PERIOD_INVENTORY = 'fpi'
+
+    FACTOR_TYPES = (
+        (BUY, 'خرید'),
+        (SALE, 'فروش'),
+        (BACK_FROM_BUY, 'بازگشت از خرید'),
+        (BACK_FROM_SALE, 'بازگشت از فروش'),
+        (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
+
+    )
+
     code = models.IntegerField()
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     receipt = models.ForeignKey(Receipt, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
@@ -123,7 +131,7 @@ class Factor(models.Model):
 
     @property
     def label(self):
-        return "فاکتور {}".format([t[1] for t in FACTOR_TYPES if t[0] == self.type][0])
+        return "فاکتور {}".format([t[1] for t in Factor.FACTOR_TYPES if t[0] == self.type][0])
 
     @property
     def remain(self):
@@ -146,6 +154,13 @@ class Factor(models.Model):
             'value': value
         }
         return res
+
+    @staticmethod
+    def getFirstPeriodInventory():
+        try:
+            return Factor.objects.get(code=0)
+        except Factor.DoesNotExist:
+            return None
 
 
 class FactorExpense(models.Model):
