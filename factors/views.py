@@ -430,7 +430,7 @@ class FirstPeriodInventoryView(APIView):
 
         ids_to_delete = data.get('ids_to_delete', [])
         if len(ids_to_delete):
-            FactorItem.objects.get(id__in=ids_to_delete).delete()
+            FactorItem.objects.filter(id__in=ids_to_delete).delete()
 
         sanad = factor.sanad
         sanad.explanation = factor.explanation
