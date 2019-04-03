@@ -19,4 +19,6 @@ urlpatterns = router.urls + [
 
     url(r'^receiptItems/mass$', ReceiptItemMass.as_view(), name=''),
     url(r'^receipts/newCodes$', newCodesForReceipt, name=''),
+
+    url(r'^firstPeriodInventory$', FirstPeriodInventoryView.as_view(), name=''),
 ]

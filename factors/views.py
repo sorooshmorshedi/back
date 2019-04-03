@@ -1,4 +1,5 @@
 from django.db import connection
+from django.db import transaction
 from django.db.models import F
 from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
@@ -372,4 +373,89 @@ def getFactorByCode(request):
     factor = get_object_or_404(queryset, code=code, type=type)
     serializer = FactorListRetrieveSerializer(factor)
     return Response(serializer.data)
+
+
+class FirstPeriodInventoryView(APIView):
+    def get(self, request):
+        factor = Factor.getFirstPeriodInventory()
+        if not factor:
+            return Response({'message': 'no first period inventory'}, status=status.HTTP_200_OK)
+        serialized = FactorListRetrieveSerializer(factor)
+        return Response(serialized.data)
+
+    @transaction.atomic
+    def post(self, request):
+        data = request.data
+        data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
+        data['factor']['code'] = 0
+        data['factor']['account'] = Account.get_partners_account().id
+
+        factor = Factor.getFirstPeriodInventory()
+        if factor:
+            serialized = FactorSerializer(instance=factor, data=data['factor'])
+        else:
+            serialized = FactorSerializer(data=data['factor'])
+        if not serialized.is_valid():
+            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        serialized.save()
+        factor = serialized.instance
+
+        items_to_create = []
+        items_to_update = []
+
+        SerializerClass = FactorItemSerializer
+
+        for item in data.get('items', []):
+            if 'id' in item:
+                items_to_update.append(item)
+            else:
+                items_to_create.append(item)
+
+        for item in items_to_create:
+            item['factor'] = factor.id
+
+        serialized = SerializerClass(data=items_to_create, many=True)
+        if serialized.is_valid():
+            serialized.save()
+        else:
+            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        for item in items_to_update:
+            instance = FactorItem.objects.get(id=item['id'])
+            serialized = SerializerClass(instance, data=item)
+            if serialized.is_valid():
+                serialized.save()
+            else:
+                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        ids_to_delete = data.get('ids_to_delete', [])
+        if len(ids_to_delete):
+            FactorItem.objects.get(id__in=ids_to_delete).delete()
+
+        sanad = factor.sanad
+        sanad.explanation = factor.explanation
+        sanad.date = factor.date
+        sanad.type = 'temporary'
+        sanad.createType = 'auto'
+        sanad.save()
+
+        if sanad.items.count():
+            clearSanad(sanad)
+
+        sanad.items.create(
+            account=Account.get_inventory_account(),
+            value=factor.sum,
+            valueType='bed',
+        )
+        sanad.items.create(
+            account=Account.get_partners_account(),
+            value=factor.sum,
+            valueType='bes',
+        )
+
+        res = Response(FactorSerializer(instance=factor).data, status=status.HTTP_200_OK)
+        return res
+
+
+
 
