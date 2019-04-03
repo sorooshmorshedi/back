@@ -138,6 +138,14 @@ class Account(BaseModel):
 
         return remain
 
+    @staticmethod
+    def get_inventory_account():
+        return Account.objects.get(code='106040001')
+
+    @staticmethod
+    def get_partners_account():
+        return Account.objects.get(code='303070001')
+
 
 class Person(BaseModel):
 
