@@ -71,7 +71,7 @@ class FactorExportView(FactorListView, BaseExportView):
                 'title': 'فاکتور خرید',
                 'verifier_form_name': ExportVerifier.FACTOR_BUY
             },
-            'sale':{
+            'sale': {
                 'title':  'فاکتور فروش',
                 'verifier_form_name': ExportVerifier.FACTOR_SALE
             },

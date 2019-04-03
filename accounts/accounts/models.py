@@ -114,16 +114,15 @@ class Account(BaseModel):
 
     def get_remain(self):
         from sanads.sanads.models import SanadItem
-        bed = bes = 0
-        try:
-            res = SanadItem.objects \
-                .annotate(bed_sum=Coalesce(Sum('value', filter=Q(valueType='bed')), 0)) \
-                .annotate(bes_sum=Coalesce(Sum('value', filter=Q(valueType='bes')), 0)) \
-                .filter(Q(account=self))
-            bed = res.bed_sum
-            bes = res.bes_sum
-        except SanadItem.DoesNotExist:
-            pass
+        bed = SanadItem.objects.filter(account__code__startswith=self.code, valueType='bed') \
+            .aggregate(Sum('value'))['value__sum']
+        bes = SanadItem.objects.filter(account__code__startswith=self.code, valueType='bes') \
+            .aggregate(Sum('value'))['value__sum']
+
+        if not bed:
+            bed = 0
+        if not bes:
+            bes = 0
 
         remain_type = '-'
         if bed != 0:

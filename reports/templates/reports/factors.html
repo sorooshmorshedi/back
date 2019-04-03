@@ -204,6 +204,10 @@
                             <th>مبلغ کل فاکتور</th>
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
+                        <tr>
+                            <th>{{ factor.remain.title }}</th>
+                            <td>{{ factor.remain.value | money }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

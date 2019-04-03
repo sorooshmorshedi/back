@@ -93,7 +93,6 @@ class Factor(models.Model):
 
     @property
     def discountSum(self):
-        discountSum = 0
         if self.discountPercent:
             discountSum = self.discountPercent * self.sum / 100
         else:
@@ -104,7 +103,6 @@ class Factor(models.Model):
 
     @property
     def taxSum(self):
-        taxSum = 0
         if self.taxPercent:
             taxSum = self.taxPercent * (self.sum - self.discountSum) / 100
         else:
@@ -126,6 +124,28 @@ class Factor(models.Model):
     @property
     def label(self):
         return "فاکتور {}".format([t[1] for t in FACTOR_TYPES if t[0] == self.type][0])
+
+    @property
+    def remain(self):
+        account_remain = self.account.get_remain()
+        if self.type in ('buy', 'backFromSale'):
+            title = 'مبلغ قابل پرداخت'
+            if account_remain['remain_type'] == 'bes':
+                value = self.totalSum + account_remain['bes']
+            else:
+                value = self.totalSum - account_remain['bed']
+        else:
+            title = 'مبلغ قابل دریافت'
+            if account_remain['remain_type'] == 'bes':
+                value = self.totalSum - account_remain['bes']
+            else:
+                value = self.totalSum + account_remain['bed']
+
+        res = {
+            'title': title,
+            'value': value
+        }
+        return res
 
 
 class FactorExpense(models.Model):
