@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -109,3 +110,10 @@ class BankDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     queryset = Bank.objects.all()
     serializer_class = BankSerializer
+
+
+@api_view(['get'])
+def getAccountRemain(request, pk):
+    account = get_object_or_404(Account.objects.all(), pk=pk)
+    return Response(account.get_remain(), status=status.HTTP_200_OK)
+

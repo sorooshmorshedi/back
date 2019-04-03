@@ -46,7 +46,6 @@ class IndependentAccountSerializer(serializers.ModelSerializer):
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    # children = serializers.ListSerializer(read_only=True, child=RecursiveField())
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):

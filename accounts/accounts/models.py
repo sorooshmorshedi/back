@@ -1,4 +1,7 @@
-from django.db import models
+from django.db import models, connection
+from django.db.models import Q
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 
 from accounts.costCenters.models import CostCenter, CostCenterGroup
 from helpers.models import BaseModel
@@ -108,6 +111,33 @@ class Account(BaseModel):
 
     def can_delete(self):
         return self.level != 0 and self.sanadItems.count() == 0
+
+    def get_remain(self):
+        from sanads.sanads.models import SanadItem
+        bed = bes = 0
+        try:
+            res = SanadItem.objects \
+                .annotate(bed_sum=Coalesce(Sum('value', filter=Q(valueType='bed')), 0)) \
+                .annotate(bes_sum=Coalesce(Sum('value', filter=Q(valueType='bes')), 0)) \
+                .filter(Q(account=self))
+            bed = res.bed_sum
+            bes = res.bes_sum
+        except SanadItem.DoesNotExist:
+            pass
+
+        remain_type = '-'
+        if bed != 0:
+            remain_type = 'bed'
+        if bes != 0:
+            remain_type = 'bes'
+
+        remain = {
+            'bed': bed,
+            'bes': bes,
+            'remain_type': remain_type
+        }
+
+        return remain
 
 
 class Person(BaseModel):

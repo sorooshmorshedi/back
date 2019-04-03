@@ -21,6 +21,7 @@ urlpatterns = [
 
     url(r'^accounts$', AccountListCreate.as_view(), name='Accounts'),
     url(r'^accounts/(?P<pk>[0-9]+)$', AccountDetail.as_view(), name='AccountDetail'),
+    url(r'^accounts/(?P<pk>[0-9]+)/remain$', getAccountRemain, name='AccountRemain'),
 
     url(r'^independentAccounts$', IndependentAccountListCreate.as_view(), name='Accounts'),
     url(r'^independentAccounts/(?P<pk>[0-9]+)$', IndependentAccountDetail.as_view(), name='AccountDetail'),
