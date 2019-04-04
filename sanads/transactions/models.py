@@ -4,12 +4,13 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
+from helpers.models import BaseModel
 from sanads.transactions.autoSanad import *
 
 from cheques.models import Cheque
 
 
-class Transaction(models.Model):
+class Transaction(BaseModel):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     TYPES = (
@@ -50,7 +51,7 @@ class Transaction(models.Model):
         return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
 
-class TransactionItem(models.Model):
+class TransactionItem(BaseModel):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems', blank=True, null=True)

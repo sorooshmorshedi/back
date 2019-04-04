@@ -5,6 +5,7 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
 from factors.signals import clearFactorSanad
+from helpers.models import BaseModel
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
 from wares.models import Ware, Warehouse, updateInventory
@@ -25,14 +26,14 @@ RECEIPT_CREATE_TYPES = (
 )
 
 
-class Expense(models.Model):
+class Expense(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpense')
     type = models.CharField(max_length=10, choices=EXPENSE_TYPES)
     explanation = models.CharField(max_length=255, blank=True)
 
 
-class Receipt(models.Model):
+class Receipt(BaseModel):
     code = models.IntegerField()
     type = models.CharField(max_length=15, choices=RAR_TYPES)
     createType = models.CharField(max_length=20, choices=RECEIPT_CREATE_TYPES, default='manual')
@@ -44,14 +45,14 @@ class Receipt(models.Model):
         return "{0} - {1}".format(self.code, self.type)
 
 
-class ReceiptItem(models.Model):
+class ReceiptItem(BaseModel):
     receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='receiptItems')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='receiptItems')
     count = models.IntegerField()
 
 
-class Factor(models.Model):
+class Factor(BaseModel):
 
     BUY = 'buy'
     SALE = 'sale'
@@ -163,7 +164,7 @@ class Factor(models.Model):
             return None
 
 
-class FactorExpense(models.Model):
+class FactorExpense(BaseModel):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='expenses')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpenses')
@@ -172,7 +173,7 @@ class FactorExpense(models.Model):
     explanation = models.CharField(max_length=255, blank=True)
 
 
-class FactorPayment(models.Model):
+class FactorPayment(BaseModel):
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='payments')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='payments')
     value = models.DecimalField(max_digits=24, decimal_places=0)
@@ -181,7 +182,7 @@ class FactorPayment(models.Model):
         unique_together = ('factor', 'transaction')
 
 
-class FactorItem(models.Model):
+class FactorItem(BaseModel):
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')

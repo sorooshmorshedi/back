@@ -1,6 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
+from helpers.models import BaseModel
 
 WARE_LEVELS = (
     (0, 'nature'),
@@ -14,7 +15,7 @@ PRICING_TYPES = {
 }
 
 
-class Unit(models.Model):
+class Unit(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -25,7 +26,7 @@ class Unit(models.Model):
         return self.name
 
 
-class Warehouse(models.Model):
+class Warehouse(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -36,7 +37,7 @@ class Warehouse(models.Model):
         return str(self.pk) + ' - ' + self.name
 
 
-class WareLevel(models.Model):
+class WareLevel(BaseModel):
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
@@ -51,7 +52,7 @@ class WareLevel(models.Model):
         return str(self.pk) + ' - ' + self.name
 
 
-class Ware(models.Model):
+class Ware(BaseModel):
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
     barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
@@ -86,7 +87,7 @@ class Ware(models.Model):
         pass
 
 
-class WarehouseInventory(models.Model):
+class WarehouseInventory(BaseModel):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='inventory')
     ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='inventory')
     count = models.IntegerField(default=0)

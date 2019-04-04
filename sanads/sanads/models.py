@@ -5,6 +5,8 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.costCenters.models import CostCenter
 from django_jalali.db import models as jmodels
 
+from helpers.models import BaseModel
+
 SANAD_TYPES = (
     ('temporary', 'موقت'),
     ('definite', 'قطعی'),
@@ -16,7 +18,7 @@ SANAD_CREATE_TYPES = (
 )
 
 
-class Sanad(models.Model):
+class Sanad(BaseModel):
     code = models.IntegerField(unique=True, verbose_name="شماره سند")
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
@@ -39,7 +41,7 @@ class Sanad(models.Model):
         ordering = ['-code', ]
 
 
-class SanadItem(models.Model):
+class SanadItem(BaseModel):
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True, null=True, verbose_name='حساب شناور')
