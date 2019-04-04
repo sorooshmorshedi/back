@@ -22,9 +22,10 @@ class Company(models.Model):
         ('get_company', 'Can get company')
     )
 
-    def get_financial_year(self):
+    @property
+    def last_financial_year(self):
         try:
-            return self.financial_years.get(is_active=True)
+            return self.financial_years.order_by('-id')[0]
         except ObjectDoesNotExist:
             return None
 
@@ -33,7 +34,6 @@ class FinancialYear(models.Model):
     name = models.CharField(unique=True, max_length=150)
     start = jmodels.jDateField()
     end = jmodels.jDateField()
-    is_active = models.BooleanField(default=0)
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
 
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')

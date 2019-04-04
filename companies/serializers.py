@@ -15,14 +15,9 @@ class FinancialYearSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    financial_year = serializers.SerializerMethodField()
     financial_years = FinancialYearSerializer(many=True, read_only=True)
 
     class Meta:
         model = Company
         fields = '__all__'
-
-    def get_financial_year(self, company):
-        financial_year = company.get_financial_year()
-        return FinancialYearSerializer(financial_year).data
 
