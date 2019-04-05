@@ -48,6 +48,14 @@ class Sanad(BaseModel):
 
 
 class SanadItem(BaseModel):
+
+    BED = 'bed'
+    BES = 'bes'
+    VALUE_TYPES = (
+        (BED, 'bed'),
+        (BES, 'bes')
+    )
+
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanad_items')
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
@@ -55,7 +63,7 @@ class SanadItem(BaseModel):
     costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True, verbose_name='مرکز هزینه')
 
     value = models.DecimalField(max_digits=24, decimal_places=0)
-    valueType = models.CharField(max_length=3, choices=(('bed', 'bed'), ('bes', 'bes')))
+    valueType = models.CharField(max_length=3, choices=VALUE_TYPES)
     explanation = models.CharField(max_length=255, blank=True, verbose_name='توضیحات')
 
     permissions = (
