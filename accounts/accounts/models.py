@@ -141,14 +141,15 @@ class Account(BaseModel):
             bes = 0
 
         remain_type = '-'
-        if bed != 0:
+        remain = bed - bes
+        if remain > 0:
             remain_type = 'bed'
-        if bes != 0:
+        elif remain < 0:
+            remain = -remain
             remain_type = 'bes'
 
         remain = {
-            'bed': bed,
-            'bes': bes,
+            'value': remain,
             'remain_type': remain_type
         }
 
