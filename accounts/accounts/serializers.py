@@ -28,7 +28,7 @@ class AccountTypeSerializer(serializers.ModelSerializer):
             res += ' - '\
                 + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')
 
-        usage = [u for u in ACCOUNT_TYPE_USAGES if u[0] == obj.usage]
+        usage = [u for u in AccountType.ACCOUNT_TYPE_USAGES if u[0] == obj.usage]
         if len(usage) != 0 and usage[0][0] != 'none':
             res += ' - ' + usage[0][1]
 

@@ -4,7 +4,7 @@ from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
 from cheques.models import Cheque, Chequebook
-from factors.models import Factor, Receipt
+from factors.models import Factor
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
 
@@ -115,20 +115,3 @@ class FactorFilter(filters.FilterSet):
         else:
             return queryset
 
-
-class ReceiptFilter(filters.FilterSet):
-    class Meta:
-        model = Receipt
-        fields = {
-            'id': ['exact'],
-            'code': ['icontains'],
-            'date': ['gte', 'lte'],
-            'time': ['gte', 'lte'],
-            'explanation': ['icontains'],
-            'type': ['exact'],
-        }
-        filter_overrides = {
-            jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
-            },
-        }

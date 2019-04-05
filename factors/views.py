@@ -3,6 +3,7 @@ from django.db import transaction
 from django.db.models import F
 from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
@@ -16,49 +17,71 @@ from .serializers import *
 
 class ExpenseModelView(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated, RPTypeListCreate,)
-    queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
 
+    def get_queryset(self):
+        return Expense.objects.inFinancialYear(self.request.user)
+
     def list(self, request, *ergs, **kwargs):
-        queryset = Expense.objects.all()
+        queryset = self.get_queryset()
         serialized = ExpenseListRetrieveSerializer(queryset, many=True)
         return Response(serialized.data)
 
     def retrieve(self, request, pk=None):
-        queryset = Expense.objects.all()
+        queryset = self.get_queryset()
         instance = get_object_or_404(queryset, pk=pk)
         serialized = ExpenseListRetrieveSerializer(instance)
         return Response(serialized.data)
 
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
+
 
 class FactorModelView(viewsets.ModelViewSet):
-    queryset = Factor.objects.all()
     serializer_class = FactorSerializer
 
+    def get_queryset(self):
+        return Factor.objects.inFinancialYear(self.request.user)
+
     def list(self, request, *ergs, **kwargs):
-        queryset = Factor.objects.all()
+        queryset = self.get_queryset()
         serialized = FactorListRetrieveSerializer(queryset, many=True)
         return Response(serialized.data)
 
     def retrieve(self, request, pk=None):
-        queryset = Factor.objects.all()
+        queryset = self.get_queryset()
         instance = get_object_or_404(queryset, pk=pk)
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
 
     def destroy(self, request, *args, **kwargs):
         pk = kwargs['pk']
-        factor = get_object_or_404(Factor, pk=pk)
+        queryset = self.get_queryset()
+        factor = get_object_or_404(queryset, pk=pk)
         clearSanad(factor.sanad)
         res = super().destroy(request, *args, **kwargs)
         return res
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+
+        sanad = Sanad(code=newSanadCode(request.user), date=request.data.get('date', now()),
+                      createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
+        sanad.save()
+        request.data['sanad'] = sanad.id
+        return super().create(request, *args, **kwargs)
 
 
 class FactorItemMass(APIView):
     serializer_class = FactorItemSerializer
 
     def post(self, request):
-        serialized = self.serializer_class(data=request.data, many=True)
+        data = []
+        for item in request.data:
+            item['financial_year'] = request.user.active_financial_year.id
+            data.append(item)
+        serialized = self.serializer_class(data=data, many=True)
         if serialized.is_valid():
             serialized.save()
             return Response(serialized.data, status=status.HTTP_201_CREATED)
@@ -66,7 +89,7 @@ class FactorItemMass(APIView):
 
     def put(self, request):
         for item in request.data:
-            instance = FactorItem.objects.get(id=item['id'])
+            instance = FactorItem.objects.inFinancialYear(request.user).get(id=item['id'])
             serialized = FactorItemSerializer(instance, data=item)
             if serialized.is_valid():
                 serialized.save()
@@ -76,7 +99,7 @@ class FactorItemMass(APIView):
 
     def delete(self, request):
         for itemId in request.data:
-            instance = FactorItem.objects.get(id=itemId)
+            instance = FactorItem.objects.inFinancialYear(request.user).get(id=itemId)
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
 
@@ -86,7 +109,11 @@ class FactorExpenseMass(APIView):
     model = FactorExpense
 
     def post(self, request):
-        serialized = FactorExpenseSerializer(data=request.data, many=True)
+        data = []
+        for item in request.data:
+            item['financial_year'] = request.user.active_financial_year.id
+            data.append(item)
+        serialized = FactorExpenseSerializer(data=data, many=True)
         if serialized.is_valid():
             serialized.save()
             return Response(serialized.data, status=status.HTTP_201_CREATED)
@@ -94,7 +121,7 @@ class FactorExpenseMass(APIView):
 
     def put(self, request):
         for item in request.data:
-            instance = self.model.objects.get(id=item['id'])
+            instance = self.model.objects.inFinancialYear(request.user).get(id=item['id'])
             serialized = self.serializer_class(instance, data=item)
             if serialized.is_valid():
                 serialized.save()
@@ -104,14 +131,14 @@ class FactorExpenseMass(APIView):
 
     def delete(self, request):
         for itemId in request.data:
-            instance = self.model.objects.get(id=itemId)
+            instance = self.model.objects.inFinancialYear(request.user).get(id=itemId)
             instance.delete()
         return Response([], status=status.HTTP_200_OK)
 
 
-class FactorSanadAndReceiptUpdate(APIView):
+class FactorSanadUpdate(APIView):
     def put(self, request, pk):
-        queryset = Factor.objects.all()
+        queryset = Factor.objects.inFinancialYear(request.user).all()
         factor = get_object_or_404(queryset, pk=pk)
         sanad = factor.sanad
         clearSanad(sanad)
@@ -146,31 +173,35 @@ class FactorSanadAndReceiptUpdate(APIView):
                 floatAccount=factor.floatAccount,
                 value=factor.sum,
                 valueType=rowTypeOne,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
             sanad.items.create(
-                account=getDA(account).account,
+                account=getDA(account, request.user).account,
                 # floatAccount=factor.floatAccount,
                 value=factor.sum,
                 valueType=rowTypeTwo,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
 
         # Factor Discount Sum
         if factor.discountSum:
             sanad.items.create(
-                account=getDA(account).account,
+                account=getDA(account, request.user).account,
                 # floatAccount=factor.floatAccount,
                 value=factor.discountSum,
                 valueType=rowTypeOne,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
                 value=factor.discountSum,
                 valueType=rowTypeTwo,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
 
         # Factor Tax Sum
@@ -180,14 +211,16 @@ class FactorSanadAndReceiptUpdate(APIView):
                 floatAccount=factor.floatAccount,
                 value=factor.taxSum,
                 valueType=rowTypeOne,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
             sanad.items.create(
-                account=getDA('tax').account,
+                account=getDA('tax', request.user).account,
                 # floatAccount=factor.floatAccount,
                 value=factor.taxSum,
                 valueType=rowTypeTwo,
-                explanation=explanation
+                explanation=explanation,
+                financial_year=sanad.financial_year
             )
 
         # Factor Expenses
@@ -198,77 +231,30 @@ class FactorSanadAndReceiptUpdate(APIView):
                     # floatAccount=factor.floatAccount,
                     value=e.value,
                     valueType='bed',
-                    explanation=explanation
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
                 )
                 sanad.items.create(
                     account=e.account,
                     floatAccount=e.floatAccount,
                     value=e.value,
                     valueType='bes',
-                    explanation=explanation
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
                 )
 
-        # Receipt
-        # receipt = factor.receipt
-        # clearReceipt(receipt)
-        #
-        # for item in factor.items.all():
-        #     receipt.items.create(
-        #         ware=item.ware,
-        #         warehouse=item.warehouse,
-        #         count=item.count
-
         return Response([])
-
-
-class ReceiptModelView(viewsets.ModelViewSet):
-    queryset = Receipt.objects.all()
-    serializer_class = ReceiptSerializer
-
-    def list(self, request, *ergs, **kwargs):
-        queryset = Receipt.objects.all()
-        serialized = ReceiptListRetrieveSerializer(queryset, many=True)
-        return Response(serialized.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Receipt.objects.all()
-        instance = get_object_or_404(queryset, pk=pk)
-        serialized = ReceiptListRetrieveSerializer(instance)
-        return Response(serialized.data)
-
-
-class ReceiptItemMass(APIView):
-    serializer_class = ReceiptItemSerializer
-
-    def post(self, request):
-        serialized = self.serializer_class(data=request.data, many=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request):
-        for item in request.data:
-            instance = ReceiptItem.objects.get(id=item['id'])
-            serialized = ReceiptItemSerializer(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
-            else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serialized.data, status=status.HTTP_200_OK)
-
-    def delete(self, request):
-        for itemId in request.data:
-            instance = ReceiptItem.objects.get(id=itemId)
-            instance.delete()
-        return Response([], status=status.HTTP_200_OK)
 
 
 class FactorPaymentMass(APIView):
     serializer_class = FactorPaymentSerializer
 
     def post(self, request):
-        serialized = self.serializer_class(data=request.data, many=True)
+        data = []
+        for item in request.data:
+            item['financial_year'] = request.user.active_financial_year.id
+            data.append(item)
+        serialized = self.serializer_class(data=data, many=True)
         if serialized.is_valid():
             serialized.save()
             self.updateFactorPaidValue(request.data)
@@ -277,7 +263,7 @@ class FactorPaymentMass(APIView):
 
     def put(self, request):
         for item in request.data:
-            instance = FactorPayment.objects.get(id=item['id'])
+            instance = FactorPayment.objects.inFinancialYear(request.user).get(id=item['id'])
             if int(item['value']) == 0:
                 instance.delete()
                 continue
@@ -286,16 +272,16 @@ class FactorPaymentMass(APIView):
                 serialized.save()
             else:
                 return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        self.updateFactorPaidValue(request.data)
+        self.updateFactorPaidValue(request.data, request.user)
         return Response([], status=status.HTTP_200_OK)
 
-    def updateFactorPaidValue(self, items):
+    def updateFactorPaidValue(self, items, user):
         factorIds = []
         for item in items:
             factorIds.append(item['factor'])
-        factors = Factor.objects.filter(pk__in=factorIds)
+        factors = Factor.objects.inFinancialYear(user).filter(pk__in=factorIds)
         for factor in factors:
-            paidValue = FactorPayment.objects.filter(factor=factor).aggregate(Sum('value'))['value__sum']
+            paidValue = FactorPayment.objects.inFinancialYear(user).filter(factor=factor).aggregate(Sum('value'))['value__sum']
             factor.paidValue = paidValue
             factor.save()
 
@@ -306,19 +292,7 @@ def newCodesForFactor(request):
     types = ['buy', 'sale', 'backFromBuy', 'backFromSale']
     for t in types:
         try:
-            res[t] = Factor.objects.filter(type=t).latest('code').code + 1
-        except:
-            res[t] = 1
-    return Response(res)
-
-
-@api_view(['get'])
-def newCodesForReceipt(request):
-    res = {}
-    types = ['receipt', 'remittance']
-    for t in types:
-        try:
-            res[t] = Receipt.objects.filter(type=t).latest('code').code + 1
+            res[t] = Factor.objects.inFinancialYear(request.user).filter(type=t).latest('code').code + 1
         except:
             res[t] = 1
     return Response(res)
@@ -348,7 +322,7 @@ def getNotPaidFactors(request):
         account_id = request.GET['accountId']
         filters &= Q(account=account_id)
 
-    qs = Factor.objects\
+    qs = Factor.objects.inFinancialYear(request.user)\
         .exclude(sanad__bed=0)\
         .filter(filters)\
         .distinct() \
@@ -369,7 +343,7 @@ def getFactorByCode(request):
 
     code = request.GET['code']
     type = request.GET['type']
-    queryset = Factor.objects.all()
+    queryset = Factor.objects.inFinancialYear(request.user).all()
     factor = get_object_or_404(queryset, code=code, type=type)
     serializer = FactorListRetrieveSerializer(factor)
     return Response(serializer.data)
@@ -421,7 +395,7 @@ class FirstPeriodInventoryView(APIView):
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
         for item in items_to_update:
-            instance = FactorItem.objects.get(id=item['id'])
+            instance = FactorItem.objects.inFinancialYear(request.user).get(id=item['id'])
             serialized = SerializerClass(instance, data=item)
             if serialized.is_valid():
                 serialized.save()
@@ -430,7 +404,7 @@ class FirstPeriodInventoryView(APIView):
 
         ids_to_delete = data.get('ids_to_delete', [])
         if len(ids_to_delete):
-            FactorItem.objects.filter(id__in=ids_to_delete).delete()
+            FactorItem.objects.inFinancialYear(request.user).filter(id__in=ids_to_delete).delete()
 
         sanad = factor.sanad
         sanad.explanation = factor.explanation

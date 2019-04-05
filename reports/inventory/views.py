@@ -11,7 +11,8 @@ from wares.models import Ware
 class InventoryListView(generics.ListAPIView):
     serializer_class = FactorItemInventorySerializer
 
-    queryset = FactorItem.objects
+    def get_queryset(self):
+        return FactorItem.objects.inFinancialYear(self.request.user)
 
     def list(self, request, *args, **kwargs):
         if 'ware' not in request.GET or 'warehouse' not in request.GET:
@@ -19,13 +20,13 @@ class InventoryListView(generics.ListAPIView):
 
         data = request.GET
 
-        factorItems = self.queryset\
+        factorItems = self.get_queryset()\
             .filter(ware=data['ware'], warehouse=data['warehouse'])\
             .select_related('factor__account') \
             .select_related('factor__sanad')\
             .order_by('-factor__date', '-factor__time')
 
-        ware = Ware.objects.get(pk=data['ware'])
+        ware = Ware.objects.inFinancialYear(request.user).get(pk=data['ware'])
         outputFees = []
         if ware.pricingType == 0: #fifo
             for factorItem in factorItems:

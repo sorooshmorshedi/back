@@ -14,46 +14,70 @@ from wares.serializers import *
 @method_decorator(csrf_exempt, name='dispatch')
 class WarehouseListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, WareListCreate,)
-    queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
+
+    def get_queryset(self):
+        return Warehouse.objects.inFinancialYear(self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class WarehouseDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)
-    queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
+
+    def get_queryset(self):
+        return Warehouse.objects.inFinancialYear(self.request.user)
 
 
 class UnitDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)
-    queryset = Unit.objects.all()
     serializer_class = UnitSerializer
+
+    def get_queryset(self):
+        return Unit.objects.inFinancialYear(self.request.user)
 
 
 class UnitListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, WareListCreate,)
-    queryset = Unit.objects.all()
     serializer_class = UnitSerializer
+
+    def get_queryset(self):
+        return Unit.objects.inFinancialYear(self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class WareListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, WareListCreate,)
-    queryset = Ware.objects.all()
     serializer_class = WareSerializer
 
+    def get_queryset(self):
+        return Ware.objects.inFinancialYear(self.request.user)
+
     def list(self, request, *ergs, **kwargs):
-        queryset = Ware.objects.all()
+        queryset = self.get_queryset()
         serializer = WareListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class WareDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)
-    queryset = Ware.objects.all()
     serializer_class = WareSerializer
 
+    def get_queryset(self):
+        return Ware.objects.inFinancialYear(self.request.user)
+
     def retrieve(self, request, pk=None):
-        queryset = Ware.objects.all()
+        queryset = self.get_queryset()
         ware = get_object_or_404(queryset, pk=pk)
         serializer = WareListRetrieveSerializer(ware)
         return Response(serializer.data)
@@ -69,19 +93,27 @@ class WareDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class WareLevelDetail(generics.RetrieveUpdateDestroyAPIView):
     # permission_classes = (IsAuthenticated, WareListDetail,)
-    queryset = WareLevel.objects.all()
     serializer_class = WareLevelSerializer
+
+    def get_queryset(self):
+        return WareLevel.objects.inFinancialYear(self.request.user)
 
 
 class WareLevelListCreate(generics.ListCreateAPIView):
     # permission_classes = (IsAuthenticated, WareListCreate,)
-    queryset = WareLevel.objects.all()
     serializer_class = WareLevelSerializer
 
+    def get_queryset(self):
+        return WareLevel.objects.inFinancialYear(self.request.user)
+
     def list(self, request, *ergs, **kwargs):
-        queryset = WareLevel.objects.filter(level=0)
+        queryset = self.get_queryset().filter(level=0)
         serializer = WareLevelSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class WarehouseInventoryView(APIView):

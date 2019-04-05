@@ -12,28 +12,36 @@ from helpers.auth import BasicCRUDPermission
 @method_decorator(csrf_exempt, name='dispatch')
 class DefaultAccountListCreate(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = DefaultAccount.objects.all()
     serializer_class = DefaultAccountSerializer
 
+    def get_queryset(self):
+        return DefaultAccount.objects.inFinancialYear(self.request.user)
+
     def list(self, request, *ergs, **kwargs):
-        queryset = DefaultAccount.objects.all()
+        queryset = self.get_queryset()
         serializer = DefaultAccountListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class DefaultAccountDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = DefaultAccount.objects.all()
     serializer_class = DefaultAccountSerializer
 
+    def get_queryset(self):
+        return DefaultAccount.objects.inFinancialYear(self.request.user)
+
     def retrieve(self, request, pk=None):
-        queryset = DefaultAccount.objects.all()
+        queryset = self.get_queryset()
         da = get_object_or_404(queryset, pk=pk)
         serializer = DefaultAccountListRetrieveSerializer(da)
         return Response(serializer.data)
 
     def delete(self, request, pk=None):
-        queryset = DefaultAccount.objects.all()
+        queryset = self.get_queryset()
         da = get_object_or_404(queryset, pk=pk)
         if da.programingName:
             raise serializers.ValidationError('این پیشفرض غیر قابل حذف می باشد')

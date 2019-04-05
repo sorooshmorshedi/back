@@ -69,7 +69,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
-    'server.middleware.ExceptionMiddleware'
+    'helpers.middlewares.ModifyRequestMiddleware.ModifyRequestMiddleware'
 
 ]
 
@@ -146,7 +146,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
-    # 'EXCEPTION_HANDLER': 'server.utils.exceptionHandler',
+    # 'EXCEPTION_HANDLER': 'server.helpers.exceptionHandler',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),

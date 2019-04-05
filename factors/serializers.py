@@ -3,7 +3,6 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer, AccountSerializer
 from factors.models import *
 from sanads.sanads.models import Sanad, newSanadCode
-from sanads.sanads.serializers import SanadSerializer
 from wares.models import WarehouseInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
@@ -66,28 +65,6 @@ class FactorSerializer(serializers.ModelSerializer):
             if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
         return data
-
-    def create(self, validated_data):
-        sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
-        sanad.save()
-        validated_data['sanad'] = sanad
-
-        if validated_data['type'] in ('sale', 'backFromBuy'):
-            receiptType = 'remittance'
-        else:
-            receiptType = 'receipt'
-        receipt = Receipt(
-            code=newReceiptCode(),
-            date=validated_data['date'],
-            time=validated_data['time'],
-            createType='auto',
-            type=receiptType
-        )
-        receipt.save()
-        validated_data['receipt'] = receipt
-
-        res = super(FactorSerializer, self).create(validated_data)
-        return res
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
@@ -159,43 +136,3 @@ class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = WarehouseInventory
         fields = '__all__'
-
-
-class ReceiptItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReceiptItem
-        fields = '__all__'
-
-    def update(self, instance, validated_data):
-        if instance.receipt.createType == 'auto':
-            raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
-        super(ReceiptItemSerializer, self).update(instance, validated_data)
-
-
-class ReceiptItemListRetrieveSerializer(ReceiptItemSerializer):
-    ware = WareListRetrieveSerializer(read_only=True, many=False)
-    warehouse = WarehouseSerializer(read_only=True, many=False)
-
-    class Meta:
-        model = ReceiptItem
-        fields = '__all__'
-
-
-class ReceiptSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Receipt
-        fields = '__all__'
-
-    def update(self, instance, validated_data):
-        if instance.createType == 'auto':
-            raise serializers.ValidationError("رسید/حواله خودکار غیر قابل ویرایش می باشد")
-        return super(ReceiptSerializer, self).update(instance, validated_data)
-
-
-class ReceiptListRetrieveSerializer(ReceiptSerializer):
-    items = ReceiptItemListRetrieveSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Receipt
-        fields = '__all__'
-

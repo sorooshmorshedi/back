@@ -9,7 +9,6 @@ from accounts.accounts.serializers import TypeReportAccountSerializer
 
 def getType(pName):
     return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
-getType.accountTypes = AccountType.objects.all()
 
 
 def getAccounts(accountType, allAccounts):
@@ -72,6 +71,8 @@ def getSerialized(pName, allAccounts):
 @api_view(['get'])
 def incomeStatementView(request):
 
+    getType.accountTypes = AccountType.objects.all()
+
     res = []
     data = request.GET
     dateFilter = Q()
@@ -86,7 +87,7 @@ def incomeStatementView(request):
     if 'codes' in data:
         dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
 
-    allAccounts = list(Account.objects \
+    allAccounts = list(Account.objects.inFinancialYear(request.user) \
         .annotate(remain=
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0) -
             Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)

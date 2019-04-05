@@ -1,7 +1,10 @@
 from django.db import models
 
+from companies.models import FinancialYear
+from helpers.models import BaseModel
 
-class ExportVerifier(models.Model):
+
+class ExportVerifier(BaseModel):
     SANAD = 'S'
     FACTOR_BUY = 'FB'
     FACTOR_SALE = 'FS'
@@ -24,11 +27,12 @@ class ExportVerifier(models.Model):
         (TRANSACTION_PAYMENT, 'پرداخت'),
     )
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='export_verifiers')
     name = models.CharField(max_length=200, blank=True, null=True)
     post = models.CharField(max_length=255)
     form = models.CharField(choices=FORMS, max_length=4)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         default_permissions = ()
 
     def __str__(self):

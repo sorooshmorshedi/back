@@ -8,8 +8,8 @@ from sanads.transactions.views import *
 from .views import *
 
 router = DefaultRouter()
-router.register(r'sanadItems', SanadItemListCreate)
-router.register(r'transactionItems', TransactionItemModelView)
+router.register(r'sanadItems', SanadItemListCreate, base_name='sanad-item')
+router.register(r'transactionItems', TransactionItemModelView, base_name='transaction-item')
 
 urlpatterns = router.urls + [
 

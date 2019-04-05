@@ -15,6 +15,7 @@ def createCheques(sender, instance, created, **kwargs):
                 bankName=bank.name,
                 branchName=bank.branch,
                 accountNumber=bank.accountNumber,
+                financial_year=instance.financial_year
             )
     else:
         for cheque in instance.cheques.all():
@@ -24,6 +25,7 @@ def createCheques(sender, instance, created, **kwargs):
                 serial=i,
                 status='blank',
                 received_or_paid=Cheque.PAID,
+                financial_year=instance.financial_year
             )
 
 
@@ -51,6 +53,8 @@ def statusChangeSanad(sender, instance, created, **kwargs):
     if cheque.has_transaction and instance.fromStatus == 'blank':
         return
     sanad = instance.sanad
+    if not sanad:
+        return
     if not created:
         clearSanad(sanad)
     sanad.explanation = cheque.explanation
@@ -84,6 +88,7 @@ def statusChangeSanad(sender, instance, created, **kwargs):
         explanation=explanation,
         account=instance.bedAccount,
         floatAccount=instance.bedFloatAccount,
+        financial_year=sanad.financial_year
     )
     sanad.items.create(
         value=value,
@@ -91,6 +96,7 @@ def statusChangeSanad(sender, instance, created, **kwargs):
         explanation=explanation,
         account=instance.besAccount,
         floatAccount=instance.besFloatAccount,
+        financial_year=sanad.financial_year
     )
     sanad.type = 'temporary'
     sanad.save()

@@ -50,13 +50,6 @@ class TransactionSerializer(serializers.ModelSerializer):
 
         return data
 
-    def create(self, validated_data):
-        sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
-        sanad.save()
-        validated_data['sanad'] = sanad
-        res = super(TransactionSerializer, self).create(validated_data)
-        return res
-
 
 class TransactionListRetrieveSerializer(TransactionSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)

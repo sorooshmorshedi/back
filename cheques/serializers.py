@@ -50,16 +50,6 @@ class StatusChangeSerializer(serializers.ModelSerializer):
 
         return data
 
-    def create(self, validated_data):
-        if 'sanad' not in validated_data or not validated_data['sanad']:
-            cheque = validated_data['cheque']
-            fromStatus = validated_data['fromStatus']
-            if not cheque.has_transaction or not fromStatus == 'blank':
-                sanad = Sanad(code=newSanadCode(), date=validated_data['date'], createType='auto')
-                sanad.save()
-                validated_data['sanad'] = sanad
-        return super(StatusChangeSerializer, self).create(validated_data)
-
 
 class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
     sanad = SanadListRetrieveSerializer(read_only=True, many=False)
@@ -73,8 +63,7 @@ class ChequeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cheque
-        fields = ('id', 'serial', 'account', 'floatAccount', 'value', 'due', 'date', 'explanation', 'bankName',
-                  'branchName', 'accountNumber', 'has_transaction')
+        fields = '__all__'
 
     def validate(self, data):
         if 'account' not in data or not data['account']:

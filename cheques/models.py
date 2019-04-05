@@ -1,8 +1,9 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
+from companies.models import FinancialYear
 from helpers.models import BaseModel
-from sanads.sanads.models import Sanad
+from sanads.sanads.models import Sanad, newSanadCode
 
 CHECK_STATUSES = (
     ('blank', 'blank'),
@@ -18,6 +19,8 @@ CHECK_STATUSES = (
 
 
 class Chequebook(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='chequebooks')
 
     code = models.IntegerField(unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequebook')
@@ -39,6 +42,8 @@ class Chequebook(BaseModel):
 
 
 class Cheque(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cheques')
 
     RECEIVED = 'r'
     PAID = 'p'
@@ -65,7 +70,7 @@ class Cheque(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=30, choices=CHECK_STATUSES)
     received_or_paid = models.CharField(max_length=10, choices=((RECEIVED, 'دریافتنی'), (PAID, 'پرداختنی')))
-    type = models.CharField(max_length=1, choices=CHEQUE_TYPES)
+    type = models.CharField(max_length=1, choices=CHEQUE_TYPES, blank=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
@@ -95,6 +100,7 @@ class Cheque(BaseModel):
 
 
 class StatusChange(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='status_changes')
 
     cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='statusChanges')
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)
@@ -118,10 +124,18 @@ class StatusChange(BaseModel):
         ('get_cheque', 'Can get cheques')
     )
 
-    # def __str__(self):
-    #     return "{0} - {1}".format(self.serial, self.explanation[0:30])
-
     class Meta(BaseModel.Meta):
         verbose_name = 'تغییر وضعیت'
         ordering = ['id', ]
+
+    def createSanad(self, user):
+        if not self.sanad:
+            cheque = self.cheque
+            fromStatus = self.fromStatus
+            if not cheque.has_transaction or not fromStatus == 'blank':
+                sanad = Sanad(code=newSanadCode(user), date=self.date,
+                              createType=Sanad.AUTO, financial_year=user.active_financial_year)
+                sanad.save()
+                self.sanad = sanad
+                self.save()
 

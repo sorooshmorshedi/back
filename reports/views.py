@@ -36,5 +36,11 @@ def exportTest(request):
 
 
 class ExportVerifiersModelView(viewsets.ModelViewSet):
-    queryset = ExportVerifier.objects.all()
     serializer_class = ExportVerifierSerializer
+
+    def get_queryset(self):
+        return ExportVerifier.objects.inFinancialYear(self.user).all()
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year
+        return super().create(request, *args, **kwargs)

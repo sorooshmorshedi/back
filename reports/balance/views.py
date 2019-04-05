@@ -28,7 +28,7 @@ def accountBalanceView(request):
     if 'codes' in data:
         dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
 
-    accounts = Account.objects\
+    accounts = Account.objects.inFinancialYear(request.user)\
         .annotate(bed_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0))\
         .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0))\
         .prefetch_related('bank').prefetch_related('person').prefetch_related('floatAccountGroup')\
@@ -63,7 +63,7 @@ def accountBalanceView(request):
 
         account._floatAccounts = []
         if account.floatAccountGroup:
-            floatAccounts = FloatAccount.objects \
+            floatAccounts = FloatAccount.objects.inFinancialYear(request.user) \
                 .filter(floatAccountGroups__in=[account.floatAccountGroup])\
                 .annotate(bed_sum=Coalesce(Sum('sanadItems__value',
                                                filter=Q(sanadItems__valueType='bed') &
@@ -107,12 +107,12 @@ def floatAccountBalanceView(request):
     if 'codes' in data:
         dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
 
-    floatAccounts = FloatAccount.objects \
+    floatAccounts = FloatAccount.objects.inFinancialYear(request.user) \
         .annotate(bed_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0)) \
         .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)) \
         .prefetch_related('floatAccountGroups')
 
-    floatAccountGroups = FloatAccountGroup.objects.prefetch_related('floatAccounts').all()
+    floatAccountGroups = FloatAccountGroup.objects.inFinancialYear(request.user).prefetch_related('floatAccounts').all()
 
     res = []
 

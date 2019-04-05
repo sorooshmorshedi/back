@@ -5,27 +5,33 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.costCenters.models import CostCenter
 from django_jalali.db import models as jmodels
 
+from companies.models import FinancialYear
 from helpers.models import BaseModel
-
-SANAD_TYPES = (
-    ('temporary', 'موقت'),
-    ('definite', 'قطعی'),
-)
-
-SANAD_CREATE_TYPES = (
-    ('auto', 'خودکار'),
-    ('manual', 'دستی')
-)
 
 
 class Sanad(BaseModel):
+    TEMPORARY = 'temporary'
+    DEFINITE = 'definite'
+    SANAD_TYPES = (
+        (TEMPORARY, 'موقت'),
+        (DEFINITE, 'قطعی'),
+    )
+
+    AUTO = 'auto'
+    MANUAL = 'manual'
+    SANAD_CREATE_TYPES = (
+        (AUTO, 'خودکار'),
+        (MANUAL, 'دستی')
+    )
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(unique=True, verbose_name="شماره سند")
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
     type = models.CharField(max_length=20, choices=SANAD_TYPES)
-    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default='manual', verbose_name="نوع ثبت")
+    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default=MANUAL, verbose_name="نوع ثبت")
 
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بدهکار")
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
@@ -37,11 +43,12 @@ class Sanad(BaseModel):
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         ordering = ['-code', ]
 
 
 class SanadItem(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanad_items')
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True, null=True, verbose_name='حساب شناور')
@@ -106,9 +113,9 @@ def clearSanad(sanad):
         item.delete()
 
 
-def newSanadCode():
+def newSanadCode(user):
     try:
-        return Sanad.objects.latest('code').code + 1
+        return Sanad.objects.inFinancialYear(user).latest('code').code + 1
     except:
         return 1
 

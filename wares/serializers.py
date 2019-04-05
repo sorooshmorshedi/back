@@ -12,7 +12,7 @@ class UnitSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Unit
-        fields = ('id', 'name', 'explanation', 'title')
+        fields = '__all__'
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
@@ -23,7 +23,7 @@ class WarehouseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Warehouse
-        fields = ('id', 'name', 'explanation', 'title')
+        fields = '__all__'
 
 
 class WareSerializer(serializers.ModelSerializer):
@@ -51,14 +51,13 @@ class WareListRetrieveSerializer(WareSerializer):
 class WareLevelSerializer(serializers.ModelSerializer):
     children = serializers.ListSerializer(read_only=True, child=RecursiveField())
     title = serializers.SerializerMethodField()
-    # wares = WareSerializer(many=True, read_only=True)
 
     def get_title(self, obj):
         return obj.code + ' - ' + obj.name
 
     class Meta:
         model = WareLevel
-        fields = ('id', 'code', 'name', 'explanation', 'children', 'title', 'parent', 'level')
+        fields = '__all__'
 
 
 

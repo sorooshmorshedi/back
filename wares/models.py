@@ -1,25 +1,16 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
+from companies.models import FinancialYear
 from helpers.models import BaseModel
-
-WARE_LEVELS = (
-    (0, 'nature'),
-    (1, 'group'),
-    (2, 'category'),
-)
-
-PRICING_TYPES = {
-    (0, 'فایفو'),
-    (1, 'میانگین موزون'),
-}
 
 
 class Unit(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='units')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         default_permissions = ()
 
     def __str__(self):
@@ -27,10 +18,11 @@ class Unit(BaseModel):
 
 
 class Warehouse(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouses')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         default_permissions = ()
 
     def __str__(self):
@@ -38,13 +30,24 @@ class Warehouse(BaseModel):
 
 
 class WareLevel(BaseModel):
+
+    NATURE = 0
+    GROUP = 1
+    CATEGORY = 2
+    WARE_LEVELS = (
+        (NATURE, 'nature'),
+        (GROUP, 'group'),
+        (CATEGORY, 'category'),
+    )
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='ware_levels')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
     level = models.IntegerField(choices=WARE_LEVELS)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         default_permissions = ()
         unique_together = ('name', 'level')
 
@@ -53,6 +56,15 @@ class WareLevel(BaseModel):
 
 
 class Ware(BaseModel):
+
+    FIFO = 0
+    WEIGHTED_MEAN = 1
+    PRICING_TYPES = {
+        (FIFO, 'فایفو'),
+        (WEIGHTED_MEAN, 'میانگین موزون'),
+    }
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
     barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
@@ -76,7 +88,7 @@ class Ware(BaseModel):
     def __str__(self):
         return self.name
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         ordering = ['code', ]
 
     def has_factorItem(self):
@@ -88,6 +100,7 @@ class Ware(BaseModel):
 
 
 class WarehouseInventory(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouse_inventory')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='inventory')
     ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='inventory')
     count = models.IntegerField(default=0)

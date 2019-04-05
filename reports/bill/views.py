@@ -12,7 +12,7 @@ from sanads.transactions.models import Transaction
 class BillListView(APIView):
 
     def get_queryset(self):
-        return Sanad.objects.order_by('-code')\
+        return Sanad.objects.inFinancialYear(self.request.user).order_by('-code')\
             .prefetch_related('items') \
             .prefetch_related('factor__items__ware__unit') \
             .prefetch_related('transaction__items__type') \

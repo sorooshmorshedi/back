@@ -4,10 +4,11 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
+from companies.models import FinancialYear
 from helpers.models import BaseModel
-from sanads.transactions.autoSanad import *
 
 from cheques.models import Cheque
+from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class Transaction(BaseModel):
@@ -18,6 +19,7 @@ class Transaction(BaseModel):
         (PAYMENT, 'پرداخت'),
     )
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactions')
     code = models.IntegerField()
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactions')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True, null=True)
@@ -37,8 +39,7 @@ class Transaction(BaseModel):
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
-
-    class Meta:
+    class Meta(BaseModel.Meta):
         ordering = ['code', ]
         unique_together = ('code', 'type')
 
@@ -50,8 +51,65 @@ class Transaction(BaseModel):
     def label(self):
         return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
+    def createSanad(self, user):
+        sanad = Sanad(code=newSanadCode(user), financial_year=self.financial_year,
+                      date=self.date, createType=Sanad.AUTO)
+        sanad.save()
+        self.sanad = sanad
+        self.save()
+
+    def updateSanad(self):
+        sanad = self.sanad
+        if not sanad:
+            raise Sanad.DoesNotExist
+
+        if self.type == Transaction.RECEIVE:
+            rowsType = 'bed'
+            lastRowType = 'bes'
+            rp = 'دریافت'
+        else:
+            rowsType = 'bes'
+            lastRowType = 'bed'
+            rp = 'پرداخت'
+
+        clearSanad(sanad)
+
+        sanad.explanation = self.explanation
+        sanad.date = self.date
+        sanad.type = Sanad.TEMPORARY
+        sanad.save()
+
+        typeNames = []
+        totalValue = 0
+        for item in self.items.all():
+
+            totalValue += item.value
+            if item.type.name not in typeNames:
+                typeNames.append(item.type.name)
+
+            sanad.items.create(
+                value=item.value,
+                valueType=rowsType,
+                explanation="بابت {0} {1} به شماره مستند {2} به تاریخ {3}".format(rp, item.type.name,
+                                                                                  item.documentNumber, str(item.date)),
+                account=item.account,
+                floatAccount=item.floatAccount,
+                financial_year=sanad.financial_year
+            )
+
+        if len(self.items.all()) != 0:
+            sanad.items.create(
+                value=totalValue,
+                valueType=lastRowType,
+                explanation="بابت {0} {1} طی {0} شماره {2}".format(rp, ', '.join(typeNames), self.code),
+                account=self.account,
+                floatAccount=self.floatAccount,
+                financial_year=sanad.financial_year
+            )
+
 
 class TransactionItem(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactionItems')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems', blank=True, null=True)
@@ -75,8 +133,8 @@ class TransactionItem(BaseModel):
         return "{0} - {1}".format(self.transaction.code, self.explanation[0:30])
 
 
-signals.post_save.connect(receiver=updateSanad, sender=Transaction)
-signals.post_save.connect(receiver=updateSanadItems, sender=TransactionItem)
-signals.post_delete.connect(receiver=clearTransactionSanad, sender=Transaction)
-signals.post_delete.connect(receiver=updateSanadItems, sender=TransactionItem)
+# signals.post_save.connect(receiver=updateSanad, sender=Transaction)
+# signals.post_save.connect(receiver=updateSanadItems, sender=TransactionItem)
+# signals.post_delete.connect(receiver=clearTransactionSanad, sender=Transaction)
+# signals.post_delete.connect(receiver=updateSanadItems, sender=TransactionItem)
 

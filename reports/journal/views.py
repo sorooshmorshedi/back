@@ -29,11 +29,13 @@ class SanadItemResource(ModelResource):
 
 
 class JournalListView(generics.ListAPIView):
-    queryset = SanadItem.objects.all()
     serializer_class = SanadItemJournalSerializer
     filterset_class = SanadItemJounalFilter
     ordering_fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name', 'value', 'valueType')
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return SanadItem.objects.inFinancialYear(self.request.user).all()
 
     def list(self, request, *args, **kwargs):
 

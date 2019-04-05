@@ -10,23 +10,39 @@ from helpers.auth import BasicCRUDPermission
 @method_decorator(csrf_exempt, name='dispatch')
 class CostCenterListCreate(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = CostCenter.objects.all()
     serializer_class = CostCenterSerializer
+
+    def get_queryset(self):
+        return CostCenter.objects.inFinancialYear(self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
 
 
 class CostCenterDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = CostCenter.objects.all()
     serializer_class = CostCenterSerializer
+
+    def get_queryset(self):
+        return CostCenter.objects.inFinancialYear(self.request.user)
 
 
 class CostCenterGroupListCreate(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = CostCenterGroup.objects.all()
     serializer_class = CostCenterGroupSerializer
+
+    def create(self, request, *args, **kwargs):
+        request.data['financial_year'] = request.user.active_financial_year.id
+        return super().create(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return CostCenterGroup.objects.inFinancialYear(self.request.user)
 
 
 class CostCenterGroupDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = CostCenterGroup.objects.all()
     serializer_class = CostCenterGroupSerializer
+
+    def get_queryset(self):
+        return CostCenterGroup.objects.inFinancialYear(self.request.user)

@@ -1,11 +1,14 @@
 from django.db.models import Max
 
-from sanads.sanads.models import Sanad, SanadItem, clearSanad
+from sanads.sanads.models import Sanad, SanadItem, clearSanad, newSanadCode
 
 
 def updateSanad(sender, instance, created, **kwargs):
     t = instance
     sanad = instance.sanad
+
+    if not sanad:
+        return
 
     if t.type == 'receive':
         rowsType = 'bed'
@@ -37,6 +40,7 @@ def updateSanad(sender, instance, created, **kwargs):
             explanation="بابت {0} {1} به شماره مستند {2} به تاریخ {3}".format(rp, item.type.name, item.documentNumber, str(item.date)),
             account=item.account,
             floatAccount=item.floatAccount,
+            financial_year=sanad.financial_year
         )
 
     if len(t.items.all()) != 0:
@@ -45,7 +49,8 @@ def updateSanad(sender, instance, created, **kwargs):
             valueType=lastRowType,
             explanation="بابت {0} {1} طی {0} شماره {2}".format(rp, ', '.join(typeNames), t.code),
             account=t.account,
-            floatAccount=t.floatAccount
+            floatAccount=t.floatAccount,
+            financial_year=sanad.financial_year
         )
 
 

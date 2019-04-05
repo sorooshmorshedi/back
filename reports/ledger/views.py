@@ -7,9 +7,11 @@ from sanads.sanads.models import SanadItem
 
 
 class LedgerListView(generics.ListAPIView):
-    queryset = SanadItem.objects.order_by('sanad__code')
     serializer_class = SanadItemLedgerSerializer
     filterset_class = SanadItemLedgerFilter
     ordering_fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name')
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return SanadItem.objects.inFinancialYear(self.request.user).order_by('sanad__code')
 

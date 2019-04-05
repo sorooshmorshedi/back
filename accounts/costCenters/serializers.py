@@ -5,7 +5,7 @@ from accounts.costCenters.models import CostCenter, CostCenterGroup
 class CostCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = CostCenter
-        fields = ('id', 'name', 'explanation', 'group')
+        fields = '__all__'
 
 
 class CostCenterGroupSerializer(serializers.ModelSerializer):
@@ -13,5 +13,5 @@ class CostCenterGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CostCenterGroup
-        fields = ('id', 'name', 'explanation', 'costCenters')
+        fields = '__all__'
 

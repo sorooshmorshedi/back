@@ -1,26 +1,14 @@
-from django.db import models, connection
-from django.db.models import Q
+from django.db import models
 from django.db.models import Sum
-from django.db.models.functions import Coalesce
-
-from accounts.costCenters.models import CostCenter, CostCenterGroup
+from accounts.costCenters.models import CostCenterGroup
+from companies.models import FinancialYear
 from helpers.models import BaseModel
-
-ACCOUNT_LEVELS = (
-    (0, 'group'),
-    (1, 'kol'),
-    (2, 'moein'),
-    (3, 'tafzili'),
-)
-
-ACCOUNT_TYPE_USAGES = (
-    ('incomeStatement', 'سود و زیان'),
-    ('balanceSheet', 'ترازنامه'),
-    ('none', 'هیچ کدام')
-)
 
 
 class FloatAccountGroup(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='float_account_groups')
+
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -32,6 +20,9 @@ class FloatAccountGroup(BaseModel):
 
 
 class FloatAccount(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='float_accounts')
+
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -51,6 +42,16 @@ class FloatAccount(BaseModel):
 
 
 class AccountType(BaseModel):
+    INCOME_STATEMENT = 'incomeStatement'
+    BALANCE_SHEET = 'balanceSheet'
+    NONE = 'none'
+
+    ACCOUNT_TYPE_USAGES = (
+        (INCOME_STATEMENT, 'سود و زیان'),
+        (BALANCE_SHEET, 'ترازنامه'),
+        (NONE, 'هیچ کدام')
+    )
+
     name = models.CharField(max_length=100)
     programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
@@ -64,6 +65,7 @@ class AccountType(BaseModel):
 
 
 class IndependentAccount(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='independent_accounts')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -75,6 +77,20 @@ class IndependentAccount(BaseModel):
 
 
 class Account(BaseModel):
+
+    GROUP = 0
+    KOL = 1
+    MOEIN = 2
+    TAFSILI = 3
+    ACCOUNT_LEVELS = (
+        (GROUP, 'group'),
+        (KOL, 'kol'),
+        (MOEIN, 'moein'),
+        (TAFSILI, 'tafzili'),
+    )
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accounts')
+
     name = models.CharField(max_length=150, verbose_name='نام حساب')
     code = models.CharField(max_length=50, unique=True, verbose_name='کد حساب')
     explanation = models.CharField(max_length=255, blank=True, null=True)
@@ -139,17 +155,17 @@ class Account(BaseModel):
         return remain
 
     @staticmethod
-
     def inventory_account():
         return Account.objects.get(code='106040001')
 
     @staticmethod
-    @property
     def partners_account():
         return Account.objects.get(code='303070001')
 
 
 class Person(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='persons')
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
@@ -191,6 +207,8 @@ class Person(BaseModel):
 
 
 class Bank(BaseModel):
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='banks')
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
 

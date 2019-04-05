@@ -21,7 +21,6 @@ urlpatterns = [
     url(r'^lists/sanads/unbalanced$', UnbalancedSanadListView.as_view(), name=''),
     url(r'^lists/sanads/empty$', EmptySanadListView.as_view(), name=''),
     url(r'^lists/factors$', FactorListView.as_view(), name=''),
-    url(r'^lists/receipts$', ReceiptListView.as_view(), name=''),
 ]
 
 # Lists Export
@@ -47,5 +46,5 @@ urlpatterns += [
 
 # Other
 router = DefaultRouter()
-router.register('exportVerifiers', ExportVerifiersModelView)
+router.register('exportVerifiers', ExportVerifiersModelView, base_name='export-verifiersgt')
 urlpatterns += router.urls

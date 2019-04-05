@@ -26,23 +26,23 @@ class BaseExportView(PDFTemplateView):
     filterset_class = None
     context = {}
 
-    def get_context_data(self, print_document=False, **kwargs):
+    def get_context_data(self, user, print_document=False, **kwargs):
         context = super().get_context_data(**kwargs)
-        company = Company.objects.first()
         context['forms'] = self.get_queryset()
-        context['company'] = company
-        context['financial_year'] = company.get_financial_year()
+        context['company'] = user.active_company
+        context['financial_year'] = user.active_financial_year
+        context['user'] = user
         context['print_document'] = print_document
         context.update(self.context)
         return context
 
     def export(self, request, export_type, *args, **kwargs):
-        self.queryset = self.filterset_class(request.GET, queryset=self.queryset).qs
         pdf = export_type == 'pdf'
         if pdf:
-            return super().get(request, *args, **kwargs)
+            return super().get(request, user=request.user, *args, **kwargs)
         else:
-            return render(request, self.template_name, context=self.get_context_data(print_document=True))
+            return render(request, self.template_name,
+                          context=self.get_context_data(user=request.user, print_document=True))
 
 
 class SanadExportView(SanadListView, BaseExportView):
@@ -53,7 +53,9 @@ class SanadExportView(SanadListView, BaseExportView):
         'verifier_form_name': ExportVerifier.SANAD
     }
     pagination_class = None
-    queryset = Sanad.objects.order_by('code')
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
 
     def get(self, request, export_type, *args, **kwargs):
         return self.export(request, export_type, *args, **kwargs)
@@ -65,6 +67,9 @@ class FactorExportView(FactorListView, BaseExportView):
     context = {}
     pagination_class = None
 
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
     def get(self, request, export_type, *args, **kwargs):
         names = {
             'buy': {
@@ -75,12 +80,12 @@ class FactorExportView(FactorListView, BaseExportView):
                 'title':  'فاکتور فروش',
                 'verifier_form_name': ExportVerifier.FACTOR_SALE
             },
-            'backFromBuy':{
+            'backFromBuy': {
                 'title':  'فاکتور برگشت از خرید',
                 'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_BUY
             },
-            'backFromSale':{
-                'title' : 'فاکتور برگشت از فروش',
+            'backFromSale': {
+                'title': 'فاکتور برگشت از فروش',
                 'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
             }
         }
@@ -106,6 +111,9 @@ class TransactionExportView(TransactionListView, BaseExportView):
     template_name = 'reports/transactions.html'
     context = {}
     pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
 
     def get(self, request, export_type, *args, **kwargs):
         transactionType = request.GET.get('type', None)
