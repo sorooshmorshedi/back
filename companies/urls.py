@@ -11,3 +11,7 @@ router.register('', CompanyModelView)
 
 urlpatterns = router.urls
 
+urlpatterns += [
+    url(r'^closeAccounts$', CloseAccountsView.as_view()),
+]
+
