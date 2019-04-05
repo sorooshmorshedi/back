@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="set active financialYear/Company api">
+    <list default="true" id="ff23a22c-0b15-447f-8320-8f34aeed6bd9" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/accounts/accounts/models.py" afterPath="$PROJECT_DIR$/accounts/accounts/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/factors/models.py" afterPath="$PROJECT_DIR$/factors/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/helpers/models.py" afterPath="$PROJECT_DIR$/helpers/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/sanads/models.py" afterPath="$PROJECT_DIR$/sanads/sanads/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sanads/transactions/models.py" afterPath="$PROJECT_DIR$/sanads/transactions/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wares/models.py" afterPath="$PROJECT_DIR$/wares/models.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,12 +17,35 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/helpers/models.py">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/companies/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="81">
-              <caret line="3" column="29" lean-forward="false" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="29" />
-              <folding />
+            <state relative-caret-position="445">
+              <caret line="178" column="14" lean-forward="true" selection-start-line="178" selection-start-column="14" selection-end-line="178" selection-end-column="14" />
+              <folding>
+                <element signature="e#0#30#0" expanded="true" />
+                <element signature="e#1570#1799#0" expanded="false" />
+                <element signature="e#1841#2092#0" expanded="false" />
+                <element signature="e#2131#3062#0" expanded="false" />
+                <element signature="e#3103#3617#0" expanded="false" />
+                <element signature="e#3656#4602#0" expanded="false" />
+                <element signature="e#4679#5852#0" expanded="false" />
+                <element signature="e#5907#6738#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/sanads/sanads/views.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-243">
+              <caret line="41" column="17" lean-forward="false" selection-start-line="41" selection-start-column="17" selection-end-line="41" selection-end-column="17" />
+              <folding>
+                <element signature="e#589#1219#0" expanded="false" />
+                <element signature="e#1758#2797#0" expanded="false" />
+                <element signature="e#2834#3575#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -36,132 +53,41 @@
       <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="351">
-              <caret line="52" column="28" lean-forward="false" selection-start-line="52" selection-start-column="28" selection-end-line="52" selection-end-column="28" />
-              <folding>
-                <element signature="e#0#40#0" expanded="true" />
-                <element signature="e#520#792#0" expanded="false" />
-                <element signature="e#830#1511#0" expanded="false" />
-                <element signature="e#1548#2063#0" expanded="false" />
-                <element signature="e#2107#2338#0" expanded="false" />
-                <element signature="e#2371#5037#0" expanded="false" />
-                <element signature="e#3695#4006#0" expanded="false" />
-                <element signature="e#4042#4097#0" expanded="false" />
-                <element signature="e#4133#4821#0" expanded="false" />
-                <element signature="e#5070#6901#0" expanded="false" />
-                <element signature="e#6932#7670#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/accounts/costCenters/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="16" column="18" lean-forward="false" selection-start-line="16" selection-start-column="18" selection-end-line="16" selection-end-column="18" />
+            <state relative-caret-position="121">
+              <caret line="130" column="8" lean-forward="false" selection-start-line="130" selection-start-column="8" selection-end-line="130" selection-end-column="8" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
-                <element signature="e#107#356#0" expanded="false" />
-                <element signature="e#392#737#0" expanded="false" />
+                <element signature="e#670#1463#0" expanded="false" />
+                <element signature="e#1500#2251#0" expanded="false" />
+                <element signature="e#2295#2643#0" expanded="false" />
+                <element signature="e#4297#4608#0" expanded="false" />
+                <element signature="e#4644#4699#0" expanded="false" />
+                <element signature="e#5700#7636#0" expanded="false" />
+                <element signature="e#7667#8508#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/sanads/models.py">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/reports/balance/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="43" column="16" lean-forward="false" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+            <state relative-caret-position="364">
+              <caret line="31" column="109" lean-forward="false" selection-start-line="31" selection-start-column="109" selection-end-line="31" selection-end-column="109" />
               <folding>
-                <element signature="e#0#27#0" expanded="true" />
-                <element signature="e#464#1362#0" expanded="false" />
-                <element signature="e#1397#2297#0" expanded="false" />
-                <element signature="e#2383#2869#0" expanded="false" />
-                <element signature="e#2942#3100#0" expanded="false" />
-                <element signature="e#3283#3405#0" expanded="false" />
-                <element signature="e#3432#3518#0" expanded="false" />
+                <element signature="e#4213#6285#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sanads/transactions/models.py">
+      <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/companies/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="53" column="22" lean-forward="false" selection-start-line="53" selection-start-column="22" selection-end-line="53" selection-end-column="22" />
+            <state relative-caret-position="378">
+              <caret line="14" column="55" lean-forward="false" selection-start-line="14" selection-start-column="55" selection-end-line="14" selection-end-column="55" />
               <folding>
-                <element signature="e#389#1636#0" expanded="false" />
-                <element signature="e#1677#2758#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wares/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="580">
-              <caret line="89" column="33" lean-forward="false" selection-start-line="89" selection-start-column="33" selection-end-line="89" selection-end-column="33" />
-              <folding>
-                <element signature="e#0#28#0" expanded="true" />
-                <element signature="e#329#554#0" expanded="false" />
-                <element signature="e#589#837#0" expanded="false" />
-                <element signature="e#872#1373#0" expanded="false" />
-                <element signature="e#1403#2794#0" expanded="false" />
-                <element signature="e#2838#3239#0" expanded="false" />
-                <element signature="e#3291#3799#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/accounts/defaultAccounts/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="81">
-              <caret line="6" column="7" lean-forward="false" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
-              <folding>
-                <element signature="e#151#947#0" expanded="false" />
-                <element signature="e#969#1021#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cheques/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="567">
-              <caret line="96" column="12" lean-forward="false" selection-start-line="96" selection-start-column="12" selection-end-line="96" selection-end-column="12" />
-              <folding>
-                <element signature="e#512#1171#0" expanded="false" />
-                <element signature="e#1204#3481#0" expanded="false" />
-                <element signature="e#3520#4943#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/factors/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
-              <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-              <folding>
-                <element signature="e#676#954#0" expanded="false" />
-                <element signature="e#987#1400#0" expanded="false" />
-                <element signature="e#1437#1745#0" expanded="false" />
-                <element signature="e#1778#5515#0" expanded="false" />
-                <element signature="e#5554#6094#0" expanded="false" />
-                <element signature="e#6133#6452#0" expanded="false" />
-                <element signature="e#6488#7441#0" expanded="false" />
-                <element signature="e#7541#7850#0" expanded="false" />
-                <element signature="e#7932#8005#0" expanded="false" />
-                <element signature="e#8291#8393#0" expanded="false" />
-                <element signature="e#8422#8510#0" expanded="false" />
+                <element signature="e#0#41#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -189,12 +115,17 @@
       <find>Decimal</find>
       <find>print(</find>
       <find>nItem.get()</find>
+      <find>inventory_account</find>
+      <find>Receipt</find>
+      <find>objects</find>
     </findStrings>
     <replaceStrings>
       <replace>Bill</replace>
+      <replace>objects.inFinancialYear(request.user)</replace>
     </replaceStrings>
     <dirStrings>
       <dir>C:\Users\MMD\Desktop\sobhanHesab\server\reports\bill</dir>
+      <dir>C:\Users\MMD\Desktop\sobhanHesab\server\reports</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -203,57 +134,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/server/utils.py" />
-        <option value="$PROJECT_DIR$/Helpers/TokenAuthSupportQueryString.py" />
-        <option value="$PROJECT_DIR$/Helpers/auth.py" />
-        <option value="$PROJECT_DIR$/server/settings.py" />
-        <option value="$PROJECT_DIR$/accounts/permissions.py" />
-        <option value="$PROJECT_DIR$/helpers/views.py" />
+        <option value="$PROJECT_DIR$/accounts/accounts/serializers.py" />
         <option value="$PROJECT_DIR$/accounts/costCenters/models.py" />
+        <option value="$PROJECT_DIR$/accounts/costCenters/serializers.py" />
         <option value="$PROJECT_DIR$/accounts/costCenters/views.py" />
         <option value="$PROJECT_DIR$/accounts/defaultAccounts/views.py" />
-        <option value="$PROJECT_DIR$/helpers/auth.py" />
-        <option value="$PROJECT_DIR$/refresh.sh" />
-        <option value="$PROJECT_DIR$/accounts/defaultAccounts/models.py" />
-        <option value="$PROJECT_DIR$/reports/templates/reports/export_verifiers.html" />
-        <option value="$PROJECT_DIR$/sanads/sanads/serializers.py" />
-        <option value="$PROJECT_DIR$/sanads/sanads/views.py" />
-        <option value="$PROJECT_DIR$/reports/inventory/views.py" />
-        <option value="$PROJECT_DIR$/factors/signals.py" />
-        <option value="$PROJECT_DIR$/wares/views.py" />
-        <option value="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
-        <option value="$PROJECT_DIR$/factors/helpers.py" />
-        <option value="$PROJECT_DIR$/reports/urls.py" />
-        <option value="$PROJECT_DIR$/reports/bill/filters.py" />
-        <option value="$PROJECT_DIR$/reports/bill/serializers.py" />
-        <option value="$PROJECT_DIR$/factors/serializers.py" />
-        <option value="$PROJECT_DIR$/reports/balance/serializers.py" />
-        <option value="$PROJECT_DIR$/sanads/admin.py" />
-        <option value="$PROJECT_DIR$/cheques/models.py" />
-        <option value="$PROJECT_DIR$/cheques/views.py" />
-        <option value="$PROJECT_DIR$/cheques/signals.py" />
-        <option value="$PROJECT_DIR$/reports/lists/serializers.py" />
-        <option value="$PROJECT_DIR$/reports/lists/views.py" />
-        <option value="$PROJECT_DIR$/cheques/serializers.py" />
-        <option value="$PROJECT_DIR$/accounts/urls.py" />
+        <option value="$PROJECT_DIR$/utils/middlewares/modifyRequestMiddleware.py" />
+        <option value="$PROJECT_DIR$/server/settings.py" />
+        <option value="$PROJECT_DIR$/cheques/urls.py" />
+        <option value="$PROJECT_DIR$/helpers/middlewares/ModifyRequestMiddleware.py" />
         <option value="$PROJECT_DIR$/accounts/accounts/views.py" />
-        <option value="$PROJECT_DIR$/accounts/accounts/serializers.py" />
         <option value="$PROJECT_DIR$/factors/urls.py" />
-        <option value="$PROJECT_DIR$/factors/views.py" />
-        <option value="$PROJECT_DIR$/reports/bill/views.py" />
-        <option value="$PROJECT_DIR$/reports/lists/export_views.py" />
-        <option value="$PROJECT_DIR$/users/urls.py" />
-        <option value="$PROJECT_DIR$/companies/serializers.py" />
-        <option value="$PROJECT_DIR$/companies/views.py" />
-        <option value="$PROJECT_DIR$/users/views.py" />
-        <option value="$PROJECT_DIR$/users/serializers.py" />
-        <option value="$PROJECT_DIR$/companies/models.py" />
-        <option value="$PROJECT_DIR$/sanads/sanads/models.py" />
-        <option value="$PROJECT_DIR$/sanads/transactions/models.py" />
-        <option value="$PROJECT_DIR$/wares/models.py" />
+        <option value="$PROJECT_DIR$/reports/lists/filters.py" />
+        <option value="$PROJECT_DIR$/factors/admin.py" />
         <option value="$PROJECT_DIR$/factors/models.py" />
+        <option value="$PROJECT_DIR$/sanads/urls.py" />
+        <option value="$PROJECT_DIR$/sanads/sanads/views.py" />
+        <option value="$PROJECT_DIR$/sanads/transactions/serializers.py" />
+        <option value="$PROJECT_DIR$/sanads/transactions/autoSanad.py" />
+        <option value="$PROJECT_DIR$/sanads/transactions/models.py" />
+        <option value="$PROJECT_DIR$/sanads/transactions/views.py" />
+        <option value="$PROJECT_DIR$/cheques/views.py" />
+        <option value="$PROJECT_DIR$/cheques/serializers.py" />
+        <option value="$PROJECT_DIR$/cheques/signals.py" />
+        <option value="$PROJECT_DIR$/cheques/models.py" />
+        <option value="$PROJECT_DIR$/factors/serializers.py" />
+        <option value="$PROJECT_DIR$/factors/views.py" />
+        <option value="$PROJECT_DIR$/reports/balance/views.py" />
+        <option value="$PROJECT_DIR$/reports/urls.py" />
+        <option value="$PROJECT_DIR$/reports/models.py" />
+        <option value="$PROJECT_DIR$/reports/views.py" />
+        <option value="$PROJECT_DIR$/reports/ledger/views.py" />
+        <option value="$PROJECT_DIR$/reports/lists/views.py" />
+        <option value="$PROJECT_DIR$/reports/bill/views.py" />
+        <option value="$PROJECT_DIR$/reports/journal/views.py" />
+        <option value="$PROJECT_DIR$/reports/incomeStatement/views.py" />
+        <option value="$PROJECT_DIR$/reports/balanceSheet/views.py" />
+        <option value="$PROJECT_DIR$/reports/inventory/views.py" />
+        <option value="$PROJECT_DIR$/wares/serializers.py" />
+        <option value="$PROJECT_DIR$/wares/models.py" />
+        <option value="$PROJECT_DIR$/wares/views.py" />
+        <option value="$PROJECT_DIR$/reports/templates/reports/sanads.html" />
+        <option value="$PROJECT_DIR$/reports/templatetags/export_verifiers.py" />
+        <option value="$PROJECT_DIR$/reports/templates/reports/transactions.html" />
+        <option value="$PROJECT_DIR$/reports/templates/reports/factors.html" />
+        <option value="$PROJECT_DIR$/reports/lists/export_views.py" />
+        <option value="$PROJECT_DIR$/accounts/defaultAccounts/models.py" />
+        <option value="$PROJECT_DIR$/sanads/sanads/models.py" />
+        <option value="$PROJECT_DIR$/sanads/sanads/serializers.py" />
+        <option value="$PROJECT_DIR$/companies/urls.py" />
         <option value="$PROJECT_DIR$/accounts/accounts/models.py" />
-        <option value="$PROJECT_DIR$/helpers/models.py" />
+        <option value="$PROJECT_DIR$/companies/views.py" />
       </list>
     </option>
   </component>
@@ -303,7 +234,25 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="wares" />
+              <option name="myItemId" value="sanads" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sh-server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="server" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sanads" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sanads" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -318,42 +267,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="accounts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sh-server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="accounts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="defaultAccounts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sh-server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="server" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="accounts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="costCenters" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -364,17 +277,17 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="SearchEverywhereHistoryKey" value="Account&#9;null&#9;null&#10;Factor&#9;null&#9;null&#10;Bil&#9;null&#9;null&#10;chequeSe&#9;null&#9;null&#10;che&#9;null&#9;null&#10;TransactionIte&#9;null&#9;null&#10;Fact&#9;null&#9;null&#10;setti&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;Sanad&#9;null&#9;null&#10;Trans&#9;null&#9;null&#10;SanadItem&#9;null&#9;null&#10;auto&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/sanads/transactions/autoSanad.py&#10;FactorIte&#9;null&#9;null&#10;FactorI&#9;null&#9;null&#10;SanadIte&#9;null&#9;null&#10;SanadIt&#9;null&#9;null&#10;Transa&#9;null&#9;null&#10;Ware&#9;null&#9;null&#10;Unit&#9;null&#9;null&#10;FactorIt&#9;null&#9;null&#10;Facto&#9;null&#9;null&#10;SanadMo&#9;null&#9;null&#10;AccountSer&#9;null&#9;null&#10;account&#9;null&#9;null&#10;settin&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;User&#9;null&#9;null&#10;Inve&#9;null&#9;null&#10;signals&#9;null&#9;null&#10;inventory&#9;null&#9;null&#10;Acctype&#9;null&#9;null&#10;warehou&#9;null&#9;null&#10;Accounse&#9;null&#9;null&#10;SanadSeria&#9;null&#9;null&#10;Exp&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/reports/lists/export_views.py&#10;Defa&#9;null&#9;null&#10;Defaut&#9;null&#9;null&#10;auth&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/helpers/auth.py&#10;BaseMo&#9;null&#9;null&#10;Default&#9;null&#9;null&#10;settub&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;sett&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;ExportVerifier&#9;null&#9;null&#10;ExportVer&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/reports/templates/reports/export_verifiers.html&#10;Transaction&#9;null&#9;null&#10;FActor&#9;null&#9;null&#10;Receipt&#9;null&#9;null&#10;AccountType&#9;null&#9;null&#10;clearSanad&#9;null&#9;null&#10;Cheque&#9;null&#9;null" />
+    <property name="SearchEverywhereHistoryKey" value="Account&#9;null&#9;null&#10;Sanad&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/reports/templates/reports/sanads.html&#10;Fina&#9;null&#9;null&#10;SanadIt&#9;null&#9;null&#10;accountty&#9;null&#9;null&#10;defa&#9;null&#9;null&#10;Ware&#9;null&#9;null&#10;Factor&#9;null&#9;null&#10;Bil&#9;null&#9;null&#10;chequeSe&#9;null&#9;null&#10;che&#9;null&#9;null&#10;TransactionIte&#9;null&#9;null&#10;Fact&#9;null&#9;null&#10;setti&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;Trans&#9;null&#9;null&#10;SanadItem&#9;null&#9;null&#10;auto&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/sanads/transactions/autoSanad.py&#10;FactorIte&#9;null&#9;null&#10;FactorI&#9;null&#9;null&#10;SanadIte&#9;null&#9;null&#10;Transa&#9;null&#9;null&#10;Unit&#9;null&#9;null&#10;FactorIt&#9;null&#9;null&#10;Facto&#9;null&#9;null&#10;SanadMo&#9;null&#9;null&#10;AccountSer&#9;null&#9;null&#10;account&#9;null&#9;null&#10;settin&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;User&#9;null&#9;null&#10;Inve&#9;null&#9;null&#10;signals&#9;null&#9;null&#10;inventory&#9;null&#9;null&#10;Acctype&#9;null&#9;null&#10;warehou&#9;null&#9;null&#10;Accounse&#9;null&#9;null&#10;SanadSeria&#9;null&#9;null&#10;Exp&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/reports/lists/export_views.py&#10;Defa&#9;null&#9;null&#10;Defaut&#9;null&#9;null&#10;auth&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/helpers/auth.py&#10;BaseMo&#9;null&#9;null&#10;Default&#9;null&#9;null&#10;settub&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;sett&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/server/settings.py&#10;ExportVerifier&#9;null&#9;null&#10;ExportVer&#9;FILE&#9;file://C:/Users/MMD/Desktop/sobhanHesab/server/reports/templates/reports/export_verifiers.html&#10;Transaction&#9;null&#9;null&#10;FActor&#9;null&#9;null&#10;Receipt&#9;null&#9;null&#10;AccountType&#9;null&#9;null" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\reports\bill" />
-      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\Helpers" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\reports\bill" />
       <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\reports\templates\reports" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\reports\bill" />
+      <recent name="C:\Users\MMD\Desktop\sobhanHesab\server\Helpers" />
     </key>
   </component>
   <component name="RunManager">
@@ -526,55 +439,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1552287271752</updated>
-    </task>
-    <task id="LOCAL-00036" summary="refresh migrations">
-      <created>1552883167187</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883167187</updated>
-    </task>
-    <task id="LOCAL-00037" summary="merge users with user_management">
-      <created>1552883212220</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883212220</updated>
-    </task>
-    <task id="LOCAL-00038" summary="Create BaseModel">
-      <created>1552883230484</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883230484</updated>
-    </task>
-    <task id="LOCAL-00039" summary="Create BaseModel">
-      <created>1552883244081</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883244081</updated>
-    </task>
-    <task id="LOCAL-00040" summary="some helper classes">
-      <created>1552883283211</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883283211</updated>
-    </task>
-    <task id="LOCAL-00041" summary="add permissions to Account app modesl">
-      <created>1552883320807</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883320807</updated>
-    </task>
-    <task id="LOCAL-00042" summary="remove user_management app, change default User Model">
-      <created>1552883339378</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1552883339378</updated>
     </task>
     <task id="LOCAL-00043" summary="try adding permissions">
       <created>1552889566191</created>
@@ -870,7 +734,56 @@
       <option name="project" value="LOCAL" />
       <updated>1554360457236</updated>
     </task>
-    <option name="localTasksCounter" value="85" />
+    <task id="LOCAL-00085" summary="make all models to inherit from BaseModel">
+      <created>1554361766974</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1554361766974</updated>
+    </task>
+    <task id="LOCAL-00086" summary="add financial year constrains and auto add">
+      <created>1554443122304</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1554443122304</updated>
+    </task>
+    <task id="LOCAL-00087" summary="fix sanadItem does not exist exception in load fixture">
+      <created>1554444166910</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1554444166910</updated>
+    </task>
+    <task id="LOCAL-00088" summary="refactor get_remain method">
+      <created>1554471561951</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1554471561951</updated>
+    </task>
+    <task id="LOCAL-00089" summary="refactor bed, bes">
+      <created>1554471579069</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1554471579069</updated>
+    </task>
+    <task id="LOCAL-00090" summary="add closeAccount Type to default accounts">
+      <created>1554471595052</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1554471595052</updated>
+    </task>
+    <task id="LOCAL-00091" summary="close account api">
+      <created>1554471804171</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1554471804171</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TodoView">
@@ -883,18 +796,18 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1048" extended-state="0" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17239556" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295583" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.5124273" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.5230037" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41449603" sideWeight="0.49814913" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41449603" sideWeight="0.4875727" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295583" sideWeight="0.49603385" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24960339" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.4875727" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.4769963" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -910,13 +823,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="kv" />
-    <MESSAGE value="cascade on delete for WarehouseInventory&#10;" />
-    <MESSAGE value="fix transaction auto sanad explanation bug" />
-    <MESSAGE value="fix check inventory bug" />
-    <MESSAGE value="add label property to Factor &amp; transaction models" />
-    <MESSAGE value="rewrite ware __str__ method" />
-    <MESSAGE value="Bill report" />
     <MESSAGE value="refactor getNotPaidFactors api, add account filter to it" />
     <MESSAGE value="factor auto sanad explanation" />
     <MESSAGE value="remove bed &amp; bes from BalanceAccountSerializer" />
@@ -935,7 +841,14 @@
     <MESSAGE value="first period inventory api" />
     <MESSAGE value="fix delete items bug" />
     <MESSAGE value="set active financialYear/Company api" />
-    <option name="LAST_COMMIT_MESSAGE" value="set active financialYear/Company api" />
+    <MESSAGE value="make all models to inherit from BaseModel" />
+    <MESSAGE value="add financial year constrains and auto add" />
+    <MESSAGE value="fix sanadItem does not exist exception in load fixture" />
+    <MESSAGE value="refactor get_remain method" />
+    <MESSAGE value="refactor bed, bes" />
+    <MESSAGE value="add closeAccount Type to default accounts" />
+    <MESSAGE value="close account api" />
+    <option name="LAST_COMMIT_MESSAGE" value="close account api" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -944,349 +857,84 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/cheques/apps.py">
+    <entry file="file://$PROJECT_DIR$/sanads/transactions/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="7" column="27" lean-forward="false" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/journal/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/sanads/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="80" column="6" lean-forward="false" selection-start-line="80" selection-start-column="6" selection-end-line="80" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python36/Lib/turtle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="2552" column="13" lean-forward="false" selection-start-line="2552" selection-start-column="13" selection-end-line="2552" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/bill/filters.py" />
-    <entry file="file://$PROJECT_DIR$/reports/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="38" column="19" lean-forward="false" selection-start-line="38" selection-start-column="19" selection-end-line="38" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/bill/serializers.py" />
-    <entry file="file://$PROJECT_DIR$/companies/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="13" column="0" lean-forward="true" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="42" column="12" lean-forward="false" selection-start-line="42" selection-start-column="12" selection-end-line="42" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/lists/filters.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="11" column="30" lean-forward="false" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/balance/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="25" column="29" lean-forward="false" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
+        <state relative-caret-position="1023">
+          <caret line="51" column="0" lean-forward="false" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
           <folding>
-            <element signature="e#0#32#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/transactions/autoSanad.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="51" column="13" lean-forward="true" selection-start-line="51" selection-start-column="13" selection-end-line="51" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="8" column="31" lean-forward="false" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="66" column="26" lean-forward="true" selection-start-line="66" selection-start-column="26" selection-end-line="66" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/signals.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="50" column="62" lean-forward="false" selection-start-line="50" selection-start-column="62" selection-end-line="50" selection-end-column="62" />
-          <folding>
-            <element signature="e#0#38#0" expanded="false" />
-            <element signature="e#242#950#0" expanded="false" />
-            <element signature="e#1042#1474#0" expanded="false" />
-            <element signature="e#1562#1771#0" expanded="false" />
-            <element signature="e#3574#4654#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/lists/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="56" column="0" lean-forward="false" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#32#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/lists/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="607">
-          <caret line="46" column="20" lean-forward="true" selection-start-line="46" selection-start-column="20" selection-end-line="46" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheques/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="45" column="66" lean-forward="false" selection-start-line="45" selection-start-column="66" selection-end-line="45" selection-end-column="66" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/ledger/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/defaultAccounts/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-473">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#52#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="499">
-          <caret line="23" column="81" lean-forward="false" selection-start-line="23" selection-start-column="81" selection-end-line="23" selection-end-column="81" />
-          <folding>
-            <element signature="e#0#41#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/balance/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="8" lean-forward="false" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/accounts/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="70" column="38" lean-forward="true" selection-start-line="70" selection-start-column="38" selection-end-line="70" selection-end-column="38" />
-          <folding>
-            <element signature="e#612#759#0" expanded="false" />
-            <element signature="e#831#978#0" expanded="false" />
-            <element signature="e#1048#1205#0" expanded="false" />
-            <element signature="e#1282#1439#0" expanded="false" />
-            <element signature="e#1517#1676#0" expanded="false" />
-            <element signature="e#1747#1906#0" expanded="false" />
-            <element signature="e#1964#2109#0" expanded="false" />
-            <element signature="e#2169#2613#0" expanded="false" />
-            <element signature="e#2680#3410#0" expanded="false" />
-            <element signature="e#3469#3604#0" expanded="false" />
-            <element signature="e#3670#3805#0" expanded="false" />
-            <element signature="e#3862#3993#0" expanded="false" />
-            <element signature="e#4057#4188#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/accounts/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="126" column="0" lean-forward="false" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
-          <folding>
-            <element signature="e#412#555#0" expanded="false" />
-            <element signature="e#1171#1264#0" expanded="false" />
-            <element signature="e#1325#3412#0" expanded="false" />
-            <element signature="e#1408#1442#0" expanded="false" />
-            <element signature="e#1468#1510#0" expanded="false" />
-            <element signature="e#1550#2878#0" expanded="false" />
-            <element signature="e#3472#3702#0" expanded="false" />
-            <element signature="e#3760#3987#0" expanded="false" />
-            <element signature="e#4792#4911#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/templates/reports/factors.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1215">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/inventory/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="23" column="47" lean-forward="false" selection-start-line="23" selection-start-column="47" selection-end-line="23" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/rest_framework/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-10166">
-          <caret line="93" column="6" lean-forward="false" selection-start-line="93" selection-start-column="6" selection-end-line="93" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/factors/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="22" column="67" lean-forward="false" selection-start-line="22" selection-start-column="67" selection-end-line="22" selection-end-column="67" />
-          <folding>
-            <element signature="e#0#41#0" expanded="false" />
+            <element signature="e#0#38#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/factors/signals.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+        <state relative-caret-position="27">
+          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/factors/serializers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="89" column="16" lean-forward="false" selection-start-line="89" selection-start-column="16" selection-end-line="89" selection-end-column="16" />
-          <folding>
-            <element signature="e#1820#2430#0" expanded="false" />
-            <element signature="e#3206#3322#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/factors/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="421" column="0" lean-forward="true" selection-start-line="421" selection-start-column="0" selection-end-line="421" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-            <element signature="e#567#1145#0" expanded="false" />
-            <element signature="e#1978#2986#0" expanded="false" />
-            <element signature="e#3027#4079#0" expanded="false" />
-            <element signature="e#5666#6175#0" expanded="false" />
-            <element signature="e#6240#6737#0" expanded="false" />
-            <element signature="e#6817#7369#0" expanded="false" />
-            <element signature="e#7729#8243#0" expanded="false" />
-            <element signature="e#8282#9294#0" expanded="false" />
-            <element signature="e#9335#10730#0" expanded="false" />
-            <element signature="e#10788#11027#0" expanded="false" />
-            <element signature="e#11086#11305#0" expanded="false" />
-            <element signature="e#11363#12372#0" expanded="false" />
-            <element signature="e#12428#12895#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/bill/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/bill/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="796">
-          <caret line="164" column="12" lean-forward="false" selection-start-line="164" selection-start-column="12" selection-end-line="164" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#27#0" expanded="false" />
-            <element signature="e#404#665#0" expanded="false" />
-            <element signature="e#720#3129#0" expanded="false" />
-            <element signature="e#3199#4139#0" expanded="false" />
-            <element signature="e#4214#5416#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/lists/export_views.py">
+    <entry file="file://$PROJECT_DIR$/sanads/transactions/autoSanad.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="27">
-          <caret line="1" column="32" lean-forward="false" selection-start-line="1" selection-start-column="32" selection-end-line="1" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/companies/management/commands/dumpdata.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
           <folding>
-            <element signature="e#0#23#0" expanded="false" />
+            <element signature="e#0#32#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/companies/serializers.py">
+    <entry file="file://$PROJECT_DIR$/helpers/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+        <state relative-caret-position="108">
+          <caret line="4" column="8" lean-forward="false" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/users/views.py">
+    <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/rest_framework/generics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="661">
-          <caret line="42" column="47" lean-forward="false" selection-start-line="42" selection-start-column="47" selection-end-line="42" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#35#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="310">
+          <caret line="276" column="48" lean-forward="false" selection-start-line="276" selection-start-column="48" selection-end-line="276" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/users/urls.py">
+    <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/rest_framework/mixins.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="8" column="0" lean-forward="false" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        <state relative-caret-position="310">
+          <caret line="64" column="27" lean-forward="false" selection-start-line="64" selection-start-column="27" selection-end-line="64" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheques/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="11" column="57" lean-forward="false" selection-start-line="11" selection-start-column="57" selection-end-line="11" selection-end-column="57" />
           <folding>
             <element signature="e#0#41#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanads/transactions/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="61" column="0" lean-forward="false" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanads/transactions/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1188">
+          <caret line="123" column="0" lean-forward="false" selection-start-line="123" selection-start-column="0" selection-end-line="123" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#52#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1297,160 +945,425 @@
           <caret line="6" column="24" lean-forward="false" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
           <folding>
             <element signature="e#179#1062#0" expanded="false" />
-            <element signature="e#1097#1445#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/users/serializers.py">
+    <entry file="file://$PROJECT_DIR$/cheques/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="7" column="4" lean-forward="false" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#46#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/companies/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="19" column="31" lean-forward="true" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+        <state relative-caret-position="324">
+          <caret line="51" column="0" lean-forward="true" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/companies/models.py">
+    <entry file="file://$PROJECT_DIR$/cheques/signals.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="23" column="0" lean-forward="true" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/sanads/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="43" column="16" lean-forward="false" selection-start-line="43" selection-start-column="16" selection-end-line="43" selection-end-column="16" />
+        <state relative-caret-position="405">
+          <caret line="56" column="13" lean-forward="false" selection-start-line="56" selection-start-column="13" selection-end-line="56" selection-end-column="13" />
           <folding>
-            <element signature="e#0#27#0" expanded="true" />
-            <element signature="e#464#1362#0" expanded="false" />
-            <element signature="e#1397#2297#0" expanded="false" />
-            <element signature="e#2383#2869#0" expanded="false" />
-            <element signature="e#2942#3100#0" expanded="false" />
-            <element signature="e#3283#3405#0" expanded="false" />
-            <element signature="e#3432#3518#0" expanded="false" />
+            <element signature="e#1152#1584#0" expanded="false" />
+            <element signature="e#1672#1881#0" expanded="false" />
+            <element signature="e#3805#4885#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sanads/transactions/models.py">
+    <entry file="file://$PROJECT_DIR$/cheques/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="53" column="22" lean-forward="false" selection-start-line="53" selection-start-column="22" selection-end-line="53" selection-end-column="22" />
+        <state relative-caret-position="364">
+          <caret line="222" column="38" lean-forward="false" selection-start-line="222" selection-start-column="38" selection-end-line="222" selection-end-column="38" />
           <folding>
-            <element signature="e#389#1636#0" expanded="false" />
-            <element signature="e#1677#2758#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wares/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="580">
-          <caret line="89" column="33" lean-forward="false" selection-start-line="89" selection-start-column="33" selection-end-line="89" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-            <element signature="e#329#554#0" expanded="false" />
-            <element signature="e#589#837#0" expanded="false" />
-            <element signature="e#872#1373#0" expanded="false" />
-            <element signature="e#1403#2794#0" expanded="false" />
-            <element signature="e#2838#3239#0" expanded="false" />
-            <element signature="e#3291#3799#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/defaultAccounts/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="6" column="7" lean-forward="false" selection-start-line="6" selection-start-column="7" selection-end-line="6" selection-end-column="7" />
-          <folding>
-            <element signature="e#151#947#0" expanded="false" />
-            <element signature="e#969#1021#0" expanded="false" />
+            <element signature="e#0#32#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheques/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="96" column="12" lean-forward="false" selection-start-line="96" selection-start-column="12" selection-end-line="96" selection-end-column="12" />
+        <state relative-caret-position="589">
+          <caret line="136" column="93" lean-forward="false" selection-start-line="136" selection-start-column="93" selection-end-line="136" selection-end-column="93" />
           <folding>
-            <element signature="e#512#1171#0" expanded="false" />
-            <element signature="e#1204#3481#0" expanded="false" />
-            <element signature="e#3520#4943#0" expanded="false" />
+            <element signature="e#0#28#0" expanded="true" />
+            <element signature="e#569#1337#0" expanded="false" />
+            <element signature="e#1370#3764#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/accounts/costCenters/models.py">
+    <entry file="file://$PROJECT_DIR$/factors/serializers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="16" column="18" lean-forward="false" selection-start-line="16" selection-start-column="18" selection-end-line="16" selection-end-column="18" />
+        <state relative-caret-position="499">
+          <caret line="67" column="0" lean-forward="false" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+            <element signature="e#1766#2376#0" expanded="false" />
+            <element signature="e#2441#2557#0" expanded="false" />
+            <marker date="1554438606531" expanded="true" signature="1395:2377" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/balance/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-567">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#32#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="634">
+          <caret line="48" column="89" lean-forward="false" selection-start-line="48" selection-start-column="89" selection-end-line="48" selection-end-column="89" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="918">
+          <caret line="34" column="28" lean-forward="false" selection-start-line="34" selection-start-column="28" selection-end-line="34" selection-end-column="28" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
-            <element signature="e#107#356#0" expanded="false" />
-            <element signature="e#392#737#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="769">
+          <caret line="45" column="14" lean-forward="false" selection-start-line="45" selection-start-column="14" selection-end-line="45" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/ledger/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="15" column="60" lean-forward="false" selection-start-line="15" selection-start-column="60" selection-end-line="15" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/lists/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="39" column="6" lean-forward="false" selection-start-line="39" selection-start-column="6" selection-end-line="39" selection-end-column="6" />
+          <folding>
+            <element signature="e#0#32#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/bill/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="14" column="49" lean-forward="false" selection-start-line="14" selection-start-column="49" selection-end-line="14" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/journal/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="481">
+          <caret line="37" column="60" lean-forward="false" selection-start-line="37" selection-start-column="60" selection-end-line="37" selection-end-column="60" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/incomeStatement/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="73" column="27" lean-forward="false" selection-start-line="73" selection-start-column="27" selection-end-line="73" selection-end-column="27" />
+          <folding>
+            <element signature="e#0#35#0" expanded="false" />
+            <element signature="e#581#807#0" expanded="false" />
+            <element signature="e#853#1770#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/balanceSheet/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="53" column="39" lean-forward="false" selection-start-line="53" selection-start-column="39" selection-end-line="53" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/inventory/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="28" column="16" lean-forward="true" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="810">
+          <caret line="62" column="0" lean-forward="false" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#38#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/factors/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        <state relative-caret-position="310">
+          <caret line="150" column="18" lean-forward="false" selection-start-line="150" selection-start-column="18" selection-end-line="150" selection-end-column="18" />
           <folding>
-            <element signature="e#676#954#0" expanded="false" />
-            <element signature="e#987#1400#0" expanded="false" />
-            <element signature="e#1437#1745#0" expanded="false" />
-            <element signature="e#1778#5515#0" expanded="false" />
-            <element signature="e#5554#6094#0" expanded="false" />
-            <element signature="e#6133#6452#0" expanded="false" />
-            <element signature="e#6488#7441#0" expanded="false" />
-            <element signature="e#7541#7850#0" expanded="false" />
-            <element signature="e#7932#8005#0" expanded="false" />
-            <element signature="e#8291#8393#0" expanded="false" />
-            <element signature="e#8422#8510#0" expanded="false" />
+            <element signature="e#5947#7009#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="19" column="34" lean-forward="false" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#41#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/factors/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="567">
+          <caret line="35" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+          <folding>
+            <element signature="e#2787#4004#0" expanded="false" />
+            <element signature="e#4045#5306#0" expanded="false" />
+            <element signature="e#6345#6958#0" expanded="false" />
+            <element signature="e#7727#8344#0" expanded="false" />
+            <element signature="e#8424#9080#0" expanded="false" />
+            <element signature="e#9150#10788#0" expanded="false" />
+            <element signature="e#10846#11115#0" expanded="false" />
+            <element signature="e#11173#12212#0" expanded="false" />
+            <element signature="e#12268#12765#0" expanded="false" />
+            <marker date="1554438633292" expanded="true" signature="600:1237" ph="..." />
+            <marker date="1554438633292" expanded="false" signature="1469:2313" ph="..." />
+            <marker date="1554438633292" expanded="false" signature="7020:7663" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="20" column="0" lean-forward="true" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#52#0" expanded="false" />
+            <element signature="e#4269#4694#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/templatetags/export_verifiers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/templates/reports/transactions.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="729">
+          <caret line="115" column="44" lean-forward="false" selection-start-line="115" selection-start-column="44" selection-end-line="115" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/templates/reports/factors.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="729">
+          <caret line="278" column="45" lean-forward="false" selection-start-line="278" selection-start-column="45" selection-end-line="278" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/django/views/generic/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="148" column="8" lean-forward="false" selection-start-line="148" selection-start-column="8" selection-end-line="148" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Envs/SH/Lib/site-packages/wkhtmltopdf/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="472">
+          <caret line="122" column="64" lean-forward="false" selection-start-line="122" selection-start-column="64" selection-end-line="122" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/lists/export_views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="243">
+          <caret line="9" column="23" lean-forward="true" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="23" />
+          <folding>
+            <element signature="e#2534#3927#0" expanded="false" />
+            <element signature="e#4309#5066#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wares/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="62" column="0" lean-forward="false" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
+          <folding>
+            <element signature="e#230#573#0" expanded="false" />
+            <element signature="e#608#979#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fixtures/accounts.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/defaultAccounts/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-284">
+          <caret line="7" column="28" lean-forward="true" selection-start-line="7" selection-start-column="28" selection-end-line="7" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/companies/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="810">
+          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/templates/reports/sanads.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="607">
+          <caret line="94" column="44" lean-forward="false" selection-start-line="94" selection-start-column="44" selection-end-line="94" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanads/sanads/serializers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="33" column="4" lean-forward="false" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="4" />
+          <folding>
+            <element signature="e#649#1508#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanads/sanads/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="661">
+          <caret line="33" column="23" lean-forward="false" selection-start-line="33" selection-start-column="23" selection-end-line="33" selection-end-column="23" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+            <element signature="e#2851#3418#0" expanded="false" />
+            <element signature="e#3491#3649#0" expanded="false" />
+            <element signature="e#3832#3954#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="16" column="21" lean-forward="false" selection-start-line="16" selection-start-column="21" selection-end-line="16" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#41#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/companies/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="14" column="55" lean-forward="false" selection-start-line="14" selection-start-column="55" selection-end-line="14" selection-end-column="55" />
+          <folding>
+            <element signature="e#0#41#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/accounts/accounts/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="344">
+          <caret line="158" column="28" lean-forward="false" selection-start-line="158" selection-start-column="28" selection-end-line="158" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reports/balance/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="364">
+          <caret line="31" column="109" lean-forward="false" selection-start-line="31" selection-start-column="109" selection-end-line="31" selection-end-column="109" />
+          <folding>
+            <element signature="e#4213#6285#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/accounts/accounts/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="52" column="28" lean-forward="false" selection-start-line="52" selection-start-column="28" selection-end-line="52" selection-end-column="28" />
+        <state relative-caret-position="121">
+          <caret line="130" column="8" lean-forward="false" selection-start-line="130" selection-start-column="8" selection-end-line="130" selection-end-column="8" />
           <folding>
-            <element signature="e#0#40#0" expanded="true" />
-            <element signature="e#520#792#0" expanded="false" />
-            <element signature="e#830#1511#0" expanded="false" />
-            <element signature="e#1548#2063#0" expanded="false" />
-            <element signature="e#2107#2338#0" expanded="false" />
-            <element signature="e#2371#5037#0" expanded="false" />
-            <element signature="e#3695#4006#0" expanded="false" />
-            <element signature="e#4042#4097#0" expanded="false" />
-            <element signature="e#4133#4821#0" expanded="false" />
-            <element signature="e#5070#6901#0" expanded="false" />
-            <element signature="e#6932#7670#0" expanded="false" />
+            <element signature="e#0#28#0" expanded="true" />
+            <element signature="e#670#1463#0" expanded="false" />
+            <element signature="e#1500#2251#0" expanded="false" />
+            <element signature="e#2295#2643#0" expanded="false" />
+            <element signature="e#4297#4608#0" expanded="false" />
+            <element signature="e#4644#4699#0" expanded="false" />
+            <element signature="e#5700#7636#0" expanded="false" />
+            <element signature="e#7667#8508#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/helpers/models.py">
+    <entry file="file://$PROJECT_DIR$/companies/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="3" column="29" lean-forward="false" selection-start-line="3" selection-start-column="29" selection-end-line="3" selection-end-column="29" />
-          <folding />
+        <state relative-caret-position="445">
+          <caret line="178" column="14" lean-forward="true" selection-start-line="178" selection-start-column="14" selection-end-line="178" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#30#0" expanded="true" />
+            <element signature="e#1570#1799#0" expanded="false" />
+            <element signature="e#1841#2092#0" expanded="false" />
+            <element signature="e#2131#3062#0" expanded="false" />
+            <element signature="e#3103#3617#0" expanded="false" />
+            <element signature="e#3656#4602#0" expanded="false" />
+            <element signature="e#4679#5852#0" expanded="false" />
+            <element signature="e#5907#6738#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanads/sanads/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-243">
+          <caret line="41" column="17" lean-forward="false" selection-start-line="41" selection-start-column="17" selection-end-line="41" selection-end-column="17" />
+          <folding>
+            <element signature="e#589#1219#0" expanded="false" />
+            <element signature="e#1758#2797#0" expanded="false" />
+            <element signature="e#2834#3575#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
