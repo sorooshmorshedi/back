@@ -73,9 +73,12 @@ def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
     newType = instance.valueType
     oldType = newType
     if instance.id:
-        obj = SanadItem.objects.get(pk=instance.id)
-        subValue = obj.value
-        oldType = obj.valueType
+        try:
+            obj = SanadItem.objects.get(pk=instance.id)
+            subValue = obj.value
+            oldType = obj.valueType
+        except SanadItem.DoesNotExist:
+            pass
 
     sanad = instance.sanad
 
