@@ -10,12 +10,14 @@ class DefaultAccount(BaseModel):
     PAYMENT = 'payment'
     RECEIVE_AND_PAYMENT = 'receiveAndPayment'
     FACTOR = 'factor'
+    CLOSE_ACCOUNTS = 'closeAccounts'
     NONE = 'none'
     USAGES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
         (RECEIVE_AND_PAYMENT, 'دریافت و پرداخت'),
         (FACTOR, 'فاکتور'),
+        (CLOSE_ACCOUNTS, 'بستن حساب ها'),
         (NONE, 'هیچ کدام')
     )
 
