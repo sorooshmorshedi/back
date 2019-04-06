@@ -13,19 +13,3 @@ def getInventoryCount(warehouse, ware):
         output_count = 0
     # print(input_count, output_count)
     return input_count - output_count
-    inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
-    res = 0
-    if len(inventory):
-        res = inventory[0].count
-    else:
-        try:
-            inventory = WarehouseInventory(
-                warehouse=Warehouse.objects.get(pk=warehouse),
-                ware=Ware.objects.get(pk=ware),
-                count=0,
-            )
-        except:
-            raise {'error': 'invalid ware or warehouse'}
-        inventory.save()
-    return res
-

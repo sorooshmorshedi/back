@@ -2,8 +2,6 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer, AccountSerializer
 from factors.models import *
-from sanads.sanads.models import Sanad, newSanadCode
-from wares.models import WarehouseInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
 
@@ -132,7 +130,7 @@ class NotPaidFactorsSerializer(FactorSerializer):
         fields = '__all__'
 
 
-class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WarehouseInventory
-        fields = '__all__'
+# class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = WarehouseInventory
+#         fields = '__all__'

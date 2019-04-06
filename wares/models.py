@@ -97,34 +97,3 @@ class Ware(BaseModel):
 
     def has_inventory(self):
         pass
-
-
-class WarehouseInventory(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouse_inventory')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, related_name='inventory')
-    ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='inventory')
-    count = models.IntegerField(default=0)
-
-    class Meta:
-        unique_together = ('warehouse', 'ware')
-
-    def __str__(self):
-        return "{0} -> {1} : {2}".format(self.warehouse.name, self.ware.name, self.count)
-
-
-def updateInventory(warehouse, ware, count):
-    inventory = WarehouseInventory.objects.filter(warehouse=warehouse, ware=ware)
-    if len(inventory):
-        inventory = inventory[0]
-        inventory.count += count
-    else:
-        try:
-            inventory = WarehouseInventory(
-                warehouse=Warehouse.objects.get(pk=warehouse),
-                ware=Ware.objects.get(pk=ware),
-                count=count,
-            )
-        except:
-            raise {'error': 'invalid ware or warehouse'}
-    inventory.save()
-    return inventory.count

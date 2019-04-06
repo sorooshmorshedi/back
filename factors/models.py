@@ -9,7 +9,7 @@ from factors.signals import clearFactorSanad
 from helpers.models import BaseModel
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
-from wares.models import Ware, Warehouse, updateInventory
+from wares.models import Ware, Warehouse
 
 EXPENSE_TYPES = (
     ('buy', 'خرید'),

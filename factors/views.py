@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDA
-from sanads.sanads.models import clearSanad
+from sanads.sanads.models import clearSanad, newSanadCode
 from .serializers import *
 
 
