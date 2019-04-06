@@ -363,6 +363,7 @@ class FirstPeriodInventoryView(APIView):
         data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
         data['factor']['code'] = 0
         data['factor']['account'] = Account.get_partners_account().id
+        data['factor']['financial_year'] = request.user.active_financial_year.id
 
         factor = Factor.getFirstPeriodInventory()
         if factor:
@@ -372,7 +373,7 @@ class FirstPeriodInventoryView(APIView):
         if not serialized.is_valid():
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         serialized.save()
-        factor = serialized.instance
+        factor = Factor.getFirstPeriodInventory()
 
         items_to_create = []
         items_to_update = []
@@ -380,6 +381,7 @@ class FirstPeriodInventoryView(APIView):
         SerializerClass = FactorItemSerializer
 
         for item in data.get('items', []):
+            item['financial_year'] = request.user.active_financial_year.id
             if 'id' in item:
                 items_to_update.append(item)
             else:
@@ -406,12 +408,11 @@ class FirstPeriodInventoryView(APIView):
         if len(ids_to_delete):
             FactorItem.objects.inFinancialYear(request.user).filter(id__in=ids_to_delete).delete()
 
-        sanad = factor.sanad
-        sanad.explanation = factor.explanation
-        sanad.date = factor.date
-        sanad.type = 'temporary'
-        sanad.createType = 'auto'
+        sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
+                      createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
         sanad.save()
+        factor.sanad = sanad
+        factor.save()
 
         if sanad.items.count():
             clearSanad(sanad)
@@ -420,11 +421,13 @@ class FirstPeriodInventoryView(APIView):
             account=Account.get_inventory_account(),
             value=factor.sum,
             valueType='bed',
+            financial_year=request.user.active_financial_year
         )
         sanad.items.create(
             account=Account.get_partners_account(),
             value=factor.sum,
             valueType='bes',
+            financial_year=request.user.active_financial_year
         )
 
         res = Response(FactorSerializer(instance=factor).data, status=status.HTTP_200_OK)
