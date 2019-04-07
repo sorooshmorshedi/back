@@ -27,6 +27,7 @@ class TransactionListCreate(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         request.data['financial_year'] = request.user.active_financial_year.id
+        request.data['code'] = Transaction.newCodes(request.user, request.data['type'])
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -128,15 +129,8 @@ class TransactionItemMass(APIView):
 
 @api_view(['get'])
 def newCodeForTransaction(request):
-    if 'type' not in request.GET:
-        return Response(['لطفا نوع را مشخص کنید'], status=status.HTTP_400_BAD_REQUEST)
-    else:
-        type = request.GET['type']
-    try:
-        code = Transaction.objects.inFinancialYear(request.user).filter(type=type).latest('code').code + 1
-    except:
-        code = 1
-    return Response(code)
+    codes = Transaction.newCodes(request.user)
+    return Response(codes)
 
 
 @api_view(['get'])

@@ -107,6 +107,23 @@ class Transaction(BaseModel):
                 financial_year=sanad.financial_year
             )
 
+    @staticmethod
+    def newCodes(user, transaction_type=None):
+        codes = {}
+        for type in Transaction.TYPES:
+            type = type[0]
+            if transaction_type:
+                if type != transaction_type:
+                    continue
+            try:
+                codes[type] = Transaction.objects.inFinancialYear(user).filter(type=type).latest('code').code + 1
+            except:
+                codes[type] = 1
+        if transaction_type:
+            return codes[transaction_type]
+        else:
+            return codes
+
 
 class TransactionItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactionItems')

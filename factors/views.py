@@ -65,12 +65,17 @@ class FactorModelView(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request.data['financial_year'] = request.user.active_financial_year.id
-
+        request.data['code'] = Factor.newCodes(request.user, request.data['type'])
         sanad = Sanad(code=newSanadCode(request.user), date=request.data.get('date', now()),
                       createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
         sanad.save()
         request.data['sanad'] = sanad.id
-        return super().create(request, *args, **kwargs)
+        try:
+            res = super().create(request, *args, **kwargs)
+        except:
+            sanad.delete()
+            raise
+        return res
 
 
 class FactorItemMass(APIView):
@@ -288,13 +293,7 @@ class FactorPaymentMass(APIView):
 
 @api_view(['get'])
 def newCodesForFactor(request):
-    res = {}
-    types = ['buy', 'sale', 'backFromBuy', 'backFromSale']
-    for t in types:
-        try:
-            res[t] = Factor.objects.inFinancialYear(request.user).filter(type=t).latest('code').code + 1
-        except:
-            res[t] = 1
+    res = Factor.newCodes(request.user)
     return Response(res)
 
 

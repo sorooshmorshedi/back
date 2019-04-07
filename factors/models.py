@@ -136,6 +136,23 @@ class Factor(BaseModel):
         except Factor.DoesNotExist:
             return None
 
+    @staticmethod
+    def newCodes(user, factor_type=None):
+        codes = {}
+        for type in Factor.FACTOR_TYPES:
+            type = type[0]
+            if factor_type:
+                if type != factor_type:
+                    continue
+            try:
+                codes[type] = Factor.objects.inFinancialYear(user).filter(type=type).latest('code').code + 1
+            except:
+                codes[type] = 1
+        if factor_type:
+            return codes[factor_type]
+        else:
+            return codes
+
 
 class FactorExpense(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_expenses')
