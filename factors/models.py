@@ -66,6 +66,9 @@ class Factor(BaseModel):
     class Meta(BaseModel.Meta):
         unique_together = ('code', 'type')
 
+    def __str__(self):
+        return "ID: {}, code: {}, financial_year: {}".format(self.pk, self.code, self.financial_year)
+
     @property
     def sum(self):
         sum = 0
@@ -111,28 +114,39 @@ class Factor(BaseModel):
     def remain(self):
         account_remain = self.account.get_remain()
         if self.type in ('buy', 'backFromSale'):
-            title = 'مبلغ قابل پرداخت'
+            after_factor_title = 'مبلغ قابل پرداخت'
             if account_remain['remain_type'] == 'bes':
-                value = self.totalSum + account_remain['bes']
+                before_factor = self.totalSum + account_remain['value']
+                sign = '+'
+                before_factor_title = 'مانده بستانکار'
             else:
-                value = self.totalSum - account_remain['bed']
+                before_factor = self.totalSum - account_remain['value']
+                sign = '-'
+                before_factor_title = 'مانده بدهکار'
         else:
-            title = 'مبلغ قابل دریافت'
+            after_factor_title = 'مبلغ قابل دریافت'
             if account_remain['remain_type'] == 'bes':
-                value = self.totalSum - account_remain['bes']
+                before_factor = self.totalSum - account_remain['value']
+                sign = '-'
+                before_factor_title = 'مانده بستانکار'
             else:
-                value = self.totalSum + account_remain['bed']
+                before_factor = self.totalSum + account_remain['value']
+                sign = '+'
+                before_factor_title = 'مانده بدهکار'
 
         res = {
-            'title': title,
-            'value': value
+            'before_factor_title': before_factor_title,
+            'before_factor': abs(before_factor),
+            'after_factor_title': after_factor_title,
+            'after_factor': account_remain['value'],
+            'sign': sign
         }
         return res
 
     @staticmethod
-    def getFirstPeriodInventory():
+    def getFirstPeriodInventory(user):
         try:
-            return Factor.objects.get(code=0)
+            return Factor.objects.inFinancialYear(user).get(code=0)
         except Factor.DoesNotExist:
             return None
 

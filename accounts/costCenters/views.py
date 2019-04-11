@@ -1,48 +1,28 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.costCenters.serializers import *
 from helpers.auth import BasicCRUDPermission
+from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class CostCenterListCreate(generics.ListCreateAPIView):
+class CostCenterListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = CostCenterSerializer
 
-    def get_queryset(self):
-        return CostCenter.objects.inFinancialYear(self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
-
-
-class CostCenterDetail(generics.RetrieveUpdateDestroyAPIView):
+class CostCenterDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = CostCenterSerializer
 
-    def get_queryset(self):
-        return CostCenter.objects.inFinancialYear(self.request.user)
 
-
-class CostCenterGroupListCreate(generics.ListCreateAPIView):
+class CostCenterGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = CostCenterGroupSerializer
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
-    def get_queryset(self):
-        return CostCenterGroup.objects.inFinancialYear(self.request.user)
-
-
-class CostCenterGroupDetail(generics.RetrieveUpdateDestroyAPIView):
+class CostCenterGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = CostCenterGroupSerializer
-
-    def get_queryset(self):
-        return CostCenterGroup.objects.inFinancialYear(self.request.user)

@@ -350,7 +350,7 @@ def getFactorByCode(request):
 
 class FirstPeriodInventoryView(APIView):
     def get(self, request):
-        factor = Factor.getFirstPeriodInventory()
+        factor = Factor.getFirstPeriodInventory(request.user)
         if not factor:
             return Response({'message': 'no first period inventory'}, status=status.HTTP_200_OK)
         serialized = FactorListRetrieveSerializer(factor)
@@ -361,10 +361,10 @@ class FirstPeriodInventoryView(APIView):
         data = request.data
         data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
         data['factor']['code'] = 0
-        data['factor']['account'] = Account.get_partners_account().id
+        data['factor']['account'] = Account.get_partners_account(request.user).id
         data['factor']['financial_year'] = request.user.active_financial_year.id
 
-        factor = Factor.getFirstPeriodInventory()
+        factor = Factor.getFirstPeriodInventory(request.user)
         if factor:
             serialized = FactorSerializer(instance=factor, data=data['factor'])
         else:
@@ -372,7 +372,7 @@ class FirstPeriodInventoryView(APIView):
         if not serialized.is_valid():
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         serialized.save()
-        factor = Factor.getFirstPeriodInventory()
+        factor = Factor.getFirstPeriodInventory(request.user)
 
         items_to_create = []
         items_to_update = []
@@ -417,13 +417,13 @@ class FirstPeriodInventoryView(APIView):
             clearSanad(sanad)
 
         sanad.items.create(
-            account=Account.get_inventory_account(),
+            account=Account.get_inventory_account(request.user),
             value=factor.sum,
             valueType='bed',
             financial_year=request.user.active_financial_year
         )
         sanad.items.create(
-            account=Account.get_partners_account(),
+            account=Account.get_partners_account(request.user),
             value=factor.sum,
             valueType='bes',
             financial_year=request.user.active_financial_year

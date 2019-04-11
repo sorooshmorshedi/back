@@ -1,11 +1,13 @@
 from rest_framework import serializers
-from rest_framework_recursive.fields import RecursiveField
 
 from accounts.accounts.models import *
 from accounts.costCenters.serializers import CostCenterGroupSerializer
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
+
+    syncFloatAccountGroups = serializers.ListField(allow_empty=True, default=[])
+
     class Meta:
         model = FloatAccount
         fields = '__all__'

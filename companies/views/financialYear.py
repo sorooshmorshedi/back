@@ -1,16 +1,20 @@
-from django.db import connection
+from django.db import transaction
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.accounts.models import Account
-from accounts.defaultAccounts.models import getDA
+from accounts.accounts.models import Account, Bank, Person, FloatAccount, FloatAccountGroup, IndependentAccount
+from accounts.costCenters.models import CostCenter, CostCenterGroup
+from accounts.defaultAccounts.models import getDA, DefaultAccount
+from companies.models import FinancialYear
 from sanads.sanads.models import SanadItem, newSanadCode, Sanad
 from sanads.sanads.serializers import SanadSerializer, SanadItemSerializer
+from wares.models import Ware, Warehouse, WareLevel, Unit
 
 
 class ClosingBaseView(APIView):
@@ -212,7 +216,54 @@ class CloseAccountsView(ClosingBaseView):
 
 
 class MoveAccountsView(ClosingBaseView):
+
+    destination_financial_year = None
+
     def post(self, request):
         self.user = request.user
+        self.destination_financial_year = get_object_or_404(FinancialYear, pk=request.data['destination_financial_year'])
         self.resetAccounts()
+        self.moveAccounts()
+        self.moveWares()
         return Response({}, status=status.HTTP_200_OK)
+
+    @transaction.atomic()
+    def moveAccounts(self):
+        destination_accounts = Account.objects \
+            .filter(financial_year=self.destination_financial_year) \
+            .exclude(financial_year=self.user.active_financial_year)
+        source_accounts = Account.objects.inFinancialYear(self.user)
+
+        for destination_account in destination_accounts:
+            if destination_account.code in [account.code for account in source_accounts]:
+                detail = "در سال مالی جدید حساب با کد {} وجود دارد".format(destination_account.code)
+                raise ValidationError(detail=detail)
+
+        self.destination_financial_year.accounts.add(*Account.objects.inFinancialYear(self.user))
+        self.destination_financial_year.persons.add(*Person.objects.inFinancialYear(self.user))
+        self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear(self.user))
+        self.destination_financial_year.float_accounts.add(*FloatAccount.objects.inFinancialYear(self.user))
+        self.destination_financial_year.float_account_groups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
+        self.destination_financial_year.independent_accounts.add(*IndependentAccount.objects.inFinancialYear(self.user))
+        self.destination_financial_year.cost_centers.add(*CostCenter.objects.inFinancialYear(self.user))
+        self.destination_financial_year.cost_center_groups.add(*CostCenterGroup.objects.inFinancialYear(self.user))
+        self.destination_financial_year.default_accounts.add(*DefaultAccount.objects.inFinancialYear(self.user))
+
+    @transaction.atomic()
+    def moveWares(self):
+        destination_wares = Ware.objects \
+            .filter(financial_year=self.destination_financial_year) \
+            .exclude(financial_year=self.user.active_financial_year)
+        source_wares = Ware.objects.inFinancialYear(self.user)
+
+        for destination_wares in destination_wares:
+            if destination_wares.code in [ware.code for ware in source_wares]:
+                detail = "در سال مالی جدید کالا با کد {} وجود دارد".format(destination_wares.code)
+                raise ValidationError(detail=detail)
+
+        self.destination_financial_year.wares.add(*Ware.objects.inFinancialYear(self.user))
+        self.destination_financial_year.warehouses.add(*Warehouse.objects.inFinancialYear(self.user))
+        self.destination_financial_year.ware_levels.add(*WareLevel.objects.inFinancialYear(self.user))
+        self.destination_financial_year.units.add(*Unit.objects.inFinancialYear(self.user))
+
+

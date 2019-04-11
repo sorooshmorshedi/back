@@ -205,8 +205,12 @@
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
                         <tr>
-                            <th>{{ factor.remain.title }}</th>
-                            <td>{{ factor.remain.value | money }}</td>
+                            <th>{{ factor.remain.before_factor_title }}</th>
+                            <td>{{ factor.remain.before_factor | money }}</td>
+                        </tr>
+                        <tr>
+                            <th>{{ factor.remain.after_factor_title }}</th>
+                            <td>{{ factor.remain.after_factor | money }}</td>
                         </tr>
                     </tbody>
                 </table>

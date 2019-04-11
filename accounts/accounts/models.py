@@ -1,28 +1,22 @@
 from django.db import models
 from django.db.models import Sum
 from accounts.costCenters.models import CostCenterGroup
-from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
 class FloatAccountGroup(BaseModel):
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='float_account_groups')
-
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'گروه حساب شناور'
 
     def __str__(self):
-        return str(self.pk) + ' - ' + self.name
+        return str(self.pk) + ' - ' + str(self.name)
 
 
 class FloatAccount(BaseModel):
-
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='float_accounts')
-
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -32,13 +26,19 @@ class FloatAccount(BaseModel):
     max_bes_with_sanad = models.CharField(max_length=20, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
-    floatAccountGroups = models.ManyToManyField(FloatAccountGroup, related_name='floatAccounts')
+    floatAccountGroups = models.ManyToManyField(FloatAccountGroup, through='FloatAccountRelation',
+                                                related_name='floatAccounts')
 
     def __str__(self):
         return self.name
 
     class Meta(BaseModel.Meta):
         verbose_name = 'حساب شناور'
+
+
+class FloatAccountRelation(BaseModel):
+    floatAccountGroup = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='relation')
+    floatAccount = models.ForeignKey(FloatAccountGroup, on_delete=models.CASCADE, related_name='relation')
 
 
 class AccountType(BaseModel):
@@ -65,7 +65,6 @@ class AccountType(BaseModel):
 
 
 class IndependentAccount(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='independent_accounts')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -89,10 +88,8 @@ class Account(BaseModel):
         (TAFSILI, 'tafzili'),
     )
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accounts')
-
     name = models.CharField(max_length=150, verbose_name='نام حساب')
-    code = models.CharField(max_length=50, unique=True, verbose_name='کد حساب')
+    code = models.CharField(max_length=50, verbose_name='کد حساب')
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
@@ -156,17 +153,16 @@ class Account(BaseModel):
         return remain
 
     @staticmethod
-    def get_inventory_account():
-        return Account.objects.get(code='106040001')
+    def get_inventory_account(user):
+        return Account.objects.inFinancialYear(user).get(code='106040001')
 
     @staticmethod
-    def get_partners_account():
-        return Account.objects.get(code='303070001')
+    def get_partners_account(user):
+        return Account.objects.inFinancialYear(user).get(code='303070001')
 
 
 class Person(BaseModel):
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='persons')
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
@@ -209,7 +205,6 @@ class Person(BaseModel):
 
 class Bank(BaseModel):
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='banks')
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
 

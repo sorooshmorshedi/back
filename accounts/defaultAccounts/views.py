@@ -1,51 +1,38 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.defaultAccounts.serializers import *
 from helpers.auth import BasicCRUDPermission
+from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class DefaultAccountListCreate(generics.ListCreateAPIView):
+class DefaultAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = DefaultAccountSerializer
-
-    def get_queryset(self):
-        return DefaultAccount.objects.inFinancialYear(self.request.user)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
         serializer = DefaultAccountListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
-
-class DefaultAccountDetail(generics.RetrieveUpdateDestroyAPIView):
+class DefaultAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = DefaultAccountSerializer
 
-    def get_queryset(self):
-        return DefaultAccount.objects.inFinancialYear(self.request.user)
-
-    def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
-        da = get_object_or_404(queryset, pk=pk)
+    def retrieve(self, request, **kwargs):
+        da = self.get_object()
         serializer = DefaultAccountListRetrieveSerializer(da)
         return Response(serializer.data)
 
-    def delete(self, request, pk=None):
-        queryset = self.get_queryset()
-        da = get_object_or_404(queryset, pk=pk)
+    def destroy(self, request, *args, **kwargs):
+        da = self.get_object()
         if da.programingName:
             raise serializers.ValidationError('این پیشفرض غیر قابل حذف می باشد')
-        return super(DefaultAccountDetail, self).delete(request, pk)
+        return super().delete(request, *args, **kwargs)
 
 
 

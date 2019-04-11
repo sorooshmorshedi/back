@@ -1,12 +1,10 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
-from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
 class Unit(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='units')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -18,7 +16,6 @@ class Unit(BaseModel):
 
 
 class Warehouse(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouses')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -40,7 +37,6 @@ class WareLevel(BaseModel):
         (CATEGORY, 'category'),
     )
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='ware_levels')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
@@ -64,7 +60,6 @@ class Ware(BaseModel):
         (WEIGHTED_MEAN, 'میانگین موزون'),
     }
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
     barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
@@ -93,7 +88,7 @@ class Ware(BaseModel):
 
     def has_factorItem(self):
         # print(self.factorItems.count())
-        return self.factorItems.count() == 0
+        return self.factorItems.count() != 0
 
     def has_inventory(self):
         pass

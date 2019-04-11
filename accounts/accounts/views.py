@@ -1,4 +1,4 @@
-from django.db import connection
+from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
@@ -10,67 +10,92 @@ from rest_framework.response import Response
 
 from accounts.accounts.serializers import *
 from helpers.auth import BasicCRUDPermission
+from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class FloatAccountListCreate(generics.ListCreateAPIView):
+class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    serializer_class = FloatAccountSerializer
+
+    def created(self, instance, request):
+        syncFloatAccountGroups = request.data.get('syncFloatAccountGroups', [])
+        financial_year = request.user.active_financial_year
+        for floatAccountGroup in syncFloatAccountGroups:
+            relation = FloatAccountRelation.create(
+                floatAccount=instance,
+                floatAccountGroup=floatAccountGroup
+            )
+            financial_year.add(relation)
+        return instance
+
+
+class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountSerializer
 
     def get_queryset(self):
-        return FloatAccount.objects.inFinancialYear(self.request.user)
+        user = self.request.user
+        financial_year = user.active_financial_year
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related(
+            Prefetch('floatAccountGroups',
+                     queryset=FloatAccountGroup.objects.inFinancialYear(user)
+                     .filter(relation__financial_year=financial_year)
+                     .distinct()
+                     )
+        )
+        return queryset
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
+    def update(self, request, *args, **kwargs):
+        res = super().update(request, *args, **kwargs)
+        syncFloatAccountGroups = request.data.get('syncFloatAccountGroups', [])
+        instance = self.get_object()
+        FloatAccountRelation.objects.inFinancialYear(request.user).filter(
+            floatAccount=instance,
+            floatAccountGroup__in=syncFloatAccountGroups
+        ).delete()
+        financial_year = request.user.active_financial_year
+        for floatAccountGroup in syncFloatAccountGroups:
+            relation = FloatAccountRelation.create(
+                floatAccount=instance,
+                floatAccountGroup=floatAccountGroup
+            )
+            financial_year.add(relation)
+        return res
 
 
-class FloatAccountDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = FloatAccountSerializer
-
-    def get_queryset(self):
-        return FloatAccount.objects.inFinancialYear(self.request.user)
-
-
-class FloatAccountGroupListCreate(generics.ListCreateAPIView):
+class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
 
     def get_queryset(self):
-        return FloatAccountGroup.objects.inFinancialYear(self.request.user)
+        user = self.request.user
+        financial_year = user.active_financial_year
+        queryset = super().get_queryset()
+        queryset = queryset.prefetch_related(
+            Prefetch('floatAccounts',
+                     queryset=FloatAccount.objects.inFinancialYear(user)
+                     .filter(relation__financial_year=financial_year)
+                     .distinct()
+                     )
+        )
+        return queryset
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
-
-class FloatAccountGroupDetail(generics.RetrieveUpdateDestroyAPIView):
+class FloatAccountGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
 
-    def get_queryset(self):
-        return FloatAccountGroup.objects.inFinancialYear(self.request.user)
 
-
-class IndependentAccountDetail(generics.RetrieveUpdateDestroyAPIView):
+class IndependentAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = IndependentAccountSerializer
 
-    def get_queryset(self):
-        return IndependentAccount.objects.inFinancialYear(self.request.user)
 
-
-class IndependentAccountListCreate(generics.ListCreateAPIView):
+class IndependentAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = IndependentAccountSerializer
-
-    def get_queryset(self):
-        return IndependentAccount.objects.inFinancialYear(self.request.user)
-
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
 
 class AccountTypeList(generics.ListCreateAPIView):
@@ -79,16 +104,9 @@ class AccountTypeList(generics.ListCreateAPIView):
     serializer_class = AccountTypeSerializer
 
 
-class AccountListCreate(generics.ListCreateAPIView):
+class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = AccountSerializer
-
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super(AccountListCreate, self).create(request, *args, **kwargs)
-
-    def get_queryset(self):
-        return Account.objects.inFinancialYear(self.request.user)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -98,59 +116,41 @@ class AccountListCreate(generics.ListCreateAPIView):
         return res
 
 
-class AccountDetail(generics.RetrieveUpdateDestroyAPIView):
+class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = AccountSerializer
 
-    def retrieve(self, request, pk=None):
-        queryset = Account.objects.inFinancialYear(request.user)
-        account = get_object_or_404(queryset, pk=pk)
+    def retrieve(self, request, **kwargs):
+        account = self.get_object()
         serializer = AccountListRetrieveSerializer(account)
         return Response(serializer.data)
 
-    def destroy(self, request, pk, *args, **kwargs):
-        account = get_object_or_404(Account.objects.inFinancialYear(request.user), pk=pk)
+    def destroy(self, request, *args, **kwargs):
+        account = self.get_object()
         if account.can_delete():
-            return super().destroy(self, request, *args, **kwargs)
-
+            return super().destroy(request, *args, **kwargs)
         return Response(['حساب های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class PersonListCreate(generics.ListCreateAPIView):
+class PersonListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = PersonSerializer
 
-    def get_queryset(self):
-        return Person.objects.inFinancialYear(self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
-
-
-class PersonDetail(generics.RetrieveUpdateDestroyAPIView):
+class PersonDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = PersonSerializer
 
-    def get_queryset(self):
-        return Person.objects.inFinancialYear(self.request.user)
 
-
-class BankListCreate(generics.ListCreateAPIView):
+class BankListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = BankSerializer
 
-    def get_queryset(self):
-        return Bank.objects.inFinancialYear(self.request.user)
 
-
-class BankDetail(generics.RetrieveUpdateDestroyAPIView):
+class BankDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = BankSerializer
-
-    def get_queryset(self):
-        return Bank.objects.inFinancialYear(self.request.user)
 
 
 @api_view(['get'])

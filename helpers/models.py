@@ -7,6 +7,7 @@ class BaseManager(models.Manager):
 
 
 class BaseModel(models.Model):
+
     class Meta:
         abstract = True
         default_permissions = ()

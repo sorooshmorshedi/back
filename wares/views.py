@@ -7,113 +7,73 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factors.helpers import getInventoryCount
+from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from wares.models import *
 from wares.serializers import *
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class WarehouseListCreate(generics.ListCreateAPIView):
+class WarehouseListCreate(ListCreateAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListCreate,)
     serializer_class = WarehouseSerializer
 
-    def get_queryset(self):
-        return Warehouse.objects.inFinancialYear(self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
-
-
-class WarehouseDetail(generics.RetrieveUpdateDestroyAPIView):
+class WarehouseDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListDetail,)
     serializer_class = WarehouseSerializer
 
-    def get_queryset(self):
-        return Warehouse.objects.inFinancialYear(self.request.user)
 
-
-class UnitDetail(generics.RetrieveUpdateDestroyAPIView):
+class UnitDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListDetail,)
     serializer_class = UnitSerializer
 
-    def get_queryset(self):
-        return Unit.objects.inFinancialYear(self.request.user)
 
-
-class UnitListCreate(generics.ListCreateAPIView):
+class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListCreate,)
     serializer_class = UnitSerializer
 
-    def get_queryset(self):
-        return Unit.objects.inFinancialYear(self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
-
-
-class WareListCreate(generics.ListCreateAPIView):
+class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListCreate,)
     serializer_class = WareSerializer
-
-    def get_queryset(self):
-        return Ware.objects.inFinancialYear(self.request.user)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
         serializer = WareListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
-
-class WareDetail(generics.RetrieveUpdateDestroyAPIView):
+class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListDetail,)
     serializer_class = WareSerializer
 
-    def get_queryset(self):
-        return Ware.objects.inFinancialYear(self.request.user)
-
-    def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
-        ware = get_object_or_404(queryset, pk=pk)
+    def retrieve(self, request, **kwargs):
+        ware = self.get_object()
         serializer = WareListRetrieveSerializer(ware)
         return Response(serializer.data)
 
-    def destroy(self, request, pk, *args, **kwargs):
-        ware = get_object_or_404(Ware, pk=pk)
-        if ware.has_factorItem():
+    def destroy(self, request, *args, **kwargs):
+        ware = self.get_object()
+        if not ware.has_factorItem():
             return super().destroy(self, request, *args, **kwargs)
 
         return Response(['کالا های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class WareLevelDetail(generics.RetrieveUpdateDestroyAPIView):
+class WareLevelDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListDetail,)
     serializer_class = WareLevelSerializer
 
-    def get_queryset(self):
-        return WareLevel.objects.inFinancialYear(self.request.user)
 
-
-class WareLevelListCreate(generics.ListCreateAPIView):
+class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
     # permission_classes = (IsAuthenticated, WareListCreate,)
     serializer_class = WareLevelSerializer
-
-    def get_queryset(self):
-        return WareLevel.objects.inFinancialYear(self.request.user)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset().filter(level=0)
         serializer = WareLevelSerializer(queryset, many=True)
         return Response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
 
 
 class WarehouseInventoryView(APIView):

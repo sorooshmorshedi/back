@@ -1,7 +1,6 @@
 from django.db import models
 
 from accounts.accounts.models import Account
-from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
@@ -21,7 +20,6 @@ class DefaultAccount(BaseModel):
         (NONE, 'هیچ کدام')
     )
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='default_accounts')
     name = models.CharField(unique=True, max_length=150)
     explanation = models.TextField(null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccount')
