@@ -8,7 +8,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.accounts.models import Account, Bank, Person, FloatAccount, FloatAccountGroup, IndependentAccount
+from accounts.accounts.models import Account, Bank, Person, FloatAccount, FloatAccountGroup, IndependentAccount, \
+    FloatAccountRelation
 from accounts.costCenters.models import CostCenter, CostCenterGroup
 from accounts.defaultAccounts.models import getDA, DefaultAccount
 from companies.models import FinancialYear
@@ -244,6 +245,7 @@ class MoveAccountsView(ClosingBaseView):
         self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear(self.user))
         self.destination_financial_year.float_accounts.add(*FloatAccount.objects.inFinancialYear(self.user))
         self.destination_financial_year.float_account_groups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
+        self.destination_financial_year.float_account_relations.add(*FloatAccountRelation.objects.inFinancialYear(self.user))
         self.destination_financial_year.independent_accounts.add(*IndependentAccount.objects.inFinancialYear(self.user))
         self.destination_financial_year.cost_centers.add(*CostCenter.objects.inFinancialYear(self.user))
         self.destination_financial_year.cost_center_groups.add(*CostCenterGroup.objects.inFinancialYear(self.user))
