@@ -138,10 +138,7 @@ def incomeStatementView(request):
     operatingCosts = t['remain']
     res.append(t)
 
-    operatingIncome = netSales \
-        - soldProductValue\
-        + grossIncome\
-        - operatingCosts
+    operatingIncome = operatingCosts - grossIncome
     t = ({
         'type': {
             'name': 'سود (زیان) عملیاتی',
