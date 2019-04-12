@@ -39,8 +39,10 @@ class Factor(BaseModel):
         (BACK_FROM_BUY, 'بازگشت از خرید'),
         (BACK_FROM_SALE, 'بازگشت از فروش'),
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
-
     )
+
+    BUY_GROUP = (BUY, BACK_FROM_SALE)
+    SALE_GROUP = (SALE, BACK_FROM_BUY)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField()
