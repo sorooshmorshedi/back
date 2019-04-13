@@ -24,7 +24,7 @@ class InventoryListView(generics.ListAPIView):
             .filter(ware=data['ware'], warehouse=data['warehouse'])\
             .select_related('factor__account')\
             .select_related('factor__sanad')\
-            .order_by('factor__code')
+            .order_by('factor__date', 'factor__time')
 
         ware = Ware.objects.inFinancialYear(request.user).get(pk=data['ware'])
         output_fees = []
