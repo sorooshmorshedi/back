@@ -27,73 +27,76 @@ class InventoryListView(generics.ListAPIView):
             .order_by('factor__date', 'factor__time')
 
         ware = Ware.objects.inFinancialYear(request.user).get(pk=data['ware'])
-        output_fees = []
-        # fifo
+        outputs = []
+        total_remained_count = 0
+        total_remained_value = 0
         if ware.pricingType == Ware.FIFO:
             for factorItem in factor_items:
-                if factorItem.factor.type in ('buy', 'backFromSale'):
-                    output_fees.append(
-                        {
-                            'fee': factorItem.fee,
-                            'count': factorItem.count
+                factorItem.input = None
+                factorItem.output = None
+                factorItem.remain = None
+                if factorItem.factor.type in Factor.BUY_GROUP:
+                    total_remained_count += factorItem.count
+                    total_remained_value += factorItem.value
+                    outputs.append({
+                        'fee': factorItem.fee,
+                        'count': factorItem.count
+                    })
+                    factorItem.input = {
+                        'count': factorItem.count,
+                        'fee': factorItem.fee,
+                        'total': factorItem.value
+                    }
+                else:
+                    remained_count = factorItem.count
+                    total = 0
+                    if ware.pricingType == ware.FIFO:
+                        fees = []
+                        for output in outputs:
+                            if remained_count == 0:
+                                break
+                            output_count = output['count']
+                            output_fee = output['fee']
+                            if output_count == 0:
+                                continue
+                            fee = {
+                                'fee': output_fee,
+                            }
+                            if remained_count > output_count:
+                                total += output_count * output_fee
+                                fee['count'] = output_count
+                                output['count'] = 0
+                                remained_count -= output_count
+                            else:
+                                total += remained_count * output_fee
+                                fee['count'] = remained_count
+                                output['count'] -= remained_count
+                                remained_count = 0
+
+                            fees.append(fee)
+
+                        total_remained_value -= total
+                        factorItem.output = {
+                            'count': factorItem.count,
+                            'fees': fees,
+                            'total': total
                         }
-                    )
-        # avg
-        elif ware.pricingType == Ware.WEIGHTED_MEAN:
-            value_sum = 0
-            count_sum = 0
-            for factorItem in factor_items:
-                if factorItem.factor.type in ('buy', 'backFromSale'):
-                    value_sum += factorItem.fee * factorItem.count
-                    count_sum += factorItem.count
-            output_fees.append({
-                'fee': value_sum/count_sum,
-                'count': count_sum
-            })
-
-        remain_count = 0
-        remain_total = 0
-        for factorItem in factor_items:
-            factorItem.input = None
-            factorItem.output = None
-            factorItem.remain = None
-            if factorItem.factor.type in Factor.BUY_GROUP:
-                remain_count += factorItem.count
-                factorItem.input = {
-                    'count': factorItem.count,
-                    'fee': factorItem.fee,
-                    'total': factorItem.count * factorItem.fee
-                }
-                remain_total += factorItem.input['total']
-            else:
-                remain_count -= factorItem.count
-                total = 0
-                count = factorItem.count
-                while count != 0 and len(output_fees):
-                    of = output_fees.pop()
-                    if of['count'] == count:
-                        total += count * of['fee']
-                        count = 0
-                    elif of['count'] > count:
-                        total += count * of['fee']
-                        of['count'] -= count
-                        count = 0
-                        output_fees.append(of)
                     else:
-                        total += of['count'] * of['fee']
-                        count -= of['count']
-                factorItem.output = {
-                    'count': factorItem.count,
-                    'fee': '-',
-                    'total': factorItem.count * factorItem.fee
-                }
-                remain_total -= factorItem.output['total']
+                        fee = total_remained_value / total_remained_count
+                        total = fee * factorItem.count
+                        total_remained_value -= total
+                        factorItem.output = {
+                            'count': factorItem.count,
+                            'fee': fee,
+                            'total': total
+                        }
 
-            factorItem.remain = {
-                'count': remain_count,
-                'fee': remain_total / remain_count,
-                'total': remain_total
-            }
+                    total_remained_count -= factorItem.count
+
+                factorItem.remain = {
+                    'count': total_remained_count,
+                    'total': total_remained_value
+                }
 
         res = FactorItemInventorySerializer(factor_items, many=True).data
         return Response(res, status.HTTP_200_OK)
