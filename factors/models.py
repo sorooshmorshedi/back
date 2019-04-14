@@ -41,7 +41,7 @@ class Factor(BaseModel):
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
     )
 
-    BUY_GROUP = (BUY, BACK_FROM_SALE)
+    BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')

@@ -86,6 +86,10 @@ class WarehouseInventoryView(APIView):
             warehouse = o['warehouse']
             ware = o['ware']
 
-            res.append(getInventoryCount(warehouse, ware))
+            res.append({
+                'ware': ware,
+                'warehouse': warehouse,
+                'count': getInventoryCount(warehouse, ware)
+            })
 
         return Response(res, status.HTTP_200_OK)

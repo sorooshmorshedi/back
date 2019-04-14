@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 
-from factors.models import FactorItem
+from factors.models import FactorItem, Factor
 from reports.inventory.serializers import FactorItemInventorySerializer
 from wares.models import Ware
 
@@ -57,7 +57,7 @@ class InventoryListView(generics.ListAPIView):
             factorItem.input = None
             factorItem.output = None
             factorItem.remain = None
-            if factorItem.factor.type in ('buy', 'backFromSale'):
+            if factorItem.factor.type in Factor.BUY_GROUP:
                 remain_count += factorItem.count
                 factorItem.input = {
                     'count': factorItem.count,
@@ -84,7 +84,7 @@ class InventoryListView(generics.ListAPIView):
                         count -= of['count']
                 factorItem.output = {
                     'count': factorItem.count,
-                    'fee': factorItem.fee,
+                    'fee': '-',
                     'total': factorItem.count * factorItem.fee
                 }
                 remain_total -= factorItem.output['total']
