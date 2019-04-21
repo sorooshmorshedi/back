@@ -93,6 +93,7 @@ class FactorExportView(FactorListView, BaseExportView):
         summarized = request.GET.get('summarized', None)
         hide_factor = request.GET.get('hide_factor', False)
         hide_expenses = request.GET.get('hide_expenses', False)
+        hide_remain = request.GET.get('hide_remain', False)
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
@@ -101,7 +102,8 @@ class FactorExportView(FactorListView, BaseExportView):
             'show_warehouse': factorType != 'sale',
             'hide_factor': hide_factor,
             'hide_expenses': hide_expenses,
-            'summarized': summarized
+            'summarized': summarized,
+            'hide_remain': hide_remain
         }
         return self.export(request, export_type, *args, **kwargs)
 

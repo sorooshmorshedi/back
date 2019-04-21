@@ -169,7 +169,9 @@ class FactorSanadUpdate(APIView):
             else:
                 account = 'backFromSale'
 
-        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} {}".format(factor.code, str(factor.date), factor.explanation)
+        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} نوع فاکتور: {} {}".format(factor.code, str(factor.date),
+                                                                                   factor.type_label,
+                                                                                   factor.explanation)
 
         # Factor Sum
         if factor.sum:

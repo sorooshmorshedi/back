@@ -69,6 +69,7 @@
                 <span> {{ company.phone1 | default:'-' }} </span>
             </div>
         </div>
+        <hr>
         <div class="row buyer part">
             <div class="col-xs-12">
                 <span> خریدار: </span>
@@ -132,10 +133,11 @@
         </div>
         {% endif %}
 
+        <hr>
         <div class="row">
             <div class="col-xs-12 ">
                 <div class="row">
-                    <span class="col-xs-2">توضیحات : </span>
+                    <span class="col-xs-2">شرح : </span>
                     <span class="col-xs-10"> {{ factor.explanation | default:'-' }} </span>
                 </div>
             </div>
@@ -204,6 +206,7 @@
                             <th>مبلغ کل فاکتور</th>
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
+                        {% if not hide_remain %}
                         <tr>
                             <th>{{ factor.remain.before_factor_title }}</th>
                             <td>{{ factor.remain.before_factor | money }}</td>
@@ -212,6 +215,7 @@
                             <th>{{ factor.remain.after_factor_title }}</th>
                             <td>{{ factor.remain.after_factor | money }}</td>
                         </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

@@ -94,9 +94,14 @@ class InventoryListView(generics.ListAPIView):
 
             factorItem.remain = {
                 'count': total_remained_count,
+                'fee': "{0:.2f}".format(total_remained_value / total_remained_count) if ware.pricingType == ware.WEIGHTED_MEAN else '-',
                 'total': total_remained_value
+
             }
 
+        ware.remain_value
         res = FactorItemInventorySerializer(factor_items, many=True).data
         return Response(res, status.HTTP_200_OK)
+
+
 

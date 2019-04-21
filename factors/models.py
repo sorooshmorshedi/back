@@ -110,7 +110,11 @@ class Factor(BaseModel):
 
     @property
     def label(self):
-        return "فاکتور {}".format([t[1] for t in Factor.FACTOR_TYPES if t[0] == self.type][0])
+        return "فاکتور {}".format(self.get_type_label)
+
+    @property
+    def type_label(self):
+        return [t[1] for t in Factor.FACTOR_TYPES if t[0] == self.type][0]
 
     @property
     def remain(self):
