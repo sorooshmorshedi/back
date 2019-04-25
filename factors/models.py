@@ -46,6 +46,7 @@ class Factor(BaseModel):
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField()
+    definite_code = models.IntegerField(blank=True, null=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
@@ -64,6 +65,9 @@ class Factor(BaseModel):
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     taxValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
+
+    is_definite = models.BooleanField(default=0)
+    definition_date = jmodels.jDateField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         unique_together = ('code', 'type')
@@ -157,19 +161,35 @@ class Factor(BaseModel):
             return None
 
     @staticmethod
-    def newCodes(user, factor_type=None):
+    def newCodes(user, is_definite=None, factor_type=None):
         codes = {}
         for type in Factor.FACTOR_TYPES:
             type = type[0]
             if factor_type:
                 if type != factor_type:
                     continue
+            codes[type] = {}
             try:
-                codes[type] = Factor.objects.inFinancialYear(user).filter(type=type).latest('code').code + 1
+                last_factor = Factor.objects.inFinancialYear(user)\
+                                .filter(type=type, is_definite=1).latest('code')
+                codes[type]['definite_code'] = last_factor.code + 1
             except:
-                codes[type] = 1
+                codes[type]['definite_code'] = 1
+            codes[type]['last_definite_id'] = last_factor.pk
+
+            try:
+                last_factor = Factor.objects.inFinancialYear(user) \
+                    .filter(type=type, is_definite=0).latest('code')
+                codes[type]['code'] = last_factor.code + 1
+            except:
+                codes[type]['code'] = 1
+            codes[type]['last_id'] = last_factor.pk
+
         if factor_type:
-            return codes[factor_type]
+            if is_definite:
+                return codes[factor_type]['definite_code']
+            else:
+                return codes[factor_type]['code']
         else:
             return codes
 
@@ -205,6 +225,10 @@ class FactorItem(BaseModel):
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
+
+    calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
+    remain_count = models.IntegerField(null=True, blank=True)
+    remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
 
     @property
     def value(self):

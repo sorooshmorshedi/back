@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDA
-from sanads.sanads.models import clearSanad, newSanadCode
+from sanads.sanads.models import clearSanad, newSanadCode, SanadItem
 from .serializers import *
 
 
@@ -59,198 +59,86 @@ class FactorModelView(viewsets.ModelViewSet):
         pk = kwargs['pk']
         queryset = self.get_queryset()
         factor = get_object_or_404(queryset, pk=pk)
-        clearSanad(factor.sanad)
+        if factor.sanad:
+            clearSanad(factor.sanad)
         res = super().destroy(request, *args, **kwargs)
         return res
 
+    @transaction.atomic()
     def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        request.data['code'] = Factor.newCodes(request.user, request.data['type'])
-        sanad = Sanad(code=newSanadCode(request.user), date=request.data.get('date', now()),
-                      createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
-        sanad.save()
-        request.data['sanad'] = sanad.id
-        try:
-            res = super().create(request, *args, **kwargs)
-        except:
-            sanad.delete()
-            raise
+        request.data['factor']['financial_year'] = request.user.active_financial_year.id
+        request.data['factor']['code'] = Factor.newCodes(request.user, 0, request.data['factor']['type'])
+
+        data = request.data
+        user = request.user
+
+        serialized = FactorSerializer(data=data['factor'])
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        factor = serialized.instance
+        self.sync_items(user, factor, data)
+        self.sync_expenses(user, factor, data)
+
+        res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
 
+    @transaction.atomic()
+    def update(self, request, *args, **kwargs):
+        factor = self.get_object()
+        data = request.data
+        user = request.user
 
-class FactorItemMass(APIView):
-    serializer_class = FactorItemSerializer
+        serialized = FactorSerializer(instance=factor, data=data['factor'])
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
 
-    def post(self, request):
-        data = []
-        for item in request.data:
-            item['financial_year'] = request.user.active_financial_year.id
-            data.append(item)
-        serialized = self.serializer_class(data=data, many=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.sync_items(user, factor, data)
+        self.sync_expenses(user, factor, data)
 
-    def put(self, request):
-        for item in request.data:
-            instance = FactorItem.objects.inFinancialYear(request.user).get(id=item['id'])
-            serialized = FactorItemSerializer(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
+        if factor.is_definite:
+            DefiniteFactor.definiteFactor(user, factor.pk)
+
+        res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
+        return res
+
+    def sync_items(self, user, factor, data):
+        return self.mass(user, factor, FactorItemSerializer, data.get('factor_items', None))
+
+    def sync_expenses(self, user, factor, data):
+        return self.mass(user, factor, FactorExpenseSerializer, data.get('factor_expenses', None))
+
+    def mass(self, user, factor, serializer_class, data):
+
+        if not data:
+            return
+
+        model = serializer_class.Meta.model
+        items_to_create = []
+        items_to_update = []
+
+        for item in data.get('items', []):
+            item['financial_year'] = factor.financial_year.id
+            if 'id' in item:
+                items_to_update.append(item)
             else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serialized.data, status=status.HTTP_200_OK)
+                items_to_create.append(item)
 
-    def delete(self, request):
-        for itemId in request.data:
-            instance = FactorItem.objects.inFinancialYear(request.user).get(id=itemId)
-            instance.delete()
-        return Response([], status=status.HTTP_200_OK)
+        for item in items_to_create:
+            item['factor'] = factor.id
 
+        serialized = serializer_class(data=items_to_create, many=True)
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
 
-class FactorExpenseMass(APIView):
-    serializer_class = FactorExpenseListRetrieveSerializer
-    model = FactorExpense
+        for item in items_to_update:
+            instance = get_object_or_404(model.objects.inFinancialYear(user), id=item['id'])
+            serialized = serializer_class(instance, data=item)
+            serialized.is_valid(raise_exception=True)
 
-    def post(self, request):
-        data = []
-        for item in request.data:
-            item['financial_year'] = request.user.active_financial_year.id
-            data.append(item)
-        serialized = FactorExpenseSerializer(data=data, many=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request):
-        for item in request.data:
-            instance = self.model.objects.inFinancialYear(request.user).get(id=item['id'])
-            serialized = self.serializer_class(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
-            else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serialized.data, status=status.HTTP_200_OK)
-
-    def delete(self, request):
-        for itemId in request.data:
-            instance = self.model.objects.inFinancialYear(request.user).get(id=itemId)
-            instance.delete()
-        return Response([], status=status.HTTP_200_OK)
-
-
-class FactorSanadUpdate(APIView):
-    def put(self, request, pk):
-        queryset = Factor.objects.inFinancialYear(request.user).all()
-        factor = get_object_or_404(queryset, pk=pk)
-        sanad = factor.sanad
-        clearSanad(sanad)
-
-        sanad.explanation = factor.explanation
-        sanad.date = factor.date
-        sanad.type = 'temporary'
-        sanad.createType = 'auto'
-        sanad.save()
-
-        if factor.type in ('sale', 'backFromBuy'):
-            rowTypeOne = 'bed'
-            rowTypeTwo = 'bes'
-            if factor.type == 'sale':
-                account = 'sale'
-            else:
-                account = 'backFromBuy'
-        else:
-            rowTypeOne = 'bes'
-            rowTypeTwo = 'bed'
-            if factor.type == 'buy':
-                account = 'buy'
-            else:
-                account = 'backFromSale'
-
-        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} نوع فاکتور: {} {}".format(factor.code, str(factor.date),
-                                                                                   factor.type_label,
-                                                                                   factor.explanation)
-
-        # Factor Sum
-        if factor.sum:
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                value=factor.sum,
-                valueType=rowTypeOne,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-            sanad.items.create(
-                account=getDA(account, request.user).account,
-                # floatAccount=factor.floatAccount,
-                value=factor.sum,
-                valueType=rowTypeTwo,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-
-        # Factor Discount Sum
-        if factor.discountSum:
-            sanad.items.create(
-                account=getDA(account, request.user).account,
-                # floatAccount=factor.floatAccount,
-                value=factor.discountSum,
-                valueType=rowTypeOne,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                value=factor.discountSum,
-                valueType=rowTypeTwo,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-
-        # Factor Tax Sum
-        if factor.taxSum:
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                value=factor.taxSum,
-                valueType=rowTypeOne,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-            sanad.items.create(
-                account=getDA('tax', request.user).account,
-                # floatAccount=factor.floatAccount,
-                value=factor.taxSum,
-                valueType=rowTypeTwo,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-
-        # Factor Expenses
-        for e in factor.expenses.all():
-            if e.value:
-                sanad.items.create(
-                    account=e.expense.account,
-                    # floatAccount=factor.floatAccount,
-                    value=e.value,
-                    valueType='bed',
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-                sanad.items.create(
-                    account=e.account,
-                    floatAccount=e.floatAccount,
-                    value=e.value,
-                    valueType='bes',
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-
-        return Response([])
+        ids_to_delete = data.get('ids_to_delete', [])
+        if len(ids_to_delete):
+            model.objects.inFinancialYear(user).filter(id__in=ids_to_delete).delete()
 
 
 class FactorPaymentMass(APIView):
@@ -336,16 +224,29 @@ def getNotPaidFactors(request):
 
 
 @api_view(['get'])
-def getFactorByCode(request):
-    if 'code' not in request.GET:
-        return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+def getFactorByPosition(request):
     if 'type' not in request.GET:
         return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+    if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
+        return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
 
-    code = request.GET['code']
     type = request.GET['type']
-    queryset = Factor.objects.inFinancialYear(request.user).all()
-    factor = get_object_or_404(queryset, code=code, type=type)
+    id = request.GET.get('id', None)
+    position = request.GET['position']
+    queryset = Factor.objects.inFinancialYear(request.user).filter(type=type)
+
+    try:
+        if position == 'next':
+            factor = queryset.filter(pk__gt=id).order_by('id')[0]
+        elif position == 'prev':
+            factor = queryset.filter(pk__lt=id).order_by('-id')[0]
+        elif position == 'first':
+            factor = queryset.order_by('id')[0]
+        elif position == 'last':
+            factor = queryset.order_by('-id')[0]
+    except IndexError:
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
     serializer = FactorListRetrieveSerializer(factor)
     return Response(serializer.data)
 
@@ -360,6 +261,11 @@ class FirstPeriodInventoryView(APIView):
 
     @transaction.atomic
     def post(self, request):
+
+        if Factor.objects.inFinancialYear(request.user).filter(type__in=Factor.SALE_GROUP).count():
+            return Response({'non_field_errors': ['لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید']},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         data = request.data
         data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
         data['factor']['code'] = 0
@@ -434,6 +340,174 @@ class FirstPeriodInventoryView(APIView):
         res = Response(FactorSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
 
+
+class DefiniteFactor(APIView):
+
+    def post(self, request, pk):
+        user = request.user
+        factor = DefiniteFactor.definiteFactor(user, pk)
+        return Response(FactorListRetrieveSerializer(factor).data)
+
+    @staticmethod
+    @transaction.atomic()
+    def definiteFactor(user, pk):
+        factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
+
+        if not factor.sanad:
+            sanad = Sanad(
+                code=newSanadCode(user),
+                date=factor.date,
+                createType=Sanad.AUTO,
+                type=Sanad.TEMPORARY,
+                explanation=factor.explanation,
+                financial_year=user.active_financial_year
+            )
+        else:
+            sanad = factor.sanad
+            clearSanad(sanad)
+            sanad.createType = Sanad.AUTO
+            sanad.type = Sanad.TEMPORARY
+            sanad.explanation = factor.explanation
+        sanad.save()
+
+        for item in factor.items.all():
+            remain = item.ware.remain(user)
+            if factor.type in Factor.BUY_GROUP:
+                item.remain_count = remain['count'] + item.count
+                item.remain_value = remain['value'] + item.value
+            else:
+                calculated_output_value = item.ware.calculated_output_value(user, item.count)
+                item.calculated_output_value = calculated_output_value
+                item.remain_count = remain['count'] - item.count
+                item.remain_value = remain['value'] - calculated_output_value
+            item.save()
+
+        if factor.type in Factor.SALE_GROUP:
+            rowTypeOne = SanadItem.BED
+            rowTypeTwo = SanadItem.BES
+            if factor.type == Factor.SALE:
+                account = 'sale'
+            else:
+                account = 'backFromBuy'
+        else:
+            rowTypeOne = SanadItem.BES
+            rowTypeTwo = SanadItem.BED
+            if factor.type == Factor.BUY:
+                account = 'buy'
+            else:
+                account = 'backFromSale'
+
+        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} نوع فاکتور: {} {}".format(factor.code,
+                                                                                   str(factor.date),
+                                                                                   factor.type_label,
+                                                                                   factor.explanation)
+
+        # Factor Sum
+        if factor.sum:
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.sum,
+                valueType=rowTypeOne,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+            sanad.items.create(
+                account=getDA(account, user).account,
+                # floatAccount=factor.floatAccount,
+                value=factor.sum,
+                valueType=rowTypeTwo,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+
+            if factor.type == Factor.SALE:
+                value = 0
+                for item in factor.items.all():
+                    value += item.calculated_output_value
+
+                sanad.items.create(
+                    account=Account.get_cost_of_sold_wares_account(user),
+                    # floatAccount=factor.floatAccount,
+                    value=value,
+                    valueType=SanadItem.BED,
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
+                )
+                sanad.items.create(
+                    account=getDA(account, user).account,
+                    # floatAccount=factor.floatAccount,
+                    value=value,
+                    valueType=SanadItem.BES,
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
+                )
+
+        # Factor Discount Sum
+        if factor.discountSum:
+            sanad.items.create(
+                account=getDA(account, user).account,
+                # floatAccount=factor.floatAccount,
+                value=factor.discountSum,
+                valueType=rowTypeOne,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.discountSum,
+                valueType=rowTypeTwo,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+
+        # Factor Tax Sum
+        if factor.taxSum:
+            sanad.items.create(
+                account=factor.account,
+                floatAccount=factor.floatAccount,
+                value=factor.taxSum,
+                valueType=rowTypeOne,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+            sanad.items.create(
+                account=getDA('tax', user).account,
+                # floatAccount=factor.floatAccount,
+                value=factor.taxSum,
+                valueType=rowTypeTwo,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
+
+        # Factor Expenses
+        for e in factor.expenses.all():
+            if e.value:
+                sanad.items.create(
+                    account=e.expense.account,
+                    # floatAccount=factor.floatAccount,
+                    value=e.value,
+                    valueType='bed',
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
+                )
+                sanad.items.create(
+                    account=e.account,
+                    floatAccount=e.floatAccount,
+                    value=e.value,
+                    valueType='bes',
+                    explanation=explanation,
+                    financial_year=sanad.financial_year
+                )
+
+        factor.is_definite = True
+        factor.definite_code = Factor.newCodes(user, is_definite=1, factor_type=factor.type)
+        factor.definition_date = now()
+        factor.sanad = sanad
+        factor.save()
+
+        return factor
 
 
 

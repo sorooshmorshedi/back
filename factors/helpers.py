@@ -3,8 +3,8 @@ from django.db.models import Sum
 from factors.models import FactorItem, Factor
 
 
-def getInventoryCount(warehouse, ware):
-    qs = FactorItem.objects.filter(warehouse=warehouse, ware=ware)
+def getInventoryCount(user, warehouse, ware):
+    qs = FactorItem.objects.inFinancialYear(user).filter(warehouse=warehouse, ware=ware)
     input_count = qs.filter(factor__type__in=(Factor.FIRST_PERIOD_INVENTORY,
                                               Factor.BUY,
                                               Factor.BACK_FROM_SALE)).aggregate(Sum('count'))['count__sum']

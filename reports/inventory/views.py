@@ -99,7 +99,6 @@ class InventoryListView(generics.ListAPIView):
 
             }
 
-        ware.remain_value
         res = FactorItemInventorySerializer(factor_items, many=True).data
         return Response(res, status.HTTP_200_OK)
 

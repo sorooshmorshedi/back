@@ -89,7 +89,7 @@ class WarehouseInventoryView(APIView):
             res.append({
                 'ware': ware,
                 'warehouse': warehouse,
-                'count': getInventoryCount(warehouse, ware)
+                'count': getInventoryCount(request.user, warehouse, ware)
             })
 
         return Response(res, status.HTTP_200_OK)

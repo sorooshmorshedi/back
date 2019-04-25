@@ -268,4 +268,6 @@ class MoveAccountsView(ClosingBaseView):
         self.destination_financial_year.ware_levels.add(*WareLevel.objects.inFinancialYear(self.user))
         self.destination_financial_year.units.add(*Unit.objects.inFinancialYear(self.user))
 
+#         Check SalesGroup factors for first period inventory factor
+
 

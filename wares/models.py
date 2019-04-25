@@ -54,6 +54,15 @@ class WareLevel(BaseModel):
         return str(self.pk) + ' - ' + self.name
 
 
+class WareMetaData(BaseModel):
+
+    factor_item_id = models.IntegerField(null=True, blank=True)
+    count = models.IntegerField(null=True, blank=True)
+
+    created_at = jmodels.jDateField(auto_now=True)
+    updated_at = jmodels.jDateField(auto_now_add=True)
+
+
 class Ware(BaseModel):
 
     FIFO = 0
@@ -82,6 +91,7 @@ class Ware(BaseModel):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
+    metadata = models.OneToOneField(WareMetaData, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -113,4 +123,86 @@ class Ware(BaseModel):
         return 'ha'
         # if self.pricingType == self.WEIGHTED_MEAN:
 
+    def last_factor_item(self, user):
+        try:
+            return self.factorItems.inFinancialYear(user)\
+                .filter(factor__is_definite=True)\
+                .order_by('-factor__definition_date')[0]
+        except IndexError:
+            return None
 
+    def remain(self, user):
+        res = {
+            'count': 0,
+            'value': 0,
+        }
+        factorItem = self.last_factor_item(user)
+        if factorItem:
+            res['count'] = factorItem.remain_count
+            res['value'] = factorItem.remain_value
+        return res
+
+    def calculated_output_value(self, user, count):
+        if self.pricingType == self.WEIGHTED_MEAN:
+            return self.calculated_output_value_for_weighted_mean(user, count)
+        else:
+            return self.calculated_output_value_for_fifo(user, count)
+
+    def calculated_output_value_for_weighted_mean(self, user, count):
+        lastFactorItem = self.last_factor_item(user)
+        remain_value = lastFactorItem.remain_value
+        remain_count = lastFactorItem.remain_count
+        fee = remain_value / remain_count
+        return fee * count
+
+    def calculated_output_value_for_fifo(self, user, needed_count):
+        if not self.metadata:
+            from factors.models import Factor
+            initialFactorItem = self.factorItems.inFinancialYear(user)\
+                .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP)\
+                .order_by('factor__definition_date')[0]
+            metadata = WareMetaData(
+                factor_item_id=initialFactorItem.id,
+                count=initialFactorItem.count
+            )
+            metadata.save()
+            self.metadata = metadata
+            self.save()
+        else:
+            initialFactorItem = self.factorItem.get(pk=self.metadata.factor_item_id)
+            metadata = self.metadata
+
+        factorItems = self.factorItems.inFinancialYear(user) \
+            .filter(factor__is_definite=True,
+                    factor__type__in=Factor.BUY_GROUP,
+                    factor__definition_date__gte=initialFactorItem.factor.definition_date) \
+            .order_by('definition_date')
+
+        total_value = 0
+        factorItem = initialFactorItem
+        count = metadata.count
+        for factorItem in factorItems:
+
+            if count == 0:
+                break
+
+            if factorItem != initialFactorItem:
+                count = factorItem.count
+
+            fee = factorItem.fee
+            if needed_count < count:
+                total_value += needed_count * fee
+                count -= needed_count
+                break
+            elif needed_count > count:
+                total_value += count * fee
+                needed_count -= count
+            else:
+                total_value += count * fee
+                count = 0
+
+        metadata.factor_item_id = factorItem.id
+        metadata.count = count
+        metadata.save()
+
+        return total_value

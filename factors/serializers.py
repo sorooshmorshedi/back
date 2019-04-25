@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer, AccountSerializer
 from factors.models import *
+from sanads.sanads.serializers import SanadSerializer
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 
 
@@ -103,6 +104,7 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
     items = FactorItemListRetrieveSerializer(read_only=True, many=True)
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
+    sanad = SanadSerializer(read_only=True, many=False)
 
     class Meta:
         model = Factor

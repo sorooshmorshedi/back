@@ -160,9 +160,12 @@ class Account(BaseModel):
     def get_partners_account(user):
         return Account.objects.inFinancialYear(user).get(code='303070001')
 
+    @staticmethod
+    def get_cost_of_sold_wares_account(user):
+        return Account.objects.inFinancialYear(user).get(code='701010001')
+
 
 class Person(BaseModel):
-
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
