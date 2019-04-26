@@ -117,6 +117,8 @@ signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
 
 
 def clearSanad(sanad):
+    if not sanad:
+        return
     sanad.explanation = ''
     sanad.type = 'manual'
     sanad.save()
@@ -129,4 +131,5 @@ def newSanadCode(user):
         return Sanad.objects.inFinancialYear(user).latest('code').code + 1
     except:
         return 1
+
 

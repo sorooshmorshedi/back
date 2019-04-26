@@ -16,16 +16,58 @@ class FactorWithAccountSerializer(FactorSerializer):
 
     class Meta:
         model = Factor
-        fields = ('id', 'code', 'date', 'type', 'isPaid', 'account', 'explanation')
+        fields = ('id', 'code', 'date', 'type', 'isPaid', 'account', 'explanation', 'is_definite', 'definition_date')
 
 
 class FactorItemInventorySerializer(serializers.ModelSerializer):
     factor = FactorWithAccountSerializer(many=False, read_only=True)
-    input = serializers.DictField()
-    output = serializers.DictField()
-    remain = serializers.DictField()
+    input = serializers.SerializerMethodField()
+    output = serializers.SerializerMethodField()
+    remain = serializers.SerializerMethodField()
+
+    def get_input(self, obj):
+        if obj.factor.type in Factor.BUY_GROUP:
+            return {
+                'count': obj.count,
+                'fee': obj.fee,
+                'value': obj.value
+            }
+        return {
+            'count': '-',
+            'fee': '-',
+            'value': '-'
+        }
+
+    def get_output(self, obj):
+        from wares.models import Ware
+        if obj.ware.pricingType == Ware.WEIGHTED_MEAN and obj.remain_count:
+            fee = obj.remain_value / obj.remain_count
+        else:
+            fee = '-'
+        if obj.factor.type in Factor.SALE_GROUP:
+            return {
+                'count': obj.count,
+                'fee': fee,
+                'value': obj.calculated_output_value
+            }
+        return {
+            'count': '-',
+            'fee': '-',
+            'value': '-'
+        }
+
+    def get_remain(self, obj):
+        from wares.models import Ware
+        if obj.ware.pricingType == Ware.WEIGHTED_MEAN and obj.remain_count:
+            fee = obj.remain_value / obj.remain_count
+        else:
+            fee = '-'
+        return {
+            'count': obj.remain_count,
+            'fee': fee,
+            'value': obj.remain_value
+        }
 
     class Meta:
         model = FactorItem
-        fields = ('id', 'input', 'output', 'remain', 'factor',)
-
+        fields = '__all__'

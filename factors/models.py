@@ -160,7 +160,7 @@ class Factor(BaseModel):
             return None
 
     @staticmethod
-    def newCodes(user, is_definite=None, factor_type=None):
+    def newCodes(user, factor_type=None):
         codes = {}
         for type in Factor.FACTOR_TYPES:
             type = type[0]
@@ -179,8 +179,7 @@ class Factor(BaseModel):
                 codes[type]['last_id'] = 0
 
         if factor_type:
-            if is_definite:
-                return codes[factor_type]['code']
+            return codes[factor_type]['code']
         else:
             return codes
 
@@ -218,7 +217,7 @@ class FactorItem(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
-    remain_count = models.IntegerField(null=True, blank=True)
+    remain_count = models.IntegerField(null=True, blank=True, default=0)
     remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
 
     @property

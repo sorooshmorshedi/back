@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from factors.models import FactorItem, Factor
+from factors.serializers import FactorItemSerializer
 from reports.inventory.serializers import FactorItemInventorySerializer
 from wares.models import Ware
 
@@ -12,7 +13,7 @@ class InventoryListView(generics.ListAPIView):
     serializer_class = FactorItemInventorySerializer
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear(self.request.user)
+        return FactorItem.objects.inFinancialYear(self.request.user).filter(factor__is_definite=True)
 
     def list(self, request, *args, **kwargs):
         if 'ware' not in request.GET or 'warehouse' not in request.GET:
@@ -22,9 +23,12 @@ class InventoryListView(generics.ListAPIView):
 
         factor_items = self.get_queryset()\
             .filter(ware=data['ware'], warehouse=data['warehouse'])\
-            .select_related('factor__account')\
-            .select_related('factor__sanad')\
+            .prefetch_related('factor__account')\
+            .prefetch_related('factor__sanad')\
             .order_by('factor__date', 'factor__time')
+
+        res = Response(FactorItemInventorySerializer(factor_items, many=True).data, status.HTTP_200_OK)
+        return res
 
         ware = Ware.objects.inFinancialYear(request.user).get(pk=data['ware'])
         outputs = []

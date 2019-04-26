@@ -54,6 +54,7 @@ class FactorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
+        read_only_fields = ('id', 'code', )
 
     def validate(self, data):
         if data['account'].level != 3:

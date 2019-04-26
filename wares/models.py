@@ -106,23 +106,6 @@ class Ware(BaseModel):
     def has_inventory(self):
         pass
 
-    @property
-    def remain_value(self):
-        from factors.models import Factor
-        total_input = self.factorItems\
-            .filter(Q(factor__type__in=Factor.BUY_GROUP))\
-            .aggregate(total_value=Sum(F('fee')*F('count'), output_field=models.DecimalField()),
-                       total_count=Sum('count'))
-
-        total_output_count = self.factorItems \
-            .filter(Q(factor__type__in=Factor.SALE_GROUP)) \
-            .aggregate(total_count=Sum('count'))['total_count']
-
-        print(total_input, total_output_count,
-              total_input['total_value'] - total_output_count * total_input['total_value'] / total_input['total_count'])
-        return 'ha'
-        # if self.pricingType == self.WEIGHTED_MEAN:
-
     def last_factor_item(self, user):
         try:
             return self.factorItems.inFinancialYear(user)\

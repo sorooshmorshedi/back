@@ -238,7 +238,9 @@ def getFactorByPosition(request):
         if position == 'next':
             factor = queryset.filter(pk__gt=id).order_by('id')[0]
         elif position == 'prev':
-            factor = queryset.filter(pk__lt=id).order_by('-id')[0]
+            if id:
+                queryset = queryset.filter(pk__lt=id)
+            factor = queryset.order_by('-id')[0]
         elif position == 'first':
             factor = queryset.order_by('id')[0]
         elif position == 'last':
@@ -298,10 +300,8 @@ class FirstPeriodInventoryView(APIView):
             item['factor'] = factor.id
 
         serialized = SerializerClass(data=items_to_create, many=True)
-        if serialized.is_valid():
-            serialized.save()
-        else:
-            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
 
         for item in items_to_update:
             instance = FactorItem.objects.inFinancialYear(request.user).get(id=item['id'])
@@ -314,6 +314,12 @@ class FirstPeriodInventoryView(APIView):
         ids_to_delete = data.get('ids_to_delete', [])
         if len(ids_to_delete):
             FactorItem.objects.inFinancialYear(request.user).filter(id__in=ids_to_delete).delete()
+
+        for item in factor.items.all():
+            remain = item.ware.remain(request.user)
+            item.remain_count = remain['count'] + item.count
+            item.remain_value = remain['value'] + item.value
+            item.save()
 
         sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
                       createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
