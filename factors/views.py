@@ -67,7 +67,6 @@ class FactorModelView(viewsets.ModelViewSet):
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
         request.data['factor']['financial_year'] = request.user.active_financial_year.id
-        request.data['factor']['code'] = Factor.newCodes(request.user, 0, request.data['factor']['type'])
 
         data = request.data
         user = request.user
@@ -269,6 +268,7 @@ class FirstPeriodInventoryView(APIView):
         data = request.data
         data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
         data['factor']['code'] = 0
+        data['factor']['is_definite'] = 1
         data['factor']['account'] = Account.get_partners_account(request.user).id
         data['factor']['financial_year'] = request.user.active_financial_year.id
 
@@ -502,7 +502,7 @@ class DefiniteFactor(APIView):
                 )
 
         factor.is_definite = True
-        factor.definite_code = Factor.newCodes(user, is_definite=1, factor_type=factor.type)
+        factor.code = Factor.newCodes(user, factor_type=factor.type)
         factor.definition_date = now()
         factor.sanad = sanad
         factor.save()

@@ -45,8 +45,7 @@ class Factor(BaseModel):
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
-    code = models.IntegerField()
-    definite_code = models.IntegerField(blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
@@ -168,27 +167,19 @@ class Factor(BaseModel):
             if factor_type:
                 if type != factor_type:
                     continue
+
             codes[type] = {}
             try:
-                last_factor = Factor.objects.inFinancialYear(user)\
-                                .filter(type=type, is_definite=1).latest('code')
-                codes[type]['definite_code'] = last_factor.code + 1
-            except:
-                codes[type]['definite_code'] = 1
-            codes[type]['last_definite_id'] = last_factor.pk
-
-            try:
                 last_factor = Factor.objects.inFinancialYear(user) \
-                    .filter(type=type, is_definite=0).latest('code')
+                    .filter(type=type, is_definite=1).latest('code')
                 codes[type]['code'] = last_factor.code + 1
+                codes[type]['last_id'] = last_factor.pk
             except:
                 codes[type]['code'] = 1
-            codes[type]['last_id'] = last_factor.pk
+                codes[type]['last_id'] = 0
 
         if factor_type:
             if is_definite:
-                return codes[factor_type]['definite_code']
-            else:
                 return codes[factor_type]['code']
         else:
             return codes
