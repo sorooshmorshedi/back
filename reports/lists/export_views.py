@@ -90,10 +90,10 @@ class FactorExportView(FactorListView, BaseExportView):
             }
         }
         factorType = request.GET.get('type', None)
-        summarized = request.GET.get('summarized', None)
-        hide_factor = request.GET.get('hide_factor', False)
-        hide_expenses = request.GET.get('hide_expenses', False)
-        hide_remain = request.GET.get('hide_remain', False)
+        summarized = request.GET.get('summarized', False) == True
+        hide_factor = request.GET.get('hide_factor', False) == True
+        hide_expenses = request.GET.get('hide_expenses', False) == True
+        hide_remain = request.GET.get('hide_remain', False) == True
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
@@ -105,6 +105,7 @@ class FactorExportView(FactorListView, BaseExportView):
             'summarized': summarized,
             'hide_remain': hide_remain
         }
+        print(self.context)
         return self.export(request, export_type, *args, **kwargs)
 
 
