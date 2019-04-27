@@ -65,3 +65,17 @@ class FactorListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Factor.objects.inFinancialYear(self.request.user).prefetch_related('items').prefetch_related('account').all()
+
+
+class FactorItemListView(generics.ListAPIView):
+    serializer_class = FactorItemListSerializer
+    filterset_class = FactorItemFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return FactorItem.objects.inFinancialYear(self.request.user)\
+            .prefetch_related('factor__account')\
+            .prefetch_related('ware') \
+            .prefetch_related('warehouse')\
+            .all()

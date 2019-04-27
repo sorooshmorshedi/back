@@ -164,6 +164,7 @@ class Ware(BaseModel):
         total_value = 0
         factorItem = initialFactorItem
         count = metadata.count
+        fees = []
         for factorItem in factorItems:
 
             if count == 0:
@@ -176,16 +177,29 @@ class Ware(BaseModel):
             if needed_count < count:
                 total_value += needed_count * fee
                 count -= needed_count
+                fees.append({
+                    'fee': fee,
+                    'count': needed_count
+                })
                 break
             elif needed_count > count:
                 total_value += count * fee
                 needed_count -= count
+                fees.append({
+                    'fee': fee,
+                    'count': count
+                })
             else:
                 total_value += count * fee
+                fees.append({
+                    'fee': fee,
+                    'count': count
+                })
                 count = 0
 
         metadata.factor_item_id = factorItem.id
         metadata.count = count
         metadata.save()
 
+        print(fees)
         return total_value

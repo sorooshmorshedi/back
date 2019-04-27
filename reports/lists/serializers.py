@@ -2,15 +2,28 @@ from rest_framework import serializers
 
 from accounts.accounts.models import Account
 from cheques.models import Cheque, Chequebook
-from factors.models import Factor
+from factors.models import Factor, FactorItem
 from factors.serializers import FactorSerializer
 from sanads.sanads.serializers import SanadSerializer
 from sanads.transactions.models import Transaction
+from wares.models import Ware, Warehouse
 
 
 class AccountSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
+        fields = '__all__'
+
+
+class WareSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ware
+        fields = '__all__'
+
+
+class WarehouseSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Warehouse
         fields = '__all__'
 
 
@@ -50,3 +63,25 @@ class FactorListSerializer(FactorSerializer):
         model = Factor
         fields = '__all__'
 
+
+class FactorItemListSerializer(serializers.ModelSerializer):
+    factor = FactorListSerializer(read_only=True, many=False)
+    ware = WareSimpleSerializer(read_only=True, many=False)
+    warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
+
+    value = serializers.SerializerMethodField()
+    discount = serializers.SerializerMethodField()
+    total_value = serializers.SerializerMethodField()
+
+    def get_value(self, obj):
+        return obj.value
+
+    def get_discount(self, obj):
+        return obj.discount
+
+    def get_total_value(self, obj):
+        return obj.totalValue
+
+    class Meta:
+        model = FactorItem
+        fields = '__all__'
