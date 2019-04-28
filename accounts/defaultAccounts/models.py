@@ -31,7 +31,7 @@ class DefaultAccount(BaseModel):
         verbose_name = 'حساب پیشفرض'
 
     def __str__(self):
-        return self.name
+        return "{} {}".format(self.name, self.programingName)
 
 
 def getDA(pn, user):

@@ -359,34 +359,14 @@ class DefiniteFactor(APIView):
     def definiteFactor(user, pk):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
 
-        if not factor.sanad:
-            sanad = Sanad(
-                code=newSanadCode(user),
-                date=factor.date,
-                createType=Sanad.AUTO,
-                type=Sanad.TEMPORARY,
-                explanation=factor.explanation,
-                financial_year=user.active_financial_year
-            )
-        else:
-            sanad = factor.sanad
-            clearSanad(sanad)
-            sanad.createType = Sanad.AUTO
-            sanad.type = Sanad.TEMPORARY
-            sanad.explanation = factor.explanation
-        sanad.save()
+        sanad = DefiniteFactor.getFactorSanad(user, factor)
+        factor.is_definite = True
+        factor.code = Factor.newCodes(user, factor_type=factor.type)
+        factor.definition_date = now()
+        factor.sanad = sanad
+        factor.save()
 
-        for item in factor.items.all():
-            remain = item.ware.remain(user)
-            if factor.type in Factor.BUY_GROUP:
-                item.remain_count = remain['count'] + item.count
-                item.remain_value = remain['value'] + item.value
-            else:
-                calculated_output_value = item.ware.calculated_output_value(user, item.count)
-                item.calculated_output_value = calculated_output_value
-                item.remain_count = remain['count'] - item.count
-                item.remain_value = remain['value'] - calculated_output_value
-            item.save()
+        DefiniteFactor.setFactorItemsRemains(user, factor)
 
         if factor.type in Factor.SALE_GROUP:
             rowTypeOne = SanadItem.BED
@@ -408,7 +388,60 @@ class DefiniteFactor(APIView):
                                                                                    factor.type_label,
                                                                                    factor.explanation)
 
-        # Factor Sum
+        if factor.type != Factor.BACK_FROM_BUY:
+            DefiniteFactor.submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation)
+
+        if factor.type == Factor.SALE:
+            DefiniteFactor.submitSaleSanadItems(user, factor, explanation)
+        elif factor.type == Factor.BACK_FROM_SALE:
+            DefiniteFactor.submitBackFromSaleSanadItems(user, factor, explanation)
+        elif factor.type == Factor.BACK_FROM_BUY:
+            DefiniteFactor.submitBackFromBuySanadItems(user, factor, explanation)
+
+        DefiniteFactor.submitDiscountSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation)
+        DefiniteFactor.submitTaxSanadItems(user, factor, rowTypeOne, rowTypeTwo, explanation)
+        DefiniteFactor.submitExpenseSanadItems(factor, explanation)
+
+        return factor
+
+    @staticmethod
+    def getFactorSanad(user, factor):
+        if not factor.sanad:
+            sanad = Sanad(
+                code=newSanadCode(user),
+                date=factor.date,
+                createType=Sanad.AUTO,
+                type=Sanad.TEMPORARY,
+                explanation=factor.explanation,
+                financial_year=user.active_financial_year
+            )
+        else:
+            sanad = factor.sanad
+            clearSanad(sanad)
+            sanad.createType = Sanad.AUTO
+            sanad.type = Sanad.TEMPORARY
+            sanad.explanation = factor.explanation
+        sanad.save()
+
+        return sanad
+
+    @staticmethod
+    def setFactorItemsRemains(user, factor):
+        for item in factor.items.all():
+            remain = item.ware.remain(user)
+            if factor.type in Factor.BUY_GROUP:
+                item.remain_count = remain['count'] + item.count
+                item.remain_value = remain['value'] + item.value
+            else:
+                calculated_output_value = item.ware.calculated_output_value(user, item.count)
+                item.calculated_output_value = calculated_output_value
+                item.remain_count = remain['count'] - item.count
+                item.remain_value = remain['value'] - calculated_output_value
+            item.save()
+
+    @staticmethod
+    def submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation):
+        sanad = factor.sanad
         if factor.sum:
             sanad.items.create(
                 account=factor.account,
@@ -427,29 +460,9 @@ class DefiniteFactor(APIView):
                 financial_year=sanad.financial_year
             )
 
-            if factor.type == Factor.SALE:
-                value = 0
-                for item in factor.items.all():
-                    value += item.calculated_output_value
-
-                sanad.items.create(
-                    account=Account.get_cost_of_sold_wares_account(user),
-                    # floatAccount=factor.floatAccount,
-                    value=value,
-                    valueType=SanadItem.BED,
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-                sanad.items.create(
-                    account=getDA(account, user).account,
-                    # floatAccount=factor.floatAccount,
-                    value=value,
-                    valueType=SanadItem.BES,
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-
-        # Factor Discount Sum
+    @staticmethod
+    def submitDiscountSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation):
+        sanad = factor.sanad
         if factor.discountSum:
             sanad.items.create(
                 account=getDA(account, user).account,
@@ -468,6 +481,9 @@ class DefiniteFactor(APIView):
                 financial_year=sanad.financial_year
             )
 
+    @staticmethod
+    def submitTaxSanadItems(user, factor, rowTypeOne, rowTypeTwo, explanation):
+        sanad = factor.sanad
         # Factor Tax Sum
         if factor.taxSum:
             sanad.items.create(
@@ -487,7 +503,9 @@ class DefiniteFactor(APIView):
                 financial_year=sanad.financial_year
             )
 
-        # Factor Expenses
+    @staticmethod
+    def submitExpenseSanadItems(factor, explanation):
+        sanad = factor.sanad
         for e in factor.expenses.all():
             if e.value:
                 sanad.items.create(
@@ -507,13 +525,86 @@ class DefiniteFactor(APIView):
                     financial_year=sanad.financial_year
                 )
 
-        factor.is_definite = True
-        factor.code = Factor.newCodes(user, factor_type=factor.type)
-        factor.definition_date = now()
-        factor.sanad = sanad
-        factor.save()
+    @staticmethod
+    def submitSaleSanadItems(user, factor, explanation):
+        sanad = factor.sanad
+        value = 0
+        for item in factor.items.all():
+            value += item.calculated_output_value
 
-        return factor
+        sanad.items.create(
+            account=Account.get_cost_of_sold_wares_account(user),
+            # floatAccount=factor.floatAccount,
+            value=value,
+            valueType=SanadItem.BED,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
+        sanad.items.create(
+            account=Account.get_inventory_account(user),
+            # floatAccount=factor.floatAccount,
+            value=value,
+            valueType=SanadItem.BES,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
 
+    @staticmethod
+    def submitBackFromSaleSanadItems(user, factor, explanation):
+        sanad = factor.sanad
+        value = 0
+        # for item in factor.items.all():
+        #     value += item.calculated_output_value
 
+        for item in factor.items.all():
+            calculated_output_value = item.ware.calculated_output_value(user, item.count)
+            value += calculated_output_value
 
+        sanad.items.create(
+            account=Account.get_inventory_account(user),
+            # floatAccount=factor.floatAccount,
+            value=value,
+            valueType=SanadItem.BED,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
+        sanad.items.create(
+            account=Account.get_cost_of_sold_wares_account(user),
+            # floatAccount=factor.floatAccount,
+            value=value,
+            valueType=SanadItem.BES,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
+
+    @staticmethod
+    def submitBackFromBuySanadItems(user, factor, explanation):
+        sanad = factor.sanad
+        value = 0
+        for item in factor.items.all():
+            value += item.calculated_output_value
+
+        sanad.items.create(
+            account=factor.account,
+            floatAccount=factor.floatAccount,
+            value=factor.sum,
+            valueType=SanadItem.BED,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
+        sanad.items.create(
+            account=Account.get_inventory_account(user),
+            # floatAccount=factor.floatAccount,
+            value=value,
+            valueType=SanadItem.BES,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )
+        sanad.items.create(
+            account=getDA('profitAndLossFromBuying', user).account,
+            # floatAccount=factor.floatAccount,
+            value=abs(value - factor.sum),
+            valueType=SanadItem.BES,
+            explanation=explanation,
+            financial_year=sanad.financial_year
+        )

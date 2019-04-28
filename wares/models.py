@@ -100,7 +100,6 @@ class Ware(BaseModel):
         ordering = ['code', ]
 
     def has_factorItem(self):
-        # print(self.factorItems.count())
         return self.factorItems.count() != 0
 
     def has_inventory(self):
@@ -139,8 +138,8 @@ class Ware(BaseModel):
         return fee * count
 
     def calculated_output_value_for_fifo(self, user, needed_count):
+        from factors.models import Factor
         if not self.metadata:
-            from factors.models import Factor
             initialFactorItem = self.factorItems.inFinancialYear(user)\
                 .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP)\
                 .order_by('factor__definition_date')[0]
@@ -152,20 +151,22 @@ class Ware(BaseModel):
             self.metadata = metadata
             self.save()
         else:
-            initialFactorItem = self.factorItem.get(pk=self.metadata.factor_item_id)
+            initialFactorItem = self.factorItems.get(pk=self.metadata.factor_item_id)
             metadata = self.metadata
 
         factorItems = self.factorItems.inFinancialYear(user) \
-            .filter(factor__is_definite=True,
-                    factor__type__in=Factor.BUY_GROUP,
-                    factor__definition_date__gte=initialFactorItem.factor.definition_date) \
-            .order_by('definition_date')
+            .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
+            .order_by('factor__definition_date')
+
+        initial_factor_definition_date = initialFactorItem.factor.definition_date
+        if initial_factor_definition_date:
+            factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date)
 
         total_value = 0
         factorItem = initialFactorItem
         count = metadata.count
         fees = []
-        for factorItem in factorItems:
+        for factorItem in factorItems.all():
 
             if count == 0:
                 break
@@ -201,5 +202,5 @@ class Ware(BaseModel):
         metadata.count = count
         metadata.save()
 
-        print(fees)
+        # print(fees)
         return total_value
