@@ -25,7 +25,7 @@ class InventoryListView(generics.ListAPIView):
             .filter(ware=data['ware'], warehouse=data['warehouse'])\
             .prefetch_related('factor__account')\
             .prefetch_related('factor__sanad')\
-            .order_by('factor__date', 'factor__time')
+            .order_by('factor__definition_date')
 
         res = Response(FactorItemInventorySerializer(factor_items, many=True).data, status.HTTP_200_OK)
         return res
@@ -105,6 +105,4 @@ class InventoryListView(generics.ListAPIView):
 
         res = FactorItemInventorySerializer(factor_items, many=True).data
         return Response(res, status.HTTP_200_OK)
-
-
 

@@ -7,6 +7,7 @@ from django.utils.timezone import now
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -55,12 +56,15 @@ class FactorModelView(viewsets.ModelViewSet):
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
 
+    @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         pk = kwargs['pk']
         queryset = self.get_queryset()
         factor = get_object_or_404(queryset, pk=pk)
-        if factor.sanad:
-            clearSanad(factor.sanad)
+        if not factor.is_deletable:
+            raise ValidationError('فاکتور غیر قابل حذف می باشد')
+        if factor.is_definite:
+            DefiniteFactor.undoDefinition(request.user, factor)
         res = super().destroy(request, *args, **kwargs)
         return res
 
@@ -85,6 +89,10 @@ class FactorModelView(viewsets.ModelViewSet):
     @transaction.atomic()
     def update(self, request, *args, **kwargs):
         factor = self.get_object()
+
+        if not factor.is_editable:
+            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
+
         data = request.data
         user = request.user
 
@@ -132,12 +140,19 @@ class FactorModelView(viewsets.ModelViewSet):
 
         for item in items_to_update:
             instance = get_object_or_404(model.objects.inFinancialYear(user), id=item['id'])
+            if hasattr(instance, 'is_editable'):
+                if not instance.is_editable:
+                    continue
             serialized = serializer_class(instance, data=item)
             serialized.is_valid(raise_exception=True)
 
         ids_to_delete = data.get('ids_to_delete', [])
-        if len(ids_to_delete):
-            model.objects.inFinancialYear(user).filter(id__in=ids_to_delete).delete()
+        for id in ids_to_delete:
+            instance = get_object_or_404(model.objects.inFinancialYear(user), id='id')
+            if hasattr(instance, 'is_editable'):
+                if not instance.is_editable:
+                    continue
+            instance.delete()
 
 
 class FactorPaymentMass(APIView):
@@ -360,11 +375,7 @@ class DefiniteFactor(APIView):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
-        factor.is_definite = True
-        factor.code = Factor.newCodes(user, factor_type=factor.type)
-        factor.definition_date = now()
         factor.sanad = sanad
-        factor.save()
 
         DefiniteFactor.setFactorItemsRemains(user, factor)
 
@@ -402,6 +413,12 @@ class DefiniteFactor(APIView):
         DefiniteFactor.submitTaxSanadItems(user, factor, rowTypeOne, rowTypeTwo, explanation)
         DefiniteFactor.submitExpenseSanadItems(factor, explanation)
 
+        factor.is_definite = True
+        factor.code = Factor.newCodes(user, factor_type=factor.type)
+        factor.definition_date = now()
+        factor.sanad = sanad
+        factor.save()
+
         return factor
 
     @staticmethod
@@ -416,14 +433,30 @@ class DefiniteFactor(APIView):
                 financial_year=user.active_financial_year
             )
         else:
+            factor = DefiniteFactor.undoDefinition(user, factor)
             sanad = factor.sanad
-            clearSanad(sanad)
+            sanad.date = factor.date
             sanad.createType = Sanad.AUTO
             sanad.type = Sanad.TEMPORARY
             sanad.explanation = factor.explanation
         sanad.save()
 
         return sanad
+
+    @staticmethod
+    def undoDefinition(user, factor):
+        sanad = factor.sanad
+        clearSanad(sanad)
+
+        factor.is_definite = False
+        factor.definition_date = None
+        factor.save()
+
+        for item in factor.items.all():
+            if item.ware.pricingType == Ware.FIFO:
+                item.ware.revert_fifo(user, item.count)
+
+        return factor
 
     @staticmethod
     def setFactorItemsRemains(user, factor):

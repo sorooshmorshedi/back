@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.db import models
-from django.db.models import signals, Sum
+from django.db.models import signals, Sum, Max
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
@@ -66,7 +66,7 @@ class Factor(BaseModel):
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
 
     is_definite = models.BooleanField(default=0)
-    definition_date = jmodels.jDateField(blank=True, null=True)
+    definition_date = models.DateTimeField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         unique_together = ('code', 'type')
@@ -183,6 +183,39 @@ class Factor(BaseModel):
         else:
             return codes
 
+    @property
+    def has_not_editable_item(self):
+        for item in self.items.all():
+            if not item.get_is_editable():
+                return True
+        return False
+
+    @property
+    def is_last_definite_factor(self):
+        last_code = Factor.objects\
+            .filter(financial_year=self.financial_year, type=self.type)\
+            .aggregate(Max('code'))['code__max']
+        if self.code == last_code:
+            return True
+
+    @property
+    def is_deletable(self):
+        if self.has_not_editable_item:
+            return False
+        if self.is_definite and self.is_last_definite_factor:
+            return True
+        return False
+
+    @property
+    def is_editable(self):
+        if self.is_definite:
+            if self.is_last_definite_factor:
+                return True
+            else:
+                return False
+        else:
+            return True
+
 
 class FactorExpense(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_expenses')
@@ -220,6 +253,8 @@ class FactorItem(BaseModel):
     remain_count = models.IntegerField(null=True, blank=True, default=0)
     remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
 
+    is_editable = models.BooleanField(default=1)
+
     @property
     def value(self):
         return self.fee * self.count
@@ -234,6 +269,22 @@ class FactorItem(BaseModel):
     @property
     def totalValue(self):
         return self.value - self.discount
+
+    def get_is_editable(self):
+        ware = self.ware
+        if ware.pricingType == Ware.FIFO:
+            return self.is_editable
+        else:
+            qs = FactorItem.objects.filter(
+                financial_year=self.financial_year,
+                ware=ware,
+                factor__type__in=Factor.SALE_GROUP,
+                factor__is_definite=True,
+                factor__definition_date__gt=str(self.factor.created_at)
+            ).count()
+            if qs:
+                return False
+            return True
 
 
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)

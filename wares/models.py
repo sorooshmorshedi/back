@@ -91,7 +91,7 @@ class Ware(BaseModel):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
-    metadata = models.OneToOneField(WareMetaData, on_delete=models.CASCADE, null=True, blank=True)
+    metadata = models.OneToOneField(WareMetaData, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -135,10 +135,16 @@ class Ware(BaseModel):
         remain_value = lastFactorItem.remain_value
         remain_count = lastFactorItem.remain_count
         fee = remain_value / remain_count
+
+        self.factorItems.inFinancialYear(user) \
+            .filter(factor__is_definite=True, id__lte=lastFactorItem.id)\
+            .update(is_editable=0)
+
         return fee * count
 
     def calculated_output_value_for_fifo(self, user, needed_count):
         from factors.models import Factor
+        from factors.models import FactorItem
         if not self.metadata:
             initialFactorItem = self.factorItems.inFinancialYear(user)\
                 .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP)\
@@ -166,10 +172,14 @@ class Ware(BaseModel):
         factorItem = initialFactorItem
         count = metadata.count
         fees = []
+        uneditableFactorItemIds = []
         for factorItem in factorItems.all():
 
-            if count == 0:
+            if needed_count == 0:
+                count = factorItem.count
                 break
+
+            uneditableFactorItemIds.append(factorItem.id)
 
             if factorItem != initialFactorItem:
                 count = factorItem.count
@@ -196,11 +206,63 @@ class Ware(BaseModel):
                     'fee': fee,
                     'count': count
                 })
-                count = 0
+                needed_count = 0
+
+        FactorItem.objects.inFinancialYear(user).filter(id__in=uneditableFactorItemIds).update(is_editable=0)
 
         metadata.factor_item_id = factorItem.id
         metadata.count = count
         metadata.save()
 
         # print(fees)
+
         return total_value
+
+    def revert_fifo(self, user, returned_count):
+        from factors.models import Factor
+        if not self.metadata:
+            raise Exception("Ware Does not have any metadata")
+
+        initialFactorItem = self.factorItems.get(pk=self.metadata.factor_item_id)
+        metadata = self.metadata
+
+        factorItems = self.factorItems.inFinancialYear(user) \
+            .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
+            .order_by('-factor__definition_date')
+
+        initial_factor_definition_date = initialFactorItem.factor.definition_date
+        if initial_factor_definition_date:
+            factorItems = factorItems.filter(factor__definition_date__lte=initial_factor_definition_date)
+
+        factorItem = initialFactorItem
+        remained_count = metadata.count
+        editableFactorItemIds = []
+        for factorItem in factorItems.all():
+
+            if returned_count == 0:
+                remained_count = factorItem.count
+                break
+
+            if factorItem == initialFactorItem:
+                remained_count = metadata.count
+            else:
+                remained_count = 0
+
+            used_count = factorItem.count - remained_count
+
+            if returned_count < used_count:
+                remained_count += returned_count
+                break
+            elif returned_count > used_count:
+                editableFactorItemIds.append(factorItem.id)
+                returned_count -= used_count
+            else:
+                editableFactorItemIds.append(factorItem.id)
+                returned_count = 0
+
+        from factors.models import FactorItem
+        FactorItem.objects.inFinancialYear(user).filter(id__in=editableFactorItemIds).update(is_editable=1)
+
+        metadata.factor_item_id = factorItem.id
+        metadata.count = remained_count
+        metadata.save()

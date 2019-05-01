@@ -77,9 +77,13 @@ class FactorItemSerializer(serializers.ModelSerializer):
         return data
 
 
-class FactorItemListRetrieveSerializer(FactorItemSerializer):
+class FactorItemRetrieveSerializer(FactorItemSerializer):
     ware = WareListRetrieveSerializer(read_only=True, many=False)
     warehouse = WarehouseSerializer(read_only=True, many=False)
+    is_editable = serializers.SerializerMethodField()
+
+    def get_is_editable(self, obj):
+        return obj.get_is_editable()
 
     class Meta(FactorItemSerializer.Meta):
         pass
@@ -103,7 +107,7 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
-    items = FactorItemListRetrieveSerializer(read_only=True, many=True)
+    items = FactorItemRetrieveSerializer(read_only=True, many=True)
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
 
