@@ -184,35 +184,30 @@ class Factor(BaseModel):
             return codes
 
     @property
-    def has_not_editable_item(self):
+    def has_uneditable_item(self):
         for item in self.items.all():
             if not item.get_is_editable():
                 return True
         return False
 
     @property
-    def is_last_definite_factor(self):
-        last_code = Factor.objects\
+    def is_last_factor(self):
+        last_id = Factor.objects\
             .filter(financial_year=self.financial_year, type=self.type)\
-            .aggregate(Max('code'))['code__max']
-        if self.code == last_code:
+            .aggregate(Max('id'))['id__max']
+        if self.id == last_id:
             return True
 
     @property
     def is_deletable(self):
-        if self.has_not_editable_item:
+        if self.has_uneditable_item:
             return False
-        if self.is_definite and self.is_last_definite_factor:
-            return True
-        return False
+        return self.is_last_factor
 
     @property
     def is_editable(self):
         if self.is_definite:
-            if self.is_last_definite_factor:
-                return True
-            else:
-                return False
+            return self.is_last_factor
         else:
             return True
 

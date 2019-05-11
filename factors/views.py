@@ -394,10 +394,14 @@ class DefiniteFactor(APIView):
             else:
                 account = 'backFromSale'
 
-        explanation = "شماره فاکتور: {} تاریخ فاکتور: {} نوع فاکتور: {} {}".format(factor.code,
-                                                                                   str(factor.date),
-                                                                                   factor.type_label,
-                                                                                   factor.explanation)
+        code = Factor.newCodes(user, factor_type=factor.type)
+
+        explanation = "فاکتور {} شماره {} به تاریخ {} {} مشتری".format(
+            factor.type_label,
+            code,
+            str(factor.date),
+            "از" if factor.type in Factor.BUY_GROUP else "به"
+        )
 
         if factor.type != Factor.BACK_FROM_BUY:
             DefiniteFactor.submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation)
@@ -414,7 +418,7 @@ class DefiniteFactor(APIView):
         DefiniteFactor.submitExpenseSanadItems(factor, explanation)
 
         factor.is_definite = True
-        factor.code = Factor.newCodes(user, factor_type=factor.type)
+        factor.code = code
         factor.definition_date = now()
         factor.sanad = sanad
         factor.save()
