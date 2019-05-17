@@ -5,7 +5,7 @@ from reports.balance.views import accountBalanceView, floatAccountBalanceView
 from reports.balanceSheet.views import balanceSheetView
 from reports.bill.views import BillListView
 from reports.incomeStatement.views import incomeStatementView
-from reports.inventory.views import InventoryListView
+from reports.inventory.views import InventoryListView, WarehouseInventoryListView
 from reports.journal.views import JournalListView
 from reports.ledger.views import LedgerListView
 from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView
@@ -42,6 +42,7 @@ urlpatterns += [
     url(r'^incomeStatement$', incomeStatementView, name=''),
     url(r'^balanceSheet$', balanceSheetView, name=''),
     url(r'^inventory$', InventoryListView.as_view(), name=''),
+    url(r'^inventory/warehouse$', WarehouseInventoryListView.as_view(), name=''),
 ]
 
 
