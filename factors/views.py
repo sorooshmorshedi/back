@@ -110,7 +110,27 @@ class FactorModelView(viewsets.ModelViewSet):
         return res
 
     def sync_items(self, user, factor, data):
-        return self.mass(user, factor, FactorItemSerializer, data.get('factor_items', None))
+        factor_items = data.get('factor_items', [])
+
+        if factor.type in Factor.SALE_GROUP:
+            for factor_item in factor_items['items']:
+                if id in factor_item:
+                    old_count = FactorItem.objects.inFinancialYear(user).get(pk=factor_item['id']).count
+                else:
+                    old_count = 0
+
+                new_count = int(factor_item['count'])
+                ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
+                remain = ware.remain(user)
+                count = remain['count']
+
+                if count + old_count - new_count < 0:
+                    raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
+                        ware,
+                        count
+                    ))
+
+        return self.mass(user, factor, FactorItemSerializer, factor_items)
 
     def sync_expenses(self, user, factor, data):
         return self.mass(user, factor, FactorExpenseSerializer, data.get('factor_expenses', None))
