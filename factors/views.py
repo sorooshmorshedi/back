@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDA
+from factors.helpers import getInventoryCount
 from sanads.sanads.models import clearSanad, newSanadCode, SanadItem
 from .serializers import *
 
@@ -121,7 +122,8 @@ class FactorModelView(viewsets.ModelViewSet):
 
                 new_count = int(factor_item['count'])
                 ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
-                remain = ware.remain(user)
+                warehouse = Warehouse.objects.inFinancialYear(user).get(pk=factor_item['warehouse'])
+                remain = getInventoryCount(user, warehouse, ware)
                 count = remain['count']
 
                 if count + old_count - new_count < 0:

@@ -3,6 +3,7 @@ from django.db.models import Sum
 from factors.models import FactorItem, Factor
 
 
+# remain by considering definition
 def getInventoryCount(user, warehouse, ware):
     qs = FactorItem.objects.inFinancialYear(user).filter(warehouse=warehouse, ware=ware)
     input_count = qs.filter(factor__type__in=Factor.BUY_GROUP, factor__is_definite=True).aggregate(Sum('count'))['count__sum']

@@ -113,6 +113,7 @@ class Ware(BaseModel):
         except IndexError:
             return None
 
+    # Just definite factors
     def remain(self, user):
         res = {
             'count': 0,
