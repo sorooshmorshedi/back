@@ -166,6 +166,7 @@ class FactorModelView(viewsets.ModelViewSet):
                     continue
             serialized = serializer_class(instance, data=item)
             serialized.is_valid(raise_exception=True)
+            serialized.save()
 
         ids_to_delete = data.get('ids_to_delete', [])
         for id in ids_to_delete:
