@@ -115,7 +115,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         if factor.type in Factor.SALE_GROUP:
             for factor_item in factor_items['items']:
-                if id in factor_item:
+                if 'id' in factor_item:
                     old_count = FactorItem.objects.inFinancialYear(user).get(pk=factor_item['id']).count
                 else:
                     old_count = 0
