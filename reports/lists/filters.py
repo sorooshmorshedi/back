@@ -127,6 +127,7 @@ class FactorItemFilter(filters.FilterSet):
             'factor__type': ['exact', 'in'],
             'id': ['exact'],
             'factor__code': ['exact'],
+            'factor__is_definite': ['exact'],
             'factor__date': ['gte', 'lte'],
             'factor__account__name': ['icontains'],
             'warehouse__name': ['icontains'],
