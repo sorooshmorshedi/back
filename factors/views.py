@@ -123,8 +123,7 @@ class FactorModelView(viewsets.ModelViewSet):
                 new_count = int(factor_item['count'])
                 ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
                 warehouse = Warehouse.objects.inFinancialYear(user).get(pk=factor_item['warehouse'])
-                remain = getInventoryCount(user, warehouse, ware)
-                count = remain['count']
+                count = getInventoryCount(user, warehouse, ware)
 
                 if count + old_count - new_count < 0:
                     raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
