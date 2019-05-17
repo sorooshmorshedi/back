@@ -62,10 +62,11 @@ class InventoryListView(generics.ListAPIView):
         serializer = self.serializer_class(page, many=True)
         data = serializer.data
 
-        if paginator.offset + paginator.limit >= paginator.count:
+        if len(data) and paginator.offset + paginator.limit >= paginator.count:
             addSum(queryset, data)
 
-        return paginator.get_paginated_response(data)
+        response = paginator.get_paginated_response(data)
+        return response
 
 
 class WarehouseInventoryListView(InventoryListView):

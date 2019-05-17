@@ -55,6 +55,13 @@ class FactorSerializer(serializers.ModelSerializer):
         model = Factor
         fields = '__all__'
         read_only_fields = ('id', 'code', )
+        extra_kwargs = {
+            "account": {
+                "error_messages": {
+                    "required": "نام حساب را وارد نکرده اید"
+                }
+            }
+        }
 
     def validate(self, data):
         if data['account'].level != 3:
