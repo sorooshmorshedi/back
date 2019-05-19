@@ -1,15 +1,13 @@
 from django.db import connection
-from django.db.models import Sum, F, DecimalField
+from django.db.models import Sum, F, DecimalField, Window, Q
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from factors.models import FactorItem, Factor
-from factors.serializers import FactorItemSerializer
-from reports.inventory.filters import InventoryFilter, WarehouseInventoryFilter
+from reports.inventory.filters import InventoryFilter
 from reports.inventory.serializers import FactorItemInventorySerializer
-from wares.models import Ware
 
 
 def addSum(queryset, data):
@@ -39,12 +37,20 @@ class InventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        params = self.request.GET
         queryset = FactorItem.objects.inFinancialYear(self.request.user).filter(factor__is_definite=True) \
-            .filter(ware=params['ware'], warehouse=params['warehouse']) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
-            .order_by('factor__definition_date')
+            .order_by('factor__definition_date') \
+            .annotate(
+                cumulative_input_count=Window(
+                    expression=Sum('count', filter=Q(calculated_output_value=0)),
+                    order_by=F('id').asc()
+                ),
+                cumulative_output_count=Window(
+                    expression=Sum('count', filter=~Q(calculated_output_value=0)),
+                    order_by=F('id').asc()
+                )
+            )
 
         return queryset
 
@@ -66,6 +72,7 @@ class InventoryListView(generics.ListAPIView):
             addSum(queryset, data)
 
         response = paginator.get_paginated_response(data)
+        # print(len(connection.queries))
         return response
 
 

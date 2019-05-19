@@ -25,6 +25,14 @@ class FactorItemInventorySerializer(serializers.ModelSerializer):
     output = serializers.SerializerMethodField()
     remain = serializers.SerializerMethodField()
 
+    cumulative_count = serializers.SerializerMethodField()
+
+    def get_cumulative_count(self, obj):
+        return {
+            'input': obj.cumulative_input_count or 0,
+            'output': obj.cumulative_output_count or 0,
+        }
+
     def get_input(self, obj):
         if obj.factor.type in Factor.BUY_GROUP:
             return {
