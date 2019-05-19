@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from reports.balance.views import accountBalanceView, floatAccountBalanceView
 from reports.balanceSheet.views import balanceSheetView
 from reports.bill.views import BillListView
+from reports.buySale.views import BuySaleView
 from reports.incomeStatement.views import incomeStatementView
 from reports.inventory.views import InventoryListView, WarehouseInventoryListView
 from reports.journal.views import JournalListView
@@ -43,6 +44,7 @@ urlpatterns += [
     url(r'^balanceSheet$', balanceSheetView, name=''),
     url(r'^inventory$', InventoryListView.as_view(), name=''),
     url(r'^inventory/warehouse$', WarehouseInventoryListView.as_view(), name=''),
+    url(r'^buySale$', BuySaleView.as_view(), name=''),
 ]
 
 
