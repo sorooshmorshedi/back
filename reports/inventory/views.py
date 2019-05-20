@@ -1,13 +1,15 @@
 from django.db import connection
-from django.db.models import Sum, F, DecimalField, Window, Q
+from django.db.models import Sum, F, DecimalField, Window, Q, Prefetch, Subquery, OuterRef
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from factors.models import FactorItem, Factor
-from reports.inventory.filters import InventoryFilter
-from reports.inventory.serializers import FactorItemInventorySerializer
+from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter
+from reports.inventory.serializers import WareInventorySerializer, AllWaresInventorySerializer, \
+    WarehouseInventorySerializer, AllWarehousesInventorySerializer
+from wares.models import Ware
 
 
 def addSum(queryset, data):
@@ -30,27 +32,18 @@ def addSum(queryset, data):
     })
 
 
-class InventoryListView(generics.ListAPIView):
-    serializer_class = FactorItemInventorySerializer
+class WareInventoryListView(generics.ListAPIView):
+    serializer_class = WareInventorySerializer
     filter_class = InventoryFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear(self.request.user).filter(factor__is_definite=True) \
+        queryset = FactorItem.objects.inFinancialYear(self.request.user)\
+            .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
             .order_by('factor__definition_date') \
-            .annotate(
-                cumulative_input_count=Window(
-                    expression=Sum('count', filter=Q(calculated_output_value=0)),
-                    order_by=F('id').asc()
-                ),
-                cumulative_output_count=Window(
-                    expression=Sum('count', filter=~Q(calculated_output_value=0)),
-                    order_by=F('id').asc()
-                )
-            )
 
         return queryset
 
@@ -76,10 +69,169 @@ class InventoryListView(generics.ListAPIView):
         return response
 
 
-class WarehouseInventoryListView(InventoryListView):
+class AllWaresInventoryListView(generics.ListAPIView):
+    serializer_class = AllWaresInventorySerializer
+    filter_class = AllWaresInventoryFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear(self.request.user).filter(factor__is_definite=True)\
-            .prefetch_related('ware') \
+
+        last_factor_item = Subquery(FactorItem.objects.inFinancialYear(self.request.user)
+                                    .filter(ware_id=OuterRef('ware_id'))
+                                    .filter(factor__is_definite=True,
+                                            factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
+                                            )
+                                    .order_by('-factor__definition_date')
+                                    .values_list('id', flat=True)[:1])
+
+        input_filter = Q(
+            factorItems__factor__is_definite=True,
+            factorItems__factor__type__in=Factor.BUY_GROUP
+        )
+
+        output_filter = Q(
+            factorItems__factor__is_definite=True,
+            factorItems__factor__type__in=Factor.SALE_GROUP
+        )
+
+        queryset = Ware.objects.inFinancialYear(self.request.user) \
+            .prefetch_related(Prefetch('factorItems', queryset=FactorItem.objects.filter(id__in=last_factor_item))) \
+            .annotate(
+                input_count=Sum('factorItems__count', filter=input_filter),
+                input_value=Sum(F('factorItems__fee') * F('factorItems__count'),
+                                filter=input_filter, output_field=DecimalField()),
+                output_count=Sum('factorItems__count', filter=output_filter),
+                output_value=Sum(F('factorItems__fee') * F('factorItems__count'),
+                                 filter=output_filter, output_field=DecimalField()),
+            )
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        params = self.request.GET
+
+        factor_items = self.get_queryset()
+
+        queryset = self.filter_class(params, queryset=factor_items).qs
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer_class(page, many=True)
+        data = serializer.data
+
+        # if len(data) and paginator.offset + paginator.limit >= paginator.count:
+        #     addSum(queryset, data)
+
+        response = paginator.get_paginated_response(data)
+        # print(len(connection.queries))
+        return response
+
+
+class WarehouseInventoryListView(generics.ListAPIView):
+    serializer_class = WarehouseInventorySerializer
+    filter_class = InventoryFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        queryset = FactorItem.objects.inFinancialYear(self.request.user)\
+            .filter(factor__is_definite=True) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
-            .order_by('factor__definition_date')
+            .prefetch_related('warehouse') \
+            .order_by('factor__definition_date') \
+            .annotate(
+            cumulative_input_count=Window(
+                expression=Sum('count', filter=Q(calculated_output_value=0)),
+                order_by=F('id').asc()
+            ),
+            cumulative_output_count=Window(
+                expression=Sum('count', filter=~Q(calculated_output_value=0)),
+                order_by=F('id').asc()
+            )
+        )
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        params = self.request.GET
+
+        factor_items = self.get_queryset()
+
+        queryset = self.filter_class(params, queryset=factor_items).qs
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer_class(page, many=True)
+        data = serializer.data
+
+        if len(data) and paginator.offset + paginator.limit >= paginator.count:
+            data.append({
+                'input': data[-1]['cumulative_count']['input'],
+                'output': data[-1]['cumulative_count']['output'],
+                'remain': data[-1]['remain']
+            })
+
+        response = paginator.get_paginated_response(data)
+        # print(len(connection.queries))
+        return response
+
+
+class AllWarehousesInventoryListView(generics.ListAPIView):
+    serializer_class = AllWarehousesInventorySerializer
+    filter_class = AllWaresInventoryFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        warehouse = self.request.GET.get('warehouse', None)
+
+        input_filter = Q(
+            factorItems__factor__is_definite=True,
+            factorItems__factor__type__in=Factor.INPUT_GROUP
+        )
+
+        output_filter = Q(
+            factorItems__factor__is_definite=True,
+            factorItems__factor__type__in=Factor.OUTPUT_GROUP
+        )
+
+        if warehouse:
+            input_filter &= Q(factorItems__warehouse=warehouse)
+            output_filter &= Q(factorItems__warehouse=warehouse)
+
+        queryset = Ware.objects.inFinancialYear(self.request.user) \
+            .annotate(
+                input_count=Sum('factorItems__count', filter=input_filter),
+                output_count=Sum('factorItems__count', filter=output_filter),
+            )
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+
+        params = self.request.GET
+
+        factor_items = self.get_queryset()
+
+        queryset = self.filter_class(params, queryset=factor_items).qs
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer_class(page, many=True)
+        data = serializer.data
+
+        # if len(data) and paginator.offset + paginator.limit >= paginator.count:
+        #     addSum(queryset, data)
+
+        response = paginator.get_paginated_response(data)
+        # print(len(connection.queries))
+        return response
+
+

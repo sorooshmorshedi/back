@@ -32,6 +32,8 @@ class Factor(BaseModel):
     BACK_FROM_BUY = 'backFromBuy'
     BACK_FROM_SALE = 'backFromSale'
     FIRST_PERIOD_INVENTORY = 'fpi'
+    INPUT_MOVE = 'im'
+    OUTPUT_MOVE = 'om'
 
     FACTOR_TYPES = (
         (BUY, 'خرید'),
@@ -43,6 +45,9 @@ class Factor(BaseModel):
 
     BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
     SALE_GROUP = (SALE, BACK_FROM_BUY)
+
+    INPUT_GROUP = (*BUY_GROUP, INPUT_MOVE)
+    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_MOVE)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField(blank=True, null=True)

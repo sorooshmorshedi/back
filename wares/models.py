@@ -107,7 +107,8 @@ class Ware(BaseModel):
 
     def last_factor_item(self, user):
         try:
-            return self.factorItems.inFinancialYear(user)\
+            from factors.models import FactorItem
+            return FactorItem.objects.inFinancialYear(user).filter(ware=self)\
                 .filter(factor__is_definite=True)\
                 .order_by('-factor__definition_date')[0]
         except IndexError:
