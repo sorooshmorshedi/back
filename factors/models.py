@@ -32,8 +32,8 @@ class Factor(BaseModel):
     BACK_FROM_BUY = 'backFromBuy'
     BACK_FROM_SALE = 'backFromSale'
     FIRST_PERIOD_INVENTORY = 'fpi'
-    INPUT_MOVE = 'im'
-    OUTPUT_MOVE = 'om'
+    INPUT_TRANSFER = 'it'
+    OUTPUT_TRANSFER = 'ot'
 
     FACTOR_TYPES = (
         (BUY, 'خرید'),
@@ -41,18 +41,20 @@ class Factor(BaseModel):
         (BACK_FROM_BUY, 'بازگشت از خرید'),
         (BACK_FROM_SALE, 'بازگشت از فروش'),
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
+        (INPUT_TRANSFER, 'وارده از انتقال'),
+        (OUTPUT_TRANSFER, 'صادره با انتقال'),
     )
 
     BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
-    INPUT_GROUP = (*BUY_GROUP, INPUT_MOVE)
-    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_MOVE)
+    INPUT_GROUP = (*BUY_GROUP, INPUT_TRANSFER)
+    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField(blank=True, null=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
@@ -60,7 +62,7 @@ class Factor(BaseModel):
     bijak = models.IntegerField(null=True, blank=True)
 
     date = jmodels.jDateField()
-    time = models.TimeField(blank=True)
+    time = models.TimeField(auto_now=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
@@ -285,6 +287,19 @@ class FactorItem(BaseModel):
             if qs:
                 return False
             return True
+
+
+class Transfer(BaseModel):
+    code = models.IntegerField()
+    date = jmodels.jDateField()
+    created_at = jmodels.jDateField(auto_now=True)
+    updated_at = jmodels.jDateField(auto_now_add=True)
+
+    input_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='input_transfer')
+    output_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='output_transfer')
+    explanation = models.CharField(max_length=255, blank=True)
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
 
 
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)

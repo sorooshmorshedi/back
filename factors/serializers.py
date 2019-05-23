@@ -3,7 +3,8 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer, AccountSerializer
 from factors.models import *
 from sanads.sanads.serializers import SanadSerializer
-from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
+from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer, WareSerializer
+from django.utils.timezone import now
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
@@ -144,7 +145,93 @@ class NotPaidFactorsSerializer(FactorSerializer):
         fields = '__all__'
 
 
-# class WarehouseInventoryListRetrieveSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = WarehouseInventory
-#         fields = '__all__'
+class TransferListRetrieveSerializer(serializers.ModelSerializer):
+
+    items = serializers.SerializerMethodField()
+
+    def get_items(self, obj):
+        input_items = obj.input_factor.items.order_by('id')\
+            .prefetch_related('warehouse')
+
+        output_items = obj.output_factor.items.order_by('id')\
+            .prefetch_related('warehouse')
+
+        items = []
+        for i in range(len(input_items)):
+            input_item = input_items[i]
+            output_item = output_items[i]
+
+            ware = WareListRetrieveSerializer(input_item.ware).data
+            count = input_item.count
+            explanation = input_item.explanation
+            output_warehouse = WarehouseSerializer(output_item.warehouse).data
+            input_warehouse = WarehouseSerializer(input_item.warehouse).data
+
+            items.append({
+                'ware': ware,
+                'count': count,
+                'explanation': explanation,
+                'output_warehouse': output_warehouse,
+                'input_warehouse': input_warehouse,
+            })
+
+        return items
+
+    class Meta:
+        model = Transfer
+        fields = ('id', 'code', 'explanation', 'date', 'items')
+
+
+class TransferCreateSerializer(serializers.ModelSerializer):
+
+    items = serializers.ListField()
+
+    def validate(self, attrs):
+        return attrs
+
+    def create(self, validated_data):
+        financial_year = validated_data['financial_year']
+        date = validated_data['date']
+        explanation = validated_data.get('explanation', '')
+        factor_data = {
+            'financial_year': financial_year,
+            'date': date,
+            'explanation': explanation,
+            'is_definite': True,
+            'definition_date': now(),
+            'time': ''
+        }
+        input_factor = Factor.objects.create(**factor_data, type=Factor.INPUT_TRANSFER)
+        input_factor.save()
+        output_factor = Factor.objects.create(**factor_data, type=Factor.OUTPUT_TRANSFER)
+        output_factor.save()
+
+        for item in validated_data['items']:
+            item_data = {
+                'financial_year': financial_year,
+                'explanation': explanation,
+                'count': item['count'],
+                'fee': 0,
+                'ware': Ware.objects.get(pk=item['ware'])
+
+            }
+            input_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['input_warehouse']))
+            output_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['output_warehouse']))
+
+        transfer_data = {
+            'financial_year': financial_year,
+            'input_factor': input_factor,
+            'output_factor': output_factor,
+            'date': date,
+            'explanation': explanation,
+            'code': Transfer.objects.aggregate(Max('code'))['code__max'] or 1
+        }
+
+        transfer = Transfer.objects.create(**transfer_data)
+
+        return transfer
+
+    class Meta:
+        model = Transfer
+        fields = ('id', 'financial_year', 'explanation', 'date', 'items')
+

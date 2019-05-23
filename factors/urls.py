@@ -6,6 +6,7 @@ from .views import *
 router = DefaultRouter()
 router.register(r'expenses', ExpenseModelView, base_name='expense')
 router.register(r'factors', FactorModelView, base_name='factor')
+router.register(r'transfers', TransferModelView, base_name='transfer')
 
 urlpatterns = router.urls + [
     url(r'^getFactorByPosition$', getFactorByPosition, name=''),

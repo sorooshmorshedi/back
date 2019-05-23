@@ -667,3 +667,55 @@ class DefiniteFactor(APIView):
             explanation=explanation,
             financial_year=sanad.financial_year
         )
+
+
+class TransferModelView(viewsets.ModelViewSet):
+    serializer_class = TransferListRetrieveSerializer
+
+    def get_queryset(self):
+        return Transfer.objects.inFinancialYear(self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        res = super().list(request, *args, **kwargs)
+        return res
+
+    def retrieve(self, request, *args, **kwargs):
+        res = super().retrieve(request, *args, **kwargs)
+        return res
+
+    def destroy(self, request, *args, **kwargs):
+        return Response({'non_field_errors': ['transfer is not deletable']}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        return Response({'non_field_errors': ['transfer is not editable']}, status=status.HTTP_400_BAD_REQUEST)
+
+    @transaction.atomic()
+    def create(self, request, *args, **kwargs):
+
+        data = request.data
+        user = request.user
+
+        data['transfer']['financial_year'] = request.user.active_financial_year.id
+
+        items = data['transfer']['items']
+
+        for item in items:
+            count = int(item['count'])
+            ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
+            warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['output_warehouse'])
+            remain = getInventoryCount(user, warehouse, ware)
+
+            if remain - count < 0:
+                raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
+                    ware,
+                    remain
+                ))
+
+        serialized = TransferCreateSerializer(data=data['transfer'])
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        transfer = serialized.instance
+
+        res = Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
+        return res

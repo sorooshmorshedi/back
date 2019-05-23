@@ -65,7 +65,7 @@ class WareInventoryListView(generics.ListAPIView):
             addSum(queryset, data)
 
         response = paginator.get_paginated_response(data)
-        # print(len(connection.queries))
+        # p.rint(len(connection.queries))
         return response
 
 
