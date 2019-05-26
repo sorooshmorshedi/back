@@ -677,7 +677,7 @@ class TransferModelView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         res = super().list(request, *args, **kwargs)
-        return res
+        return ree
 
     def retrieve(self, request, *args, **kwargs):
         res = super().retrieve(request, *args, **kwargs)
