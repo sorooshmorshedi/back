@@ -207,11 +207,15 @@ class Factor(BaseModel):
 
     @property
     def is_deletable(self):
-        return self.is_last_factor
+        if self.is_definite:
+            return self.is_last_factor
+        return True
 
     @property
     def is_editable(self):
-        return self.is_last_factor
+        if self.is_definite:
+            return self.is_last_factor
+        return True
 
 
 class FactorExpense(BaseModel):
