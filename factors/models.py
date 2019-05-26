@@ -200,7 +200,7 @@ class Factor(BaseModel):
     @property
     def is_last_factor(self):
         last_id = Factor.objects\
-            .filter(financial_year=self.financial_year, is_definite=self.is_definite, type=self.type)\
+            .filter(financial_year=self.financial_year, is_definite=self.is_definite)\
             .aggregate(Max('id'))['id__max']
         if self.id == last_id:
             return True
