@@ -198,23 +198,33 @@ class Factor(BaseModel):
         return False
 
     @property
-    def is_last_factor(self):
-        last_id = Factor.objects\
-            .filter(financial_year=self.financial_year, is_definite=self.is_definite)\
+    def has_editable_item(self):
+        for item in self.items.all():
+            if item.get_is_editable():
+                return True
+        return False
+
+    @property
+    def is_last_definite_factor(self):
+        last = Factor.objects\
+            .filter(financial_year=self.financial_year,
+                    is_definite=self.is_definite,
+                    type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
+                    )\
             .aggregate(Max('id'))['id__max']
-        if self.id == last_id:
+        if self.id == last:
             return True
 
     @property
     def is_deletable(self):
         if self.is_definite:
-            return self.is_last_factor
+            return self.is_last_definite_factor
         return True
 
     @property
     def is_editable(self):
         if self.is_definite:
-            return self.is_last_factor
+            return self.is_last_definite_factor
         return True
 
 

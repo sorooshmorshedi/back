@@ -217,14 +217,12 @@ class Ware(BaseModel):
         metadata.count = count
         metadata.save()
 
-        # print(fees)
-
         return total_value
 
     def revert_fifo(self, user, returned_count):
         from factors.models import Factor
         if not self.metadata:
-            raise Exception("Ware Does not have any metadata")
+            raise Exception("Ware", self.name, "Does not have any metadata")
 
         initialFactorItem = self.factorItems.get(pk=self.metadata.factor_item_id)
         metadata = self.metadata
@@ -242,10 +240,6 @@ class Ware(BaseModel):
         editableFactorItemIds = []
         for factorItem in factorItems.all():
 
-            if returned_count == 0:
-                remained_count = factorItem.count
-                break
-
             if factorItem == initialFactorItem:
                 remained_count = metadata.count
             else:
@@ -261,7 +255,8 @@ class Ware(BaseModel):
                 returned_count -= used_count
             else:
                 editableFactorItemIds.append(factorItem.id)
-                returned_count = 0
+                remained_count = factorItem.count
+                break
 
         from factors.models import FactorItem
         FactorItem.objects.inFinancialYear(user).filter(id__in=editableFactorItemIds).update(is_editable=1)

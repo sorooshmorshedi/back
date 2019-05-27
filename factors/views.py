@@ -64,8 +64,10 @@ class FactorModelView(viewsets.ModelViewSet):
         factor = get_object_or_404(queryset, pk=pk)
         if not factor.is_deletable:
             raise ValidationError('فاکتور غیر قابل حذف می باشد')
+
         if factor.is_definite:
             DefiniteFactor.undoDefinition(request.user, factor)
+
         res = super().destroy(request, *args, **kwargs)
         return res
 
@@ -113,6 +115,7 @@ class FactorModelView(viewsets.ModelViewSet):
     def sync_items(self, user, factor, data):
         factor_items = data.get('factor_items', [])
 
+        # Check Inventory
         if factor.type in Factor.SALE_GROUP:
             for factor_item in factor_items['items']:
                 if 'id' in factor_item:
@@ -170,7 +173,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         ids_to_delete = data.get('ids_to_delete', [])
         for id in ids_to_delete:
-            instance = get_object_or_404(model.objects.inFinancialYear(user), id='id')
+            instance = get_object_or_404(model.objects.inFinancialYear(user), id=id)
             if hasattr(instance, 'is_editable'):
                 if not instance.is_editable:
                     continue
@@ -478,9 +481,17 @@ class DefiniteFactor(APIView):
         factor.definition_date = None
         factor.save()
 
-        for item in factor.items.all():
-            if item.ware.pricingType == Ware.FIFO:
-                item.ware.revert_fifo(user, item.count)
+        if factor.type in Factor.SALE_GROUP:
+            for item in factor.items.all():
+                if item.ware.pricingType == Ware.FIFO:
+                    print('reverting ', item.count, item.ware.name)
+                    item.ware.revert_fifo(user, item.count)
+        elif factor.type in Factor.BUY_GROUP:
+            for item in factor.items.all():
+                ware = item.ware
+                if ware.metadata:
+                    if item.id == ware.metadata.factor_item_id:
+                        ware.metadata.delete()
 
         return factor
 
