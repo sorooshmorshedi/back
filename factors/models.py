@@ -216,16 +216,34 @@ class Factor(BaseModel):
             return True
 
     @property
+    def is_output_after_this(self):
+        count = Factor.objects \
+            .filter(financial_year=self.financial_year,
+                    type__in=Factor.OUTPUT_GROUP,
+                    created_at__gte=self.created_at
+                    ) \
+            .count()
+        return count
+
+    @property
     def is_deletable(self):
+        res = True
         if self.is_definite:
-            return self.is_last_definite_factor
-        return True
+            if self.type in Factor.BUY_GROUP:
+                res = not self.is_output_after_this
+            else:
+                res = self.is_last_definite_factor
+        return res
 
     @property
     def is_editable(self):
+        res = True
         if self.is_definite:
-            return self.is_last_definite_factor
-        return True
+            if self.type in Factor.BUY_GROUP:
+                res = not self.is_output_after_this
+            else:
+                res = self.is_last_definite_factor
+        return res
 
 
 class FactorExpense(BaseModel):
