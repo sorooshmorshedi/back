@@ -79,7 +79,7 @@ class Factor(BaseModel):
         unique_together = ('code', 'type')
 
     def __str__(self):
-        return "ID: {}, code: {}, financial_year: {}".format(self.pk, self.code, self.financial_year)
+        return "ID: {}, code: {}, type: {}, is_definite: {}".format(self.pk, self.code, self.type, self.is_definite)
 
     @property
     def sum(self):
@@ -206,14 +206,17 @@ class Factor(BaseModel):
 
     @property
     def is_last_definite_factor(self):
-        last = Factor.objects\
+        count = Factor.objects\
             .filter(financial_year=self.financial_year,
                     is_definite=self.is_definite,
-                    type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
+                    type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP),
+                    definition_date__gt=self.definition_date
                     )\
-            .aggregate(Max('id'))['id__max']
-        if self.id == last:
+            .count()
+        if count == 0:
             return True
+        else:
+            return False
 
     @property
     def is_output_after_this(self):

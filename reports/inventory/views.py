@@ -82,7 +82,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
                                     .filter(factor__is_definite=True,
                                             factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
                                             )
-                                    .order_by('-factor__definition_date')
+                                    .order_by('factor__definition_date')
                                     .values_list('id', flat=True)[:1])
 
         input_filter = Q(
