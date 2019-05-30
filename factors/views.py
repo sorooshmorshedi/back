@@ -116,23 +116,24 @@ class FactorModelView(viewsets.ModelViewSet):
         factor_items = data.get('factor_items', [])
 
         # Check Inventory
-        if factor.type in Factor.SALE_GROUP:
-            for factor_item in factor_items['items']:
-                if 'id' in factor_item:
-                    old_count = FactorItem.objects.inFinancialYear(user).get(pk=factor_item['id']).count
-                else:
-                    old_count = 0
+        if factor.is_definite:
+            if factor.type in Factor.SALE_GROUP:
+                for factor_item in factor_items['items']:
+                    if 'id' in factor_item:
+                        old_count = FactorItem.objects.inFinancialYear(user).get(pk=factor_item['id']).count
+                    else:
+                        old_count = 0
 
-                new_count = int(factor_item['count'])
-                ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
-                warehouse = Warehouse.objects.inFinancialYear(user).get(pk=factor_item['warehouse'])
-                count = getInventoryCount(user, warehouse, ware)
+                    new_count = int(factor_item['count'])
+                    ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
+                    warehouse = Warehouse.objects.inFinancialYear(user).get(pk=factor_item['warehouse'])
+                    count = getInventoryCount(user, warehouse, ware)
 
-                if count + old_count - new_count < 0:
-                    raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
-                        ware,
-                        count
-                    ))
+                    if count + old_count - new_count < 0:
+                        raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
+                            ware,
+                            count
+                        ))
 
         return self.mass(user, factor, FactorItemSerializer, factor_items)
 
@@ -398,6 +399,20 @@ class DefiniteFactor(APIView):
     @transaction.atomic()
     def definiteFactor(user, pk):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
+
+        # Check Inventory
+        if factor.type in Factor.SALE_GROUP:
+            for factor_item in factor.items.all():
+                new_count = int(factor_item.count)
+                ware = factor_item.ware
+                warehouse = factor_item.warehouse
+                count = getInventoryCount(user, warehouse, ware)
+
+                if count - new_count < 0:
+                    raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
+                        ware,
+                        count
+                    ))
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
