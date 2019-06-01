@@ -209,7 +209,6 @@ class Factor(BaseModel):
         count = Factor.objects\
             .filter(financial_year=self.financial_year,
                     is_definite=self.is_definite,
-                    type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP),
                     definition_date__gt=self.definition_date
                     )\
             .count()
