@@ -6,10 +6,17 @@ from reports.lists.serializers import *
 
 
 def addSum(queryset, data):
+    input_count = queryset.filter(factor__type__in=Factor.INPUT_GROUP).aggregate(Sum('count'))['count__sum']
+    output_count = queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(Sum('count'))['count__sum']
+    input_value = queryset.filter(factor__type__in=Factor.INPUT_GROUP) \
+        .annotate(value=Sum(F('fee') * F('count'), output_field=DecimalField())) \
+        .aggregate(Sum('value'))['value__sum']
+    output_value = queryset.filter(factor__type__in=Factor.OUTPUT_GROUP) \
+        .annotate(value=Sum(F('fee') * F('count'), output_field=DecimalField())) \
+        .aggregate(Sum('value'))['value__sum']
     data.append({
-        'count': queryset.aggregate(Sum('count'))['count__sum'],
-        'value': queryset.annotate(value=Sum(F('fee') * F('count'), output_field=DecimalField()))
-            .aggregate(Sum('value'))['value__sum']
+        'count': input_count - output_count,
+        'value': input_value - output_value
     })
 
 
