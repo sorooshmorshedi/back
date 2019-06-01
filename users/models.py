@@ -6,10 +6,10 @@ from companies.models import Company, FinancialYear
 
 class User(AbstractUser):
 
-    active_company = models.OneToOneField(Company, on_delete=models.PROTECT, related_name='users',
-                                          blank=True, null=True)
-    active_financial_year = models.OneToOneField(FinancialYear, on_delete=models.PROTECT, related_name='users',
-                                                 blank=True, null=True)
+    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='users',
+                                       blank=True, null=True)
+    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users',
+                                              blank=True, null=True)
 
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
