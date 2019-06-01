@@ -107,7 +107,7 @@ class FactorModelView(viewsets.ModelViewSet):
         self.sync_expenses(user, factor, data)
 
         if factor.is_definite:
-            DefiniteFactor.definiteFactor(user, factor.pk)
+            DefiniteFactor.definiteFactor(user, factor.pk, check_inventory=False)
 
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
@@ -397,22 +397,23 @@ class DefiniteFactor(APIView):
 
     @staticmethod
     @transaction.atomic()
-    def definiteFactor(user, pk):
+    def definiteFactor(user, pk, check_inventory=True):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
 
         # Check Inventory
-        if factor.type in Factor.SALE_GROUP:
-            for factor_item in factor.items.all():
-                new_count = int(factor_item.count)
-                ware = factor_item.ware
-                warehouse = factor_item.warehouse
-                count = getInventoryCount(user, warehouse, ware)
+        if check_inventory:
+            if factor.type in Factor.SALE_GROUP:
+                for factor_item in factor.items.all():
+                    new_count = int(factor_item.count)
+                    ware = factor_item.ware
+                    warehouse = factor_item.warehouse
+                    count = getInventoryCount(user, warehouse, ware)
 
-                if count - new_count < 0:
-                    raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
-                        ware,
-                        count
-                    ))
+                    if count - new_count < 0:
+                        raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
+                            ware,
+                            count
+                        ))
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
@@ -499,7 +500,6 @@ class DefiniteFactor(APIView):
         if factor.type in Factor.SALE_GROUP:
             for item in factor.items.all():
                 if item.ware.pricingType == Ware.FIFO:
-                    print('reverting ', item.count, item.ware.name)
                     item.ware.revert_fifo(user, item.count)
         elif factor.type in Factor.BUY_GROUP:
             for item in factor.items.all():
@@ -703,7 +703,7 @@ class TransferModelView(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         res = super().list(request, *args, **kwargs)
-        return ree
+        return res
 
     def retrieve(self, request, *args, **kwargs):
         res = super().retrieve(request, *args, **kwargs)
