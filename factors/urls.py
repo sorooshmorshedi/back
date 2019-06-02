@@ -15,5 +15,7 @@ urlpatterns = router.urls + [
     url(r'^factorPayments/mass$', FactorPaymentMass.as_view(), name=''),
     url(r'^factors/definite/(?P<pk>[0-9]+)$', DefiniteFactor.as_view(), name=''),
 
+    url(r'^getTransferByPosition$', getTransferByPosition, name=''),
+
     url(r'^firstPeriodInventory$', FirstPeriodInventoryView.as_view(), name=''),
 ]

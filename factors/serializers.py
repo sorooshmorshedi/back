@@ -218,13 +218,19 @@ class TransferCreateSerializer(serializers.ModelSerializer):
             input_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['input_warehouse']))
             output_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['output_warehouse']))
 
+        code = Transfer.objects.aggregate(Max('code'))['code__max']
+        if code:
+            code += 1
+        else:
+            code = 1
+
         transfer_data = {
             'financial_year': financial_year,
             'input_factor': input_factor,
             'output_factor': output_factor,
             'date': date,
             'explanation': explanation,
-            'code': Transfer.objects.aggregate(Max('code'))['code__max'] or 1
+            'code': code
         }
 
         transfer = Transfer.objects.create(**transfer_data)
