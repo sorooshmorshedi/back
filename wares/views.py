@@ -1,3 +1,5 @@
+from django.db.models import Count
+from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
@@ -90,6 +92,41 @@ class WarehouseInventoryView(APIView):
                 'ware': ware,
                 'warehouse': warehouse,
                 'count': getInventoryCount(request.user, warehouse, ware)
+            })
+
+        return Response(res, status.HTTP_200_OK)
+
+
+class WareInventoryView(APIView):
+    def get(self, request):
+        res = []
+        data = request.GET
+        user = request.user
+        ware = data.get('ware', None)
+        if not ware:
+            return Response(['Enter ware please'], status.HTTP_400_BAD_REQUEST)
+
+        from factors.models import Factor
+        qs = Warehouse.objects.inFinancialYear(user) \
+            .annotate(
+                input_count=Coalesce(Sum('factorItems__count', default=0,
+                                         filter=Q(factorItems__factor__type__in=Factor.INPUT_GROUP,
+                                                  factorItems__ware=ware,
+                                                  factorItems__factor__is_definite=True)), 0),
+                output_count=Coalesce(Sum('factorItems__count', default=0,
+                                          filter=Q(factorItems__factor__type__in=Factor.OUTPUT_GROUP,
+                                                   factorItems__ware=ware,
+                                                   factorItems__factor__is_definite=True)), 0),
+                remain_count=F('input_count')-F('output_count')
+            )
+
+        for warehouse in qs.all():
+            res.append({
+                'id': warehouse.id,
+                'name': warehouse.name,
+                'input_count': warehouse.input_count,
+                'output_count': warehouse.output_count,
+                'remain_count': warehouse.remain_count,
             })
 
         return Response(res, status.HTTP_200_OK)

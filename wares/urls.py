@@ -18,5 +18,6 @@ urlpatterns = [
     url(r'^warehouses/(?P<pk>[0-9]+)$', WarehouseDetail.as_view(), name='floatWareDetail'),
 
     url(r'^inventory/check$', WarehouseInventoryView.as_view(), name=''),
+    url(r'^inventory/forWare$', WareInventoryView.as_view(), name=''),
 
 ]
