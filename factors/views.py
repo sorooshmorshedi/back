@@ -118,22 +118,31 @@ class FactorModelView(viewsets.ModelViewSet):
         # Check Inventory
         if factor.is_definite:
             if factor.type in Factor.SALE_GROUP:
-                for factor_item in factor_items['items']:
-                    if 'id' in factor_item:
-                        old_count = FactorItem.objects.inFinancialYear(user).get(pk=factor_item['id']).count
+                inventories = []
+                for item in factor_items['items']:
+                    if 'id' in item:
+                        old_count = FactorItem.objects.inFinancialYear(user).get(pk=item['id']).count
                     else:
                         old_count = 0
+                    ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
+                    warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
+                    remain = getInventoryCount(user, warehouse, ware)
+                    remain += old_count
 
-                    new_count = int(factor_item['count'])
-                    ware = Ware.objects.inFinancialYear(user).get(pk=factor_item['ware'])
-                    warehouse = Warehouse.objects.inFinancialYear(user).get(pk=factor_item['warehouse'])
-                    count = getInventoryCount(user, warehouse, ware)
+                    inventories.append({
+                        'ware': ware,
+                        'warehouse': warehouse,
+                        'remain': remain
+                    })
 
-                    if count + old_count - new_count < 0:
-                        raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
-                            ware,
-                            count
-                        ))
+                for item in factor_items['items']:
+                    count = int(item['count'])
+                    for inventory in inventories:
+                        if inventory['ware'].id == item['ware'] and inventory['warehouse'].id == item['warehouse']:
+                            inventory['remain'] -= count
+
+                        if inventory['remain'] < 0:
+                            raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
 
         return self.mass(user, factor, FactorItemSerializer, factor_items)
 
@@ -403,17 +412,27 @@ class DefiniteFactor(APIView):
         # Check Inventory
         if check_inventory:
             if factor.type in Factor.SALE_GROUP:
-                for factor_item in factor.items.all():
-                    new_count = int(factor_item.count)
-                    ware = factor_item.ware
-                    warehouse = factor_item.warehouse
+
+                inventories = []
+                for item in factor.items.all():
+                    ware = item.ware
+                    warehouse = item.warehouse
                     count = getInventoryCount(user, warehouse, ware)
 
-                    if count - new_count < 0:
-                        raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
-                            ware,
-                            count
-                        ))
+                    inventories.append({
+                        'ware': ware,
+                        'warehouse': warehouse,
+                        'remain': count
+                    })
+
+                for item in factor.items.all():
+                    count = item.count
+                    for inventory in inventories:
+                        if inventory['ware'] == item.ware and inventory['warehouse'] == item.warehouse:
+                            inventory['remain'] -= count
+
+                        if inventory['remain'] < 0:
+                            raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
@@ -762,17 +781,26 @@ class TransferModelView(viewsets.ModelViewSet):
 
     def check_inventory(self, items):
         user = self.request.user
+        inventories = []
         for item in items:
-            count = int(item['count'])
             ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
             warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['output_warehouse'])
             remain = getInventoryCount(user, warehouse, ware)
 
-            if remain - count < 0:
-                raise ValidationError("موجودی انبار برای کالای {} کافی نیست. موجودی انبار: {}".format(
-                    ware,
-                    remain
-                ))
+            inventories.append({
+                'ware': ware,
+                'warehouse': warehouse,
+                'remain': remain
+            })
+
+        for item in items:
+            count = int(item['count'])
+            for inventory in inventories:
+                if inventory['ware'].id == item['ware'] and inventory['warehouse'].id == item['output_warehouse']:
+                    inventory['remain'] -= count
+
+                if inventory['remain'] < 0:
+                    raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
 
     def delete_transfer_object(self):
         instance = self.get_object()
