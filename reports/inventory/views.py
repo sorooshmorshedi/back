@@ -143,14 +143,15 @@ class WarehouseInventoryListView(generics.ListAPIView):
             .prefetch_related('factor__sanad') \
             .prefetch_related('warehouse') \
             .order_by('factor__definition_date') \
+            .annotate(definition_date=F('factor__definition_date')) \
             .annotate(
             cumulative_input_count=Window(
                 expression=Sum('count', filter=Q(calculated_output_value=0)),
-                order_by=F('id').asc()
+                order_by=F('definition_date').asc()
             ),
             cumulative_output_count=Window(
                 expression=Sum('count', filter=~Q(calculated_output_value=0)),
-                order_by=F('id').asc()
+                order_by=F('definition_date').asc()
             )
         )
 
