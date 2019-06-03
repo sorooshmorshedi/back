@@ -685,14 +685,21 @@ class DefiniteFactor(APIView):
             explanation=explanation,
             financial_year=sanad.financial_year
         )
-        sanad.items.create(
-            account=getDA('profitAndLossFromBuying', user).account,
-            # floatAccount=factor.floatAccount,
-            value=abs(value - factor.sum),
-            valueType=SanadItem.BES,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
+
+        profit_and_loss_value = value - factor.sum
+        if profit_and_loss_value:
+            if profit_and_loss_value > 0:
+                value_type = SanadItem.BES
+            else:
+                value_type = SanadItem.BED
+            sanad.items.create(
+                account=getDA('profitAndLossFromBuying', user).account,
+                # floatAccount=factor.floatAccount,
+                value=profit_and_loss_value,
+                valueType=value_type,
+                explanation=explanation,
+                financial_year=sanad.financial_year
+            )
 
 
 class TransferModelView(viewsets.ModelViewSet):
