@@ -710,21 +710,50 @@ class TransferModelView(viewsets.ModelViewSet):
         return res
 
     def destroy(self, request, *args, **kwargs):
-        return Response({'non_field_errors': ['transfer is not deletable']}, status=status.HTTP_400_BAD_REQUEST)
+        self.delete_transfer_object()
+        return Response({}, status=status.HTTP_200_OK)
 
+    @transaction.atomic()
     def update(self, request, *args, **kwargs):
-        return Response({'non_field_errors': ['transfer is not editable']}, status=status.HTTP_400_BAD_REQUEST)
+        self.delete_transfer_object()
+
+        data = request.data
+        data['transfer']['financial_year'] = request.user.active_financial_year.id
+        items = data['transfer']['items']
+
+        self.check_inventory(items)
+
+        serialized = TransferCreateSerializer(data=data['transfer'])
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        transfer = serialized.instance
+
+        res = Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
+        return res
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
 
         data = request.data
-        user = request.user
 
         data['transfer']['financial_year'] = request.user.active_financial_year.id
 
         items = data['transfer']['items']
 
+        self.check_inventory(items)
+
+        serialized = TransferCreateSerializer(data=data['transfer'])
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        transfer = serialized.instance
+
+        res = Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
+        return res
+
+    def check_inventory(self, items):
+        user = self.request.user
         for item in items:
             count = int(item['count'])
             ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
@@ -737,14 +766,15 @@ class TransferModelView(viewsets.ModelViewSet):
                     remain
                 ))
 
-        serialized = TransferCreateSerializer(data=data['transfer'])
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-
-        transfer = serialized.instance
-
-        res = Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
-        return res
+    def delete_transfer_object(self):
+        instance = self.get_object()
+        input_factor = instance.input_factor
+        output_factor = instance.output_factor
+        if not input_factor.is_last_definite_factor and not output_factor.is_last_definite_factor:
+            raise ValidationError('انتقال غیر قابل ویرایش می باشد')
+        instance.delete()
+        input_factor.delete()
+        output_factor.delete()
 
 
 @api_view(['get'])
