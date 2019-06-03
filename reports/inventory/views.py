@@ -43,7 +43,7 @@ class WareInventoryListView(generics.ListAPIView):
             .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
-            .order_by('factor__code') \
+            .order_by('factor__definition_date') \
 
         return queryset
 
@@ -82,7 +82,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
                                     .filter(factor__is_definite=True,
                                             factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
                                             )
-                                    .order_by('factor__code')
+                                    .order_by('factor__definition_date')
                                     .values_list('id', flat=True)[:1])
 
         input_filter = Q(
@@ -142,7 +142,7 @@ class WarehouseInventoryListView(generics.ListAPIView):
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
             .prefetch_related('warehouse') \
-            .order_by('factor__code') \
+            .order_by('factor__definition_date') \
             .annotate(
             cumulative_input_count=Window(
                 expression=Sum('count', filter=Q(calculated_output_value=0)),
