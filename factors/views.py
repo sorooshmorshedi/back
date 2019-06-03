@@ -689,9 +689,10 @@ class DefiniteFactor(APIView):
         profit_and_loss_value = value - factor.sum
         if profit_and_loss_value:
             if profit_and_loss_value > 0:
-                value_type = SanadItem.BES
-            else:
                 value_type = SanadItem.BED
+            else:
+                profit_and_loss_value = abs(profit_and_loss_value)
+                value_type = SanadItem.BES
             sanad.items.create(
                 account=getDA('profitAndLossFromBuying', user).account,
                 # floatAccount=factor.floatAccount,
