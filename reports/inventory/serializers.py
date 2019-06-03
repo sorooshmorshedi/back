@@ -160,8 +160,8 @@ class WarehouseInventorySerializer(serializers.ModelSerializer):
         return 0
 
     def get_remain(self, obj):
-        input_count = obj.cumulative_input_count or 0
-        output_count = obj.cumulative_output_count or 0
+        input_count = obj.cumulative_input_count if obj.cumulative_input_count else 0
+        output_count = obj.cumulative_output_count if obj.cumulative_output_count else 0
         return input_count - output_count
 
     class Meta:
