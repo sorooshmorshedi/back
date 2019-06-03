@@ -1,16 +1,11 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from wkhtmltopdf.views import PDFTemplateView
 
-from companies.models import Company
-from factors.models import Factor
-from reports.lists.filters import SanadFilter
-from reports.lists.views import SanadListView, FactorListView, TransactionListView
+from factors.serializers import TransferListRetrieveSerializer
+from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView
 from reports.models import ExportVerifier
-from sanads.sanads.models import Sanad
-from sanads.sanads.serializers import SanadSerializer
 from sanads.transactions.models import Transaction
 
 
@@ -105,7 +100,26 @@ class FactorExportView(FactorListView, BaseExportView):
             'summarized': summarized,
             'hide_remain': hide_remain
         }
-        print(self.context)
+        return self.export(request, export_type, *args, **kwargs)
+
+
+class TransferExportView(TransferListView, BaseExportView):
+    filename = 'transfers.pdf'
+    template_name = 'reports/transfers.html'
+    context = {}
+    pagination_class = None
+
+    def get_queryset(self):
+        return TransferListRetrieveSerializer(
+                self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs,
+                many=True
+            ).data
+
+    def get(self, request, export_type, *args, **kwargs):
+        self.context = {
+            'form_name': 'انتقال',
+            'verifier_form_name': ExportVerifier.TRANSFER
+        }
         return self.export(request, export_type, *args, **kwargs)
 
 

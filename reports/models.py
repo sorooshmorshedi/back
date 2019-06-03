@@ -14,6 +14,7 @@ class ExportVerifier(BaseModel):
     REMITTANCE = 'RC'
     TRANSACTION_RECEIVE = 'TR'
     TRANSACTION_PAYMENT = 'TP'
+    TRANSFER = 't'
 
     FORMS = (
         (SANAD, 'سند'),
@@ -25,6 +26,7 @@ class ExportVerifier(BaseModel):
         (REMITTANCE, 'حواله'),
         (TRANSACTION_RECEIVE, 'دریافت'),
         (TRANSACTION_PAYMENT, 'پرداخت'),
+        (TRANSFER, 'انتقال'),
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='export_verifiers')

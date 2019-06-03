@@ -2,6 +2,9 @@ from django.db import connection
 from django.db.models import Q, Count
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+
+from factors.models import Transfer
+from factors.serializers import TransferListRetrieveSerializer
 from reports.lists.filters import *
 from reports.lists.serializers import *
 from sanads.transactions.models import Transaction
@@ -65,6 +68,16 @@ class FactorListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Factor.objects.inFinancialYear(self.request.user).prefetch_related('items').prefetch_related('account').all()
+
+
+class TransferListView(generics.ListAPIView):
+    serializer_class = TransferListRetrieveSerializer
+    filterset_class = TransferFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Transfer.objects.inFinancialYear(self.request.user).all()
 
 
 class FactorItemListView(generics.ListAPIView):

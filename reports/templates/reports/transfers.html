@@ -1,0 +1,85 @@
+{% extends 'reports/base.html' %}
+{% load report_filters %}
+{% load export_verifiers %}
+
+{% block content %}
+{% for transfer in forms %}
+
+        {% if forloop.last %}
+            <div>
+        {% else %}
+            <div class="break-after">
+        {% endif %}
+
+        {% if not hide_transfer %}
+        <div class="text-center">
+            <h3>
+                {{ company.name }}
+            </h3>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 text-center">
+                {{ form_name }}
+            </div>
+        </div>
+
+        <div class="row form-header">
+            <div class="col-xs-12 text-left">
+                <span>شماره : </span>
+                <span> {{ transfer.code }} </span>
+            </div>
+            <div class="col-xs-12 text-left">
+                <span>تاریخ : </span>
+                <span dir="ltr"> {{ transfer.date }} </span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 ">
+                <div class="row">
+                    <span class="col-xs-2">شرح : </span>
+                    <span class="col-xs-10"> {{ transfer.explanation | default:'-' }} </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row"
+             style="margin-top: 15px;">
+            <div class="col-xs-12">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>شرح</th>
+                            <th>از انبار</th>
+                            <th>تعداد</th>
+                            <th>واحد</th>
+                            <th>به انبار</th>
+                            <th>توضیحات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in transfer.items %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.ware.name }}</td>
+                            <td>{{ item.input_warehouse.name }}</td>
+                            <td>{{ item.count }}</td>
+                            <td>{{ item.ware.unit.name }}</td>
+                            <td>{{ item.output_warehouse.name }}</td>
+                            <td>{{ item.explanation }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+    {% show_verifiers verifier_form_name user %}
+
+    {% endblock %}

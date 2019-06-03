@@ -10,7 +10,7 @@ from reports.inventory.views import WareInventoryListView, AllWaresInventoryList
     AllWarehousesInventoryListView
 from reports.journal.views import JournalListView
 from reports.ledger.views import LedgerListView
-from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView
+from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView
 from reports.lists.views import *
 from reports.views import exportTest, ExportVerifiersModelView
 
@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^lists/sanads/unbalanced$', UnbalancedSanadListView.as_view(), name=''),
     url(r'^lists/sanads/empty$', EmptySanadListView.as_view(), name=''),
     url(r'^lists/factors$', FactorListView.as_view(), name=''),
+    url(r'^lists/transfers$', TransferListView.as_view(), name=''),
     url(r'^lists/factorItems$', FactorItemListView.as_view(), name=''),
 ]
 
@@ -30,6 +31,7 @@ urlpatterns = [
 urlpatterns += [
     url(r'^lists/sanads/(?P<export_type>\S+)', SanadExportView.as_view(), name=''),
     url(r'^lists/factors/(?P<export_type>\S+)', FactorExportView.as_view(), name=''),
+    url(r'^lists/transfers/(?P<export_type>\S+)', TransferExportView.as_view(), name=''),
     url(r'^lists/transactions/(?P<export_type>\S+)', TransactionExportView.as_view(), name=''),
 ]
 

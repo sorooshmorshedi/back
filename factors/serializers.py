@@ -179,7 +179,8 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transfer
-        fields = ('id', 'code', 'explanation', 'date', 'items')
+        # fields = ('id', 'code', 'explanation', 'date', 'items')
+        fields = '__all__'
 
 
 class TransferCreateSerializer(serializers.ModelSerializer):

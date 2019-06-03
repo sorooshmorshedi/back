@@ -4,7 +4,7 @@ from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
 from cheques.models import Cheque, Chequebook
-from factors.models import Factor, FactorItem
+from factors.models import Factor, FactorItem, Transfer
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
 
@@ -115,6 +115,23 @@ class FactorFilter(filters.FilterSet):
             return queryset.filter(sanad__bed=F('paidValue'))
         else:
             return queryset
+
+
+class TransferFilter(filters.FilterSet):
+
+    class Meta:
+        model = Transfer
+        fields = {
+            'id': ['exact'],
+            # 'code': ['gte', 'lte', 'exact'],
+            'date': ['gte', 'lte'],
+            'explanation': ['icontains'],
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.DateFilter,
+            },
+        }
 
 
 class FactorItemFilter(filters.FilterSet):
