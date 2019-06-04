@@ -43,7 +43,7 @@ class WareInventoryListView(generics.ListAPIView):
             .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
-            .order_by('factor__definition_date') \
+            .order_by('factor__definition_date', 'id')
 
         return queryset
 

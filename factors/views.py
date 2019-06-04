@@ -531,17 +531,25 @@ class DefiniteFactor(APIView):
 
     @staticmethod
     def setFactorItemsRemains(user, factor):
+        prev_items = {}
         for item in factor.items.all():
-            remain = item.ware.remain(user)
+            ware_id = item.ware.id
+            last_definite_factor = None
+            if ware_id in prev_items:
+                last_definite_factor = prev_items[ware_id]
+
+            remain = item.ware.remain(user, last_definite_factor)
             if factor.type in Factor.BUY_GROUP:
                 item.remain_count = remain['count'] + item.count
                 item.remain_value = remain['value'] + item.value
             else:
-                calculated_output_value = item.ware.calculated_output_value(user, item.count)
+                calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
                 item.calculated_output_value = calculated_output_value
                 item.remain_count = remain['count'] - item.count
                 item.remain_value = remain['value'] - calculated_output_value
             item.save()
+
+            prev_items[ware_id] = item
 
     @staticmethod
     def submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation):

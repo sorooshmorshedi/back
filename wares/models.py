@@ -116,31 +116,34 @@ class Ware(BaseModel):
             return None
 
     # Just definite factors
-    def remain(self, user):
+    def remain(self, user, last_factor_item=None):
         res = {
             'count': 0,
             'value': 0,
         }
-        factorItem = self.last_factor_item(user)
+        if not last_factor_item:
+            last_factor_item = self.last_factor_item(user)
+        factorItem = last_factor_item
         if factorItem:
             res['count'] = factorItem.remain_count
             res['value'] = factorItem.remain_value
         return res
 
-    def calculated_output_value(self, user, count):
+    def calculated_output_value(self, user, count, last_factor_item=None):
         if self.pricingType == self.WEIGHTED_MEAN:
-            return self.calculated_output_value_for_weighted_mean(user, count)
+            if not last_factor_item:
+                last_factor_item = self.last_factor_item(user)
+            return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
         else:
             return self.calculated_output_value_for_fifo(user, count)
 
-    def calculated_output_value_for_weighted_mean(self, user, count):
-        lastFactorItem = self.last_factor_item(user)
-        remain_value = lastFactorItem.remain_value
-        remain_count = lastFactorItem.remain_count
+    def calculated_output_value_for_weighted_mean(self, user, count, last_factor_item):
+        remain_value = last_factor_item.remain_value
+        remain_count = last_factor_item.remain_count
         fee = remain_value / remain_count
 
         self.factorItems.inFinancialYear(user) \
-            .filter(factor__is_definite=True, id__lte=lastFactorItem.id)\
+            .filter(factor__is_definite=True, id__lte=last_factor_item.id)\
             .update(is_editable=0)
 
         return fee * count
