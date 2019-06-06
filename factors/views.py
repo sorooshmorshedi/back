@@ -107,7 +107,7 @@ class FactorModelView(viewsets.ModelViewSet):
         self.sync_expenses(user, factor, data)
 
         if factor.is_definite:
-            DefiniteFactor.definiteFactor(user, factor.pk, check_inventory=False)
+            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=False)
 
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
@@ -118,31 +118,7 @@ class FactorModelView(viewsets.ModelViewSet):
         # Check Inventory
         if factor.is_definite:
             if factor.type in Factor.SALE_GROUP:
-                inventories = []
-                for item in factor_items['items']:
-                    if 'id' in item:
-                        old_count = FactorItem.objects.inFinancialYear(user).get(pk=item['id']).count
-                    else:
-                        old_count = 0
-                    ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
-                    warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
-                    remain = getInventoryCount(user, warehouse, ware)
-                    remain += old_count
-
-                    inventories.append({
-                        'ware': ware,
-                        'warehouse': warehouse,
-                        'remain': remain
-                    })
-
-                for item in factor_items['items']:
-                    count = int(item['count'])
-                    for inventory in inventories:
-                        if inventory['ware'].id == item['ware'] and inventory['warehouse'].id == item['warehouse']:
-                            inventory['remain'] -= count
-
-                        if inventory['remain'] < 0:
-                            raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
+                check_inventory(user, factor_items['items'], consider_old_count=True)
 
         return self.mass(user, factor, FactorItemSerializer, factor_items)
 
@@ -397,6 +373,59 @@ class FirstPeriodInventoryView(APIView):
         return res
 
 
+# Check Inventory
+def check_inventory(user, factor_items, consider_old_count):
+
+    inventories = []
+    for item in factor_items:
+        if type(item) == FactorItem:
+            ware = item.ware
+            warehouse = item.warehouse
+            old_count = item.count
+        else:
+            ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
+            warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
+            if 'id' in item:
+                old_count = FactorItem.objects.inFinancialYear(user).get(pk=item['id']).count
+            else:
+                old_count = 0
+
+        if not consider_old_count:
+            old_count = 0
+
+        remain = getInventoryCount(user, warehouse, ware)
+        remain += old_count
+
+        is_duplicate_row = False
+        for inventory in inventories:
+            if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
+                inventory['remain'] += remain
+                is_duplicate_row = True
+        if not is_duplicate_row:
+            inventories.append({
+                'ware': ware,
+                'warehouse': warehouse,
+                'remain': remain
+            })
+
+    for item in factor_items:
+        if type(item) is FactorItem:
+            ware = item.ware.id
+            warehouse = item.warehouse.id
+            count = int(item.count)
+        else:
+            ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
+            warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
+            count = int(item['count'])
+
+        for inventory in inventories:
+            if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
+                inventory['remain'] -= count
+
+            if inventory['remain'] < 0:
+                raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
+
+
 class DefiniteFactor(APIView):
 
     def post(self, request, pk):
@@ -406,33 +435,13 @@ class DefiniteFactor(APIView):
 
     @staticmethod
     @transaction.atomic()
-    def definiteFactor(user, pk, check_inventory=True):
+    def definiteFactor(user, pk, perform_inventory_check=True):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
 
         # Check Inventory
-        if check_inventory:
+        if perform_inventory_check:
             if factor.type in Factor.SALE_GROUP:
-
-                inventories = []
-                for item in factor.items.all():
-                    ware = item.ware
-                    warehouse = item.warehouse
-                    count = getInventoryCount(user, warehouse, ware)
-
-                    inventories.append({
-                        'ware': ware,
-                        'warehouse': warehouse,
-                        'remain': count
-                    })
-
-                for item in factor.items.all():
-                    count = item.count
-                    for inventory in inventories:
-                        if inventory['ware'] == item.ware and inventory['warehouse'] == item.warehouse:
-                            inventory['remain'] -= count
-
-                        if inventory['remain'] < 0:
-                            raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
+                check_inventory(user, factor.items.all(), consider_old_count=False)
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
@@ -532,13 +541,15 @@ class DefiniteFactor(APIView):
     @staticmethod
     def setFactorItemsRemains(user, factor):
         prev_items = {}
-        for item in factor.items.all():
+        for item in factor.items.order_by('id').all():
             ware_id = item.ware.id
             last_definite_factor = None
             if ware_id in prev_items:
                 last_definite_factor = prev_items[ware_id]
+                print(last_definite_factor.remain_count)
 
             remain = item.ware.remain(user, last_definite_factor)
+            print(item.count, remain)
             if factor.type in Factor.BUY_GROUP:
                 item.remain_count = remain['count'] + item.count
                 item.remain_value = remain['value'] + item.value
@@ -793,13 +804,24 @@ class TransferModelView(viewsets.ModelViewSet):
         for item in items:
             ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
             warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['output_warehouse'])
+            if 'id' in item:
+                old_count = FactorItem.objects.inFinancialYear(user).get(pk=item['id']).count
+            else:
+                old_count = 0
             remain = getInventoryCount(user, warehouse, ware)
+            remain += old_count
 
-            inventories.append({
-                'ware': ware,
-                'warehouse': warehouse,
-                'remain': remain
-            })
+            is_duplicate_row = False
+            for inventory in inventories:
+                if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
+                    inventory['remain'] += remain
+                    is_duplicate_row = True
+            if not is_duplicate_row:
+                inventories.append({
+                    'ware': ware,
+                    'warehouse': warehouse,
+                    'remain': remain
+                })
 
         for item in items:
             count = int(item['count'])

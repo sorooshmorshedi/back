@@ -111,7 +111,7 @@ class Ware(BaseModel):
             from factors.models import Factor
             return FactorItem.objects.inFinancialYear(user).filter(ware=self)\
                 .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP))\
-                .order_by('-factor__definition_date')[0]
+                .order_by('-factor__definition_date', '-id')[0]
         except IndexError:
             return None
 

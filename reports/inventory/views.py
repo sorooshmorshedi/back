@@ -142,18 +142,23 @@ class WarehouseInventoryListView(generics.ListAPIView):
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
             .prefetch_related('warehouse') \
-            .order_by('factor__definition_date') \
-            .annotate(definition_date=F('factor__definition_date')) \
+            .order_by('factor__definition_date', 'id') \
             .annotate(
-            cumulative_input_count=Window(
-                expression=Sum('count', filter=Q(calculated_output_value=0)),
-                order_by=F('definition_date').asc()
-            ),
-            cumulative_output_count=Window(
-                expression=Sum('count', filter=~Q(calculated_output_value=0)),
-                order_by=F('definition_date').asc()
+                definition_date=F('factor__definition_date'),
+                type=F('factor__type')
+            ) \
+            .annotate(
+                cumulative_input_count=Window(
+                    # expression=Sum('count', filter=Q(calculated_output_value=0)),
+                    expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
+                    order_by=[F('definition_date').asc(), F('id').asc()]
+                ),
+                cumulative_output_count=Window(
+                    # expression=Sum('count', filter=~Q(calculated_output_value=0)),
+                    expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
+                    order_by=[F('definition_date').asc(), F('id').asc()]
+                )
             )
-        )
 
         return queryset
 
