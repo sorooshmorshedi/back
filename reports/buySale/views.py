@@ -28,10 +28,11 @@ class BuySaleView(generics.ListAPIView):
 
     def get_queryset(self):
         return FactorItem.objects.inFinancialYear(self.request.user)\
-            .filter(factor__is_definite=True) \
+            .filter(factor__is_definite=True)\
             .prefetch_related('factor__account')\
             .prefetch_related('ware') \
             .prefetch_related('warehouse')\
+            .order_by('id')\
             .all()
 
     def list(self, request, *args, **kwargs):
