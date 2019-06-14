@@ -378,7 +378,7 @@ def check_inventory(user, factor_items, consider_old_count):
 
     inventories = []
     for item in factor_items:
-        if type(item) == FactorItem:
+        if type(item) is FactorItem:
             ware = item.ware
             warehouse = item.warehouse
             old_count = item.count
@@ -393,25 +393,25 @@ def check_inventory(user, factor_items, consider_old_count):
         if not consider_old_count:
             old_count = 0
 
-        remain = getInventoryCount(user, warehouse, ware)
-        remain += old_count
-
         is_duplicate_row = False
         for inventory in inventories:
             if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
-                inventory['remain'] += remain
+                inventory['remain'] += old_count
                 is_duplicate_row = True
         if not is_duplicate_row:
+            remain = getInventoryCount(user, warehouse, ware) + old_count
             inventories.append({
                 'ware': ware,
                 'warehouse': warehouse,
                 'remain': remain
             })
 
+    print(inventories)
+
     for item in factor_items:
         if type(item) is FactorItem:
-            ware = item.ware.id
-            warehouse = item.warehouse.id
+            ware = item.ware
+            warehouse = item.warehouse
             count = int(item.count)
         else:
             ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
@@ -422,6 +422,7 @@ def check_inventory(user, factor_items, consider_old_count):
             if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
                 inventory['remain'] -= count
 
+            print(inventory)
             if inventory['remain'] < 0:
                 raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
 
@@ -546,10 +547,8 @@ class DefiniteFactor(APIView):
             last_definite_factor = None
             if ware_id in prev_items:
                 last_definite_factor = prev_items[ware_id]
-                print(last_definite_factor.remain_count)
 
             remain = item.ware.remain(user, last_definite_factor)
-            print(item.count, remain)
             if factor.type in Factor.BUY_GROUP:
                 item.remain_count = remain['count'] + item.count
                 item.remain_value = remain['value'] + item.value
