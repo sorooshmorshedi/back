@@ -15,8 +15,8 @@ def addSum(queryset, data):
         .annotate(value=Sum(F('fee') * F('count'), output_field=DecimalField())) \
         .aggregate(Sum('value'))['value__sum']
     data.append({
-        'count': input_count - output_count,
-        'value': input_value - output_value
+        'count': input_count if input_count else 0 - output_count if output_count else 0,
+        'value': input_value if input_value else 0 - output_value if output_value else 0
     })
 
 
