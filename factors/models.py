@@ -319,6 +319,10 @@ class FactorItem(BaseModel):
                 return False
             return True
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.discountValue = self.discount
+        return super(FactorItem, self).save(force_insert=False, force_update=False, using=None, update_fields=None)
+
 
 class Transfer(BaseModel):
     code = models.IntegerField()
