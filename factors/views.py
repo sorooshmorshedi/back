@@ -406,8 +406,6 @@ def check_inventory(user, factor_items, consider_old_count):
                 'remain': remain
             })
 
-    print(inventories)
-
     for item in factor_items:
         if type(item) is FactorItem:
             ware = item.ware
@@ -422,7 +420,6 @@ def check_inventory(user, factor_items, consider_old_count):
             if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
                 inventory['remain'] -= count
 
-            print(inventory)
             if inventory['remain'] < 0:
                 raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(inventory['ware']))
 
