@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models import F
-from django.db.models import Q
 from django.db.models import Sum
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
@@ -54,15 +52,6 @@ class WareLevel(BaseModel):
         return str(self.pk) + ' - ' + self.name
 
 
-class WareMetaData(BaseModel):
-
-    factor_item_id = models.IntegerField(null=True, blank=True)
-    count = models.IntegerField(null=True, blank=True)
-
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
-
-
 class Ware(BaseModel):
 
     FIFO = 0
@@ -91,7 +80,6 @@ class Ware(BaseModel):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
-    metadata = models.OneToOneField(WareMetaData, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -120,13 +108,15 @@ class Ware(BaseModel):
         res = {
             'count': 0,
             'value': 0,
+            'last_factor_item': None,
         }
         if not last_factor_item:
             last_factor_item = self.last_factor_item(user)
-        factorItem = last_factor_item
-        if factorItem:
-            res['count'] = factorItem.remain_count
-            res['value'] = factorItem.remain_value
+        factor_item = last_factor_item
+        if factor_item:
+            res['count'] = factor_item.remain_count
+            res['value'] = factor_item.remain_value
+            res['last_factor_item'] = factor_item
         return res
 
     def calculated_output_value(self, user, count, last_factor_item=None):
@@ -148,23 +138,31 @@ class Ware(BaseModel):
 
         return fee * count
 
+    def initial_factor_item_and_count_for_fifo(self, user):
+        # total output
+        from factors.models import Factor
+        total_output = self.factorItems.inFinancialYear(user) \
+            .filter(factor__type__in=Factor.SALE_GROUP, factor__is_definite=True).aggregate(Sum('count'))['count__sum']
+
+        if not total_output:
+            total_output = 0
+
+        # find first usable factor item
+        initialFactorItem = self.factorItems.inFinancialYear(user) \
+            .filter(factor__type__in=Factor.BUY_GROUP, factor__is_definite=True) \
+            .order_by('factor__definition_date', 'id') \
+            .filter(total_input_count__gt=total_output) \
+            .first()
+
+        count = initialFactorItem.total_input_count - total_output
+
+        return initialFactorItem, count
+
     def calculated_output_value_for_fifo(self, user, needed_count):
         from factors.models import Factor
         from factors.models import FactorItem
-        if not self.metadata:
-            initialFactorItem = self.factorItems.inFinancialYear(user)\
-                .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP)\
-                .order_by('factor__definition_date')[0]
-            metadata = WareMetaData(
-                factor_item_id=initialFactorItem.id,
-                count=initialFactorItem.count
-            )
-            metadata.save()
-            self.metadata = metadata
-            self.save()
-        else:
-            initialFactorItem = self.factorItems.get(pk=self.metadata.factor_item_id)
-            metadata = self.metadata
+
+        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
@@ -175,14 +173,11 @@ class Ware(BaseModel):
             factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date)
 
         total_value = 0
-        factorItem = initialFactorItem
-        count = metadata.count
         fees = []
         uneditableFactorItemIds = []
         for factorItem in factorItems.all():
 
             if needed_count == 0:
-                count = factorItem.count
                 break
 
             uneditableFactorItemIds.append(factorItem.id)
@@ -216,19 +211,12 @@ class Ware(BaseModel):
 
         FactorItem.objects.inFinancialYear(user).filter(id__in=uneditableFactorItemIds).update(is_editable=0)
 
-        metadata.factor_item_id = factorItem.id
-        metadata.count = count
-        metadata.save()
-
         return total_value
 
     def revert_fifo(self, user, returned_count):
         from factors.models import Factor
-        if not self.metadata:
-            raise Exception("Ware", self.name, "Does not have any metadata")
 
-        initialFactorItem = self.factorItems.get(pk=self.metadata.factor_item_id)
-        metadata = self.metadata
+        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
@@ -238,13 +226,11 @@ class Ware(BaseModel):
         if initial_factor_definition_date:
             factorItems = factorItems.filter(factor__definition_date__lte=initial_factor_definition_date)
 
-        factorItem = initialFactorItem
-        remained_count = metadata.count
         editableFactorItemIds = []
         for factorItem in factorItems.all():
 
             if factorItem == initialFactorItem:
-                remained_count = metadata.count
+                remained_count = count
             else:
                 remained_count = 0
 
@@ -258,12 +244,7 @@ class Ware(BaseModel):
                 returned_count -= used_count
             else:
                 editableFactorItemIds.append(factorItem.id)
-                remained_count = factorItem.count
                 break
 
         from factors.models import FactorItem
         FactorItem.objects.inFinancialYear(user).filter(id__in=editableFactorItemIds).update(is_editable=1)
-
-        metadata.factor_item_id = factorItem.id
-        metadata.count = remained_count
-        metadata.save()
