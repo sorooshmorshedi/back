@@ -342,9 +342,8 @@ class FirstPeriodInventoryView(APIView):
             FactorItem.objects.inFinancialYear(request.user).filter(id__in=ids_to_delete).delete()
 
         for item in factor.items.all():
-            remain = item.ware.remain(request.user)
-            item.remain_count = remain['count'] + item.count
-            item.remain_value = remain['value'] + item.value
+            item.total_input_count = item.count
+            item.remain_value = item.value
             item.save()
 
         sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
@@ -527,12 +526,6 @@ class DefiniteFactor(APIView):
             for item in factor.items.all():
                 if item.ware.pricingType == Ware.FIFO:
                     item.ware.revert_fifo(user, item.count)
-        elif factor.type in Factor.BUY_GROUP:
-            for item in factor.items.all():
-                ware = item.ware
-                if ware.metadata:
-                    if item.id == ware.metadata.factor_item_id:
-                        ware.metadata.delete()
 
         return factor
 
@@ -541,19 +534,29 @@ class DefiniteFactor(APIView):
         prev_items = {}
         for item in factor.items.order_by('id').all():
             ware_id = item.ware.id
-            last_definite_factor = None
             if ware_id in prev_items:
                 last_definite_factor = prev_items[ware_id]
+            else:
+                last_definite_factor = item.ware.last_factor_item(user)
+                if last_definite_factor:
+                    item.remain_value = last_definite_factor.remain_value
+                    item.total_input_count = last_definite_factor.total_input_count
+                    item.total_output_count = last_definite_factor.total_output_count
+                else:
+                    item.remain_value = 0
+                    item.total_input_count = 0
+                    item.total_output_count = 0
 
-            remain = item.ware.remain(user, last_definite_factor)
             if factor.type in Factor.BUY_GROUP:
-                item.remain_count = remain['count'] + item.count
-                item.remain_value = remain['value'] + item.value
+                item.remain_value += item.value
+                item.total_input_count += item.count
             else:
                 calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
                 item.calculated_output_value = calculated_output_value
-                item.remain_count = remain['count'] - item.count
-                item.remain_value = remain['value'] - calculated_output_value
+
+                item.remain_value -= calculated_output_value
+                item.total_output_count += item.count
+
             item.save()
 
             prev_items[ware_id] = item

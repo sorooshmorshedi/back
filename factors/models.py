@@ -282,11 +282,17 @@ class FactorItem(BaseModel):
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
 
-    calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
-    remain_count = models.IntegerField(null=True, blank=True, default=0)
-    remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
+    # These field are not warehouse wised
+    calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
+    remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
+    total_input_count = models.IntegerField(blank=True, default=0)
+    total_output_count = models.IntegerField(blank=True, default=0)
 
     is_editable = models.BooleanField(default=1)
+
+    @property
+    def remain_count(self):
+        return self.total_input_count - self.total_output_count
 
     @property
     def value(self):
