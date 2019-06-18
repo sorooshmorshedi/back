@@ -113,15 +113,16 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
 
     def get_remain(self, obj):
         if len(obj.factorItems.all()):
-            factorItem = obj.factorItems.all()[0]
-            if obj.pricingType == Ware.WEIGHTED_MEAN and factorItem.remain_count:
-                fee = factorItem.remain_value / factorItem.remain_count
+            remain_count = obj.input_count - obj.output_count
+            remain_value = obj.input_value - obj.output_value
+            if obj.pricingType == Ware.WEIGHTED_MEAN and remain_count:
+                fee = remain_value / remain_count
             else:
                 fee = '-'
             return {
-                'count': factorItem.remain_count,
+                'count': remain_count,
                 'fee': fee,
-                'value': factorItem.remain_value
+                'value': remain_value
             }
         return {
             'count': 0,
