@@ -533,19 +533,21 @@ class DefiniteFactor(APIView):
     def setFactorItemsRemains(user, factor):
         prev_items = {}
         for item in factor.items.order_by('id').all():
+
             ware_id = item.ware.id
             if ware_id in prev_items:
                 last_definite_factor = prev_items[ware_id]
             else:
-                last_definite_factor = item.ware.last_factor_item(user)
-                if last_definite_factor:
-                    item.remain_value = last_definite_factor.remain_value
-                    item.total_input_count = last_definite_factor.total_input_count
-                    item.total_output_count = last_definite_factor.total_output_count
-                else:
-                    item.remain_value = 0
-                    item.total_input_count = 0
-                    item.total_output_count = 0
+                last_definite_factor = item.ware.last_factor_item(user, exclude_factors=[factor.id])
+
+            if last_definite_factor:
+                item.remain_value = last_definite_factor.remain_value
+                item.total_input_count = last_definite_factor.total_input_count
+                item.total_output_count = last_definite_factor.total_output_count
+            else:
+                item.remain_value = 0
+                item.total_input_count = 0
+                item.total_output_count = 0
 
             if factor.type in Factor.BUY_GROUP:
                 item.remain_value += item.value
