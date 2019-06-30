@@ -93,12 +93,14 @@ class Ware(BaseModel):
     def has_inventory(self):
         pass
 
-    def last_factor_item(self, user):
+    def last_factor_item(self, user, exclude_factors=[]):
         try:
             from factors.models import FactorItem
             from factors.models import Factor
+            from django.db.models import Q
             return FactorItem.objects.inFinancialYear(user).filter(ware=self)\
                 .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP))\
+                .filter(~Q(factor__in=exclude_factors))\
                 .order_by('-factor__definition_date', '-id')[0]
         except IndexError:
             return None
