@@ -127,7 +127,7 @@ class Ware(BaseModel):
                 last_factor_item = self.last_factor_item(user)
             return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
         else:
-            return self.calculated_output_value_for_fifo(user, count)
+            return self.calculated_output_value_for_fifo(user, count, last_factor_item)
 
     def calculated_output_value_for_weighted_mean(self, user, count, last_factor_item):
         remain_value = last_factor_item.remain_value
@@ -140,14 +140,17 @@ class Ware(BaseModel):
 
         return fee * count
 
-    def initial_factor_item_and_count_for_fifo(self, user):
+    def initial_factor_item_and_count_for_fifo(self, user, last_factor_item):
         # total output
         from factors.models import Factor
         total_output = self.factorItems.inFinancialYear(user) \
             .filter(factor__type__in=Factor.SALE_GROUP, factor__is_definite=True).aggregate(Sum('count'))['count__sum']
+        print('to', total_output, last_factor_item.total_output_count)
 
         if not total_output:
             total_output = 0
+
+        total_output += last_factor_item.total_output_count
 
         # find first usable factor item
         initialFactorItem = self.factorItems.inFinancialYear(user) \
@@ -160,24 +163,28 @@ class Ware(BaseModel):
 
         return initialFactorItem, count
 
-    def calculated_output_value_for_fifo(self, user, needed_count):
+    def calculated_output_value_for_fifo(self, user, needed_count, last_factor_item):
         from factors.models import Factor
         from factors.models import FactorItem
 
-        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user)
+        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
+        print(initialFactorItem.fee, count)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
-            .order_by('factor__definition_date')
+            .order_by('factor__definition_date', 'id')
 
         initial_factor_definition_date = initialFactorItem.factor.definition_date
+        initial_factor_item_id = initialFactorItem.id
         if initial_factor_definition_date:
-            factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date)
+            factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date,
+                                             id__gte=initial_factor_item_id)
 
         total_value = 0
         fees = []
         uneditableFactorItemIds = []
         for factorItem in factorItems.all():
+            print('fa', factorItem.fee, factorItem.count)
 
             if needed_count == 0:
                 break
@@ -215,10 +222,11 @@ class Ware(BaseModel):
 
         return total_value
 
-    def revert_fifo(self, user, returned_count):
+    def revert_fifo(self, user, returned_count, last_factor_item):
+        return
         from factors.models import Factor
 
-        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user)
+        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
