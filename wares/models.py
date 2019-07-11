@@ -145,12 +145,12 @@ class Ware(BaseModel):
         from factors.models import Factor
         total_output = self.factorItems.inFinancialYear(user) \
             .filter(factor__type__in=Factor.SALE_GROUP, factor__is_definite=True).aggregate(Sum('count'))['count__sum']
-        print('to', total_output, last_factor_item.total_output_count)
 
         if not total_output:
             total_output = 0
 
-        total_output += last_factor_item.total_output_count
+        if last_factor_item:
+            total_output += last_factor_item.total_output_count
 
         # find first usable factor item
         initialFactorItem = self.factorItems.inFinancialYear(user) \
@@ -159,7 +159,12 @@ class Ware(BaseModel):
             .filter(total_input_count__gt=total_output) \
             .first()
 
-        count = initialFactorItem.total_input_count - total_output
+        if initialFactorItem:
+            total_input_count = initialFactorItem.total_input_count
+        else:
+            total_input_count = 0
+
+        count = total_input_count - total_output
 
         return initialFactorItem, count
 
@@ -168,17 +173,17 @@ class Ware(BaseModel):
         from factors.models import FactorItem
 
         initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
-        print(initialFactorItem.fee, count)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
             .order_by('factor__definition_date', 'id')
 
-        initial_factor_definition_date = initialFactorItem.factor.definition_date
-        initial_factor_item_id = initialFactorItem.id
-        if initial_factor_definition_date:
-            factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date,
-                                             id__gte=initial_factor_item_id)
+        if initialFactorItem:
+            initial_factor_definition_date = initialFactorItem.factor.definition_date
+            initial_factor_item_id = initialFactorItem.id
+            if initial_factor_definition_date:
+                factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date,
+                                                 id__gte=initial_factor_item_id)
 
         total_value = 0
         fees = []
