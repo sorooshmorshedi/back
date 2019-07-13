@@ -122,9 +122,9 @@ class Ware(BaseModel):
         return res
 
     def calculated_output_value(self, user, count, last_factor_item=None):
+        if not last_factor_item:
+            last_factor_item = self.last_factor_item(user)
         if self.pricingType == self.WEIGHTED_MEAN:
-            if not last_factor_item:
-                last_factor_item = self.last_factor_item(user)
             return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
         else:
             return self.calculated_output_value_for_fifo(user, count, last_factor_item)
@@ -141,16 +141,9 @@ class Ware(BaseModel):
         return fee * count
 
     def initial_factor_item_and_count_for_fifo(self, user, last_factor_item):
-        # total output
         from factors.models import Factor
-        total_output = self.factorItems.inFinancialYear(user) \
-            .filter(factor__type__in=Factor.SALE_GROUP, factor__is_definite=True).aggregate(Sum('count'))['count__sum']
-        print('to', total_output, last_factor_item.total_output_count)
 
-        if not total_output:
-            total_output = 0
-
-        total_output += last_factor_item.total_output_count
+        total_output = last_factor_item.total_output_count
 
         # find first usable factor item
         initialFactorItem = self.factorItems.inFinancialYear(user) \
@@ -168,7 +161,6 @@ class Ware(BaseModel):
         from factors.models import FactorItem
 
         initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
-        print(initialFactorItem.fee, count)
 
         factorItems = self.factorItems.inFinancialYear(user) \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \

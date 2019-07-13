@@ -290,6 +290,15 @@ class FactorItem(BaseModel):
 
     is_editable = models.BooleanField(default=1)
 
+    def __str__(self):
+        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}, total_input: {}, total_output: {}"\
+            .format(
+                self.factor.id,
+                self.factor.type,
+                self.factor.is_definite,
+                self.ware,
+                self.count, self.total_input_count, self.total_output_count)
+
     @property
     def remain_count(self):
         return self.total_input_count - self.total_output_count
