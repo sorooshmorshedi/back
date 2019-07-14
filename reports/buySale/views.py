@@ -1,6 +1,8 @@
 from django.db.models import Sum, DecimalField
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+
+from reports.buySale.serializers import BuySaleSerializer
 from reports.lists.filters import *
 from reports.lists.serializers import *
 
@@ -40,7 +42,7 @@ def addSum(queryset, data, reverse_discount_sum):
 
 
 class BuySaleView(generics.ListAPIView):
-    serializer_class = FactorItemListSerializer
+    serializer_class = BuySaleSerializer
     filterset_class = FactorItemFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
