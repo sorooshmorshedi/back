@@ -15,18 +15,21 @@ class BuySaleSerializer(serializers.ModelSerializer):
     count = serializers.SerializerMethodField()
 
     def get_value(self, obj):
-        return obj.value
+        return self.format_value(obj, obj.value)
 
     def get_discount(self, obj):
-        return obj.discount
+        return self.format_value(obj, obj.discount)
 
     def get_total_value(self, obj):
-        return obj.totalValue
+        return self.format_value(obj, obj.totalValue)
 
     def get_count(self, obj):
+        return self.format_value(obj, obj.count)
+
+    def format_value(self, obj, value):
         if obj.factor.type in (Factor.BACK_FROM_BUY, Factor.BACK_FROM_SALE):
-            return -obj.count
-        return obj.count
+            return -value
+        return value
 
     class Meta:
         model = FactorItem
