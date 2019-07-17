@@ -550,7 +550,7 @@ class DefiniteFactor(APIView):
                 item.total_input_count = 0
                 item.total_output_count = 0
 
-            if factor.type in Factor.BUY_GROUP:
+            if factor.type in (Factor.BUY, FirstPeriodInventoryView):
                 item.remain_value += item.value
                 item.total_input_count += item.count
             else:
