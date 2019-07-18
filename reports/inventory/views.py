@@ -150,12 +150,10 @@ class WarehouseInventoryListView(generics.ListAPIView):
             ) \
             .annotate(
                 cumulative_input_count=Window(
-                    # expression=Sum('count', filter=Q(calculated_output_value=0)),
                     expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
                     order_by=[F('definition_date').asc(), F('id').asc()]
                 ),
                 cumulative_output_count=Window(
-                    # expression=Sum('count', filter=~Q(calculated_output_value=0)),
                     expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
                     order_by=[F('definition_date').asc(), F('id').asc()]
                 )

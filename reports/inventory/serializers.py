@@ -29,10 +29,16 @@ class WareInventorySerializer(serializers.ModelSerializer):
 
     def get_input(self, obj):
         if obj.factor.type in Factor.BUY_GROUP:
+            if obj.factor.type == Factor.BACK_FROM_SALE:
+                value = obj.calculated_output_value
+                fee = '-'
+            else:
+                value = obj.value
+                fee = obj.fee
             return {
                 'count': obj.count,
-                'fee': obj.fee,
-                'value': obj.value
+                'fee': fee,
+                'value': value
             }
         return {
             'count': '-',

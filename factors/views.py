@@ -550,9 +550,12 @@ class DefiniteFactor(APIView):
                 item.total_input_count = 0
                 item.total_output_count = 0
 
-            if factor.type in (Factor.BUY, FirstPeriodInventoryView):
+            if factor.type in Factor.BUY_GROUP:
                 item.remain_value += item.value
                 item.total_input_count += item.count
+                if factor.type == Factor.BACK_FROM_SALE:
+                    calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
+                    item.calculated_output_value = calculated_output_value
             else:
                 calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
                 item.calculated_output_value = calculated_output_value
