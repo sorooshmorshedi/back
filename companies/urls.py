@@ -7,8 +7,8 @@ from companies.views.companies import FinancialYearModelView
 
 
 router = DefaultRouter()
-router.register('financialYears', FinancialYearModelView)
-router.register('', CompanyModelView)
+router.register('financialYears', FinancialYearModelView, base_name='financial-year')
+router.register('', CompanyModelView, base_name='company')
 
 urlpatterns = router.urls
 

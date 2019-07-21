@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_filters',
     'import_export',
     'wkhtmltopdf',
+    'rest_framework_swagger',
 
     'users',
     'companies',

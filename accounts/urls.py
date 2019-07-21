@@ -1,8 +1,11 @@
-from django.conf.urls import url, include
-from django.urls import path
+from django.conf.urls import url
 
+from accounts.accounts.views import FloatAccountListCreate, FloatAccountDetail, FloatAccountGroupListCreate, \
+    FloatAccountGroupDetail, AccountTypeList, AccountListCreate, AccountDetail, getAccountRemain, \
+    IndependentAccountListCreate, IndependentAccountDetail, PersonListCreate, PersonDetail, BankListCreate, BankDetail
+from accounts.costCenters.views import CostCenterListCreate, CostCenterDetail, CostCenterGroupListCreate, \
+    CostCenterGroupDetail
 from accounts.defaultAccounts.views import DefaultAccountListCreate, DefaultAccountDetail
-from .views import *
 
 
 urlpatterns = [

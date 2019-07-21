@@ -85,8 +85,11 @@ class Account(BaseModel):
         (GROUP, 'group'),
         (KOL, 'kol'),
         (MOEIN, 'moein'),
-        (TAFSILI, 'tafzili'),
+        (TAFSILI, 'tafsili'),
     )
+
+    CODE_LENGTHS = [1, 3, 5, 9]
+    PARENT_PART = [0, 1, 3, 5]
 
     name = models.CharField(max_length=150, verbose_name='نام حساب')
     code = models.CharField(max_length=50, verbose_name='کد حساب')
@@ -94,7 +97,7 @@ class Account(BaseModel):
     is_disabled = models.BooleanField(default=False)
 
     max_bed = models.IntegerField(blank=True, null=True)
-    max_bes = models.IntegerField( blank=True, null=True)
+    max_bes = models.IntegerField(blank=True, null=True)
     max_bed_with_sanad = models.IntegerField(blank=True, null=True)
     max_bes_with_sanad = models.IntegerField(blank=True, null=True)
 
@@ -207,7 +210,6 @@ class Person(BaseModel):
 
 
 class Bank(BaseModel):
-
 
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
 

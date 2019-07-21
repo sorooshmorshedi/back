@@ -58,26 +58,31 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        CODE_LENGTHS = [1, 3, 5, 9]
-        PARENT_PART = [0, 1, 3, 5]
-        if len(data['code']) != CODE_LENGTHS[data['level']]:
+
+        if len(data['code']) != Account.CODE_LENGTHS[data['level']]:
             raise serializers.ValidationError("کد حساب نا معتبر می باشد")
-        if data['level'] != 0:
-            if 'parent' not in data.keys():
-                raise serializers.ValidationError("حساب های زیر مجموعه گروه، باید پدر داشته باشند")
-            if data['parent'].code != data['code'][0:PARENT_PART[data['level']]]:
-                raise serializers.ValidationError("کد حساب، با حساب پدر مطابقت ندارد")
-            if data['parent'].level != data['level'] - 1:
-                raise serializers.ValidationError("سطح حساب، با حساب پدر مطابقت ندارد")
-        else:
-            if 'parent' in data.keys() and data['parent'] is not None:
+
+        parent = data.get('patent', None)
+        print(parent)
+        if data['level'] != Account.GROUP:
+            if parent:
                 raise serializers.ValidationError("حساب گروه، نمی تواند پدر داشته باشد")
+        else:
+            print('ha', parent)
+            if not parent:
+                raise serializers.ValidationError("حساب های زیر مجموعه گروه، باید پدر داشته باشند")
+            if parent.code != data['code'][0:Account.PARENT_PART[data['level']]]:
+                raise serializers.ValidationError("کد حساب، با حساب پدر مطابقت ندارد")
+            if parent.level != data['level'] - 1:
+                raise serializers.ValidationError("سطح حساب، با حساب پدر مطابقت ندارد")
 
-        if 'floatAccountGroup' in data.keys() and data['floatAccountGroup'] is not None and data['level'] != 3:
-            raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
-
-        if 'costCenterGroup' in data.keys() and data['costCenterGroup'] is not None and data['level'] != 3:
-            raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
+        if data['level'] != Account.TAFSILI:
+            floatAccountGroup = data.get('floatAccountGroup', None)
+            if floatAccountGroup:
+                raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
+            costCenterGroup = data.get('costCenterGroup', None)
+            if costCenterGroup:
+                raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
 
         return data
 

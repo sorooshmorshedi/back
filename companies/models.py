@@ -31,7 +31,7 @@ class Company(models.Model):
     def last_financial_year(self):
         try:
             return self.financial_years.order_by('-id')[0]
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, IndexError):
             return None
 
 
