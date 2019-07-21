@@ -554,14 +554,17 @@ class DefiniteFactor(APIView):
                 item.remain_value += item.value
                 item.total_input_count += item.count
                 if factor.type == Factor.BACK_FROM_SALE:
-                    calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
-                    item.calculated_output_value = calculated_output_value
+                    last_sale = item.ware.last_factor_item(user, other_filters={'factor__type': Factor.SALE})
+                    item.calculated_output_value = item.count * last_sale.fees[-1]['fee']
             else:
-                calculated_output_value = item.ware.calculated_output_value(user, item.count, last_definite_factor)
+                calculated_output_value, fees = item.ware.calculated_output_value(user, item.count, last_definite_factor)
                 item.calculated_output_value = calculated_output_value
 
                 item.remain_value -= calculated_output_value
                 item.total_output_count += item.count
+                for fee in fees:
+                    fee['fee'] = float(fee['fee'])
+                item.fees = fees
 
             item.save()
 
@@ -685,8 +688,7 @@ class DefiniteFactor(APIView):
         #     value += item.calculated_output_value
 
         for item in factor.items.all():
-            calculated_output_value = item.ware.calculated_output_value(user, item.count)
-            value += calculated_output_value
+            value += item.calculated_output_value
 
         sanad.items.create(
             account=Account.get_inventory_account(user),

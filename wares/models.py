@@ -93,15 +93,22 @@ class Ware(BaseModel):
     def has_inventory(self):
         pass
 
-    def last_factor_item(self, user, exclude_factors=[]):
+    def last_factor_item(self, user, exclude_factors=None, other_filters=None):
         try:
             from factors.models import FactorItem
             from factors.models import Factor
             from django.db.models import Q
-            return FactorItem.objects.inFinancialYear(user).filter(ware=self)\
+            last_factor_item = FactorItem.objects.inFinancialYear(user).filter(ware=self)\
                 .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP))\
-                .filter(~Q(factor__in=exclude_factors))\
-                .order_by('-factor__definition_date', '-id')[0]
+                .order_by('-factor__definition_date', '-id')
+
+            if exclude_factors:
+                last_factor_item = last_factor_item.filter(~Q(factor__in=exclude_factors))
+
+            if other_filters:
+                last_factor_item = last_factor_item.filter(**other_filters)
+
+            return last_factor_item[0]
         except IndexError:
             return None
 
@@ -138,7 +145,7 @@ class Ware(BaseModel):
             .filter(factor__is_definite=True, id__lte=last_factor_item.id)\
             .update(is_editable=0)
 
-        return fee * count
+        return fee * count, [{'fee': fee, 'count': count}]
 
     def initial_factor_item_and_count_for_fifo(self, user, last_factor_item):
         from factors.models import Factor
@@ -176,7 +183,6 @@ class Ware(BaseModel):
         fees = []
         uneditableFactorItemIds = []
         for factorItem in factorItems.all():
-            print('fa', factorItem.fee, factorItem.count)
 
             if needed_count == 0:
                 break
@@ -212,7 +218,7 @@ class Ware(BaseModel):
 
         FactorItem.objects.inFinancialYear(user).filter(id__in=uneditableFactorItemIds).update(is_editable=0)
 
-        return total_value
+        return total_value, fees
 
     def revert_fifo(self, user, returned_count, last_factor_item):
         return

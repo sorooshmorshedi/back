@@ -1,4 +1,6 @@
 from decimal import Decimal
+
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import signals, Sum, Max
 from django_jalali.db import models as jmodels
@@ -270,6 +272,10 @@ class FactorPayment(BaseModel):
         unique_together = ('factor', 'transaction')
 
 
+def get_empty_dict():
+    return {}
+
+
 class FactorItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_items')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
@@ -278,6 +284,7 @@ class FactorItem(BaseModel):
 
     count = models.IntegerField()
     fee = models.DecimalField(max_digits=24, decimal_places=0)
+    fees = JSONField(default=get_empty_dict)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
