@@ -294,8 +294,8 @@ class FirstPeriodInventoryView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data
+        data['factor'].pop('sanad', None)
         data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
-        data['factor']['code'] = 0
         data['factor']['is_definite'] = 1
         data['factor']['account'] = Account.get_partners_account(request.user).id
         data['factor']['financial_year'] = request.user.active_financial_year.id
@@ -305,10 +305,13 @@ class FirstPeriodInventoryView(APIView):
             serialized = FactorSerializer(instance=factor, data=data['factor'])
         else:
             serialized = FactorSerializer(data=data['factor'])
-        if not serialized.is_valid():
-            return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serialized.is_valid(raise_exception=True)
         serialized.save()
-        factor = Factor.getFirstPeriodInventory(request.user)
+
+        factor = serialized.instance
+        factor.code = 0
+        factor.save()
 
         items_to_create = []
         items_to_update = []
@@ -346,11 +349,13 @@ class FirstPeriodInventoryView(APIView):
             item.remain_value = item.value
             item.save()
 
-        sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
-                      createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
-        sanad.save()
-        factor.sanad = sanad
-        factor.save()
+        sanad = factor.sanad
+        if not sanad:
+            sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
+                          createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
+            sanad.save()
+            factor.sanad = sanad
+            factor.save()
 
         if sanad.items.count():
             clearSanad(sanad)
