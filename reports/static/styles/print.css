@@ -4,6 +4,11 @@ body {
     color: black !important;
 }
 
+/* Table ----------------------------------------------- */
+.table-bordered, .table-bordered td, .table-bordered th{
+    border-color: black !important;
+}
+
 /* Fonts ---------------------------------------------- */
 * {
     font-family: IRANSans !important;
