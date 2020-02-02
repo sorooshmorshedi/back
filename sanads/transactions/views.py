@@ -54,6 +54,14 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = TransactionListRetrieveSerializer(transaction)
         return Response(serializer.data)
 
+    def delete(self, request, **kwargs):
+        transaction = self.get_object()
+        for item in transaction.items.all():
+            if item.cheque:
+                raise serializers.ValidationError("ابتدا چک ها را حذف کنید")
+        transaction.delete()
+        return Response()
+
 
 class TransactionItemModelView(viewsets.ModelViewSet):
     # permission_classes = (IsAuthenticated, RPTypeListCreate,)
