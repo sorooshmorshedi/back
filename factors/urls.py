@@ -1,7 +1,9 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from .views import *
+from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
+from factors.views.transferViews import TransferModelView, getTransferByPosition
+from factors.views.factorViews import *
 
 router = DefaultRouter()
 router.register(r'expenses', ExpenseModelView, base_name='expense')
