@@ -10,10 +10,7 @@ from accounts.accounts.models import Account
 from django.urls.base import reverse
 from rest_framework import status
 
-from companies.models import Company
-from companies.tests.test_companies import CompanyTest
 from helpers.test import ITestCase
-from users.tests.test_users import UserTest
 
 
 class AccountTest(ITestCase):
