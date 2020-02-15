@@ -30,7 +30,7 @@ class AccountTest(ITestCase):
 
     def test_update_account(self):
         account = self.get_account()
-        new_name = self.faker.name()
+        new_name = 'this is a new name'
 
         user = User.objects.first()
         self.client.force_authenticate(user)

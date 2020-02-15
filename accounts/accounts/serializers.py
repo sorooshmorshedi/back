@@ -114,6 +114,7 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
+        read_only_fields = ('code', 'level')
         fields = '__all__'
 
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)

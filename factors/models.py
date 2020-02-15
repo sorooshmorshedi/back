@@ -282,7 +282,7 @@ class FactorItem(BaseModel):
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')
 
-    count = models.IntegerField()
+    count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
     fees = JSONField(default=get_empty_dict)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
