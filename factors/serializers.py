@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveCreateUpdateSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from factors.models import *
 from sanads.sanads.serializers import SanadSerializer
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
@@ -19,7 +19,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
 
 class ExpenseListRetrieveSerializer(ExpenseSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
 
     class Meta(ExpenseSerializer.Meta):
         pass
@@ -32,7 +32,7 @@ class FactorExpenseSerializer(serializers.ModelSerializer):
 
 
 class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     expense = ExpenseListRetrieveSerializer(read_only=True, many=False)
 
@@ -112,7 +112,7 @@ class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
 
 
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
     items = FactorItemRetrieveSerializer(read_only=True, many=True)
@@ -132,7 +132,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
 
 
 class NotPaidFactorsSerializer(FactorSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     payments = FactorPaymentSerializer(read_only=True, many=True)
     sum = serializers.SerializerMethodField()

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveCreateUpdateSerializer
+from accounts.accounts.serializers import AccountListRetrieveSerializer
 from accounts.defaultAccounts.models import DefaultAccount
 
 
@@ -17,7 +17,7 @@ class DefaultAccountSerializer(serializers.ModelSerializer):
 
 
 class DefaultAccountListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True)
+    account = AccountListRetrieveSerializer(read_only=True)
 
     class Meta:
         model = DefaultAccount

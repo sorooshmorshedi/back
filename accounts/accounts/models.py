@@ -112,7 +112,7 @@ class Account(BaseModel):
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
     def __str__(self):
-        return "{0} - {1}".format(self.code, self.name)
+        return self.title
 
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
@@ -124,6 +124,10 @@ class Account(BaseModel):
             ('update_account', 'ویرایش حساب'),
             ('delete_account', 'حذف حساب'),
         )
+
+    @property
+    def title(self):
+        return "{0} - {1}".format(self.code, self.name)
 
     def can_delete(self):
         return self.level != 0 and self.sanadItems.count() == 0

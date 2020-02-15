@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveCreateUpdateSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from sanads.sanads.models import newSanadCode
 from sanads.sanads.serializers import SanadSerializer
@@ -26,7 +26,7 @@ class TransactionItemSerializer(serializers.ModelSerializer):
 
 
 class TransactionItemListRetrieveSerializer(TransactionItemSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     type = DefaultAccountListRetrieveSerializer(read_only=True, many=False)
 
@@ -52,7 +52,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class TransactionListRetrieveSerializer(TransactionSerializer):
-    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
+    account = AccountListRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
 
     class Meta(TransactionSerializer.Meta):

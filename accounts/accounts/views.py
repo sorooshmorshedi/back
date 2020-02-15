@@ -113,7 +113,7 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
         parent = serializer.validated_data['parent']
         if parent:
             code = parent.get_new_child_code()
-            level = parent.level - 1
+            level = parent.level + 1
         else:
             code = Account.objects.inFinancialYear(self.request.user).filter(level=Account.GROUP).annotate(Max('code'))[
                        'code_max'] + 1
@@ -125,19 +125,19 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
-        queryset = AccountListRetrieveCreateUpdateSerializer.setup_eager_loading(queryset)
-        serializer = AccountListRetrieveCreateUpdateSerializer(queryset, many=True)
+        queryset = AccountListRetrieveSerializer.setup_eager_loading(queryset)
+        serializer = AccountListRetrieveSerializer(queryset, many=True)
         res = Response(serializer.data)
         return res
 
 
 class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = AccountListRetrieveCreateUpdateSerializer
+    serializer_class = AccountListRetrieveSerializer
 
     def retrieve(self, request, **kwargs):
         account = self.get_object()
-        serializer = AccountListRetrieveCreateUpdateSerializer(account)
+        serializer = AccountListRetrieveSerializer(account)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):

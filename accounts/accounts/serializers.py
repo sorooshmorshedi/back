@@ -47,13 +47,6 @@ class IndependentAccountSerializer(serializers.ModelSerializer):
 
 
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
-
-    def get_title(self, obj):
-        if type(obj) == Account:
-            return obj.code + ' - ' + obj.name
-        return ''
-
     class Meta:
         model = Account
         exclude = ('code', 'level')
@@ -113,7 +106,16 @@ class BankSerializer(serializers.ModelSerializer):
         return data
 
 
-class AccountListRetrieveCreateUpdateSerializer(AccountCreateUpdateSerializer):
+class AccountListRetrieveSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj):
+        return obj.title
+
+    class Meta:
+        model = Account
+        fields = '__all__'
+
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
     costCenterGroup = CostCenterGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
@@ -130,13 +132,18 @@ class AccountListRetrieveCreateUpdateSerializer(AccountCreateUpdateSerializer):
             .prefetch_related('bank')
         return queryset
 
-    class Meta(AccountCreateUpdateSerializer.Meta):
-        pass
-
 
 # Other
-class TypeReportAccountCreateUpdateSerializer(AccountCreateUpdateSerializer):
-    remain = serializers.IntegerField()
+class TypeReportAccountSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
 
-    class Meta(AccountCreateUpdateSerializer.Meta):
-        fields = ('id', 'title', 'remain')
+    def get_title(self, obj):
+        if type(obj) == Account:
+            return obj.title
+        return ''
+
+    class Meta:
+        model = Account
+        fields = '__all__'
+
+    remain = serializers.IntegerField()
