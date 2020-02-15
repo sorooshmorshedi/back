@@ -5,7 +5,6 @@ from helpers.models import BaseModel
 
 
 class FloatAccountGroup(BaseModel):
-
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
@@ -76,7 +75,6 @@ class IndependentAccount(BaseModel):
 
 
 class Account(BaseModel):
-
     GROUP = 0
     KOL = 1
     MOEIN = 2
@@ -107,8 +105,10 @@ class Account(BaseModel):
     level = models.IntegerField(choices=ACCOUNT_LEVELS)
 
     type = models.ForeignKey(AccountType, on_delete=models.SET_NULL, related_name='accounts', blank=True, null=True)
-    costCenterGroup = models.ForeignKey(CostCenterGroup, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
-    floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
+    costCenterGroup = models.ForeignKey(CostCenterGroup, on_delete=models.PROTECT, related_name='accounts', blank=True,
+                                        null=True)
+    floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts',
+                                          blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
     def __str__(self):
@@ -155,6 +155,22 @@ class Account(BaseModel):
 
         return remain
 
+    def get_new_child_code(self):
+
+        if self.level == self.TAFSILI:
+            return None
+
+        last_child = self.children.order_by('-code').first()
+        if last_child:
+            last_code = last_child.code[self.PARENT_PART[self.level + 1]:]
+        else:
+            last_code = ''
+            for i in range(self.CODE_LENGTHS[self.level] - 1):
+                last_code += '0'
+            last_code += '1'
+
+        return self.code + last_code
+
     @staticmethod
     def get_inventory_account(user):
         return Account.objects.inFinancialYear(user).get(code='106040001')
@@ -169,7 +185,6 @@ class Account(BaseModel):
 
 
 class Person(BaseModel):
-
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
 
     personType = models.CharField(choices=(('real', 'حقیقی'), ('legal', 'حقوقی')), max_length=5)
@@ -210,7 +225,6 @@ class Person(BaseModel):
 
 
 class Bank(BaseModel):
-
     account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
 
     name = models.CharField(max_length=100, null=True, blank=True)
