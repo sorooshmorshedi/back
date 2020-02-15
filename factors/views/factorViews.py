@@ -89,6 +89,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
     @transaction.atomic()
     def update(self, request, *args, **kwargs):
+
         factor = self.get_object()
 
         if not factor.is_editable:
@@ -97,7 +98,7 @@ class FactorModelView(viewsets.ModelViewSet):
         data = request.data
         user = request.user
 
-        serialized = FactorSerializer(instance=factor, data=data['factor'])
+        serialized = FactorUpdateSerializer(instance=factor, data=data['factor'])
         serialized.is_valid(raise_exception=True)
         serialized.save()
 

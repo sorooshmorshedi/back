@@ -42,7 +42,6 @@ class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class FactorSerializer(serializers.ModelSerializer):
-
     hasTax = serializers.SerializerMethodField()
     isPaid = serializers.SerializerMethodField()
 
@@ -55,7 +54,7 @@ class FactorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
-        read_only_fields = ('id', 'code', )
+        read_only_fields = ('id', 'code',)
         extra_kwargs = {
             "account": {
                 "error_messages": {
@@ -69,14 +68,32 @@ class FactorSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
         if data['account'].floatAccountGroup:
             if 'floatAccount' not in data or not data['floatAccount']:
-                raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
+                raise serializers.ValidationError(
+                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
+            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
+                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+        return data
+
+
+class FactorUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Factor
+        fields = '__all__'
+        read_only_fields = ('id', 'code', 'financial_year')
+
+    def validate(self, data):
+        if data['account'].level != 3:
+            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
+        if data['account'].floatAccountGroup:
+            if 'floatAccount' not in data or not data['floatAccount']:
+                raise serializers.ValidationError(
+                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
             if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
         return data
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FactorItem
         fields = '__all__'
@@ -125,7 +142,6 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class FactorPaymentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FactorPayment
         fields = '__all__'
@@ -146,14 +162,13 @@ class NotPaidFactorsSerializer(FactorSerializer):
 
 
 class TransferListRetrieveSerializer(serializers.ModelSerializer):
-
     items = serializers.SerializerMethodField()
 
     def get_items(self, obj):
-        input_items = obj.input_factor.items.order_by('id')\
+        input_items = obj.input_factor.items.order_by('id') \
             .prefetch_related('warehouse')
 
-        output_items = obj.output_factor.items.order_by('id')\
+        output_items = obj.output_factor.items.order_by('id') \
             .prefetch_related('warehouse')
 
         items = []
@@ -184,7 +199,6 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class TransferCreateSerializer(serializers.ModelSerializer):
-
     items = serializers.ListField()
 
     def validate(self, attrs):
@@ -241,4 +255,3 @@ class TransferCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = ('id', 'financial_year', 'explanation', 'date', 'items')
-
