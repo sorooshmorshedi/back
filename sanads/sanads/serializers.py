@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListRetrieveCreateUpdateSerializer, FloatAccountSerializer
 from accounts.costCenters.serializers import CostCenterSerializer
 from factors.models import Factor
 
@@ -39,7 +39,7 @@ class SanadItemSerializer(serializers.ModelSerializer):
 
 
 class SanadItemListRetrieveSerializer(SanadItemSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = CostCenterSerializer(read_only=True, many=False)
 

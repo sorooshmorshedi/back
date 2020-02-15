@@ -22,7 +22,7 @@ class DefaultAccount(BaseModel):
 
     name = models.CharField(unique=True, max_length=150)
     explanation = models.TextField(null=True, blank=True)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccount')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
     usage = models.CharField(choices=USAGES, max_length=20)
 
     programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)

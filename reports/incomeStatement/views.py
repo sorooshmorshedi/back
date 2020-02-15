@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from accounts.accounts.models import AccountType, Account
-from accounts.accounts.serializers import TypeReportAccountSerializer
+from accounts.accounts.serializers import TypeReportAccountCreateUpdateSerializer
 
 
 def getType(pName):
@@ -64,7 +64,7 @@ def getSerialized(pName, allAccounts):
             'prefixColor': prefixColor
         },
         'remain': remain,
-        'accounts': TypeReportAccountSerializer(getAccounts(at, allAccounts), many=True).data
+        'accounts': TypeReportAccountCreateUpdateSerializer(getAccounts(at, allAccounts), many=True).data
     }
 
 

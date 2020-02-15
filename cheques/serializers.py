@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListRetrieveCreateUpdateSerializer, FloatAccountSerializer
 from cheques.models import *
 from sanads.sanads.models import newSanadCode
 from sanads.sanads.serializers import SanadListRetrieveSerializer
@@ -86,7 +86,7 @@ class ChequeSerializer(serializers.ModelSerializer):
 
 
 class ChequeListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     statusChanges = StatusChangeListRetrieveSerializer(read_only=True, many=True)
 
@@ -122,7 +122,7 @@ class ChequebookSerializer(serializers.ModelSerializer):
 
 
 class ChequebookListRetrieveSerializer(ChequebookSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountListRetrieveCreateUpdateSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     cheques = ChequeListRetrieveSerializer(read_only=True, many=True)
 

@@ -22,12 +22,12 @@ urlpatterns = [
     # ChangeIt to list
     url(r'^accountTypes$', AccountTypeList.as_view(), name='accountTypes'),
 
-    url(r'^accounts$', AccountListCreate.as_view(), name='Accounts'),
-    url(r'^accounts/(?P<pk>[0-9]+)$', AccountDetail.as_view(), name='AccountDetail'),
-    url(r'^accounts/(?P<pk>[0-9]+)/remain$', getAccountRemain, name='AccountRemain'),
+    url(r'^accounts$', AccountListCreate.as_view(), name='accounts'),
+    url(r'^accounts/(?P<pk>[0-9]+)$', AccountDetail.as_view(), name='accountDetail'),
+    url(r'^accounts/(?P<pk>[0-9]+)/remain$', getAccountRemain, name='accountRemain'),
 
-    url(r'^independentAccounts$', IndependentAccountListCreate.as_view(), name='Accounts'),
-    url(r'^independentAccounts/(?P<pk>[0-9]+)$', IndependentAccountDetail.as_view(), name='AccountDetail'),
+    url(r'^independentAccounts$', IndependentAccountListCreate.as_view(), name='independentAccounts'),
+    url(r'^independentAccounts/(?P<pk>[0-9]+)$', IndependentAccountDetail.as_view(), name='independentAccountDetail'),
 
     url(r'^persons$', PersonListCreate.as_view()),
     url(r'^persons/(?P<pk>[0-9]+)$', PersonDetail.as_view()),

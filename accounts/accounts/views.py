@@ -1,4 +1,5 @@
 from django.db.models import Prefetch
+from django.db.models.aggregates import Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
@@ -106,23 +107,37 @@ class AccountTypeList(generics.ListCreateAPIView):
 
 class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = AccountSerializer
+    serializer_class = AccountCreateUpdateSerializer
+
+    def perform_create(self, serializer):
+        parent = serializer.validated_data['parent']
+        if parent:
+            code = parent.get_new_child_code()
+            level = parent.level - 1
+        else:
+            code = Account.objects.inFinancialYear(self.request.user).filter(level=Account.GROUP).annotate(Max('code'))[
+                       'code_max'] + 1
+            level = 0
+        serializer.save(
+            code=code,
+            level=level
+        )
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
-        queryset = AccountListRetrieveSerializer.setup_eager_loading(queryset)
-        serializer = AccountListRetrieveSerializer(queryset, many=True)
+        queryset = AccountListRetrieveCreateUpdateSerializer.setup_eager_loading(queryset)
+        serializer = AccountListRetrieveCreateUpdateSerializer(queryset, many=True)
         res = Response(serializer.data)
         return res
 
 
 class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = AccountSerializer
+    serializer_class = AccountListRetrieveCreateUpdateSerializer
 
     def retrieve(self, request, **kwargs):
         account = self.get_object()
-        serializer = AccountListRetrieveSerializer(account)
+        serializer = AccountListRetrieveCreateUpdateSerializer(account)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
@@ -157,4 +172,3 @@ class BankDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 def getAccountRemain(request, pk):
     account = get_object_or_404(Account.objects.inFinancialYear(request.user), pk=pk)
     return Response(account.get_remain(), status=status.HTTP_200_OK)
-

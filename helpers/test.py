@@ -11,13 +11,8 @@ from helpers.validators import ModelValidator
 
 class ITestCase(unittest.TestCase, APIClient):
     faker = Faker('fa_IR')
-    fixtures = []
 
     def setUp(self):
-        # call_command('loaddata', 'fixtures/accounts.json', verbosity=0)
-        # call_command('loaddata', 'fixtures/companies.json', verbosity=0)
-        for fixture in self.fixtures:
-            call_command('loaddata', fixture, verbosity=0)
         self.client = APIClient()
         return super().setUp()
 

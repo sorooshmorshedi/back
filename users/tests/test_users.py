@@ -1,4 +1,4 @@
-from django.urls import reverse
+from django.urls.base import reverse
 from rest_framework import status
 
 from helpers.test import ITestCase

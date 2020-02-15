@@ -5,7 +5,6 @@ from accounts.costCenters.serializers import CostCenterGroupSerializer
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
-
     syncFloatAccountGroups = serializers.ListField(allow_empty=True, default=[])
 
     class Meta:
@@ -27,8 +26,8 @@ class AccountTypeSerializer(serializers.ModelSerializer):
     def get_title(self, obj):
         res = obj.name
         if obj.nature != 'non':
-            res += ' - '\
-                + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')
+            res += ' - ' \
+                   + ('بدهکار' if obj.nature == 'bed' else 'بستانکار')
 
         usage = [u for u in AccountType.ACCOUNT_TYPE_USAGES if u[0] == obj.usage]
         if len(usage) != 0 and usage[0][0] != 'none':
@@ -47,48 +46,37 @@ class IndependentAccountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'explanation')
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
-        return obj.code + ' - ' + obj.name
+        if type(obj) == Account:
+            return obj.code + ' - ' + obj.name
+        return ''
 
     class Meta:
         model = Account
-        fields = '__all__'
+        exclude = ('code', 'level')
 
     def validate(self, data):
 
-        if len(data['code']) != Account.CODE_LENGTHS[data['level']]:
-            raise serializers.ValidationError("کد حساب نا معتبر می باشد")
-
         parent = data.get('patent', None)
-        print(parent)
-        if data['level'] != Account.GROUP:
-            if parent:
-                raise serializers.ValidationError("حساب گروه، نمی تواند پدر داشته باشد")
-        else:
-            print('ha', parent)
-            if not parent:
-                raise serializers.ValidationError("حساب های زیر مجموعه گروه، باید پدر داشته باشند")
-            if parent.code != data['code'][0:Account.PARENT_PART[data['level']]]:
-                raise serializers.ValidationError("کد حساب، با حساب پدر مطابقت ندارد")
-            if parent.level != data['level'] - 1:
-                raise serializers.ValidationError("سطح حساب، با حساب پدر مطابقت ندارد")
 
-        if data['level'] != Account.TAFSILI:
-            floatAccountGroup = data.get('floatAccountGroup', None)
-            if floatAccountGroup:
-                raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
-            costCenterGroup = data.get('costCenterGroup', None)
-            if costCenterGroup:
-                raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
+        if parent:
+            if parent.level == Account.MOEIN:
+                floatAccountGroup = data.get('floatAccountGroup', None)
+                if floatAccountGroup:
+                    raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
+                costCenterGroup = data.get('costCenterGroup', None)
+                if costCenterGroup:
+                    raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
 
         return data
 
     def create(self, validated_data):
         data = validated_data.copy()
-        if data['level'] != 0 and ('type' not in data.keys() or ('type' in data.keys() and data['type'] is None)):
+        account_type = data.get('type', None)
+        if account_type:
             data['type'] = data['parent'].type
 
         return Account.objects.create(**data)
@@ -96,6 +84,7 @@ class AccountSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         res = super().update(instance, validated_data)
         if instance.level != 0:
+            # update children when account's type changes
             Account.objects.filter(code__startswith=instance.code).update(type=instance.type)
         return res
 
@@ -124,7 +113,7 @@ class BankSerializer(serializers.ModelSerializer):
         return data
 
 
-class AccountListRetrieveSerializer(AccountSerializer):
+class AccountListRetrieveCreateUpdateSerializer(AccountCreateUpdateSerializer):
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
     costCenterGroup = CostCenterGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
@@ -133,22 +122,21 @@ class AccountListRetrieveSerializer(AccountSerializer):
 
     @staticmethod
     def setup_eager_loading(queryset):
-        queryset = queryset\
-            .prefetch_related('floatAccountGroup')\
-            .prefetch_related('costCenterGroup')\
-            .prefetch_related('type')\
-            .prefetch_related('person')\
+        queryset = queryset \
+            .prefetch_related('floatAccountGroup') \
+            .prefetch_related('costCenterGroup') \
+            .prefetch_related('type') \
+            .prefetch_related('person') \
             .prefetch_related('bank')
         return queryset
 
-    class Meta(AccountSerializer.Meta):
+    class Meta(AccountCreateUpdateSerializer.Meta):
         pass
 
 
 # Other
-class TypeReportAccountSerializer(AccountSerializer):
+class TypeReportAccountCreateUpdateSerializer(AccountCreateUpdateSerializer):
     remain = serializers.IntegerField()
 
-    class Meta(AccountSerializer.Meta):
+    class Meta(AccountCreateUpdateSerializer.Meta):
         fields = ('id', 'title', 'remain')
-
