@@ -94,15 +94,30 @@ class FactorUpdateSerializer(serializers.ModelSerializer):
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
+    sale_price = serializers.DecimalField(max_digits=24, decimal_places=0)
+
     class Meta:
         model = FactorItem
         fields = '__all__'
 
-    def validate(self, data):
-        return data
+    def update(self, instance, validated_data):
+        self.updateWarePrice(validated_data)
+        return super(FactorItemSerializer, self).update(instance, validated_data)
+
+    def create(self, validated_data):
+        self.updateWarePrice(validated_data)
+        return super(FactorItemSerializer, self).create(validated_data)
+
+    @staticmethod
+    def updateWarePrice(validated_data):
+        ware = validated_data.get('ware')
+        sale_price = validated_data.pop('sale_price')
+        if sale_price:
+            ware.price = sale_price
+            ware.save()
 
 
-class FactorItemRetrieveSerializer(FactorItemSerializer):
+class FactorItemRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListRetrieveSerializer(read_only=True, many=False)
     warehouse = WarehouseSerializer(read_only=True, many=False)
     is_editable = serializers.SerializerMethodField()
@@ -110,8 +125,9 @@ class FactorItemRetrieveSerializer(FactorItemSerializer):
     def get_is_editable(self, obj):
         return obj.get_is_editable()
 
-    class Meta(FactorItemSerializer.Meta):
-        pass
+    class Meta:
+        model = FactorItem
+        fields = '__all__'
 
 
 class TransactionSerializerForPayment(serializers.ModelSerializer):

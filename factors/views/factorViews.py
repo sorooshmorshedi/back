@@ -469,6 +469,7 @@ class DefiniteFactor(APIView):
                 item.total_output_count += item.count
                 for fee in fees:
                     fee['fee'] = float(fee['fee'])
+                    fee['count'] = float(fee['count'])
                 item.fees = fees
 
             item.save()
