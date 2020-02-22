@@ -7,7 +7,7 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from factors.signals import clearFactorSanad
+from factors.signals import clearFactorSanad, updateWareBalanceOnSave, updateWareBalanceOnDelete
 from helpers.models import BaseModel
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
@@ -360,4 +360,7 @@ class Transfer(BaseModel):
 
 
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
+
+signals.pre_save.connect(receiver=updateWareBalanceOnSave, sender=FactorItem)
+signals.pre_delete.connect(receiver=updateWareBalanceOnDelete, sender=FactorItem)
 
