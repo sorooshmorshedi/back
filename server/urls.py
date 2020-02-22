@@ -33,6 +33,9 @@ schema_view = get_schema_view(title='Users API', renderer_classes=[OpenAPIRender
 
 urlpatterns = [
     url('test', TestView.as_view()),
+
+    url(r'^home/', include('home.urls')),
+
     url(r'^login$', obtain_jwt_token, name='login'),
     url(r'^users/', include('users.urls')),
     url(r'^companies/', include('companies.urls')),
