@@ -134,20 +134,31 @@ class FactorModelView(viewsets.ModelViewSet):
 
             if is_output and not for_delete:
                 if ware.minSale and item.count < ware.minSale:
-                    confirmations.append("حداقل فروش {} برابر {} می باشد".format(ware.name, ware.minSale))
+                    confirmations.append("حداقل مبلغ فروش {} برابر {} می باشد".format(ware.name, ware.minSale))
 
                 if ware.maxSale and item.count > ware.maxSale:
-                    confirmations.append("حداکثر فروش {} برابر {} می باشد".format(ware.name, ware.maxSale))
+                    confirmations.append("حداکثر مبلغ فروش {} برابر {} می باشد".format(ware.name, ware.maxSale))
 
             if for_delete:
                 is_output = not is_output
 
+            balance = ware.get_balance(warehouse)
             if is_output:
-                if ware.minInventory and ware.get_balance(warehouse) - count < ware.minInventory:
-                    confirmations.append("حداقل موجودی {} برابر {} می باشد".format(ware.name, ware.minInventory))
+                if ware.minInventory and balance - count < ware.minInventory:
+                    confirmations.append("حداقل موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
+                        ware.name,
+                        ware.minInventory,
+                        ware.unit.name,
+                        balance
+                    ))
             else:
-                if ware.maxInventory and ware.get_balance(warehouse) + count > ware.maxInventory:
-                    confirmations.append("حداکثر موجودی {} برابر {} می باشد".format(ware.name, ware.maxInventory))
+                if ware.maxInventory and balance + count > ware.maxInventory:
+                    confirmations.append("حداکثر موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
+                        ware.name,
+                        ware.minInventory,
+                        ware.unit.name,
+                        balance
+                    ))
 
         if len(confirmations):
             raise ConfirmationError(confirmations)
