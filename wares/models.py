@@ -28,7 +28,6 @@ class Warehouse(BaseModel):
 
 
 class WareLevel(BaseModel):
-
     NATURE = 0
     GROUP = 1
     CATEGORY = 2
@@ -53,7 +52,6 @@ class WareLevel(BaseModel):
 
 
 class Ware(BaseModel):
-
     FIFO = 0
     WEIGHTED_MEAN = 1
     PRICING_TYPES = {
@@ -98,8 +96,8 @@ class Ware(BaseModel):
             from factors.models import FactorItem
             from factors.models import Factor
             from django.db.models import Q
-            last_factor_item = FactorItem.objects.inFinancialYear(user).filter(ware=self)\
-                .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP))\
+            last_factor_item = FactorItem.objects.inFinancialYear(user).filter(ware=self) \
+                .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
                 .order_by('-factor__definition_date', '-id')
 
             if exclude_factors:
@@ -112,7 +110,11 @@ class Ware(BaseModel):
         except IndexError:
             return None
 
-    # Just definite factors
+    def get_balance(self, warehouse: Warehouse):
+        return WareBalance.get_balance(self, warehouse)
+
+        # Just definite factors
+
     def remain(self, user, last_factor_item=None):
         res = {
             'count': 0,
@@ -142,7 +144,7 @@ class Ware(BaseModel):
         fee = remain_value / remain_count
 
         self.factorItems.inFinancialYear(user) \
-            .filter(factor__is_definite=True, id__lte=last_factor_item.id)\
+            .filter(factor__is_definite=True, id__lte=last_factor_item.id) \
             .update(is_editable=0)
 
         return fee * count, [{'fee': fee, 'count': count}]
@@ -256,3 +258,25 @@ class Ware(BaseModel):
 
         from factors.models import FactorItem
         FactorItem.objects.inFinancialYear(user).filter(id__in=editableFactorItemIds).update(is_editable=1)
+
+
+class WareBalance(models.Model):
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='balance')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='balance')
+    count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
+
+    @staticmethod
+    def update_balance(ware: Ware, warehouse: Warehouse, change):
+        ware_balance, created = WareBalance.objects.get_or_create(ware=ware, warehouse=warehouse)
+        ware_balance.count += change
+        ware_balance.save()
+
+    @staticmethod
+    def get_balance(ware: Ware, warehouse: Warehouse):
+        ware_balance, created = WareBalance.objects.get_or_create(ware=ware, warehouse=warehouse)
+        return ware_balance.count
+
+    @staticmethod
+    def get_balances(ware: Ware):
+        ware_balances = WareBalance.objects.get_or_create(ware=ware)
+        return ware_balances
