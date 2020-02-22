@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDA
 from factors.helpers import getInventoryCount
+from helpers.exceptions.ConfirmationError import ConfirmationError
 from sanads.sanads.models import clearSanad, newSanadCode, SanadItem
 from factors.serializers import *
 
@@ -63,6 +64,8 @@ class FactorModelView(viewsets.ModelViewSet):
         if not factor.is_deletable:
             raise ValidationError('فاکتور غیر قابل حذف می باشد')
 
+        self.check_confirmations(request, factor, for_delete=True)
+
         if factor.is_definite:
             DefiniteFactor.undoDefinition(request.user, factor)
 
@@ -81,8 +84,11 @@ class FactorModelView(viewsets.ModelViewSet):
         serialized.save()
 
         factor = serialized.instance
+
         self.sync_items(user, factor, data)
         self.sync_expenses(user, factor, data)
+
+        self.check_confirmations(request, factor)
 
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
@@ -94,6 +100,8 @@ class FactorModelView(viewsets.ModelViewSet):
 
         if not factor.is_editable:
             raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
+
+        self.check_confirmations(request, factor)
 
         data = request.data
         user = request.user
@@ -110,6 +118,39 @@ class FactorModelView(viewsets.ModelViewSet):
 
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
+
+    def check_confirmations(self, request, factor: Factor, for_delete=False):
+
+        is_confirmed = request.data.get('_confirmed', False)
+        if is_confirmed:
+            return
+
+        confirmations = []
+        for item in factor.items.all():
+            ware = item.ware
+            warehouse = item.warehouse
+            count = item.count
+            is_output = factor.type in Factor.OUTPUT_GROUP
+
+            if is_output and not for_delete:
+                if ware.minSale and item.count < ware.minSale:
+                    confirmations.append("حداقل فروش {} برابر {} می باشد".format(ware.name, ware.minSale))
+
+                if ware.maxSale and item.count > ware.maxSale:
+                    confirmations.append("حداکثر فروش {} برابر {} می باشد".format(ware.name, ware.maxSale))
+
+            if for_delete:
+                is_output = not is_output
+
+            if is_output:
+                if ware.minInventory and ware.get_balance(warehouse) - count < ware.minInventory:
+                    confirmations.append("حداقل موجودی {} برابر {} می باشد".format(ware.name, ware.minInventory))
+            else:
+                if ware.maxInventory and ware.get_balance(warehouse) + count > ware.maxInventory:
+                    confirmations.append("حداکثر موجودی {} برابر {} می باشد".format(ware.name, ware.maxInventory))
+
+        if len(confirmations):
+            raise ConfirmationError(confirmations)
 
     def sync_items(self, user, factor, data):
         factor_items = data.get('factor_items', [])
@@ -313,11 +354,11 @@ def check_inventory(user, factor_items, consider_old_count):
         if type(item) is FactorItem:
             ware = item.ware
             warehouse = item.warehouse
-            count = int(item.count)
+            count = Decimal(item.count)
         else:
             ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
             warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
-            count = int(item['count'])
+            count = Decimal(item['count'])
 
         for inventory in inventories:
             if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
