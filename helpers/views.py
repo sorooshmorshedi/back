@@ -1,6 +1,14 @@
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from helpers.exceptions.ConfirmationError import ConfirmationError
+
+
+class TestView(APIView):
+    def get(self, request):
+        return Response([])
 
 
 class ListCreateAPIViewWithAutoFinancialYear(generics.ListCreateAPIView):
@@ -32,5 +40,3 @@ class RetrieveUpdateDestroyAPIViewWithAutoFinancialYear(generics.RetrieveUpdateD
         if instance.financial_year.count() == 0:
             instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-

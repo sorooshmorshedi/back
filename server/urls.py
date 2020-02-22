@@ -23,6 +23,8 @@ from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 # existing serializer, viewset, router registrations code
+from helpers.views import TestView
+
 ...
 
 # Create our schema's view w/ the get_schema_view() helper method. Pass in the proper Renderers for swagger
@@ -30,6 +32,7 @@ schema_view = get_schema_view(title='Users API', renderer_classes=[OpenAPIRender
 
 
 urlpatterns = [
+    url('test', TestView.as_view()),
     url(r'^login$', obtain_jwt_token, name='login'),
     url(r'^users/', include('users.urls')),
     url(r'^companies/', include('companies.urls')),
