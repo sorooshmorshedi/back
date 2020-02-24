@@ -84,13 +84,17 @@ class FactorExportView(FactorListView, BaseExportView):
                 'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
             }
         }
+
         factorType = request.GET.get('type', None)
         summarized = request.GET.get('summarized', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
+        hide_prices = request.GET.get('hide_prices', 'false') == 'true'
+
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
+
         self.context = {
             'form_name': names[factorType]['title'],
             'verifier_form_name': names[factorType]['verifier_form_name'],
@@ -98,7 +102,8 @@ class FactorExportView(FactorListView, BaseExportView):
             'hide_factor': hide_factor,
             'hide_expenses': hide_expenses,
             'summarized': summarized,
-            'hide_remain': hide_remain
+            'hide_remain': hide_remain,
+            'hide_prices': hide_prices
         }
         return self.export(request, export_type, *args, **kwargs)
 

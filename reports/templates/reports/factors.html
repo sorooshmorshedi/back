@@ -3,7 +3,7 @@
 {% load export_verifiers %}
 
 {% block content %}
-{% for factor in forms %}
+    {% for factor in forms %}
 
         {% if forloop.last %}
             <div>
@@ -11,7 +11,7 @@
             <div class="break-after">
         {% endif %}
 
-        {% if not hide_factor %}
+    {% if not hide_factor %}
         <div class="text-center">
             <h3>
                 {{ company.name }}
@@ -34,103 +34,103 @@
             </div>
             <div class="col-xs-12 text-left">
                 <span>ساعت : </span>
-                <span dir="ltr"> {{ factor.time | date:"G:i"}} </span>
+                <span dir="ltr"> {{ factor.time | date:"G:i" }} </span>
             </div>
 
         </div>
 
         <!-- seller in sale factor -->
         {% if factor.type == 'sale' or factor.type == 'backFromBuy' %}
-        <div class="row company part">
-            <div class="col-xs-12">
-                <span>فروشنده: </span>
-                <span> {{ company.name }} </span>
-            </div>
-            {% if not summarized %}
-            <div class="col-xs-3">
-                <span> کد اقتصادی: </span>
-                <span> {{ company.eghtesadi_code | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span> شماره ملی: </span>
-                <span> {{ company.shenase | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>کد پستی: </span>
-                <span> {{ company.postal_code | default:'-' }} </span>
-            </div>
-            {% endif %}
-            <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ company.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>تلفن: </span>
-                <span> {{ company.phone1 | default:'-' }} </span>
-            </div>
-        </div>
-        <hr>
-        <div class="row buyer part">
-            <div class="col-xs-12">
-                <span> خریدار: </span>
-                <span> {{ factor.account }} </span>
-                {% if factor.floatAccount %}
-                <span> - </span>
-                <span> حساب شناور: </span>
-                <span> {{ factor.account }} </span>
+            <div class="row company part">
+                <div class="col-xs-12">
+                    <span>فروشنده: </span>
+                    <span> {{ company.name }} </span>
+                </div>
+                {% if not summarized %}
+                    <div class="col-xs-3">
+                        <span> کد اقتصادی: </span>
+                        <span> {{ company.eghtesadi_code | default:'-' }} </span>
+                    </div>
+                    <div class="col-xs-3">
+                        <span> شماره ملی: </span>
+                        <span> {{ company.shenase | default:'-' }} </span>
+                    </div>
+                    <div class="col-xs-3">
+                        <span>کد پستی: </span>
+                        <span> {{ company.postal_code | default:'-' }} </span>
+                    </div>
                 {% endif %}
+                <div class="col-xs-3">
+                    <span>آدرس: </span>
+                    <span> {{ company.address1 | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span>تلفن: </span>
+                    <span> {{ company.phone1 | default:'-' }} </span>
+                </div>
             </div>
-            {% if not summarized %}
-            <div class="col-xs-3">
-                <span> کد اقتصادی: </span>
-                <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
+            <hr>
+            <div class="row buyer part">
+                <div class="col-xs-12">
+                    <span> خریدار: </span>
+                    <span> {{ factor.account }} </span>
+                    {% if factor.floatAccount %}
+                        <span> - </span>
+                        <span> حساب شناور: </span>
+                        <span> {{ factor.account }} </span>
+                    {% endif %}
+                </div>
+                {% if not summarized %}
+                    <div class="col-xs-3">
+                        <span> کد اقتصادی: </span>
+                        <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
+                    </div>
+                    <div class="col-xs-3">
+                        <span> شماره ملی: </span>
+                        <span> {{ factor.account.person.meli_code | default:'-' }} </span>
+                    </div>
+                    <div class="col-xs-3">
+                        <span>کد پستی: </span>
+                        <span> {{ factor.account.person.postalCode | default:'-' }} </span>
+                    </div>
+                {% endif %}
+                <div class="col-xs-3">
+                    <span>آدرس: </span>
+                    <span> {{ factor.account.person.address1 | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span>تلفن: </span>
+                    <span> {{ factor.account.person.phone1 | default:'-' }} </span>
+                </div>
             </div>
-            <div class="col-xs-3">
-                <span> شماره ملی: </span>
-                <span> {{ factor.account.person.meli_code | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>کد پستی: </span>
-                <span> {{ factor.account.person.postalCode | default:'-' }} </span>
-            </div>
-            {% endif %}
-            <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ factor.account.person.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>تلفن: </span>
-                <span> {{ factor.account.person.phone1 | default:'-' }} </span>
-            </div>
-        </div>
         {% endif %}
 
         <!-- seller in buy factor -->
         {% if factor.type == 'buy' or factor.type == 'backFromSale' %}
-        <div class="row seller">
-            <div class="col-xs-6">
-                <span> فروشنده: </span>
-                <span> {{ factor.account }} </span>
+            <div class="row seller">
+                <div class="col-xs-6">
+                    <span> فروشنده: </span>
+                    <span> {{ factor.account }} </span>
+                </div>
+                {% if factor.floatAccount %}
+                    <div class="col-xs-6">
+                        <span> حساب شناور: </span>
+                        <span> {{ factor.account }} </span>
+                    </div>
+                {% endif %}
+                <div class="col-xs-3">
+                    <span> کد اقتصادی: </span>
+                    <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span> شماره ملی: </span>
+                    <span> {{ factor.account.person.meli_code | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span>بیجک: </span>
+                    <span> {{ factor.bijak | default:'-' }} </span>
+                </div>
             </div>
-            {% if factor.floatAccount %}
-            <div class="col-xs-6">
-                <span> حساب شناور: </span>
-                <span> {{ factor.account }} </span>
-            </div>
-            {% endif %}
-            <div class="col-xs-3">
-                <span> کد اقتصادی: </span>
-                <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span> شماره ملی: </span>
-                <span> {{ factor.account.person.meli_code | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>بیجک: </span>
-                <span> {{ factor.bijak | default:'-' }} </span>
-            </div>
-        </div>
         {% endif %}
 
         <hr>
@@ -148,44 +148,49 @@
             <div class="col-xs-12">
                 <table class="table table-bordered table-striped">
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>شرح</th>
-                            {% if show_warehouse %}
+                    <tr>
+                        <th>#</th>
+                        <th>شرح</th>
+                        {% if show_warehouse %}
                             <th>انبار</th>
-                            {% endif %}
-                            <th>تعداد</th>
-                            <th>واحد</th>
+                        {% endif %}
+                        <th>تعداد</th>
+                        <th>واحد</th>
+                        {% if not hide_prices %}
                             <th>قیمت واحد</th>
                             <th>جمع</th>
                             <th>تخفیف (مبلغ)</th>
                             <th>تخفیف درصد</th>
                             <th>جمع کل پس از تخفیف</th>
-                        </tr>
+                        {% endif %}
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for item in factor.items.all %}
+                    {% for item in factor.items.all %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ item.ware }}</td>
                             {% if show_warehouse %}
-                            <td>{{ item.warehouse.name | default:'-' }}</td>
+                                <td>{{ item.warehouse.name | default:'-' }}</td>
                             {% endif %}
                             <td>{{ item.count }}</td>
                             <td>{{ item.ware.unit.name }}</td>
-                            <td>{{ item.fee | money }}</td>
-                            <td>{{ item.value | money }}</td>
-                            <td>{{ item.discountValue | money }}</td>
-                            <td>{{ item.discountPercent }}</td>
-                            <td>{{ item.totalValue | money }}</td>
+                            {% if not hide_prices %}
+                                <td>{{ item.fee | money }}</td>
+                                <td>{{ item.value | money }}</td>
+                                <td>{{ item.discountValue | money }}</td>
+                                <td>{{ item.discountPercent }}</td>
+                                <td>{{ item.totalValue | money }}</td>
+                            {% endif %}
                         </tr>
-                        {% endfor %}
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="col-xs-6 col-xs-offset-6">
-                <table class="table table-bordered table-striped">
-                    <tbody>
+            {% if not hide_prices %}
+                <div class="col-xs-6 col-xs-offset-6">
+                    <table class="table table-bordered table-striped">
+                        <tbody>
                         <tr>
                             <th>جمع</th>
                             <td>{{ factor.sum | money }}</td>
@@ -207,22 +212,23 @@
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
                         {% if not hide_remain %}
-                        <tr>
-                            <th>{{ factor.remain.before_factor_title }}</th>
-                            <td>{{ factor.remain.before_factor | money }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ factor.remain.after_factor_title }}</th>
-                            <td>{{ factor.remain.after_factor | money }}</td>
-                        </tr>
+                            <tr>
+                                <th>{{ factor.remain.before_factor_title }}</th>
+                                <td>{{ factor.remain.before_factor | money }}</td>
+                            </tr>
+                            <tr>
+                                <th>{{ factor.remain.after_factor_title }}</th>
+                                <td>{{ factor.remain.after_factor | money }}</td>
+                            </tr>
                         {% endif %}
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
+    {% endif %}
 
-        {% if not hide_expenses and factor.expenses.all %}
+    {% if not hide_prices and not hide_expenses and factor.expenses.all %}
         <div class="break-after"></div>
 
         <div class="row form-header">
@@ -239,7 +245,7 @@
             </div>
             <div class="col-xs-12 text-left">
                 <span>ساعت : </span>
-                <span dir="ltr"> {{ factor.time | date:"G:i"}} </span>
+                <span dir="ltr"> {{ factor.time | date:"G:i" }} </span>
             </div>
         </div>
 
@@ -248,17 +254,17 @@
             <div class="col-xs-12">
                 <table class="table table-bordered table-striped">
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>نام هزینه ثابت</th>
-                            <th>مبلغ</th>
-                            <th>پرداخت کننده</th>
-                            <th>حساب شناور</th>
-                            <th>توضیحات</th>
-                        </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>نام هزینه ثابت</th>
+                        <th>مبلغ</th>
+                        <th>پرداخت کننده</th>
+                        <th>حساب شناور</th>
+                        <th>توضیحات</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {% for item in factor.expenses.all %}
+                    {% for item in factor.expenses.all %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ item.expense.name }}</td>
@@ -267,17 +273,17 @@
                             <td>{{ item.floatAccount | default:'-' }}</td>
                             <td>{{ item.explanation }}</td>
                         </tr>
-                        {% endfor %}
-                        <tr>
-                            <td colspan="2">مجموع</td>
-                            <td>{{ factor.expensesSum | money }}</td>
-                            <td colspan="3"></td>
-                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2">مجموع</td>
+                        <td>{{ factor.expensesSum | money }}</td>
+                        <td colspan="3"></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        {% endif %}
+    {% endif %}
 
 
     </div>
@@ -286,4 +292,4 @@
 
     {% show_verifiers verifier_form_name user %}
 
-    {% endblock %}
+{% endblock %}
