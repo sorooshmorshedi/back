@@ -9,8 +9,6 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import getDA
-from cheques.models.ChequeModel import Cheque
-from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import *
 
 
@@ -40,7 +38,7 @@ class ChequebookModelView(viewsets.ModelViewSet):
         )
 
 
-class ChequeModelView(viewsets.ModelViewSet):
+class ReceivedChequeModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = ChequeCreateUpdateSerializer
     queryset = Cheque.objects.all()
@@ -65,11 +63,15 @@ class ChequeModelView(viewsets.ModelViewSet):
         if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
             return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
                             status=status.HTTP_400_BAD_REQUEST)
-        return super(ChequeModelView, self).perform_destroy(instance)
+        return super(ReceivedChequeModelView, self).perform_destroy(instance)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
+    def perform_create(self, serializer: ChequeCreateUpdateSerializer) -> None:
+        user = self.request.user
+        serializer.save(
+            financial_year=user.active_financial_year,
+            status='blank',
+            received_or_paid=Cheque.RECEIVED,
+        )
 
 
 class ChangeChequeStatus(APIView):

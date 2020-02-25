@@ -92,8 +92,8 @@ def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
 
 def updateSanadValuesOnDelete(sender, instance, using, **kwargs):
     sanad = instance.sanad
-    sanad.bed -= instance.value
-    sanad.bes -= instance.value
+    sanad.bed -= instance.bed
+    sanad.bes -= instance.bes
     sanad.save()
 
 

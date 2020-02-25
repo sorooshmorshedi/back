@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from cheques.views import *
 
 router = DefaultRouter()
-router.register(r'cheques', ChequeModelView, base_name='cheque')
+router.register(r'receivedCheques', ReceivedChequeModelView, base_name='receivedCheque')
 router.register(r'chequebooks', ChequebookModelView, base_name='chequebook')
 
 urlpatterns = router.urls + [

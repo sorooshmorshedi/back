@@ -77,3 +77,21 @@ class Cheque(BaseModel):
     class Meta(BaseModel.Meta):
         verbose_name = 'چک'
         ordering = ['serial', ]
+
+    def save(self, *args, **kwargs):
+        res = super(Cheque, self).save(*args, **kwargs)
+        if not self.id:
+            if self.has_transaction:
+                from sanads.transactions.models import TransactionItem
+                try:
+                    transaction_item = TransactionItem.objects.get(cheque=self)
+                except TransactionItem.DoesNotExist:
+                    return
+                transaction_item.documentNumber = self.serial
+                transaction_item.date = self.date
+                transaction_item.due = self.due
+                transaction_item.explanation = self.explanation
+                transaction_item.value = self.value
+                transaction_item.save()
+        return res
+

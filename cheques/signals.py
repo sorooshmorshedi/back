@@ -7,14 +7,6 @@ from cheques.models.StatusChangeModel import StatusChange
 from sanads.sanads.models import clearSanad
 
 
-def validateChequeUpdate(sender, instance, raw, using, update_fields, **kwargs):
-    if not update_fields or instance.status == 'blank':
-        return
-    for i in update_fields:
-        if i not in ['status']:
-            raise serializers.ValidationError("فقط چک های سفید قابل ویرایش هستند")
-
-
 def statusChangeSanad(sender, instance, created, **kwargs):
     value = instance.cheque.value
     cheque = instance.cheque
@@ -107,26 +99,6 @@ def deleteStatusChange(sender, instance, using, **kwargs):
 
     cheque.save()
 
-
-def saveCheque(sender, instance, created, **kwargs):
-    cheque = instance
-    if not created:
-        if cheque.has_transaction:
-            from sanads.transactions.models import TransactionItem
-            try:
-                ti = TransactionItem.objects.get(cheque=cheque)
-            except TransactionItem.DoesNotExist:
-                return
-            ti.documentNumber = cheque.serial
-            ti.date = cheque.date
-            ti.due = cheque.due
-            ti.explanation = cheque.explanation
-            ti.value = cheque.value
-            ti.save()
-
-
-signals.pre_save.connect(receiver=validateChequeUpdate, sender=Cheque)
-signals.post_save.connect(receiver=saveCheque, sender=Cheque)
 
 signals.pre_delete.connect(receiver=deleteStatusChange, sender=StatusChange)
 signals.post_save.connect(receiver=statusChangeSanad, sender=StatusChange)

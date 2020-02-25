@@ -66,6 +66,7 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cheque
         fields = '__all__'
+        read_only_fields = ('financial_year', 'status', 'received_or_paid')
 
     def validate(self, data):
         if 'account' not in data or not data['account']:
@@ -79,12 +80,14 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
             if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
 
+        if self.instance:
+            if self.instance.status != 'blank':
+                raise serializers.ValidationError("فقط چک های سفید قابل ویرایش هستند")
+
         return data
 
     def create(self, validated_data):
         data = validated_data.copy()
-        data['status'] = 'blank'
-        data['received_or_paid'] = Cheque.RECEIVED
         return super(ChequeCreateUpdateSerializer, self).create(validated_data=data)
 
 
