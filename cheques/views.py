@@ -15,8 +15,8 @@ from cheques.serializers import *
 
 
 class ChequebookModelView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = ChequebookSerializer
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChequebookCreateUpdateSerializer
 
     def get_queryset(self):
         return Chequebook.objects.inFinancialYear(self.request.user)
@@ -32,14 +32,17 @@ class ChequebookModelView(viewsets.ModelViewSet):
         serializer = ChequebookListRetrieveSerializer(chequebook)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        return super().create(request, *args, **kwargs)
+    def perform_create(self, serializer: ChequeCreateUpdateSerializer):
+        user = self.request.user
+        serializer.save(
+            code=Chequebook.newCode(user),
+            financial_year=user.active_financial_year
+        )
 
 
 class ChequeModelView(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated, )
-    serializer_class = ChequeSerializer
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChequeCreateUpdateSerializer
     queryset = Cheque.objects.all()
 
     def get_queryset(self):
@@ -60,7 +63,8 @@ class ChequeModelView(viewsets.ModelViewSet):
         if instance.received_or_paid == Cheque.PAID:
             return Response(['چک پرداختی غیر قابل حذف می باشد'], status=status.HTTP_400_BAD_REQUEST)
         if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
-            return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'], status=status.HTTP_400_BAD_REQUEST)
+            return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
+                            status=status.HTTP_400_BAD_REQUEST)
         return super(ChequeModelView, self).perform_destroy(instance)
 
     def create(self, request, *args, **kwargs):
@@ -76,7 +80,8 @@ class ChangeChequeStatus(APIView):
 
         statusChangesCount = cheque.statusChanges.count()
         if statusChangesCount != 0 and statusChangesCount != 1:
-            return Response(['برای ویرایش چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'], status=status.HTTP_400_BAD_REQUEST)
+            return Response(['برای ویرایش چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
+                            status=status.HTTP_400_BAD_REQUEST)
 
         data = request.data['cheque']
         data['financial_year'] = request.user.active_financial_year.id
@@ -88,7 +93,7 @@ class ChangeChequeStatus(APIView):
             data['accountNumber'] = bank.accountNumber
             data['serial'] = cheque.serial
 
-        serialized = ChequeSerializer(cheque, data=data)
+        serialized = ChequeCreateUpdateSerializer(cheque, data=data)
         if serialized.is_valid():
             serialized.save()
         else:
@@ -172,11 +177,13 @@ class ChangeChequeStatus(APIView):
             if cheque.received_or_paid == Cheque.RECEIVED:
                 cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['bedAccount'])
                 if 'bedFloatAccount' in data:
-                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(pk=data['bedFloatAccount'])
+                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                        pk=data['bedFloatAccount'])
             else:
                 cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['besAccount'])
                 if 'besFloatAccount' in data:
-                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(pk=data['besFloatAccount'])
+                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                        pk=data['besFloatAccount'])
             cheque.status = data['toStatus']
             cheque.save()
             serialized.save()
@@ -220,11 +227,13 @@ def revertChequeInFlowStatus(request, pk):
         if cheque.received_or_paid == Cheque.RECEIVED:
             cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['bedAccount'])
             if 'bedFloatAccount' in data:
-                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(pk=data['bedFloatAccount'])
+                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                    pk=data['bedFloatAccount'])
         else:
             cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['besAccount'])
             if 'besFloatAccount' in data:
-                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(pk=data['besFloatAccount'])
+                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                    pk=data['besFloatAccount'])
         cheque.status = data['toStatus']
         cheque.save()
         serialized.save()
@@ -232,5 +241,3 @@ def revertChequeInFlowStatus(request, pk):
     else:
         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serialized.data, status=status.HTTP_200_OK)
-
-

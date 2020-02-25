@@ -1,4 +1,5 @@
 from django.db import models
+
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from helpers.models import BaseModel
@@ -25,3 +26,41 @@ class Chequebook(BaseModel):
     class Meta(BaseModel.Meta):
         verbose_name = 'دفتر چک'
         ordering = ['code', ]
+
+    def save(self, *args, **kwargs):
+
+        created = self.id
+        res = super(Chequebook, self).save(*args, **kwargs)
+
+        if created:
+            self._create_cheques()
+        else:
+            for cheque in self.cheques.all():
+                cheque.delete()
+            self._create_cheques()
+
+        return res
+
+    def _create_cheques(self):
+        from cheques.models.ChequeModel import Cheque
+        bank = self.account.bank
+        for i in range(self.serial_from, self.serial_to + 1):
+            self.cheques.create(
+                serial=i,
+                status='blank',
+                received_or_paid=Cheque.PAID,
+                bankName=bank.name,
+                branchName=bank.branch,
+                accountNumber=bank.accountNumber,
+                financial_year=self.financial_year
+            )
+
+    @staticmethod
+    def newCode(user):
+        try:
+            last_chequebook = Chequebook.objects.inFinancialYear(user).latest('code')
+            code = last_chequebook.code + 1
+        except:
+            code = 1
+
+        return code

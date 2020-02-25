@@ -14,9 +14,12 @@ class StatusChange(BaseModel):
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)
 
     bedAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBedAccount')
-    bedFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBesAccount', blank=True, null=True)
-    besAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBedFloatAccount')
-    besFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBesFloatAccount', blank=True, null=True)
+    bedFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
+                                        related_name='chequeStatusChangesAsBesAccount', blank=True, null=True)
+    besAccount = models.ForeignKey(Account, on_delete=models.PROTECT,
+                                   related_name='chequeStatusChangesAsBedFloatAccount')
+    besFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
+                                        related_name='chequeStatusChangesAsBesFloatAccount', blank=True, null=True)
 
     date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True)

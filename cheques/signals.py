@@ -7,41 +7,6 @@ from cheques.models.StatusChangeModel import StatusChange
 from sanads.sanads.models import clearSanad
 
 
-def createCheques(sender, instance, created, **kwargs):
-    if created:
-        bank = instance.account.bank
-        for i in range(instance.serial_from, instance.serial_to + 1):
-            instance.cheques.create(
-                serial=i,
-                status='blank',
-                received_or_paid=Cheque.PAID,
-                bankName=bank.name,
-                branchName=bank.branch,
-                accountNumber=bank.accountNumber,
-                financial_year=instance.financial_year
-            )
-    else:
-        for cheque in instance.cheques.all():
-            cheque.delete()
-        for i in range(instance.serial_from, instance.serial_to + 1):
-            instance.cheques.create(
-                serial=i,
-                status='blank',
-                received_or_paid=Cheque.PAID,
-                financial_year=instance.financial_year
-            )
-
-
-def validateChequebookUpdate(sender, instance, raw, using, update_fields, **kwargs):
-    if update_fields \
-            and ('serial_from' not in update_fields or instance.serial_from == update_fields['serial_from']) \
-            and ('serial_to' not in update_fields or instance.serial_to == update_fields['serial_to']):
-        return
-    for cheque in instance.cheques.all():
-        if cheque.status != 'blank':
-            raise serializers.ValidationError("برای ویرایش دسته چک، باید وضعیت همه چک های آن سفید باشد")
-
-
 def validateChequeUpdate(sender, instance, raw, using, update_fields, **kwargs):
     if not update_fields or instance.status == 'blank':
         return
@@ -159,9 +124,6 @@ def saveCheque(sender, instance, created, **kwargs):
             ti.value = cheque.value
             ti.save()
 
-
-signals.pre_save.connect(receiver=validateChequebookUpdate, sender=Chequebook)
-signals.post_save.connect(receiver=createCheques, sender=Chequebook)
 
 signals.pre_save.connect(receiver=validateChequeUpdate, sender=Cheque)
 signals.post_save.connect(receiver=saveCheque, sender=Cheque)
