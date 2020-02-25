@@ -48,7 +48,6 @@ class Sanad(BaseModel):
 
 
 class SanadItem(BaseModel):
-
     BED = 'bed'
     BES = 'bes'
     VALUE_TYPES = (
@@ -59,11 +58,14 @@ class SanadItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanad_items')
     sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True, null=True, verbose_name='حساب شناور')
-    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True, verbose_name='مرکز هزینه')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True,
+                                     null=True, verbose_name='حساب شناور')
+    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True,
+                                   verbose_name='مرکز هزینه')
 
-    value = models.DecimalField(max_digits=24, decimal_places=0)
-    valueType = models.CharField(max_length=3, choices=VALUE_TYPES)
+    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+
     explanation = models.CharField(max_length=255, blank=True, verbose_name='توضیحات')
 
     permissions = (
@@ -75,42 +77,25 @@ class SanadItem(BaseModel):
 
 
 def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
-
-    subValue = 0
-    addValue = instance.value
-    newType = instance.valueType
-    oldType = newType
-    if instance.id:
-        try:
-            obj = SanadItem.objects.get(pk=instance.id)
-            subValue = obj.value
-            oldType = obj.valueType
-        except SanadItem.DoesNotExist:
-            pass
-
     sanad = instance.sanad
 
-    if oldType == 'bed':
-        sanad.bed -= subValue
-    else:
-        sanad.bes -= subValue
+    if instance.id:
+        sanadItem = SanadItem.objects.get(pk=instance.id)
+        sanad.bed -= sanadItem.bed
+        sanad.bes -= sanadItem.bes
 
-    if newType == 'bed':
-        sanad.bed += Decimal(addValue)
-    else:
-        sanad.bes += Decimal(addValue)
+    sanad.bed += instance.bed
+    sanad.bes += instance.bes
 
     sanad.save()
 
 
 def updateSanadValuesOnDelete(sender, instance, using, **kwargs):
     sanad = instance.sanad
-    if instance.valueType == 'bed':
-        sanad.bed -= instance.value
-    else:
-        sanad.bes -= instance.value
-
+    sanad.bed -= instance.value
+    sanad.bes -= instance.value
     sanad.save()
+
 
 signals.pre_save.connect(receiver=updateSanadValues, sender=SanadItem)
 signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
@@ -131,5 +116,3 @@ def newSanadCode(user):
         return Sanad.objects.inFinancialYear(user).latest('code').code + 1
     except:
         return 1
-
-

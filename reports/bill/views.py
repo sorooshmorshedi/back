@@ -12,7 +12,7 @@ from sanads.transactions.models import Transaction
 class BillListView(APIView):
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear(self.request.user).order_by('code')\
+        return Sanad.objects.inFinancialYear(self.request.user).order_by('code') \
             .prefetch_related('items') \
             .prefetch_related('factor__items__ware__unit') \
             .prefetch_related('transaction__items__type') \
@@ -57,21 +57,21 @@ class BillListView(APIView):
             for i in range(1, len(data)):
                 bed_sum += data[i]['bed']
                 bes_sum += data[i]['bes']
-                if data[i-1]['remain_type'] == BED:
+                if data[i - 1]['remain_type'] == BED:
                     if data[i]['bed'] != 0:
-                        data[i]['remain'] = data[i-1]['remain'] + data[i]['bed']
+                        data[i]['remain'] = data[i - 1]['remain'] + data[i]['bed']
                     else:
-                        data[i]['remain'] = data[i-1]['remain'] - data[i]['bes']
+                        data[i]['remain'] = data[i - 1]['remain'] - data[i]['bes']
                 else:
                     if data[i]['bes'] != 0:
-                        data[i]['remain'] = data[i-1]['remain'] + Decimal(data[i]['bes'])
+                        data[i]['remain'] = data[i - 1]['remain'] + Decimal(data[i]['bes'])
                     else:
-                        data[i]['remain'] = data[i-1]['remain'] - Decimal(data[i]['bed'])
+                        data[i]['remain'] = data[i - 1]['remain'] - Decimal(data[i]['bed'])
                 if data[i]['remain'] < 0:
                     data[i]['remain'] = -data[i]['remain']
-                    data[i]['remain_type'] = BED if data[i-1]['remain_type'] == BES else BES
+                    data[i]['remain_type'] = BED if data[i - 1]['remain_type'] == BES else BES
                 else:
-                    data[i]['remain_type'] = data[i-1]['remain_type']
+                    data[i]['remain_type'] = data[i - 1]['remain_type']
 
             data.append({
                 'bed': bed_sum,
@@ -88,9 +88,9 @@ class BillListView(APIView):
             return
         for item in factor.items.all():
             value = item.totalValue
-            valueType = 'bed' if factor.type in ('buy', 'backFromSale') else 'bes'
+
             bed = bes = 0
-            if valueType == 'bed':
+            if factor.type in Factor.BUY_GROUP:
                 bed = value
             else:
                 bes = value
@@ -101,8 +101,12 @@ class BillListView(APIView):
                 'type': factor.type,
                 'date': str(factor.date),
                 'sanad': sanad.id,
-                'explanation': "نام کالا: {}, تعداد: {} {}, قیمت واحد: {}, تخفیف: {}, توضیحات: {}".format(item.ware, item.count, item.ware.unit,
-                                                          item.fee, item.discount, item.explanation),
+                'explanation': "نام کالا: {}, تعداد: {} {}, قیمت واحد: {}, تخفیف: {}, توضیحات: {}".format(item.ware,
+                                                                                                          item.count,
+                                                                                                          item.ware.unit,
+                                                                                                          item.fee,
+                                                                                                          item.discount,
+                                                                                                          item.explanation),
                 'bed': bed,
                 'bes': bes
             }
@@ -115,12 +119,13 @@ class BillListView(APIView):
             return
         for item in transaction.items.all():
             value = item.value
-            valueType = 'bed' if transaction.type == 'receive' else 'bes'
+
             bed = bes = 0
-            if valueType == 'bed':
+            if transaction.type == Transaction.RECEIVE:
                 bed = value
             else:
                 bes = value
+
             row = {
                 'form_name': transaction.label,
                 'form_id': transaction.id,
@@ -131,9 +136,13 @@ class BillListView(APIView):
                 'bes': bes
             }
             if item.cheque:
-                row['explanation'] = "شماره چک: {}, تاریخ سررسید: {}, توضیحات: {}".format(item.cheque.serial, item.cheque.due, item.explanation)
+                row['explanation'] = "شماره چک: {}, تاریخ سررسید: {}, توضیحات: {}".format(item.cheque.serial,
+                                                                                          item.cheque.due,
+                                                                                          item.explanation)
             else:
-                row['explanation'] = "نوع: {}, تاریخ: {}, شماره مستند: {}, توضیحات: {}".format(item.type, item.date, item.documentNumber, item.explanation)
+                row['explanation'] = "نوع: {}, تاریخ: {}, شماره مستند: {}, توضیحات: {}".format(item.type, item.date,
+                                                                                               item.documentNumber,
+                                                                                               item.explanation)
             # serialized = self.serializer_class(data=row)
             # serialized.is_valid()
             # data.append(serialized.data)
@@ -143,11 +152,6 @@ class BillListView(APIView):
         for item in sanad.items.all():
             if item.account_id != account_id:
                 continue
-            bed = bes = 0
-            if item.valueType == 'bed':
-                bed = item.value
-            else:
-                bes = item.value
 
             row = {
                 'form_name': 'سند',
@@ -155,8 +159,8 @@ class BillListView(APIView):
                 'date': str(sanad.date),
                 'sanad': sanad.id,
                 'explanation': "{}".format(item.explanation),
-                'bed': bed,
-                'bes': bes
+                'bed': item.bed,
+                'bes': item.bes
             }
 
             # serialized = self.serializer_class(data=row)

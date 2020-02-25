@@ -108,8 +108,8 @@ class ClosingBaseView(APIView):
     def resetAccounts(self):
         self.accounts = Account.objects.inFinancialYear(self.user) \
             .filter(level=Account.TAFSILI) \
-            .annotate(bed_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed')), 0)) \
-            .annotate(bes_sum=Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes')), 0)) \
+            .annotate(bed_sum=Coalesce(Sum('sanadItems__bed'), 0)) \
+            .annotate(bes_sum=Coalesce(Sum('sanadItems__bes'), 0)) \
             .prefetch_related('sanadItems') \
             .prefetch_related('floatAccountGroup')
 

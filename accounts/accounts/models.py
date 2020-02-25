@@ -111,6 +111,9 @@ class Account(BaseModel):
                                           blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
+    # bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    # bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+
     def __str__(self):
         return self.title
 
@@ -134,10 +137,10 @@ class Account(BaseModel):
 
     def get_remain(self):
         from sanads.sanads.models import SanadItem
-        bed = SanadItem.objects.filter(account__code__startswith=self.code, valueType='bed') \
-            .aggregate(Sum('value'))['value__sum']
-        bes = SanadItem.objects.filter(account__code__startswith=self.code, valueType='bes') \
-            .aggregate(Sum('value'))['value__sum']
+        bed = SanadItem.objects.filter(account__code__startswith=self.code) \
+            .aggregate(Sum('bed'))['bed__sum']
+        bes = SanadItem.objects.filter(account__code__startswith=self.code) \
+            .aggregate(Sum('bes'))['bes__sum']
 
         if not bed:
             bed = 0

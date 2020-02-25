@@ -89,8 +89,8 @@ def incomeStatementView(request):
 
     allAccounts = list(Account.objects.inFinancialYear(request.user) \
         .annotate(remain=
-            Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bed') & dateFilter), 0) -
-            Coalesce(Sum('sanadItems__value', filter=Q(sanadItems__valueType='bes') & dateFilter), 0)
+            Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
+            Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
         ).filter(level=3).order_by('code'))
 
     usingTypes = (

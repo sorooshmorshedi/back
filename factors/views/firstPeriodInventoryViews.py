@@ -93,14 +93,12 @@ class FirstPeriodInventoryView(APIView):
 
         sanad.items.create(
             account=Account.get_inventory_account(request.user),
-            value=factor.sum,
-            valueType='bed',
+            bed=factor.sum,
             financial_year=request.user.active_financial_year
         )
         sanad.items.create(
             account=Account.get_partners_account(request.user),
-            value=factor.sum,
-            valueType='bes',
+            bes=factor.sum,
             financial_year=request.user.active_financial_year
         )
 

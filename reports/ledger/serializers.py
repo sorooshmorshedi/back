@@ -22,5 +22,5 @@ class SanadItemLedgerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SanadItem
-        fields = ('account', 'sanad', 'explanation', 'value', 'valueType')
+        fields = ('account', 'sanad', 'explanation', 'bed', 'bes')
 

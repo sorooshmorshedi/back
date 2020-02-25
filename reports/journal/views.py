@@ -18,20 +18,16 @@ class SanadItemResource(ModelResource):
         fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name')
 
     def dehydrate_بدهکار(self, sanadItem):
-        if sanadItem.valueType == 'bed':
-            return sanadItem.value
-        return 0
+        return sanadItem.bed
 
     def dehydrate_بستانکار(self, sanadItem):
-        if sanadItem.valueType == 'bes':
-            return sanadItem.value
-        return 0
+        return sanadItem.bes
 
 
 class JournalListView(generics.ListAPIView):
     serializer_class = SanadItemJournalSerializer
     filterset_class = SanadItemJounalFilter
-    ordering_fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name', 'value', 'valueType')
+    ordering_fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name', 'bed', 'bes')
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):

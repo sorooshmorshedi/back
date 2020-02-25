@@ -401,16 +401,22 @@ class DefiniteFactor(APIView):
 
         DefiniteFactor.setFactorItemsRemains(user, factor)
 
+        first_row_bed = 0
+        first_row_bes = 0
+
+        second_row_bed = 0
+        second_row_bes = 0
+
         if factor.type in Factor.SALE_GROUP:
-            rowTypeOne = SanadItem.BED
-            rowTypeTwo = SanadItem.BES
+            first_row_bed = factor.sum()
+            second_row_bes = factor.sum()
             if factor.type == Factor.SALE:
                 account = 'sale'
             else:
                 account = 'backFromBuy'
         else:
-            rowTypeOne = SanadItem.BES
-            rowTypeTwo = SanadItem.BED
+            first_row_bes = factor.sum()
+            second_row_bes = factor.sum()
             if factor.type == Factor.BUY:
                 account = 'buy'
             else:
@@ -426,7 +432,16 @@ class DefiniteFactor(APIView):
         )
 
         if factor.type != Factor.BACK_FROM_BUY:
-            DefiniteFactor.submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation)
+            DefiniteFactor.submitSumSanadItems(
+                user,
+                factor,
+                first_row_bed,
+                first_row_bes,
+                second_row_bed,
+                second_row_bes,
+                account,
+                explanation
+            )
 
         if factor.type == Factor.SALE:
             DefiniteFactor.submitSaleSanadItems(user, factor, explanation)
@@ -529,65 +544,69 @@ class DefiniteFactor(APIView):
             prev_items[ware_id] = item
 
     @staticmethod
-    def submitSumSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation):
+    def submitSumSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
+                            explanation):
         sanad = factor.sanad
         if factor.sum:
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
-                value=factor.sum,
-                valueType=rowTypeOne,
+                bed=first_row_bed,
+                bes=first_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
+
             sanad.items.create(
                 account=getDA(account, user).account,
                 # floatAccount=factor.floatAccount,
-                value=factor.sum,
-                valueType=rowTypeTwo,
+                bed=second_row_bed,
+                bes=second_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
 
     @staticmethod
-    def submitDiscountSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation):
+    def submitDiscountSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
+                                 explanation):
         sanad = factor.sanad
         if factor.discountSum:
             sanad.items.create(
                 account=getDA(account, user).account,
                 # floatAccount=factor.floatAccount,
-                value=factor.discountSum,
-                valueType=rowTypeOne,
+                bed=first_row_bed,
+                bes=first_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
-                value=factor.discountSum,
-                valueType=rowTypeTwo,
+                bed=second_row_bed,
+                bes=second_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
 
     @staticmethod
-    def submitTaxSanadItems(user, factor, rowTypeOne, rowTypeTwo, explanation):
+    def submitTaxSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
+                            explanation):
         sanad = factor.sanad
         # Factor Tax Sum
         if factor.taxSum:
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
-                value=factor.taxSum,
-                valueType=rowTypeOne,
+                bed=first_row_bed,
+                bes=first_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
             sanad.items.create(
                 account=getDA('tax', user).account,
                 # floatAccount=factor.floatAccount,
-                value=factor.taxSum,
-                valueType=rowTypeTwo,
+                bed=second_row_bed,
+                bes=second_row_bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
@@ -600,16 +619,14 @@ class DefiniteFactor(APIView):
                 sanad.items.create(
                     account=e.expense.account,
                     # floatAccount=factor.floatAccount,
-                    value=e.value,
-                    valueType='bed',
+                    bed=e.value,
                     explanation=explanation,
                     financial_year=sanad.financial_year
                 )
                 sanad.items.create(
                     account=e.account,
                     floatAccount=e.floatAccount,
-                    value=e.value,
-                    valueType='bes',
+                    bes=e.value,
                     explanation=explanation,
                     financial_year=sanad.financial_year
                 )
@@ -624,16 +641,14 @@ class DefiniteFactor(APIView):
         sanad.items.create(
             account=Account.get_cost_of_sold_wares_account(user),
             # floatAccount=factor.floatAccount,
-            value=value,
-            valueType=SanadItem.BED,
+            bed=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             account=Account.get_inventory_account(user),
             # floatAccount=factor.floatAccount,
-            value=value,
-            valueType=SanadItem.BES,
+            bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
@@ -651,16 +666,14 @@ class DefiniteFactor(APIView):
         sanad.items.create(
             account=Account.get_inventory_account(user),
             # floatAccount=factor.floatAccount,
-            value=value,
-            valueType=SanadItem.BED,
+            bed=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             account=Account.get_cost_of_sold_wares_account(user),
             # floatAccount=factor.floatAccount,
-            value=value,
-            valueType=SanadItem.BES,
+            bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
@@ -675,32 +688,33 @@ class DefiniteFactor(APIView):
         sanad.items.create(
             account=factor.account,
             floatAccount=factor.floatAccount,
-            value=factor.sum,
-            valueType=SanadItem.BED,
+            bed=factor.sum,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             account=Account.get_inventory_account(user),
             # floatAccount=factor.floatAccount,
-            value=value,
-            valueType=SanadItem.BES,
+            bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
 
         profit_and_loss_value = value - factor.sum
         if profit_and_loss_value:
+            bed = 0
+            bes = 0
             if profit_and_loss_value > 0:
-                value_type = SanadItem.BED
+                bed = profit_and_loss_value
             else:
                 profit_and_loss_value = abs(profit_and_loss_value)
-                value_type = SanadItem.BES
+                bes = profit_and_loss_value
+
             sanad.items.create(
                 account=getDA('profitAndLossFromBuying', user).account,
                 # floatAccount=factor.floatAccount,
-                value=profit_and_loss_value,
-                valueType=value_type,
+                bed=bed,
+                bes=bes,
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )

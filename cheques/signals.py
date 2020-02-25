@@ -90,16 +90,14 @@ def statusChangeSanad(sender, instance, created, **kwargs):
         explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} ".format(statuses[newStatus], cheque.serial, due)
 
     sanad.items.create(
-        value=value,
-        valueType='bed',
+        bed=value,
         explanation=explanation,
         account=instance.bedAccount,
         floatAccount=instance.bedFloatAccount,
         financial_year=sanad.financial_year
     )
     sanad.items.create(
-        value=value,
-        valueType='bes',
+        bes=value,
         explanation=explanation,
         account=instance.besAccount,
         floatAccount=instance.besFloatAccount,
