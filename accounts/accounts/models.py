@@ -111,8 +111,8 @@ class Account(BaseModel):
                                           blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
-    # bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
-    # bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
 
     def __str__(self):
         return self.title
