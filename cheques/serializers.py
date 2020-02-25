@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
-from cheques.models import *
-from sanads.sanads.models import newSanadCode
+from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequebookModel import Chequebook
+from cheques.models.StatusChangeModel import StatusChange
 from sanads.sanads.serializers import SanadListRetrieveSerializer
 
 

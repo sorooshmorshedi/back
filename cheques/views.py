@@ -1,4 +1,3 @@
-from django.db import connection
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
@@ -8,7 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import getDA
+from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import *
 
 

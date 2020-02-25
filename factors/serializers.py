@@ -94,7 +94,7 @@ class FactorUpdateSerializer(serializers.ModelSerializer):
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
-    sale_price = serializers.DecimalField(max_digits=24, decimal_places=0)
+    sale_price = serializers.DecimalField(max_digits=24, decimal_places=0, allow_null=True, default=None)
 
     class Meta:
         model = FactorItem

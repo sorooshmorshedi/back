@@ -3,7 +3,8 @@ from django.db.models import F
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
-from cheques.models import Cheque, Chequebook
+from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, FactorItem, Transfer
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction

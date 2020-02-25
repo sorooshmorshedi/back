@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
-from cheques.models import Cheque, Chequebook
+from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorSerializer
 from sanads.sanads.serializers import SanadSerializer

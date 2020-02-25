@@ -4,10 +4,10 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
+from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.models import BaseModel
 
-from cheques.models import Cheque
 from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 

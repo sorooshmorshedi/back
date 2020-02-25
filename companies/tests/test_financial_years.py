@@ -1,3 +1,5 @@
+import random
+
 import jdatetime
 from django.urls import reverse
 from rest_framework import status
@@ -46,7 +48,7 @@ class FinancialYearTest(ITestCase):
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
 
-        new_name = self.faker.name()
+        new_name = 'sep {}'.format(random.random())
 
         response = self.client.patch(reverse('financial-year-detail', args=[financial_year.id]), data={
             'name': new_name,

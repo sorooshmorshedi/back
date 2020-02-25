@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from django.db.models import signals
-from cheques.models import Cheque, Chequebook, StatusChange
+
+from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequebookModel import Chequebook
+from cheques.models.StatusChangeModel import StatusChange
 from sanads.sanads.models import clearSanad
 
 

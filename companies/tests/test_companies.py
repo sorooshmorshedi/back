@@ -1,3 +1,5 @@
+import random
+
 from django.urls import reverse
 from rest_framework import status
 
@@ -39,7 +41,7 @@ class CompanyTest(ITestCase):
         self.client.force_login(user)
         company = CompanyTest.create_company()
 
-        new_company_name = self.faker.name()
+        new_company_name = 'alia {}'.format(random.random())
 
         response = self.client.put(reverse('company-detail', args=[company.id]), data={
             'name': new_company_name
@@ -48,7 +50,7 @@ class CompanyTest(ITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = response.data
-        self.assertAlmostEqual(data['name'], new_company_name)
+        self.assertEqual(data['name'], new_company_name)
 
     def test_delete_companies(self):
         user = UserTest.create_user()
