@@ -2,7 +2,6 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from wkhtmltopdf.views import PDFTemplateView
-
 from factors.serializers import TransferListRetrieveSerializer
 from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView
 from reports.models import ExportVerifier
@@ -87,23 +86,32 @@ class FactorExportView(FactorListView, BaseExportView):
 
         factorType = request.GET.get('type', None)
         summarized = request.GET.get('summarized', 'false') == 'true'
+        pre_factor = request.GET.get('pre_factor', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
 
+        pre_factor = True
+
+        form_name = names[factorType]['title']
+
+        if pre_factor:
+            form_name = "پیش {}".format(form_name)
+
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
 
         self.context = {
-            'form_name': names[factorType]['title'],
+            'form_name': form_name,
             'verifier_form_name': names[factorType]['verifier_form_name'],
             'show_warehouse': factorType != 'sale',
             'hide_factor': hide_factor,
             'hide_expenses': hide_expenses,
             'summarized': summarized,
             'hide_remain': hide_remain,
-            'hide_prices': hide_prices
+            'hide_prices': hide_prices,
+            'pre_factor': pre_factor
         }
         return self.export(request, export_type, *args, **kwargs)
 

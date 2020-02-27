@@ -18,7 +18,7 @@
             </h3>
         </div>
         <div class="row">
-            <div class="col-xs-12 text-center">
+            <div class="col-xs-12 text-center" style="font-size: 1.3em">
                 {{ form_name }}
             </div>
         </div>
@@ -46,7 +46,7 @@
                     <span>فروشنده: </span>
                     <span> {{ company.name }} </span>
                 </div>
-                {% if not summarized %}
+                {% if not summarized and not pre_factor %}
                     <div class="col-xs-3">
                         <span> کد اقتصادی: </span>
                         <span> {{ company.eghtesadi_code | default:'-' }} </span>
@@ -80,7 +80,7 @@
                         <span> {{ factor.account }} </span>
                     {% endif %}
                 </div>
-                {% if not summarized %}
+                {% if not summarized and not pre_factor %}
                     <div class="col-xs-3">
                         <span> کد اقتصادی: </span>
                         <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
@@ -228,7 +228,7 @@
         </div>
     {% endif %}
 
-    {% if not hide_prices and not hide_expenses and factor.expenses.all %}
+    {% if not hide_prices and not hide_expenses and not pre_factor and factor.expenses.all %}
         <div class="break-after"></div>
 
         <div class="row form-header">
