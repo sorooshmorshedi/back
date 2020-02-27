@@ -65,7 +65,7 @@ class Ware(BaseModel):
     explanation = models.CharField(max_length=255, blank=True, null=True)
     isDisabled = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=24, decimal_places=0)
-    pricingType = models.IntegerField(choices=PRICING_TYPES)
+    pricingType = models.IntegerField(choices=PRICING_TYPES, null=True, blank=True)
     minSale = models.IntegerField(blank=True, null=True)
     maxSale = models.IntegerField(blank=True, null=True)
     minInventory = models.IntegerField(blank=True, null=True)
@@ -75,9 +75,11 @@ class Ware(BaseModel):
     updated_at = jmodels.jDateField(auto_now_add=True)
 
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
+
+    isService = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
