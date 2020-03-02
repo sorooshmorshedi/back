@@ -3,6 +3,7 @@ from rest_framework import serializers
 from accounts.accounts.models import Account
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
+from cheques.serializers import ChequebookListRetrieveSerializer
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorSerializer
 from sanads.sanads.serializers import SanadSerializer
@@ -39,6 +40,13 @@ class TransactionListSerializer(serializers.ModelSerializer):
 
 class ChequeListSerializer(serializers.ModelSerializer):
     account = AccountSimpleSerializer(read_only=True, many=False)
+    chequebook = ChequebookListRetrieveSerializer(read_only=True, many=False)
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj: Cheque):
+        if not obj.chequebook:
+            return "{} - {} - {}".format(obj.serial, obj.account.title, obj.explanation)
+        return "{} - {} - {}".format(obj.serial, obj.chequebook.account.title, obj.chequebook.explanation)
 
     class Meta:
         model = Cheque

@@ -42,6 +42,10 @@ class ChequeFilter(filters.FilterSet):
             'status': ['exact'],
             'bankName': ['icontains'],
             'type': ['exact'],
+            'received_or_paid': ['exact'],
+            'chequebook__id': ['exact'],
+            'chequebook__explanation': ['icontains'],
+            'chequebook__account__name': ['icontains'],
         }
         filter_overrides = {
             jmodels.jDateField: {
