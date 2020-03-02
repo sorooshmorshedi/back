@@ -15,8 +15,8 @@ def statusChangeSanad(sender, instance, created, **kwargs):
     sanad = instance.sanad
     if not sanad:
         return
-    if not created:
-        clearSanad(sanad)
+
+    clearSanad(sanad)
 
     due = "/".join(str(cheque.due).split("-"))
 

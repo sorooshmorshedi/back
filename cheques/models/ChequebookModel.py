@@ -1,4 +1,5 @@
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
@@ -29,7 +30,7 @@ class Chequebook(BaseModel):
 
     def save(self, *args, **kwargs):
 
-        created = self.id
+        created = not self.id
         res = super(Chequebook, self).save(*args, **kwargs)
 
         if created:
@@ -49,11 +50,18 @@ class Chequebook(BaseModel):
                 serial=i,
                 status='blank',
                 received_or_paid=Cheque.PAID,
+                account=self.account,
+                floatAccount=self.floatAccount,
                 bankName=bank.name,
                 branchName=bank.branch,
                 accountNumber=bank.accountNumber,
                 financial_year=self.financial_year
             )
+
+    def is_deletable(self, raise_exception=False):
+        for cheque in self.cheques.all():
+            if cheque.status != 'blank':
+                raise ValidationError("برای ویرایش یا حذف دسته چک، باید وضعیت همه چک های آن سفید باشد")
 
     @staticmethod
     def newCode(user):

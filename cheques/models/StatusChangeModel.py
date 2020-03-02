@@ -23,6 +23,8 @@ class StatusChange(BaseModel):
 
     date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True)
+
+    # not used
     transferNumber = models.IntegerField(null=True)
 
     fromStatus = models.CharField(max_length=30, choices=CHEQUE_STATUSES)
@@ -44,8 +46,12 @@ class StatusChange(BaseModel):
             cheque = self.cheque
             fromStatus = self.fromStatus
             if not cheque.has_transaction or not fromStatus == 'blank':
-                sanad = Sanad(code=newSanadCode(user), date=self.date,
-                              createType=Sanad.AUTO, financial_year=user.active_financial_year)
+                sanad = Sanad(
+                    code=newSanadCode(user),
+                    date=self.date,
+                    createType=Sanad.AUTO,
+                    financial_year=user.active_financial_year
+                )
                 sanad.save()
                 self.sanad = sanad
                 self.save()

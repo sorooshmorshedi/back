@@ -1,6 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
+from accounts.defaultAccounts.models import getDA
 from cheques.models.ChequebookModel import Chequebook
 from companies.models import FinancialYear
 from helpers.models import BaseModel
@@ -80,18 +81,106 @@ class Cheque(BaseModel):
 
     def save(self, *args, **kwargs):
         res = super(Cheque, self).save(*args, **kwargs)
-        if not self.id:
-            if self.has_transaction:
-                from sanads.transactions.models import TransactionItem
-                try:
-                    transaction_item = TransactionItem.objects.get(cheque=self)
-                except TransactionItem.DoesNotExist:
-                    return
-                transaction_item.documentNumber = self.serial
-                transaction_item.date = self.date
-                transaction_item.due = self.due
-                transaction_item.explanation = self.explanation
-                transaction_item.value = self.value
-                transaction_item.save()
+        if self.has_transaction:
+            from sanads.transactions.models import TransactionItem
+            try:
+                transaction_item = TransactionItem.objects.get(cheque=self)
+            except TransactionItem.DoesNotExist:
+                return
+            transaction_item.documentNumber = self.serial
+            transaction_item.date = self.date
+            transaction_item.due = self.due
+            transaction_item.explanation = self.explanation
+            transaction_item.value = self.value
+            transaction_item.save()
+
+        if not self.lastAccount:
+            self.lastAccount = self.account
+            self.lastFloatAccount = self.floatAccount
+
         return res
 
+    def changeStatus(self, user, date, to_status, account: Account = None, floatAccount: floatAccount = None,
+                     explanation='', sanad=None):
+        data = {
+            'cheque': self.id,
+            'fromStatus': self.status,
+            'toStatus': to_status,
+            'financial_year': user.active_financial_year.id,
+            'date': date,
+            'explanation': explanation
+        }
+
+        if sanad:
+            data['sanad'] = sanad.id
+
+        lastFloatAccount = None
+
+        if self.received_or_paid == Cheque.RECEIVED:
+
+            data['besAccount'] = self.lastAccount.id
+            if self.lastFloatAccount:
+                data['besFloatAccount'] = self.lastFloatAccount.id
+
+            if to_status == 'revoked' or to_status == 'bounced':
+                lastAccount = self.account
+                data['bedAccount'] = self.account.id
+                if self.floatAccount:
+                    lastFloatAccount = self.floatAccount
+                    data['bedFloatAccount'] = self.floatAccount.id
+
+            elif to_status == 'notPassed':
+                lastAccount = getDA('receivedCheque', user).account
+                data['bedAccount'] = lastAccount.id
+
+            else:
+                lastAccount = account
+                data['bedAccount'] = account.id
+                if floatAccount:
+                    lastFloatAccount = floatAccount
+                    data['bedFloatAccount'] = floatAccount.id
+
+        else:
+
+            data['bedAccount'] = self.lastAccount.id
+            if self.lastFloatAccount:
+                data['bedFloatAccount'] = self.lastFloatAccount.id
+
+            if to_status == 'revoked' or to_status == 'bounced':
+                lastAccount = self.account
+                data['besAccount'] = self.account.id
+                if self.floatAccount:
+                    lastFloatAccount = self.floatAccount
+                    data['besFloatAccount'] = self.floatAccount.id
+
+            elif to_status == 'passed':
+                lastAccount = self.chequebook.account
+                data['besAccount'] = self.chequebook.account.id
+                if self.chequebook.floatAccount:
+                    lastFloatAccount = self.chequebook.floatAccount
+                    data['besFloatAccount'] = self.chequebook.floatAccount.id
+
+            elif to_status == 'notPassed':
+                lastAccount = getDA('paidCheque', user).account
+                data['besAccount'] = lastAccount.id
+
+            else:
+                lastAccount = account
+                data['besAccount'] = account.id
+                if floatAccount:
+                    lastFloatAccount = floatAccount
+                    data['besFloatAccount'] = floatAccount.id
+
+        from cheques.serializers import StatusChangeSerializer
+        serialized = StatusChangeSerializer(data=data)
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        self.lastAccount = lastAccount
+        self.lastFloatAccount = lastFloatAccount
+        self.status = to_status
+        self.save()
+
+        serialized.instance.createSanad(user)
+
+        return serialized.data
