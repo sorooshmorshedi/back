@@ -4,7 +4,7 @@ from accounts.accounts.models import Account, FloatAccount
 from cheques.models.ChequeModel import Cheque, CHEQUE_STATUSES
 from companies.models import FinancialYear
 from helpers.models import BaseModel
-from sanads.sanads.models import Sanad, newSanadCode
+from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class StatusChange(BaseModel):
@@ -22,7 +22,7 @@ class StatusChange(BaseModel):
                                         related_name='chequeStatusChangesAsBesFloatAccount', blank=True, null=True)
 
     date = jmodels.jDateField()
-    explanation = models.CharField(max_length=255, blank=True)
+    explanation = models.CharField(max_length=255, blank=True, null=True)
 
     # not used
     transferNumber = models.IntegerField(null=True)
@@ -41,7 +41,7 @@ class StatusChange(BaseModel):
         verbose_name = 'تغییر وضعیت'
         ordering = ['id', ]
 
-    def createSanad(self, user):
+    def _createSanad(self, user):
         if not self.sanad:
             cheque = self.cheque
             fromStatus = self.fromStatus
@@ -55,3 +55,63 @@ class StatusChange(BaseModel):
                 sanad.save()
                 self.sanad = sanad
                 self.save()
+
+                return sanad
+
+    def updateSanad(self, user):
+        value = self.cheque.value
+        cheque = self.cheque
+
+        if cheque.has_transaction and self.fromStatus == 'blank':
+            return
+
+        sanad = self.sanad
+        if not sanad:
+            sanad = self._createSanad(user)
+
+        clearSanad(sanad)
+
+        due = "/".join(str(cheque.due).split("-"))
+
+        sanad.explanation = cheque.explanation
+        sanad.date = cheque.date
+
+        if cheque.received_or_paid == Cheque.PAID:
+            received_or_paid = 'پرداخت'
+        else:
+            received_or_paid = 'دریافت'
+
+        if self.toStatus == 'notPassed' and self.fromStatus != 'inFlow':
+            explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} از {3}".format(received_or_paid, cheque.serial,
+                                                                                    due, cheque.account.name)
+        else:
+            newStatus = self.toStatus
+            if self.fromStatus == 'inFlow' and newStatus in ('notPassed', 'bounced'):
+                newStatus = 'revokeInFlow'
+            statuses = {
+                'revokeInFlow': 'ابطال در جریان قرار دادن',
+                'inFlow': 'در جریان قرار دادن',
+                'passed': 'وصول',
+                'bounced': 'برگشت',
+                'cashed': 'نقد',
+                'revoked': 'ابطال',
+                'transferred': 'انتقال چک',
+            }
+            explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} ".format(statuses[newStatus], cheque.serial, due)
+
+        sanad.items.create(
+            bed=value,
+            explanation=explanation,
+            account=self.bedAccount,
+            floatAccount=self.bedFloatAccount,
+            financial_year=sanad.financial_year
+        )
+        sanad.items.create(
+            bes=value,
+            explanation=explanation,
+            account=self.besAccount,
+            floatAccount=self.besFloatAccount,
+            financial_year=sanad.financial_year
+        )
+        sanad.type = 'temporary'
+        sanad.save()

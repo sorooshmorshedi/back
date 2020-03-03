@@ -9,7 +9,6 @@ from .views import *
 
 router = DefaultRouter()
 router.register(r'sanadItems', SanadItemListCreate, base_name='sanad-item')
-router.register(r'transactionItems', TransactionItemModelView, base_name='transaction-item')
 
 urlpatterns = router.urls + [
 
@@ -25,5 +24,4 @@ urlpatterns = router.urls + [
     url(r'^transactions/(?P<pk>[0-9]+)$', TransactionDetail.as_view(), name=''),
     url(r'^transactions/newCodes$', newCodeForTransaction, name=''),
     url(r'^transactions/getTransactionByCode$', getTransactionByCode, name=''),
-    url(r'^transactionItems/mass$', TransactionItemMass.as_view(), name=''),
 ]

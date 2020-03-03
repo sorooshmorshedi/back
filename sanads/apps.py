@@ -6,3 +6,4 @@ class SanadConfig(AppConfig):
 
     def create(self):
         import sanads.sanads.signals
+        import sanads.transactions.signals

@@ -11,6 +11,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
         default_permissions = ()
+        ordering = ['pk']
 
     objects = BaseManager()
 

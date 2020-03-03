@@ -2,15 +2,14 @@ from django.db.models import Count, Q, F
 from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics
 from rest_framework import status
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factors.helpers import getInventoryCount
-from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
-from wares.models import *
+from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
+    RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
+from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
 from wares.serializers import *
 
 
@@ -109,16 +108,16 @@ class WareInventoryView(APIView):
         from factors.models import Factor
         qs = Warehouse.objects.inFinancialYear(user) \
             .annotate(
-                input_count=Coalesce(Sum('factorItems__count', default=0,
-                                         filter=Q(factorItems__factor__type__in=Factor.INPUT_GROUP,
-                                                  factorItems__ware=ware,
-                                                  factorItems__factor__is_definite=True)), 0),
-                output_count=Coalesce(Sum('factorItems__count', default=0,
-                                          filter=Q(factorItems__factor__type__in=Factor.OUTPUT_GROUP,
-                                                   factorItems__ware=ware,
-                                                   factorItems__factor__is_definite=True)), 0),
-                remain_count=F('input_count')-F('output_count')
-            )
+            input_count=Coalesce(Sum('factorItems__count', default=0,
+                                     filter=Q(factorItems__factor__type__in=Factor.INPUT_GROUP,
+                                              factorItems__ware=ware,
+                                              factorItems__factor__is_definite=True)), 0),
+            output_count=Coalesce(Sum('factorItems__count', default=0,
+                                      filter=Q(factorItems__factor__type__in=Factor.OUTPUT_GROUP,
+                                               factorItems__ware=ware,
+                                               factorItems__factor__is_definite=True)), 0),
+            remain_count=F('input_count') - F('output_count')
+        )
 
         for warehouse in qs.all():
             res.append({

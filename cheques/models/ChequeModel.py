@@ -83,20 +83,19 @@ class Cheque(BaseModel):
         res = super(Cheque, self).save(*args, **kwargs)
         if self.has_transaction:
             from sanads.transactions.models import TransactionItem
-            try:
-                transaction_item = TransactionItem.objects.get(cheque=self)
-            except TransactionItem.DoesNotExist:
-                return
-            transaction_item.documentNumber = self.serial
-            transaction_item.date = self.date
-            transaction_item.due = self.due
-            transaction_item.explanation = self.explanation
-            transaction_item.value = self.value
-            transaction_item.save()
+            transaction_item = TransactionItem.objects.filter(cheque=self).first()
+            if transaction_item:
+                transaction_item.documentNumber = self.serial
+                transaction_item.date = self.date
+                transaction_item.due = self.due
+                transaction_item.explanation = self.explanation
+                transaction_item.value = self.value
+                transaction_item.save()
 
         if not self.lastAccount:
             self.lastAccount = self.account
             self.lastFloatAccount = self.floatAccount
+            res = self.save()
 
         return res
 
@@ -181,6 +180,4 @@ class Cheque(BaseModel):
         self.status = to_status
         self.save()
 
-        serialized.instance.createSanad(user)
-
-        return serialized.data
+        return serialized.instance

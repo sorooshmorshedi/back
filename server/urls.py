@@ -23,7 +23,7 @@ from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 # existing serializer, viewset, router registrations code
-from helpers.views import TestView
+from helpers.views.TestView import TestView
 
 ...
 

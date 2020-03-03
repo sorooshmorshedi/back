@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, FloatAccount
 from cheques.serializers import *
+from sanads.sanads.models import clearSanad
 
 
 class ChequebookModelView(viewsets.ModelViewSet):
@@ -83,6 +84,13 @@ class SubmitChequeApiView(APIView):
         user = self.request.user
         data = request.data
 
+        cheque = self.submitCheque(user, data)
+
+        return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
+
+    @staticmethod
+    def submitCheque(user, data):
+
         received_or_paid = data.get('received_or_paid')
 
         if received_or_paid == Cheque.RECEIVED:
@@ -99,14 +107,16 @@ class SubmitChequeApiView(APIView):
 
         cheque = serializer.instance
 
-        cheque.changeStatus(
+        status_change = cheque.changeStatus(
             user=user,
             date=cheque.date,
             to_status='notPassed',
             explanation=cheque.explanation,
         )
 
-        return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
+        status_change.updateSanad(user)
+
+        return cheque
 
 
 class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
@@ -120,6 +130,15 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
         if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
             return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
                             status=status.HTTP_400_BAD_REQUEST)
+
+        user = self.request.user
+        if instance.has_transaction:
+            transaction_item = instance.transactionItem
+            transaction = transaction_item.transaction
+
+            transaction_item.delete()
+            transaction.updateSanad(user)
+
         return super(ChequeApiView, self).perform_destroy(instance)
 
     def update(self, request, *args, **kwargs):
@@ -141,13 +160,14 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
 
         statusChanges.delete()
 
-        cheque.changeStatus(
+        status_change = cheque.changeStatus(
             user=user,
             date=cheque.date,
             to_status='notPassed',
             explanation=cheque.explanation,
             sanad=sanad
         )
+        status_change.updateSanad(user)
 
         return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
 
@@ -196,6 +216,8 @@ class ChequeByPositionApiView(APIView):
 
 class ChangeChequeStatus(APIView):
     def post(self, request, pk):
+        user = request.user
+
         data = request.data
         queryset = Cheque.objects.inFinancialYear(request.user)
         cheque = get_object_or_404(queryset, pk=pk)
@@ -206,7 +228,7 @@ class ChangeChequeStatus(APIView):
         floatAccount = FloatAccount.objects.filter(pk=data.get('floatAccount')).first()
         explanation = data.get('explanation')
 
-        status_change_data = cheque.changeStatus(
+        status_change = cheque.changeStatus(
             user=request.user,
             date=date,
             to_status=to_status,
@@ -214,8 +236,9 @@ class ChangeChequeStatus(APIView):
             floatAccount=floatAccount,
             explanation=explanation,
         )
+        status_change.updateSanad(user)
 
-        return Response(status_change_data, status=status.HTTP_200_OK)
+        return Response(StatusChangeListRetrieveSerializer(instance=status_change).data, status=status.HTTP_200_OK)
 
 
 class StatusChangeView(generics.RetrieveDestroyAPIView):
@@ -223,6 +246,53 @@ class StatusChangeView(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         return StatusChange.objects.inFinancialYear(self.request.user)
+
+    def perform_destroy(self, instance: StatusChange):
+
+        user = self.request.user
+        cheque = instance.cheque
+
+        last_status_change_id = StatusChange.objects.filter(cheque=cheque).latest('id').id
+
+        if instance.id != last_status_change_id:
+            raise serializers.ValidationError("ابتدا تغییرات جلوتر را پاک کنید")
+
+        if cheque.statusChanges.count() == 1:
+            if cheque.received_or_paid == Cheque.RECEIVED:
+                raise ValidationError("حذف اولین تغییر وضعیت چک دریافتی امکان پذیر نیست")
+            else:
+                cheque.account = None
+                cheque.floatAccount = None
+                cheque.value = None
+                cheque.due = None
+                cheque.date = None
+                cheque.explanation = ''
+                cheque.lastAccount = None
+                cheque.lastFloatAccount = None
+
+        if cheque.has_transaction:
+            cheque.has_transaction = False
+            transaction_item = cheque.transactionItem
+            transaction_item.delete()
+            transaction_item.transaction.updateSanad(user)
+        else:
+            clearSanad(instance.sanad)
+
+        cheque.status = instance.fromStatus
+
+        if cheque.received_or_paid == Cheque.RECEIVED:
+            lastAccount = instance.besAccount
+            lastFloatAccount = instance.besFloatAccount
+        else:
+            lastAccount = instance.bedAccount
+            lastFloatAccount = instance.bedFloatAccount
+
+        cheque.lastAccount = lastAccount
+        cheque.lastFloatAccount = lastFloatAccount
+
+        cheque.save()
+
+        instance.delete()
 
 
 @api_view(['post'])

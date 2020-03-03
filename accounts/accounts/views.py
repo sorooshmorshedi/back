@@ -11,7 +11,9 @@ from rest_framework.response import Response
 
 from accounts.accounts.serializers import *
 from helpers.auth import BasicCRUDPermission
-from helpers.views import ListCreateAPIViewWithAutoFinancialYear, RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
+from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
+    RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
+from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
 
 
 @method_decorator(csrf_exempt, name='dispatch')
