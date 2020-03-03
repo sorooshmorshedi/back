@@ -28,5 +28,5 @@ def updateAccountBalanceOnDelete(sender, instance: SanadItem, **kwargs):
     account.save()
 
 
-signals.pre_save.connect(receiver=updateAccountBalanceOnSave(), sender=SanadItem)
-signals.pre_delete.connect(receiver=updateAccountBalanceOnDelete(), sender=SanadItem)
+signals.pre_save.connect(receiver=updateAccountBalanceOnSave, sender=SanadItem)
+signals.pre_delete.connect(receiver=updateAccountBalanceOnDelete, sender=SanadItem)

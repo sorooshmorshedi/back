@@ -2,8 +2,8 @@ from django.apps import AppConfig
 
 
 class SanadConfig(AppConfig):
-    name = 'sanad'
+    name = 'sanads'
 
-    def create(self):
+    def ready(self):
         import sanads.sanads.signals
         import sanads.transactions.signals

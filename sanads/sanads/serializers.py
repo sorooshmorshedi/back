@@ -8,21 +8,18 @@ from sanads.transactions.models import Transaction
 
 
 class SanadItemSerializer(serializers.ModelSerializer):
-
-    def __init__(self, *args, **kwargs):
-        many = kwargs.pop('many', True)
-        super(SanadItemSerializer, self).__init__(many=many, *args, **kwargs)
-
     class Meta:
         model = SanadItem
         fields = '__all__'
+        read_only_fields = ('financial_year', 'code')
 
     def validate(self, data):
         if data['account'].level != 3:
             raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
         if data['account'].floatAccountGroup:
             if 'floatAccount' not in data or not data['floatAccount']:
-                raise serializers.ValidationError("حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
+                raise serializers.ValidationError(
+                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
             if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
                 raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
 
@@ -51,6 +48,7 @@ class SanadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
         fields = '__all__'
+        read_only_fields = ('financial_year', 'code')
 
     def update(self, instance, validated_data):
         if instance.createType == 'auto':
@@ -59,14 +57,12 @@ class SanadSerializer(serializers.ModelSerializer):
 
 
 class FactorWithTypeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Factor
         fields = ('id', 'type')
 
 
 class TransactionWithTypeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Transaction
         fields = ('id', 'type')
@@ -79,5 +75,3 @@ class SanadListRetrieveSerializer(SanadSerializer):
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'
-
-

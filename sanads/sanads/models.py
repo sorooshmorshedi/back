@@ -1,4 +1,3 @@
-from decimal import Decimal
 from django.db.models import signals
 from django.db import models
 from accounts.accounts.models import Account, FloatAccount
@@ -6,6 +5,7 @@ from accounts.costCenters.models import CostCenter
 from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
+from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.models import BaseModel
 
 
@@ -45,6 +45,32 @@ class Sanad(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+
+    def check_account_balance_confirmations(self, request):
+        user = request.user
+
+        is_confirmed = request.data.get('_confirmed', False)
+        if is_confirmed:
+            return
+
+        for item in self.items.all():
+            account = item.account
+
+            balance = account.bed - account.bes
+
+            if balance > 0:
+                if account.max_bed and account.max_bed < balance:
+                    raise ConfirmationError("بدهکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
+                        account.title,
+                        account.max_bed
+                    ))
+            else:
+                balance = -balance
+                if account.max_bes and account.max_bes < balance:
+                    raise ConfirmationError("بستانکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
+                        account.title,
+                        account.max_bes
+                    ))
 
 
 class SanadItem(BaseModel):

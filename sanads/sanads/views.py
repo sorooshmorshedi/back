@@ -1,14 +1,13 @@
-from django.template.backends import django
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics
 from rest_framework import status
-from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.views import APIView
+
+from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.serializers import *
 
 
@@ -26,9 +25,29 @@ class SanadListCreate(generics.ListCreateAPIView):
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        request.data['financial_year'] = request.user.active_financial_year.id
-        request.data['code'] = newSanadCode(request.user)
-        return super().create(request, *args, **kwargs)
+        user = request.user
+        data = request.data
+        sanad_data = data.get('sanad')
+        items_data = data.get('items')
+
+        serializer = SanadSerializer(data=sanad_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            financial_year=user.active_financial_year,
+            code=newSanadCode(user)
+        )
+
+        MassRelatedCUD(
+            user,
+            items_data.get('items'),
+            items_data.get('ids_to_delete'),
+            'sanad',
+            serializer.instance.id,
+            SanadItemSerializer,
+            SanadItemSerializer,
+        ).sync()
+
+        return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
 
 class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -44,66 +63,27 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = SanadListRetrieveSerializer(sanad)
         return Response(serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        user = request.user
+        data = request.data
+        sanad_data = data.get('sanad')
+        items_data = data.get('items')
 
-class SanadItemListCreate(viewsets.ModelViewSet):
-    # permission_classes = (IsAuthenticated, RPTypeListCreate,)
-    serializer_class = SanadItemSerializer
+        serializer = SanadSerializer(instance=self.get_object(), data=sanad_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    def get_queryset(self):
-        return Sanad.objects.inFinancialYear(self.request.user)
+        MassRelatedCUD(
+            user,
+            items_data.get('items'),
+            items_data.get('ids_to_delete'),
+            'sanad',
+            serializer.instance.id,
+            SanadItemSerializer,
+            SanadItemSerializer,
+        ).sync()
 
-    def create(self, request):
-        if type(request.data) is not list:
-            request.data['financial_year'] = request.user.active_financial_year.id
-            return super().create(request)
-        data = []
-        for item in request.data:
-            item['financial_year'] = request.user.active_financial_year.id
-            data.append(item)
-        serialized = self.serializer_class(data=data, many=True)
-        if serialized.is_valid():
-            serialized.save()
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def list(self, request, *ergs, **kwargs):
-        queryset = self.get_queryset()
-        serializer = SanadItemListRetrieveSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class SanadItemMass(APIView):
-    serializer_class = SanadItemSerializer
-
-    def put(self, request):
-        for item in request.data:
-            instance = SanadItem.objects.inFinancialYear(request.user).get(id=item['id'])
-            serialized = SanadItemSerializer(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
-            else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serialized.data, status=status.HTTP_200_OK)
-
-    def delete(self, request):
-        for itemId in request.data:
-            instance = SanadItem.objects.inFinancialYear(request.user).get(id=itemId)
-            instance.delete()
-        return Response([], status=status.HTTP_200_OK)
-
-
-class SanadItemDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeDetail,)
-    serializer_class = SanadItemSerializer
-
-    def get_queryset(self):
-        return Sanad.objects.inFinancialYear(self.request.user)
-
-    def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
-        sanadItem = get_object_or_404(queryset, pk=pk)
-        serializer = SanadItemListRetrieveSerializer(sanadItem)
-        return Response(serializer.data)
+        return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
 
 
 @api_view(['get'])
@@ -121,4 +101,3 @@ def getSanadByCode(request):
     sanad = get_object_or_404(queryset, code=code)
     serializer = SanadListRetrieveSerializer(sanad)
     return Response(serializer.data)
-
