@@ -450,8 +450,26 @@ class DefiniteFactor(APIView):
         elif factor.type == Factor.BACK_FROM_BUY:
             DefiniteFactor.submitBackFromBuySanadItems(user, factor, explanation)
 
-        DefiniteFactor.submitDiscountSanadItems(user, factor, rowTypeOne, rowTypeTwo, account, explanation)
-        DefiniteFactor.submitTaxSanadItems(user, factor, rowTypeOne, rowTypeTwo, explanation)
+        DefiniteFactor.submitDiscountSanadItems(
+            user,
+            factor,
+            first_row_bed,
+            first_row_bes,
+            second_row_bed,
+            second_row_bes,
+            account,
+            explanation
+        )
+        DefiniteFactor.submitTaxSanadItems(
+            user,
+            factor,
+            first_row_bed,
+            first_row_bes,
+            second_row_bed,
+            second_row_bes,
+            account,
+            explanation
+        )
         DefiniteFactor.submitExpenseSanadItems(factor, explanation)
 
         factor.is_definite = True
