@@ -114,7 +114,11 @@ class SubmitChequeApiView(APIView):
             explanation=cheque.explanation,
         )
 
-        status_change.updateSanad(user)
+        sanad = status_change.updateSanad(user)
+
+        is_confirmed = data.get('_confirmed')
+        if sanad and not is_confirmed:
+            sanad.check_account_balance_confirmations()
 
         return cheque
 
@@ -123,23 +127,6 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = Cheque.objects.all()
     serializer_class = ChequeListRetrieveSerializer
-
-    def perform_destroy(self, instance):
-        if instance.received_or_paid == Cheque.PAID:
-            return Response(['چک پرداختی غیر قابل حذف می باشد'], status=status.HTTP_400_BAD_REQUEST)
-        if instance.status != 'notPassed' or instance.statusChanges.count() != 1:
-            return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        user = self.request.user
-        if instance.has_transaction:
-            transaction_item = instance.transactionItem
-            transaction = transaction_item.transaction
-
-            transaction_item.delete()
-            transaction.updateSanad(user)
-
-        return super(ChequeApiView, self).perform_destroy(instance)
 
     def update(self, request, *args, **kwargs):
 
@@ -167,20 +154,42 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
             explanation=cheque.explanation,
             sanad=sanad
         )
-        status_change.updateSanad(user)
+        sanad = status_change.updateSanad(user)
+
+        is_confirmed = request.data.get('_confirmed')
+        if not is_confirmed:
+            sanad.check_account_balance_confirmations()
 
         return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         cheque = self.get_object()
 
-        if cheque.statusChanges.count() > 1:
-            raise ValidationError("ابتدا تغییر وضعیت ها را پاک کنید")
-
         if cheque.received_or_paid == Cheque.PAID:
             raise ValidationError("چک پرداختی غیر قابل حذف می باشد")
 
+        if cheque.status != 'notPassed' or cheque.statusChanges.count() != 1:
+            return Response(['برای حذف چک باید ابتدا تغییر وضعیت های آن ها را پاک کنید'],
+                            status=status.HTTP_400_BAD_REQUEST)
+
         return super(ChequeApiView, self).destroy(request, *args, **kwargs)
+
+    def perform_destroy(self, instance: Cheque):
+
+        user = self.request.user
+        if instance.has_transaction:
+            transaction_item = instance.transactionItem
+            transaction = transaction_item.transaction
+
+            transaction_item.delete()
+            transaction.updateSanad(user)
+        else:
+            status_change = instance.statusChanges.first()
+            if status_change:
+                sanad = status_change.sanad
+                clearSanad(sanad)
+
+        return super(ChequeApiView, self).perform_destroy(instance)
 
 
 class ChequeByPositionApiView(APIView):
@@ -236,7 +245,11 @@ class ChangeChequeStatus(APIView):
             floatAccount=floatAccount,
             explanation=explanation,
         )
-        status_change.updateSanad(user)
+        sanad = status_change.updateSanad(user)
+
+        is_confirmed = data.get('_confirmed')
+        if not is_confirmed:
+            sanad.check_account_balance_confirmations()
 
         return Response(StatusChangeListRetrieveSerializer(instance=status_change).data, status=status.HTTP_200_OK)
 

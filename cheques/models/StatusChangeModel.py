@@ -63,7 +63,7 @@ class StatusChange(BaseModel):
         cheque = self.cheque
 
         if cheque.has_transaction and self.fromStatus == 'blank':
-            return
+            return None
 
         sanad = self.sanad
         if not sanad:
@@ -115,3 +115,5 @@ class StatusChange(BaseModel):
         )
         sanad.type = 'temporary'
         sanad.save()
+
+        return sanad

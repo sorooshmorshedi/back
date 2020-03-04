@@ -46,12 +46,7 @@ class Sanad(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
 
-    def check_account_balance_confirmations(self, request):
-        user = request.user
-
-        is_confirmed = request.data.get('_confirmed', False)
-        if is_confirmed:
-            return
+    def check_account_balance_confirmations(self):
 
         for item in self.items.all():
             account = item.account

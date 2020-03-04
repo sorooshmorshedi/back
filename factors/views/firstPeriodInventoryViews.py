@@ -102,5 +102,9 @@ class FirstPeriodInventoryView(APIView):
             financial_year=request.user.active_financial_year
         )
 
+        is_confirmed = data.get('_confirmed')
+        if not is_confirmed:
+            sanad.check_account_balance_confirmations()
+
         res = Response(FactorSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res

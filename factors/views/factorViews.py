@@ -114,7 +114,8 @@ class FactorModelView(viewsets.ModelViewSet):
         self.sync_expenses(user, factor, data)
 
         if factor.is_definite:
-            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=False)
+            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=False,
+                                          is_confirmed=request.data.get('_confirmed'))
 
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
@@ -383,12 +384,12 @@ class DefiniteFactor(APIView):
 
     def post(self, request, pk):
         user = request.user
-        factor = DefiniteFactor.definiteFactor(user, pk)
+        factor = DefiniteFactor.definiteFactor(user, pk, is_confirmed=request.data.get('_confirmed'))
         return Response(FactorListRetrieveSerializer(factor).data)
 
     @staticmethod
     @transaction.atomic()
-    def definiteFactor(user, pk, perform_inventory_check=True):
+    def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(user), pk=pk)
 
         # Check Inventory
@@ -477,6 +478,9 @@ class DefiniteFactor(APIView):
         factor.definition_date = now()
         factor.sanad = sanad
         factor.save()
+
+        if not is_confirmed:
+            sanad.check_account_balance_confirmations()
 
         return factor
 

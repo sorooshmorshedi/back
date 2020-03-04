@@ -47,6 +47,10 @@ class SanadListCreate(generics.ListCreateAPIView):
             SanadItemSerializer,
         ).sync()
 
+        is_confirmed = data.get('_confirmed')
+        if not is_confirmed:
+            serializer.instance.check_account_balance_confirmations()
+
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
 
@@ -82,6 +86,10 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
             SanadItemSerializer,
             SanadItemSerializer,
         ).sync()
+
+        is_confirmed = data.get('_confirmed')
+        if not is_confirmed:
+            serializer.instance.check_account_balance_confirmations()
 
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
 
