@@ -143,23 +143,24 @@ class FactorModelView(viewsets.ModelViewSet):
             if for_delete:
                 is_output = not is_output
 
-            balance = ware.get_balance(warehouse)
-            if is_output:
-                if ware.minInventory and balance - count < ware.minInventory:
-                    confirmations.append("حداقل موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
-                        ware.name,
-                        ware.minInventory,
-                        ware.unit.name,
-                        balance
-                    ))
-            else:
-                if ware.maxInventory and balance + count > ware.maxInventory:
-                    confirmations.append("حداکثر موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
-                        ware.name,
-                        ware.minInventory,
-                        ware.unit.name,
-                        balance
-                    ))
+            if not ware.isService:
+                balance = ware.get_balance(warehouse)
+                if is_output:
+                    if ware.minInventory and balance - count < ware.minInventory:
+                        confirmations.append("حداقل موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
+                            ware.name,
+                            ware.minInventory,
+                            ware.unit.name,
+                            balance
+                        ))
+                else:
+                    if ware.maxInventory and balance + count > ware.maxInventory:
+                        confirmations.append("حداکثر موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
+                            ware.name,
+                            ware.minInventory,
+                            ware.unit.name,
+                            balance
+                        ))
 
         if len(confirmations):
             raise ConfirmationError(confirmations)
@@ -372,6 +373,9 @@ def check_inventory(user, factor_items, consider_old_count):
             warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['warehouse'])
             count = Decimal(item['count'])
 
+        if ware.isService:
+            continue
+
         for inventory in inventories:
             if inventory['ware'] == ware and inventory['warehouse'] == warehouse:
                 inventory['remain'] -= count
@@ -409,15 +413,15 @@ class DefiniteFactor(APIView):
         second_row_bes = 0
 
         if factor.type in Factor.SALE_GROUP:
-            first_row_bed = factor.sum()
-            second_row_bes = factor.sum()
+            first_row_bed = factor.sum
+            second_row_bes = factor.sum
             if factor.type == Factor.SALE:
                 account = 'sale'
             else:
                 account = 'backFromBuy'
         else:
-            first_row_bes = factor.sum()
-            second_row_bes = factor.sum()
+            first_row_bes = factor.sum
+            second_row_bes = factor.sum
             if factor.type == Factor.BUY:
                 account = 'buy'
             else:
@@ -527,6 +531,9 @@ class DefiniteFactor(APIView):
     def setFactorItemsRemains(user, factor):
         prev_items = {}
         for item in factor.items.order_by('id').all():
+
+            if item.ware.isService:
+                continue
 
             ware_id = item.ware.id
             if ware_id in prev_items:

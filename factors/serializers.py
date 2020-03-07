@@ -100,6 +100,15 @@ class FactorItemSerializer(serializers.ModelSerializer):
         model = FactorItem
         fields = '__all__'
 
+    def validate(self, attrs):
+        ware = attrs.get('ware')
+        warehouse = attrs.get('warehouse')
+
+        if not ware.isService and not warehouse:
+            raise serializers.ValidationError("انبار اجباری می باشد")
+
+        return super(FactorItemSerializer, self).validate(attrs)
+
     def update(self, instance, validated_data):
         self.updateWarePrice(validated_data)
         return super(FactorItemSerializer, self).update(instance, validated_data)

@@ -12,6 +12,10 @@ def updateWareBalanceOnSave(sender, instance, **kwargs):
 
     ware = instance.ware
     warehouse = instance.warehouse
+
+    if ware.isService:
+        return
+    
     if instance.id:
         factorItem = FactorItem.objects.get(pk=instance.id)
         change = instance.count - factorItem.count

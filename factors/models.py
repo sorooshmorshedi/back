@@ -28,7 +28,6 @@ class Expense(BaseModel):
 
 
 class Factor(BaseModel):
-
     BUY = 'buy'
     SALE = 'sale'
     BACK_FROM_BUY = 'backFromBuy'
@@ -57,7 +56,8 @@ class Factor(BaseModel):
     code = models.IntegerField(blank=True, null=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True,
+                                     null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
     paidValue = models.DecimalField(default=0, max_digits=24, decimal_places=0)
@@ -208,11 +208,11 @@ class Factor(BaseModel):
 
     @property
     def is_last_definite_factor(self):
-        count = Factor.objects\
+        count = Factor.objects \
             .filter(financial_year=self.financial_year,
                     is_definite=self.is_definite,
                     definition_date__gt=self.definition_date
-                    )\
+                    ) \
             .count()
         if count == 0:
             return True
@@ -257,7 +257,8 @@ class FactorExpense(BaseModel):
     expense = models.ForeignKey(Expense, on_delete=models.PROTECT, related_name='factorExpenses')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='expenses')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpenses')
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenses', blank=True, null=True)
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenses', blank=True,
+                                     null=True)
     value = models.DecimalField(max_digits=24, decimal_places=0)
     explanation = models.CharField(max_length=255, blank=True)
 
@@ -280,7 +281,8 @@ class FactorItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_items')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems', null=True,
+                                  blank=True)
 
     count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
@@ -298,13 +300,13 @@ class FactorItem(BaseModel):
     is_editable = models.BooleanField(default=1)
 
     def __str__(self):
-        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}, total_input: {}, total_output: {}"\
+        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}, total_input: {}, total_output: {}" \
             .format(
-                self.factor.id,
-                self.factor.type,
-                self.factor.is_definite,
-                self.ware,
-                self.count, self.total_input_count, self.total_output_count)
+            self.factor.id,
+            self.factor.type,
+            self.factor.is_definite,
+            self.ware,
+            self.count, self.total_input_count, self.total_output_count)
 
     @property
     def remain_count(self):
@@ -363,4 +365,3 @@ signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
 
 signals.pre_save.connect(receiver=updateWareBalanceOnSave, sender=FactorItem)
 signals.pre_delete.connect(receiver=updateWareBalanceOnDelete, sender=FactorItem)
-
