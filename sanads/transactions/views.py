@@ -1,15 +1,15 @@
-from django.db.models.query import Prefetch
+from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
-from sanads.sanads.models import clearSanad
-from sanads.transactions.models import Transaction, TransactionItem
+from sanads.sanads.models import clearSanad, Sanad
+from sanads.transactions.models import Transaction
 from sanads.transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
 
 
@@ -32,15 +32,23 @@ class TransactionListCreate(generics.ListCreateAPIView):
         data = request.data
         transaction_data = data.get('transaction')
 
+        sanad = Sanad.objects.inFinancialYear(user).filter(code=transaction_data.get('sanad_code')).first()
+
+        if sanad and not sanad.isEmpty:
+            raise ValidationError("سند باید خالی باشد")
+
         serializer = TransactionCreateUpdateSerializer(data=transaction_data)
         serializer.is_valid(raise_exception=True)
         serializer.save(
             financial_year=user.active_financial_year,
-            code=Transaction.newCodes(request.user, transaction_data.get('type'))
+            code=Transaction.newCodes(request.user, transaction_data.get('type')),
+            sanad=sanad
         )
         transaction = serializer.instance
         transaction.sync(user, data)
         transaction.updateSanad(user)
+
+        # raise serializers.ValidationError("haa")
 
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_201_CREATED)
 

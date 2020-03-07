@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, FloatAccount
 from cheques.serializers import *
-from sanads.sanads.models import clearSanad
+from sanads.sanads.models import clearSanad, Sanad
 
 
 class ChequebookModelView(viewsets.ModelViewSet):
@@ -107,11 +107,17 @@ class SubmitChequeApiView(APIView):
 
         cheque = serializer.instance
 
+        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code')).first()
+
+        if sanad and not sanad.isEmpty:
+            raise ValidationError("سند باید خالی باشد")
+
         status_change = cheque.changeStatus(
             user=user,
             date=cheque.date,
             to_status='notPassed',
             explanation=cheque.explanation,
+            sanad=sanad
         )
 
         sanad = status_change.updateSanad(user)
@@ -233,9 +239,14 @@ class ChangeChequeStatus(APIView):
 
         date = data.get('date')
         to_status = data.get('to_status')
-        account = get_object_or_404(Account, pk=data.get('account'))
+        account = Account.objects.filter(pk=data.get('account')).first()
         floatAccount = FloatAccount.objects.filter(pk=data.get('floatAccount')).first()
         explanation = data.get('explanation')
+
+        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code')).first()
+
+        if sanad and not sanad.isEmpty:
+            raise ValidationError("سند باید خالی باشد")
 
         status_change = cheque.changeStatus(
             user=request.user,
@@ -244,6 +255,7 @@ class ChangeChequeStatus(APIView):
             account=account,
             floatAccount=floatAccount,
             explanation=explanation,
+            sanad=sanad
         )
         sanad = status_change.updateSanad(user)
 

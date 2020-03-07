@@ -56,7 +56,6 @@ class Transaction(BaseModel):
         for i in range(len(items_data.get('items'))):
             item = items_data['items'][i]
             cheque_data = item.get('cheque')
-            print('haa')
             if cheque_data:
                 if item.get('id'):
                     items_data['items'].pop(i)

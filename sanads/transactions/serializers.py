@@ -39,10 +39,11 @@ class TransactionItemListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class TransactionCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Transaction
         fields = '__all__'
-        read_only_fields = ('financial_year', 'code')
+        read_only_fields = ('financial_year', 'code', 'sanad')
 
     def validate(self, data):
         if data['account'].level != 3:
@@ -60,6 +61,7 @@ class TransactionCreateUpdateSerializer(serializers.ModelSerializer):
 class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
+    sanad_code = serializers.IntegerField(source="sanad.code")
 
     class Meta:
         model = Transaction

@@ -46,6 +46,10 @@ class Sanad(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
 
+    @property
+    def isEmpty(self):
+        return self.items.count() == 0
+
     def check_account_balance_confirmations(self):
 
         for item in self.items.all():
