@@ -14,7 +14,6 @@ urlpatterns = router.urls + [
     url(r'^getFactorByPosition$', getFactorByPosition, name=''),
     url(r'^notPaidFactors$', getNotPaidFactors, name=''),
     url(r'^factors/newCodes$', newCodesForFactor, name=''),
-    url(r'^factorPayments/mass$', FactorPaymentMass.as_view(), name=''),
     url(r'^factors/definite/(?P<pk>[0-9]+)$', DefiniteFactor.as_view(), name=''),
 
     url(r'^getTransferByPosition$', getTransferByPosition, name=''),

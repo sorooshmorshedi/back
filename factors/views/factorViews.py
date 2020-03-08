@@ -219,47 +219,6 @@ class FactorModelView(viewsets.ModelViewSet):
             instance.delete()
 
 
-class FactorPaymentMass(APIView):
-    serializer_class = FactorPaymentSerializer
-
-    def post(self, request):
-        data = []
-        for item in request.data:
-            item['financial_year'] = request.user.active_financial_year.id
-            data.append(item)
-        serialized = self.serializer_class(data=data, many=True)
-        if serialized.is_valid():
-            serialized.save()
-            self.updateFactorPaidValue(request.data)
-            return Response(serialized.data, status=status.HTTP_201_CREATED)
-        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request):
-        for item in request.data:
-            instance = FactorPayment.objects.inFinancialYear(request.user).get(id=item['id'])
-            if int(item['value']) == 0:
-                instance.delete()
-                continue
-            serialized = self.serializer_class(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
-            else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-        self.updateFactorPaidValue(request.data, request.user)
-        return Response([], status=status.HTTP_200_OK)
-
-    def updateFactorPaidValue(self, items, user):
-        factorIds = []
-        for item in items:
-            factorIds.append(item['factor'])
-        factors = Factor.objects.inFinancialYear(user).filter(pk__in=factorIds)
-        for factor in factors:
-            paidValue = FactorPayment.objects.inFinancialYear(user).filter(factor=factor).aggregate(Sum('value'))[
-                'value__sum']
-            factor.paidValue = paidValue
-            factor.save()
-
-
 @api_view(['get'])
 def newCodesForFactor(request):
     res = Factor.newCodes(request.user)
