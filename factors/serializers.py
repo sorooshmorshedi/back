@@ -65,15 +65,8 @@ class FactorSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
-        if data['account'].floatAccountGroup:
-            if 'floatAccount' not in data or not data['floatAccount']:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
-        return data
+        AccountValidator.tafsili(data)
+        return super(FactorSerializer, self).validate(data)
 
 
 class FactorUpdateSerializer(serializers.ModelSerializer):
@@ -83,15 +76,8 @@ class FactorUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'code', 'financial_year')
 
     def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
-        if data['account'].floatAccountGroup:
-            if 'floatAccount' not in data or not data['floatAccount']:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
-        return data
+        AccountValidator.tafsili(data)
+        return super(FactorUpdateSerializer, self).validate(data)
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
