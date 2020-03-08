@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account, Bank, Person, FloatAccount, FloatAccountGroup, IndependentAccount, \
     FloatAccountRelation
 from accounts.costCenters.models import CostCenter, CostCenterGroup
-from accounts.defaultAccounts.models import getDA, DefaultAccount
+from accounts.defaultAccounts.models import getDefaultAccount, DefaultAccount
 from companies.models import FinancialYear
 from sanads.sanads.models import SanadItem, newSanadCode, Sanad
 from sanads.sanads.serializers import SanadSerializer, SanadItemSerializer
@@ -142,16 +142,16 @@ class CloseAccountsView(ClosingBaseView):
 
     def closeTemporaries(self):
         explanation = 'بابت بستن حساب های موقت'
-        account = getDA('currentEarnings', self.user).account
+        account = getDefaultAccount('currentEarnings', self.user).account
         for code in self.TemporaryGroupCodes:
             self.createSanad(code, account, explanation)
 
     def closeEarnings(self):
         self.resetAccounts()
         explanation = 'بابت بستن حساب سود و زیان جاری'
-        account = getDA('currentEarnings', self.user).account
+        account = getDefaultAccount('currentEarnings', self.user).account
         remain = account.get_remain()
-        destination_account = getDA('retainedEarnings', self.user).account
+        destination_account = getDefaultAccount('retainedEarnings', self.user).account
 
         items = []
         value = remain['value']
@@ -183,7 +183,7 @@ class CloseAccountsView(ClosingBaseView):
     def closePermanents(self):
         self.resetAccounts()
         explanation = 'بابت بستن حساب های دائمی'
-        account = getDA('closing', self.user).account
+        account = getDefaultAccount('closing', self.user).account
         for code in self.PermanentGroupCodes:
             self.createSanad(code, account, explanation)
 
@@ -205,7 +205,7 @@ class CloseAccountsView(ClosingBaseView):
 
     def openingSanad(self, financial_year):
         explanation = 'بابت افتتاح حساب'
-        account = getDA('closing', self.user).account
+        account = getDefaultAccount('closing', self.user).account
         items = []
         for code in self.PermanentGroupCodes:
             res = self.createSanadItems(code, account)

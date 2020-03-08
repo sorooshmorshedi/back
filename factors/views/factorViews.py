@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.defaultAccounts.models import getDA
+from accounts.defaultAccounts.models import getDefaultAccount
 from factors.helpers import getInventoryCount
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from sanads.sanads.models import clearSanad, newSanadCode, SanadItem
@@ -546,8 +546,8 @@ class DefiniteFactor(APIView):
             )
 
             sanad.items.create(
-                account=getDA(account, user).account,
-                # floatAccount=factor.floatAccount,
+                account=getDefaultAccount(account, user).account,
+                floatAccount=getDefaultAccount(account, user).floatAccount,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -560,8 +560,8 @@ class DefiniteFactor(APIView):
         sanad = factor.sanad
         if factor.discountSum:
             sanad.items.create(
-                account=getDA(account, user).account,
-                # floatAccount=factor.floatAccount,
+                account=getDefaultAccount(account, user).account,
+                floatAccount=getDefaultAccount(account, user).floatAccount,
                 bed=first_row_bed,
                 bes=first_row_bes,
                 explanation=explanation,
@@ -591,8 +591,8 @@ class DefiniteFactor(APIView):
                 financial_year=sanad.financial_year
             )
             sanad.items.create(
-                account=getDA('tax', user).account,
-                # floatAccount=factor.floatAccount,
+                account=getDefaultAccount('tax', user).account,
+                floatAccount=getDefaultAccount('tax', user).floatAccount,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -606,7 +606,7 @@ class DefiniteFactor(APIView):
             if e.value:
                 sanad.items.create(
                     account=e.expense.account,
-                    # floatAccount=factor.floatAccount,
+                    floatAccount=e.expense.floatAccount,
                     bed=e.value,
                     explanation=explanation,
                     financial_year=sanad.financial_year
@@ -628,14 +628,12 @@ class DefiniteFactor(APIView):
 
         sanad.items.create(
             account=Account.get_cost_of_sold_wares_account(user),
-            # floatAccount=factor.floatAccount,
             bed=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             account=Account.get_inventory_account(user),
-            # floatAccount=factor.floatAccount,
             bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
@@ -645,22 +643,18 @@ class DefiniteFactor(APIView):
     def submitBackFromSaleSanadItems(user, factor, explanation):
         sanad = factor.sanad
         value = 0
-        # for item in factor.items.all():
-        #     value += item.calculated_output_value
 
         for item in factor.items.all():
             value += item.calculated_output_value
 
         sanad.items.create(
             account=Account.get_inventory_account(user),
-            # floatAccount=factor.floatAccount,
             bed=value,
             explanation=explanation,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             account=Account.get_cost_of_sold_wares_account(user),
-            # floatAccount=factor.floatAccount,
             bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
@@ -682,7 +676,6 @@ class DefiniteFactor(APIView):
         )
         sanad.items.create(
             account=Account.get_inventory_account(user),
-            # floatAccount=factor.floatAccount,
             bes=value,
             explanation=explanation,
             financial_year=sanad.financial_year
@@ -699,8 +692,8 @@ class DefiniteFactor(APIView):
                 bes = profit_and_loss_value
 
             sanad.items.create(
-                account=getDA('profitAndLossFromBuying', user).account,
-                # floatAccount=factor.floatAccount,
+                account=getDefaultAccount('profitAndLossFromBuying', user).account,
+                floatAccount=getDefaultAccount('profitAndLossFromBuying', user).floatAccount,
                 bed=bed,
                 bes=bes,
                 explanation=explanation,

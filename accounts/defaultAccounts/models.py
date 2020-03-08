@@ -36,5 +36,5 @@ class DefaultAccount(BaseModel):
         return "{} {}".format(self.name, self.programingName)
 
 
-def getDA(pn, user):
+def getDefaultAccount(pn, user):
     return DefaultAccount.objects.inFinancialYear(user).get(programingName=pn)
