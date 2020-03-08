@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.validators import AccountValidator
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.models.StatusChangeModel import StatusChange
@@ -21,22 +22,8 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         if 'bedAccount' not in data or 'besAccount' not in data:
             raise serializers.ValidationError("حساب بدهکار و یا بستانکار انتخاب نشده است")
 
-        if ('bedAccount' in data and data['bedAccount'].level != 3) or (
-                'besAccount' in data and data['besAccount'].level != 3):
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
-
-        if 'bedAccount' in data and data['bedAccount'].floatAccountGroup:
-            if 'bedFloatAccount' not in data:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['bedAccount'].floatAccountGroup not in list(data['bedFloatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
-        if 'besAccount' in data and data['besAccount'].floatAccountGroup:
-            if 'besFloatAccount' not in data:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['bedAccount'].floatAccountGroup not in list(data['bedFloatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+        AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount')
+        AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount')
 
         if data['bedAccount'] == data['besAccount']:
             raise serializers.ValidationError("حساب بدهکار و بستانکار نمی تواند یکی باشد")
@@ -73,21 +60,15 @@ class ChequebookCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year', 'code',)
 
     def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
-        if data['account'].floatAccountGroup:
-            if 'floatAccount' not in data:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+
+        AccountValidator.tafsili(data)
 
         if self.instance:
             for cheque in self.instance.cheques.all():
                 if cheque.status != 'blank':
                     raise serializers.ValidationError("برای ویرایش دسته چک، باید وضعیت همه چک های آن سفید باشد")
 
-        return data
+        return super(ChequebookCreateUpdateSerializer, self).validate(data)
 
 
 class ChequebookListRetrieveSerializer(serializers.ModelSerializer):
@@ -107,16 +88,7 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
 
-        if 'account' not in data or not data['account']:
-            raise serializers.ValidationError("لطفا حساب دریافت کننده/پرداخت کننده را مشخص کنید")
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
-        if data['account'].floatAccountGroup:
-            if 'floatAccount' not in data:
-                raise serializers.ValidationError(
-                    "حساب تفضیلی شناور برای حساب های دارای گروه حساب تفضیلی شناور باید انتخاب گردد")
-            if data['account'].floatAccountGroup not in list(data['floatAccount'].floatAccountGroups.all()):
-                raise serializers.ValidationError("حساب شناور انتخاب شده باید مطعلق به گروه حساب شناور حساب باشد")
+        AccountValidator.tafsili(data)
 
         received_or_paid = data.get('received_or_paid')
 

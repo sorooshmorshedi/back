@@ -107,7 +107,7 @@ class SubmitChequeApiView(APIView):
 
         cheque = serializer.instance
 
-        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code')).first()
+        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code', None)).first()
 
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
@@ -243,7 +243,7 @@ class ChangeChequeStatus(APIView):
         floatAccount = FloatAccount.objects.filter(pk=data.get('floatAccount')).first()
         explanation = data.get('explanation')
 
-        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code')).first()
+        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code', None)).first()
 
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
