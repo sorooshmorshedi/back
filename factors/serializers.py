@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.validators import AccountValidator
 from factors.models import *
 from sanads.sanads.serializers import SanadSerializer
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
@@ -13,13 +14,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب انتخابی باید حتما از سطح آخر باشد")
+        AccountValidator.tafsili(data)
         return data
 
 
 class ExpenseListRetrieveSerializer(ExpenseSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
+    floatAccount = FloatAccountSerializer(read_only=True, many=False)
 
     class Meta(ExpenseSerializer.Meta):
         pass

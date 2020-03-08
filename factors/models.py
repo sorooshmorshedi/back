@@ -23,6 +23,8 @@ class Expense(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='expenses')
     name = models.CharField(max_length=100, unique=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpense')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpense', null=True,
+                                     blank=True)
     type = models.CharField(max_length=10, choices=EXPENSE_TYPES)
     explanation = models.CharField(max_length=255, blank=True)
 
