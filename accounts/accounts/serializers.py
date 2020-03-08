@@ -1,12 +1,11 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import *
+from accounts.accounts.validators import AccountValidator
 from accounts.costCenters.serializers import CostCenterGroupSerializer
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
-    syncFloatAccountGroups = serializers.ListField(allow_empty=True, default=[])
-
     class Meta:
         model = FloatAccount
         fields = '__all__'
@@ -51,20 +50,20 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
         model = Account
         exclude = ('code', 'level')
 
-    def validate(self, data):
+    def validate(self, attrs):
 
-        parent = data.get('patent', None)
+        parent = attrs.get('patent', None)
 
         if parent:
             if parent.level == Account.MOEIN:
-                floatAccountGroup = data.get('floatAccountGroup', None)
-                if floatAccountGroup:
-                    raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه حساب شناور باشد")
-                costCenterGroup = data.get('costCenterGroup', None)
+
+                AccountValidator.tafsili(attrs)
+
+                costCenterGroup = attrs.get('costCenterGroup', None)
                 if costCenterGroup:
                     raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
 
-        return data
+        return attrs
 
     def create(self, validated_data):
         data = validated_data.copy()

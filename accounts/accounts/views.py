@@ -22,14 +22,14 @@ class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     serializer_class = FloatAccountSerializer
 
     def created(self, instance, request):
-        syncFloatAccountGroups = request.data.get('syncFloatAccountGroups', [])
+        syncFloatAccountGroups = request.data.pop('syncFloatAccountGroups', [])
         financial_year = request.user.active_financial_year
         for floatAccountGroup in syncFloatAccountGroups:
-            relation = FloatAccountRelation.create(
+            relation = FloatAccountRelation.objects.create(
                 floatAccount=instance,
-                floatAccountGroup=floatAccountGroup
+                floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
-            financial_year.add(relation)
+            financial_year.float_account_relations.add(relation)
         return instance
 
 
@@ -60,9 +60,9 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         ).delete()
         financial_year = request.user.active_financial_year
         for floatAccountGroup in syncFloatAccountGroups:
-            relation = FloatAccountRelation.create(
+            relation = FloatAccountRelation.objects.create(
                 floatAccount=instance,
-                floatAccountGroup=floatAccountGroup
+                floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
             financial_year.add(relation)
         return res
@@ -135,7 +135,13 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = AccountListRetrieveSerializer
+
+    def get_serializer_class(self):
+        method = self.request.method.lower()
+        if method == 'put':
+            return AccountCreateUpdateSerializer
+        else:
+            return AccountListRetrieveSerializer
 
     def retrieve(self, request, **kwargs):
         account = self.get_object()

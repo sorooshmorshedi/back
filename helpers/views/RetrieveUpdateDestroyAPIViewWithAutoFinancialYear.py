@@ -5,7 +5,7 @@ from rest_framework.response import Response
 class RetrieveUpdateDestroyAPIViewWithAutoFinancialYear(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.inFinancialYear(self.request.user)
+        return self.get_serializer_class().Meta.model.objects.inFinancialYear(self.request.user)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

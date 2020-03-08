@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.accounts.models import Account
+from accounts.accounts.models import Account, FloatAccount
 from helpers.models import BaseModel
 
 
@@ -23,6 +23,8 @@ class DefaultAccount(BaseModel):
     name = models.CharField(unique=True, max_length=150)
     explanation = models.TextField(null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
+                                     blank=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
     programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)
@@ -36,6 +38,3 @@ class DefaultAccount(BaseModel):
 
 def getDA(pn, user):
     return DefaultAccount.objects.inFinancialYear(user).get(programingName=pn)
-
-
-

@@ -36,8 +36,8 @@ class FloatAccount(BaseModel):
 
 
 class FloatAccountRelation(BaseModel):
-    floatAccountGroup = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='relation')
-    floatAccount = models.ForeignKey(FloatAccountGroup, on_delete=models.CASCADE, related_name='relation')
+    floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.CASCADE, related_name='relation')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='relation')
 
 
 class AccountType(BaseModel):
