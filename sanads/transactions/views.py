@@ -48,8 +48,6 @@ class TransactionListCreate(generics.ListCreateAPIView):
         transaction.sync(user, data)
         transaction.updateSanad(user)
 
-        # raise serializers.ValidationError("haa")
-
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_201_CREATED)
 
 

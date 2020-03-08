@@ -70,7 +70,6 @@ class BuySaleView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
 
         params = self.request.GET
-        print(params)
 
         report_type = Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
 
