@@ -10,9 +10,13 @@ class ListCreateAPIViewWithAutoFinancialYear(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         self.perform_create(serializer)
+
         serializer.instance.financial_year.add(request.user.active_financial_year)
+
         self.created(serializer.instance, request)
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

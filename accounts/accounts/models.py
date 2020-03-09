@@ -1,15 +1,17 @@
 from django.db import models
 from django.db.models import Sum
-from accounts.costCenters.models import CostCenterGroup
+from django.db.models.aggregates import Max
+
 from helpers.models import BaseModel
 
 
 class FloatAccountGroup(BaseModel):
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
+    is_cost_center = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
-        verbose_name = 'گروه حساب شناور'
+        pass
 
     def __str__(self):
         return str(self.pk) + ' - ' + str(self.name)
@@ -18,6 +20,7 @@ class FloatAccountGroup(BaseModel):
 class FloatAccount(BaseModel):
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
+    is_cost_center = models.BooleanField(default=False)
 
     max_bed = models.CharField(max_length=20, blank=True, null=True)
     max_bes = models.CharField(max_length=20, blank=True, null=True)
@@ -32,7 +35,7 @@ class FloatAccount(BaseModel):
         return self.name
 
     class Meta(BaseModel.Meta):
-        verbose_name = 'حساب شناور'
+        pass
 
 
 class FloatAccountRelation(BaseModel):
@@ -63,17 +66,6 @@ class AccountType(BaseModel):
         return "{} - {} - {} - {}".format(self.name, self.nature, self.usage, self.programingName)
 
 
-class IndependentAccount(BaseModel):
-    name = models.CharField(max_length=100)
-    explanation = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta(BaseModel.Meta):
-        verbose_name = 'حساب مستقل'
-
-    def __str__(self):
-        return self.name
-
-
 class Account(BaseModel):
     GROUP = 0
     KOL = 1
@@ -86,8 +78,26 @@ class Account(BaseModel):
         (TAFSILI, 'tafsili'),
     )
 
+    PERSON = 'p'
+    BANK = 'b'
+    OTHER = 'o'
+    ACCOUNT_TYPES = (
+        (PERSON, 'اشخاص'),
+        (BANK, 'بانک'),
+        (OTHER, 'دیگر')
+    )
+
+    BUYER_PERSON = 'b'
+    SELLER_PERSON = 's'
+    PERSON_TYPES = (
+        (BUYER_PERSON, 'خریدار'),
+        (SELLER_PERSON, 'فروشنده'),
+    )
+
     CODE_LENGTHS = [1, 3, 5, 9]
     PARENT_PART = [0, 1, 3, 5]
+
+    account_type = models.CharField(max_length=2, choices=ACCOUNT_TYPES, default=OTHER)
 
     name = models.CharField(max_length=150, verbose_name='نام حساب')
     code = models.CharField(max_length=50, verbose_name='کد حساب')
@@ -105,8 +115,8 @@ class Account(BaseModel):
     level = models.IntegerField(choices=ACCOUNT_LEVELS)
 
     type = models.ForeignKey(AccountType, on_delete=models.SET_NULL, related_name='accounts', blank=True, null=True)
-    costCenterGroup = models.ForeignKey(CostCenterGroup, on_delete=models.PROTECT, related_name='accounts', blank=True,
-                                        null=True)
+    costCenterGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT,
+                                        related_name='accountsAsCostCenter', blank=True, null=True)
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts',
                                           blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
@@ -114,19 +124,37 @@ class Account(BaseModel):
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
 
+    # Person fields
+    is_real = models.BooleanField(default=True)
+    person_type = models.CharField(choices=PERSON_TYPES, max_length=10, default="", blank="true")
+    phone_1 = models.CharField(max_length=20, default="", blank=True)
+    phone_2 = models.CharField(max_length=20, default="", blank=True)
+    mobile = models.CharField(max_length=20, default="", blank=True)
+    melli_code = models.CharField(max_length=20, default="", blank=True)
+    website = models.URLField(default="", blank=True)
+    fax = models.CharField(max_length=20, default="", blank=True)
+    email = models.EmailField(default="", blank=True)
+    address_1 = models.CharField(max_length=255, default="", blank=True)
+    address_2 = models.CharField(max_length=255, default="", blank=True)
+    city = models.CharField(max_length=255, default="", blank=True)
+    province = models.CharField(max_length=255, default="", blank=True)
+    postal_code = models.CharField(max_length=20, default="", blank=True)
+    account_number_1 = models.CharField(max_length=50, default="", blank=True)
+    account_number_2 = models.CharField(max_length=50, default="", blank=True)
+    eghtesadi_code = models.CharField(max_length=50, default="", blank=True)
+
+    # Bank Fields
+    branch_name = models.CharField(max_length=100, default="", blank=True)
+    branch_code = models.CharField(max_length=20, default="", blank=True)
+    account_number = models.CharField(max_length=50, default="", blank=True)
+    sheba = models.CharField(max_length=50, default="", blank=True)
+    phone = models.CharField(max_length=30, default="", blank=True)
+
     def __str__(self):
         return self.title
 
     class Meta(BaseModel.Meta):
-        ordering = ['code', ]
-        verbose_name = 'حساب'
-        verbose_name_plural = 'حساب ها'
-        permissions = (
-            ('create_account', 'تعریف حساب'),
-            ('retrieve_account', 'مشاهده حساب'),
-            ('update_account', 'ویرایش حساب'),
-            ('delete_account', 'حذف حساب'),
-        )
+        ordering = ['code']
 
     @property
     def title(self):
@@ -176,7 +204,24 @@ class Account(BaseModel):
                 last_code += '0'
             last_code += '1'
 
-        return self.code + last_code
+        code = self.code + last_code
+
+        if code[:self.PARENT_PART[self.level + 1]] != self.code:
+            from rest_framework import serializers
+            raise serializers.ValidationError("تعداد حساب های این سطح پر شده است")
+
+        return code
+
+    @staticmethod
+    def get_new_group_code(user):
+        code = \
+            Account.objects.inFinancialYear(user).filter(level=Account.GROUP).aggregate(Max('code'))[
+                'code__max']
+        code = int(code) + 1
+
+        if code >= 10:
+            from rest_framework import serializers
+            raise serializers.ValidationError("تعداد حساب های این سطح پر شده است")
 
     @staticmethod
     def get_inventory_account(user):
@@ -189,62 +234,3 @@ class Account(BaseModel):
     @staticmethod
     def get_cost_of_sold_wares_account(user):
         return Account.objects.inFinancialYear(user).get(code='701010001')
-
-
-class Person(BaseModel):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='person', primary_key=True)
-
-    personType = models.CharField(choices=(('real', 'حقیقی'), ('legal', 'حقوقی')), max_length=5)
-
-    phone1 = models.CharField(max_length=20, null=True, blank=True)
-    phone2 = models.CharField(max_length=20, null=True, blank=True)
-    mobile = models.CharField(max_length=20, null=True, blank=True)
-    meli_code = models.CharField(max_length=20, null=True, blank=True)
-    website = models.URLField(null=True, blank=True)
-    fax = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-
-    address1 = models.CharField(max_length=255, null=True, blank=True)
-    address2 = models.CharField(max_length=255, null=True, blank=True)
-    city = models.CharField(max_length=255, null=True, blank=True)
-    province = models.CharField(max_length=255, null=True, blank=True)
-    postalCode = models.CharField(max_length=20, null=True, blank=True)
-    accountNumber1 = models.CharField(max_length=50, null=True, blank=True)
-    accountNumber2 = models.CharField(max_length=50, null=True, blank=True)
-    eghtesadiCode = models.CharField(max_length=50, null=True, blank=True)
-
-    type = models.CharField(choices=(('buyer', 'buyer'), ('seller', 'seller')), max_length=10)
-
-    file = models.FileField(null=True, blank=True)
-
-    def __str__(self):
-        return "{0} - {1}".format(self.account.code, self.account.name)
-
-    class Meta(BaseModel.Meta):
-        verbose_name = 'حساب اشخاص'
-        verbose_name_plural = 'حساب های اشخاص'
-        permissions = (
-            ('create_buyer', 'تعریف حساب خریدار'),
-            ('retrieve_buyer', 'مشاهده حساب خریدار'),
-            ('update_buyer', 'ویرایش حساب خریدار'),
-            ('delete_buyer', 'حذف حساب خریدار'),
-        )
-
-
-class Bank(BaseModel):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='bank', primary_key=True)
-
-    name = models.CharField(max_length=100, null=True, blank=True)
-    branch = models.CharField(max_length=100, null=True, blank=True)
-    branchCode = models.CharField(max_length=20, null=True, blank=True)
-    accountNumber = models.CharField(max_length=50, null=True, blank=True)
-    sheba = models.CharField(max_length=50, null=True, blank=True)
-    phone = models.CharField(max_length=30, null=True, blank=True)
-
-    file = models.FileField(null=True, blank=True)
-
-    def __str__(self):
-        return "{0} - {1}".format(self.account.code, self.account.name)
-
-    class Meta(BaseModel.Meta):
-        verbose_name = 'حساب بانک'

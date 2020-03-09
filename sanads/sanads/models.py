@@ -1,7 +1,6 @@
 from django.db.models import signals
 from django.db import models
 from accounts.accounts.models import Account, FloatAccount
-from accounts.costCenters.models import CostCenter
 from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
@@ -85,7 +84,7 @@ class SanadItem(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True,
                                      null=True, verbose_name='حساب شناور')
-    costCenter = models.ForeignKey(CostCenter, on_delete=models.PROTECT, blank=True, null=True,
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, blank=True, null=True,
                                    verbose_name='مرکز هزینه')
 
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)

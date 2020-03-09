@@ -8,9 +8,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.accounts.models import Account, Bank, Person, FloatAccount, FloatAccountGroup, IndependentAccount, \
-    FloatAccountRelation
-from accounts.costCenters.models import CostCenter, CostCenterGroup
+from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup, FloatAccountRelation
 from accounts.defaultAccounts.models import getDefaultAccount, DefaultAccount
 from companies.models import FinancialYear
 from sanads.sanads.models import SanadItem, newSanadCode, Sanad
@@ -119,7 +117,7 @@ class ClosingBaseView(APIView):
         for item in items:
             new_item = item.copy()
             if new_item['valueType'] == SanadItem.BED:
-                new_item['valueType']= SanadItem.BES
+                new_item['valueType'] = SanadItem.BES
             else:
                 new_item['valueType'] = SanadItem.BED
             new_items.append(new_item)
@@ -217,12 +215,12 @@ class CloseAccountsView(ClosingBaseView):
 
 
 class MoveAccountsView(ClosingBaseView):
-
     destination_financial_year = None
 
     def post(self, request):
         self.user = request.user
-        self.destination_financial_year = get_object_or_404(FinancialYear, pk=request.data['destination_financial_year'])
+        self.destination_financial_year = get_object_or_404(FinancialYear,
+                                                            pk=request.data['destination_financial_year'])
         self.resetAccounts()
         self.moveAccounts()
         self.moveWares()
@@ -243,13 +241,14 @@ class MoveAccountsView(ClosingBaseView):
         self.destination_financial_year.accounts.add(*Account.objects.inFinancialYear(self.user))
         self.destination_financial_year.persons.add(*Person.objects.inFinancialYear(self.user))
         self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear(self.user))
-        self.destination_financial_year.float_accounts.add(*FloatAccount.objects.inFinancialYear(self.user))
-        self.destination_financial_year.float_account_groups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
-        self.destination_financial_year.float_account_relations.add(*FloatAccountRelation.objects.inFinancialYear(self.user))
+        self.destination_financial_year.floatAccounts.add(*FloatAccount.objects.inFinancialYear(self.user))
+        self.destination_financial_year.floatAccountGroups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
+        self.destination_financial_year.floatAccountRelations.add(
+            *FloatAccountRelation.objects.inFinancialYear(self.user))
         self.destination_financial_year.independent_accounts.add(*IndependentAccount.objects.inFinancialYear(self.user))
         self.destination_financial_year.cost_centers.add(*CostCenter.objects.inFinancialYear(self.user))
         self.destination_financial_year.cost_center_groups.add(*CostCenterGroup.objects.inFinancialYear(self.user))
-        self.destination_financial_year.default_accounts.add(*DefaultAccount.objects.inFinancialYear(self.user))
+        self.destination_financial_year.defaultAccounts.add(*DefaultAccount.objects.inFinancialYear(self.user))
 
     @transaction.atomic()
     def moveWares(self):
@@ -265,9 +264,7 @@ class MoveAccountsView(ClosingBaseView):
 
         self.destination_financial_year.wares.add(*Ware.objects.inFinancialYear(self.user))
         self.destination_financial_year.warehouses.add(*Warehouse.objects.inFinancialYear(self.user))
-        self.destination_financial_year.ware_levels.add(*WareLevel.objects.inFinancialYear(self.user))
+        self.destination_financial_year.wareLevels.add(*WareLevel.objects.inFinancialYear(self.user))
         self.destination_financial_year.units.add(*Unit.objects.inFinancialYear(self.user))
 
 #         Check SalesGroup factors for first period inventory factor
-
-

@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
-from accounts.accounts.serializers import BankSerializer, PersonSerializer, AccountTypeSerializer
+from accounts.accounts.serializers import AccountTypeSerializer
 from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
     BalanceFloatAccountGroupSerializer, FloatBalanceSerializer
 

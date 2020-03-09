@@ -1,11 +1,18 @@
 from rest_framework import serializers
 
-from accounts.accounts.models import *
+from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account
 from accounts.accounts.validators import AccountValidator
-from accounts.costCenters.serializers import CostCenterGroupSerializer
+
+
+class FloatAccountGroupSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FloatAccountGroup
+        fields = '__all__'
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
+    floatAccountGroups = FloatAccountGroupSimpleSerializer(many=True, read_only=True)
+
     class Meta:
         model = FloatAccount
         fields = '__all__'
@@ -39,31 +46,23 @@ class AccountTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class IndependentAccountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IndependentAccount
-        fields = ('id', 'name', 'explanation')
-
-
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         exclude = ('code', 'level')
 
-    def validate(self, attrs):
+    def validate(self, data):
 
-        parent = attrs.get('patent', None)
+        account_type = data.get('account_type', None)
+        if not account_type:
+            raise serializers.ValidationError("نوع حساب مشخص نشده است")
 
-        if parent:
-            if parent.level == Account.MOEIN:
+        if account_type == Account.PERSON:
+            person_type = data.get('person_type')
+            if not person_type:
+                raise serializers.ValidationError("لطفا خریدار یا فروشنده را مشخص کنید")
 
-                AccountValidator.tafsili(attrs)
-
-                costCenterGroup = attrs.get('costCenterGroup', None)
-                if costCenterGroup:
-                    raise serializers.ValidationError("تنها حساب سطح آخر (تفضیلی) می تواند دارای گروه مرکز هزینه باشد")
-
-        return attrs
+        return data
 
     def create(self, validated_data):
         data = validated_data.copy()
@@ -81,30 +80,6 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
         return res
 
 
-class PersonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Person
-        fields = '__all__'
-
-    def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب اشخاص باید سطح آخر باشد")
-
-        return data
-
-
-class BankSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bank
-        fields = '__all__'
-
-    def validate(self, data):
-        if data['account'].level != 3:
-            raise serializers.ValidationError("حساب بانک باید سطح آخر باشد")
-
-        return data
-
-
 class AccountListRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
@@ -117,19 +92,14 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
-    costCenterGroup = CostCenterGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
-    person = PersonSerializer(read_only=True, many=False)
-    bank = BankSerializer(read_only=True, many=False)
 
     @staticmethod
     def setup_eager_loading(queryset):
         queryset = queryset \
             .prefetch_related('floatAccountGroup') \
             .prefetch_related('costCenterGroup') \
-            .prefetch_related('type') \
-            .prefetch_related('person') \
-            .prefetch_related('bank')
+            .prefetch_related('type')
         return queryset
 
 

@@ -18,8 +18,6 @@ class FloatAccountGroupAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Account)
-admin.site.register(Bank)
-admin.site.register(Person)
 admin.site.register(FloatAccount, FloatAccountAdmin)
 admin.site.register(FloatAccountGroup, FloatAccountGroupAdmin)
 admin.site.register(DefaultAccount)
