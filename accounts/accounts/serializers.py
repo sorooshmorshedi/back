@@ -92,6 +92,7 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
+    costCenterGroup = FloatAccountGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
 
     @staticmethod
