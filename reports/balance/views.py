@@ -79,7 +79,7 @@ def accountBalanceView(request):
 
 
 @api_view(['get'])
-def floatAccountBalanceView(request):
+def floatAccountBalanceByGroupView(request):
     data = request.GET
 
     dateFilter = Q()
@@ -148,6 +148,50 @@ def floatAccountBalanceView(request):
                     'group_name': '',
                     'float_account_name': floatAccount.name,
                 })
+
+    for account in res:
+        remain = account['bed_sum'] - account['bes_sum']
+        if remain > 0:
+            account['bed_remain'] = remain
+            account['bes_remain'] = 0
+        else:
+            account['bes_remain'] = -remain
+            account['bed_remain'] = 0
+
+    res = Response(res)
+    return res
+
+
+@api_view(['get'])
+def floatAccountBalanceView(request):
+    data = request.GET
+
+    dateFilter = Q()
+    if 'from_date' in data:
+        dateFilter &= Q(sanadItems__sanad__date__gte=data['from_date'])
+    if 'to_date' in data:
+        dateFilter &= Q(sanadItems__sanad__date__lte=data['to_date'])
+    if 'from_code' in data:
+        dateFilter &= Q(sanadItems__sanad__code__gte=data['from_code'])
+    if 'to_code' in data:
+        dateFilter &= Q(sanadItems__sanad__code__lte=data['to_code'])
+    if 'codes' in data:
+        dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
+
+    floatAccounts = FloatAccount.objects.inFinancialYear(request.user).annotate(
+        bed_sum=Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0),
+        bes_sum=Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0),
+    )
+
+    res = []
+    for floatAccount in floatAccounts:
+        res.append({
+            'bed_sum': floatAccount.bed_sum,
+            'bes_sum': floatAccount.bes_sum,
+            'bed_remain': 0,
+            'bes_remain': 0,
+            'float_account_name': floatAccount.name,
+        })
 
     for account in res:
         remain = account['bed_sum'] - account['bes_sum']

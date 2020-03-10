@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from reports.balance.views import accountBalanceView, floatAccountBalanceView
+from reports.balance.views import accountBalanceView, floatAccountBalanceView, floatAccountBalanceByGroupView
 from reports.balanceSheet.views import balanceSheetView
 from reports.bill.views import BillListView
 from reports.buySale.views import BuySaleView
@@ -38,6 +38,7 @@ urlpatterns += [
 # Reports
 urlpatterns += [
     url(r'^balance$', accountBalanceView, name=''),
+    url(r'^balance/floatsByGroup$', floatAccountBalanceByGroupView, name=''),
     url(r'^balance/floats$', floatAccountBalanceView, name=''),
     url(r'^ledger$', LedgerListView.as_view(), name=''),
     url(r'^bill$', BillListView.as_view(), name=''),
