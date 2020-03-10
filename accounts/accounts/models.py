@@ -197,14 +197,12 @@ class Account(BaseModel):
 
         last_child = self.children.order_by('-code').first()
         if last_child:
-            last_code = last_child.code[self.PARENT_PART[self.level + 1]:]
+            last_code = int(last_child.code) + 1
+            code = str(last_code)
         else:
-            last_code = ''
-            for i in range(self.CODE_LENGTHS[self.level] - 1):
-                last_code += '0'
-            last_code += '1'
-
-        code = self.code + last_code
+            child_part = self.CODE_LENGTHS[self.level + 1] - self.PARENT_PART[self.level + 1]
+            last_code = '1'.zfill(child_part)
+            code = self.code + last_code
 
         if code[:self.PARENT_PART[self.level + 1]] != self.code:
             from rest_framework import serializers
