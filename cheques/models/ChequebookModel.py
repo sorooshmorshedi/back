@@ -44,7 +44,6 @@ class Chequebook(BaseModel):
 
     def _create_cheques(self):
         from cheques.models.ChequeModel import Cheque
-        bank = self.account.bank
         for i in range(self.serial_from, self.serial_to + 1):
             self.cheques.create(
                 serial=i,
@@ -52,9 +51,9 @@ class Chequebook(BaseModel):
                 received_or_paid=Cheque.PAID,
                 account=self.account,
                 floatAccount=self.floatAccount,
-                bankName=bank.name,
-                branchName=bank.branch,
-                accountNumber=bank.accountNumber,
+                bankName=self.account.bank_name,
+                branchName=self.account.branch_name,
+                accountNumber=self.account.account_number,
                 financial_year=self.financial_year
             )
 

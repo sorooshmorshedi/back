@@ -1,4 +1,3 @@
-from django.db import connection
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -30,8 +29,7 @@ def accountBalanceView(request):
     accounts = Account.objects.inFinancialYear(request.user) \
         .annotate(bed_sum=Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0)) \
         .annotate(bes_sum=Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)) \
-        .prefetch_related('bank').prefetch_related('person').prefetch_related('floatAccountGroup') \
-        .prefetch_related('type') \
+        .prefetch_related('floatAccountGroup').prefetch_related('type') \
         .order_by('code')
 
     for account in accounts:
@@ -53,10 +51,6 @@ def accountBalanceView(request):
 
         if account.type:
             account._type = AccountTypeSerializer(account.type).data
-        if hasattr(account, 'bank'):
-            account._bank = BankSerializer(account.bank).data
-        if hasattr(account, 'person'):
-            account._person = PersonSerializer(account.person).data
         if account.floatAccountGroup:
             account._floatAccountGroup = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
 

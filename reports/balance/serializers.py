@@ -17,7 +17,6 @@ class BalanceFloatAccountSerializer(serializers.ModelSerializer):
 
 
 class BalanceFloatAccountGroupSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FloatAccountGroup
         fields = '__all__'
@@ -31,16 +30,12 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
 
     _floatAccountGroup = serializers.ReadOnlyField()
     _floatAccounts = serializers.ReadOnlyField()
-    _bank = serializers.ReadOnlyField()
-    _person = serializers.ReadOnlyField()
-    _type= serializers.ReadOnlyField()
+    _type = serializers.ReadOnlyField()
 
     class Meta:
         model = Account
         fields = ('id', 'code', 'name', 'level', 'bed_sum', 'bes_sum', 'bed_remain', 'bes_remain',
                   '_floatAccountGroup',
-                  '_bank',
-                  '_person',
                   '_floatAccounts',
                   '_type')
 
@@ -59,4 +54,3 @@ class FloatBalanceSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         pass
-
