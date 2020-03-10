@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from accounts.accounts.models import AccountType, Account
 from accounts.accounts.serializers import TypeReportAccountSerializer
+from reports.filters import get_account_sanad_items_filter
 
 
 def getType(pName):
@@ -70,28 +71,16 @@ def getSerialized(pName, allAccounts):
 
 @api_view(['get'])
 def incomeStatementView(request):
-
     getType.accountTypes = AccountType.objects.all()
 
     res = []
-    data = request.GET
-    dateFilter = Q()
-    if 'from_date' in data:
-        dateFilter &= Q(sanadItems__sanad__date__gte=data['from_date'])
-    if 'to_date' in data:
-        dateFilter &= Q(sanadItems__sanad__date__lte=data['to_date'])
-    if 'from_code' in data:
-        dateFilter &= Q(sanadItems__sanad__code__gte=data['from_code'])
-    if 'to_code' in data:
-        dateFilter &= Q(sanadItems__sanad__code__lte=data['to_code'])
-    if 'codes' in data:
-        dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
+    dateFilter = get_account_sanad_items_filter(request)
 
     allAccounts = list(Account.objects.inFinancialYear(request.user) \
-        .annotate(remain=
-            Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
-            Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
-        ).filter(level=3).order_by('code'))
+                       .annotate(remain=
+                                 Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
+                                 Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
+                                 ).filter(level=3).order_by('code'))
 
     usingTypes = (
         'sale',
@@ -157,8 +146,8 @@ def incomeStatementView(request):
     res.append(t)
 
     specialIncome = operatingIncome \
-        + nonOperatingIncomes \
-        - nonOperatingCosts
+                    + nonOperatingIncomes \
+                    - nonOperatingCosts
     t = ({
         'type': {
             'name': 'سود (زیان) ویژه',
@@ -170,5 +159,3 @@ def incomeStatementView(request):
 
     res = Response(res)
     return res
-
-

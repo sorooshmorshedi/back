@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from accounts.accounts.models import AccountType, Account
 from accounts.accounts.serializers import TypeReportAccountSerializer
 
-
 # def getType(pName):
 #     return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
 # getType.accountTypes = AccountType.objects.inFinancialYear(request.user).all()
+from reports.filters import get_account_sanad_items_filter
 
 
 def getAccounts(accountType, allAccounts):
@@ -32,24 +32,13 @@ def getRemain(accountType, allAccounts):
 def balanceSheetView(request):
     # print(len(connection.queries))
     res = {}
-    data = request.GET
-    dateFilter = Q()
-    if 'from_date' in data:
-        dateFilter &= Q(sanadItems__sanad__date__gte=data['from_date'])
-    if 'to_date' in data:
-        dateFilter &= Q(sanadItems__sanad__date__lte=data['to_date'])
-    if 'from_code' in data:
-        dateFilter &= Q(sanadItems__sanad__code__gte=data['from_code'])
-    if 'to_code' in data:
-        dateFilter &= Q(sanadItems__sanad__code__lte=data['to_code'])
-    if 'codes' in data:
-        dateFilter &= Q(sanadItems__sanad__code__in=data['codes'])
+    dateFilter = get_account_sanad_items_filter(request)
 
     allAccounts = Account.objects.inFinancialYear(request.user) \
         .annotate(remain=
-            Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
-            Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
-        ).filter(level=3).order_by('code')
+                  Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
+                  Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
+                  ).filter(level=3).order_by('code')
 
     accountTypes = AccountType.objects.filter(usage='balanceSheet')
 
@@ -61,12 +50,12 @@ def balanceSheetView(request):
             'accounts': TypeReportAccountSerializer(getAccounts(at, allAccounts), many=True).data
         }
 
-    remain = res['cacheAndBank']['remain']\
-        + res['shortTimeInvestments']['remain']\
-        + res['commercialAccountsAndReceivables']['remain']\
-        + res['otherAccountsAndReceivables']['remain']\
-        + res['inventories']['remain']\
-        + res['ordersAndPrepayments']['remain']
+    remain = res['cacheAndBank']['remain'] \
+             + res['shortTimeInvestments']['remain'] \
+             + res['commercialAccountsAndReceivables']['remain'] \
+             + res['otherAccountsAndReceivables']['remain'] \
+             + res['inventories']['remain'] \
+             + res['ordersAndPrepayments']['remain']
     res['totalCurrentAssets'] = {
         'name': 'جمع دارایی های جاری',
         'remain': remain
@@ -82,48 +71,48 @@ def balanceSheetView(request):
     }
 
     remain = res['totalCurrentAssets']['remain'] \
-        + res['totalNotCurrentAssets']['remain']
+             + res['totalNotCurrentAssets']['remain']
     res['totalAssets'] = {
         'name': 'جمع دارایی ها',
         'remain': remain
     }
 
     remain = res['businessAccountsAndPayableDocuments']['remain'] \
-        + res['otherAccountsAndPayableDocuments']['remain'] \
-        + res['prepayments']['remain'] \
-        + res['saveTypes']['remain'] \
-        + res['paidDividends']['remain'] \
-        + res['receivableFunds']['remain']
+             + res['otherAccountsAndPayableDocuments']['remain'] \
+             + res['prepayments']['remain'] \
+             + res['saveTypes']['remain'] \
+             + res['paidDividends']['remain'] \
+             + res['receivableFunds']['remain']
     res['totalCurrentDebt'] = {
         'name': 'جمع بدهی های جاری',
         'remain': remain
     }
 
     remain = res['longtermAccountsAndPayableDocuments']['remain'] \
-        + res['longtermReceivableFunds']['remain'] \
-        + res['savedEndingServiceBenefits']['remain']
+             + res['longtermReceivableFunds']['remain'] \
+             + res['savedEndingServiceBenefits']['remain']
     res['totalNotCurrentDebt'] = {
         'name': 'جمع بدهی های غیر جاری',
         'remain': remain
     }
 
     remain = res['totalCurrentDebt']['remain'] \
-        + res['totalNotCurrentDebt']['remain']
+             + res['totalNotCurrentDebt']['remain']
     res['totalDebt'] = {
         'name': 'جمع بدهی ها',
         'remain': remain
     }
 
     remain = res['fund']['remain'] \
-        + res['savings']['remain'] \
-        + res['accumulatedProfit']['remain']
+             + res['savings']['remain'] \
+             + res['accumulatedProfit']['remain']
     res['equitiesSum'] = {
         'name': 'جمع حقوق صاحبان سهام',
         'remain': remain
     }
 
     remain = res['equitiesSum']['remain'] \
-        + res['totalDebt']['remain']
+             + res['totalDebt']['remain']
     res['totalDebtsAndEquities'] = {
         'name': 'جمع بدهی ها و حقوق صاحبان سهام',
         'remain': remain
@@ -131,5 +120,3 @@ def balanceSheetView(request):
     # print(len(connection.queries))
 
     return Response(res)
-
-
