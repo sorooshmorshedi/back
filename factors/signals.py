@@ -15,7 +15,7 @@ def updateWareBalanceOnSave(sender, instance, **kwargs):
 
     if ware.isService:
         return
-    
+
     if instance.id:
         factorItem = FactorItem.objects.get(pk=instance.id)
         change = instance.count - factorItem.count
@@ -34,6 +34,9 @@ def updateWareBalanceOnDelete(sender, instance, **kwargs):
     ware = instance.ware
     warehouse = instance.warehouse
     change = instance.count
+
+    if ware.isService:
+        return
 
     if instance.factor.type in Factor.INPUT_GROUP:
         WareBalance.update_balance(ware, warehouse, -change)

@@ -245,9 +245,6 @@ class MoveAccountsView(ClosingBaseView):
         self.destination_financial_year.floatAccountGroups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
         self.destination_financial_year.floatAccountRelations.add(
             *FloatAccountRelation.objects.inFinancialYear(self.user))
-        self.destination_financial_year.independent_accounts.add(*IndependentAccount.objects.inFinancialYear(self.user))
-        self.destination_financial_year.cost_centers.add(*CostCenter.objects.inFinancialYear(self.user))
-        self.destination_financial_year.cost_center_groups.add(*CostCenterGroup.objects.inFinancialYear(self.user))
         self.destination_financial_year.defaultAccounts.add(*DefaultAccount.objects.inFinancialYear(self.user))
 
     @transaction.atomic()

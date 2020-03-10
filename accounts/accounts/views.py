@@ -26,7 +26,7 @@ class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
                 floatAccount=instance,
                 floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
-            financial_year.float_account_relations.add(relation)
+            financial_year.floatAccountRelations.add(relation)
         return instance
 
 
@@ -58,7 +58,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
                 floatAccount=instance,
                 floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
-            financial_year.float_account_relations.add(relation)
+            financial_year.floatAccountRelations.add(relation)
         return res
 
 

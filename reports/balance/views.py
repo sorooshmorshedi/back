@@ -46,8 +46,8 @@ def accountBalanceView(request):
             account.bed_remain = remain
             account.bes_remain = 0
         else:
-            account.bes_remain = -remain
             account.bed_remain = 0
+            account.bes_remain = -remain
 
         if account.type:
             account._type = AccountTypeSerializer(account.type).data
@@ -75,7 +75,6 @@ def accountBalanceView(request):
                 account._floatAccounts.append(BalanceFloatAccountSerializer(floatAccount).data)
 
     res = Response(BalanceAccountSerializer(accounts, many=True).data)
-    # print(len(connection.queries))
     return res
 
 
@@ -128,5 +127,4 @@ def floatAccountBalanceView(request):
             account.bed_remain = 0
 
     res = Response(FloatBalanceSerializer(res, many=True).data)
-    # print(len(connection.queries))
     return res

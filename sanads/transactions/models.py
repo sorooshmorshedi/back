@@ -197,7 +197,7 @@ class TransactionItem(BaseModel):
     due = jmodels.jDateField(null=True, blank=True)
     documentNumber = models.CharField(max_length=50, null=True, blank=True)
     bankName = models.CharField(max_length=255, null=True, blank=True)
-    explanation = models.CharField(max_length=255, null=True, blank=True)
+    explanation = models.CharField(max_length=255, default="", blank=True)
 
     file = models.FileField(blank=True, null=True)
 
