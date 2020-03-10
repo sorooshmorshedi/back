@@ -16,10 +16,6 @@ class SanadItemSerializer(serializers.ModelSerializer):
     def validate(self, data):
         AccountValidator.tafsili(data)
 
-        if 'costCenter' in data and data['costCenter']:
-            if data['costCenter'].group != data['account'].costCenterGroup:
-                raise serializers.ValidationError("مرکز هزینه انتخاب شده باید مطعلق به گروه مرکز هزینه حساب باشد")
-
         return data
 
     def update(self, instance, validated_data):

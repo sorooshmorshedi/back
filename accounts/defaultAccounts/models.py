@@ -25,6 +25,8 @@ class DefaultAccount(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
                                      blank=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccountsAsCostCenter',
+                                   blank=True, null=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
     programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)

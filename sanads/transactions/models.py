@@ -25,6 +25,8 @@ class Transaction(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactions')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactions', blank=True,
                                      null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionsAsCostCenter',
+                                   blank=True, null=True)
     date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='transaction', blank=True, null=True)
@@ -137,6 +139,7 @@ class Transaction(BaseModel):
                                                                                   item.documentNumber, str(item.date)),
                 account=item.account,
                 floatAccount=item.floatAccount,
+                costCenter=item.costCenter,
                 financial_year=sanad.financial_year
             )
 
@@ -157,6 +160,7 @@ class Transaction(BaseModel):
                 explanation="بابت {0} {1} طی {0} شماره {2}".format(rp, ', '.join(typeNames), self.code),
                 account=self.account,
                 floatAccount=self.floatAccount,
+                costCenter=self.costCenter,
                 financial_year=sanad.financial_year
             )
 
@@ -188,6 +192,8 @@ class TransactionItem(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems',
                                      blank=True, null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItemsAsCostCenter',
+                                   blank=True, null=True)
     cheque = models.OneToOneField(Cheque, on_delete=models.CASCADE, related_name='transactionItem', blank=True,
                                   null=True)
 

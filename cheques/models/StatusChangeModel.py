@@ -16,10 +16,15 @@ class StatusChange(BaseModel):
     bedAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequeStatusChangesAsBedAccount')
     bedFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
                                         related_name='chequeStatusChangesAsBesAccount', blank=True, null=True)
+    bedCostCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
+                                      related_name='chequeStatusChangesAsBesAccountAsCostCenter', blank=True, null=True)
     besAccount = models.ForeignKey(Account, on_delete=models.PROTECT,
                                    related_name='chequeStatusChangesAsBedFloatAccount')
     besFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
                                         related_name='chequeStatusChangesAsBesFloatAccount', blank=True, null=True)
+    besCostCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT,
+                                      related_name='chequeStatusChangesAsBesFloatAccountAsCostCenter', blank=True,
+                                      null=True)
 
     date = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True, null=True)
@@ -104,13 +109,14 @@ class StatusChange(BaseModel):
             explanation=explanation,
             account=self.bedAccount,
             floatAccount=self.bedFloatAccount,
+            costCenter=self.bedCostCenter,
             financial_year=sanad.financial_year
         )
         sanad.items.create(
             bes=value,
             explanation=explanation,
             account=self.besAccount,
-            floatAccount=self.besFloatAccount,
+            costCenter=self.besCostCenter,
             financial_year=sanad.financial_year
         )
         sanad.type = 'temporary'

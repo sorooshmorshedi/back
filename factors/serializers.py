@@ -21,6 +21,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 class ExpenseListRetrieveSerializer(ExpenseSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
 
     class Meta(ExpenseSerializer.Meta):
         pass
@@ -35,6 +36,7 @@ class FactorExpenseSerializer(serializers.ModelSerializer):
 class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     expense = ExpenseListRetrieveSerializer(read_only=True, many=False)
 
     class Meta:
@@ -143,6 +145,7 @@ class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
     items = FactorItemRetrieveSerializer(read_only=True, many=True)
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
@@ -162,6 +165,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
 class NotPaidFactorsSerializer(FactorSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     payments = FactorPaymentSerializer(read_only=True, many=True)
     sum = serializers.SerializerMethodField()
 

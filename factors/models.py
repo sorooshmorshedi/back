@@ -25,6 +25,8 @@ class Expense(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpense')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpense', null=True,
                                      blank=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenseAsCostCenter',
+                                   blank=True, null=True)
     type = models.CharField(max_length=10, choices=EXPENSE_TYPES)
     explanation = models.CharField(max_length=255, blank=True)
 
@@ -60,6 +62,8 @@ class Factor(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True,
                                      null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorsAsCostCenter',
+                                   blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
     paidValue = models.DecimalField(default=0, max_digits=24, decimal_places=0)
@@ -261,6 +265,8 @@ class FactorExpense(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpenses')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenses', blank=True,
                                      null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpensesAsCostCenter',
+                                   blank=True, null=True)
     value = models.DecimalField(max_digits=24, decimal_places=0)
     explanation = models.CharField(max_length=255, blank=True)
 

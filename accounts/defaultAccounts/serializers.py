@@ -8,7 +8,8 @@ from accounts.defaultAccounts.models import DefaultAccount
 class DefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultAccount
-        fields = ('id', 'name', 'explanation', 'account', 'floatAccount', 'usage')
+        fields = '__all__'
+        read_only_fields = ('programingName',)
 
     def validate(self, data):
         AccountValidator.tafsili(data)
@@ -19,9 +20,8 @@ class DefaultAccountSerializer(serializers.ModelSerializer):
 class DefaultAccountListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True)
     floatAccount = FloatAccountSerializer(read_only=True)
+    costCenter = FloatAccountSerializer(read_only=True)
 
     class Meta:
         model = DefaultAccount
         fields = '__all__'
-
-

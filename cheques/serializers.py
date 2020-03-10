@@ -22,8 +22,10 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         if 'bedAccount' not in data or 'besAccount' not in data:
             raise serializers.ValidationError("حساب بدهکار و یا بستانکار انتخاب نشده است")
 
-        AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount')
-        AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount')
+        AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount',
+                                 cost_center_key='besCostCenter')
+        AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount',
+                                 cost_center_key='bedCostCenter')
 
         if data['bedAccount'] == data['besAccount']:
             raise serializers.ValidationError("حساب بدهکار و بستانکار نمی تواند یکی باشد")
@@ -74,6 +76,7 @@ class ChequebookCreateUpdateSerializer(serializers.ModelSerializer):
 class ChequebookListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
 
     class Meta:
         model = Chequebook
@@ -112,6 +115,7 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
 class ChequeListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     statusChanges = StatusChangeListRetrieveSerializer(read_only=True, many=True)
 
     chequebook = ChequebookListRetrieveSerializer(read_only=True, many=False)

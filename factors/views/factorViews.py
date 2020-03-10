@@ -256,7 +256,8 @@ def getNotPaidFactors(request):
         .prefetch_related('items') \
         .prefetch_related('payments') \
         .prefetch_related('account') \
-        .prefetch_related('floatAccount')
+        .prefetch_related('floatAccount') \
+        .prefetch_related('costCenter')
     res = Response(NotPaidFactorsSerializer(qs, many=True).data)
     return res
 
@@ -539,6 +540,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
+                costCenter=factor.costCenter,
                 bed=first_row_bed,
                 bes=first_row_bes,
                 explanation=explanation,
@@ -548,6 +550,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=getDefaultAccount(account, user).account,
                 floatAccount=getDefaultAccount(account, user).floatAccount,
+                costCenter=getDefaultAccount(account, user).costCenter,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -562,6 +565,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=getDefaultAccount(account, user).account,
                 floatAccount=getDefaultAccount(account, user).floatAccount,
+                costCenter=getDefaultAccount(account, user).costCenter,
                 bed=first_row_bed,
                 bes=first_row_bes,
                 explanation=explanation,
@@ -570,6 +574,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
+                costCenter=factor.costCenter,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -585,6 +590,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=factor.account,
                 floatAccount=factor.floatAccount,
+                costCenter=factor.costCenter,
                 bed=first_row_bed,
                 bes=first_row_bes,
                 explanation=explanation,
@@ -593,6 +599,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=getDefaultAccount('tax', user).account,
                 floatAccount=getDefaultAccount('tax', user).floatAccount,
+                costCenter=getDefaultAccount('tax', user).costCenter,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -607,6 +614,7 @@ class DefiniteFactor(APIView):
                 sanad.items.create(
                     account=e.expense.account,
                     floatAccount=e.expense.floatAccount,
+                    costCenter=e.expense.costCenter,
                     bed=e.value,
                     explanation=explanation,
                     financial_year=sanad.financial_year
@@ -614,6 +622,7 @@ class DefiniteFactor(APIView):
                 sanad.items.create(
                     account=e.account,
                     floatAccount=e.floatAccount,
+                    costCenter=e.costCenter,
                     bes=e.value,
                     explanation=explanation,
                     financial_year=sanad.financial_year
@@ -670,6 +679,7 @@ class DefiniteFactor(APIView):
         sanad.items.create(
             account=factor.account,
             floatAccount=factor.floatAccount,
+            costCenter=factor.costCenter,
             bed=factor.sum,
             explanation=explanation,
             financial_year=sanad.financial_year
@@ -694,6 +704,7 @@ class DefiniteFactor(APIView):
             sanad.items.create(
                 account=getDefaultAccount('profitAndLossFromBuying', user).account,
                 floatAccount=getDefaultAccount('profitAndLossFromBuying', user).floatAccount,
+                costCenter=getDefaultAccount('profitAndLossFromBuying', user).costCenter,
                 bed=bed,
                 bes=bes,
                 explanation=explanation,

@@ -13,6 +13,8 @@ class Chequebook(BaseModel):
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequebook')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequebook', blank=True,
                                      null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequebooksAsCostCenter',
+                                   blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     serial_from = models.IntegerField()
     serial_to = models.IntegerField()
@@ -51,6 +53,7 @@ class Chequebook(BaseModel):
                 received_or_paid=Cheque.PAID,
                 account=self.account,
                 floatAccount=self.floatAccount,
+                costCenter=self.costCenter,
                 bankName=self.account.bank_name,
                 branchName=self.account.branch_name,
                 accountNumber=self.account.account_number,

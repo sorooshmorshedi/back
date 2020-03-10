@@ -21,6 +21,7 @@ class TransactionItemCreateUpdateSerializer(serializers.ModelSerializer):
 class TransactionItemListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     type = DefaultAccountListRetrieveSerializer(read_only=True, many=False)
     cheque = ChequeListRetrieveSerializer(read_only=True, many=False)
 

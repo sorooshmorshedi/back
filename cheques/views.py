@@ -241,6 +241,7 @@ class ChangeChequeStatus(APIView):
         to_status = data.get('to_status')
         account = Account.objects.filter(pk=data.get('account')).first()
         floatAccount = FloatAccount.objects.filter(pk=data.get('floatAccount')).first()
+        costCenter = FloatAccount.objects.filter(pk=data.get('costCenter')).first()
         explanation = data.get('explanation')
 
         sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code', None)).first()
@@ -254,6 +255,7 @@ class ChangeChequeStatus(APIView):
             to_status=to_status,
             account=account,
             floatAccount=floatAccount,
+            costCenter=costCenter,
             explanation=explanation,
             sanad=sanad
         )
@@ -288,12 +290,14 @@ class StatusChangeView(generics.RetrieveDestroyAPIView):
             else:
                 cheque.account = None
                 cheque.floatAccount = None
+                cheque.costCenter = None
                 cheque.value = None
                 cheque.due = None
                 cheque.date = None
                 cheque.explanation = ''
                 cheque.lastAccount = None
                 cheque.lastFloatAccount = None
+                cheque.lastCostCenter = None
 
         if cheque.has_transaction:
             cheque.has_transaction = False
@@ -308,12 +312,15 @@ class StatusChangeView(generics.RetrieveDestroyAPIView):
         if cheque.received_or_paid == Cheque.RECEIVED:
             lastAccount = instance.besAccount
             lastFloatAccount = instance.besFloatAccount
+            lastCostCenter = instance.besCostCenter
         else:
             lastAccount = instance.bedAccount
             lastFloatAccount = instance.bedFloatAccount
+            lastCostCenter = instance.bedCostCenter
 
         cheque.lastAccount = lastAccount
         cheque.lastFloatAccount = lastFloatAccount
+        cheque.lastCostCenter = lastCostCenter
 
         cheque.save()
 
@@ -338,9 +345,13 @@ def revertChequeInFlowStatus(request, pk):
     data['financial_year'] = request.user.active_financial_year.id
     if statusChange.besFloatAccount:
         data['bedFloatAccount'] = statusChange.besFloatAccount.id
+    if statusChange.besCostCenter:
+        data['bedCostCenter'] = statusChange.besCostCenter.id
     data['besAccount'] = statusChange.bedAccount.id
     if statusChange.bedFloatAccount:
         data['besFloatAccount'] = statusChange.bedFloatAccount
+    if statusChange.bedCostCenter:
+        data['besCostCenter'] = statusChange.bedCostCenter
 
     serialized = StatusChangeSerializer(data=data)
     if serialized.is_valid():
@@ -349,11 +360,19 @@ def revertChequeInFlowStatus(request, pk):
             if 'bedFloatAccount' in data:
                 cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
                     pk=data['bedFloatAccount'])
+            if 'bedCostCenter' in data:
+                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear(request.user).get(
+                    pk=data['bedCostCenter'])
+
         else:
             cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['besAccount'])
             if 'besFloatAccount' in data:
                 cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
                     pk=data['besFloatAccount'])
+            if 'besCostCenter' in data:
+                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear(request.user).get(
+                    pk=data['besCostCenter'])
+
         cheque.status = data['toStatus']
         cheque.save()
         serialized.save()

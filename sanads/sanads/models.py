@@ -85,7 +85,7 @@ class SanadItem(BaseModel):
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True,
                                      null=True, verbose_name='حساب شناور')
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, blank=True, null=True,
-                                   verbose_name='مرکز هزینه')
+                                   verbose_name='مرکز هزینه', related_name="sanadItemsAsCostCenter")
 
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
