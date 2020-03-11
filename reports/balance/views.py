@@ -18,7 +18,7 @@ def accountBalanceView(request):
     accounts = Account.objects.inFinancialYear(request.user) \
         .annotate(bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0)) \
         .annotate(bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0)) \
-        .prefetch_related('floatAccountGroup').prefetch_related('type') \
+        .prefetch_related('floatAccountGroup').prefetch_related('costCenterGroup').prefetch_related('type') \
         .order_by('code')
 
     for account in accounts:
@@ -42,8 +42,11 @@ def accountBalanceView(request):
             account._type = AccountTypeSerializer(account.type).data
         if account.floatAccountGroup:
             account._floatAccountGroup = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
+        if account.costCenterGroup:
+            account._costCenterGroup = BalanceFloatAccountGroupSerializer(account.costCenterGroup).data
 
         account._floatAccounts = []
+        account._costCenters = []
         if account.floatAccountGroup:
             floatAccounts = FloatAccount.objects.inFinancialYear(request.user) \
                 .filter(floatAccountGroups__in=[account.floatAccountGroup]) \
@@ -63,6 +66,25 @@ def accountBalanceView(request):
                     floatAccount.bed_remain = 0
                 account._floatAccounts.append(BalanceFloatAccountSerializer(floatAccount).data)
 
+        if account.costCenterGroup:
+            floatAccounts = FloatAccount.objects.inFinancialYear(request.user) \
+                .filter(floatAccountGroups__in=[account.costCenterGroup]) \
+                .annotate(bed_sum=Coalesce(Sum('sanadItemsAsCostCenter__bed',
+                                               filter=Q(sanadItemsAsCostCenter__account=account) & filters), 0)) \
+                .annotate(bes_sum=Coalesce(Sum('sanadItemsAsCostCenter__bes',
+                                               filter=Q(sanadItemsAsCostCenter__account=account) & filters), 0)) \
+                .prefetch_related('floatAccountGroups')
+
+            for floatAccount in floatAccounts:
+                remain = floatAccount.bed_sum - floatAccount.bes_sum
+                if remain > 0:
+                    floatAccount.bed_remain = remain
+                    floatAccount.bes_remain = 0
+                else:
+                    floatAccount.bes_remain = -remain
+                    floatAccount.bed_remain = 0
+                account._costCenters.append(BalanceFloatAccountSerializer(floatAccount).data)
+
     res = Response(BalanceAccountSerializer(accounts, many=True).data)
     return res
 
@@ -71,26 +93,41 @@ def accountBalanceView(request):
 def floatAccountBalanceByGroupView(request):
     filters = get_account_sanad_items_filter(request)
 
-    floatAccounts = FloatAccount.objects.inFinancialYear(request.user)
-    floatAccountGroups = FloatAccountGroup.objects.inFinancialYear(request.user).prefetch_related('floatAccounts')
+    is_cost_center = request.GET.get('is_cost_center') == 'true'
+
+    floatAccounts = FloatAccount.objects.inFinancialYear(request.user).filter(is_cost_center=is_cost_center)
+    floatAccountGroups = FloatAccountGroup.objects.inFinancialYear(request.user).prefetch_related(
+        'floatAccounts').filter(is_cost_center=is_cost_center)
+
+    if is_cost_center:
+        sanad_item_key = "sanadItemsAsCostCenter"
+        float_account_group_key = "costCenterGroup"
+    else:
+        sanad_item_key = "sanadItems"
+        float_account_group_key = "floatAccountGroup"
 
     for floatAccountGroup in floatAccountGroups.all():
         annotates = {
             "bed_sum_{}".format(floatAccountGroup.id): Coalesce(
                 Sum(
-                    'sanadItems__bed',
-                    filter=(filters & Q(sanadItems__account__floatAccountGroup=floatAccountGroup))
+                    '{}__bed'.format(sanad_item_key),
+                    filter=(filters & Q(**{
+                        '{}__account__{}'.format(sanad_item_key, float_account_group_key): floatAccountGroup
+                    }))
                 ),
                 0
             ),
             "bes_sum_{}".format(floatAccountGroup.id): Coalesce(
                 Sum(
-                    'sanadItems__bes',
-                    filter=(filters & Q(sanadItems__account__floatAccountGroup=floatAccountGroup))
+                    '{}__bes'.format(sanad_item_key),
+                    filter=(filters & Q(**{
+                        '{}__account__{}'.format(sanad_item_key, float_account_group_key): floatAccountGroup
+                    }))
                 ),
                 0
             ),
         }
+
         floatAccounts = floatAccounts.annotate(**annotates)
 
     res = []
@@ -143,10 +180,17 @@ def floatAccountBalanceByGroupView(request):
 def floatAccountBalanceView(request):
     filters = get_account_sanad_items_filter(request)
 
+    is_cost_center = request.GET.get('is_cost_center') == 'true'
+
+    if is_cost_center:
+        sanad_item_key = "sanadItemsAsCostCenter"
+    else:
+        sanad_item_key = "sanadItems"
+
     floatAccounts = FloatAccount.objects.inFinancialYear(request.user).annotate(
-        bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0),
-        bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0),
-    )
+        bed_sum=Coalesce(Sum('{}__bed'.format(sanad_item_key), filter=filters), 0),
+        bes_sum=Coalesce(Sum('{}__bes'.format(sanad_item_key), filter=filters), 0),
+    ).filter(is_cost_center=is_cost_center)
 
     res = []
     for floatAccount in floatAccounts:
