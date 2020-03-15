@@ -118,10 +118,6 @@ class FactorItemSerializer(serializers.ModelSerializer):
 class FactorItemRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListRetrieveSerializer(read_only=True, many=False)
     warehouse = WarehouseSerializer(read_only=True, many=False)
-    is_editable = serializers.SerializerMethodField()
-
-    def get_is_editable(self, obj):
-        return obj.get_is_editable()
 
     class Meta:
         model = FactorItem

@@ -199,20 +199,6 @@ class Factor(BaseModel):
             return codes
 
     @property
-    def has_uneditable_item(self):
-        for item in self.items.all():
-            if not item.get_is_editable():
-                return True
-        return False
-
-    @property
-    def has_editable_item(self):
-        for item in self.items.all():
-            if item.get_is_editable():
-                return True
-        return False
-
-    @property
     def is_last_definite_factor(self):
         count = Factor.objects \
             .filter(financial_year=self.financial_year,
@@ -239,10 +225,6 @@ class Factor(BaseModel):
     def is_deletable(self):
         if self.is_definite:
             return self.is_last_definite_factor
-            # if self.type in Factor.BUY_GROUP:
-            #     return self.is_last_definite_factor and not self.is_output_after_this
-            # else:
-            #     return self.is_last_definite_factor
         else:
             return True
 
@@ -250,10 +232,6 @@ class Factor(BaseModel):
     def is_editable(self):
         if self.is_definite:
             return self.is_last_definite_factor
-            # if self.type in Factor.BUY_GROUP:
-            #     res = not self.is_output_after_this
-            # else:
-            #     res = self.is_last_definite_factor
         else:
             return True
 
@@ -305,8 +283,6 @@ class FactorItem(BaseModel):
     total_input_count = models.IntegerField(blank=True, default=0)
     total_output_count = models.IntegerField(blank=True, default=0)
 
-    is_editable = models.BooleanField(default=1)
-
     def __str__(self):
         return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}, total_input: {}, total_output: {}" \
             .format(
@@ -334,22 +310,6 @@ class FactorItem(BaseModel):
     @property
     def totalValue(self):
         return self.value - self.discount
-
-    def get_is_editable(self):
-        ware = self.ware
-        if ware.pricingType == Ware.FIFO:
-            return self.is_editable
-        else:
-            qs = FactorItem.objects.filter(
-                financial_year=self.financial_year,
-                ware=ware,
-                factor__type__in=Factor.SALE_GROUP,
-                factor__is_definite=True,
-                factor__definition_date__gt=str(self.factor.created_at)
-            ).count()
-            if qs:
-                return False
-            return True
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.discountValue = self.discount

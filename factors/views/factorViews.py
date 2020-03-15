@@ -57,7 +57,6 @@ class FactorModelView(viewsets.ModelViewSet):
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
 
-    @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         pk = kwargs['pk']
         queryset = self.get_queryset()
@@ -73,7 +72,6 @@ class FactorModelView(viewsets.ModelViewSet):
         res = super().destroy(request, *args, **kwargs)
         return res
 
-    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         request.data['factor']['financial_year'] = request.user.active_financial_year.id
 
@@ -94,7 +92,6 @@ class FactorModelView(viewsets.ModelViewSet):
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
 
-    @transaction.atomic()
     def update(self, request, *args, **kwargs):
 
         factor = self.get_object()

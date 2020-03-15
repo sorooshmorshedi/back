@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Sum
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
@@ -150,10 +149,6 @@ class Ware(BaseModel):
         remain_count = last_factor_item.remain_count
         fee = remain_value / remain_count
 
-        self.factorItems.inFinancialYear() \
-            .filter(factor__is_definite=True, id__lte=last_factor_item.id) \
-            .update(is_editable=0)
-
         return fee * count, [{'fee': fee, 'count': count}]
 
     def initial_factor_item_and_count_for_fifo(self, user, last_factor_item):
@@ -174,7 +169,6 @@ class Ware(BaseModel):
 
     def calculated_output_value_for_fifo(self, user, needed_count, last_factor_item):
         from factors.models import Factor
-        from factors.models import FactorItem
 
         initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
 
@@ -225,8 +219,6 @@ class Ware(BaseModel):
                 })
                 needed_count = 0
 
-        FactorItem.objects.inFinancialYear().filter(id__in=uneditableFactorItemIds).update(is_editable=0)
-
         return total_value, fees
 
     def revert_fifo(self, user, returned_count, last_factor_item):
@@ -262,9 +254,6 @@ class Ware(BaseModel):
             else:
                 editableFactorItemIds.append(factorItem.id)
                 break
-
-        from factors.models import FactorItem
-        FactorItem.objects.inFinancialYear().filter(id__in=editableFactorItemIds).update(is_editable=1)
 
 
 class WareBalance(BaseModel):
