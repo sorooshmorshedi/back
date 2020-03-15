@@ -479,12 +479,6 @@ class DefiniteFactor(APIView):
         factor.definition_date = None
         factor.save()
 
-        if factor.type in Factor.SALE_GROUP:
-            for item in factor.items.all():
-                if item.ware.pricingType == Ware.FIFO:
-                    last_factor_item = item.ware.last_factor_item(user, exclude_factors=[factor.id])
-                    item.ware.revert_fifo(user, item.count, last_factor_item)
-
         return factor
 
     @staticmethod

@@ -221,40 +221,6 @@ class Ware(BaseModel):
 
         return total_value, fees
 
-    def revert_fifo(self, user, returned_count, last_factor_item):
-        return
-        from factors.models import Factor
-
-        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
-
-        factorItems = self.factorItems.inFinancialYear() \
-            .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
-            .order_by('-factor__definition_date')
-
-        initial_factor_definition_date = initialFactorItem.factor.definition_date
-        if initial_factor_definition_date:
-            factorItems = factorItems.filter(factor__definition_date__lte=initial_factor_definition_date)
-
-        editableFactorItemIds = []
-        for factorItem in factorItems.all():
-
-            if factorItem == initialFactorItem:
-                remained_count = count
-            else:
-                remained_count = 0
-
-            used_count = factorItem.count - remained_count
-
-            if returned_count < used_count:
-                remained_count += returned_count
-                break
-            elif returned_count > used_count:
-                editableFactorItemIds.append(factorItem.id)
-                returned_count -= used_count
-            else:
-                editableFactorItemIds.append(factorItem.id)
-                break
-
 
 class WareBalance(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresBalance')
