@@ -16,13 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url, include
-from rest_framework.schemas import get_schema_view
-from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework.authtoken.views import obtain_auth_token
 
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
-# existing serializer, viewset, router registrations code
 from helpers.views.TestView import TestView
 
 ...
@@ -36,7 +34,7 @@ urlpatterns = [
 
     url(r'^home/', include('home.urls')),
 
-    url(r'^login$', obtain_jwt_token, name='login'),
+    url(r'^login$', obtain_auth_token, name='login'),
     url(r'^users/', include('users.urls')),
     url(r'^companies/', include('companies.urls')),
     url(r'^accounts/', include('accounts.urls')),

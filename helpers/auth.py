@@ -1,5 +1,8 @@
+from rest_framework import exceptions
+from rest_framework.authentication import TokenAuthentication, get_authorization_header
 from rest_framework.permissions import BasePermission
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
+from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
 
 
 class BasicCRUDPermission(BasePermission):
@@ -25,11 +28,14 @@ class BasicCRUDPermission(BasePermission):
         return user.has_perm(perm)
 
 
-class TokenAuthSupportQueryString(JSONWebTokenAuthentication):
-    def get_jwt_value(self, request):
-        token = request.query_params.get('token', None)
-        if token:
-            return token
-        else:
-            return super(TokenAuthSupportQueryString, self).get_jwt_value(request)
+class TokenAuthSupportQueryString(TokenAuthentication):
 
+    def authenticate(self, request):
+        token = request.query_params.get("token", None)
+
+        if token:
+            result = self.authenticate_credentials(token)
+        else:
+            result = super(TokenAuthSupportQueryString, self).authenticate(request)
+
+        return result

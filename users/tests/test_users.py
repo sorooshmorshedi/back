@@ -1,14 +1,14 @@
 from django.urls.base import reverse
 from rest_framework import status
 
-from helpers.test import ITestCase
+from helpers.test import MTestCase
 from users.models import User
 
 
-class UserTest(ITestCase):
+class UserTest(MTestCase):
 
     def test_retrieve_user(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_authenticate(user)
 
         response = self.client.get(reverse('retrieve-user'))
@@ -18,7 +18,7 @@ class UserTest(ITestCase):
         self.client.logout()
 
     def test_set_active_company(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_authenticate(user)
 
         from companies.tests.test_companies import CompanyTest
@@ -38,9 +38,6 @@ class UserTest(ITestCase):
         pass
 
     @staticmethod
-    def create_user(username=None, password='123abc456'):
-        username = username if username else ITestCase.faker.name()
-        user = User.objects.create_user(username, password=password)
+    def get_user():
+        user = User.objects.first()
         return user
-
-

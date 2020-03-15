@@ -170,7 +170,7 @@ class Factor(BaseModel):
     @staticmethod
     def getFirstPeriodInventory(user):
         try:
-            return Factor.objects.inFinancialYear(user).get(code=0)
+            return Factor.objects.inFinancialYear().get(code=0)
         except Factor.DoesNotExist:
             return None
 
@@ -185,7 +185,7 @@ class Factor(BaseModel):
 
             codes[type] = {}
             try:
-                last_factor = Factor.objects.inFinancialYear(user) \
+                last_factor = Factor.objects.inFinancialYear() \
                     .filter(type=type, is_definite=1).latest('code')
                 codes[type]['code'] = last_factor.code + 1
                 codes[type]['last_id'] = last_factor.pk

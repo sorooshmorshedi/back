@@ -104,7 +104,7 @@ class ClosingBaseView(APIView):
         serialized.save()
 
     def resetAccounts(self):
-        self.accounts = Account.objects.inFinancialYear(self.user) \
+        self.accounts = Account.objects.inFinancialYear() \
             .filter(level=Account.TAFSILI) \
             .annotate(bed_sum=Coalesce(Sum('sanadItems__bed'), 0)) \
             .annotate(bes_sum=Coalesce(Sum('sanadItems__bes'), 0)) \
@@ -140,16 +140,16 @@ class CloseAccountsView(ClosingBaseView):
 
     def closeTemporaries(self):
         explanation = 'بابت بستن حساب های موقت'
-        account = getDefaultAccount('currentEarnings', self.user).account
+        account = getDefaultAccount('currentEarnings').account
         for code in self.TemporaryGroupCodes:
             self.createSanad(code, account, explanation)
 
     def closeEarnings(self):
         self.resetAccounts()
         explanation = 'بابت بستن حساب سود و زیان جاری'
-        account = getDefaultAccount('currentEarnings', self.user).account
+        account = getDefaultAccount('currentEarnings').account
         remain = account.get_remain()
-        destination_account = getDefaultAccount('retainedEarnings', self.user).account
+        destination_account = getDefaultAccount('retainedEarnings').account
 
         items = []
         value = remain['value']
@@ -181,7 +181,7 @@ class CloseAccountsView(ClosingBaseView):
     def closePermanents(self):
         self.resetAccounts()
         explanation = 'بابت بستن حساب های دائمی'
-        account = getDefaultAccount('closing', self.user).account
+        account = getDefaultAccount('closing').account
         for code in self.PermanentGroupCodes:
             self.createSanad(code, account, explanation)
 
@@ -203,7 +203,7 @@ class CloseAccountsView(ClosingBaseView):
 
     def openingSanad(self, financial_year):
         explanation = 'بابت افتتاح حساب'
-        account = getDefaultAccount('closing', self.user).account
+        account = getDefaultAccount('closing').account
         items = []
         for code in self.PermanentGroupCodes:
             res = self.createSanadItems(code, account)
@@ -231,37 +231,37 @@ class MoveAccountsView(ClosingBaseView):
         destination_accounts = Account.objects \
             .filter(financial_year=self.destination_financial_year) \
             .exclude(financial_year=self.user.active_financial_year)
-        source_accounts = Account.objects.inFinancialYear(self.user)
+        source_accounts = Account.objects.inFinancialYear()
 
         for destination_account in destination_accounts:
             if destination_account.code in [account.code for account in source_accounts]:
                 detail = "در سال مالی جدید حساب با کد {} وجود دارد".format(destination_account.code)
                 raise ValidationError(detail=detail)
 
-        self.destination_financial_year.accounts.add(*Account.objects.inFinancialYear(self.user))
-        self.destination_financial_year.persons.add(*Person.objects.inFinancialYear(self.user))
-        self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear(self.user))
-        self.destination_financial_year.floatAccounts.add(*FloatAccount.objects.inFinancialYear(self.user))
-        self.destination_financial_year.floatAccountGroups.add(*FloatAccountGroup.objects.inFinancialYear(self.user))
+        self.destination_financial_year.accounts.add(*Account.objects.inFinancialYear())
+        self.destination_financial_year.persons.add(*Person.objects.inFinancialYear())
+        self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear())
+        self.destination_financial_year.floatAccounts.add(*FloatAccount.objects.inFinancialYear())
+        self.destination_financial_year.floatAccountGroups.add(*FloatAccountGroup.objects.inFinancialYear())
         self.destination_financial_year.floatAccountRelations.add(
-            *FloatAccountRelation.objects.inFinancialYear(self.user))
-        self.destination_financial_year.defaultAccounts.add(*DefaultAccount.objects.inFinancialYear(self.user))
+            *FloatAccountRelation.objects.inFinancialYear())
+        self.destination_financial_year.defaultAccounts.add(*DefaultAccount.objects.inFinancialYear())
 
     @transaction.atomic()
     def moveWares(self):
         destination_wares = Ware.objects \
             .filter(financial_year=self.destination_financial_year) \
             .exclude(financial_year=self.user.active_financial_year)
-        source_wares = Ware.objects.inFinancialYear(self.user)
+        source_wares = Ware.objects.inFinancialYear()
 
         for destination_wares in destination_wares:
             if destination_wares.code in [ware.code for ware in source_wares]:
                 detail = "در سال مالی جدید کالا با کد {} وجود دارد".format(destination_wares.code)
                 raise ValidationError(detail=detail)
 
-        self.destination_financial_year.wares.add(*Ware.objects.inFinancialYear(self.user))
-        self.destination_financial_year.warehouses.add(*Warehouse.objects.inFinancialYear(self.user))
-        self.destination_financial_year.wareLevels.add(*WareLevel.objects.inFinancialYear(self.user))
-        self.destination_financial_year.units.add(*Unit.objects.inFinancialYear(self.user))
+        self.destination_financial_year.wares.add(*Ware.objects.inFinancialYear())
+        self.destination_financial_year.warehouses.add(*Warehouse.objects.inFinancialYear())
+        self.destination_financial_year.wareLevels.add(*WareLevel.objects.inFinancialYear())
+        self.destination_financial_year.units.add(*Unit.objects.inFinancialYear())
 
 #         Check SalesGroup factors for first period inventory factor

@@ -20,8 +20,6 @@ CHEQUE_STATUSES = (
 
 
 class Cheque(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cheques')
-
     RECEIVED = 'r'
     PAID = 'p'
 
@@ -36,6 +34,8 @@ class Cheque(BaseModel):
         (COMPANY, 'شرکت'),
         (OTHER_COMPANY, 'شرکت سایرین')
     )
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cheques')
     serial = models.CharField(max_length=255)
     chequebook = models.ForeignKey(Chequebook, on_delete=models.CASCADE, related_name='cheques', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='receivedCheques', blank=True,
@@ -60,8 +60,9 @@ class Cheque(BaseModel):
                                     null=True)
     lastFloatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='lastCheques', blank=True,
                                          null=True)
-    lastCostCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='lastChequesAsCostCenter', blank=True,
-                                         null=True)
+    lastCostCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='lastChequesAsCostCenter',
+                                       blank=True,
+                                       null=True)
 
     bankName = models.CharField(max_length=100, null=True, blank=True)
     branchName = models.CharField(max_length=100, null=True, blank=True)
@@ -96,7 +97,7 @@ class Cheque(BaseModel):
                 transaction_item.value = self.value
                 transaction_item.save()
 
-        if not self.lastAccount:
+        if self.status == 'blank' and self.lastAccount != self.account:
             self.lastAccount = self.account
             self.lastFloatAccount = self.floatAccount
             self.lastCostCenter = self.costCenter
@@ -140,7 +141,7 @@ class Cheque(BaseModel):
                     data['bedCostCenter'] = self.costCenter.id
 
             elif to_status == 'notPassed':
-                defaultAccount = getDefaultAccount('receivedCheque', user)
+                defaultAccount = getDefaultAccount('receivedCheque')
                 lastAccount = defaultAccount.account
                 lastFloatAccount = defaultAccount.floatAccount
                 lastCostCenter = defaultAccount.costCenter
@@ -171,7 +172,7 @@ class Cheque(BaseModel):
                     lastFloatAccount = self.floatAccount
                     data['besFloatAccount'] = self.floatAccount.id
                 if self.costCenter:
-                    lastCostCenter  = self.costCenter
+                    lastCostCenter = self.costCenter
                     data['besCostCenter'] = self.costCenter.id
 
             elif to_status == 'passed':
@@ -185,7 +186,7 @@ class Cheque(BaseModel):
                     data['besCostCenter'] = self.chequebook.costCenter.id
 
             elif to_status == 'notPassed':
-                defaultAccount = getDefaultAccount('paidCheque', user)
+                defaultAccount = getDefaultAccount('paidCheque')
                 lastAccount = defaultAccount.account
                 lastFloatAccount = defaultAccount.floatAccount
                 lastCostCenter = defaultAccount.costCenter

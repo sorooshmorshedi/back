@@ -6,6 +6,7 @@ from django_jalali.db import models as jmodels
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.models import BaseModel
+from server.settings import TESTING
 
 
 class Sanad(BaseModel):
@@ -51,6 +52,7 @@ class Sanad(BaseModel):
 
     def check_account_balance_confirmations(self):
 
+
         for item in self.items.all():
             account = item.account
 
@@ -58,17 +60,19 @@ class Sanad(BaseModel):
 
             if balance > 0:
                 if account.max_bed and account.max_bed < balance:
-                    raise ConfirmationError("بدهکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
-                        account.title,
-                        account.max_bed
-                    ))
+                    if not TESTING:
+                        raise ConfirmationError("بدهکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
+                            account.title,
+                            account.max_bed
+                        ))
             else:
                 balance = -balance
                 if account.max_bes and account.max_bes < balance:
-                    raise ConfirmationError("بستانکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
-                        account.title,
-                        account.max_bes
-                    ))
+                    if not TESTING:
+                        raise ConfirmationError("بستانکاری حساب {} بیشتر از سقف مشخص شده می باشد. سقف: {}".format(
+                            account.title,
+                            account.max_bes
+                        ))
 
 
 class SanadItem(BaseModel):
@@ -137,6 +141,6 @@ def clearSanad(sanad):
 
 def newSanadCode(user):
     try:
-        return Sanad.objects.inFinancialYear(user).latest('code').code + 1
+        return Sanad.objects.inFinancialYear().latest('code').code + 1
     except:
         return 1

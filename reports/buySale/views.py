@@ -59,7 +59,7 @@ class BuySaleView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear(self.request.user)\
+        return FactorItem.objects.inFinancialYear()\
             .filter(factor__is_definite=True)\
             .prefetch_related('factor__account')\
             .prefetch_related('ware') \

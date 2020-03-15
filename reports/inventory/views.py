@@ -40,7 +40,7 @@ class WareInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear(self.request.user)\
+        queryset = FactorItem.objects.inFinancialYear()\
             .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
@@ -78,7 +78,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
 
     def get_queryset(self):
 
-        last_factor_item = Subquery(FactorItem.objects.inFinancialYear(self.request.user)
+        last_factor_item = Subquery(FactorItem.objects.inFinancialYear()
                                     .filter(ware_id=OuterRef('ware_id'))
                                     .filter(factor__is_definite=True,
                                             factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
@@ -96,7 +96,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
             factorItems__factor__type__in=Factor.SALE_GROUP
         )
 
-        queryset = Ware.objects.inFinancialYear(self.request.user) \
+        queryset = Ware.objects.inFinancialYear() \
             .prefetch_related(Prefetch('factorItems', queryset=FactorItem.objects.filter(id__in=last_factor_item))) \
             .annotate(
                 input_count=Sum('factorItems__count', filter=input_filter),
@@ -138,7 +138,7 @@ class WarehouseInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear(self.request.user)\
+        queryset = FactorItem.objects.inFinancialYear()\
             .filter(factor__is_definite=True) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
@@ -210,7 +210,7 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
             input_filter &= Q(factorItems__warehouse=warehouse)
             output_filter &= Q(factorItems__warehouse=warehouse)
 
-        queryset = Ware.objects.inFinancialYear(self.request.user) \
+        queryset = Ware.objects.inFinancialYear() \
             .annotate(
                 input_count=Sum('factorItems__count', filter=input_filter),
                 output_count=Sum('factorItems__count', filter=output_filter),

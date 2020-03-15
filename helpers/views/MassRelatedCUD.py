@@ -42,13 +42,13 @@ class MassRelatedCUD:
         self.perform_create(serializer)
 
         for item in items_to_update:
-            instance = get_object_or_404(model.objects.inFinancialYear(self.user), id=item['id'])
+            instance = get_object_or_404(model.objects.inFinancialYear(), id=item['id'])
             serializer = self.update_serializer(instance, data=item)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
 
         for item_id in self.ids_to_delete:
-            instance = get_object_or_404(model.objects.inFinancialYear(self.user), id=item_id)
+            instance = get_object_or_404(model.objects.inFinancialYear(), id=item_id)
             self.perform_delete(instance)
 
     def perform_create(self, serializer):

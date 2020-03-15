@@ -8,7 +8,7 @@ router = DefaultRouter()
 router.register(r'chequebooks', ChequebookModelView, base_name='chequebooks')
 
 urlpatterns = router.urls + [
-    url(r'^cheques/(?P<pk>[0-9]+)$', ChequeApiView.as_view(), name='changeChequeStatus'),
+    url(r'^cheques/(?P<pk>[0-9]+)$', ChequeApiView.as_view(), name='chequeDetail'),
     url(r'^cheques/submit', SubmitChequeApiView.as_view(), name='submitCheque'),
     url(r'^getChequeByPosition$', ChequeByPositionApiView.as_view(), name='getChequeByPosition'),
 

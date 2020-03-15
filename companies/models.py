@@ -1,9 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django_jalali.db import models as jmodels
-from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup, FloatAccountRelation
-from accounts.defaultAccounts.models import DefaultAccount
-from wares.models import Ware, Warehouse, WareLevel, Unit
 
 
 class Company(models.Model):
@@ -34,6 +30,7 @@ class Company(models.Model):
 
 
 class FinancialYear(models.Model):
+    from django_jalali.db import models as jmodels
     objects = models.Manager()
 
     name = models.CharField(unique=True, max_length=150)
@@ -42,14 +39,3 @@ class FinancialYear(models.Model):
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
 
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')
-
-    accounts = models.ManyToManyField(Account, related_name='financial_year', blank=True)
-    floatAccounts = models.ManyToManyField(FloatAccount, related_name='financial_year', blank=True)
-    floatAccountGroups = models.ManyToManyField(FloatAccountGroup, related_name='financial_year', blank=True)
-    floatAccountRelations = models.ManyToManyField(FloatAccountRelation, related_name='financial_year', blank=True)
-    defaultAccounts = models.ManyToManyField(DefaultAccount, related_name='financial_year', blank=True)
-
-    wares = models.ManyToManyField(Ware, related_name='financial_year', blank=True)
-    warehouses = models.ManyToManyField(Warehouse, related_name='financial_year', blank=True)
-    wareLevels = models.ManyToManyField(WareLevel, related_name='financial_year', blank=True)
-    units = models.ManyToManyField(Unit, related_name='financial_year', blank=True)

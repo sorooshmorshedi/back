@@ -1,8 +1,7 @@
-import django
+from django.core.management import call_command
 from django.db.models.aggregates import Count
 
-django.setup()
-
+from helpers.test import MTestCase
 from users.models import User
 
 from accounts.accounts.models import Account
@@ -10,33 +9,38 @@ from accounts.accounts.models import Account
 from django.urls.base import reverse
 from rest_framework import status
 
-from helpers.test import ITestCase
+from users.tests.test_users import UserTest
 
 
-class AccountTest(ITestCase):
+class AccountTest(MTestCase):
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user = UserTest.get_user()
+        cls.account = AccountTest.get_account()[0]
 
     def test_create_account(self):
-        parent = Account.objects.filter(level=Account.MOEIN).first()
+        parent = self.get_account(level=Account.MOEIN)[0]
 
-        user = User.objects.first()
-        self.client.force_authenticate(user)
+        self.client.force_authenticate(self.user)
 
         response = self.client.post(reverse('accounts'), data={
             'name': self.faker.name(),
+            'account_type': Account.OTHER,
             'parent': parent.id,
         })
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_account(self):
-        account = self.get_account()
+        account = self.get_account()[0]
         new_name = 'this is a new name'
 
-        user = User.objects.first()
-        self.client.force_authenticate(user)
+        self.client.force_authenticate(self.user)
 
         response = self.client.put(reverse('accountDetail', args=[account.id]), data={
-            'name': new_name
+            'name': new_name,
+            'account_type': Account.OTHER
         })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -65,4 +69,12 @@ class AccountTest(ITestCase):
 
     @staticmethod
     def get_account(level=Account.TAFSILI):
-        return Account.objects.filter(level=level).first()
+        account = Account.objects.filter(level=level).first()
+
+        float_account_id = cost_center_id = None
+        if account.floatAccountGroup:
+            float_account_id = account.floatAccountGroup.floatAccounts.first().id
+        if account.costCenterGroup:
+            cost_center_id = account.costCenterGroup.floatAccounts.first().id
+
+        return account, float_account_id, cost_center_id

@@ -9,7 +9,7 @@ from accounts.accounts.serializers import TypeReportAccountSerializer
 
 # def getType(pName):
 #     return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
-# getType.accountTypes = AccountType.objects.inFinancialYear(request.user).all()
+# getType.accountTypes = AccountType.objects.inFinancialYear().all()
 from reports.filters import get_account_sanad_items_filter
 
 
@@ -34,7 +34,7 @@ def balanceSheetView(request):
     res = {}
     dateFilter = get_account_sanad_items_filter(request)
 
-    allAccounts = Account.objects.inFinancialYear(request.user) \
+    allAccounts = Account.objects.inFinancialYear() \
         .annotate(remain=
                   Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
                   Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)

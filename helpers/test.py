@@ -1,25 +1,35 @@
 import datetime
-import unittest
 from random import random
+from typing import Optional, Any
+
 import jdatetime
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
+from django.db.models.base import Model
 from faker import Faker
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
+
+from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
 from helpers.validators import ModelValidator
 
 
-class ITestCase(unittest.TestCase, APIClient):
+class MAPIClient(APIClient):
+    def force_authenticate(self, user: Optional[Model] = ..., token: Optional[Any] = ...) -> None:
+        super(MAPIClient, self).force_authenticate(user, token)
+        ModifyRequestMiddleware.user = user
+
+
+class MTestCase(APITestCase):
+    fixtures = ['companies.json', 'accounts.json', 'users.json', 'wares.json']
     faker = Faker('fa_IR')
 
     def setUp(self):
-        self.client = APIClient()
+        self.client = MAPIClient()
         return super().setUp()
 
     @staticmethod
     def get_fake_phone_number():
         while True:
-            phone = '09' + str(int(random() * 10**9))
+            phone = '09' + str(int(random() * 10 ** 9))
             try:
                 ModelValidator.phone_validator(phone)
                 break
@@ -29,8 +39,6 @@ class ITestCase(unittest.TestCase, APIClient):
 
     @staticmethod
     def get_fake_jalali_date():
-        date = datetime.datetime.strptime(ITestCase.faker.date(), "%Y-%m-%d")
+        date = datetime.datetime.strptime(MTestCase.faker.date(), "%Y-%m-%d")
         date = jdatetime.date.fromgregorian(date=date).strftime("%Y-%m-%d")
         return date
-
-

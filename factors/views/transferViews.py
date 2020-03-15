@@ -14,7 +14,7 @@ class TransferModelView(viewsets.ModelViewSet):
     serializer_class = TransferListRetrieveSerializer
 
     def get_queryset(self):
-        return Transfer.objects.inFinancialYear(self.request.user)
+        return Transfer.objects.inFinancialYear()
 
     def list(self, request, *args, **kwargs):
         res = super().list(request, *args, **kwargs)
@@ -71,10 +71,10 @@ class TransferModelView(viewsets.ModelViewSet):
         user = self.request.user
         inventories = []
         for item in items:
-            ware = Ware.objects.inFinancialYear(user).get(pk=item['ware'])
-            warehouse = Warehouse.objects.inFinancialYear(user).get(pk=item['output_warehouse'])
+            ware = Ware.objects.inFinancialYear().get(pk=item['ware'])
+            warehouse = Warehouse.objects.inFinancialYear().get(pk=item['output_warehouse'])
             if 'id' in item:
-                old_count = FactorItem.objects.inFinancialYear(user).get(pk=item['id']).count
+                old_count = FactorItem.objects.inFinancialYear().get(pk=item['id']).count
             else:
                 old_count = 0
             remain = getInventoryCount(user, warehouse, ware)
@@ -119,7 +119,7 @@ def getTransferByPosition(request):
 
     id = request.GET.get('id', None)
     position = request.GET['position']
-    queryset = Transfer.objects.inFinancialYear(request.user)
+    queryset = Transfer.objects.inFinancialYear()
 
     try:
         if position == 'next':

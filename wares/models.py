@@ -2,26 +2,30 @@ from django.db import models
 from django.db.models import Sum
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
+from companies.models import FinancialYear
+from helpers.functions import get_current_user
 from helpers.models import BaseModel
 
 
 class Unit(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='units')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
-        default_permissions = ()
+        backward_financial_year = True
 
     def __str__(self):
         return self.name
 
 
 class Warehouse(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouses')
     name = models.CharField(max_length=100, unique=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
-        default_permissions = ()
+        backward_financial_year = True
 
     def __str__(self):
         return str(self.pk) + ' - ' + self.name
@@ -37,6 +41,7 @@ class WareLevel(BaseModel):
         (CATEGORY, 'category'),
     )
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wareLevels')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     code = models.CharField(max_length=50, unique=True)
@@ -44,7 +49,7 @@ class WareLevel(BaseModel):
     level = models.IntegerField(choices=WARE_LEVELS)
 
     class Meta(BaseModel.Meta):
-        default_permissions = ()
+        backward_financial_year = True
         unique_together = ('name', 'level')
 
     def __str__(self):
@@ -59,6 +64,7 @@ class Ware(BaseModel):
         (WEIGHTED_MEAN, 'میانگین موزون'),
     }
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50, unique=True)
     barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
@@ -86,6 +92,7 @@ class Ware(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
+        backward_financial_year = True
 
     def has_factorItem(self):
         return self.factorItems.count() != 0
@@ -98,7 +105,7 @@ class Ware(BaseModel):
             from factors.models import FactorItem
             from factors.models import Factor
             from django.db.models import Q
-            last_factor_item = FactorItem.objects.inFinancialYear(user).filter(ware=self) \
+            last_factor_item = FactorItem.objects.inFinancialYear().filter(ware=self) \
                 .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
                 .order_by('-factor__definition_date', '-id')
 
@@ -114,8 +121,6 @@ class Ware(BaseModel):
 
     def get_balance(self, warehouse: Warehouse):
         return WareBalance.get_balance(self, warehouse)
-
-        # Just definite factors
 
     def remain(self, user, last_factor_item=None):
         res = {
@@ -145,7 +150,7 @@ class Ware(BaseModel):
         remain_count = last_factor_item.remain_count
         fee = remain_value / remain_count
 
-        self.factorItems.inFinancialYear(user) \
+        self.factorItems.inFinancialYear() \
             .filter(factor__is_definite=True, id__lte=last_factor_item.id) \
             .update(is_editable=0)
 
@@ -157,7 +162,7 @@ class Ware(BaseModel):
         total_output = last_factor_item.total_output_count
 
         # find first usable factor item
-        initialFactorItem = self.factorItems.inFinancialYear(user) \
+        initialFactorItem = self.factorItems.inFinancialYear() \
             .filter(factor__type__in=Factor.BUY_GROUP, factor__is_definite=True) \
             .order_by('factor__definition_date', 'id') \
             .filter(total_input_count__gt=total_output) \
@@ -173,7 +178,7 @@ class Ware(BaseModel):
 
         initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
 
-        factorItems = self.factorItems.inFinancialYear(user) \
+        factorItems = self.factorItems.inFinancialYear() \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
             .order_by('factor__definition_date', 'id')
 
@@ -220,7 +225,7 @@ class Ware(BaseModel):
                 })
                 needed_count = 0
 
-        FactorItem.objects.inFinancialYear(user).filter(id__in=uneditableFactorItemIds).update(is_editable=0)
+        FactorItem.objects.inFinancialYear().filter(id__in=uneditableFactorItemIds).update(is_editable=0)
 
         return total_value, fees
 
@@ -230,7 +235,7 @@ class Ware(BaseModel):
 
         initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
 
-        factorItems = self.factorItems.inFinancialYear(user) \
+        factorItems = self.factorItems.inFinancialYear() \
             .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
             .order_by('-factor__definition_date')
 
@@ -259,26 +264,40 @@ class Ware(BaseModel):
                 break
 
         from factors.models import FactorItem
-        FactorItem.objects.inFinancialYear(user).filter(id__in=editableFactorItemIds).update(is_editable=1)
+        FactorItem.objects.inFinancialYear().filter(id__in=editableFactorItemIds).update(is_editable=1)
 
 
-class WareBalance(models.Model):
+class WareBalance(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresBalance')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='balance')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='balance')
     count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
 
+    class Meta(BaseModel.Meta):
+        pass
+
     @staticmethod
     def update_balance(ware: Ware, warehouse: Warehouse, change):
-        ware_balance, created = WareBalance.objects.get_or_create(ware=ware, warehouse=warehouse)
+        user = get_current_user()
+        ware_balance, created = WareBalance.objects.get_or_create(
+            ware=ware,
+            warehouse=warehouse,
+            financial_year=user.active_financial_year
+        )
         ware_balance.count += change
         ware_balance.save()
 
     @staticmethod
     def get_balance(ware: Ware, warehouse: Warehouse):
-        ware_balance, created = WareBalance.objects.get_or_create(ware=ware, warehouse=warehouse)
+        user = get_current_user()
+        ware_balance, created = WareBalance.objects.get_or_create(
+            ware=ware,
+            warehouse=warehouse,
+            financial_year=user.active_financial_year
+        )
         return ware_balance.count
 
     @staticmethod
     def get_balances(ware: Ware):
-        ware_balances = WareBalance.objects.get_or_create(ware=ware)
+        ware_balances = WareBalance.objects.inFinancialYear().filter(ware=ware)
         return ware_balances

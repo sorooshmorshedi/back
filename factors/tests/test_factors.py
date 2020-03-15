@@ -1,50 +1,52 @@
-import django
-
-django.setup()
-
+from accounts.tests.test_accounts import AccountTest
 from users.models import User
 
 from django.urls.base import reverse
 from rest_framework import status
 
-from helpers.test import ITestCase
+from helpers.test import MTestCase
+from wares.models import Ware
 
 
-class FactorTest(ITestCase):
-    data = {
-        "factor": {
-            "taxPercent": 0,
-            "taxValue": 0,
-            "discountPercent": 0,
-            "discountValue": 0,
-            "expenses": [],
-            "date": "1398-11-26",
-            "time": "14:48",
-            "account": 492,
-            "type": "buy"
-        },
-        "factor_items": {
-            "items": [{
-                "discountValue": 0,
+class FactorTest(MTestCase):
+
+    @property
+    def data(self):
+        account, float_account_id, cost_center_id = AccountTest.get_account()
+
+        ware = Ware.objects.first()
+
+        return {
+            "factor": {
+                "taxPercent": 0,
+                "taxValue": 0,
                 "discountPercent": 0,
-                "fee": "1600000",
-                "is_editable": True,
-                "ware": 2,
-                "warehouse": 1,
-                "count": "2"
-            }],
-            "ids_to_delete": []
-        },
-        "factor_expenses": {
-            "items": [{
-                "expense": 1,
-                "value": "123",
-                "account": 491,
-                "explanation": "sdf"
-            }],
-            "ids_to_delete": []
+                "discountValue": 0,
+                "expenses": [],
+                "date": "1398-11-26",
+                "time": "14:48",
+                "account": account.id,
+                "floatAccount": float_account_id,
+                "costCenter": cost_center_id,
+                "type": "buy"
+            },
+            "factor_items": {
+                "items": [{
+                    "discountValue": 0,
+                    "discountPercent": 0,
+                    "fee": "1600000",
+                    "is_editable": True,
+                    "ware": ware.id,
+                    "warehouse": 1,
+                    "count": "2"
+                }],
+                "ids_to_delete": []
+            },
+            "factor_expenses": {
+                "items": [],
+                "ids_to_delete": []
+            }
         }
-    }
 
     def test_factor(self):
         user = User.objects.first()
@@ -70,4 +72,3 @@ class FactorTest(ITestCase):
         response = self.client.delete(reverse('factor-detail', args=[factor_id]))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-

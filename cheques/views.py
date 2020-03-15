@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, FloatAccount
+from accounts.defaultAccounts.models import getDefaultAccount
 from cheques.serializers import *
 from sanads.sanads.models import clearSanad, Sanad
 
@@ -18,7 +19,7 @@ class ChequebookModelView(viewsets.ModelViewSet):
     serializer_class = ChequebookCreateUpdateSerializer
 
     def get_queryset(self):
-        return Chequebook.objects.inFinancialYear(self.request.user)
+        return Chequebook.objects.inFinancialYear()
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -51,7 +52,7 @@ class ChequebookByPositionApiView(APIView):
 
         id = request.GET.get('id', None)
         position = request.GET['position']
-        queryset = Chequebook.objects.inFinancialYear(request.user)
+        queryset = Chequebook.objects.inFinancialYear()
 
         try:
             if position == 'next':
@@ -77,7 +78,7 @@ class SubmitChequeApiView(APIView):
     queryset = Cheque.objects.all()
 
     def get_queryset(self):
-        return Cheque.objects.inFinancialYear(self.request.user)
+        return Cheque.objects.inFinancialYear()
 
     def post(self, request):
 
@@ -107,7 +108,7 @@ class SubmitChequeApiView(APIView):
 
         cheque = serializer.instance
 
-        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code', None)).first()
+        sanad = Sanad.objects.inFinancialYear().filter(code=data.pop('sanad_code', None)).first()
 
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
@@ -158,7 +159,10 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
             date=cheque.date,
             to_status='notPassed',
             explanation=cheque.explanation,
-            sanad=sanad
+            sanad=sanad,
+            account=cheque.account,
+            floatAccount=cheque.floatAccount,
+            costCenter=cheque.costCenter
         )
         sanad = status_change.updateSanad(user)
 
@@ -209,7 +213,7 @@ class ChequeByPositionApiView(APIView):
         received_or_paid = request.GET['received_or_paid']
         id = request.GET.get('id', None)
         position = request.GET['position']
-        queryset = Cheque.objects.inFinancialYear(request.user).filter(received_or_paid=received_or_paid)
+        queryset = Cheque.objects.inFinancialYear().filter(received_or_paid=received_or_paid)
 
         try:
             if position == 'next':
@@ -234,7 +238,7 @@ class ChangeChequeStatus(APIView):
         user = request.user
 
         data = request.data
-        queryset = Cheque.objects.inFinancialYear(request.user)
+        queryset = Cheque.objects.inFinancialYear()
         cheque = get_object_or_404(queryset, pk=pk)
 
         date = data.get('date')
@@ -244,7 +248,7 @@ class ChangeChequeStatus(APIView):
         costCenter = FloatAccount.objects.filter(pk=data.get('costCenter')).first()
         explanation = data.get('explanation')
 
-        sanad = Sanad.objects.inFinancialYear(user).filter(code=data.pop('sanad_code', None)).first()
+        sanad = Sanad.objects.inFinancialYear().filter(code=data.pop('sanad_code', None)).first()
 
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
@@ -272,7 +276,7 @@ class StatusChangeView(generics.RetrieveDestroyAPIView):
     serializer_class = StatusChangeSerializer
 
     def get_queryset(self):
-        return StatusChange.objects.inFinancialYear(self.request.user)
+        return StatusChange.objects.inFinancialYear()
 
     def perform_destroy(self, instance: StatusChange):
 
@@ -329,7 +333,7 @@ class StatusChangeView(generics.RetrieveDestroyAPIView):
 
 @api_view(['post'])
 def revertChequeInFlowStatus(request, pk):
-    queryset = Cheque.objects.inFinancialYear(request.user).all()
+    queryset = Cheque.objects.inFinancialYear().all()
     cheque = get_object_or_404(queryset, pk=pk)
     if cheque.status != 'inFlow':
         return Response(['وضعیت چک باید درجریان باشد'], status.HTTP_400_BAD_REQUEST)
@@ -356,21 +360,21 @@ def revertChequeInFlowStatus(request, pk):
     serialized = StatusChangeSerializer(data=data)
     if serialized.is_valid():
         if cheque.received_or_paid == Cheque.RECEIVED:
-            cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['bedAccount'])
+            cheque.lastAccount = Account.objects.inFinancialYear().get(pk=data['bedAccount'])
             if 'bedFloatAccount' in data:
-                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear().get(
                     pk=data['bedFloatAccount'])
             if 'bedCostCenter' in data:
-                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear(request.user).get(
+                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear().get(
                     pk=data['bedCostCenter'])
 
         else:
-            cheque.lastAccount = Account.objects.inFinancialYear(request.user).get(pk=data['besAccount'])
+            cheque.lastAccount = Account.objects.inFinancialYear().get(pk=data['besAccount'])
             if 'besFloatAccount' in data:
-                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear(request.user).get(
+                cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear().get(
                     pk=data['besFloatAccount'])
             if 'besCostCenter' in data:
-                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear(request.user).get(
+                cheque.lastCostCenter = FloatAccount.objects.inFinancialYear().get(
                     pk=data['besCostCenter'])
 
         cheque.status = data['toStatus']

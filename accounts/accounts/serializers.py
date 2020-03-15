@@ -8,6 +8,7 @@ class FloatAccountGroupSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloatAccountGroup
         fields = '__all__'
+        read_only_fields = ['financial_year']
 
 
 class FloatAccountSerializer(serializers.ModelSerializer):
@@ -16,6 +17,7 @@ class FloatAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloatAccount
         fields = '__all__'
+        read_only_fields = ['financial_year']
 
 
 class FloatAccountGroupSerializer(serializers.ModelSerializer):
@@ -24,6 +26,7 @@ class FloatAccountGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = FloatAccountGroup
         fields = '__all__'
+        read_only_fields = ['financial_year']
 
 
 class AccountTypeSerializer(serializers.ModelSerializer):
@@ -44,12 +47,14 @@ class AccountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountType
         fields = '__all__'
+        read_only_fields = ['financial_year']
 
 
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        exclude = ('code', 'level')
+        fields = '__all__'
+        read_only_fields = ('financial_year', 'code', 'level')
 
     def validate(self, data):
 
@@ -88,7 +93,7 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        read_only_fields = ('code', 'level')
+        read_only_fields = ('financial_year', 'code', 'level')
         fields = '__all__'
 
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
@@ -116,5 +121,6 @@ class TypeReportAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = '__all__'
+        read_only_fields = ['financial_year']
 
     remain = serializers.IntegerField()

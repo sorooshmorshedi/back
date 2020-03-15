@@ -1,23 +1,29 @@
+from builtins import tuple
+
 from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
 
+from companies.models import FinancialYear
+from helpers.functions import get_current_user
 from helpers.models import BaseModel
 
 
 class FloatAccountGroup(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='floatAccountGroups')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_cost_center = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
-        pass
+        backward_financial_year = True
 
     def __str__(self):
         return str(self.pk) + ' - ' + str(self.name)
 
 
 class FloatAccount(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='floatAccounts')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_cost_center = models.BooleanField(default=False)
@@ -35,12 +41,16 @@ class FloatAccount(BaseModel):
         return self.name
 
     class Meta(BaseModel.Meta):
-        pass
+        backward_financial_year = True
 
 
 class FloatAccountRelation(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='floatAccountRelations')
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.CASCADE, related_name='relation')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='relation')
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
 
 
 class AccountType(BaseModel):
@@ -54,13 +64,14 @@ class AccountType(BaseModel):
         (NONE, 'هیچ کدام')
     )
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accountTypes')
     name = models.CharField(max_length=100)
     programingName = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
     usage = models.CharField(max_length=30, choices=ACCOUNT_TYPE_USAGES, blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = 'نوع حساب'
+        backward_financial_year = True
 
     def __str__(self):
         return "{} - {} - {} - {}".format(self.name, self.nature, self.usage, self.programingName)
@@ -97,6 +108,7 @@ class Account(BaseModel):
     CODE_LENGTHS = [1, 3, 5, 9]
     PARENT_PART = [0, 1, 3, 5]
 
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accounts')
     account_type = models.CharField(max_length=2, choices=ACCOUNT_TYPES, default=OTHER)
 
     name = models.CharField(max_length=150, verbose_name='نام حساب')
@@ -120,9 +132,6 @@ class Account(BaseModel):
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts',
                                           blank=True, null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
-
-    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
-    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
 
     # Person fields
     is_real = models.BooleanField(default=True)
@@ -155,40 +164,28 @@ class Account(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['code']
+        backward_financial_year = True
 
     @property
     def title(self):
         return "{0} - {1}".format(self.code, self.name)
 
+    @property
+    def bed(self):
+        bed, bes = AccountBalance.get_bed_bes(account=self)
+        return bed
+
+    @property
+    def bes(self):
+        bed, bes = AccountBalance.get_bed_bes(account=self)
+        return bes
+
+    @property
+    def balance(self):
+        return AccountBalance.get_balance(account=self)
+
     def can_delete(self):
         return self.level != 0 and self.sanadItems.count() == 0
-
-    def get_remain(self):
-        from sanads.sanads.models import SanadItem
-        bed = SanadItem.objects.filter(account__code__startswith=self.code) \
-            .aggregate(Sum('bed'))['bed__sum']
-        bes = SanadItem.objects.filter(account__code__startswith=self.code) \
-            .aggregate(Sum('bes'))['bes__sum']
-
-        if not bed:
-            bed = 0
-        if not bes:
-            bes = 0
-
-        remain_type = '-'
-        remain = bed - bes
-        if remain > 0:
-            remain_type = 'bed'
-        elif remain < 0:
-            remain = -remain
-            remain_type = 'bes'
-
-        remain = {
-            'value': remain,
-            'remain_type': remain_type
-        }
-
-        return remain
 
     def get_new_child_code(self):
 
@@ -211,9 +208,9 @@ class Account(BaseModel):
         return code
 
     @staticmethod
-    def get_new_group_code(user):
+    def get_new_group_code():
         code = \
-            Account.objects.inFinancialYear(user).filter(level=Account.GROUP).aggregate(Max('code'))[
+            Account.objects.filter(level=Account.GROUP).aggregate(Max('code'))[
                 'code__max']
         code = int(code) + 1
 
@@ -223,12 +220,67 @@ class Account(BaseModel):
 
     @staticmethod
     def get_inventory_account(user):
-        return Account.objects.inFinancialYear(user).get(code='106040001')
+        return Account.objects.inFinancialYear().get(code='106040001')
 
     @staticmethod
     def get_partners_account(user):
-        return Account.objects.inFinancialYear(user).get(code='303070001')
+        return Account.objects.inFinancialYear().get(code='303070001')
 
     @staticmethod
     def get_cost_of_sold_wares_account(user):
-        return Account.objects.inFinancialYear(user).get(code='701010001')
+        return Account.objects.inFinancialYear().get(code='701010001')
+
+
+class AccountBalance(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accountsBalance')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='balance')
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='balance', blank=True,
+                                     null=True)
+    costCenter = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='balanceAsCostCenter',
+                                   blank=True,
+                                   null=True)
+
+    bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+    bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
+
+    class Meta(BaseModel.Meta):
+        pass
+
+    @staticmethod
+    def update_balance(account, bed_change=0, bes_change=0, floatAccount=None, costCenter=None):
+        user = get_current_user()
+        account_balance, created = AccountBalance.objects.get_or_create(
+            account=account,
+            floatAccount=floatAccount,
+            costCenter=costCenter,
+            financial_year=user.active_financial_year
+        )
+        account_balance.bed += bed_change
+        account_balance.bes += bes_change
+        account_balance.save()
+
+    @staticmethod
+    def get_bed_bes(account=None, floatAccount=None, costCenter=None) -> tuple:
+        qs = AccountBalance.objects
+
+        if account:
+            qs = qs.filter(account=account)
+
+        if floatAccount:
+            qs = qs.filter(floatAccount=floatAccount)
+
+        if costCenter:
+            qs = qs.filter(costCenter=costCenter)
+
+        result = qs.aggregate(
+            bed_sum=Sum('bed'),
+            bes_sum=Sum('bes'),
+        )
+
+        return result.get('bed_sum', 0), result.get('bes_sum', 0)
+
+    @staticmethod
+    def get_balance(account, floatAccount=None, costCenter=None):
+        bed, bes = AccountBalance.get_bed_bes(account, floatAccount, costCenter)
+        balance = bed - bes
+        return balance

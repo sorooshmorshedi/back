@@ -4,11 +4,11 @@ from django.urls import reverse
 from rest_framework import status
 
 from companies.models import Company
-from helpers.test import ITestCase
+from helpers.test import MTestCase
 from users.tests import UserTest
 
 
-class CompanyTest(ITestCase):
+class CompanyTest(MTestCase):
     def test_create_company(self):
         user = UserTest()
         self.client.force_authenticate(user)
@@ -22,7 +22,7 @@ class CompanyTest(ITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_retrieve_companies(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
 
         company_name = self.faker.name()
@@ -37,7 +37,7 @@ class CompanyTest(ITestCase):
         self.assertEqual(data['name'], company_name)
 
     def test_update_companies(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
         company = CompanyTest.create_company()
 
@@ -53,7 +53,7 @@ class CompanyTest(ITestCase):
         self.assertEqual(data['name'], new_company_name)
 
     def test_delete_companies(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
         company = CompanyTest.create_company()
 
@@ -63,7 +63,7 @@ class CompanyTest(ITestCase):
 
     @staticmethod
     def create_company(name=None):
-        name = name if name else ITestCase.faker.name()
+        name = name if name else MTestCase.faker.name()
         company = Company(
             name=name,
         )

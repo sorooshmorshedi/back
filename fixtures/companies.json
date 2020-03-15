@@ -1,9 +1,0 @@
-[
- {
-    "model": "companies.company",
-    "pk": 1,
-    "fields": {
-      "name": "نام شرکت"
-    }
-  }
-]

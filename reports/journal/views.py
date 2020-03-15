@@ -31,7 +31,7 @@ class JournalListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return SanadItem.objects.inFinancialYear(self.request.user).all()
+        return SanadItem.objects.inFinancialYear().all()
 
     def list(self, request, *args, **kwargs):
 

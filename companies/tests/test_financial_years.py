@@ -6,11 +6,11 @@ from rest_framework import status
 
 from companies.models import Company, FinancialYear
 from companies.tests.test_companies import CompanyTest
-from helpers.test import ITestCase
+from helpers.test import MTestCase
 from users.tests import UserTest
 
 
-class FinancialYearTest(ITestCase):
+class FinancialYearTest(MTestCase):
     def test_create_financial_year(self):
         user = UserTest()
         company = CompanyTest.create_company()
@@ -30,7 +30,7 @@ class FinancialYearTest(ITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_retrieve_financial_year(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
@@ -43,7 +43,7 @@ class FinancialYearTest(ITestCase):
         self.assertEqual(data['name'], financial_year.name)
 
     def test_update_financial_year(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
@@ -60,7 +60,7 @@ class FinancialYearTest(ITestCase):
         self.assertEqual(data['name'], new_name)
 
     def test_delete_financial_year(self):
-        user = UserTest.create_user()
+        user = UserTest.get_user()
         self.client.force_login(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
@@ -71,7 +71,7 @@ class FinancialYearTest(ITestCase):
 
     @staticmethod
     def create_financial_year(company, name=None, start=None, end=None):
-        name = name if name else ITestCase.faker.name()
+        name = name if name else MTestCase.faker.name()
         start = start if start else jdatetime.date.today()
         end = end if end else jdatetime.date.today() + jdatetime.timedelta(days=365)
         financial_year = FinancialYear(

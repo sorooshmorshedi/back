@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorListRetrieveSerializer, FactorSerializer, FactorItemSerializer
+from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 
@@ -20,7 +21,7 @@ class FirstPeriodInventoryView(APIView):
     @transaction.atomic
     def post(self, request):
 
-        if Factor.objects.inFinancialYear(request.user).filter(type__in=Factor.SALE_GROUP).count():
+        if Factor.objects.inFinancialYear().filter(type__in=Factor.SALE_GROUP).count():
             return Response({'non_field_errors': ['لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید']},
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,36 +45,15 @@ class FirstPeriodInventoryView(APIView):
         factor.code = 0
         factor.save()
 
-        items_to_create = []
-        items_to_update = []
-
-        SerializerClass = FactorItemSerializer
-
-        for item in data.get('items', []):
-            item['financial_year'] = request.user.active_financial_year.id
-            if 'id' in item:
-                items_to_update.append(item)
-            else:
-                items_to_create.append(item)
-
-        for item in items_to_create:
-            item['factor'] = factor.id
-
-        serialized = SerializerClass(data=items_to_create, many=True)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-
-        for item in items_to_update:
-            instance = FactorItem.objects.inFinancialYear(request.user).get(id=item['id'])
-            serialized = SerializerClass(instance, data=item)
-            if serialized.is_valid():
-                serialized.save()
-            else:
-                return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        ids_to_delete = data.get('ids_to_delete', [])
-        if len(ids_to_delete):
-            FactorItem.objects.inFinancialYear(request.user).filter(id__in=ids_to_delete).delete()
+        MassRelatedCUD(
+            request.user,
+            data.get('items', []),
+            data.get('ids_to_delete', []),
+            'factor',
+            factor.id,
+            FactorItemSerializer,
+            FactorItemSerializer
+        ).sync()
 
         for item in factor.items.all():
             item.total_input_count = item.count

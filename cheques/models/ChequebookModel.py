@@ -54,7 +54,7 @@ class Chequebook(BaseModel):
                 account=self.account,
                 floatAccount=self.floatAccount,
                 costCenter=self.costCenter,
-                bankName=self.account.bank_name,
+                bankName=self.account.name,
                 branchName=self.account.branch_name,
                 accountNumber=self.account.account_number,
                 financial_year=self.financial_year
@@ -68,7 +68,7 @@ class Chequebook(BaseModel):
     @staticmethod
     def newCode(user):
         try:
-            last_chequebook = Chequebook.objects.inFinancialYear(user).latest('code')
+            last_chequebook = Chequebook.objects.inFinancialYear().latest('code')
             code = last_chequebook.code + 1
         except:
             code = 1

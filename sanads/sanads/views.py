@@ -17,7 +17,7 @@ class SanadListCreate(generics.ListCreateAPIView):
     serializer_class = SanadSerializer
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear(self.request.user)
+        return Sanad.objects.inFinancialYear()
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -59,7 +59,7 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SanadSerializer
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear(self.request.user)
+        return Sanad.objects.inFinancialYear()
 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
@@ -105,7 +105,7 @@ def getSanadByCode(request):
         return Response(['کد سند وارد نشده است'], status.HTTP_400_BAD_REQUEST)
 
     code = request.GET['code']
-    queryset = Sanad.objects.inFinancialYear(request.user).all()
+    queryset = Sanad.objects.inFinancialYear().all()
     sanad = get_object_or_404(queryset, code=code)
     serializer = SanadListRetrieveSerializer(sanad)
     return Response(serializer.data)

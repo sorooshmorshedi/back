@@ -106,7 +106,7 @@ class WareInventoryView(APIView):
             return Response(['Enter ware please'], status.HTTP_400_BAD_REQUEST)
 
         from factors.models import Factor
-        qs = Warehouse.objects.inFinancialYear(user) \
+        qs = Warehouse.objects.inFinancialYear() \
             .annotate(
             input_count=Coalesce(Sum('factorItems__count', default=0,
                                      filter=Q(factorItems__factor__type__in=Factor.INPUT_GROUP,

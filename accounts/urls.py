@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from accounts.accounts.views import FloatAccountListCreate, FloatAccountDetail, FloatAccountGroupListCreate, \
-    FloatAccountGroupDetail, AccountTypeList, AccountListCreate, AccountDetail, getAccountRemain
+    FloatAccountGroupDetail, AccountTypeList, AccountListCreate, AccountDetail
 from accounts.defaultAccounts.views import DefaultAccountListCreate, DefaultAccountDetail
 
 urlpatterns = [
@@ -15,7 +15,6 @@ urlpatterns = [
 
     url(r'^accounts$', AccountListCreate.as_view(), name='accounts'),
     url(r'^accounts/(?P<pk>[0-9]+)$', AccountDetail.as_view(), name='accountDetail'),
-    url(r'^accounts/(?P<pk>[0-9]+)/remain$', getAccountRemain, name='accountRemain'),
 
     url(r'^defaultAccounts$', DefaultAccountListCreate.as_view(), name=''),
     url(r'^defaultAccounts/(?P<pk>[0-9]+)$', DefaultAccountDetail.as_view(), name=''),

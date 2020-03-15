@@ -1,5 +1,6 @@
 from django.db.models import signals
 
+from accounts.accounts.models import AccountBalance
 from sanads.sanads.models import SanadItem
 
 
@@ -13,8 +14,13 @@ def updateAccountBalanceOnSave(sender, instance: SanadItem, **kwargs):
         bed -= sanadItem.bed
         bes -= sanadItem.bes
 
-    account.bed += bed
-    account.bes += bes
+    AccountBalance.update_balance(
+        account=account,
+        bed_change=bed,
+        bes_change=bes,
+        floatAccount=instance.floatAccount,
+        costCenter=instance.costCenter
+    )
     account.save()
 
 
@@ -23,8 +29,13 @@ def updateAccountBalanceOnDelete(sender, instance: SanadItem, **kwargs):
     bed = instance.bed
     bes = instance.bes
 
-    account.bed -= bed
-    account.bes -= bes
+    AccountBalance.update_balance(
+        account=account,
+        bed_change=-bed,
+        bes_change=-bes,
+        floatAccount=instance.floatAccount,
+        costCenter=instance.costCenter
+    )
     account.save()
 
 

@@ -177,7 +177,7 @@ class Transaction(BaseModel):
                 if type != transaction_type:
                     continue
             try:
-                codes[type] = Transaction.objects.inFinancialYear(user).filter(type=type).latest('code').code + 1
+                codes[type] = Transaction.objects.inFinancialYear().filter(type=type).latest('code').code + 1
             except:
                 codes[type] = 1
         if transaction_type:

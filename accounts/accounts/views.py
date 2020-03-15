@@ -1,14 +1,13 @@
 from django.db.models import Prefetch
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.accounts.models import FloatAccountRelation
 from accounts.accounts.serializers import *
 from helpers.auth import BasicCRUDPermission
+from helpers.functions import get_current_user
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
@@ -40,7 +39,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         queryset = super().get_queryset()
         queryset = queryset.prefetch_related(
             Prefetch('floatAccountGroups',
-                     queryset=FloatAccountGroup.objects.inFinancialYear(user)
+                     queryset=FloatAccountGroup.objects.inFinancialYear()
                      .filter(relation__financial_year=financial_year)
                      .distinct()
                      )
@@ -51,7 +50,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         res = super().update(request, *args, **kwargs)
         syncFloatAccountGroups = request.data.get('syncFloatAccountGroups', [])
         instance = self.get_object()
-        FloatAccountRelation.objects.inFinancialYear(request.user).filter(floatAccount=instance).delete()
+        FloatAccountRelation.objects.inFinancialYear().filter(floatAccount=instance).delete()
         financial_year = request.user.active_financial_year
         for floatAccountGroup in syncFloatAccountGroups:
             relation = FloatAccountRelation.objects.create(
@@ -72,7 +71,7 @@ class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
         queryset = super().get_queryset()
         queryset = queryset.prefetch_related(
             Prefetch('floatAccounts',
-                     queryset=FloatAccount.objects.inFinancialYear(user)
+                     queryset=FloatAccount.objects.inFinancialYear()
                      .filter(relation__financial_year=financial_year)
                      .distinct()
                      )
@@ -96,6 +95,7 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     serializer_class = AccountCreateUpdateSerializer
 
     def perform_create(self, serializer):
+
         parent = serializer.validated_data.get('parent')
         account_type = serializer.validated_data.get('account_type')
         if parent:
@@ -124,10 +124,11 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
                 code = parent.get_new_child_code()
                 level = 3
             else:
-                code = Account.get_new_group_code(self.request.user)
+                code = Account.get_new_group_code()
                 level = 0
 
         serializer.save(
+            financial_year=self.request.user.active_financial_year,
             parent=parent,
             code=code,
             level=level
@@ -142,7 +143,7 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 
 class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         method = self.request.method.lower()
@@ -162,9 +163,3 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
             return super().destroy(request, *args, **kwargs)
         return Response(['حساب های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['get'])
-def getAccountRemain(request, pk):
-    account = get_object_or_404(Account.objects.inFinancialYear(request.user), pk=pk)
-    return Response(account.get_remain(), status=status.HTTP_200_OK)

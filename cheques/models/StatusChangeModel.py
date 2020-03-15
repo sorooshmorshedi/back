@@ -8,7 +8,7 @@ from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class StatusChange(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='status_changes')
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='statusChanges')
 
     cheque = models.ForeignKey(Cheque, on_delete=models.CASCADE, related_name='statusChanges')
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='statusChange', blank=True, null=True)

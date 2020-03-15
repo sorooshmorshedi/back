@@ -13,5 +13,5 @@ class LedgerListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return SanadItem.objects.inFinancialYear(self.request.user).order_by('sanad__code')
+        return SanadItem.objects.inFinancialYear().order_by('sanad__code')
 

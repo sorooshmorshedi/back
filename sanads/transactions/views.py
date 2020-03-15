@@ -19,7 +19,7 @@ class TransactionListCreate(generics.ListCreateAPIView):
     serializer_class = TransactionCreateUpdateSerializer
 
     def get_queryset(self):
-        return Transaction.objects.inFinancialYear(self.request.user)
+        return Transaction.objects.inFinancialYear()
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -32,7 +32,7 @@ class TransactionListCreate(generics.ListCreateAPIView):
         data = request.data
         transaction_data = data.get('transaction')
 
-        sanad = Sanad.objects.inFinancialYear(user).filter(code=transaction_data.get('sanad_code')).first()
+        sanad = Sanad.objects.inFinancialYear().filter(code=transaction_data.get('sanad_code')).first()
 
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
@@ -56,7 +56,7 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TransactionCreateUpdateSerializer
 
     def get_queryset(self):
-        return Transaction.objects.inFinancialYear(self.request.user)
+        return Transaction.objects.inFinancialYear()
 
     def update(self, request, *args, **kwargs):
 
@@ -106,7 +106,7 @@ def getTransactionByCode(request):
 
     code = request.GET['code']
     type = request.GET['type']
-    queryset = Transaction.objects.inFinancialYear(request.user).all()
+    queryset = Transaction.objects.inFinancialYear().all()
     transaction = get_object_or_404(queryset, code=code, type=type)
     serializer = TransactionListRetrieveSerializer(transaction)
     return Response(serializer.data)
