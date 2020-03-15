@@ -84,7 +84,7 @@ class ClosingBaseView(APIView):
         data = {
             'financial_year': financial_year.id,
             'date': financial_year.end,
-            'code': newSanadCode(self.user),
+            'code': newSanadCode(),
             'explanation': explanation,
             'type': Sanad.TEMPORARY,
             'createType': Sanad.AUTO

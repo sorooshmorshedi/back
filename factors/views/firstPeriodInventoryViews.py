@@ -5,86 +5,124 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account
 from factors.models import Factor, FactorItem
-from factors.serializers import FactorListRetrieveSerializer, FactorSerializer, FactorItemSerializer
+from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
+from helpers.functions import get_current_user
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class FirstPeriodInventoryView(APIView):
     def get(self, request):
-        factor = Factor.getFirstPeriodInventory(request.user)
+        factor = Factor.get_first_period_inventory()
         if not factor:
             return Response({'message': 'no first period inventory'}, status=status.HTTP_200_OK)
         serialized = FactorListRetrieveSerializer(factor)
         return Response(serialized.data)
 
-    @transaction.atomic
     def post(self, request):
 
         if Factor.objects.inFinancialYear().filter(type__in=Factor.SALE_GROUP).count():
             return Response({'non_field_errors': ['لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید']},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        data = request.data
-        data['factor'].pop('sanad', None)
-        data['factor']['type'] = Factor.FIRST_PERIOD_INVENTORY
-        data['factor']['is_definite'] = 1
-        data['factor']['account'] = Account.get_partners_account(request.user).id
-        data['factor']['financial_year'] = request.user.active_financial_year.id
+        first_period_inventory = self.set_first_period_inventory(request.data)
 
-        factor = Factor.getFirstPeriodInventory(request.user)
-        if factor:
-            serialized = FactorSerializer(instance=factor, data=data['factor'])
-        else:
-            serialized = FactorSerializer(data=data['factor'])
+        res = Response(FactorCreateUpdateSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
+        return res
 
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
+    @staticmethod
+    def set_first_period_inventory(data, financial_year=None):
+        """
+        :param data: {
+            factor: {...},
+            factor_items: {
+                item: [{..}, ...},
+                ids_to_delete: []
+        }
+        :param financial_year:
+        :return:
+        """
 
-        factor = serialized.instance
-        factor.code = 0
-        factor.save()
+        user = get_current_user()
 
-        MassRelatedCUD(
-            request.user,
-            data.get('items', []),
-            data.get('ids_to_delete', []),
-            'factor',
-            factor.id,
-            FactorItemSerializer,
-            FactorItemSerializer
-        ).sync()
+        if not financial_year:
+            financial_year = user.active_financial_year
 
-        for item in factor.items.all():
-            item.total_input_count = item.count
-            item.remain_value = item.value
-            item.save()
+        factor_data = data['factor']
+        factor_items_data = data.get('factor_items')
 
-        sanad = factor.sanad
-        if not sanad:
-            sanad = Sanad(code=newSanadCode(request.user), date=factor.date, explanation=factor.explanation,
-                          createType=Sanad.AUTO, financial_year=request.user.active_financial_year)
-            sanad.save()
-            factor.sanad = sanad
-            factor.save()
+        first_period_inventory = FirstPeriodInventoryView._create_or_update_factor(factor_data, factor_items_data,
+                                                                                   financial_year, user)
 
-        if sanad.items.count():
-            clearSanad(sanad)
-
-        sanad.items.create(
-            account=Account.get_inventory_account(request.user),
-            bed=factor.sum,
-            financial_year=request.user.active_financial_year
-        )
-        sanad.items.create(
-            account=Account.get_partners_account(request.user),
-            bes=factor.sum,
-            financial_year=request.user.active_financial_year
-        )
+        sanad = FirstPeriodInventoryView._create_or_update_sanad(first_period_inventory, financial_year, user)
 
         is_confirmed = data.get('_confirmed')
         if not is_confirmed:
             sanad.check_account_balance_confirmations()
 
-        res = Response(FactorSerializer(instance=factor).data, status=status.HTTP_200_OK)
-        return res
+        return first_period_inventory
+
+    @staticmethod
+    def _create_or_update_factor(factor_data, factor_items_data, financial_year, user):
+        factor_data.pop('sanad', None)
+        factor_data['type'] = Factor.FIRST_PERIOD_INVENTORY
+        factor_data['is_definite'] = 1
+        factor_data['account'] = Account.get_partners_account(user).id
+
+        first_period_inventory = Factor.get_first_period_inventory(financial_year)
+        if first_period_inventory:
+            serializer = FactorCreateUpdateSerializer(instance=first_period_inventory, data=factor_data)
+        else:
+            serializer = FactorCreateUpdateSerializer(data=factor_data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            code=0,
+            financial_year=financial_year
+        )
+
+        first_period_inventory = serializer.instance
+
+        MassRelatedCUD(
+            user,
+            factor_items_data.get('items', []),
+            factor_items_data.get('ids_to_delete', []),
+            'factor',
+            first_period_inventory.id,
+            FactorItemSerializer,
+            FactorItemSerializer
+        ).sync()
+
+        for item in first_period_inventory.items.all():
+            item.total_input_count = item.count
+            item.remain_value = item.value
+            item.save()
+
+        return first_period_inventory
+
+    @staticmethod
+    def _create_or_update_sanad(first_period_inventory, financial_year, user):
+        sanad = first_period_inventory.sanad
+        if not sanad:
+            sanad = Sanad(code=newSanadCode(financial_year), date=first_period_inventory.date,
+                          explanation=first_period_inventory.explanation,
+                          createType=Sanad.AUTO, financial_year=financial_year)
+            sanad.save()
+            first_period_inventory.sanad = sanad
+            first_period_inventory.save()
+
+        if sanad.items.count():
+            clearSanad(sanad)
+
+        sanad.items.create(
+            account=Account.get_inventory_account(user),
+            bed=first_period_inventory.sum,
+            financial_year=financial_year
+        )
+        sanad.items.create(
+            account=Account.get_partners_account(user),
+            bes=first_period_inventory.sum,
+            financial_year=financial_year
+        )
+
+        return sanad

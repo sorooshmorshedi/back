@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.models import Account
 from factors.models import FactorItem, Factor
-from factors.serializers import FactorSerializer, FactorItemSerializer
+from factors.serializers import FactorCreateUpdateSerializer, FactorItemSerializer
 from reports.lists.serializers import WarehouseSimpleSerializer
 from wares.models import Ware
 
@@ -13,7 +13,7 @@ class AccountInventorySerializer(serializers.ModelSerializer):
         fields = ('id', 'code', 'name')
 
 
-class FactorWithAccountSerializer(FactorSerializer):
+class FactorWithAccountCreateUpdateSerializer(FactorCreateUpdateSerializer):
     account = AccountInventorySerializer(many=False, read_only=True)
 
     class Meta:
@@ -22,7 +22,7 @@ class FactorWithAccountSerializer(FactorSerializer):
 
 
 class WareInventorySerializer(serializers.ModelSerializer):
-    factor = FactorWithAccountSerializer(many=False, read_only=True)
+    factor = FactorWithAccountCreateUpdateSerializer(many=False, read_only=True)
     input = serializers.SerializerMethodField()
     output = serializers.SerializerMethodField()
     remain = serializers.SerializerMethodField()
@@ -142,7 +142,7 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
 
 
 class WarehouseInventorySerializer(serializers.ModelSerializer):
-    factor = FactorWithAccountSerializer(many=False, read_only=True)
+    factor = FactorWithAccountCreateUpdateSerializer(many=False, read_only=True)
     warehouse = WarehouseSimpleSerializer(many=False, read_only=True)
     input = serializers.SerializerMethodField()
     output = serializers.SerializerMethodField()

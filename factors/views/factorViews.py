@@ -1,18 +1,18 @@
 from django.db import transaction
 from django.db.models import F
-from django.db.models import Q, Sum
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDefaultAccount
 from factors.helpers import getInventoryCount
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from sanads.sanads.models import clearSanad, newSanadCode, SanadItem
+from sanads.sanads.models import clearSanad, newSanadCode
 from factors.serializers import *
 from server.settings import TESTING
 
@@ -41,7 +41,9 @@ class ExpenseModelView(viewsets.ModelViewSet):
 
 
 class FactorModelView(viewsets.ModelViewSet):
-    serializer_class = FactorSerializer
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = FactorCreateUpdateSerializer
 
     def get_queryset(self):
         return Factor.objects.inFinancialYear()
@@ -57,35 +59,22 @@ class FactorModelView(viewsets.ModelViewSet):
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
 
-    def destroy(self, request, *args, **kwargs):
-        pk = kwargs['pk']
-        queryset = self.get_queryset()
-        factor = get_object_or_404(queryset, pk=pk)
-        if not factor.is_deletable:
-            raise ValidationError('فاکتور غیر قابل حذف می باشد')
-
-        self.check_confirmations(request, factor, for_delete=True)
-
-        if factor.is_definite:
-            DefiniteFactor.undoDefinition(request.user, factor)
-
-        res = super().destroy(request, *args, **kwargs)
-        return res
-
     def create(self, request, *args, **kwargs):
-        request.data['factor']['financial_year'] = request.user.active_financial_year.id
 
         data = request.data
         user = request.user
 
-        serialized = FactorSerializer(data=data['factor'])
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
+        factor_data = data['factor']
 
-        factor = serialized.instance
+        serializer = FactorCreateUpdateSerializer(data=factor_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            financial_year=user.active_financial_year,
+            code=Factor.newCodes(factor_type=factor_data.get('type'))
+        )
 
-        self.sync_items(user, factor, data)
-        self.sync_expenses(user, factor, data)
+        factor = serializer.instance
+        factor.sync(user, data)
 
         self.check_confirmations(request, factor)
 
@@ -99,24 +88,22 @@ class FactorModelView(viewsets.ModelViewSet):
         if not factor.is_editable:
             raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
 
-        self.check_confirmations(request, factor)
-
         data = request.data
         user = request.user
 
-        serialized = FactorUpdateSerializer(instance=factor, data=data['factor'])
+        serialized = FactorCreateUpdateSerializer(instance=factor, data=data['factor'])
         serialized.is_valid(raise_exception=True)
         serialized.save()
 
-        self.sync_items(user, factor, data)
-        self.sync_expenses(user, factor, data)
+        factor.sync(user, data)
 
         if factor.is_definite:
-            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=False,
+            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=True,
                                           is_confirmed=request.data.get('_confirmed'))
 
-        res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
-        return res
+        self.check_confirmations(request, factor)
+
+        return Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
 
     def check_confirmations(self, request, factor: Factor, for_delete=False):
 
@@ -142,7 +129,7 @@ class FactorModelView(viewsets.ModelViewSet):
                 is_output = not is_output
 
             if not ware.isService:
-                balance = ware.get_balance(warehouse)
+                balance = ware.get_inventory_count(warehouse)
                 if is_output:
                     if ware.minInventory and balance - count < ware.minInventory:
                         confirmations.append("حداقل موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
@@ -165,63 +152,25 @@ class FactorModelView(viewsets.ModelViewSet):
             if not TESTING:
                 raise ConfirmationError(confirmations)
 
-    def sync_items(self, user, factor, data):
-        factor_items = data.get('factor_items', [])
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs['pk']
+        queryset = self.get_queryset()
+        factor = get_object_or_404(queryset, pk=pk)
+        if not factor.is_deletable:
+            raise ValidationError('فاکتور غیر قابل حذف می باشد')
 
-        # Check Inventory
+        self.check_confirmations(request, factor, for_delete=True)
+
         if factor.is_definite:
-            if factor.type in Factor.SALE_GROUP:
-                check_inventory(user, factor_items['items'], consider_old_count=True)
+            DefiniteFactor.undoDefinition(request.user, factor)
 
-        return self.mass(user, factor, FactorItemSerializer, factor_items)
-
-    def sync_expenses(self, user, factor, data):
-        return self.mass(user, factor, FactorExpenseSerializer, data.get('factor_expenses', None))
-
-    def mass(self, user, factor, serializer_class, data):
-
-        if not data:
-            return
-
-        model = serializer_class.Meta.model
-        items_to_create = []
-        items_to_update = []
-
-        for item in data.get('items', []):
-            item['financial_year'] = factor.financial_year.id
-            if 'id' in item:
-                items_to_update.append(item)
-            else:
-                items_to_create.append(item)
-
-        for item in items_to_create:
-            item['factor'] = factor.id
-
-        serialized = serializer_class(data=items_to_create, many=True)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-
-        for item in items_to_update:
-            instance = get_object_or_404(model.objects.inFinancialYear(), id=item['id'])
-            if hasattr(instance, 'is_editable'):
-                if not instance.is_editable:
-                    continue
-            serialized = serializer_class(instance, data=item)
-            serialized.is_valid(raise_exception=True)
-            serialized.save()
-
-        ids_to_delete = data.get('ids_to_delete', [])
-        for id in ids_to_delete:
-            instance = get_object_or_404(model.objects.inFinancialYear(), id=id)
-            if hasattr(instance, 'is_editable'):
-                if not instance.is_editable:
-                    continue
-            instance.delete()
+        res = super().destroy(request, *args, **kwargs)
+        return res
 
 
 @api_view(['get'])
 def newCodesForFactor(request):
-    res = Factor.newCodes(request.user)
+    res = Factor.newCodes()
     return Response(res)
 
 
@@ -258,7 +207,7 @@ def getNotPaidFactors(request):
         .prefetch_related('account') \
         .prefetch_related('floatAccount') \
         .prefetch_related('costCenter')
-    res = Response(NotPaidFactorsSerializer(qs, many=True).data)
+    res = Response(NotPaidFactorsCreateUpdateSerializer(qs, many=True).data)
     return res
 
 
@@ -352,14 +301,8 @@ class DefiniteFactor(APIView):
         return Response(FactorListRetrieveSerializer(factor).data)
 
     @staticmethod
-    @transaction.atomic()
     def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
-
-        # Check Inventory
-        if perform_inventory_check:
-            if factor.type in Factor.SALE_GROUP:
-                check_inventory(user, factor.items.all(), consider_old_count=False)
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
@@ -387,7 +330,7 @@ class DefiniteFactor(APIView):
             else:
                 account = 'backFromSale'
 
-        code = Factor.newCodes(user, factor_type=factor.type)
+        code = factor.code
 
         explanation = "فاکتور {} شماره {} به تاریخ {} {} مشتری".format(
             factor.type_label,
@@ -446,13 +389,16 @@ class DefiniteFactor(APIView):
         if not is_confirmed:
             sanad.check_account_balance_confirmations()
 
+        if perform_inventory_check and factor.type in Factor.SALE_GROUP:
+            factor.check_inventory()
+
         return factor
 
     @staticmethod
     def getFactorSanad(user, factor):
         if not factor.sanad:
             sanad = Sanad(
-                code=newSanadCode(user),
+                code=newSanadCode(),
                 date=factor.date,
                 createType=Sanad.AUTO,
                 type=Sanad.TEMPORARY,

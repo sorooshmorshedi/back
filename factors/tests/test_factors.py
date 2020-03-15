@@ -57,6 +57,8 @@ class FactorTest(MTestCase):
         self._test_delete_factor(factor_id)
 
     def _test_create_factor(self):
+        user = User.objects.first()
+        self.client.force_authenticate(user)
         response = self.client.post(reverse('factor-list'), data=self.data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

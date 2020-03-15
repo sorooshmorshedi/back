@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from wares.models import Warehouse, Ware, WareBalance
+from wares.models import Warehouse, Ware, WareInventory
 
 admin.site.register(Warehouse)
 admin.site.register(Ware)
-admin.site.register(WareBalance)
+admin.site.register(WareInventory)

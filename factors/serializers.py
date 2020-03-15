@@ -31,6 +31,7 @@ class FactorExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactorExpense
         fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
 
 
 class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
@@ -44,20 +45,11 @@ class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FactorSerializer(serializers.ModelSerializer):
-    hasTax = serializers.SerializerMethodField()
-    isPaid = serializers.SerializerMethodField()
-
-    def get_isPaid(self, obj):
-        return obj.paidValue == obj.totalSum
-
-    def get_hasTax(self, obj):
-        return obj.taxValue != 0 or obj.taxPercent != 0
-
+class FactorCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
-        read_only_fields = ('id', 'code',)
+        read_only_fields = ['id', 'code', 'financial_year']
         extra_kwargs = {
             "account": {
                 "error_messages": {
@@ -68,18 +60,7 @@ class FactorSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         AccountValidator.tafsili(data)
-        return super(FactorSerializer, self).validate(data)
-
-
-class FactorUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Factor
-        fields = '__all__'
-        read_only_fields = ('id', 'code', 'financial_year')
-
-    def validate(self, data):
-        AccountValidator.tafsili(data)
-        return super(FactorUpdateSerializer, self).validate(data)
+        return super(FactorCreateUpdateSerializer, self).validate(data)
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
@@ -88,6 +69,7 @@ class FactorItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactorItem
         fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
 
     def validate(self, attrs):
         ware = attrs.get('ware')
@@ -158,7 +140,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class NotPaidFactorsSerializer(FactorSerializer):
+class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)

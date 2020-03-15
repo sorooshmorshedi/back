@@ -52,7 +52,7 @@ class StatusChange(BaseModel):
             fromStatus = self.fromStatus
             if not cheque.has_transaction or not fromStatus == 'blank':
                 sanad = Sanad(
-                    code=newSanadCode(user),
+                    code=newSanadCode(),
                     date=self.date,
                     createType=Sanad.AUTO,
                     financial_year=user.active_financial_year

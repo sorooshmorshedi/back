@@ -4,11 +4,14 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import signals, Sum, Max
 from django_jalali.db import models as jmodels
+from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from factors.signals import clearFactorSanad, updateWareBalanceOnSave, updateWareBalanceOnDelete
+from factors.signals import clearFactorSanad, updateInventoryOnSave, updateInventoryOnDelete
+from helpers.functions import get_current_user
 from helpers.models import BaseModel
+from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad
 from sanads.transactions.models import Transaction
 from wares.models import Ware, Warehouse
@@ -167,15 +170,53 @@ class Factor(BaseModel):
         }
         return res
 
+    def sync(self, user, data):
+        from factors.serializers import FactorItemSerializer
+        from factors.serializers import FactorExpenseSerializer
+
+        factor_items_data = data.get('factor_items')
+        factor_expenses_data = data.get('factor_expenses')
+
+        MassRelatedCUD(
+            user,
+            factor_items_data.get('items'),
+            factor_items_data.get('ids_to_delete'),
+            'factor',
+            self.id,
+            FactorItemSerializer,
+            FactorItemSerializer
+        ).sync()
+
+        MassRelatedCUD(
+            user,
+            factor_expenses_data.get('items'),
+            factor_expenses_data.get('ids_to_delete'),
+            'factor',
+            self.id,
+            FactorExpenseSerializer,
+            FactorExpenseSerializer
+
+        ).sync()
+
+    def check_inventory(self):
+        for item in self.items.all():
+            ware = item.ware
+            warehouse = item.warehouse
+
+            count = ware.get_inventory_count(warehouse)
+
+            if count < 0:
+                raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(ware))
+
     @staticmethod
-    def getFirstPeriodInventory(user):
+    def get_first_period_inventory(financial_year=None):
         try:
-            return Factor.objects.inFinancialYear().get(code=0)
+            return Factor.objects.inFinancialYear(financial_year).get(code=0)
         except Factor.DoesNotExist:
             return None
 
     @staticmethod
-    def newCodes(user, factor_type=None):
+    def newCodes(factor_type=None):
         codes = {}
         for type in Factor.FACTOR_TYPES:
             type = type[0]
@@ -331,5 +372,5 @@ class Transfer(BaseModel):
 
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
 
-signals.pre_save.connect(receiver=updateWareBalanceOnSave, sender=FactorItem)
-signals.pre_delete.connect(receiver=updateWareBalanceOnDelete, sender=FactorItem)
+signals.pre_save.connect(receiver=updateInventoryOnSave, sender=FactorItem)
+signals.pre_delete.connect(receiver=updateInventoryOnDelete, sender=FactorItem)

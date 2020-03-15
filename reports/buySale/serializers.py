@@ -1,10 +1,10 @@
 from factors.models import FactorItem, Factor
-from reports.lists.serializers import FactorListSerializer, WareSimpleSerializer, WarehouseSimpleSerializer
+from reports.lists.serializers import FactorListCreateUpdateSerializer, WareSimpleSerializer, WarehouseSimpleSerializer
 from rest_framework import serializers
 
 
 class BuySaleSerializer(serializers.ModelSerializer):
-    factor = FactorListSerializer(read_only=True, many=False)
+    factor = FactorListCreateUpdateSerializer(read_only=True, many=False)
     ware = WareSimpleSerializer(read_only=True, many=False)
     warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
 

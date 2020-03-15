@@ -52,7 +52,6 @@ class Sanad(BaseModel):
 
     def check_account_balance_confirmations(self):
 
-
         for item in self.items.all():
             account = item.account
 
@@ -139,8 +138,8 @@ def clearSanad(sanad):
         item.delete()
 
 
-def newSanadCode(user):
+def newSanadCode(financial_year=None):
     try:
-        return Sanad.objects.inFinancialYear().latest('code').code + 1
+        return Sanad.objects.inFinancialYear(financial_year).latest('code').code + 1
     except:
         return 1

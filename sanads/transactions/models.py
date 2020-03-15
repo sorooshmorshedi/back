@@ -95,7 +95,7 @@ class Transaction(BaseModel):
         return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
     def _createSanad(self, user):
-        sanad = Sanad(code=newSanadCode(user), financial_year=self.financial_year,
+        sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year,
                       date=self.date, createType=Sanad.AUTO)
         sanad.save()
         self.sanad = sanad

@@ -118,8 +118,8 @@ class Ware(BaseModel):
         except IndexError:
             return None
 
-    def get_balance(self, warehouse: Warehouse):
-        return WareBalance.get_balance(self, warehouse)
+    def get_inventory_count(self, warehouse: Warehouse):
+        return WareInventory.get_inventory_count(self, warehouse)
 
     def remain(self, user, last_factor_item=None):
         res = {
@@ -222,7 +222,7 @@ class Ware(BaseModel):
         return total_value, fees
 
 
-class WareBalance(BaseModel):
+class WareInventory(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresBalance')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='balance')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='balance')
@@ -232,9 +232,9 @@ class WareBalance(BaseModel):
         pass
 
     @staticmethod
-    def update_balance(ware: Ware, warehouse: Warehouse, change):
+    def update_inventory(ware: Ware, warehouse: Warehouse, change):
         user = get_current_user()
-        ware_balance, created = WareBalance.objects.get_or_create(
+        ware_balance, created = WareInventory.objects.get_or_create(
             ware=ware,
             warehouse=warehouse,
             financial_year=user.active_financial_year
@@ -243,9 +243,9 @@ class WareBalance(BaseModel):
         ware_balance.save()
 
     @staticmethod
-    def get_balance(ware: Ware, warehouse: Warehouse):
+    def get_inventory_count(ware: Ware, warehouse: Warehouse):
         user = get_current_user()
-        ware_balance, created = WareBalance.objects.get_or_create(
+        ware_balance, created = WareInventory.objects.get_or_create(
             ware=ware,
             warehouse=warehouse,
             financial_year=user.active_financial_year
@@ -253,6 +253,6 @@ class WareBalance(BaseModel):
         return ware_balance.count
 
     @staticmethod
-    def get_balances(ware: Ware):
-        ware_balances = WareBalance.objects.inFinancialYear().filter(ware=ware)
+    def get_inventory(ware: Ware):
+        ware_balances = WareInventory.objects.inFinancialYear().filter(ware=ware)
         return ware_balances

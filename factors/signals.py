@@ -1,14 +1,18 @@
 from sanads.sanads.models import clearSanad
-from wares.models import WareBalance
+from wares.models import WareInventory
 
 
 def clearFactorSanad(sender, instance, **kwargs):
     clearSanad(instance.sanad)
 
 
-def updateWareBalanceOnSave(sender, instance, **kwargs):
+def updateInventoryOnSave(sender, instance, **kwargs):
     from factors.models import Factor
     from factors.models import FactorItem
+
+    factor = instance.factor
+    if not factor.is_definite:
+        return
 
     ware = instance.ware
     warehouse = instance.warehouse
@@ -23,13 +27,17 @@ def updateWareBalanceOnSave(sender, instance, **kwargs):
         change = instance.count
 
     if instance.factor.type in Factor.INPUT_GROUP:
-        WareBalance.update_balance(ware, warehouse, change)
+        WareInventory.update_inventory(ware, warehouse, change)
     else:
-        WareBalance.update_balance(ware, warehouse, -change)
+        WareInventory.update_inventory(ware, warehouse, -change)
 
 
-def updateWareBalanceOnDelete(sender, instance, **kwargs):
+def updateInventoryOnDelete(sender, instance, **kwargs):
     from factors.models import Factor
+
+    factor = instance.factor
+    if not factor.is_definite:
+        return
 
     ware = instance.ware
     warehouse = instance.warehouse
@@ -39,6 +47,6 @@ def updateWareBalanceOnDelete(sender, instance, **kwargs):
         return
 
     if instance.factor.type in Factor.INPUT_GROUP:
-        WareBalance.update_balance(ware, warehouse, -change)
+        WareInventory.update_inventory(ware, warehouse, -change)
     else:
-        WareBalance.update_balance(ware, warehouse, change)
+        WareInventory.update_inventory(ware, warehouse, change)

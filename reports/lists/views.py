@@ -61,7 +61,7 @@ class EmptySanadListView(SanadListView):
 
 
 class FactorListView(generics.ListAPIView):
-    serializer_class = FactorListSerializer
+    serializer_class = FactorListCreateUpdateSerializer
     filterset_class = FactorFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination

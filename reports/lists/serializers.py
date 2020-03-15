@@ -5,7 +5,7 @@ from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import ChequebookListRetrieveSerializer
 from factors.models import Factor, FactorItem
-from factors.serializers import FactorSerializer
+from factors.serializers import FactorCreateUpdateSerializer
 from sanads.sanads.serializers import SanadSerializer
 from sanads.transactions.models import Transaction
 from wares.models import Ware, Warehouse
@@ -61,7 +61,7 @@ class ChequebookListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FactorListSerializer(FactorSerializer):
+class FactorListCreateUpdateSerializer(FactorCreateUpdateSerializer):
     account = AccountSimpleSerializer(read_only=True, many=False)
     total_sum = serializers.SerializerMethodField()
 
@@ -74,7 +74,7 @@ class FactorListSerializer(FactorSerializer):
 
 
 class FactorItemListSerializer(serializers.ModelSerializer):
-    factor = FactorListSerializer(read_only=True, many=False)
+    factor = FactorListCreateUpdateSerializer(read_only=True, many=False)
     ware = WareSimpleSerializer(read_only=True, many=False)
     warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
 
