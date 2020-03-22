@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account
 from accounts.accounts.validators import AccountValidator
+from sanads.sanads.models import SanadItem
 
 
 class FloatAccountGroupSimpleSerializer(serializers.ModelSerializer):
@@ -66,6 +67,12 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             person_type = data.get('person_type')
             if not person_type:
                 raise serializers.ValidationError("لطفا خریدار یا فروشنده را مشخص کنید")
+
+        if self.instance and SanadItem.objects.filter(account=self.instance).exists():
+            if self.instance.floatAccountGroup != data.get('floatAccountGroup'):
+                raise serializers.ValidationError("گروه حساب شناور برای حساب دارای گردش غیر قابل ویرایش می باشد")
+            if self.instance.costCenterGroup != data.get('costCenterGroup'):
+                raise serializers.ValidationError("گروه مرکز هزینه برای حساب دارای گردش غیر قابل ویرایش می باشد")
 
         return data
 
