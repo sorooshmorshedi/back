@@ -14,6 +14,7 @@ class MassRelatedCUD:
             parent_id,
             create_serializer,
             update_serializer,
+            financial_year=None
     ):
         self.user = user
         self.items = items
@@ -22,6 +23,11 @@ class MassRelatedCUD:
         self.parent_field = parent_field
         self.create_serializer = create_serializer
         self.update_serializer = update_serializer
+
+        if financial_year:
+            self.financial_year = financial_year
+        else:
+            self.financial_year = self.user.active_financial_year
 
     def sync(self):
 
@@ -53,12 +59,12 @@ class MassRelatedCUD:
 
     def perform_create(self, serializer):
         serializer.save(
-            financial_year=self.user.active_financial_year
+            financial_year=self.financial_year
         )
 
     def perform_update(self, serializer):
         serializer.save(
-            financial_year=self.user.active_financial_year
+            financial_year=self.financial_year
         )
 
     def perform_delete(self, instance):

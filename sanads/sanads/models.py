@@ -25,7 +25,7 @@ class Sanad(BaseModel):
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
-    code = models.IntegerField(unique=True, verbose_name="شماره سند")
+    code = models.IntegerField(verbose_name="شماره سند")
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateField(auto_now=True)
@@ -45,6 +45,7 @@ class Sanad(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+        unique_together = ['code', 'financial_year']
 
     @property
     def isEmpty(self):

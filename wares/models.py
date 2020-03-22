@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.aggregates import Sum, Max, Min
+from django.db.models.functions.comparison import Coalesce
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
@@ -223,36 +225,132 @@ class Ware(BaseModel):
 
 
 class WareInventory(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresBalance')
-    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='balance')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='balance')
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresInventories')
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
     count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
+    fee = models.DecimalField(max_digits=24, decimal_places=0)
+
+    order = models.IntegerField()
 
     class Meta(BaseModel.Meta):
-        pass
+        ordering = ['order']
+
+    def __str__(self):
+        return "{} - {} - {} - {} {} ({})".format(
+            self.financial_year.id,
+            self.ware.id,
+            self.warehouse.id,
+            self.count,
+            self.fee,
+            self.id
+        )
 
     @staticmethod
-    def update_inventory(ware: Ware, warehouse: Warehouse, change):
-        user = get_current_user()
-        ware_balance, created = WareInventory.objects.get_or_create(
+    def _get_order(ware: Ware, warehouse: Warehouse, revert=False):
+        qs = WareInventory.objects.filter(ware=ware, warehouse=warehouse)
+
+        if revert:
+            return qs.aggregate(min_order=Coalesce(Min('order'), 0))['min_order'] - 1
+        else:
+            return qs.aggregate(max_order=Coalesce(Max('order'), 0))['max_order'] + 1
+
+    @staticmethod
+    def increase_inventory(ware: Ware, warehouse: Warehouse, count, fee, financial_year=None, revert=False):
+        print('inc', count, revert)
+        if not financial_year:
+            user = get_current_user()
+            financial_year = user.active_financial_year
+
+        WareInventory.objects.create(
             ware=ware,
             warehouse=warehouse,
-            financial_year=user.active_financial_year
+            count=count,
+            fee=fee,
+            financial_year=financial_year,
+            order=WareInventory._get_order(ware, warehouse, revert=revert)
         )
-        ware_balance.count += change
-        ware_balance.save()
 
     @staticmethod
-    def get_inventory_count(ware: Ware, warehouse: Warehouse):
-        user = get_current_user()
-        ware_balance, created = WareInventory.objects.get_or_create(
+    def decrease_inventory(ware: Ware, warehouse: Warehouse, count, financial_year=None, revert=False):
+        print('dec', count, revert)
+        if not financial_year:
+            user = get_current_user()
+            financial_year = user.active_financial_year
+
+        ware_balances = WareInventory.objects.filter(
             ware=ware,
             warehouse=warehouse,
-            financial_year=user.active_financial_year
+            financial_year=financial_year
         )
-        return ware_balance.count
+
+        if revert:
+            ware_balances = ware_balances.order_by('-order')
+        else:
+            ware_balances = ware_balances.order_by('order')
+
+        for ware_balance in ware_balances:
+            if ware_balance.count == count:
+                ware_balance.delete()
+                break
+            elif ware_balance.count < count:
+                count -= ware_balance.count
+                ware_balance.delete()
+            elif ware_balance.count > count:
+                ware_balance.count -= count
+                ware_balance.save()
+                break
 
     @staticmethod
-    def get_inventory(ware: Ware):
-        ware_balances = WareInventory.objects.inFinancialYear().filter(ware=ware)
-        return ware_balances
+    def get_price(ware: Ware, count, financial_year=None):
+        if not financial_year:
+            user = get_current_user()
+            financial_year = user.active_financial_year
+
+        ware_balances = WareInventory.objects.filter(
+            ware=ware,
+            financial_year=financial_year
+        )
+
+        fees = []
+
+        for ware_balance in ware_balances:
+            fee = {
+                'fee': ware_balance.fee,
+            }
+            if ware_balance == count:
+                fee['count'] = ware_balance.count
+                break
+            elif ware_balance < count:
+                fee['count'] = ware_balance.count
+            elif ware_balance > count:
+                fee['count'] = count
+                break
+
+            fees.append(fee)
+
+        price = 0
+        final_fee = 0
+
+        for fee in fees:
+            price += fee['count'] * fee['fee']
+
+        if ware.pricingType == Ware.WEIGHTED_MEAN:
+            final_fee = price / count
+        elif ware.pricingType == Ware.FIFO:
+            final_fee = fees
+
+        return price, final_fee
+
+    @staticmethod
+    def get_inventory_count(ware: Ware, warehouse: Warehouse, financial_year=None):
+        if not financial_year:
+            user = get_current_user()
+            financial_year = user.active_financial_year
+
+        ware_balance = WareInventory.objects.filter(
+            ware=ware,
+            warehouse=warehouse,
+            financial_year=financial_year
+        ).aggregate(count=Coalesce(Sum('count'), 0))
+        return ware_balance['count']

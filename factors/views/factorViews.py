@@ -1,4 +1,3 @@
-from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -12,9 +11,11 @@ from rest_framework.views import APIView
 from accounts.defaultAccounts.models import getDefaultAccount
 from factors.helpers import getInventoryCount
 from helpers.exceptions.ConfirmationError import ConfirmationError
+from helpers.functions import get_current_user
 from sanads.sanads.models import clearSanad, newSanadCode
 from factors.serializers import *
 from server.settings import TESTING
+from wares.models import WareInventory, Ware
 
 
 class ExpenseModelView(viewsets.ModelViewSet):
@@ -162,7 +163,7 @@ class FactorModelView(viewsets.ModelViewSet):
         self.check_confirmations(request, factor, for_delete=True)
 
         if factor.is_definite:
-            DefiniteFactor.undoDefinition(request.user, factor)
+            clearSanad(factor.sanad)
 
         res = super().destroy(request, *args, **kwargs)
         return res
@@ -380,10 +381,9 @@ class DefiniteFactor(APIView):
         )
         DefiniteFactor.submitExpenseSanadItems(factor, explanation)
 
-        factor.is_definite = True
-        factor.code = code
         factor.definition_date = now()
         factor.sanad = sanad
+        factor.is_definite = True
         factor.save()
 
         if not is_confirmed:
@@ -406,8 +406,8 @@ class DefiniteFactor(APIView):
                 financial_year=user.active_financial_year
             )
         else:
-            factor = DefiniteFactor.undoDefinition(user, factor)
             sanad = factor.sanad
+            clearSanad(sanad)
             sanad.date = factor.date
             sanad.createType = Sanad.AUTO
             sanad.type = Sanad.TEMPORARY
@@ -415,17 +415,6 @@ class DefiniteFactor(APIView):
         sanad.save()
 
         return sanad
-
-    @staticmethod
-    def undoDefinition(user, factor):
-        sanad = factor.sanad
-        clearSanad(sanad)
-
-        factor.is_definite = False
-        factor.definition_date = None
-        factor.save()
-
-        return factor
 
     @staticmethod
     def setFactorItemsRemains(user, factor):
@@ -464,9 +453,15 @@ class DefiniteFactor(APIView):
                 item.remain_value -= calculated_output_value
                 item.total_output_count += item.count
                 for fee in fees:
-                    fee['fee'] = float(fee['fee'])
                     fee['count'] = float(fee['count'])
+                    fee['fee'] = float(fee['fee'])
+
                 item.fees = fees
+
+            if not factor.is_definite:
+                DefiniteFactor.updateInventoryOnFactorItemSave(item, perform_revert=False)
+            else:
+                DefiniteFactor.updateInventoryOnFactorItemSave(item)
 
             item.save()
 
@@ -650,3 +645,52 @@ class DefiniteFactor(APIView):
                 explanation=explanation,
                 financial_year=sanad.financial_year
             )
+
+    @staticmethod
+    def updateInventoryOnFactorItemSave(factor_item, financial_year=None, perform_revert=True):
+        from factors.models import Factor
+        from factors.models import FactorItem
+
+        if not financial_year:
+            financial_year = get_current_user().active_financial_year
+
+        ware = factor_item.ware
+        warehouse = factor_item.warehouse
+
+        if ware.isService:
+            return
+
+        factorItem = None
+        if factor_item.id:
+            factorItem = FactorItem.objects.get(pk=factor_item.id)
+
+        if factor_item.factor.type in Factor.INPUT_GROUP:
+            if factorItem and perform_revert:
+                WareInventory.decrease_inventory(ware, warehouse, factorItem.count, financial_year, revert=True)
+            WareInventory.increase_inventory(ware, warehouse, factor_item.count, factor_item.fee, financial_year)
+        else:
+            if factorItem and perform_revert:
+                ware = factorItem.ware
+                if ware.pricingType == Ware.FIFO:
+                    fees = factorItem.fees.copy()
+                    fees.reverse()
+                    for fee in fees:
+                        WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], financial_year,
+                                                         revert=True)
+
+            WareInventory.decrease_inventory(ware, warehouse, factor_item.count, financial_year)
+
+        next_financial_year = FinancialYear.objects.filter(start__gt=financial_year.start).order_by('start').first()
+        if next_financial_year:
+            next_year_first_period_inventory = Factor.get_first_period_inventory(next_financial_year)
+            if next_year_first_period_inventory and Factor.objects.inFinancialYear(next_financial_year).filter(
+                    code__gte=1).exists():
+                count = ware.get_inventory_count(warehouse)
+                has_changed = True
+                for item in next_year_first_period_inventory.items.all():
+                    if item.ware == ware and item.warehouse == warehouse and item.count == count:
+                        has_changed = False
+                        break
+
+                if has_changed:
+                    raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")

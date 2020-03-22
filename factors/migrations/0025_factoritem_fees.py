@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='factoritem',
             name='fees',
-            field=django.contrib.postgres.fields.jsonb.JSONField(default=factors.models.get_empty_dict),
+            field=django.contrib.postgres.fields.jsonb.JSONField(default=factors.models.get_empty_array),
         ),
     ]

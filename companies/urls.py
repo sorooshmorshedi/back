@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from companies.views.financialYear import CloseAccountsView, MoveAccountsView
+from companies.views.financialYear import CloseFinancialYearView, MoveFinancialYearView
 from companies.views.companies import CompanyModelView
 from companies.views.companies import FinancialYearModelView
 
@@ -13,7 +13,7 @@ router.register('', CompanyModelView, base_name='company')
 urlpatterns = router.urls
 
 urlpatterns += [
-    url(r'^closeAccounts$', CloseAccountsView.as_view()),
-    url(r'^moveAccounts$', MoveAccountsView.as_view()),
+    url(r'^closeFinancialYear$', CloseFinancialYearView.as_view()),
+    url(r'^moveFinancialYear$', MoveFinancialYearView.as_view()),
 ]
 

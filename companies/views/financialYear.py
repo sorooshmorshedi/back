@@ -1,267 +1,206 @@
-from django.db import transaction
-from django.db.models import Q
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
-from rest_framework import status
+import jdatetime
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup, FloatAccountRelation
-from accounts.defaultAccounts.models import getDefaultAccount, DefaultAccount
+from accounts.accounts.models import Account, AccountType, AccountBalance
+from accounts.defaultAccounts.models import getDefaultAccount
 from companies.models import FinancialYear
-from sanads.sanads.models import SanadItem, newSanadCode, Sanad
-from sanads.sanads.serializers import SanadSerializer, SanadItemSerializer
-from wares.models import Ware, Warehouse, WareLevel, Unit
+from factors.models import Factor
+from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
+from sanads.sanads.models import SanadItem, clearSanad
+from wares.models import WareInventory
 
 
-class ClosingBaseView(APIView):
-    user = None
-    accounts = None
-    created_sanads = []
+class ClosingHelpers:
+    @staticmethod
+    def create_sanad_items_with_balance(sanad, accounts=None, reverse=False):
+        sanad_items = []
 
-    TemporaryGroupCodes = [6, 7, 8]
-    PermanentGroupCodes = [1, 2, 3, 4, 5]
-    NeuralGroupCode = 9
+        qs = AccountBalance.objects.inFinancialYear()
+        if accounts:
+            qs = qs.filter(account__in=accounts)
 
-    def createSanad(self, code, destination_account, explanation):
-        res = self.createSanadItems(code, destination_account)
-        items = res['items']
-        sanad_remain = res['sanad_remain']
-        if sanad_remain != 0:
-            self.saveSanad(items, explanation)
+        balances = qs.all()
 
-    # By default reverses valueTypes
-    def createSanadItems(self, code, destination_account):
-        # todo FloatAccounts
-        items = []
-        sanad_bed_sum = 0
-        sanad_bes_sum = 0
-        for account in self.accounts:
-            if account.code.find(str(code)) != 0:
-                continue
-            if account.bed_sum == account.bes_sum == 0:
-                continue
-
-            sanad_bed_sum += account.bed_sum
-            sanad_bes_sum += account.bes_sum
-
-            value = account.bed_sum - account.bes_sum
-            if value < 0:
-                value_type = SanadItem.BES
-                value = -value
+        for balance in balances:
+            remain = balance.bed - balance.bes
+            bed = bes = 0
+            if remain > 0:
+                bed = remain
             else:
-                value_type = SanadItem.BED
+                bes = remain
 
-            items.append({
-                'account': account.id,
-                'value': value,
-                'valueType': value_type,
-            })
+            if reverse:
+                bed, bes = bes, bed
 
-        sanad_remain = sanad_bed_sum - sanad_bes_sum
-        sanad_value_type = SanadItem.BES
-        if sanad_remain < 0:
-            sanad_remain = -sanad_remain
-            sanad_value_type = SanadItem.BED
+            if bed == bes == 0:
+                continue
 
-        if destination_account:
-            items.append({
-                'account': destination_account.id,
-                'value': sanad_remain,
-                'valueType': sanad_value_type,
-            })
+            item = SanadItem(
+                financial_year=sanad.financial_year,
+                sanad=sanad,
+                account=balance.account,
+                floatAccount=balance.floatAccount,
+                costCenter=balance.costCenter,
+                bed=bed,
+                bes=bes
+            )
 
-        return {
-            'items': items,
-            'sanad_remain': sanad_remain
-        }
+            item.save()
+            sanad_items.append(item)
 
-    def saveSanad(self, items, explanation, financial_year=None):
-        if not financial_year:
-            financial_year = self.user.active_financial_year
-        data = {
-            'financial_year': financial_year.id,
-            'date': financial_year.end,
-            'code': newSanadCode(),
-            'explanation': explanation,
-            'type': Sanad.TEMPORARY,
-            'createType': Sanad.AUTO
-        }
-        serialized = SanadSerializer(data=data)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-        sanad = serialized.instance
-        self.created_sanads.append(sanad)
-
-        for item in items:
-            item['explanation'] = explanation
-            item['financial_year'] = financial_year.id
-            item['sanad'] = sanad.id
-        serialized = SanadItemSerializer(data=items, many=True)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-
-    def resetAccounts(self):
-        self.accounts = Account.objects.inFinancialYear() \
-            .filter(level=Account.TAFSILI) \
-            .annotate(bed_sum=Coalesce(Sum('sanadItems__bed'), 0)) \
-            .annotate(bes_sum=Coalesce(Sum('sanadItems__bes'), 0)) \
-            .prefetch_related('sanadItems') \
-            .prefetch_related('floatAccountGroup')
+        return sanad_items
 
     @staticmethod
-    def getReversedSanadItems(items):
-        new_items = []
-        for item in items:
-            new_item = item.copy()
-            if new_item['valueType'] == SanadItem.BED:
-                new_item['valueType'] = SanadItem.BES
-            else:
-                new_item['valueType'] = SanadItem.BED
-            new_items.append(new_item)
-        return new_items
+    def balance_sanad(sanad, defaultAccount):
 
+        sanad_remain = sanad.bed - sanad.bes
+        bed = bes = 0
+        if sanad_remain > 0:
+            bed = sanad_remain
+        elif sanad_remain < 0:
+            bes = sanad_remain
 
-class CloseAccountsView(ClosingBaseView):
+        current_earnings_default_account = getDefaultAccount(defaultAccount)
 
-    def post(self, request):
-        self.user = request.user
-        self.resetAccounts()
-        # self.openingSanad(self.user.active_financial_year)
-        # print(len(connection.queries))
-        # return Response({}, status=status.HTTP_200_OK)
-        self.closeTemporaries()
-        self.closeEarnings()
-        self.closePermanents()
-        self.closeNeutrals()
-        return Response({}, status=status.HTTP_200_OK)
+        item = SanadItem(
+            financial_year=sanad.financial_year,
+            sanad=sanad,
+            account=current_earnings_default_account.account,
+            floatAccount=current_earnings_default_account.floatAccount,
+            costCenter=current_earnings_default_account.costCenter,
+            bed=bed,
+            bes=bes
+        )
 
-    def closeTemporaries(self):
-        explanation = 'بابت بستن حساب های موقت'
-        account = getDefaultAccount('currentEarnings').account
-        for code in self.TemporaryGroupCodes:
-            self.createSanad(code, account, explanation)
+        item.save()
 
-    def closeEarnings(self):
-        self.resetAccounts()
-        explanation = 'بابت بستن حساب سود و زیان جاری'
-        account = getDefaultAccount('currentEarnings').account
-        remain = account.get_remain()
-        destination_account = getDefaultAccount('retainedEarnings').account
+        return item
+
+    @staticmethod
+    def create_first_period_inventory(target_financial_year):
+
+        first_period_inventory = Factor.get_first_period_inventory(target_financial_year)
+        if first_period_inventory:
+            first_period_inventory.delete()
+
+        data = {
+            'factor': {
+                'date': jdatetime.date.today(),
+                'time': jdatetime.datetime.now(),
+            },
+            'factor_items': {
+                'items': [],
+                'ids_to_delete': []
+            }
+        }
 
         items = []
-        value = remain['value']
-        if remain['remain_type'] == SanadItem.BED:
-            value_type = SanadItem.BES
-        else:
-            value_type = SanadItem.BED
 
-        items.append({
-            'account': account.id,
-            'value': value,
-            'valueType': value_type,
-        })
+        WareInventory.objects.inFinancialYear(target_financial_year).delete()
+        for inventory in WareInventory.objects.inFinancialYear().all():
+            items.append({
+                'fee': inventory.fee,
+                'ware': inventory.ware.id,
+                'warehouse': inventory.warehouse.id,
+                'count': inventory.count,
+            })
 
-        if value_type == SanadItem.BED:
-            value_type = SanadItem.BES
-        else:
-            value_type = SanadItem.BED
+        data['factor_items']['items'] = items
 
-        items.append({
-            'account': destination_account.id,
-            'value': value,
-            'valueType': value_type,
-        })
-
-        if value != 0:
-            self.saveSanad(items, explanation)
-
-    def closePermanents(self):
-        self.resetAccounts()
-        explanation = 'بابت بستن حساب های دائمی'
-        account = getDefaultAccount('closing').account
-        for code in self.PermanentGroupCodes:
-            self.createSanad(code, account, explanation)
-
-        remain = account.get_remain()
-        if remain['value'] != 0:
-            raise ValidationError(detail='حساب اختتامیه مانده دارد')
-
-    def closeNeutrals(self):
-        explanation = 'بابت بستن حساب ها'
-        res = self.createSanadItems(self.NeuralGroupCode, destination_account=None)
-        items = res['items']
-        sanad_remain = res['sanad_remain']
-
-        if sanad_remain == 0:
-            if len(items):
-                self.saveSanad(items, explanation)
-        else:
-            raise ValidationError(detail='سند بستن حساب های خنتی تراز نیست')
-
-    def openingSanad(self, financial_year):
-        explanation = 'بابت افتتاح حساب'
-        account = getDefaultAccount('closing').account
-        items = []
-        for code in self.PermanentGroupCodes:
-            res = self.createSanadItems(code, account)
-            items += res['items']
-        res = self.createSanadItems(self.NeuralGroupCode, destination_account=None)
-        items += res['items']
-        items = self.getReversedSanadItems(items)
-        self.saveSanad(items, explanation, financial_year)
+        FirstPeriodInventoryView.set_first_period_inventory(data, target_financial_year)
 
 
-class MoveAccountsView(ClosingBaseView):
-    destination_financial_year = None
+class CloseFinancialYearView(APIView):
+    sanad = None
 
     def post(self, request):
-        self.user = request.user
-        self.destination_financial_year = get_object_or_404(FinancialYear,
-                                                            pk=request.data['destination_financial_year'])
-        self.resetAccounts()
-        self.moveAccounts()
-        self.moveWares()
-        return Response({}, status=status.HTTP_200_OK)
+        data = request.data
+        user = request.user
 
-    @transaction.atomic()
-    def moveAccounts(self):
-        destination_accounts = Account.objects \
-            .filter(financial_year=self.destination_financial_year) \
-            .exclude(financial_year=self.user.active_financial_year)
-        source_accounts = Account.objects.inFinancialYear()
+        current_financial_year = user.active_financial_year
+        # target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
+        target_financial_year = FinancialYear.objects.get(pk=189)
 
-        for destination_account in destination_accounts:
-            if destination_account.code in [account.code for account in source_accounts]:
-                detail = "در سال مالی جدید حساب با کد {} وجود دارد".format(destination_account.code)
-                raise ValidationError(detail=detail)
+        if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_definite=True).exists():
+            raise ValidationError("ابتدا فاکتور های قطعی سال مالی جدید را پاک نمایید")
 
-        self.destination_financial_year.accounts.add(*Account.objects.inFinancialYear())
-        self.destination_financial_year.persons.add(*Person.objects.inFinancialYear())
-        self.destination_financial_year.banks.add(*Bank.objects.inFinancialYear())
-        self.destination_financial_year.floatAccounts.add(*FloatAccount.objects.inFinancialYear())
-        self.destination_financial_year.floatAccountGroups.add(*FloatAccountGroup.objects.inFinancialYear())
-        self.destination_financial_year.floatAccountRelations.add(
-            *FloatAccountRelation.objects.inFinancialYear())
-        self.destination_financial_year.defaultAccounts.add(*DefaultAccount.objects.inFinancialYear())
+        self.sanad = current_financial_year.get_closing_sanad()
+        clearSanad(self.sanad)
 
-    @transaction.atomic()
-    def moveWares(self):
-        destination_wares = Ware.objects \
-            .filter(financial_year=self.destination_financial_year) \
-            .exclude(financial_year=self.user.active_financial_year)
-        source_wares = Ware.objects.inFinancialYear()
+        self.add_temporaries_sanad_items()
 
-        for destination_wares in destination_wares:
-            if destination_wares.code in [ware.code for ware in source_wares]:
-                detail = "در سال مالی جدید کالا با کد {} وجود دارد".format(destination_wares.code)
-                raise ValidationError(detail=detail)
+        self.add_current_earnings_sanad_item()
 
-        self.destination_financial_year.wares.add(*Ware.objects.inFinancialYear())
-        self.destination_financial_year.warehouses.add(*Warehouse.objects.inFinancialYear())
-        self.destination_financial_year.wareLevels.add(*WareLevel.objects.inFinancialYear())
-        self.destination_financial_year.units.add(*Unit.objects.inFinancialYear())
+        self.add_retained_earnings_sanad_item()
 
-#         Check SalesGroup factors for first period inventory factor
+        self.add_permanents_sanad_items()
+
+        self.add_closing_sanad_item()
+
+        self.create_opening_sanad(target_financial_year)
+
+        ClosingHelpers.create_first_period_inventory(target_financial_year)
+
+        return Response([])
+
+    def add_temporaries_sanad_items(self):
+        accounts = Account.objects \
+            .filter(type__usage=AccountType.INCOME_STATEMENT) \
+            .all()
+
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad, accounts, reverse=True)
+
+        return sanad_items
+
+    def add_current_earnings_sanad_item(self):
+        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'currentEarnings')
+        return [sanad_item]
+
+    def add_retained_earnings_sanad_item(self):
+        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'retainedEarnings')
+        return [sanad_item]
+
+    def add_permanents_sanad_items(self):
+        accounts = Account.objects \
+            .filter(type__usage__in=[AccountType.BALANCE_SHEET, None, AccountType.NONE]) \
+            .all()
+
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad, accounts, reverse=True)
+        return sanad_items
+
+    def add_closing_sanad_item(self):
+        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'closing')
+        return [sanad_item]
+
+    def create_opening_sanad(self, target_financial_year):
+        accounts = Account.objects \
+            .filter(type__usage__in=[AccountType.BALANCE_SHEET, None, AccountType.NONE]) \
+            .all()
+
+        sanad = target_financial_year.get_opening_sanad()
+        clearSanad(sanad)
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad, accounts, reverse=False)
+
+        return sanad_items
+
+
+class MoveFinancialYearView(APIView):
+    sanad = None
+
+    def post(self, request):
+        # target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
+        target_financial_year = FinancialYear.objects.get(pk=189)
+
+        self.sanad = target_financial_year.get_opening_sanad()
+
+        self.move_accounts()
+
+        ClosingHelpers.create_first_period_inventory(target_financial_year)
+
+        return Response([])
+
+    def move_accounts(self):
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad)
+        return sanad_items

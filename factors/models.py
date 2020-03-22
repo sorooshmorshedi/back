@@ -8,8 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from factors.signals import clearFactorSanad, updateInventoryOnSave, updateInventoryOnDelete
-from helpers.functions import get_current_user
+from factors.signals import clearFactorSanad, updateInventoryOnSanadItemDelete, updateInventoryOnFactorDelete
 from helpers.models import BaseModel
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad
@@ -300,8 +299,8 @@ class FactorPayment(BaseModel):
         unique_together = ('factor', 'transaction')
 
 
-def get_empty_dict():
-    return {}
+def get_empty_array():
+    return []
 
 
 class FactorItem(BaseModel):
@@ -313,7 +312,7 @@ class FactorItem(BaseModel):
 
     count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
-    fees = JSONField(default=get_empty_dict)
+    fees = JSONField(default=get_empty_array)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
@@ -370,7 +369,7 @@ class Transfer(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
 
 
+signals.pre_delete.connect(receiver=updateInventoryOnFactorDelete, sender=Factor)
 signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
 
-signals.pre_save.connect(receiver=updateInventoryOnSave, sender=FactorItem)
-signals.pre_delete.connect(receiver=updateInventoryOnDelete, sender=FactorItem)
+signals.pre_delete.connect(receiver=updateInventoryOnSanadItemDelete, sender=FactorItem)

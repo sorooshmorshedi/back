@@ -1,5 +1,8 @@
+import jdatetime
+from django_jalali.db import models as jmodels
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 
 class Company(models.Model):
@@ -17,9 +20,8 @@ class Company(models.Model):
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
 
-    permissions = (
-        ('get_company', 'Can get company')
-    )
+    def __str__(self):
+        return "{} ({})".format(self.name, self.id)
 
     @property
     def last_financial_year(self):
@@ -30,7 +32,6 @@ class Company(models.Model):
 
 
 class FinancialYear(models.Model):
-    from django_jalali.db import models as jmodels
     objects = models.Manager()
 
     name = models.CharField(unique=True, max_length=150)
@@ -39,3 +40,46 @@ class FinancialYear(models.Model):
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
 
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')
+    openingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
+                                     related_name='financialYearAsOpeningSanad', null=True, blank=True)
+    closingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
+                                     related_name='financialYearAsClosingSanad', null=True, blank=True)
+
+    def __str__(self):
+        return "{} {} ({})".format(self.company, self.name, self.id)
+
+    def get_opening_sanad(self):
+        from sanads.sanads.models import Sanad
+        from sanads.sanads.models import newSanadCode
+
+        if not self.openingSanad:
+            code = newSanadCode(self)
+            if code != 1:
+                raise ValidationError('ابتدا سند های سال مالی جدید را پاک کنید')
+
+            sanad = Sanad.objects.create(
+                financial_year=self,
+                code=code,
+                createType=Sanad.AUTO,
+                date=jdatetime.date.today()
+            )
+            self.openingSanad = sanad
+            self.save()
+
+        return self.openingSanad
+
+    def get_closing_sanad(self):
+        from sanads.sanads.models import Sanad
+        from sanads.sanads.models import newSanadCode
+
+        if not self.closingSanad:
+            sanad = Sanad.objects.create(
+                financial_year=self,
+                code=newSanadCode(self),
+                createType=Sanad.AUTO,
+                date=jdatetime.date.today()
+            )
+            self.closingSanad = sanad
+            self.save()
+
+        return self.closingSanad

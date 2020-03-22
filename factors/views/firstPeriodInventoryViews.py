@@ -1,14 +1,32 @@
-from django.db import transaction
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account
-from factors.models import Factor, FactorItem
+from factors.models import Factor
 from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
+from factors.views.factorViews import DefiniteFactor
 from helpers.functions import get_current_user
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad, newSanadCode, clearSanad
+
+
+class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
+
+    def perform_create(self, serializer):
+        serializer.save(
+            financial_year=self.financial_year
+        )
+        print('ha')
+        print(serializer.instance)
+        for item in serializer.instance:
+            DefiniteFactor.updateInventoryOnFactorItemSave(item, self.financial_year, perform_revert=False)
+
+    def perform_update(self, serializer):
+        serializer.save(
+            financial_year=self.financial_year
+        )
+        DefiniteFactor.updateInventoryOnFactorItemSave(serializer.instance, self.financial_year, perform_revert=True)
 
 
 class FirstPeriodInventoryView(APIView):
@@ -36,7 +54,7 @@ class FirstPeriodInventoryView(APIView):
         :param data: {
             factor: {...},
             factor_items: {
-                item: [{..}, ...},
+                items: [{..}, ...},
                 ids_to_delete: []
         }
         :param financial_year:
@@ -83,14 +101,15 @@ class FirstPeriodInventoryView(APIView):
 
         first_period_inventory = serializer.instance
 
-        MassRelatedCUD(
+        FirstPeriodInventoryItemMassRelatedCUD(
             user,
             factor_items_data.get('items', []),
             factor_items_data.get('ids_to_delete', []),
             'factor',
             first_period_inventory.id,
             FactorItemSerializer,
-            FactorItemSerializer
+            FactorItemSerializer,
+            financial_year=financial_year
         ).sync()
 
         for item in first_period_inventory.items.all():
