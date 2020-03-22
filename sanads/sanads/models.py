@@ -45,7 +45,6 @@ class Sanad(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
-        unique_together = ['code', 'financial_year']
 
     @property
     def isEmpty(self):

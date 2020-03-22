@@ -5,8 +5,11 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from helpers.db import queryset_iterator
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.serializers import *
 
@@ -92,6 +95,21 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
             serializer.instance.check_account_balance_confirmations()
 
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
+
+
+class ReorderSanadsApiView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        qs = Sanad.objects.inFinancialYear()
+
+        code = 1
+        for sanad in queryset_iterator(qs, key='date'):
+            sanad.code = code
+            sanad.save()
+            code += 1
+
+        return Response([])
 
 
 @api_view(['get'])
