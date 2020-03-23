@@ -680,17 +680,11 @@ class DefiniteFactor(APIView):
 
             WareInventory.decrease_inventory(ware, warehouse, factor_item.count, financial_year)
 
-        next_financial_year = FinancialYear.objects.filter(start__gt=financial_year.start).order_by('start').first()
-        if next_financial_year:
-            next_year_first_period_inventory = Factor.get_first_period_inventory(next_financial_year)
-            if next_year_first_period_inventory and Factor.objects.inFinancialYear(next_financial_year).filter(
-                    code__gte=1).exists():
-                count = ware.get_inventory_count(warehouse)
-                has_changed = True
-                for item in next_year_first_period_inventory.items.all():
-                    if item.ware == ware and item.warehouse == warehouse and item.count == count:
-                        has_changed = False
-                        break
+        is_used_in_next_years = FactorItem.objects.filter(
+            factor__financial_year__start__gt=financial_year.start,
+            factor__type__in=Factor.OUTPUT_GROUP,
+            ware=ware
+        ).exists()
 
-                if has_changed:
-                    raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
+        if is_used_in_next_years:
+            raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
