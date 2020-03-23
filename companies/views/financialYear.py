@@ -1,5 +1,6 @@
 import jdatetime
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -121,8 +122,7 @@ class CloseFinancialYearView(APIView):
         user = request.user
 
         current_financial_year = user.active_financial_year
-        # target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
-        target_financial_year = FinancialYear.objects.get(pk=189)
+        target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
 
         if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_definite=True).exists():
             raise ValidationError("ابتدا فاکتور های قطعی سال مالی جدید را پاک نمایید")
@@ -202,8 +202,7 @@ class MoveFinancialYearView(APIView):
     sanad = None
 
     def post(self, request):
-        # target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
-        target_financial_year = FinancialYear.objects.get(pk=189)
+        target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
 
         self.sanad = target_financial_year.get_opening_sanad()
 
