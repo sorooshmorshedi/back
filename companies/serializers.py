@@ -4,6 +4,10 @@ from companies.models import Company, FinancialYear
 
 
 class FinancialYearSerializer(serializers.ModelSerializer):
+    is_closed = serializers.SerializerMethodField()
+
+    def get_is_closed(self, obj: FinancialYear):
+        return obj.is_closed
 
     class Meta:
         model = FinancialYear
@@ -20,4 +24,3 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = '__all__'
-

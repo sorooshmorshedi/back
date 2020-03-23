@@ -48,6 +48,10 @@ class FinancialYear(models.Model):
     def __str__(self):
         return "{} {} ({})".format(self.company, self.name, self.id)
 
+    @property
+    def is_closed(self):
+        return self.closingSanad is not None
+
     def get_opening_sanad(self):
         from sanads.sanads.models import Sanad
         from sanads.sanads.models import newSanadCode
