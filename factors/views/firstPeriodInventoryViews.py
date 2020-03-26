@@ -113,8 +113,6 @@ class FirstPeriodInventoryView(APIView):
         ).sync()
 
         for item in first_period_inventory.items.all():
-            item.total_input_count = item.count
-            item.remain_value = item.value
             item.save()
 
         return first_period_inventory

@@ -46,7 +46,7 @@ class WareInventorySerializer(serializers.ModelSerializer):
             'value': '-'
         }
 
-    def get_output(self, obj):
+    def get_output(self, obj: FactorItem):
         from wares.models import Ware
         if obj.ware.pricingType == Ware.WEIGHTED_MEAN and obj.remain_count:
             fee = round(obj.remain_value / obj.remain_count, 2)

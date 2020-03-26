@@ -313,28 +313,35 @@ class FactorItem(BaseModel):
     count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
     fees = JSONField(default=get_empty_array)
+    remain_fees = JSONField(default=get_empty_array)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
 
     # These field are not warehouse wised
     calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
-    remain_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
-    total_input_count = models.IntegerField(blank=True, default=0)
-    total_output_count = models.IntegerField(blank=True, default=0)
 
     def __str__(self):
-        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}, total_input: {}, total_output: {}" \
-            .format(
+        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(
             self.factor.id,
             self.factor.type,
             self.factor.is_definite,
-            self.ware,
-            self.count, self.total_input_count, self.total_output_count)
+            self.ware, self.count
+        )
 
     @property
     def remain_count(self):
-        return self.total_input_count - self.total_output_count
+        count = 0
+        for fee in self.remain_fees:
+            count += fee['count']
+        return count
+
+    @property
+    def remain_value(self):
+        value = 0
+        for fee in self.remain_fees:
+            value += fee['count'] + fee['fee']
+        return value
 
     @property
     def value(self):
@@ -353,6 +360,9 @@ class FactorItem(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.discountValue = self.discount
+        self.calculated_output_value = 0
+        for fee in self.fees:
+            self.calculated_output_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
 
 

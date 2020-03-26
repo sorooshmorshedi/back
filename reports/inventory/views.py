@@ -1,9 +1,7 @@
-from django.db import connection
 from django.db.models import Sum, F, DecimalField, Window, Q, Prefetch, Subquery, OuterRef
+from django.db.models.functions.comparison import Coalesce
 from rest_framework import generics
-from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.response import Response
 
 from factors.models import FactorItem, Factor
 from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter
@@ -40,7 +38,7 @@ class WareInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear()\
+        queryset = FactorItem.objects.inFinancialYear() \
             .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
@@ -49,7 +47,6 @@ class WareInventoryListView(generics.ListAPIView):
         return queryset
 
     def list(self, request, *args, **kwargs):
-
         params = self.request.GET
 
         factor_items = self.get_queryset()
@@ -77,7 +74,6 @@ class AllWaresInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-
         last_factor_item = Subquery(FactorItem.objects.inFinancialYear()
                                     .filter(ware_id=OuterRef('ware_id'))
                                     .filter(factor__is_definite=True,
@@ -99,18 +95,17 @@ class AllWaresInventoryListView(generics.ListAPIView):
         queryset = Ware.objects.inFinancialYear() \
             .prefetch_related(Prefetch('factorItems', queryset=FactorItem.objects.filter(id__in=last_factor_item))) \
             .annotate(
-                input_count=Sum('factorItems__count', filter=input_filter),
-                input_value=Sum(F('factorItems__fee') * F('factorItems__count'),
-                                filter=input_filter, output_field=DecimalField()),
-                output_count=Sum('factorItems__count', filter=output_filter),
-                output_value=Sum(F('factorItems__calculated_output_value'),
-                                 filter=output_filter, output_field=DecimalField()),
-            )
+            input_count=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
+            input_value=Coalesce(Sum(F('factorItems__fee') * F('factorItems__count'), 0),
+                                 filter=input_filter, output_field=DecimalField()),
+            output_count=Coalesce(Sum('factorItems__count', filter=output_filter), 0),
+            output_value=Coalesce(Sum(F('factorItems__calculated_output_value'),
+                                      filter=output_filter, output_field=DecimalField()), 0)
+        )
 
         return queryset
 
     def list(self, request, *args, **kwargs):
-
         params = self.request.GET
 
         factor_items = self.get_queryset()
@@ -138,31 +133,30 @@ class WarehouseInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear()\
+        queryset = FactorItem.objects.inFinancialYear() \
             .filter(factor__is_definite=True) \
             .prefetch_related('factor__account') \
             .prefetch_related('factor__sanad') \
             .prefetch_related('warehouse') \
             .order_by('factor__definition_date', 'id') \
             .annotate(
-                definition_date=F('factor__definition_date'),
-                type=F('factor__type')
-            ) \
+            definition_date=F('factor__definition_date'),
+            type=F('factor__type')
+        ) \
             .annotate(
-                cumulative_input_count=Window(
-                    expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
-                    order_by=[F('definition_date').asc(), F('id').asc()]
-                ),
-                cumulative_output_count=Window(
-                    expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
-                    order_by=[F('definition_date').asc(), F('id').asc()]
-                )
+            cumulative_input_count=Window(
+                expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
+                order_by=[F('definition_date').asc(), F('id').asc()]
+            ),
+            cumulative_output_count=Window(
+                expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
+                order_by=[F('definition_date').asc(), F('id').asc()]
             )
+        )
 
         return queryset
 
     def list(self, request, *args, **kwargs):
-
         params = self.request.GET
 
         factor_items = self.get_queryset()
@@ -212,14 +206,13 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
 
         queryset = Ware.objects.inFinancialYear() \
             .annotate(
-                input_count=Sum('factorItems__count', filter=input_filter),
-                output_count=Sum('factorItems__count', filter=output_filter),
-            )
+            input_count=Sum('factorItems__count', filter=input_filter),
+            output_count=Sum('factorItems__count', filter=output_filter),
+        )
 
         return queryset
 
     def list(self, request, *args, **kwargs):
-
         params = self.request.GET
 
         factor_items = self.get_queryset()
@@ -238,5 +231,3 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         response = paginator.get_paginated_response(data)
         # print(len(connection.queries))
         return response
-
-

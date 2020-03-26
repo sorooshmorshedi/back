@@ -308,7 +308,7 @@ class DefiniteFactor(APIView):
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
 
-        DefiniteFactor.setFactorItemsRemains(user, factor)
+        DefiniteFactor.setFactorItemsFeesAndUpdateInventory(factor)
 
         first_row_bed = 0
         first_row_bes = 0
@@ -417,55 +417,22 @@ class DefiniteFactor(APIView):
         return sanad
 
     @staticmethod
-    def setFactorItemsRemains(user, factor):
-        prev_items = {}
+    def setFactorItemsFeesAndUpdateInventory(factor):
         for item in factor.items.order_by('id').all():
 
             if item.ware.isService:
                 continue
 
-            ware_id = item.ware.id
-            if ware_id in prev_items:
-                last_definite_factor = prev_items[ware_id]
-            else:
-                last_definite_factor = item.ware.last_factor_item(user, exclude_factors=[factor.id])
-
-            if last_definite_factor:
-                item.remain_value = last_definite_factor.remain_value
-                item.total_input_count = last_definite_factor.total_input_count
-                item.total_output_count = last_definite_factor.total_output_count
-            else:
-                item.remain_value = 0
-                item.total_input_count = 0
-                item.total_output_count = 0
-
-            if factor.type in Factor.BUY_GROUP:
-                item.remain_value += item.value
-                item.total_input_count += item.count
-                if factor.type == Factor.BACK_FROM_SALE:
-                    last_sale = item.ware.last_factor_item(user, other_filters={'factor__type': Factor.SALE})
-                    item.calculated_output_value = item.count * last_sale.fees[-1]['fee']
-            else:
-                calculated_output_value, fees = item.ware.calculated_output_value(user, item.count,
-                                                                                  last_definite_factor)
-                item.calculated_output_value = calculated_output_value
-
-                item.remain_value -= calculated_output_value
-                item.total_output_count += item.count
-                for fee in fees:
-                    fee['count'] = float(fee['count'])
-                    fee['fee'] = float(fee['fee'])
-
-                item.fees = fees
+            if factor.type in Factor.SALE_GROUP:
+                item.fees = WareInventory.get_fees(item.ware, item.warehouse, item.count)
 
             if not factor.is_definite:
                 DefiniteFactor.updateInventoryOnFactorItemSave(item, perform_revert=False)
             else:
                 DefiniteFactor.updateInventoryOnFactorItemSave(item)
 
+            item.remain_fees = WareInventory.get_remain_fees(item.ware)
             item.save()
-
-            prev_items[ware_id] = item
 
     @staticmethod
     def submitSumSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,

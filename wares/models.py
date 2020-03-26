@@ -140,96 +140,6 @@ class Ware(BaseModel):
             res['last_factor_item'] = factor_item
         return res
 
-    def calculated_output_value(self, user, count, last_factor_item=None):
-        if not last_factor_item:
-            last_factor_item = self.last_factor_item(user)
-        if not last_factor_item:
-            raise ValidationError("ابتدا فاکتور خرید ثبت کنید")
-        if self.pricingType == self.WEIGHTED_MEAN:
-            return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
-        else:
-            return self.calculated_output_value_for_fifo(user, count, last_factor_item)
-
-    def calculated_output_value_for_weighted_mean(self, user, count, last_factor_item):
-        remain_value = last_factor_item.remain_value
-        remain_count = last_factor_item.remain_count
-        fee = remain_value / remain_count
-
-        return fee * count, [{'fee': fee, 'count': count}]
-
-    def initial_factor_item_and_count_for_fifo(self, user, last_factor_item):
-        from factors.models import Factor
-
-        total_output = last_factor_item.total_output_count
-
-        # find first usable factor item
-        initialFactorItem = self.factorItems.inFinancialYear() \
-            .filter(factor__type__in=Factor.BUY_GROUP, factor__is_definite=True) \
-            .order_by('factor__definition_date', 'id') \
-            .filter(total_input_count__gt=total_output) \
-            .first()
-
-        if not initialFactorItem:
-            raise ValidationError("موجودی کافی نیست")
-
-        count = initialFactorItem.total_input_count - total_output
-
-        return initialFactorItem, count
-
-    def calculated_output_value_for_fifo(self, user, needed_count, last_factor_item):
-        from factors.models import Factor
-
-        initialFactorItem, count = self.initial_factor_item_and_count_for_fifo(user, last_factor_item)
-
-        factorItems = self.factorItems.inFinancialYear() \
-            .filter(factor__is_definite=True, factor__type__in=Factor.BUY_GROUP) \
-            .order_by('factor__definition_date', 'id')
-
-        initial_factor_definition_date = initialFactorItem.factor.definition_date
-        initial_factor_item_id = initialFactorItem.id
-        if initial_factor_definition_date:
-            factorItems = factorItems.filter(factor__definition_date__gte=initial_factor_definition_date,
-                                             id__gte=initial_factor_item_id)
-
-        total_value = 0
-        fees = []
-        uneditableFactorItemIds = []
-        for factorItem in factorItems.all():
-
-            if needed_count == 0:
-                break
-
-            uneditableFactorItemIds.append(factorItem.id)
-
-            if factorItem != initialFactorItem:
-                count = factorItem.count
-
-            fee = factorItem.fee
-            if needed_count < count:
-                total_value += needed_count * fee
-                count -= needed_count
-                fees.append({
-                    'fee': fee,
-                    'count': needed_count
-                })
-                break
-            elif needed_count > count:
-                total_value += count * fee
-                needed_count -= count
-                fees.append({
-                    'fee': fee,
-                    'count': count
-                })
-            else:
-                total_value += count * fee
-                fees.append({
-                    'fee': fee,
-                    'count': count
-                })
-                needed_count = 0
-
-        return total_value, fees
-
 
 class WareInventory(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresInventories')
@@ -297,7 +207,6 @@ class WareInventory(BaseModel):
             ware_balances = ware_balances.order_by('order')
 
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
-        print(current_inventory_count, count)
         if current_inventory_count < count:
             raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
                 ware,
@@ -318,13 +227,14 @@ class WareInventory(BaseModel):
                 break
 
     @staticmethod
-    def get_price(ware: Ware, count, financial_year=None):
+    def get_fees(ware: Ware, warehouse: Warehouse, count, financial_year=None):
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
 
         ware_balances = WareInventory.objects.filter(
             ware=ware,
+            warehouse=warehouse,
             financial_year=financial_year
         )
 
@@ -332,31 +242,20 @@ class WareInventory(BaseModel):
 
         for ware_balance in ware_balances:
             fee = {
-                'fee': ware_balance.fee,
+                'fee': float(ware_balance.fee),
             }
-            if ware_balance == count:
-                fee['count'] = ware_balance.count
+            if ware_balance.count == count:
+                fee['count'] = float(ware_balance.count)
                 break
-            elif ware_balance < count:
-                fee['count'] = ware_balance.count
-            elif ware_balance > count:
-                fee['count'] = count
+            elif ware_balance.count < count:
+                fee['count'] = float(ware_balance.count)
+            elif ware_balance.count > count:
+                fee['count'] = float(count)
                 break
 
             fees.append(fee)
 
-        price = 0
-        final_fee = 0
-
-        for fee in fees:
-            price += fee['count'] * fee['fee']
-
-        if ware.pricingType == Ware.WEIGHTED_MEAN:
-            final_fee = price / count
-        elif ware.pricingType == Ware.FIFO:
-            final_fee = fees
-
-        return price, final_fee
+        return fees
 
     @staticmethod
     def get_inventory_count(ware: Ware, warehouse: Warehouse, financial_year=None):
@@ -370,3 +269,22 @@ class WareInventory(BaseModel):
             financial_year=financial_year
         ).aggregate(count=Coalesce(Sum('count'), 0))
         return ware_balance['count']
+
+    @staticmethod
+    def get_remain_fees(ware: Ware, financial_year=None):
+        if not financial_year:
+            user = get_current_user()
+            financial_year = user.active_financial_year
+
+        ware_inventories = WareInventory.objects.filter(
+            ware=ware,
+            financial_year=financial_year
+        )
+
+        fees = []
+        for ware_inventory in ware_inventories:
+            fees.append({
+                'count': float(ware_inventory.count),
+                'fee': float(ware_inventory.fee),
+            })
+        return fees
