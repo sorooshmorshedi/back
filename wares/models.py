@@ -2,6 +2,8 @@ from django.db import models
 from django.db.models.aggregates import Sum, Max, Min
 from django.db.models.functions.comparison import Coalesce
 from django_jalali.db import models as jmodels
+from rest_framework.exceptions import ValidationError
+
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
 from helpers.functions import get_current_user
@@ -141,6 +143,8 @@ class Ware(BaseModel):
     def calculated_output_value(self, user, count, last_factor_item=None):
         if not last_factor_item:
             last_factor_item = self.last_factor_item(user)
+            if not last_factor_item:
+                raise ValidationError("ابتدا فاکتور خرید ثبت کنید")
         if self.pricingType == self.WEIGHTED_MEAN:
             return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
         else:
