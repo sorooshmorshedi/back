@@ -6,12 +6,8 @@ def clearFactorSanad(sender, instance, **kwargs):
     clearSanad(instance.sanad)
 
 
-def updateInventoryOnFactorDelete(sender, instance, **kwargs):
-    for factor_item in instance.items.all():
-        updateInventoryOnSanadItemDelete(sender, factor_item)
-
-
-def updateInventoryOnSanadItemDelete(sender, instance, **kwargs):
+def updateInventoryOnFactorItemDelete(sender, instance, **kwargs):
+    print('item')
     from factors.models import Factor
 
     factor = instance.factor
