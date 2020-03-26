@@ -293,6 +293,14 @@ class WareInventory(BaseModel):
         else:
             ware_balances = ware_balances.order_by('order')
 
+        current_inventory_count = ware_balances.aggregate(count=Sum('count'))['count']
+        if current_inventory_count < count:
+            raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
+                ware,
+                "{0:g}".format(float(current_inventory_count)),
+                ware.unit
+            ))
+
         for ware_balance in ware_balances:
             if ware_balance.count == count:
                 ware_balance.delete()
