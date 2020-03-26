@@ -86,7 +86,7 @@ class Factor(BaseModel):
     definition_date = models.DateTimeField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
-        unique_together = ('code', 'type')
+        pass
 
     def __str__(self):
         return "ID: {}, code: {}, type: {}, is_definite: {}".format(self.pk, self.code, self.type, self.is_definite)
