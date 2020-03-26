@@ -143,8 +143,8 @@ class Ware(BaseModel):
     def calculated_output_value(self, user, count, last_factor_item=None):
         if not last_factor_item:
             last_factor_item = self.last_factor_item(user)
-            if not last_factor_item:
-                raise ValidationError("ابتدا فاکتور خرید ثبت کنید")
+        if not last_factor_item:
+            raise ValidationError("ابتدا فاکتور خرید ثبت کنید")
         if self.pricingType == self.WEIGHTED_MEAN:
             return self.calculated_output_value_for_weighted_mean(user, count, last_factor_item)
         else:
@@ -168,6 +168,9 @@ class Ware(BaseModel):
             .order_by('factor__definition_date', 'id') \
             .filter(total_input_count__gt=total_output) \
             .first()
+
+        if not initialFactorItem:
+            raise ValidationError("موجودی کافی نیست")
 
         count = initialFactorItem.total_input_count - total_output
 
