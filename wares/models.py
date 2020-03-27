@@ -241,17 +241,22 @@ class WareInventory(BaseModel):
         fees = []
 
         for ware_balance in ware_balances:
+
+            if count == 0:
+                break
+
             fee = {
                 'fee': float(ware_balance.fee),
             }
             if ware_balance.count == count:
                 fee['count'] = float(ware_balance.count)
-                break
+                count = 0
             elif ware_balance.count < count:
                 fee['count'] = float(ware_balance.count)
+                count -= ware_balance.count
             elif ware_balance.count > count:
                 fee['count'] = float(count)
-                break
+                count = 0
 
             fees.append(fee)
 

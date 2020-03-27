@@ -1,4 +1,9 @@
+from random import randint
+
+import jdatetime
+
 from accounts.tests.test_accounts import AccountTest
+from factors.models import Factor, FactorItem
 from users.models import User
 
 from django.urls.base import reverse
@@ -6,9 +11,14 @@ from rest_framework import status
 
 from helpers.test import MTestCase
 from wares.models import Ware
+from wares.tests import WareTest
 
 
 class FactorTest(MTestCase):
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.user = User.objects.first()
 
     @property
     def data(self):
@@ -48,29 +58,52 @@ class FactorTest(MTestCase):
             }
         }
 
-    def test_factor(self):
-        user = User.objects.first()
-        self.client.force_authenticate(user)
-
-        factor_id = self._test_create_factor()
-        self._test_update_factor(factor_id)
-        self._test_delete_factor(factor_id)
-
-    def _test_create_factor(self):
-        user = User.objects.first()
-        self.client.force_authenticate(user)
+    def test_create_factor(self):
+        self.client.force_authenticate(self.user)
         response = self.client.post(reverse('factor-list'), data=self.data, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         return response.data['id']
 
-    def _test_update_factor(self, factor_id):
+    def test_update_factor(self):
+        self.client.force_authenticate(self.user)
+        factor_id = FactorTest.create_factor(self.user.active_financial_year, Factor.BUY).id
         response = self.client.put(reverse('factor-detail', args=[factor_id]), data=self.data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def _test_delete_factor(self, factor_id):
+    def test_delete_factor(self):
+        self.client.force_authenticate(self.user)
+        factor_id = FactorTest.create_factor(self.user.active_financial_year, Factor.BUY).id
         response = self.client.delete(reverse('factor-detail', args=[factor_id]))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    @staticmethod
+    def create_factor(financial_year, factor_type):
+        account, float_account_id, cost_center_id = AccountTest.get_account()
+        factor = Factor.objects.create(
+            type=factor_type,
+            account=account,
+            floatAccount_id=float_account_id,
+            costCenter_id=cost_center_id,
+            date=jdatetime.date.today(),
+            financial_year=financial_year
+        )
+        return factor
+
+    @staticmethod
+    def create_factor_item(factor: Factor, **kwargs):
+        ware = kwargs.get('ware', WareTest.get_ware())
+        warehouse = kwargs.get('warehouse', ware.warehouse)
+        count = kwargs.get('count', randint(5, 20))
+        fee = kwargs.get('fee', randint(1, 10) * 1000)
+        factor_item = FactorItem.objects.create(
+            factor=factor,
+            ware=ware,
+            warehouse=warehouse,
+            count=count,
+            fee=fee,
+            financial_year=factor.financial_year
+        )
+        return factor_item

@@ -92,13 +92,17 @@ class FactorModelView(viewsets.ModelViewSet):
         data = request.data
         user = request.user
 
+        is_definite = factor.is_definite
+        if is_definite:
+            DefiniteFactor.undoDefinition(user, factor)
+
         serialized = FactorCreateUpdateSerializer(instance=factor, data=data['factor'])
         serialized.is_valid(raise_exception=True)
         serialized.save()
 
         factor.sync(user, data)
 
-        if factor.is_definite:
+        if is_definite:
             DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=True,
                                           is_confirmed=request.data.get('_confirmed'))
 
@@ -163,7 +167,7 @@ class FactorModelView(viewsets.ModelViewSet):
         self.check_confirmations(request, factor, for_delete=True)
 
         if factor.is_definite:
-            clearSanad(factor.sanad)
+            DefiniteFactor.undoDefinition(request.user, factor)
 
         res = super().destroy(request, *args, **kwargs)
         return res
@@ -302,6 +306,40 @@ class DefiniteFactor(APIView):
         return Response(FactorListRetrieveSerializer(factor).data)
 
     @staticmethod
+    def undoDefinition(user, factor: Factor):
+        sanad = DefiniteFactor.getFactorSanad(user, factor)
+        clearSanad(sanad)
+
+        factor.is_definite = False
+        factor.definition_date = None
+        factor.save()
+
+        financial_year = user.active_financial_year
+
+        for factor_item in factor.items.all():
+
+            ware = factor_item.ware
+            warehouse = factor_item.warehouse
+
+            if ware.isService:
+                continue
+
+            if factor_item.factor.type in Factor.INPUT_GROUP:
+                WareInventory.decrease_inventory(ware, warehouse, factor_item.count, financial_year, revert=True)
+            else:
+                ware = factor_item.ware
+                if ware.pricingType == Ware.FIFO:
+                    fees = factor_item.fees.copy()
+                    fees.reverse()
+                    for fee in fees:
+                        WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], financial_year,
+                                                         revert=True)
+
+            factor_item.fees = []
+            factor_item.remain_fees = []
+            factor_item.save()
+
+    @staticmethod
     def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
 
@@ -426,10 +464,7 @@ class DefiniteFactor(APIView):
             if factor.type in Factor.SALE_GROUP:
                 item.fees = WareInventory.get_fees(item.ware, item.warehouse, item.count)
 
-            if not factor.is_definite:
-                DefiniteFactor.updateInventoryOnFactorItemSave(item, perform_revert=False)
-            else:
-                DefiniteFactor.updateInventoryOnFactorItemSave(item)
+            DefiniteFactor.updateInventoryOnFactorItemSave(item)
 
             item.remain_fees = WareInventory.get_remain_fees(item.ware)
             item.save()
@@ -614,7 +649,7 @@ class DefiniteFactor(APIView):
             )
 
     @staticmethod
-    def updateInventoryOnFactorItemSave(factor_item, financial_year=None, perform_revert=True):
+    def updateInventoryOnFactorItemSave(factor_item, financial_year=None):
         from factors.models import Factor
         from factors.models import FactorItem
 
@@ -627,24 +662,9 @@ class DefiniteFactor(APIView):
         if ware.isService:
             return
 
-        factorItem = None
-        if factor_item.id:
-            factorItem = FactorItem.objects.get(pk=factor_item.id)
-
         if factor_item.factor.type in Factor.INPUT_GROUP:
-            if factorItem and perform_revert:
-                WareInventory.decrease_inventory(ware, warehouse, factorItem.count, financial_year, revert=True)
             WareInventory.increase_inventory(ware, warehouse, factor_item.count, factor_item.fee, financial_year)
         else:
-            if factorItem and perform_revert:
-                ware = factorItem.ware
-                if ware.pricingType == Ware.FIFO:
-                    fees = factorItem.fees.copy()
-                    fees.reverse()
-                    for fee in fees:
-                        WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], financial_year,
-                                                         revert=True)
-
             WareInventory.decrease_inventory(ware, warehouse, factor_item.count, financial_year)
 
         is_used_in_next_years = FactorItem.objects.filter(

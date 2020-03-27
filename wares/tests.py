@@ -1,3 +1,10 @@
-from django.test import TestCase
+from helpers.test import MTestCase
+from wares.models import Ware
 
-# Create your tests here.
+
+class WareTest(MTestCase):
+
+    @staticmethod
+    def get_ware():
+        ware = Ware.objects.first()
+        return ware

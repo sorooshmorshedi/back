@@ -8,7 +8,6 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from factors.signals import clearFactorSanad, updateInventoryOnFactorItemDelete
 from helpers.models import BaseModel
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad
@@ -377,8 +376,3 @@ class Transfer(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
-
-
-signals.post_delete.connect(receiver=clearFactorSanad, sender=Factor)
-
-signals.pre_delete.connect(receiver=updateInventoryOnFactorItemDelete, sender=FactorItem)
