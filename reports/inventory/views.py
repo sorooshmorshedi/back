@@ -96,8 +96,8 @@ class AllWaresInventoryListView(generics.ListAPIView):
             .prefetch_related(Prefetch('factorItems', queryset=FactorItem.objects.filter(id__in=last_factor_item))) \
             .annotate(
             input_count=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
-            input_value=Coalesce(Sum(F('factorItems__fee') * F('factorItems__count'), 0),
-                                 filter=input_filter, output_field=DecimalField()),
+            input_value=Coalesce(Sum(F('factorItems__fee') * F('factorItems__count'),
+                                 filter=input_filter, output_field=DecimalField()), 0),
             output_count=Coalesce(Sum('factorItems__count', filter=output_filter), 0),
             output_value=Coalesce(Sum(F('factorItems__calculated_output_value'),
                                       filter=output_filter, output_field=DecimalField()), 0)
