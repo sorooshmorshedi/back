@@ -1,7 +1,7 @@
+from django.utils.functional import cached_property
 from rest_framework import serializers
 
-from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account
-from accounts.accounts.validators import AccountValidator
+from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account, AccountBalance
 from sanads.sanads.models import SanadItem
 
 
@@ -94,6 +94,24 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
 
 class AccountListRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
+    costCenterGroup = FloatAccountGroupSerializer(read_only=True)
+    type = AccountTypeSerializer(read_only=True)
+
+    balance = serializers.SerializerMethodField()
+
+    def get_balance(self, obj: Account):
+        bed = bes = 0
+        for balance in self.balances:
+            if balance.account.code.startswith(obj.code):
+                bed += balance.bed
+                bes = + balance.bes
+        remain = abs(bed - bes)
+        return {
+            'bed': bed,
+            'bes': bes,
+            'remain': remain
+        }
 
     def get_title(self, obj):
         return obj.title
@@ -103,10 +121,6 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year', 'code', 'level')
         fields = '__all__'
 
-    floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
-    costCenterGroup = FloatAccountGroupSerializer(read_only=True)
-    type = AccountTypeSerializer(read_only=True)
-
     @staticmethod
     def setup_eager_loading(queryset):
         queryset = queryset \
@@ -114,6 +128,10 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
             .prefetch_related('costCenterGroup') \
             .prefetch_related('type')
         return queryset
+
+    @cached_property
+    def balances(self):
+        return AccountBalance.objects.inFinancialYear().prefetch_related('account').all()
 
 
 # Other
