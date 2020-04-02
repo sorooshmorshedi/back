@@ -17,16 +17,14 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
         serializer.save(
             financial_year=self.financial_year
         )
-        print('ha')
-        print(serializer.instance)
         for item in serializer.instance:
-            DefiniteFactor.updateInventoryOnFactorItemSave(item, self.financial_year, perform_revert=False)
+            DefiniteFactor.updateInventoryOnFactorItemSave(item, self.financial_year)
 
     def perform_update(self, serializer):
         serializer.save(
             financial_year=self.financial_year
         )
-        DefiniteFactor.updateInventoryOnFactorItemSave(serializer.instance, self.financial_year, perform_revert=True)
+        DefiniteFactor.updateInventoryOnFactorItemSave(serializer.instance, self.financial_year)
 
 
 class FirstPeriodInventoryView(APIView):
@@ -68,6 +66,10 @@ class FirstPeriodInventoryView(APIView):
 
         factor_data = data['factor']
         factor_items_data = data.get('factor_items')
+
+        first_period_inventory = Factor.get_first_period_inventory(financial_year)
+        if first_period_inventory:
+            DefiniteFactor.undoDefinition(user, first_period_inventory)
 
         first_period_inventory = FirstPeriodInventoryView._create_or_update_factor(factor_data, factor_items_data,
                                                                                    financial_year, user)
