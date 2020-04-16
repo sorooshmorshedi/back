@@ -70,7 +70,7 @@ class FinancialYearTest(MTestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def create_financial_year(company, name=None, start=None, end=None):
+    def create_financial_year(company, name=None, start=None, end=None) -> FinancialYear:
         name = name if name else MTestCase.faker.name()
         start = start if start else jdatetime.date.today()
         end = end if end else jdatetime.date.today() + jdatetime.timedelta(days=365)

@@ -42,15 +42,23 @@ class FinancialYear(models.Model):
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')
     openingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
                                      related_name='financialYearAsOpeningSanad', null=True, blank=True)
-    closingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
-                                     related_name='financialYearAsClosingSanad', null=True, blank=True)
+
+    temporaryClosingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
+                                              related_name='financialYearAsTemporaryClosingSanad', null=True,
+                                              blank=True)
+    currentEarningsClosingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
+                                                    related_name='financialYearAsCurrentEarningsClosingSanad',
+                                                    null=True, blank=True)
+    permanentsClosingSanad = models.ForeignKey('sanads.Sanad', on_delete=models.SET_NULL,
+                                               related_name='financialYearAsPermanentsClosingSanad', null=True,
+                                               blank=True)
 
     def __str__(self):
         return "{} {} ({})".format(self.company, self.name, self.id)
 
     @property
     def is_closed(self):
-        return self.closingSanad is not None
+        return self.temporaryClosingSanad is not None
 
     def get_opening_sanad(self):
         from sanads.sanads.models import Sanad
@@ -72,18 +80,27 @@ class FinancialYear(models.Model):
 
         return self.openingSanad
 
-    def get_closing_sanad(self):
+    def check_closing_sanads(self):
         from sanads.sanads.models import Sanad
         from sanads.sanads.models import newSanadCode
 
-        if not self.closingSanad:
-            sanad = Sanad.objects.create(
-                financial_year=self,
-                code=newSanadCode(self),
-                createType=Sanad.AUTO,
-                date=jdatetime.date.today()
-            )
-            self.closingSanad = sanad
-            self.save()
+        closing_sanads = [
+            'temporaryClosingSanad',
+            'currentEarningsClosingSanad',
+            'permanentsClosingSanad'
+        ]
+        need_save = False
 
-        return self.closingSanad
+        for sanad_name in closing_sanads:
+            if not getattr(self, sanad_name):
+                sanad = Sanad.objects.create(
+                    financial_year=self,
+                    code=newSanadCode(self),
+                    createType=Sanad.AUTO,
+                    date=jdatetime.date.today()
+                )
+                setattr(self, sanad_name, sanad)
+                need_save = True
+
+        if need_save:
+            self.save()

@@ -10,6 +10,7 @@ from companies.models import FinancialYear
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from sanads.sanads.models import SanadItem, clearSanad
+from users.models import User
 from users.serializers import UserSerializer
 from wares.models import WareInventory
 
@@ -31,7 +32,7 @@ class ClosingHelpers:
             if remain > 0:
                 bed = remain
             else:
-                bes = remain
+                bes = -remain
 
             if reverse:
                 bed, bes = bes, bed
@@ -59,9 +60,9 @@ class ClosingHelpers:
 
         sanad_remain = sanad.bed - sanad.bes
         bed = bes = 0
-        if sanad_remain > 0:
-            bed = sanad_remain
-        elif sanad_remain < 0:
+        if sanad_remain < 0:
+            bed = -sanad_remain
+        elif sanad_remain > 0:
             bes = sanad_remain
 
         current_earnings_default_account = getDefaultAccount(defaultAccount)
@@ -121,61 +122,114 @@ class CloseFinancialYearView(APIView):
         data = request.data
         user = request.user
 
-        current_financial_year = user.active_financial_year
         target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
 
         if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_definite=True).exists():
             raise ValidationError("ابتدا فاکتور های قطعی سال مالی جدید را پاک نمایید")
 
-        self.sanad = current_financial_year.get_closing_sanad()
-        clearSanad(self.sanad)
-
-        self.add_temporaries_sanad_items()
-
-        self.add_current_earnings_sanad_item()
-
-        self.add_retained_earnings_sanad_item()
-
-        self.add_permanents_sanad_items()
-
-        self.add_closing_sanad_item()
-
-        self.create_opening_sanad(target_financial_year)
-
-        ClosingHelpers.create_first_period_inventory(target_financial_year)
+        CloseFinancialYearView.close_financial_year(user, target_financial_year)
 
         return Response(UserSerializer(request.user).data)
 
-    def add_temporaries_sanad_items(self):
+    @staticmethod
+    def close_financial_year(user: User, target_financial_year: FinancialYear):
+        current_financial_year = user.active_financial_year
+
+        current_financial_year.check_closing_sanads()
+
+        sanad = current_financial_year.temporaryClosingSanad
+        clearSanad(sanad)
+        CloseFinancialYearView.add_temporaries_sanad_items(sanad)
+        CloseFinancialYearView.add_current_earnings_sanad_item(sanad)
+        sanad.save()
+
+        sanad = current_financial_year.currentEarningsClosingSanad
+        clearSanad(sanad)
+        CloseFinancialYearView.add_retained_earnings_sanad_item(sanad)
+        sanad.save()
+
+        sanad = current_financial_year.permanentsClosingSanad
+        clearSanad(sanad)
+        CloseFinancialYearView.add_permanents_sanad_items(sanad)
+        CloseFinancialYearView.add_closing_sanad_item(sanad)
+        sanad.save()
+
+        CloseFinancialYearView.create_opening_sanad(target_financial_year)
+
+        ClosingHelpers.create_first_period_inventory(target_financial_year)
+
+    @staticmethod
+    def add_temporaries_sanad_items(sanad):
         accounts = Account.objects \
             .filter(type__usage=AccountType.INCOME_STATEMENT) \
             .all()
 
-        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad, accounts, reverse=True)
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad, accounts, reverse=True)
 
         return sanad_items
 
-    def add_current_earnings_sanad_item(self):
-        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'currentEarnings')
+    @staticmethod
+    def add_current_earnings_sanad_item(sanad):
+        sanad_item = ClosingHelpers.balance_sanad(sanad, 'currentEarnings')
         return [sanad_item]
 
-    def add_retained_earnings_sanad_item(self):
-        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'retainedEarnings')
-        return [sanad_item]
+    @staticmethod
+    def add_retained_earnings_sanad_item(sanad):
+        current_earnings_default_account = getDefaultAccount('currentEarnings').account
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(
+            sanad,
+            [current_earnings_default_account],
+            reverse=True
+        )
+        sanad_items.append(ClosingHelpers.balance_sanad(sanad, 'retainedEarnings'))
+        return sanad_items
 
-    def add_permanents_sanad_items(self):
+    @staticmethod
+    def add_permanents_sanad_items(sanad):
         accounts = Account.objects \
             .filter(type__usage__in=[AccountType.BALANCE_SHEET, None, AccountType.NONE]) \
             .all()
 
-        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad, accounts, reverse=True)
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad, accounts, reverse=True)
         return sanad_items
 
-    def add_closing_sanad_item(self):
-        sanad_item = ClosingHelpers.balance_sanad(self.sanad, 'closing')
-        return [sanad_item]
+    @staticmethod
+    def add_closing_sanad_item(sanad):
+        closing_account_default_account = getDefaultAccount('closing')
 
-    def create_opening_sanad(self, target_financial_year):
+        sanad_items = []
+
+        bed = sanad.bed
+        bes = sanad.bes
+
+        item = SanadItem(
+            financial_year=sanad.financial_year,
+            sanad=sanad,
+            account=closing_account_default_account.account,
+            floatAccount=closing_account_default_account.floatAccount,
+            costCenter=closing_account_default_account.costCenter,
+            bed=bes,
+            bes=0
+        )
+        item.save()
+        sanad_items.append(item)
+
+        item = SanadItem(
+            financial_year=sanad.financial_year,
+            sanad=sanad,
+            account=closing_account_default_account.account,
+            floatAccount=closing_account_default_account.floatAccount,
+            costCenter=closing_account_default_account.costCenter,
+            bed=0,
+            bes=bed
+        )
+        item.save()
+        sanad_items.append(item)
+
+        return sanad_items
+
+    @staticmethod
+    def create_opening_sanad(target_financial_year):
         accounts = Account.objects \
             .filter(type__usage__in=[AccountType.BALANCE_SHEET, None, AccountType.NONE]) \
             .all()
