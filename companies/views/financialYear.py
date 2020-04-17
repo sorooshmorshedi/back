@@ -154,7 +154,7 @@ class CloseFinancialYearView(APIView):
         CloseFinancialYearView.add_closing_sanad_item(sanad)
         sanad.save()
 
-        CloseFinancialYearView.create_opening_sanad(target_financial_year)
+        CloseFinancialYearView.create_opening_sanad(current_financial_year, target_financial_year)
 
         ClosingHelpers.create_first_period_inventory(target_financial_year)
 
@@ -229,14 +229,28 @@ class CloseFinancialYearView(APIView):
         return sanad_items
 
     @staticmethod
-    def create_opening_sanad(target_financial_year):
-        accounts = Account.objects \
-            .filter(type__usage__in=[AccountType.BALANCE_SHEET, None, AccountType.NONE]) \
-            .all()
+    def create_opening_sanad(current_financial_year, target_financial_year):
 
         sanad = target_financial_year.get_opening_sanad()
         clearSanad(sanad)
-        sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad, accounts, reverse=False)
+
+        opening_default_account = getDefaultAccount('opening')
+        closing_default_account = getDefaultAccount('closing')
+
+        sanad_items = []
+        for sanad_item in current_financial_year.permanentsClosingSanad.items.all():
+            sanad_item.id = None
+            sanad_item.sanad = sanad
+            sanad_item.bed, sanad_item.bes = sanad_item.bes, sanad_item.bed
+
+            if sanad_item.account == closing_default_account.account:
+                sanad_item.account = opening_default_account.account
+                sanad_item.floatAccount = opening_default_account.floatAccount
+                sanad_item.costCenter = opening_default_account.costCenter
+
+            sanad_item.save()
+
+            sanad_items.append(sanad_item)
 
         return sanad_items
 

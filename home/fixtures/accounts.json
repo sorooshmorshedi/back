@@ -20751,6 +20751,51 @@
     }
   },
   {
+    "model": "accounts.account",
+    "pk": 669,
+    "fields": {
+      "financial_year": 1,
+      "account_type": "o",
+      "name": "تراز افتتاحیه",
+      "code": "903010001",
+      "explanation": null,
+      "is_disabled": false,
+      "max_bed": null,
+      "max_bes": null,
+      "max_bed_with_sanad": null,
+      "max_bes_with_sanad": null,
+      "created_at": null,
+      "updated_at": null,
+      "level": 3,
+      "type": 39,
+      "costCenterGroup": null,
+      "floatAccountGroup": null,
+      "parent": 230,
+      "is_real": true,
+      "person_type": "",
+      "phone_1": "",
+      "phone_2": "",
+      "mobile": "",
+      "melli_code": "",
+      "website": "",
+      "fax": "",
+      "email": "",
+      "address_1": "",
+      "address_2": "",
+      "city": "",
+      "province": "",
+      "postal_code": "",
+      "account_number_1": "",
+      "account_number_2": "",
+      "eghtesadi_code": "",
+      "branch_name": "",
+      "branch_code": "",
+      "account_number": "",
+      "sheba": "",
+      "phone": ""
+    }
+  },
+  {
     "model": "accounts.defaultaccount",
     "pk": 1,
     "fields": {
@@ -21042,6 +21087,20 @@
       "costCenter": 12,
       "usage": "factor",
       "programingName": null
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 22,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب تراز افتتاحیه",
+      "explanation": "",
+      "account": 669,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "closeAccounts",
+      "programingName": "opening"
     }
   }
 ]

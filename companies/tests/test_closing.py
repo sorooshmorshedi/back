@@ -26,6 +26,8 @@ class ClosingTest(MTestCase):
         cls.fund_account = Account.objects.get(code='501010001')
         cls.current_earnings_account = Account.objects.get(code='505020001')
         cls.retained_earnings_account = Account.objects.get(code='505010002')
+        cls.closing_account = Account.objects.get(code='904010001')
+        cls.opening_account = Account.objects.get(code='903010001')
 
     def test_closing(self):
         self.client.force_authenticate(self.user)
@@ -46,32 +48,39 @@ class ClosingTest(MTestCase):
         SanadTest.create_sanad_item(sanad, self.bank_account, bed=5000)
         SanadTest.create_sanad_item(sanad, self.fund_account, bes=5000)
 
-        # for balance in AccountBalance.objects.all():
-        #     print(balance.account.title)
-        #     print(' - ', balance.bed, balance.bes)
-        # print("---------------------")
-
         target_financial_year = FinancialYearTest.create_financial_year(self.user.active_company)
         CloseFinancialYearView.close_financial_year(self.user, target_financial_year)
 
         current_financial_year = self.user.active_financial_year
 
         sanad = current_financial_year.temporaryClosingSanad
-        for sanad_item in sanad.items.all():
-            print(sanad_item.account.title)
-            print(' - ', sanad_item.bed, sanad_item.bes)
+        self.check_sanad_item(sanad, self.ware_sale_account, bed=1200)
+        self.check_sanad_item(sanad, self.income_account, bed=500)
+        self.check_sanad_item(sanad, self.ware_cost_account, bes=1000)
+        self.check_sanad_item(sanad, self.current_earnings_account, bes=700)
 
-        print('-----------')
         sanad = current_financial_year.currentEarningsClosingSanad
-        for sanad_item in sanad.items.all():
-            print(sanad_item.account.title)
-            print(' - ', sanad_item.bed, sanad_item.bes)
+        self.check_sanad_item(sanad, self.current_earnings_account, bed=700)
+        self.check_sanad_item(sanad, self.retained_earnings_account, bes=700)
 
-        print('-----------')
         sanad = current_financial_year.permanentsClosingSanad
-        for sanad_item in sanad.items.all():
-            print(sanad_item.account.title)
-            print(' - ', sanad_item.bed, sanad_item.bes)
+        self.check_sanad_item(sanad, self.fund_account, bed=5000)
+        self.check_sanad_item(sanad, self.retained_earnings_account, bed=700)
+        self.check_sanad_item(sanad, self.closing_account, bed=5700)
+        self.check_sanad_item(sanad, self.ware_inventory_account, bes=1000)
+        self.check_sanad_item(sanad, self.bank_account, bes=3000)
+        self.check_sanad_item(sanad, self.person_account, bes=1200)
+        self.check_sanad_item(sanad, self.receivable_account, bes=500)
+        self.check_sanad_item(sanad, self.closing_account, bes=5700)
 
-        # target_financial_year.currentEarningsClosingSanad
-        # target_financial_year.permanentsClosingSanad
+        target_financial_year.refresh_from_db()
+        opening_sanad = target_financial_year.get_opening_sanad()
+        for sanad_item in sanad.items.all():
+            account = sanad_item.account
+            if account == self.closing_account:
+                account = self.opening_account
+            self.check_sanad_item(opening_sanad, account, bed=sanad_item.bes, bes=sanad_item.bed)
+
+    def check_sanad_item(self, sanad: Sanad, account: Account, bed=0, bes=0):
+        sanad_item = sanad.items.filter(account=account, bed=bed, bes=bes).first()
+        self.assertNotEqual(sanad_item, None)
