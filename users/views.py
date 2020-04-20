@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models import User
-from users.permissions import ChangePasswordPermission
+from users.permissions import ChangePasswordPermission, DeleteUserPermission
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer
 
 
@@ -35,7 +35,7 @@ class UserUpdateView(generics.UpdateAPIView):
 
 
 class UserDestroyView(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, DeleteUserPermission)
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
 
