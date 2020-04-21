@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser, Permission
+from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.db import models
 
 from companies.models import Company, FinancialYear
@@ -25,3 +25,9 @@ class User(AbstractUser):
             company = self.active_company
 
         return super(User, self).has_perm(perm, company)
+
+
+class Role(models.Model):
+    company = models.ForeignKey(Company, related_name='roles', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
