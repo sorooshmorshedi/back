@@ -30,6 +30,14 @@ class Company(models.Model):
         except (ObjectDoesNotExist, IndexError):
             return None
 
+    class Meta:
+        permissions = (
+            ('get.account', 'مشاهده حساب ها'),
+            ('post.account', 'تعریف حساب'),
+            ('put.account', 'ویرایش حساب'),
+            ('delete.account', 'حذف حساب'),
+        )
+
 
 class FinancialYear(models.Model):
     objects = models.Manager()
