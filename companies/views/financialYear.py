@@ -11,7 +11,7 @@ from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from sanads.sanads.models import SanadItem, clearSanad
 from users.models import User
-from users.serializers import UserSerializer
+from users.serializers import UserListRetrieveSerializer
 from wares.models import WareInventory
 
 
@@ -129,7 +129,7 @@ class CloseFinancialYearView(APIView):
 
         CloseFinancialYearView.close_financial_year(user, target_financial_year)
 
-        return Response(UserSerializer(request.user).data)
+        return Response(UserListRetrieveSerializer(request.user).data)
 
     @staticmethod
     def close_financial_year(user: User, target_financial_year: FinancialYear):
@@ -263,7 +263,7 @@ class CancelFinancialYearClosingView(APIView):
         if closing_sanad:
             closing_sanad.delete()
 
-        return Response(UserSerializer(request.user).data)
+        return Response(UserListRetrieveSerializer(request.user).data)
 
 
 class MoveFinancialYearView(APIView):
@@ -278,7 +278,7 @@ class MoveFinancialYearView(APIView):
 
         ClosingHelpers.create_first_period_inventory(target_financial_year)
 
-        return Response(UserSerializer(request.user).data)
+        return Response(UserListRetrieveSerializer(request.user).data)
 
     def move_accounts(self):
         sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad)
