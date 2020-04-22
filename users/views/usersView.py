@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models import User
-from users.permissions import ChangePasswordPermission, DeleteUserPermission
+from users.permissions import DeleteUserPermission, ChangePasswordPermission
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer
 
 

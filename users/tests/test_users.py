@@ -45,8 +45,8 @@ class UserTest(MTestCase):
         self.client.logout()
 
     def test_user_change_password(self):
-        user = UserTest.get_user()
-        self.client.force_authenticate(user)
+        self.client.force_authenticate(UserTest.get_user())
+        user = self.create_user()
 
         response = self.client.post(reverse('change-user-password'), data={
             'user': user.id,

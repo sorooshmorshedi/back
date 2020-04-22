@@ -4,6 +4,12 @@ from django.db import models
 from companies.models import Company, FinancialYear
 
 
+class Role(models.Model):
+    company = models.ForeignKey(Company, related_name='roles', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
+
+
 class User(AbstractUser):
     active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany',
                                        blank=True, null=True)
@@ -11,6 +17,8 @@ class User(AbstractUser):
                                               blank=True, null=True)
 
     phone = models.CharField(max_length=11, default="", blank=True)
+
+    roles = models.ManyToManyField(Role, related_name='users')
 
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
@@ -25,9 +33,3 @@ class User(AbstractUser):
             company = self.active_company
 
         return super(User, self).has_perm(perm, company)
-
-
-class Role(models.Model):
-    company = models.ForeignKey(Company, related_name='roles', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
