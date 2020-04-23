@@ -10,7 +10,7 @@ from users.tests import UserTest
 
 class CompanyTest(MTestCase):
     def test_create_company(self):
-        user = UserTest()
+        user = UserTest.get_user()
         self.client.force_authenticate(user)
 
         company_name = self.faker.name()
@@ -23,7 +23,7 @@ class CompanyTest(MTestCase):
 
     def test_retrieve_companies(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
 
         company_name = self.faker.name()
 
@@ -38,7 +38,7 @@ class CompanyTest(MTestCase):
 
     def test_update_companies(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         company = CompanyTest.create_company()
 
         new_company_name = 'alia {}'.format(random.random())
@@ -54,7 +54,7 @@ class CompanyTest(MTestCase):
 
     def test_delete_companies(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         company = CompanyTest.create_company()
 
         response = self.client.delete(reverse('company-detail', args=[company.id]))

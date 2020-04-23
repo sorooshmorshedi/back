@@ -1,7 +1,7 @@
 import jdatetime
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.tests.test_financial_years import FinancialYearTest
-from companies.views.financialYear import CloseFinancialYearView
+from companies.views.financialYearViews import CloseFinancialYearView
 from sanads.sanads.models import newSanadCode, Sanad, SanadItem
 from sanads.tests.test_sanads import SanadTest
 from users.models import User

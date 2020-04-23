@@ -1,14 +1,18 @@
 import jdatetime
+from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, AccountType, AccountBalance
 from accounts.defaultAccounts.models import getDefaultAccount
 from companies.models import FinancialYear
+from companies.serializers import FinancialYearSerializer
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
+from helpers.auth import BasicCRUDPermission
 from sanads.sanads.models import SanadItem, clearSanad
 from users.models import User
 from users.serializers import UserListRetrieveSerializer
@@ -116,6 +120,9 @@ class ClosingHelpers:
 
 
 class CloseFinancialYearView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'close.financialYear'
+
     sanad = None
 
     def post(self, request):
@@ -256,6 +263,8 @@ class CloseFinancialYearView(APIView):
 
 
 class CancelFinancialYearClosingView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'cancelClosing.financialYear'
 
     def post(self, request):
         financial_year = request.user.active_financial_year
@@ -267,6 +276,8 @@ class CancelFinancialYearClosingView(APIView):
 
 
 class MoveFinancialYearView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'move.financialYear'
     sanad = None
 
     def post(self, request):
@@ -283,3 +294,10 @@ class MoveFinancialYearView(APIView):
     def move_accounts(self):
         sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad)
         return sanad_items
+
+
+class FinancialYearModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'financialYear'
+    queryset = FinancialYear.objects.all()
+    serializer_class = FinancialYearSerializer

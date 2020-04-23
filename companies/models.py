@@ -31,7 +31,12 @@ class Company(models.Model):
             return None
 
     class Meta:
-        permissions = ()
+        permissions = (
+            ('get.company', 'مشاهده شرکت'),
+            ('create.company', 'تعریف شرکت'),
+            ('update.company', 'ویرایش شرکت'),
+            ('delete.company', 'حذف شرکت'),
+        )
 
 
 class FinancialYear(models.Model):
@@ -58,6 +63,18 @@ class FinancialYear(models.Model):
 
     def __str__(self):
         return "{} {} ({})".format(self.company, self.name, self.id)
+
+    class Meta:
+        permissions = (
+            ('get.financialYear', 'مشاهده سال مالی'),
+            ('create.financialYear', 'تعریف سال مالی'),
+            ('update.financialYear', 'ویرایش سال مالی'),
+            ('delete.financialYear', 'حذف سال مالی'),
+
+            ('move.financialYear', 'انتقال سال مالی'),
+            ('close.financialYear', 'بستن سال مالی'),
+            ('cancelClosing.financialYear', 'لغو بستن سال مالی'),
+        )
 
     @property
     def is_closed(self):

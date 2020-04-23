@@ -1,9 +1,9 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from companies.views.financialYear import CloseFinancialYearView, MoveFinancialYearView, CancelFinancialYearClosingView
-from companies.views.companies import CompanyModelView
-from companies.views.companies import FinancialYearModelView
+from companies.views.financialYearViews import CloseFinancialYearView, MoveFinancialYearView, \
+    CancelFinancialYearClosingView, FinancialYearModelView
+from companies.views.companyViews import CompanyModelView
 
 router = DefaultRouter()
 router.register('financialYears', FinancialYearModelView, base_name='financial-year')

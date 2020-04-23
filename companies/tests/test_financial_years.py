@@ -7,12 +7,12 @@ from rest_framework import status
 from companies.models import Company, FinancialYear
 from companies.tests.test_companies import CompanyTest
 from helpers.test import MTestCase
-from users.tests import UserTest
+from users.tests.test_users import UserTest
 
 
 class FinancialYearTest(MTestCase):
     def test_create_financial_year(self):
-        user = UserTest()
+        user = UserTest.get_user()
         company = CompanyTest.create_company()
         self.client.force_authenticate(user)
 
@@ -31,7 +31,7 @@ class FinancialYearTest(MTestCase):
 
     def test_retrieve_financial_year(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
 
@@ -44,7 +44,7 @@ class FinancialYearTest(MTestCase):
 
     def test_update_financial_year(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
 
@@ -61,7 +61,7 @@ class FinancialYearTest(MTestCase):
 
     def test_delete_financial_year(self):
         user = UserTest.get_user()
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         company = CompanyTest.create_company()
         financial_year = FinancialYearTest.create_financial_year(company)
 
