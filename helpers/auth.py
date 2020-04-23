@@ -6,24 +6,30 @@ from rest_framework.permissions import BasePermission
 class BasicCRUDPermission(BasePermission):
 
     def has_permission(self, request, view):
-        base_name = getattr(view, 'permission_base_codename', None)
-        if not base_name:
-            raise Exception("permission base codename does not found")
-
-        method = request.method
         user = request.user
 
-        operation = ''
-        if method == 'POST':
-            operation = "create"
-        if method == 'GET':
-            operation = "get"
-        if method == 'PUT':
-            operation = "update"
-        if method == 'DELETE':
-            operation = "delete"
+        permission_codename = getattr(view, 'permission_codename', None)
 
-        permission_codename = "{}.{}".format(operation, base_name)
+        if not permission_codename:
+            base_codename = getattr(view, 'permission_base_codename', None)
+            if not base_codename:
+                raise Exception(
+                    "permission_base_codename does not found, declare permission_base_codename or permission_codename in view"
+                )
+
+            method = request.method
+
+            operation = ''
+            if method == 'POST':
+                operation = "create"
+            if method == 'GET':
+                operation = "get"
+            if method == 'PUT':
+                operation = "update"
+            if method == 'DELETE':
+                operation = "delete"
+
+            permission_codename = "{}.{}".format(operation, base_codename)
 
         has_perm = user.has_perm(permission_codename)
         if has_perm:
