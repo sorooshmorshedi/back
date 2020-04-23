@@ -118,7 +118,6 @@ class TransferModelView(viewsets.ModelViewSet):
         output_factor.delete()
 
 
-@api_view(['get'])
 class GetTransferByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'transfer'
