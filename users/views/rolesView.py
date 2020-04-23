@@ -1,15 +1,25 @@
 from django.contrib.auth.models import Permission
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
+from rest_framework.views import APIView
+
 from users.models import Role
 from users.serializers import RoleSerializer, PermissionListSerializer
 
 
-class PermissionListView(generics.ListAPIView):
+class PermissionListView(APIView):
     permission_classes = (IsAuthenticated,)
-    queryset = Permission.objects.all()
-    serializer_class = PermissionListSerializer
+
+    def get(self, request):
+        queryset = Permission.objects.all()
+        excludes = ('auth', 'admin', 'authtoken', 'sessions')
+
+        for app_label in excludes:
+            queryset = queryset.exclude(content_type__app_label=app_label)
+
+        return Response(PermissionListSerializer(queryset, many=True).data)
 
 
 class RoleListView(generics.ListAPIView):

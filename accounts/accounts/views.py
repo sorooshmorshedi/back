@@ -1,4 +1,5 @@
 from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +8,6 @@ from rest_framework.response import Response
 from accounts.accounts.models import FloatAccountRelation
 from accounts.accounts.serializers import *
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_current_user
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
@@ -16,6 +16,7 @@ from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIVi
 class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountSerializer
+    permission_base_codename = 'floatAccount'
 
     def created(self, instance, request):
         syncFloatAccountGroups = request.data.pop('syncFloatAccountGroups', [])
@@ -32,6 +33,7 @@ class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountSerializer
+    permission_base_codename = 'floatAccount'
 
     def get_queryset(self):
         user = self.request.user
@@ -64,6 +66,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
+    permission_base_codename = 'floatAccountGroup'
 
     def get_queryset(self):
         user = self.request.user
@@ -82,17 +85,39 @@ class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
 class FloatAccountGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
+    permission_base_codename = 'floatAccountGroup'
 
 
 class AccountTypeList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_classes = (IsAuthenticated, )
     queryset = AccountType.objects.all()
     serializer_class = AccountTypeSerializer
+
+
+def get_account_permission_base_codename(view):
+    method = view.request.method.lower()
+
+    if method == 'get':
+        return 'account'
+    elif method == 'post':
+        parent_id = view.request.data.get('parent', None)
+        if parent_id:
+            parent = get_object_or_404(Account, pk=parent_id)
+            return "account{}".format(parent.level + 1)
+        else:
+            return "account0"
+    else:
+        account = view.get_object()
+        return "account{}".format(account.level)
 
 
 class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = AccountCreateUpdateSerializer
+
+    @property
+    def permission_base_codename(self):
+        return get_account_permission_base_codename(self)
 
     def perform_create(self, serializer):
 
@@ -143,7 +168,11 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 
 class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_base_codename(self):
+        return get_account_permission_base_codename(self)
 
     def get_serializer_class(self):
         method = self.request.method.lower()

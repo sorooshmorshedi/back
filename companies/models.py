@@ -31,12 +31,7 @@ class Company(models.Model):
             return None
 
     class Meta:
-        permissions = (
-            ('get.account', 'مشاهده حساب ها'),
-            ('post.account', 'تعریف حساب'),
-            ('put.account', 'ویرایش حساب'),
-            ('delete.account', 'حذف حساب'),
-        )
+        permissions = ()
 
 
 class FinancialYear(models.Model):

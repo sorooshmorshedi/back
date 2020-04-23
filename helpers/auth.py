@@ -1,28 +1,40 @@
+from django.contrib.auth.models import Permission
 from rest_framework.authentication import TokenAuthentication, get_authorization_header
 from rest_framework.permissions import BasePermission
 
 
 class BasicCRUDPermission(BasePermission):
+
     def has_permission(self, request, view):
-        return True
-        model = view.serializer_class.Meta.model
-        app_label = model._meta.app_label
-        model_name = model._meta.model_name
+        base_name = getattr(view, 'permission_base_codename', None)
+        if not base_name:
+            raise Exception("permission base codename does not found")
 
         method = request.method
         user = request.user
 
-        perm = ''
+        operation = ''
         if method == 'POST':
-            perm = "{}.create_{}".format(app_label, model_name)
+            operation = "create"
         if method == 'GET':
-            perm = "{}.retrieve_{}".format(app_label, model_name)
+            operation = "get"
         if method == 'PUT':
-            perm = "{}.update_{}".format(app_label, model_name)
+            operation = "update"
         if method == 'DELETE':
-            perm = "{}.delete_{}".format(app_label, model_name)
+            operation = "delete"
 
-        return user.has_perm(perm)
+        permission_codename = "{}.{}".format(operation, base_name)
+
+        has_perm = user.has_perm(permission_codename)
+        if has_perm:
+            return True
+        else:
+            permission = Permission.objects.filter(codename=permission_codename).first()
+            if permission:
+                self.message = "شما اجازه این عملیات را ندارید: {}".format(permission.name)
+            else:
+                self.message = "not found permission: {}".format(permission_codename)
+            return False
 
 
 class TokenAuthSupportQueryString(TokenAuthentication):

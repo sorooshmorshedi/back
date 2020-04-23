@@ -5,13 +5,15 @@ from rest_framework.response import Response
 
 from accounts.defaultAccounts.serializers import *
 from helpers.auth import BasicCRUDPermission
-from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
+from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
+    RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DefaultAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'defaultAccount'
     serializer_class = DefaultAccountSerializer
 
     def list(self, request, *ergs, **kwargs):
@@ -22,6 +24,7 @@ class DefaultAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class DefaultAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'defaultAccount'
     serializer_class = DefaultAccountSerializer
 
     def retrieve(self, request, **kwargs):
@@ -34,6 +37,3 @@ class DefaultAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         if da.programingName:
             raise serializers.ValidationError('این پیشفرض غیر قابل حذف می باشد')
         return super().delete(request, *args, **kwargs)
-
-
-

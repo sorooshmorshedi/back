@@ -23,6 +23,7 @@ class BaseManager(models.Manager):
 class BaseModel(models.Model):
     class Meta:
         abstract = True
+        permissions = ()
         default_permissions = ()
         ordering = ['pk']
         backward_financial_year = False

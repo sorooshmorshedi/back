@@ -23,7 +23,7 @@ class User(AbstractUser):
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
 
-    def has_perm(self, perm, company=None):
+    def has_perm(self, permission_codename, company=None):
         if not self.is_active:
             return False
         if self.is_superuser:
@@ -32,4 +32,4 @@ class User(AbstractUser):
         if not company:
             company = self.active_company
 
-        return super(User, self).has_perm(perm, company)
+        return self.roles.filter(company=company, permissions__codename=permission_codename).exists()

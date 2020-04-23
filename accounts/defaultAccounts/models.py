@@ -34,7 +34,12 @@ class DefaultAccount(BaseModel):
     programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
-        verbose_name = 'حساب پیشفرض'
+        permissions = (
+            ('get.defaultAccount', 'مشاهده حساب های پیشفرض'),
+            ('create.defaultAccount', 'تعریف حساب پیشفرض'),
+            ('update.defaultAccount', 'ویرایش حساب پیشفرض'),
+            ('delete.defaultAccount', 'حذف حساب پیشفرض'),
+        )
 
     def __str__(self):
         return "{} {}".format(self.name, self.programingName)

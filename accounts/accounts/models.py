@@ -17,6 +17,12 @@ class FloatAccountGroup(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permissions = (
+            ('get.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه'),
+            ('create.floatAccountGroup', 'تعریف گروه حساب شناور / مرکز هزینه'),
+            ('update.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه'),
+            ('delete.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه'),
+        )
 
     def __str__(self):
         return str(self.pk) + ' - ' + str(self.name)
@@ -42,6 +48,12 @@ class FloatAccount(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permissions = (
+            ('get.floatAccount', 'مشاهده حساب های شناور'),
+            ('create.floatAccount', 'تعریف حساب شناور'),
+            ('update.floatAccount', 'ویرایش حساب شناور'),
+            ('delete.floatAccount', 'حذف حساب شناور'),
+        )
 
 
 class FloatAccountRelation(BaseModel):
@@ -165,6 +177,25 @@ class Account(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['code']
         backward_financial_year = True
+        permissions = (
+            ('get.account', 'مشاهده حساب ها'),
+
+            ('create.account0', 'تعریف گروه'),
+            ('update.account0', 'ویرایش گروه'),
+            ('delete.account0', 'حذف گروه'),
+
+            ('create.account1', 'تعریف کل'),
+            ('update.account1', 'ویرایش کل'),
+            ('delete.account1', 'حذف کل'),
+
+            ('create.account2', 'تعریف معین'),
+            ('update.account2', 'ویرایش معین'),
+            ('delete.account2', 'حذف معین'),
+
+            ('create.account3', 'تعریف تفصیلی'),
+            ('update.account3', 'ویرایش تفصیلی'),
+            ('delete.account3', 'حذف تفصیلی'),
+        )
 
     @property
     def title(self):

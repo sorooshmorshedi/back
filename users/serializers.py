@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from companies.serializers import FinancialYearSerializer, CompanySerializer
 from users.models import Role
@@ -48,7 +49,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'roles')
 
 
+class ContentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = '__all__'
+
+
 class PermissionListSerializer(serializers.ModelSerializer):
+    content_type = ContentTypeSerializer()
+    contentType = content_type
+
     class Meta:
         model = Permission
         fields = '__all__'
