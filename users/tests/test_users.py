@@ -103,7 +103,7 @@ class UserTest(MTestCase):
 
     @staticmethod
     def get_user():
-        user = User.objects.first()
+        user = User.objects.filter(is_superuser=True).first()
         return user
 
     @staticmethod
