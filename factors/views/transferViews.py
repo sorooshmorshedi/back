@@ -2,15 +2,21 @@ from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from factors.helpers import getInventoryCount
 from factors.models import Transfer, FactorItem
 from factors.serializers import TransferListRetrieveSerializer, TransferCreateSerializer
+from helpers.auth import BasicCRUDPermission
 from wares.models import Ware, Warehouse
 
 
 class TransferModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'transfer'
+
     serializer_class = TransferListRetrieveSerializer
 
     def get_queryset(self):
@@ -113,27 +119,31 @@ class TransferModelView(viewsets.ModelViewSet):
 
 
 @api_view(['get'])
-def getTransferByPosition(request):
-    if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
-        return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+class GetTransferByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'transfer'
 
-    id = request.GET.get('id', None)
-    position = request.GET['position']
-    queryset = Transfer.objects.inFinancialYear()
+    def get(self, request):
+        if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
+            return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
 
-    try:
-        if position == 'next':
-            factor = queryset.filter(pk__gt=id).order_by('id')[0]
-        elif position == 'prev':
-            if id:
-                queryset = queryset.filter(pk__lt=id)
-            factor = queryset.order_by('-id')[0]
-        elif position == 'first':
-            factor = queryset.order_by('id')[0]
-        elif position == 'last':
-            factor = queryset.order_by('-id')[0]
-    except IndexError:
-        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+        id = request.GET.get('id', None)
+        position = request.GET['position']
+        queryset = Transfer.objects.inFinancialYear()
 
-    serializer = TransferListRetrieveSerializer(factor)
-    return Response(serializer.data)
+        try:
+            if position == 'next':
+                factor = queryset.filter(pk__gt=id).order_by('id')[0]
+            elif position == 'prev':
+                if id:
+                    queryset = queryset.filter(pk__lt=id)
+                factor = queryset.order_by('-id')[0]
+            elif position == 'first':
+                factor = queryset.order_by('id')[0]
+            elif position == 'last':
+                factor = queryset.order_by('-id')[0]
+        except IndexError:
+            return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TransferListRetrieveSerializer(factor)
+        return Response(serializer.data)

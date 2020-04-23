@@ -31,6 +31,14 @@ class Expense(BaseModel):
     type = models.CharField(max_length=10, choices=EXPENSE_TYPES)
     explanation = models.CharField(max_length=255, blank=True)
 
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.expense', 'مشاهده هزینه فاکتور'),
+            ('create.expense', 'تعریف هزینه  فاکتور'),
+            ('update.expense', 'ویرایش هزینه فاکتور'),
+            ('delete.expense', 'حذف هزینه فاکتور'),
+        )
+
 
 class Factor(BaseModel):
     BUY = 'buy'
@@ -85,7 +93,38 @@ class Factor(BaseModel):
     definition_date = models.DateTimeField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
-        pass
+        permissions = (
+            ('get.buyFactor', 'مشاهده فاکتور خرید'),
+            ('create.buyFactor', 'تعریف فاکتور خرید'),
+            ('update.buyFactor', 'ویرایش فاکتور خرید'),
+            ('delete.buyFactor', 'حذف فاکتور خرید'),
+            ('definite.buyFactor', 'قطعی کردن خرید'),
+
+            ('get.saleFactor', 'مشاهده فاکتور فروش'),
+            ('create.saleFactor', 'تعریف فاکتور فروش'),
+            ('update.saleFactor', 'ویرایش فاکتور فروش'),
+            ('delete.saleFactor', 'حذف فاکتور فروش'),
+            ('definite.saleFactor', 'قطعی کردن فروش'),
+
+            ('get.backFromSaleFactor', 'مشاهده فاکتور برگشت از فروش'),
+            ('create.backFromSaleFactor', 'تعریف فاکتور برگشت از فروش'),
+            ('update.backFromSaleFactor', 'ویرایش فاکتور برگشت از فروش'),
+            ('delete.backFromSaleFactor', 'حذف فاکتور برگشت از فروش'),
+            ('definite.backFromSaleFactor', 'قطعی کردن برگشت از فروش'),
+
+            ('get.backFromBuyFactor', 'مشاهده فاکتور برگشت از خرید'),
+            ('create.backFromBuyFactor', 'تعریف فاکتور برگشت از خرید'),
+            ('update.backFromBuyFactor', 'ویرایش فاکتور برگشت از خرید'),
+            ('delete.backFromBuyFactor', 'حذف فاکتور برگشت از خرید'),
+            ('definite.backFromBuyFactor', 'قطعی کردن برگشت از خرید'),
+
+            ('get.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده'),
+            ('get.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده'),
+
+            ('get.firstPeriodInventory', 'مشاهده موجودی اول دوره'),
+            ('update.firstPeriodInventory', 'ثبت موجودی اول دوره'),
+
+        )
 
     def __str__(self):
         return "ID: {}, code: {}, type: {}, is_definite: {}".format(self.pk, self.code, self.type, self.is_definite)
@@ -287,6 +326,9 @@ class FactorExpense(BaseModel):
     value = models.DecimalField(max_digits=24, decimal_places=0)
     explanation = models.CharField(max_length=255, blank=True)
 
+    class Meta(BaseModel.Meta):
+        pass
+
 
 class FactorPayment(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_payments')
@@ -327,6 +369,9 @@ class FactorItem(BaseModel):
             self.factor.is_definite,
             self.ware, self.count
         )
+
+    class Meta(BaseModel.Meta):
+        pass
 
     @property
     def remain_count(self):
@@ -376,3 +421,11 @@ class Transfer(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.transfer', 'مشاهده انتقال'),
+            ('create.transfer', 'تعریف انتقال'),
+            ('update.transfer', 'ویرایش انتقال'),
+            ('delete.transfer', 'حذف انتقال'),
+        )

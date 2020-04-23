@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from accounts.defaultAccounts.models import getDefaultAccount
 from factors.helpers import getInventoryCount
+from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user
 from sanads.sanads.models import clearSanad, newSanadCode
@@ -19,8 +20,9 @@ from wares.models import WareInventory, Ware
 
 
 class ExpenseModelView(viewsets.ModelViewSet):
-    # permission_classes = (IsAuthenticated, RPTypeListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = ExpenseSerializer
+    permission_base_codename = 'expense'
 
     def get_queryset(self):
         return Expense.objects.inFinancialYear()
@@ -41,18 +43,39 @@ class ExpenseModelView(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
+def get_factor_permission_codename(factor_type):
+    base_codename = ''
+    if factor_type == Factor.BUY:
+        base_codename = 'buy'
+    elif factor_type == Factor.SALE:
+        base_codename = 'sale'
+    elif factor_type == Factor.BACK_FROM_BUY:
+        base_codename = 'backFromBuy'
+    elif factor_type == Factor.BACK_FROM_SALE:
+        base_codename = 'backFromSale'
+    return "{}Factor".format(base_codename)
+
+
 class FactorModelView(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     serializer_class = FactorCreateUpdateSerializer
+
+    @property
+    def permission_base_codename(self):
+        if self.request.method.lower() == 'post':
+            factor_data = self.request.data['factor']
+            factor_type = factor_data.get('type')
+        else:
+            factor_type = self.get_object().type
+        return get_factor_permission_codename(factor_type)
 
     def get_queryset(self):
         return Factor.objects.inFinancialYear()
 
+    # Disabled
     def list(self, request, *ergs, **kwargs):
-        queryset = self.get_queryset()
-        serialized = FactorListRetrieveSerializer(queryset, many=True)
-        return Response(serialized.data)
+        return Response([])
 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
@@ -179,71 +202,89 @@ def newCodesForFactor(request):
     return Response(res)
 
 
-@api_view(['get'])
-def getNotPaidFactors(request):
-    filters = Q()
+class NotPaidFactorsView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
-    if 'transactionType' not in request.GET:
-        return Response([], status=status.HTTP_400_BAD_REQUEST)
+    @property
+    def permission_base_codename(self):
 
-    tType = request.GET['transactionType']
+        transaction_type = self.request.GET.get('transactionType')
+        if transaction_type == Transaction.RECEIVE:
+            return 'notReceivedFactor'
+        else:
+            return 'notPaidFactor'
 
-    if 'transactionId' in request.GET:
-        tId = request.GET['transactionId']
-        filters &= (~Q(sanad__bed=F('paidValue')) | Q(payments__transaction_id=tId))
-    else:
-        filters &= ~Q(sanad__bed=F('paidValue'))
+    def get(self, request):
 
-    if tType == 'receive':
-        filters &= Q(type__in=("sale", "backFromBuy"))
-    else:
-        filters &= Q(type__in=("buy", "backFromSale"))
+        filters = Q()
 
-    if 'accountId' in request.GET:
-        account_id = request.GET['accountId']
-        filters &= Q(account=account_id)
+        if 'transactionType' not in request.GET:
+            return Response([], status=status.HTTP_400_BAD_REQUEST)
 
-    qs = Factor.objects.inFinancialYear() \
-        .exclude(sanad__bed=0) \
-        .filter(filters) \
-        .distinct() \
-        .prefetch_related('items') \
-        .prefetch_related('payments') \
-        .prefetch_related('account') \
-        .prefetch_related('floatAccount') \
-        .prefetch_related('costCenter')
-    res = Response(NotPaidFactorsCreateUpdateSerializer(qs, many=True).data)
-    return res
+        tType = request.GET['transactionType']
+
+        if 'transactionId' in request.GET:
+            tId = request.GET['transactionId']
+            filters &= (~Q(sanad__bed=F('paidValue')) | Q(payments__transaction_id=tId))
+        else:
+            filters &= ~Q(sanad__bed=F('paidValue'))
+
+        if tType == 'receive':
+            filters &= Q(type__in=("sale", "backFromBuy"))
+        else:
+            filters &= Q(type__in=("buy", "backFromSale"))
+
+        if 'accountId' in request.GET:
+            account_id = request.GET['accountId']
+            filters &= Q(account=account_id)
+
+        qs = Factor.objects.inFinancialYear() \
+            .exclude(sanad__bed=0) \
+            .filter(filters) \
+            .distinct() \
+            .prefetch_related('items') \
+            .prefetch_related('payments') \
+            .prefetch_related('account') \
+            .prefetch_related('floatAccount') \
+            .prefetch_related('costCenter')
+        res = Response(NotPaidFactorsCreateUpdateSerializer(qs, many=True).data)
+        return res
 
 
-@api_view(['get'])
-def getFactorByPosition(request):
-    if 'type' not in request.GET:
-        return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-    if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
-        return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+class GetFactorByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
-    type = request.GET['type']
-    id = request.GET.get('id', None)
-    position = request.GET['position']
-    queryset = Factor.objects.inFinancialYear().filter(type=type)
+    @property
+    def permission_base_codename(self):
+        return get_factor_permission_codename(self.request.GET.get('type'))
 
-    try:
-        if position == 'next':
-            factor = queryset.filter(pk__gt=id).order_by('id')[0]
-        elif position == 'prev':
-            if id:
-                queryset = queryset.filter(pk__lt=id)
-            factor = queryset.order_by('-id')[0]
-        elif position == 'first':
-            factor = queryset.order_by('id')[0]
-        elif position == 'last':
-            factor = queryset.order_by('-id')[0]
-    except IndexError:
-        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):
+        if 'type' not in request.GET:
+            return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+        if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
+            return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
 
-    serializer = FactorListRetrieveSerializer(factor)
-    return Response(serializer.data)
+        type = request.GET['type']
+        id = request.GET.get('id', None)
+        position = request.GET['position']
+        queryset = Factor.objects.inFinancialYear().filter(type=type)
+
+        try:
+            if position == 'next':
+                factor = queryset.filter(pk__gt=id).order_by('id')[0]
+            elif position == 'prev':
+                if id:
+                    queryset = queryset.filter(pk__lt=id)
+                factor = queryset.order_by('-id')[0]
+            elif position == 'first':
+                factor = queryset.order_by('id')[0]
+            elif position == 'last':
+                factor = queryset.order_by('-id')[0]
+        except IndexError:
+            return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FactorListRetrieveSerializer(factor)
+        return Response(serializer.data)
 
 
 def check_inventory(user, factor_items, consider_old_count):
@@ -299,6 +340,7 @@ def check_inventory(user, factor_items, consider_old_count):
 
 
 class DefiniteFactor(APIView):
+    permission_classes = (IsAuthenticated, )
 
     def post(self, request, pk):
         user = request.user

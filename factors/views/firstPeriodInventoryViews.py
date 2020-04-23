@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -6,6 +7,7 @@ from accounts.accounts.models import Account
 from factors.models import Factor
 from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
 from factors.views.factorViews import DefiniteFactor
+from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_current_user
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.sanads.models import Sanad, newSanadCode, clearSanad
@@ -28,6 +30,9 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
 
 
 class FirstPeriodInventoryView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'firstPeriodInventory'
+
     def get(self, request):
         factor = Factor.get_first_period_inventory()
         if not factor:
