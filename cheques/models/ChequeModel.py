@@ -70,10 +70,6 @@ class Cheque(BaseModel):
 
     has_transaction = models.BooleanField(default=False)
 
-    permissions = (
-        ('get_cheque', 'Can get cheques')
-    )
-
     def __str__(self):
         if self.chequebook:
             return "{} - {} - {}".format(self.received_or_paid, self.chequebook.explanation[0:50], self.serial)
@@ -83,6 +79,21 @@ class Cheque(BaseModel):
     class Meta(BaseModel.Meta):
         verbose_name = 'چک'
         ordering = ['serial', ]
+        permissions = (
+            ('get.receivedCheque', 'مشاهده چک دریافتی'),
+            ('update.receivedCheque', 'ویرایش چک دریافتی'),
+            ('delete.receivedCheque', 'حذف چک دریافتی'),
+
+            ('submit.receivedCheque', 'ثبت چک دریافتی'),
+            ('changeStatus.receivedCheque', 'تغییر وضعیت دریافتی'),
+
+            ('get.paidCheque', 'مشاهده چک پرداختی'),
+            ('update.paidCheque', 'ویرایش چک پرداختی'),
+            ('delete.paidCheque', 'حذف چک پرداختی'),
+
+            ('submit.paidCheque', 'ثبت چک پرداختی'),
+            ('changeStatus.paidCheque', 'تغییر وضعیت پرداختی'),
+        )
 
     def save(self, *args, **kwargs):
         res = super(Cheque, self).save(*args, **kwargs)

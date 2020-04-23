@@ -19,16 +19,18 @@ class Chequebook(BaseModel):
     serial_from = models.IntegerField()
     serial_to = models.IntegerField()
 
-    permissions = (
-        ('get_cheque', 'Can get cheques')
-    )
-
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
     class Meta(BaseModel.Meta):
         verbose_name = 'دفتر چک'
         ordering = ['code', ]
+        permissions = (
+            ('get.chequebook', 'مشاهده دفتر چک'),
+            ('create.chequebook', 'تعریف دفتر چک'),
+            ('update.chequebook', 'ویرایش دفتر چک'),
+            ('delete.chequebook', 'حذف دفتر چک'),
+        )
 
     def save(self, *args, **kwargs):
 

@@ -38,13 +38,14 @@ class StatusChange(BaseModel):
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
 
-    permissions = (
-        ('get_cheque', 'Can get cheques')
-    )
-
     class Meta(BaseModel.Meta):
         verbose_name = 'تغییر وضعیت'
         ordering = ['id', ]
+        permissions = (
+            ('delete.receivedChequeStatusChange', 'حذف تغییر وضعیت های چک دریافتی'),
+
+            ('delete.paidChequeStatusChange', 'حذف تغییر وضعیت های چک پرداختی'),
+        )
 
     def _createSanad(self, user):
         if not self.sanad:
