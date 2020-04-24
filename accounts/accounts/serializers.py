@@ -2,7 +2,7 @@ from django.utils.functional import cached_property
 from rest_framework import serializers
 
 from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account, AccountBalance
-from sanads.sanads.models import SanadItem
+from sanads.models import SanadItem
 
 
 class FloatAccountGroupSimpleSerializer(serializers.ModelSerializer):

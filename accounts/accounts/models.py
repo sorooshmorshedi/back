@@ -3,6 +3,7 @@ from builtins import tuple
 from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
+from django.db.models.functions.comparison import Coalesce
 
 from companies.models import FinancialYear
 from helpers.functions import get_current_user
@@ -304,11 +305,11 @@ class AccountBalance(BaseModel):
             qs = qs.filter(costCenter=costCenter)
 
         result = qs.aggregate(
-            bed_sum=Sum('bed'),
-            bes_sum=Sum('bes'),
+            bed_sum=Coalesce(Sum('bed'), 0),
+            bes_sum=Coalesce(Sum('bes'), 0),
         )
 
-        return result.get('bed_sum', 0), result.get('bes_sum', 0)
+        return result['bed_sum'], result['bes_sum']
 
     @staticmethod
     def get_balance(account, floatAccount=None, costCenter=None):
