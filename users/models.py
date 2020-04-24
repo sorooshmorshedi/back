@@ -9,6 +9,15 @@ class Role(models.Model):
     name = models.CharField(max_length=255)
     permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
 
+    class Meta:
+        default_permissions = ()
+        permissions = (
+            ('get.role', 'مشاهده نقش'),
+            ('create.role', 'تعریف نقش'),
+            ('update.role', 'ویرایش نقش'),
+            ('delete.role', 'حذف نقش'),
+        )
+
 
 class User(AbstractUser):
     active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany',
@@ -22,6 +31,15 @@ class User(AbstractUser):
 
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
+        default_permissions = ()
+        permissions = (
+            ('get.user', 'مشاهده کاربر'),
+            ('create.user', 'تعریف کاربر'),
+            ('update.user', 'ویرایش کاربر'),
+            ('delete.user', 'حذف کاربر'),
+
+            ('changePassword.user', 'تغییر کلمه عبور کاربران'),
+        )
 
     def has_perm(self, permission_codename, company=None):
         if not self.is_active:

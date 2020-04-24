@@ -1,7 +1,7 @@
 import django_filters
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
-from sanads.sanads.models import SanadItem
+from sanads.models import SanadItem
 
 
 class SanadItemJounalFilter(filters.FilterSet):

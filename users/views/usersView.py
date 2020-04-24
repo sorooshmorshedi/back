@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from helpers.auth import BasicCRUDPermission
 from users.models import User
 from users.permissions import DeleteUserPermission, ChangePasswordPermission
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer
@@ -17,25 +18,29 @@ class CurrentUserApiView(APIView):
 
 
 class UserListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'user'
     queryset = User.objects.all()
     serializer_class = UserListRetrieveSerializer
 
 
 class UserCreateView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'user'
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
 
 
 class UserUpdateView(generics.UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'user'
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
 
 
 class UserDestroyView(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated, DeleteUserPermission)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission, DeleteUserPermission)
+    permission_base_codename = 'user'
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
 
@@ -55,7 +60,6 @@ class SetActiveCompany(APIView):
 
     def post(self, request):
         from companies.models import Company
-        # TODO : check permissions
         user = request.user
         company = request.data.get('company', None)
         company = get_object_or_404(Company, pk=company)
@@ -70,7 +74,6 @@ class SetActiveFinancialYear(APIView):
 
     def post(self, request):
         from companies.models import FinancialYear
-        # TODO : check permissions
         user = request.user
         financial_year = request.data.get('financial_year', None)
         financial_year = get_object_or_404(FinancialYear, pk=financial_year)

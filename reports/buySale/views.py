@@ -1,7 +1,9 @@
 from django.db.models import Sum, DecimalField
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
+from helpers.auth import BasicCRUDPermission
 from reports.buySale.serializers import BuySaleSerializer
 from reports.lists.filters import *
 from reports.lists.serializers import *
@@ -53,22 +55,30 @@ def addSum(queryset, data, report_type):
 
 
 class BuySaleView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_codename(self):
+        if self.request.GET['factor__type__in'] == 'sale,backFromSale':
+            return 'get.saleReport'
+        else:
+            return 'get.buyReport'
+
     serializer_class = BuySaleSerializer
     filterset_class = FactorItemFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear()\
-            .filter(factor__is_definite=True)\
-            .prefetch_related('factor__account')\
+        return FactorItem.objects.inFinancialYear() \
+            .filter(factor__is_definite=True) \
+            .prefetch_related('factor__account') \
             .prefetch_related('ware') \
-            .prefetch_related('warehouse')\
-            .order_by('id')\
+            .prefetch_related('warehouse') \
+            .order_by('id') \
             .all()
 
     def list(self, request, *args, **kwargs):
-
         params = self.request.GET
 
         report_type = Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
@@ -89,4 +99,3 @@ class BuySaleView(generics.ListAPIView):
         response = paginator.get_paginated_response(data)
         # print(len(connection.queries))
         return response
-

@@ -10,7 +10,7 @@ from factors.views.factorViews import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_current_user
 from helpers.views.MassRelatedCUD import MassRelatedCUD
-from sanads.sanads.models import Sanad, newSanadCode, clearSanad
+from sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):

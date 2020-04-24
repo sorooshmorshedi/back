@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
-from sanads.sanads.models import SanadItem, Sanad
+from sanads.models import SanadItem, Sanad
 
 
 class SanadLedgerSerializer(serializers.ModelSerializer):

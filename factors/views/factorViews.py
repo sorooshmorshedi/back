@@ -13,7 +13,7 @@ from factors.helpers import getInventoryCount
 from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user
-from sanads.sanads.models import clearSanad, newSanadCode
+from sanads.models import clearSanad, newSanadCode
 from factors.serializers import *
 from server.settings import TESTING
 from wares.models import WareInventory, Ware

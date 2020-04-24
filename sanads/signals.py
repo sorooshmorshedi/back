@@ -1,7 +1,7 @@
 from django.db.models import signals
 
 from accounts.accounts.models import AccountBalance
-from sanads.sanads.models import SanadItem
+from sanads.models import SanadItem
 
 
 def updateAccountBalanceOnSave(sender, instance: SanadItem, **kwargs):

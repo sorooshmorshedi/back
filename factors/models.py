@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import signals, Sum, Max
+from django.db.models import Sum
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
@@ -10,8 +10,8 @@ from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from helpers.models import BaseModel
 from helpers.views.MassRelatedCUD import MassRelatedCUD
-from sanads.sanads.models import Sanad
-from sanads.transactions.models import Transaction
+from sanads.models import Sanad
+from transactions.models import Transaction
 from wares.models import Ware, Warehouse
 
 EXPENSE_TYPES = (

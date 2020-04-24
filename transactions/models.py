@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import signals, Sum
+from django.db.models import Sum
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
@@ -9,7 +9,7 @@ from companies.models import FinancialYear
 from helpers.models import BaseModel
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
-from sanads.sanads.models import Sanad, newSanadCode, clearSanad
+from sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class Transaction(BaseModel):
@@ -36,19 +36,26 @@ class Transaction(BaseModel):
 
     type = models.CharField(max_length=20, choices=TYPES)
 
-    permissions = (
-        ('get_sanad', 'Can get sanads')
-    )
-
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
         unique_together = ('code', 'type')
+        permissions = (
+            ('get.receiveTransaction', 'مشاهده دریافت'),
+            ('create.receiveTransaction', 'تعریف دریافت'),
+            ('update.receiveTransaction', 'ویرایش دریافت'),
+            ('delete.receiveTransaction', 'حذف دریافت'),
+
+            ('get.paymentTransaction', 'مشاهده پرداخت'),
+            ('create.paymentTransaction', 'تعریف پرداخت'),
+            ('update.paymentTransaction', 'ویرایش پرداخت'),
+            ('delete.paymentTransaction', 'حذف پرداخت'),
+        )
 
     def sync(self, user, data):
-        from sanads.transactions.serializers import TransactionItemCreateUpdateSerializer
+        from transactions.serializers import TransactionItemCreateUpdateSerializer
         from factors.serializers import FactorPaymentSerializer
         from cheques.views import SubmitChequeApiView
 
@@ -207,9 +214,8 @@ class TransactionItem(BaseModel):
 
     file = models.FileField(blank=True, null=True)
 
-    permissions = (
-        ('get_sanad', 'Can get sanads')
-    )
-
     def __str__(self):
         return "{0} - {1}".format(self.transaction.code, self.explanation[0:30])
+
+    class Meta(BaseModel.Meta):
+        pass

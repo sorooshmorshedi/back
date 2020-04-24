@@ -1,16 +1,23 @@
-from django.db import connection
 from django.db.models import Q, Count
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
-from factors.models import Transfer
 from factors.serializers import TransferListRetrieveSerializer
+from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *
-from sanads.transactions.models import Transaction
+from transactions.models import Transaction
+from transactions.views import get_transaction_permission_base_codename
 
 
 class TransactionListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_codename(self):
+        return "get.{}".format(get_transaction_permission_base_codename(self.request.GET.get('type')))
+
     serializer_class = TransactionListSerializer
     filterset_class = TransactionFilter
     ordering_fields = '__all__'
@@ -87,8 +94,8 @@ class FactorItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear()\
-            .prefetch_related('factor__account')\
+        return FactorItem.objects.inFinancialYear() \
+            .prefetch_related('factor__account') \
             .prefetch_related('ware') \
-            .prefetch_related('warehouse')\
+            .prefetch_related('warehouse') \
             .all()

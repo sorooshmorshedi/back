@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
 from accounts.accounts.models import Account
-from sanads.sanads.models import SanadItem, Sanad
+from sanads.models import SanadItem, Sanad
 
 
 class SanadJournalSerializer(serializers.ModelSerializer):

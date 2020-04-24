@@ -1,8 +1,7 @@
-from django.conf.urls import url, include
-from django.urls import path
+from django.conf.urls import url
 
-from .views import *
-
+from wares.views import WareLevelListCreate, WareLevelDetail, WareListCreate, WareDetail, WarehouseListCreate, \
+    UnitListCreate, UnitDetail, WarehouseDetail, WareInventoryView
 
 urlpatterns = [
     url(r'^wareLevels$', WareLevelListCreate.as_view(), name='Wares'),
@@ -17,7 +16,6 @@ urlpatterns = [
     url(r'^warehouses$', WarehouseListCreate.as_view(), name='warehouse'),
     url(r'^warehouses/(?P<pk>[0-9]+)$', WarehouseDetail.as_view(), name='floatWareDetail'),
 
-    url(r'^inventory/check$', WarehouseInventoryView.as_view(), name=''),
     url(r'^inventory/forWare$', WareInventoryView.as_view(), name=''),
 
 ]

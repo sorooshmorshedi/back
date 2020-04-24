@@ -17,6 +17,12 @@ class Unit(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permissions = (
+            ('get.unit', 'مشاهده واحد'),
+            ('create.unit', 'تعریف واحد'),
+            ('update.unit', 'ویرایش واحد'),
+            ('delete.unit', 'حذف واحد'),
+        )
 
     def __str__(self):
         return self.name
@@ -29,6 +35,12 @@ class Warehouse(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permissions = (
+            ('get.warehouse', 'مشاهده انبار'),
+            ('create.warehouse', 'تعریف انبار'),
+            ('update.warehouse', 'ویرایش انبار'),
+            ('delete.warehouse', 'حذف انبار'),
+        )
 
     def __str__(self):
         return str(self.pk) + ' - ' + self.name
@@ -54,6 +66,12 @@ class WareLevel(BaseModel):
     class Meta(BaseModel.Meta):
         backward_financial_year = True
         unique_together = ('name', 'level')
+        permissions = (
+            ('get.wareLevel', 'مشاهده سطح کالا'),
+            ('create.wareLevel', 'تعریف سطح کالا'),
+            ('update.wareLevel', 'ویرایش سطح کالا'),
+            ('delete.wareLevel', 'حذف سطح کالا'),
+        )
 
     def __str__(self):
         return str(self.pk) + ' - ' + self.name
@@ -96,6 +114,14 @@ class Ware(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
         backward_financial_year = True
+        permissions = (
+            ('get.ware', 'مشاهده کالا'),
+            ('create.ware', 'تعریف کالا'),
+            ('update.ware', 'ویرایش کالا'),
+            ('delete.ware', 'حذف کالا'),
+
+            ('get.wareInventory', 'مشاهده موجودی کالا'),
+        )
 
     def has_factorItem(self):
         return self.factorItems.count() != 0

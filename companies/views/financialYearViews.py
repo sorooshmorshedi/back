@@ -13,7 +13,7 @@ from companies.serializers import FinancialYearSerializer
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from helpers.auth import BasicCRUDPermission
-from sanads.sanads.models import SanadItem, clearSanad
+from sanads.models import SanadItem, clearSanad
 from users.models import User
 from users.serializers import UserListRetrieveSerializer
 from wares.models import WareInventory
@@ -268,9 +268,8 @@ class CancelFinancialYearClosingView(APIView):
 
     def post(self, request):
         financial_year = request.user.active_financial_year
-        closing_sanad = financial_year.closingSanad
-        if closing_sanad:
-            closing_sanad.delete()
+        if financial_year.is_closed:
+            financial_year.delete_closing_sanads()
 
         return Response(UserListRetrieveSerializer(request.user).data)
 

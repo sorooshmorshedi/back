@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'accounts',
     'wares',
     'sanads',
+    'transactions',
     'cheques',
     'factors',
     'reports',

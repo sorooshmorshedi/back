@@ -5,7 +5,7 @@ from wkhtmltopdf.views import PDFTemplateView
 from factors.serializers import TransferListRetrieveSerializer
 from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView
 from reports.models import ExportVerifier
-from sanads.transactions.models import Transaction
+from transactions.models import Transaction
 
 
 class BaseExportView(PDFTemplateView):

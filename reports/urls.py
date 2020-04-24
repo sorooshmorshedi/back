@@ -1,11 +1,11 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from reports.balance.views import accountBalanceView, floatAccountBalanceView, floatAccountBalanceByGroupView
-from reports.balanceSheet.views import balanceSheetView
+from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView
+from reports.balanceSheet.views import BalanceSheetView
 from reports.bill.views import BillListView
 from reports.buySale.views import BuySaleView
-from reports.incomeStatement.views import incomeStatementView
+from reports.incomeStatement.views import IncomeStatementView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView
 from reports.journal.views import JournalListView
@@ -37,15 +37,15 @@ urlpatterns += [
 
 # Reports
 urlpatterns += [
-    url(r'^balance$', accountBalanceView, name=''),
-    url(r'^balance/floatsByGroup$', floatAccountBalanceByGroupView, name=''),
-    url(r'^balance/floats$', floatAccountBalanceView, name=''),
+    url(r'^balance$', AccountBalanceView.as_view(), name=''),
+    url(r'^balance/floatsByGroup$', FloatAccountBalanceByGroupView.as_view(), name=''),
+    url(r'^balance/floats$', FloatAccountBalanceView.as_view(), name=''),
     url(r'^ledger$', LedgerListView.as_view(), name=''),
     url(r'^bill$', BillListView.as_view(), name=''),
     url(r'^journal$', JournalListView.as_view(), name=''),
     url(r'^export$', exportTest, name=''),
-    url(r'^incomeStatement$', incomeStatementView, name=''),
-    url(r'^balanceSheet$', balanceSheetView, name=''),
+    url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
+    url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
     url(r'^buySale$', BuySaleView.as_view(), name=''),
 
     url(r'^inventory/ware$', WareInventoryListView.as_view(), name=''),
@@ -53,7 +53,6 @@ urlpatterns += [
     url(r'^inventory/warehouse$', WarehouseInventoryListView.as_view(), name=''),
     url(r'^inventory/warehouse/all$', AllWarehousesInventoryListView.as_view(), name=''),
 ]
-
 
 # Other
 router = DefaultRouter()

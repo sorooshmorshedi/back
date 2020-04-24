@@ -5,7 +5,7 @@ from accounts.accounts.validators import AccountValidator
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.models.StatusChangeModel import StatusChange
-from sanads.sanads.serializers import SanadListRetrieveSerializer
+from sanads.serializers import SanadListRetrieveSerializer
 
 
 class StatusChangeSerializer(serializers.ModelSerializer):

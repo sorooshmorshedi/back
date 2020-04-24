@@ -40,6 +40,7 @@ urlpatterns = [
     url(r'^accounts/', include('accounts.urls')),
     url(r'^wares/', include('wares.urls')),
     url(r'^sanads/', include('sanads.urls')),
+    url(r'^transactions/', include('transactions.urls')),
     url(r'^cheques/', include('cheques.urls')),
     url(r'^factors/', include('factors.urls')),
     url(r'^reports/', include('reports.urls')),

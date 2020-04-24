@@ -5,12 +5,13 @@ from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
+from helpers.auth import BasicCRUDPermission
 from users.models import Role
 from users.serializers import RoleSerializer, PermissionListSerializer
 
 
 class PermissionListView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         queryset = Permission.objects.all()
@@ -23,13 +24,15 @@ class PermissionListView(APIView):
 
 
 class RoleListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'role'
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
 
 class RoleCreateView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'role'
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
@@ -40,12 +43,14 @@ class RoleCreateView(generics.CreateAPIView):
 
 
 class RoleUpdateView(generics.UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'role'
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
 
 class RoleDestroyView(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'role'
     queryset = Role.objects.all()
     serializer_class = RoleSerializer

@@ -2,11 +2,13 @@ from django.http import HttpResponse
 from import_export.fields import Field
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
+from helpers.auth import BasicCRUDPermission
 from reports.journal.filters import SanadItemJounalFilter
 from reports.journal.serializers import SanadItemJournalSerializer
 from reports.views import ModelResource
-from sanads.sanads.models import SanadItem
+from sanads.models import SanadItem
 
 
 class SanadItemResource(ModelResource):
@@ -25,6 +27,8 @@ class SanadItemResource(ModelResource):
 
 
 class JournalListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.journalReport'
     serializer_class = SanadItemJournalSerializer
     filterset_class = SanadItemJounalFilter
     ordering_fields = ('sanad__date', 'sanad__code', 'explanation', 'account__code', 'account__name', 'bed', 'bes')

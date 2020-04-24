@@ -1,6 +1,6 @@
 import jdatetime
 from accounts.accounts.models import Account, FloatAccount
-from sanads.sanads.models import newSanadCode, Sanad, SanadItem
+from sanads.models import newSanadCode, Sanad, SanadItem
 from users.models import User
 
 from helpers.test import MTestCase

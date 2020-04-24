@@ -1,8 +1,8 @@
 from django.apps import AppConfig
 
 
-class SanadConfig(AppConfig):
-    name = 'sanads'
+class TransactionConfig(AppConfig):
+    name = 'transactions'
 
     def ready(self):
         pass

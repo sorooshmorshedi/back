@@ -4,6 +4,28 @@ from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
+class Report(BaseModel):
+    class Meta(BaseModel.Meta):
+        managed = False
+
+        permissions = (
+            ('get.accountBalanceReport', 'مشاهده تراز'),
+            ('get.floatAccountBalanceByGroupReport', 'مشاهده تراز شناور بر اساس گروه'),
+            ('get.floatAccountBalanceReport', 'مشاهده تراز شناور'),
+            ('get.balanceSheetReport', 'مشاهده ترازنامه'),
+            ('get.billReport', 'مشاهده صورت حساب تفصیلی'),
+            ('get.buyReport', 'مشاهده گزارش خرید'),
+            ('get.saleReport', 'مشاهده گزارش فروش'),
+            ('get.incomeStatementReport', 'مشاهده گزارش سود و زیان تفصیلی'),
+            ('get.wareInventoryReport', 'مشاهده کاردکس کالا'),
+            ('get.allWaresInventoryReport', 'مشاهده کاردکس همه کالا ها'),
+            ('get.warehouseInventoryReport', 'مشاهده کاردکس انبار'),
+            ('get.allWarehousesInventoryReport', 'مشاهده کاردکس همه انبار ها'),
+            ('get.journalReport', 'مشاهده دفتر روزنامه'),
+            ('get.ledgerReport', 'مشاهده دفتر کل، معین، تفصیلی'),
+        )
+
+
 class ExportVerifier(BaseModel):
     SANAD = 'S'
     FACTOR_BUY = 'FB'
@@ -35,7 +57,12 @@ class ExportVerifier(BaseModel):
     form = models.CharField(choices=FORMS, max_length=4)
 
     class Meta(BaseModel.Meta):
-        default_permissions = ()
+        permissions = (
+            ('get.exportVerifier', 'مشاهده تایید کنندگان خروجی'),
+            ('create.exportVerifier', 'تعریف تایید کنندگان خروجی'),
+            ('update.exportVerifier', 'ویرایش تایید کنندگان خروجی'),
+            ('delete.exportVerifier', 'حذف تایید کنندگان خروجی'),
+        )
 
     def __str__(self):
         form_name = ''

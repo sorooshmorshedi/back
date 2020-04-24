@@ -1,15 +1,19 @@
 from decimal import Decimal
 from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factors.models import Factor
-from sanads.sanads.models import Sanad
-from sanads.transactions.models import Transaction
+from helpers.auth import BasicCRUDPermission
+from sanads.models import Sanad
+from transactions.models import Transaction
 
 
 class BillListView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.billReport'
 
     def get_queryset(self):
         return Sanad.objects.inFinancialYear().order_by('code') \

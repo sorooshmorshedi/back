@@ -3,7 +3,8 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import *
-from sanads.sanads.serializers import SanadSerializer
+from sanads.serializers import SanadSerializer
+from transactions.serializers import TransactionSerializerForPayment
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 from django.utils.timezone import now
 
@@ -103,12 +104,6 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FactorItem
-        fields = '__all__'
-
-
-class TransactionSerializerForPayment(serializers.ModelSerializer):
-    class Meta:
-        model = Transaction
         fields = '__all__'
 
 

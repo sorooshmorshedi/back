@@ -4,7 +4,7 @@ from accounts.accounts.models import Account, FloatAccount
 from cheques.models.ChequeModel import Cheque, CHEQUE_STATUSES
 from companies.models import FinancialYear
 from helpers.models import BaseModel
-from sanads.sanads.models import Sanad, newSanadCode, clearSanad
+from sanads.models import Sanad, newSanadCode, clearSanad
 
 
 class StatusChange(BaseModel):

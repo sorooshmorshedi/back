@@ -3,11 +3,12 @@ from import_export import fields
 from import_export import resources
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 
+from helpers.auth import BasicCRUDPermission
 from reports.models import ExportVerifier
 from reports.serializers import ExportVerifierSerializer
-from sanads.sanads.models import Sanad
-
+from sanads.models import Sanad
 
 
 class ModelResource(resources.ModelResource):
@@ -21,7 +22,6 @@ class ModelResource(resources.ModelResource):
 
 
 class SanadResource(ModelResource):
-
     class Meta:
         model = Sanad
 
@@ -36,6 +36,8 @@ def exportTest(request):
 
 
 class ExportVerifiersModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_base_codename = 'exportVerifier'
     serializer_class = ExportVerifierSerializer
 
     def get_queryset(self):

@@ -4,7 +4,7 @@ from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAc
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from cheques.serializers import ChequeListRetrieveSerializer
-from sanads.transactions.models import *
+from transactions.models import *
 
 
 class TransactionItemCreateUpdateSerializer(serializers.ModelSerializer):
@@ -46,6 +46,12 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad_code = serializers.IntegerField(source="sanad.code")
 
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+
+
+class TransactionSerializerForPayment(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = '__all__'

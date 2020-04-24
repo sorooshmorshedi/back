@@ -6,8 +6,8 @@ from django_jalali.db import models as jmodels
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, FactorItem, Transfer
-from sanads.sanads.models import Sanad
-from sanads.transactions.models import Transaction
+from sanads.models import Sanad
+from transactions.models import Transaction
 
 
 class TransactionFilter(filters.FilterSet):

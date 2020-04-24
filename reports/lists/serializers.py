@@ -6,8 +6,8 @@ from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import ChequebookListRetrieveSerializer
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorCreateUpdateSerializer
-from sanads.sanads.serializers import SanadSerializer
-from sanads.transactions.models import Transaction
+from sanads.serializers import SanadSerializer
+from transactions.models import Transaction
 from wares.models import Ware, Warehouse
 
 

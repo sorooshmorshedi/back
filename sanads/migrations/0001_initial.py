@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                 ('account', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='transactionItems', to='accounts.Account')),
                 ('cheque', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transactionItem', to='cheques.Cheque')),
                 ('floatAccount', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='transactionItems', to='accounts.FloatAccount')),
-                ('transaction', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='sanads.Transaction')),
+                ('transaction', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='transactions.transaction')),
                 ('type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='accounts.DefaultAccount')),
             ],
         ),

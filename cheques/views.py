@@ -11,7 +11,7 @@ from accounts.accounts.models import Account, FloatAccount
 from cheques.permissions import SubmitChequePermission, ChangeChequeStatusPermission
 from cheques.serializers import *
 from helpers.auth import BasicCRUDPermission
-from sanads.sanads.models import clearSanad, Sanad
+from sanads.models import clearSanad, Sanad
 
 
 class ChequebookModelView(viewsets.ModelViewSet):

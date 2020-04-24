@@ -81,8 +81,8 @@ class FinancialYear(models.Model):
         return self.temporaryClosingSanad is not None
 
     def get_opening_sanad(self):
-        from sanads.sanads.models import Sanad
-        from sanads.sanads.models import newSanadCode
+        from sanads.models import Sanad
+        from sanads.models import newSanadCode
 
         if not self.openingSanad:
             code = newSanadCode(self)
@@ -101,8 +101,8 @@ class FinancialYear(models.Model):
         return self.openingSanad
 
     def check_closing_sanads(self):
-        from sanads.sanads.models import Sanad
-        from sanads.sanads.models import newSanadCode
+        from sanads.models import Sanad
+        from sanads.models import newSanadCode
 
         closing_sanads = [
             'temporaryClosingSanad',
@@ -124,3 +124,8 @@ class FinancialYear(models.Model):
 
         if need_save:
             self.save()
+
+    def delete_closing_sanads(self):
+        self.temporaryClosingSanad.delete()
+        self.currentEarningsClosingSanad.delete()
+        self.permanentsClosingSanad.delete()

@@ -98,7 +98,7 @@ class Cheque(BaseModel):
     def save(self, *args, **kwargs):
         res = super(Cheque, self).save(*args, **kwargs)
         if self.has_transaction:
-            from sanads.transactions.models import TransactionItem
+            from transactions.models import TransactionItem
             transaction_item = TransactionItem.objects.filter(cheque=self).first()
             if transaction_item:
                 transaction_item.documentNumber = self.serial

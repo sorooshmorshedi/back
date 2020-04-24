@@ -1,10 +1,13 @@
 from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from accounts.accounts.models import AccountType, Account
 from accounts.accounts.serializers import TypeReportAccountSerializer
+from helpers.auth import BasicCRUDPermission
 from reports.filters import get_account_sanad_items_filter
 
 
@@ -69,93 +72,96 @@ def getSerialized(pName, allAccounts):
     }
 
 
-@api_view(['get'])
-def incomeStatementView(request):
-    getType.accountTypes = AccountType.objects.all()
+class IncomeStatementView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.incomeStatementReport'
 
-    res = []
-    dateFilter = get_account_sanad_items_filter(request)
+    def get(self, request):
+        getType.accountTypes = AccountType.objects.all()
 
-    allAccounts = list(Account.objects.inFinancialYear() \
-                       .annotate(remain=
-                                 Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
-                                 Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
-                                 ).filter(level=3).order_by('code'))
+        res = []
+        dateFilter = get_account_sanad_items_filter(request)
 
-    usingTypes = (
-        'sale',
-        'backFromSaleAndDiscounts',
-        'soldProductValue',
-        'operatingCosts',
-        'nonOperatingIncomes',
-        'nonOperatingCosts',
-    )
+        allAccounts = list(Account.objects.inFinancialYear() \
+                           .annotate(remain=
+                                     Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
+                                     Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
+                                     ).filter(level=3).order_by('code'))
 
-    t = getSerialized('sale', allAccounts)
-    res.append(t)
-    sale = t['remain']
+        usingTypes = (
+            'sale',
+            'backFromSaleAndDiscounts',
+            'soldProductValue',
+            'operatingCosts',
+            'nonOperatingIncomes',
+            'nonOperatingCosts',
+        )
 
-    t = getSerialized('backFromSaleAndDiscounts', allAccounts)
-    res.append(t)
-    backFromSaleAndDiscounts = t['remain']
+        t = getSerialized('sale', allAccounts)
+        res.append(t)
+        sale = t['remain']
 
-    netSales = sale - backFromSaleAndDiscounts
-    t = ({
-        'type': {
-            'name': 'فروش خالص',
-            'pName': None
-        },
-        'remain': netSales,
-    })
-    res.append(t)
+        t = getSerialized('backFromSaleAndDiscounts', allAccounts)
+        res.append(t)
+        backFromSaleAndDiscounts = t['remain']
 
-    t = getSerialized('soldProductValue', allAccounts)
-    soldProductValue = t['remain']
-    res.append(t)
+        netSales = sale - backFromSaleAndDiscounts
+        t = ({
+            'type': {
+                'name': 'فروش خالص',
+                'pName': None
+            },
+            'remain': netSales,
+        })
+        res.append(t)
 
-    grossIncome = netSales - soldProductValue
-    t = ({
-        'type': {
-            'name': 'سود (زیان) ناخالص',
-            'pName': None
-        },
-        'remain': grossIncome,
-    })
-    res.append(t)
+        t = getSerialized('soldProductValue', allAccounts)
+        soldProductValue = t['remain']
+        res.append(t)
 
-    t = getSerialized('operatingCosts', allAccounts)
-    operatingCosts = t['remain']
-    res.append(t)
+        grossIncome = netSales - soldProductValue
+        t = ({
+            'type': {
+                'name': 'سود (زیان) ناخالص',
+                'pName': None
+            },
+            'remain': grossIncome,
+        })
+        res.append(t)
 
-    operatingIncome = grossIncome - operatingCosts
-    t = ({
-        'type': {
-            'name': 'سود (زیان) عملیاتی',
-            'pName': None
-        },
-        'remain': operatingIncome
-    })
-    res.append(t)
+        t = getSerialized('operatingCosts', allAccounts)
+        operatingCosts = t['remain']
+        res.append(t)
 
-    t = getSerialized('nonOperatingIncomes', allAccounts)
-    nonOperatingIncomes = t['remain']
-    res.append(t)
+        operatingIncome = grossIncome - operatingCosts
+        t = ({
+            'type': {
+                'name': 'سود (زیان) عملیاتی',
+                'pName': None
+            },
+            'remain': operatingIncome
+        })
+        res.append(t)
 
-    t = getSerialized('nonOperatingCosts', allAccounts)
-    nonOperatingCosts = t['remain']
-    res.append(t)
+        t = getSerialized('nonOperatingIncomes', allAccounts)
+        nonOperatingIncomes = t['remain']
+        res.append(t)
 
-    specialIncome = operatingIncome \
-                    + nonOperatingIncomes \
-                    - nonOperatingCosts
-    t = ({
-        'type': {
-            'name': 'سود (زیان) ویژه',
-            'pName': None
-        },
-        'remain': specialIncome
-    })
-    res.append(t)
+        t = getSerialized('nonOperatingCosts', allAccounts)
+        nonOperatingCosts = t['remain']
+        res.append(t)
 
-    res = Response(res)
-    return res
+        specialIncome = operatingIncome \
+                        + nonOperatingIncomes \
+                        - nonOperatingCosts
+        t = ({
+            'type': {
+                'name': 'سود (زیان) ویژه',
+                'pName': None
+            },
+            'remain': specialIncome
+        })
+        res.append(t)
+
+        res = Response(res)
+        return res

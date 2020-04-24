@@ -3,10 +3,12 @@ from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factors.helpers import getInventoryCount
+from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
@@ -15,27 +17,32 @@ from wares.serializers import *
 
 @method_decorator(csrf_exempt, name='dispatch')
 class WarehouseListCreate(ListCreateAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'warehouse'
     serializer_class = WarehouseSerializer
 
 
 class WarehouseDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'warehouse'
     serializer_class = WarehouseSerializer
 
 
 class UnitDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'unit'
     serializer_class = UnitSerializer
 
 
 class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'unit'
     serializer_class = UnitSerializer
 
 
 class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'ware'
     serializer_class = WareSerializer
 
     def list(self, request, *ergs, **kwargs):
@@ -45,7 +52,8 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 
 class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'ware'
     serializer_class = WareSerializer
 
     def retrieve(self, request, **kwargs):
@@ -63,12 +71,14 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
 
 class WareLevelDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'wareLevel'
     serializer_class = WareLevelSerializer
 
 
 class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
-    # permission_classes = (IsAuthenticated, WareListCreate,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_base_codename = 'wareLevel'
     serializer_class = WareLevelSerializer
 
     def list(self, request, *ergs, **kwargs):
@@ -77,30 +87,13 @@ class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
         return Response(serializer.data)
 
 
-class WarehouseInventoryView(APIView):
-    def post(self, request):
-        res = []
-        data = request.data
-        for o in data:
-            if 'warehouse' not in o or 'ware' not in o:
-                return Response(['لطفا کالا و انبار را انتخاب کنید'], status.HTTP_400_BAD_REQUEST)
-            warehouse = o['warehouse']
-            ware = o['ware']
-
-            res.append({
-                'ware': ware,
-                'warehouse': warehouse,
-                'count': getInventoryCount(request.user, warehouse, ware)
-            })
-
-        return Response(res, status.HTTP_200_OK)
-
-
 class WareInventoryView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.wareInventory'
+
     def get(self, request):
         res = []
         data = request.GET
-        user = request.user
         ware = data.get('ware', None)
         if not ware:
             return Response(['Enter ware please'], status.HTTP_400_BAD_REQUEST)

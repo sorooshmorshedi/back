@@ -2,8 +2,10 @@ from django.db.models import Sum, F, DecimalField, Window, Q, Prefetch, Subquery
 from django.db.models.functions.comparison import Coalesce
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
 from factors.models import FactorItem, Factor
+from helpers.auth import BasicCRUDPermission
 from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter
 from reports.inventory.serializers import WareInventorySerializer, AllWaresInventorySerializer, \
     WarehouseInventorySerializer, AllWarehousesInventorySerializer
@@ -32,6 +34,8 @@ def addSum(queryset, data):
 
 
 class WareInventoryListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.wareInventoryReport'
     serializer_class = WareInventorySerializer
     filter_class = InventoryFilter
     ordering_fields = '__all__'
@@ -68,6 +72,8 @@ class WareInventoryListView(generics.ListAPIView):
 
 
 class AllWaresInventoryListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.allWaresInventoryReport'
     serializer_class = AllWaresInventorySerializer
     filter_class = AllWaresInventoryFilter
     ordering_fields = '__all__'
@@ -127,6 +133,8 @@ class AllWaresInventoryListView(generics.ListAPIView):
 
 
 class WarehouseInventoryListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.warehouseInventoryReport'
     serializer_class = WarehouseInventorySerializer
     filter_class = InventoryFilter
     ordering_fields = '__all__'
@@ -182,6 +190,8 @@ class WarehouseInventoryListView(generics.ListAPIView):
 
 
 class AllWarehousesInventoryListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'get.allWarehousesInventoryReport'
     serializer_class = AllWarehousesInventorySerializer
     filter_class = AllWaresInventoryFilter
     ordering_fields = '__all__'

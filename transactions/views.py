@@ -1,30 +1,36 @@
 from django.core.exceptions import ValidationError
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics, serializers
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from sanads.sanads.models import clearSanad, Sanad
-from sanads.transactions.models import Transaction
-from sanads.transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
+from helpers.auth import BasicCRUDPermission
+from sanads.models import clearSanad, Sanad
+from transactions.models import Transaction
+from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class TransactionListCreate(generics.ListCreateAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeListCreate,)
+def get_transaction_permission_base_codename(transaction_type):
+    if transaction_type == Transaction.RECEIVE:
+        return "receiveTransaction"
+    else:
+        return "paymentTransaction"
+
+
+class TransactionCreateView(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     serializer_class = TransactionCreateUpdateSerializer
+
+    @property
+    def permission_base_codename(self):
+        return get_transaction_permission_base_codename(self.request.data.get('type'))
 
     def get_queryset(self):
         return Transaction.objects.inFinancialYear()
-
-    def list(self, request, *ergs, **kwargs):
-        queryset = self.get_queryset()
-        serializer = TransactionListRetrieveSerializer(queryset, many=True)
-        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -52,8 +58,12 @@ class TransactionListCreate(generics.ListCreateAPIView):
 
 
 class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated, RPTypeDetail,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     serializer_class = TransactionCreateUpdateSerializer
+
+    @property
+    def permission_base_codename(self):
+        return get_transaction_permission_base_codename(self.get_object().type)
 
     def get_queryset(self):
         return Transaction.objects.inFinancialYear()
@@ -97,16 +107,23 @@ def newCodeForTransaction(request):
     return Response(codes)
 
 
-@api_view(['get'])
-def getTransactionByCode(request):
-    if 'code' not in request.GET:
-        return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-    if 'type' not in request.GET:
-        return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+class GetTransactionByCodeView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    serializer_class = TransactionCreateUpdateSerializer
 
-    code = request.GET['code']
-    type = request.GET['type']
-    queryset = Transaction.objects.inFinancialYear().all()
-    transaction = get_object_or_404(queryset, code=code, type=type)
-    serializer = TransactionListRetrieveSerializer(transaction)
-    return Response(serializer.data)
+    @property
+    def permission_base_codename(self):
+        return get_transaction_permission_base_codename(self.request.GET.get('type'))
+
+    def get(self, request):
+        if 'code' not in request.GET:
+            return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+        if 'type' not in request.GET:
+            return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+
+        code = request.GET['code']
+        type = request.GET['type']
+        queryset = Transaction.objects.inFinancialYear().all()
+        transaction = get_object_or_404(queryset, code=code, type=type)
+        serializer = TransactionListRetrieveSerializer(transaction)
+        return Response(serializer.data)
