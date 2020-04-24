@@ -35,8 +35,9 @@ class UserTest(MTestCase):
         self.client.logout()
 
     def test_delete_user(self):
+        self.client.force_authenticate(UserTest.get_user())
+
         user = UserTest.create_user()
-        self.client.force_authenticate(user)
 
         response = self.client.delete(reverse('destroy-user', args=[user.id]))
 

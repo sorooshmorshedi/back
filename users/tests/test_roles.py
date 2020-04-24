@@ -75,7 +75,6 @@ class RoleTest(MTestCase):
         response = self.client.get(reverse('list-permissions'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), Permission.objects.count())
 
         self.client.logout()
 

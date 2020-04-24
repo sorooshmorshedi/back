@@ -5,4 +5,4 @@ class SanadConfig(AppConfig):
     name = 'sanads'
 
     def ready(self):
-        pass
+        import sanads.signals
