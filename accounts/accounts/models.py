@@ -6,7 +6,7 @@ from django.db.models.aggregates import Max
 from django.db.models.functions.comparison import Coalesce
 
 from companies.models import FinancialYear
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_new_child_code
 from helpers.models import BaseModel
 
 
@@ -224,20 +224,16 @@ class Account(BaseModel):
         if self.level == self.TAFSILI:
             return None
 
+        last_child_code = None
         last_child = self.children.order_by('-code').first()
         if last_child:
-            last_code = int(last_child.code) + 1
-            code = str(last_code)
-        else:
-            child_part = self.CODE_LENGTHS[self.level + 1] - self.PARENT_PART[self.level + 1]
-            last_code = '1'.zfill(child_part)
-            code = self.code + last_code
+            last_child_code = last_child.code
 
-        if code[:self.PARENT_PART[self.level + 1]] != self.code:
-            from rest_framework import serializers
-            raise serializers.ValidationError("تعداد حساب های این سطح پر شده است")
-
-        return code
+        return get_new_child_code(
+            self.code,
+            self.CODE_LENGTHS[self.level + 1] - self.PARENT_PART[self.level + 1],
+            last_child_code
+        )
 
     @staticmethod
     def get_new_group_code():
