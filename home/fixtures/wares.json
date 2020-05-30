@@ -1194,7 +1194,7 @@
       "explanation": null,
       "isDisabled": false,
       "price": "500000",
-      "pricingType": 1,
+      "pricingType": "f",
       "minSale": null,
       "maxSale": null,
       "minInventory": null,

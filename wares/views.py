@@ -50,6 +50,15 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
         serializer = WareListRetrieveSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    def perform_create(self, serializer: WareSerializer) -> None:
+        category = serializer.validated_data.get('category')
+        code = category.get_new_child_code()
+        print(category.code, code)
+        serializer.save(
+            code=code,
+            financial_year=self.request.user.active_financial_year
+        )
+
 
 class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -81,10 +90,16 @@ class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_base_codename = 'wareLevel'
     serializer_class = WareLevelSerializer
 
-    def list(self, request, *ergs, **kwargs):
-        queryset = self.get_queryset().filter(level=0)
-        serializer = WareLevelSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def perform_create(self, serializer: WareLevelSerializer) -> None:
+        parent = serializer.validated_data.get('parent')
+        if parent:
+            code = parent.get_new_child_code()
+        else:
+            code = WareLevel.get_new_nature_code()
+        serializer.save(
+            code=code,
+            financial_year=self.request.user.active_financial_year
+        )
 
 
 class WareInventoryView(APIView):

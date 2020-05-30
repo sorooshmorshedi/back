@@ -35,9 +35,7 @@ class WareSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ware
         fields = '__all__'
-
-    def validate(self, data):
-        return data
+        read_only_fields = ('code', 'financial_year',)
 
 
 class WareListRetrieveSerializer(WareSerializer):
@@ -49,7 +47,6 @@ class WareListRetrieveSerializer(WareSerializer):
 
 
 class WareLevelSerializer(serializers.ModelSerializer):
-    children = serializers.ListSerializer(read_only=True, child=RecursiveField())
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj):
@@ -58,6 +55,4 @@ class WareLevelSerializer(serializers.ModelSerializer):
     class Meta:
         model = WareLevel
         fields = '__all__'
-
-
-
+        read_only_fields = ('code', 'financial_year',)

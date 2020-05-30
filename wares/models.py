@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_new_child_code
 from helpers.models import BaseModel
 
 
@@ -47,6 +47,8 @@ class Warehouse(BaseModel):
 
 
 class WareLevel(BaseModel):
+    CODE_LENGTHS = [1, 2, 2, 3]
+
     NATURE = 0
     GROUP = 1
     CATEGORY = 2
@@ -76,10 +78,35 @@ class WareLevel(BaseModel):
     def __str__(self):
         return str(self.pk) + ' - ' + self.name
 
+    def get_new_child_code(self):
+
+        last_child_code = None
+        last_child = self.wares.order_by('-code').first()
+        print(last_child)
+        if last_child:
+            last_child_code = last_child.code
+
+        return get_new_child_code(
+            self.code,
+            self.CODE_LENGTHS[self.level + 1],
+            last_child_code
+        )
+
+    @staticmethod
+    def get_new_nature_code():
+        code = WareLevel.objects.filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
+        code = int(code) + 1
+
+        if code >= 10:
+            from rest_framework import serializers
+            raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
+
+        return str(code)
+
 
 class Ware(BaseModel):
-    FIFO = 0
-    WEIGHTED_MEAN = 1
+    FIFO = 'f'
+    WEIGHTED_MEAN = 'wm'
     PRICING_TYPES = {
         (FIFO, 'فایفو'),
         (WEIGHTED_MEAN, 'میانگین موزون'),
@@ -92,7 +119,7 @@ class Ware(BaseModel):
     explanation = models.CharField(max_length=255, blank=True, null=True)
     isDisabled = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=24, decimal_places=0)
-    pricingType = models.IntegerField(choices=PRICING_TYPES, null=True, blank=True)
+    pricingType = models.CharField(max_length=2, choices=PRICING_TYPES)
     minSale = models.IntegerField(blank=True, null=True)
     maxSale = models.IntegerField(blank=True, null=True)
     minInventory = models.IntegerField(blank=True, null=True)
