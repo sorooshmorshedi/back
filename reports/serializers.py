@@ -7,4 +7,5 @@ class ExportVerifierSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExportVerifier
-        fields = '__all__'
+        read_only_fields = ('id', )
+        exclude = ('financial_year', )
