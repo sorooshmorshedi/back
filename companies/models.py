@@ -1,11 +1,15 @@
+from typing import Any, Tuple, Dict
+
 import jdatetime
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
+from helpers.models import BaseModel
 
-class Company(models.Model):
+
+class Company(BaseModel):
     name = models.CharField(unique=True, max_length=150)
     address1 = models.CharField(max_length=255, blank=True, null=True)
     address2 = models.CharField(max_length=255, blank=True, null=True)
@@ -30,7 +34,7 @@ class Company(models.Model):
         except (ObjectDoesNotExist, IndexError):
             return None
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         permissions = (
             ('get.company', 'مشاهده شرکت'),
             ('create.company', 'تعریف شرکت'),
@@ -38,8 +42,13 @@ class Company(models.Model):
             ('delete.company', 'حذف شرکت'),
         )
 
+    def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+        if self.usersActiveCompany.all().count() != 0:
+            raise ValidationError("این شرکت برای بعضی از کاربران فعال است")
+        return super().delete(using, keep_parents)
 
-class FinancialYear(models.Model):
+
+class FinancialYear(BaseModel):
     objects = models.Manager()
 
     name = models.CharField(unique=True, max_length=150)
@@ -64,7 +73,7 @@ class FinancialYear(models.Model):
     def __str__(self):
         return "{} {} ({})".format(self.company, self.name, self.id)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         permissions = (
             ('get.financialYear', 'مشاهده سال مالی'),
             ('create.financialYear', 'تعریف سال مالی'),
@@ -75,6 +84,11 @@ class FinancialYear(models.Model):
             ('close.financialYear', 'بستن سال مالی'),
             ('cancelClosing.financialYear', 'لغو بستن سال مالی'),
         )
+
+    def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+        if self.users.all().count() != 0:
+            raise ValidationError("این سال مالی برای بعضی از کاربران فعال است")
+        return super().delete(using, keep_parents)
 
     @property
     def is_closed(self):
