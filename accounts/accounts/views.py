@@ -56,6 +56,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         financial_year = request.user.active_financial_year
         for floatAccountGroup in syncFloatAccountGroups:
             relation = FloatAccountRelation.objects.create(
+                financial_year=request.user.active_financial_year,
                 floatAccount=instance,
                 floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
