@@ -34,6 +34,7 @@ class DefaultAccount(BaseModel):
     programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
+        backward_financial_year = True
         permissions = (
             ('get.defaultAccount', 'مشاهده حساب های پیشفرض'),
             ('create.defaultAccount', 'تعریف حساب پیشفرض'),

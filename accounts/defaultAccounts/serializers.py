@@ -8,8 +8,8 @@ from accounts.defaultAccounts.models import DefaultAccount
 class DefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultAccount
-        fields = '__all__'
-        read_only_fields = ('programingName',)
+        read_only_fields = ('id', 'programingName',)
+        exclude = ('financial_year', )
 
     def validate(self, data):
         AccountValidator.tafsili(data)
