@@ -32,6 +32,7 @@ class Expense(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     class Meta(BaseModel.Meta):
+        backward_financial_year = True
         permissions = (
             ('get.expense', 'مشاهده هزینه فاکتور'),
             ('create.expense', 'تعریف هزینه  فاکتور'),
