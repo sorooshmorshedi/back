@@ -22,7 +22,7 @@ class DefaultAccount(BaseModel):
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='financialYear')
-    name = models.CharField(unique=True, max_length=150)
+    name = models.CharField(max_length=150)
     explanation = models.TextField(null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
