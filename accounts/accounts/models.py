@@ -118,8 +118,7 @@ class Account(BaseModel):
         (SELLER_PERSON, 'فروشنده'),
     )
 
-    CODE_LENGTHS = [1, 3, 5, 9]
-    PARENT_PART = [0, 1, 3, 5]
+    CODE_LENGTHS = [1, 2, 2, 4]
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accounts')
     account_type = models.CharField(max_length=2, choices=ACCOUNT_TYPES, default=OTHER)
@@ -231,20 +230,20 @@ class Account(BaseModel):
 
         return get_new_child_code(
             self.code,
-            self.CODE_LENGTHS[self.level + 1] - self.PARENT_PART[self.level + 1],
+            self.CODE_LENGTHS[self.level + 1],
             last_child_code
         )
 
     @staticmethod
     def get_new_group_code():
-        code = \
-            Account.objects.filter(level=Account.GROUP).aggregate(Max('code'))[
-                'code__max']
+        code = Account.objects.filter(level=Account.GROUP).aggregate(Max('code'))['code__max']
         code = int(code) + 1
 
         if code >= 10:
             from rest_framework import serializers
             raise serializers.ValidationError("تعداد حساب های این سطح پر شده است")
+
+        return str(code)
 
     @staticmethod
     def get_inventory_account(user):
