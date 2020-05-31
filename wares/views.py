@@ -21,6 +21,9 @@ class WarehouseListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_base_codename = 'warehouse'
     serializer_class = WarehouseSerializer
 
+    def perform_create(self, serializer: WarehouseSerializer) -> None:
+        serializer.save(financial_year=self.request.user.active_financial_year)
+
 
 class WarehouseDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -38,6 +41,9 @@ class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'unit'
     serializer_class = UnitSerializer
+
+    def perform_create(self, serializer: UnitSerializer) -> None:
+        serializer.save(financial_year=self.request.user.active_financial_year)
 
 
 class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
