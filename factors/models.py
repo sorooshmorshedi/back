@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
-from accounts.accounts.models import Account, FloatAccount
+from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
 from helpers.models import BaseModel
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -177,25 +177,27 @@ class Factor(BaseModel):
 
     @property
     def remain(self):
-        account_remain = self.account.get_remain()
+        bed, bes = AccountBalance.get_bed_bes(self.account, self.floatAccount, self.costCenter)
+        remain_value = abs(bed - bes)
+        remain_type = "bed" if bed > bes else "bes"
         if self.type in ('buy', 'backFromSale'):
             after_factor_title = 'مبلغ قابل پرداخت'
-            if account_remain['remain_type'] == 'bes':
-                before_factor = self.totalSum + account_remain['value']
+            if remain_type == 'bes':
+                before_factor = self.totalSum + remain_value
                 sign = '+'
                 before_factor_title = 'مانده بستانکار'
             else:
-                before_factor = self.totalSum - account_remain['value']
+                before_factor = self.totalSum - remain_value
                 sign = '-'
                 before_factor_title = 'مانده بدهکار'
         else:
             after_factor_title = 'مبلغ قابل دریافت'
-            if account_remain['remain_type'] == 'bes':
-                before_factor = self.totalSum - account_remain['value']
+            if remain_type == 'bes':
+                before_factor = self.totalSum - remain_value
                 sign = '-'
                 before_factor_title = 'مانده بستانکار'
             else:
-                before_factor = self.totalSum + account_remain['value']
+                before_factor = self.totalSum + remain_value
                 sign = '+'
                 before_factor_title = 'مانده بدهکار'
 
@@ -203,7 +205,7 @@ class Factor(BaseModel):
             'before_factor_title': before_factor_title,
             'before_factor': abs(before_factor),
             'after_factor_title': after_factor_title,
-            'after_factor': account_remain['value'],
+            'after_factor': remain_value,
             'sign': sign
         }
         return res

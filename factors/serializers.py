@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Max
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
@@ -133,6 +134,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactorPayment
         fields = '__all__'
+        read_only_fields = ('financial_year', )
 
 
 class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
