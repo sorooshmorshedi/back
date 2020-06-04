@@ -14,13 +14,21 @@ class PermissionListView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request):
-        queryset = Permission.objects.all()
-        excludes = ('auth', 'admin', 'authtoken', 'sessions')
+        queryset = Permission.objects.all().order_by('pk')
+        excludes = ('auth', 'admin', 'authtoken', 'sessions', 'contenttypes')
 
         for app_label in excludes:
             queryset = queryset.exclude(content_type__app_label=app_label)
 
-        return Response(PermissionListSerializer(queryset, many=True).data)
+        groups = {}
+        for permission in queryset:
+            model = permission.content_type.model
+            if model not in groups:
+                groups[model] = []
+            groups[model].append(PermissionListSerializer(permission).data)
+
+        return Response(groups)
+        # return Response(PermissionListSerializer(queryset, many=True).data)
 
 
 class RoleListView(generics.ListAPIView):
