@@ -3,7 +3,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from companies.serializers import FinancialYearSerializer, CompanySerializer
-from users.models import Role
+from users.models import Role, User
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -19,6 +19,10 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_company = CompanySerializer()
     active_financial_year = FinancialYearSerializer()
     roles = RoleSerializer(many=True)
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj: User):
+        return obj.first_name + ' ' + obj.last_name
 
     class Meta:
         model = get_user_model()
