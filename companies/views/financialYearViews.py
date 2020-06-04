@@ -280,7 +280,7 @@ class MoveFinancialYearView(APIView):
     sanad = None
 
     def post(self, request):
-        target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
+        target_financial_year = get_object_or_404(FinancialYear, pk=request.data.get('target_financial_year'))
 
         self.sanad = target_financial_year.get_opening_sanad()
 
