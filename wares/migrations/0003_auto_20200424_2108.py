@@ -2,10 +2,6 @@
 
 from django.db import migrations, models
 
-from wares.models import Ware
-
-Ware.objects.update(pricingType=0)
-
 
 class Migration(migrations.Migration):
     dependencies = [
