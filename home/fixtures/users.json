@@ -13,6 +13,7 @@
       "is_staff": true,
       "is_active": true,
       "date_joined": "2019-03-18T07:45:57.870Z",
+      "phone": "09876543210",
       "active_company": 1,
       "active_financial_year": 1,
       "groups": [],

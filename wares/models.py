@@ -125,8 +125,8 @@ class Ware(BaseModel):
     minInventory = models.IntegerField(blank=True, null=True)
     maxInventory = models.IntegerField(blank=True, null=True)
 
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)

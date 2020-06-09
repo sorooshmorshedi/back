@@ -35,7 +35,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'password', 'roles')
+        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'password', 'roles', 'is_active')
 
     def create(self, validated_data):
         user = super().create(validated_data)
@@ -50,7 +50,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'roles')
+        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'roles', 'is_active')
 
 
 class ContentTypeSerializer(serializers.ModelSerializer):

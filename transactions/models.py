@@ -31,8 +31,8 @@ class Transaction(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.CASCADE, related_name='transaction', blank=True, null=True)
 
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     type = models.CharField(max_length=20, choices=TYPES)
 

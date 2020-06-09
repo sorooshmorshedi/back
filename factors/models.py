@@ -82,8 +82,8 @@ class Factor(BaseModel):
     date = jmodels.jDateField()
     time = models.TimeField(auto_now=True)
 
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
@@ -416,8 +416,8 @@ class FactorItem(BaseModel):
 class Transfer(BaseModel):
     code = models.IntegerField()
     date = jmodels.jDateField()
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     input_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='input_transfer')
     output_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='output_transfer')

@@ -28,8 +28,8 @@ class Sanad(BaseModel):
     code = models.IntegerField(verbose_name="شماره سند")
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
-    created_at = jmodels.jDateField(auto_now=True)
-    updated_at = jmodels.jDateField(auto_now_add=True)
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
     type = models.CharField(max_length=20, choices=SANAD_TYPES)
     createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default=MANUAL, verbose_name="نوع ثبت")
 
