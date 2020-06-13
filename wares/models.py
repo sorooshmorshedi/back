@@ -81,8 +81,11 @@ class WareLevel(BaseModel):
     def get_new_child_code(self):
 
         last_child_code = None
-        last_child = self.wares.order_by('-code').first()
-        print(last_child)
+        if self.level == WareLevel.CATEGORY:
+            last_child = self.wares.order_by('-code').first()
+        else:
+            last_child = self.children.order_by('-code').first()
+
         if last_child:
             last_child_code = last_child.code
 
