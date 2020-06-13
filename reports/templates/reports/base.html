@@ -2,7 +2,7 @@
 
 <html>
 
-  <head>
+<head>
     {% load staticfiles %}
     <title>MMD page</title>
     <link rel="stylesheet"
@@ -16,22 +16,25 @@
 
     <meta charset="UTF-8">
 
-  </head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-  <body
-          {% if print_document %}
-          onload="print();close();"
-          {% endif %}
-  >
-    <div class="container-fluid rtl">
 
-      {% block content %}
-      {% endblock %}
+</head>
 
-    </div>
-  </body>
+<body
+        {% if print_document %}
+            onload="print();close();"
+        {% endif %}
+>
+<div class="container-fluid rtl">
 
-  <script>
-  </script>
+    {% block content %}
+    {% endblock %}
+
+</div>
+</body>
+
+<script>
+</script>
 
 </html>
