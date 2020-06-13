@@ -5,4 +5,7 @@ register = template.Library()
 
 @register.filter(is_safe=True)
 def money(value):
-    return '{:,}'.format(value)
+    try:
+        return '{:,}'.format(value)
+    except ValueError:
+        return value
