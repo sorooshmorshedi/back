@@ -7,7 +7,7 @@ from django.db.models.functions.comparison import Coalesce
 
 from companies.models import FinancialYear
 from helpers.functions import get_current_user, get_new_child_code
-from helpers.models import BaseModel
+from helpers.models import BaseModel, PHONE, MELLI_CODE, POSTAL_CODE
 
 
 class FloatAccountGroup(BaseModel):
@@ -150,8 +150,8 @@ class Account(BaseModel):
     person_type = models.CharField(choices=PERSON_TYPES, max_length=10, default="", blank="true")
     phone_1 = models.CharField(max_length=20, default="", blank=True)
     phone_2 = models.CharField(max_length=20, default="", blank=True)
-    mobile = models.CharField(max_length=20, default="", blank=True)
-    melli_code = models.CharField(max_length=20, default="", blank=True)
+    mobile = PHONE(null=True, blank=True)
+    melli_code = MELLI_CODE(null=True, blank=True)
     website = models.URLField(default="", blank=True)
     fax = models.CharField(max_length=20, default="", blank=True)
     email = models.EmailField(default="", blank=True)
@@ -159,7 +159,7 @@ class Account(BaseModel):
     address_2 = models.CharField(max_length=255, default="", blank=True)
     city = models.CharField(max_length=255, default="", blank=True)
     province = models.CharField(max_length=255, default="", blank=True)
-    postal_code = models.CharField(max_length=20, default="", blank=True)
+    postal_code = POSTAL_CODE(null=True, blank=True)
     account_number_1 = models.CharField(max_length=50, default="", blank=True)
     account_number_2 = models.CharField(max_length=50, default="", blank=True)
     eghtesadi_code = models.CharField(max_length=50, default="", blank=True)

@@ -20,7 +20,7 @@ class Company(BaseModel):
     fax = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
-    postal_code = POSTAL_CODE
+    postal_code = POSTAL_CODE(blank=True, null=True)
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
     explanation = EXPLANATION

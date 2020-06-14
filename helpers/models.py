@@ -1,3 +1,6 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinLengthValidator
 from django.db import models
 import django.db.models.options as options
@@ -32,13 +35,40 @@ class BaseModel(models.Model):
     objects = BaseManager()
 
 
-POSTAL_CODE = models.CharField(
-    max_length=10,
-    blank=True,
-    null=True,
-    validators=[RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')]
-)
+def POSTAL_CODE(**kwargs):
+    return models.CharField(
+        **kwargs,
+        max_length=10,
+        validators=[RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')]
+    )
+
+
+def PHONE(**kwargs):
+    return models.CharField(
+        **kwargs,
+        max_length=11,
+        validators=[RegexValidator(regex='^.{11}$', message='طول شماره موبایل باید 11 رقم باشد', code='nomatch')]
+    )
+
 
 EXPLANATION = models.CharField(max_length=255, blank=True, null=True)
 
-EXPLANATION = models.CharField(max_length=255, blank=True, null=True)
+
+def is_valid_melli_code(value):
+    if not re.search(r'^\d{10}$', value):
+        is_valid = False
+    else:
+        check = int(value[9])
+        s = sum([int(value[x]) * (10 - x) for x in range(9)]) % 11
+        is_valid = (2 > s == check) or (s >= 2 and check + s == 11)
+
+    if not is_valid:
+        raise ValidationError("کد ملی وارد شده صحیح نیست")
+
+
+def MELLI_CODE(**kwargs):
+    return models.CharField(
+        **kwargs,
+        max_length=10,
+        validators=[is_valid_melli_code]
+    )
