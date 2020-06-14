@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator, MinLengthValidator
 from django.db import models
 import django.db.models.options as options
 
@@ -29,3 +30,15 @@ class BaseModel(models.Model):
         backward_financial_year = False
 
     objects = BaseManager()
+
+
+POSTAL_CODE = models.CharField(
+    max_length=10,
+    blank=True,
+    null=True,
+    validators=[RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')]
+)
+
+EXPLANATION = models.CharField(max_length=255, blank=True, null=True)
+
+EXPLANATION = models.CharField(max_length=255, blank=True, null=True)

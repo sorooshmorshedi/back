@@ -13,7 +13,7 @@ class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
         fields = '__all__'
-        read_only_fields = ('financial_year', )
+        read_only_fields = ('financial_year',)
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warehouse
         fields = '__all__'
-        read_only_fields = ('financial_year', )
+        read_only_fields = ('financial_year',)
 
 
 class WareSerializer(serializers.ModelSerializer):

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from helpers.models import BaseModel
+from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION
 
 
 class Company(BaseModel):
@@ -20,9 +20,10 @@ class Company(BaseModel):
     fax = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
-    postal_code = models.CharField(max_length=10, blank=True, null=True)
+    postal_code = POSTAL_CODE
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
+    explanation = EXPLANATION
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)
