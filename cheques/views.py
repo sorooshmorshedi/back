@@ -45,6 +45,7 @@ class ChequebookModelView(viewsets.ModelViewSet):
         super(ChequebookModelView, self).perform_destroy(instance)
 
 
+"""
 class ChequebookByPositionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'chequebook'
@@ -73,6 +74,7 @@ class ChequebookByPositionApiView(APIView):
 
         serializer = ChequebookListRetrieveSerializer(chequebook)
         return Response(serializer.data)
+"""
 
 
 class SubmitChequeApiView(APIView):
