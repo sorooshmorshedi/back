@@ -80,7 +80,7 @@ class Factor(BaseModel):
     bijak = models.IntegerField(null=True, blank=True)
 
     date = jmodels.jDateField()
-    time = models.TimeField(auto_now=True)
+    time = models.TimeField()
 
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
