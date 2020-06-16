@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from rest_framework_recursive.fields import RecursiveField
-
-from wares.models import Unit, Warehouse, WareLevel, Ware
+from wares.models import Unit, Warehouse, WareLevel, Ware, WareInventory
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -40,9 +38,18 @@ class WareSerializer(serializers.ModelSerializer):
         read_only_fields = ('code', 'financial_year',)
 
 
+class WareInventoryListSerializer(serializers.ModelSerializer):
+    warehouse = WarehouseSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = WareInventory
+        fields = '__all__'
+
+
 class WareListRetrieveSerializer(WareSerializer):
     unit = UnitSerializer(read_only=True)
     warehouse = WarehouseSerializer(read_only=True)
+    inventory = WareInventoryListSerializer(read_only=True, many=True)
 
     class Meta(WareSerializer.Meta):
         pass

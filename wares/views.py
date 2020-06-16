@@ -1,13 +1,8 @@
-from django.db.models import Count, Q, F
-from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from factors.helpers import getInventoryCount
 from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
@@ -106,40 +101,3 @@ class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
             code=code,
             financial_year=self.request.user.active_financial_year
         )
-
-
-class WareInventoryView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'get.wareInventory'
-
-    def get(self, request):
-        res = []
-        data = request.GET
-        ware = data.get('ware', None)
-        if not ware:
-            return Response(['Enter ware please'], status.HTTP_400_BAD_REQUEST)
-
-        from factors.models import Factor
-        qs = Warehouse.objects.inFinancialYear() \
-            .annotate(
-            input_count=Coalesce(Sum('factorItems__count', default=0,
-                                     filter=Q(factorItems__factor__type__in=Factor.INPUT_GROUP,
-                                              factorItems__ware=ware,
-                                              factorItems__factor__is_definite=True)), 0),
-            output_count=Coalesce(Sum('factorItems__count', default=0,
-                                      filter=Q(factorItems__factor__type__in=Factor.OUTPUT_GROUP,
-                                               factorItems__ware=ware,
-                                               factorItems__factor__is_definite=True)), 0),
-            remain_count=F('input_count') - F('output_count')
-        )
-
-        for warehouse in qs.all():
-            res.append({
-                'id': warehouse.id,
-                'name': warehouse.name,
-                'input_count': warehouse.input_count,
-                'output_count': warehouse.output_count,
-                'remain_count': warehouse.remain_count,
-            })
-
-        return Response(res, status.HTTP_200_OK)
