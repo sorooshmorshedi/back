@@ -23,6 +23,7 @@ class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
         financial_year = request.user.active_financial_year
         for floatAccountGroup in syncFloatAccountGroups:
             relation = FloatAccountRelation.objects.create(
+                financial_year=request.user.active_financial_year,
                 floatAccount=instance,
                 floatAccountGroup=FloatAccountGroup.objects.get(pk=floatAccountGroup)
             )
@@ -90,7 +91,7 @@ class FloatAccountGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear)
 
 
 class AccountTypeList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
     queryset = AccountType.objects.all()
     serializer_class = AccountTypeSerializer
 
