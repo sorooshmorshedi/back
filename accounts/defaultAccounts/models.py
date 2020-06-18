@@ -11,19 +11,21 @@ class DefaultAccount(BaseModel):
     RECEIVE_AND_PAYMENT = 'receiveAndPayment'
     FACTOR = 'factor'
     CLOSE_ACCOUNTS = 'closeAccounts'
-    NONE = 'none'
+    OTHER = 'other'
     USAGES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
         (RECEIVE_AND_PAYMENT, 'دریافت و پرداخت'),
         (FACTOR, 'فاکتور'),
         (CLOSE_ACCOUNTS, 'بستن حساب ها'),
-        (NONE, 'هیچ کدام')
+        (OTHER, 'دیگر')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='financialYear')
     name = models.CharField(max_length=150)
     explanation = models.TextField(null=True, blank=True)
+
+    account_level = models.IntegerField(choices=Account.ACCOUNT_LEVELS, default=Account.TAFSILI)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
                                      blank=True)
@@ -31,7 +33,7 @@ class DefaultAccount(BaseModel):
                                    blank=True, null=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
-    programingName = models.CharField(unique=True, max_length=50, null=True, blank=True)
+    nickname = models.CharField(unique=True, max_length=50, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -43,8 +45,12 @@ class DefaultAccount(BaseModel):
         )
 
     def __str__(self):
-        return "{} {}".format(self.name, self.programingName)
+        return "{} {}".format(self.name, self.nickname)
+
+    @staticmethod
+    def get(nickname):
+        return DefaultAccount.objects.get(nickname=nickname)
 
 
 def getDefaultAccount(pn):
-    return DefaultAccount.objects.get(programingName=pn)
+    return DefaultAccount.objects.get(nickname=pn)

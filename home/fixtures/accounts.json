@@ -244,7 +244,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0641\u0631\u0648\u0634",
-      "programingName": "sale",
+      "nickname": "sale",
       "nature": "bes",
       "usage": "incomeStatement"
     }
@@ -255,7 +255,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0628\u0631\u06af\u0634\u062a \u0627\u0632 \u0641\u0631\u0648\u0634 \u0648 \u062a\u062e\u0641\u06cc\u0641\u0627\u062a",
-      "programingName": "backFromSaleAndDiscounts",
+      "nickname": "backFromSaleAndDiscounts",
       "nature": "bed",
       "usage": "incomeStatement"
     }
@@ -266,7 +266,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0631\u0622\u0645\u062f \u0647\u0627\u06cc \u0639\u0645\u0644\u06cc\u0627\u062a\u06cc",
-      "programingName": "operatingIncomes",
+      "nickname": "operatingIncomes",
       "nature": "bes",
       "usage": "incomeStatement"
     }
@@ -277,7 +277,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0628\u0647\u0627\u06cc \u062a\u0645\u0627\u0645 \u0634\u062f\u0647 \u06a9\u0627\u0644\u0627\u06cc \u0641\u0631\u0648\u0634 \u0631\u0641\u062a\u0647 \u0648 \u062e\u062f\u0645\u0627\u062a \u0627\u0631\u0627\u0626\u0647 \u0634\u062f\u0647",
-      "programingName": "soldProductValue",
+      "nickname": "soldProductValue",
       "nature": "bed",
       "usage": "incomeStatement"
     }
@@ -288,7 +288,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0647\u0632\u06cc\u0646\u0647 \u0647\u0627\u06cc \u0639\u0645\u0644\u06cc\u0627\u062a\u06cc",
-      "programingName": "operatingCosts",
+      "nickname": "operatingCosts",
       "nature": "bed",
       "usage": "incomeStatement"
     }
@@ -299,7 +299,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0631\u0622\u0645\u062f \u063a\u06cc\u0631 \u0639\u0645\u0644\u06cc\u0627\u062a\u06cc",
-      "programingName": "nonOperatingIncomes",
+      "nickname": "nonOperatingIncomes",
       "nature": "bes",
       "usage": "incomeStatement"
     }
@@ -310,7 +310,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0647\u0632\u06cc\u0646\u0647 \u0647\u0627\u06cc \u063a\u06cc\u0631 \u0639\u0645\u0644\u06cc\u0627\u062a\u06cc",
-      "programingName": "nonOperatingCosts",
+      "nickname": "nonOperatingCosts",
       "nature": "bed",
       "usage": "incomeStatement"
     }
@@ -321,7 +321,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0646\u0642\u062f \u0648 \u0628\u0627\u0646\u06a9",
-      "programingName": "cacheAndBank",
+      "nickname": "cacheAndBank",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -332,7 +332,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0631\u0645\u0627\u06cc\u0647 \u06af\u0630\u0627\u0631\u06cc \u0647\u0627\u06cc \u06a9\u0648\u062a\u0627\u0647 \u0645\u062f\u062a",
-      "programingName": "shortTimeInvestments",
+      "nickname": "shortTimeInvestments",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -343,7 +343,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062d\u0633\u0627\u0628 \u0647\u0627 \u0648 \u0627\u0633\u0646\u0627\u062f \u062f\u0631\u06cc\u0627\u0641\u062a\u0646\u06cc \u062a\u062c\u0627\u0631\u06cc",
-      "programingName": "commercialAccountsAndReceivables",
+      "nickname": "commercialAccountsAndReceivables",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -354,7 +354,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0627\u06cc\u0631 \u062d\u0633\u0627\u0628 \u0647\u0627\u06cc \u0648 \u0627\u0633\u0646\u0627\u062f \u062f\u0631\u06cc\u0627\u0641\u062a\u0646\u06cc",
-      "programingName": "otherAccountsAndReceivables",
+      "nickname": "otherAccountsAndReceivables",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -365,7 +365,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0645\u0648\u062c\u0648\u062f\u06cc \u0645\u0648\u0627\u062f \u0648 \u06a9\u0627\u0644\u0627",
-      "programingName": "inventories",
+      "nickname": "inventories",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -376,7 +376,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0641\u0627\u0631\u0634\u0627\u062a \u0648 \u067e\u06cc\u0634 \u067e\u0631\u062f\u0627\u062e\u062a \u0647\u0627",
-      "programingName": "ordersAndPrepayments",
+      "nickname": "ordersAndPrepayments",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -387,7 +387,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0627\u0631\u0627\u06cc\u06cc \u0647\u0627\u06cc \u062b\u0627\u0628\u062a \u0645\u0634\u0647\u0648\u062f",
-      "programingName": "evidentFixedAssets",
+      "nickname": "evidentFixedAssets",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -398,7 +398,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0627\u0631\u0627\u06cc\u06cc \u0647\u0627\u06cc \u0646\u0627 \u0645\u0634\u0647\u0648\u062f",
-      "programingName": "notEvidentAssets",
+      "nickname": "notEvidentAssets",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -409,7 +409,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0631\u0645\u0627\u06cc\u0647 \u06af\u0630\u0627\u0631\u06cc \u0647\u0627\u06cc \u0628\u0644\u0646\u062f \u0645\u062f\u062a",
-      "programingName": "longTimeInvestments",
+      "nickname": "longTimeInvestments",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -420,7 +420,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0627\u06cc\u0631 \u062f\u0627\u0631\u0627\u06cc\u06cc \u0647\u0627",
-      "programingName": "otherAssets",
+      "nickname": "otherAssets",
       "nature": "bed",
       "usage": "balanceSheet"
     }
@@ -431,7 +431,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062d\u0633\u0627\u0628 \u0647\u0627 \u0648 \u0627\u0633\u0646\u0627\u062f \u067e\u0631\u062f\u0627\u062e\u062a\u0646\u06cc \u062a\u062c\u0627\u0631\u06cc",
-      "programingName": "businessAccountsAndPayableDocuments",
+      "nickname": "businessAccountsAndPayableDocuments",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -442,7 +442,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0627\u06cc\u0631 \u062d\u0633\u0627\u0628 \u0647\u0627 \u0648 \u0627\u0633\u0646\u0627\u062f \u067e\u0631\u062f\u0627\u062e\u062a\u06cc",
-      "programingName": "otherAccountsAndPayableDocuments",
+      "nickname": "otherAccountsAndPayableDocuments",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -453,7 +453,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u067e\u06cc\u0634 \u062f\u0631\u06cc\u0627\u0641\u062a \u0647\u0627",
-      "programingName": "prepayments",
+      "nickname": "prepayments",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -464,7 +464,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0627\u0646\u0648\u0627\u0639 \u0630\u062e\u06cc\u0631\u0647 \u0647\u0627",
-      "programingName": "saveTypes",
+      "nickname": "saveTypes",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -475,7 +475,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0648\u062f \u0633\u0647\u0627\u0645 \u067e\u0631\u062f\u0627\u062e\u062a\u06cc",
-      "programingName": "paidDividends",
+      "nickname": "paidDividends",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -486,7 +486,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062a\u0633\u0647\u06cc\u0644\u0627\u062a \u0645\u0627\u0644\u06cc \u067e\u0631\u062f\u0627\u062e\u062a\u0646\u06cc",
-      "programingName": "receivableFunds",
+      "nickname": "receivableFunds",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -497,7 +497,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062d\u0633\u0627\u0628 \u0647\u0627 \u0648 \u0627\u0633\u0646\u0627\u062f \u067e\u0631\u062f\u0627\u062e\u062a\u0646\u06cc \u0628\u0644\u0646\u062f \u0645\u062f\u062a",
-      "programingName": "longtermAccountsAndPayableDocuments",
+      "nickname": "longtermAccountsAndPayableDocuments",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -508,7 +508,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062a\u0633\u0647\u06cc\u0644\u0627\u062a \u0645\u0627\u0644\u06cc \u067e\u0631\u062f\u0627\u062e\u062a\u0646\u06cc \u0628\u0644\u0646\u062f \u0645\u062f\u062a",
-      "programingName": "longtermReceivableFunds",
+      "nickname": "longtermReceivableFunds",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -519,7 +519,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0630\u062e\u06cc\u0631\u0647 \u0645\u0632\u0627\u06cc\u0627\u06cc \u067e\u0627\u06cc\u0627\u0646 \u062e\u062f\u0645\u062a \u06a9\u0627\u0631\u06a9\u0646\u0627\u0646",
-      "programingName": "savedEndingServiceBenefits",
+      "nickname": "savedEndingServiceBenefits",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -530,7 +530,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0631\u0645\u0627\u06cc\u0647",
-      "programingName": "fund",
+      "nickname": "fund",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -541,7 +541,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0627\u0646\u062f\u0648\u062e\u062a\u0647 \u0647\u0627",
-      "programingName": "savings",
+      "nickname": "savings",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -552,7 +552,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0648\u062f (\u0632\u06cc\u0627\u0646) \u0627\u0646\u0628\u0627\u0634\u062a\u0647",
-      "programingName": "accumulatedProfit",
+      "nickname": "accumulatedProfit",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -563,7 +563,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0628\u062f\u0648\u0646 \u0646\u0648\u0639",
-      "programingName": "noType",
+      "nickname": "noType",
       "nature": "non",
       "usage": "none"
     }
@@ -574,7 +574,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0627\u0633\u062a\u0647\u0644\u0627\u06a9 \u0627\u0646\u0628\u0627\u0634\u062a\u0647",
-      "programingName": "accumulatedDepreciation",
+      "nickname": "accumulatedDepreciation",
       "nature": "bes",
       "usage": "balanceSheet"
     }
@@ -585,7 +585,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062d\u0633\u0627\u0628\u0647\u0627\u06cc \u0627\u0646\u062a\u0638\u0627\u0645\u06cc \u0648 \u06a9\u0646\u062a\u0631\u0644\u06cc",
-      "programingName": "controlAccounts",
+      "nickname": "controlAccounts",
       "nature": "non",
       "usage": "none"
     }
@@ -20806,7 +20806,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "receive",
-      "programingName": "receivedCheque"
+      "nickname": "receivedCheque"
     }
   },
   {
@@ -20820,7 +20820,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "payment",
-      "programingName": "paidCheque"
+      "nickname": "paidCheque"
     }
   },
   {
@@ -20833,8 +20833,8 @@
       "account": 234,
       "floatAccount": null,
       "costCenter": null,
-      "usage": "none",
-      "programingName": "inFlowDocuments"
+      "usage": "other",
+      "nickname": "inFlowDocuments"
     }
   },
   {
@@ -20848,7 +20848,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "receiveAndPayment",
-      "programingName": "bank"
+      "nickname": "bank"
     }
   },
   {
@@ -20862,7 +20862,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "receiveAndPayment",
-      "programingName": "cash"
+      "nickname": "cash"
     }
   },
   {
@@ -20876,7 +20876,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "buy"
+      "nickname": "buy"
     }
   },
   {
@@ -20890,7 +20890,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "backFromBuy"
+      "nickname": "backFromBuy"
     }
   },
   {
@@ -20904,7 +20904,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "buyDiscount"
+      "nickname": "buyDiscount"
     }
   },
   {
@@ -20918,7 +20918,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "sale"
+      "nickname": "sale"
     }
   },
   {
@@ -20932,7 +20932,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "backFromSale"
+      "nickname": "backFromSale"
     }
   },
   {
@@ -20946,7 +20946,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "saleDiscount"
+      "nickname": "saleDiscount"
     }
   },
   {
@@ -20960,7 +20960,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "tax"
+      "nickname": "tax"
     }
   },
   {
@@ -20974,7 +20974,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": "currentEarnings"
+      "nickname": "currentEarnings"
     }
   },
   {
@@ -20988,7 +20988,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": "retainedEarnings"
+      "nickname": "retainedEarnings"
     }
   },
   {
@@ -21002,7 +21002,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": "closing"
+      "nickname": "closing"
     }
   },
   {
@@ -21016,7 +21016,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "factor",
-      "programingName": "profitAndLossFromBuying"
+      "nickname": "profitAndLossFromBuying"
     }
   },
   {
@@ -21030,7 +21030,7 @@
       "floatAccount": 7,
       "costCenter": null,
       "usage": "receiveAndPayment",
-      "programingName": null
+      "nickname": null
     }
   },
   {
@@ -21044,7 +21044,7 @@
       "floatAccount": 7,
       "costCenter": null,
       "usage": "factor",
-      "programingName": null
+      "nickname": null
     }
   },
   {
@@ -21058,7 +21058,7 @@
       "floatAccount": 7,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": null
+      "nickname": null
     }
   },
   {
@@ -21072,7 +21072,7 @@
       "floatAccount": 7,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": null
+      "nickname": null
     }
   },
   {
@@ -21086,7 +21086,7 @@
       "floatAccount": 7,
       "costCenter": 12,
       "usage": "factor",
-      "programingName": null
+      "nickname": null
     }
   },
   {
@@ -21100,7 +21100,77 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "closeAccounts",
-      "programingName": "opening"
+      "nickname": "opening"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 23,
+    "fields": {
+      "financial_year": 1,
+      "name": "معین بانک",
+      "explanation": "",
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "other",
+      "nickname": "bankParent"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 24,
+    "fields": {
+      "financial_year": 1,
+      "name": "معین شخص حقیقی خریدار",
+      "explanation": "",
+      "account": 65,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "other",
+      "nickname": "realBuyerParent"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 25,
+    "fields": {
+      "financial_year": 1,
+      "name": "معین شخص حقوقی خریدار",
+      "explanation": "",
+      "account": 66,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "other",
+      "nickname": "notRealBuyerParent"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 26,
+    "fields": {
+      "financial_year": 1,
+      "name": "معین شخص حقیقی فروشنده",
+      "explanation": "",
+      "account": 115,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "other",
+      "nickname": "realSellerParent"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 27,
+    "fields": {
+      "financial_year": 1,
+      "name": "معین شخص حقوقی فروشنده",
+      "explanation": "",
+      "account": 493,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "other",
+      "nickname": "notRealSellerParent"
     }
   }
 ]

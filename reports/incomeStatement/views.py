@@ -12,7 +12,7 @@ from reports.filters import get_account_sanad_items_filter
 
 
 def getType(pName):
-    return list(filter(lambda at: at.programingName == pName, getType.accountTypes))[0]
+    return list(filter(lambda at: at.nickname == pName, getType.accountTypes))[0]
 
 
 def getAccounts(accountType, allAccounts):
@@ -49,12 +49,12 @@ def getSerialized(pName, allAccounts):
     prefix = None
     prefixColor = None
 
-    if at.programingName in subPrefix:
+    if at.nickname in subPrefix:
         hasPrefix = True
         prefix = 'کسر می شود:'
         prefixColor = 'red'
 
-    if at.programingName in addPrefix:
+    if at.nickname in addPrefix:
         hasPrefix = True
         prefix = 'اضافه می شود:'
         prefixColor = 'blue'
@@ -63,7 +63,7 @@ def getSerialized(pName, allAccounts):
         'type': {
             'name': at.name,
             'hasPrefix': hasPrefix,
-            'pName': at.programingName,
+            'pName': at.nickname,
             'prefix': prefix,
             'prefixColor': prefixColor
         },

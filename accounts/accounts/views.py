@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from accounts.accounts.models import FloatAccountRelation
 from accounts.accounts.serializers import *
+from accounts.defaultAccounts.models import DefaultAccount
 from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
@@ -129,25 +130,24 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
             code = parent.get_new_child_code()
             level = parent.level + 1
         else:
-            parent_code = None
+            parent = None
             if account_type == Account.BANK:
-                parent_code = "10101"
+                parent = DefaultAccount.get("bankParent").account
             elif account_type == Account.PERSON:
                 person_type = serializer.validated_data.get('person_type')
                 is_real = serializer.validated_data.get('is_real')
                 if person_type == Account.BUYER_PERSON:
                     if is_real:
-                        parent_code = '10301'
+                        parent = DefaultAccount.get("realBuyerParent").account
                     else:
-                        parent_code = '10302'
+                        parent = DefaultAccount.get("notRealBuyerParent").account
                 else:
                     if is_real:
-                        parent_code = '30101'
+                        parent = DefaultAccount.get("realSellerParent").account
                     else:
-                        parent_code = '30102'
+                        parent = DefaultAccount.get("notRealSellerParent").account
 
-            if parent_code:
-                parent = Account.objects.get(code=parent_code)
+            if parent:
                 code = parent.get_new_child_code()
                 level = 3
             else:

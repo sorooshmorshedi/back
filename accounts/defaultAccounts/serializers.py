@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from accounts.accounts.models import Account
 from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.models import DefaultAccount
@@ -8,11 +9,18 @@ from accounts.defaultAccounts.models import DefaultAccount
 class DefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultAccount
-        read_only_fields = ('id', 'programingName',)
-        exclude = ('financial_year', )
+        read_only_fields = ('id', 'nickname',)
+        exclude = ('financial_year',)
 
     def validate(self, data):
-        AccountValidator.tafsili(data)
+        defaultAccount = self.instance
+        account = data.get('account')
+        if defaultAccount:
+            if account.level != defaultAccount.level:
+                raise serializers.ValidationError("سطح حساب اشتباه می باشد")
+
+        if account.level == Account.TAFSILI:
+            AccountValidator.tafsili(data)
 
         return data
 
