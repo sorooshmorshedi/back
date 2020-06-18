@@ -47,7 +47,7 @@ class Warehouse(BaseModel):
 
 
 class WareLevel(BaseModel):
-    CODE_LENGTHS = [1, 2, 2, 3]
+    CODE_LENGTHS = [2, 2, 2, 3]
 
     NATURE = 0
     GROUP = 1
@@ -100,7 +100,10 @@ class WareLevel(BaseModel):
         code = WareLevel.objects.filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
         code = int(code) + 1
 
-        if code >= 10:
+        if code < 9:
+            code += 10
+
+        if code >= 99:
             from rest_framework import serializers
             raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
 

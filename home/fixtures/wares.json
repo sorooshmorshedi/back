@@ -114,7 +114,7 @@
       "financial_year": 1,
       "name": "\u0627\u062a\u0627\u0642 \u0647\u0627",
       "explanation": null,
-      "code": "1",
+      "code": "10",
       "parent": null,
       "level": 0
     }
@@ -126,7 +126,7 @@
       "financial_year": 1,
       "name": "\u0627\u062a\u0627\u0642 \u0647\u0627",
       "explanation": null,
-      "code": "101",
+      "code": "1001",
       "parent": 1,
       "level": 1
     }
@@ -138,7 +138,7 @@
       "financial_year": 1,
       "name": "\u062f\u0648 \u062a\u062e\u062a\u0647",
       "explanation": null,
-      "code": "10101",
+      "code": "100101",
       "parent": 2,
       "level": 2
     }
@@ -150,7 +150,7 @@
       "financial_year": 1,
       "name": "\u0633\u0647 \u062a\u062e\u062a\u0647",
       "explanation": null,
-      "code": "10102",
+      "code": "100102",
       "parent": 2,
       "level": 2
     }
@@ -162,7 +162,7 @@
       "financial_year": 1,
       "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647",
       "explanation": null,
-      "code": "10103",
+      "code": "100103",
       "parent": 2,
       "level": 2
     }
@@ -174,7 +174,7 @@
       "financial_year": 1,
       "name": "\u062a\u0634\u06a9 \u0627\u0638\u0627\u0641\u0647 \u062f\u0631 \u0627\u062a\u0627\u0642 \u0647\u0627",
       "explanation": null,
-      "code": "10104",
+      "code": "100104",
       "parent": 2,
       "level": 2
     }
@@ -186,7 +186,7 @@
       "financial_year": 1,
       "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
       "explanation": null,
-      "code": "2",
+      "code": "12",
       "parent": null,
       "level": 0
     }
@@ -198,7 +198,7 @@
       "financial_year": 1,
       "name": "\u0646\u0648\u0634\u06cc\u062f\u0646\u06cc",
       "explanation": null,
-      "code": "201",
+      "code": "1201",
       "parent": 7,
       "level": 1
     }
@@ -210,7 +210,7 @@
       "financial_year": 1,
       "name": "\u0646\u0648\u0634\u0627\u0628\u0647",
       "explanation": null,
-      "code": "20101",
+      "code": "120101",
       "parent": 8,
       "level": 2
     }
@@ -222,7 +222,7 @@
       "financial_year": 1,
       "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
       "explanation": null,
-      "code": "202",
+      "code": "1202",
       "parent": 7,
       "level": 1
     }
@@ -234,7 +234,7 @@
       "financial_year": 1,
       "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
       "explanation": null,
-      "code": "20201",
+      "code": "120201",
       "parent": 10,
       "level": 2
     }
@@ -246,7 +246,7 @@
       "financial_year": 1,
       "name": "\u0647\u0632\u06cc\u0646\u0647",
       "explanation": null,
-      "code": "3",
+      "code": "13",
       "parent": null,
       "level": 0
     }
@@ -258,7 +258,7 @@
       "financial_year": 1,
       "name": "\u0647\u0632\u06cc\u0646\u0647",
       "explanation": null,
-      "code": "301",
+      "code": "1301",
       "parent": 12,
       "level": 1
     }
@@ -270,7 +270,7 @@
       "financial_year": 1,
       "name": "\u0647\u0632\u06cc\u0646\u0647",
       "explanation": null,
-      "code": "30101",
+      "code": "130101",
       "parent": 13,
       "level": 2
     }
@@ -282,7 +282,7 @@
       "financial_year": 1,
       "name": "\u0631\u0633\u062a\u0648\u0631\u0627\u0646",
       "explanation": null,
-      "code": "4",
+      "code": "14",
       "parent": null,
       "level": 0
     }
@@ -294,7 +294,7 @@
       "financial_year": 1,
       "name": "\u0631\u0633\u062a\u0648\u0631\u0627\u0646",
       "explanation": null,
-      "code": "401",
+      "code": "1401",
       "parent": 15,
       "level": 1
     }
@@ -306,7 +306,7 @@
       "financial_year": 1,
       "name": "\u0646\u0647\u0627\u0631",
       "explanation": null,
-      "code": "40101",
+      "code": "140101",
       "parent": 16,
       "level": 2
     }
@@ -318,7 +318,7 @@
       "financial_year": 1,
       "name": "\u0634\u0627\u0645",
       "explanation": null,
-      "code": "40102",
+      "code": "140102",
       "parent": 16,
       "level": 2
     }
@@ -330,7 +330,7 @@
       "financial_year": 1,
       "name": "\u0646\u0648\u0634\u06cc\u062f\u0646\u06cc",
       "explanation": null,
-      "code": "40103",
+      "code": "140103",
       "parent": 16,
       "level": 2
     }
@@ -342,7 +342,7 @@
       "financial_year": 1,
       "name": "\u0634\u0631\u0628\u062a\u062e\u0627\u0646\u0647",
       "explanation": null,
-      "code": "40104",
+      "code": "140104",
       "parent": 16,
       "level": 2
     }
@@ -354,7 +354,7 @@
       "financial_year": 1,
       "name": "\u062f\u0633\u0631 \u0648 \u0633\u0627\u0644\u0627\u062f",
       "explanation": null,
-      "code": "40105",
+      "code": "140105",
       "parent": 16,
       "level": 2
     }
@@ -366,7 +366,7 @@
       "financial_year": 1,
       "name": "\u062f\u0648\u062a\u062e\u062a\u0647",
       "explanation": null,
-      "code": "102",
+      "code": "1002",
       "parent": 1,
       "level": 1
     }
@@ -378,7 +378,7 @@
       "financial_year": 1,
       "name": "\u062f\u0648\u062a\u062e\u062a\u0647 \u06a9\u0627\u0645\u0644",
       "explanation": null,
-      "code": "10201",
+      "code": "100201",
       "parent": 22,
       "level": 2
     }
@@ -389,7 +389,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0648 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644",
-      "code": "10101001",
+      "code": "100101001",
       "barcode": "12",
       "explanation": "asdf",
       "isDisabled": false,
@@ -414,7 +414,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0648 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
-      "code": "10101002",
+      "code": "100101002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -439,7 +439,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0647 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u0633\u06cc\u0646\u06af\u0644",
-      "code": "10102001",
+      "code": "100102001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -464,7 +464,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0647 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u0633\u06cc\u0646\u06af\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
-      "code": "10102002",
+      "code": "100102002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -489,7 +489,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u062f\u0648 \u0633\u06cc\u0646\u06af\u0644",
-      "code": "10103001",
+      "code": "100103001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -514,7 +514,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u062f\u0648 \u0633\u06cc\u0646\u06af\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
-      "code": "10103002",
+      "code": "100103002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -539,7 +539,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0646\u0648\u0634\u0627\u0628\u0647 \u067e\u067e\u0633\u06cc",
-      "code": "20101001",
+      "code": "120101001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -564,7 +564,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062e\u06cc\u0627\u0631\u0634\u0648\u0631 \u06af\u0627\u0644\u0646\u06cc",
-      "code": "20201001",
+      "code": "120201001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -589,7 +589,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0644\u0648 \u062e\u0648\u0631\u0634\u062a \u0631\u0648\u0632",
-      "code": "40101001",
+      "code": "140101001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -614,7 +614,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u06a9\u0644\u0645 \u067e\u0644\u0648 \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "40101002",
+      "code": "140101002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -639,7 +639,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u06a9\u062a\u0647 \u06af\u0648\u062c\u0647",
-      "code": "40101003",
+      "code": "140101003",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -664,7 +664,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0645\u067e\u062e\u062a \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "40101004",
+      "code": "140101004",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -689,7 +689,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0644\u0648 \u06a9\u0628\u0627\u0628 \u062a\u0627\u0628\u0647 \u0627\u06cc",
-      "code": "40101005",
+      "code": "140101005",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -714,7 +714,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u06cc\u0632\u06cc \u0633\u0646\u06af\u06cc",
-      "code": "40101006",
+      "code": "140101006",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -739,7 +739,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062f\u0648 \u067e\u06cc\u0627\u0632\u0647 \u0622\u0644\u0648",
-      "code": "40102001",
+      "code": "140102001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -764,7 +764,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u06a9\u0634\u06a9 \u0628\u0627\u062f\u0645\u062c\u0627\u0646",
-      "code": "40102002",
+      "code": "140102002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -789,7 +789,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u06a9\u0648\u06a9\u0648 \u0633\u0628\u0632\u06cc",
-      "code": "40102003",
+      "code": "140102003",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -814,7 +814,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062e\u0648\u0631\u0627\u06a9 \u06a9\u0628\u0627\u0628 \u062a\u0627\u0628\u0647 \u0627\u06cc",
-      "code": "40102004",
+      "code": "140102004",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -839,7 +839,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0639\u062f\u0633\u06cc",
-      "code": "40102005",
+      "code": "140102005",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -864,7 +864,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062d\u0644\u0648\u0627 \u0632\u0639\u0641\u0631\u0627\u0646\u06cc",
-      "code": "40105001",
+      "code": "140105001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -889,7 +889,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0646\u0627\u0646 \u067e\u0646\u06cc\u0631 \u0633\u0628\u0632\u06cc",
-      "code": "40105002",
+      "code": "140105002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -914,7 +914,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0627\u0644\u0627\u062f \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "40105003",
+      "code": "140105003",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -939,7 +939,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0627\u0644\u0627\u062f \u0641\u0635\u0644",
-      "code": "40105004",
+      "code": "140105004",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -964,7 +964,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0645\u0627\u0633\u062a  \u0648 \u062e\u06cc\u0627\u0631",
-      "code": "40105005",
+      "code": "140105005",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -989,7 +989,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062a\u0631\u0634\u06cc \u0628\u0627\u062f\u0645\u062c\u0627\u0646",
-      "code": "40105006",
+      "code": "140105006",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1014,7 +1014,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0627\u06cc \u0633\u06cc\u0627\u0647",
-      "code": "40104001",
+      "code": "140104001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1039,7 +1039,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0686\u0627\u06cc \u0632\u0639\u0641\u0631\u0627\u0646",
-      "code": "40104002",
+      "code": "140104002",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1064,7 +1064,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0639\u0631\u0642 \u0628\u06cc\u062f\u0645\u0634\u06a9 \u0646\u0633\u062a\u0631\u0646 \u0628\u0627 \u062e\u0627\u06a9\u0634\u06cc\u0631",
-      "code": "40104003",
+      "code": "140104003",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1089,7 +1089,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0639\u0631\u0642 \u0628\u0647\u0627\u0631 \u0646\u0627\u0631\u0646\u062c",
-      "code": "40104004",
+      "code": "140104004",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1114,7 +1114,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0634\u0631\u0628\u062a \u0622\u0644\u0628\u0627\u0644\u0648/\u0628\u0647 \u0644\u06cc\u0645\u0648/\u0622\u0628\u0644\u06cc\u0645\u0648/\u0633\u06a9\u0646\u062c\u0628\u06cc\u0646",
-      "code": "40104005",
+      "code": "140104005",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1139,7 +1139,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u06a9\u0646\u062c\u0628\u06cc\u0646 \u062e\u06cc\u0627\u0631",
-      "code": "40104006",
+      "code": "140104006",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1164,7 +1164,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0627\u062a\u0627\u0642 \u0644\u0628 \u0622\u0628",
-      "code": "10101003",
+      "code": "100101003",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1175,7 +1175,7 @@
       "minInventory": null,
       "maxInventory": null,
       "created_at": "1398-12-20",
-      "updated_at": "1398-01-02",
+      "updated_at": "1399-01-12",
       "category": 3,
       "warehouse": 1,
       "unit": 1,
@@ -1189,7 +1189,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u0633\u0646\u06af \u0633\u06cc\u0627\u0647",
-      "code": "10101004",
+      "code": "100101004",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1214,7 +1214,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062a\u0634\u06a9",
-      "code": "10104001",
+      "code": "100104001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1239,7 +1239,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062a\u062a\u0633",
-      "code": "10101005",
+      "code": "100101005",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -1264,7 +1264,7 @@
     "fields": {
       "financial_year": 1,
       "name": "\u062e\u062f\u0645\u062a \u06cc\u06a9",
-      "code": "10201001",
+      "code": "100201001",
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
