@@ -1,7 +1,10 @@
+from typing import Any
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
@@ -71,10 +74,17 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         serializer = WareListRetrieveSerializer(ware)
         return Response(serializer.data)
 
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        ware = self.get_object()
+        if ware.pricingType != request.data.get('pricingType') and ware.has_factorItem():
+            return Response(['نحوه قیمت گذاری کالا های دارای گردش غیر قابل تغییر می باشد'],
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
+
     def destroy(self, request, *args, **kwargs):
         ware = self.get_object()
         if not ware.has_factorItem():
-            return super().destroy(self, request, *args, **kwargs)
+            return super().destroy(request, *args, **kwargs)
 
         return Response(['کالا های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
