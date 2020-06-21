@@ -48,7 +48,7 @@ class FirstPeriodInventoryView(APIView):
 
         first_period_inventory = self.set_first_period_inventory(request.data)
 
-        res = Response(FactorCreateUpdateSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
+        res = Response(FactorListRetrieveSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
         return res
 
     @staticmethod
