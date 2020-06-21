@@ -2,9 +2,29 @@ from rest_framework import status
 from rest_framework.views import exception_handler
 
 labels = {
+    # User
+    'username': 'نام کاربری',
+
+    # Use full
     'name': 'نام',
     'postal_code': 'کد پستی',
-    'mobile': 'موبایل'
+    'mobile': 'موبایل',
+    'phone': 'موبایل',
+    'account': 'حساب',
+
+    # Cheque
+    'serial_from': 'از شماره سریال',
+    'serial_to': 'تا شماره سریال',
+
+    # Ware
+    'unit': 'واحد شمارش',
+    'category': 'دسته بندی',
+    'pricingType': 'نوع قیمت گذاری',
+    'price': 'قیمت',
+
+    # Other
+    'form': 'فرم',
+    'post': 'سمت',
 }
 
 
