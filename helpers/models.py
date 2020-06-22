@@ -72,3 +72,7 @@ def MELLI_CODE(**kwargs):
         max_length=10,
         validators=[is_valid_melli_code]
     )
+
+
+def DECIMAL(**kwargs):
+    return models.DecimalField(max_digits=24, decimal_places=0, default=0, **kwargs)
