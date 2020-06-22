@@ -1,5 +1,6 @@
 from django.conf.urls import url
 
+from users.views.citiesView import CityListCreateView, CityDetailView
 from users.views.rolesView import RoleCreateView, RoleUpdateView, RoleDestroyView, RoleListView, PermissionListView
 from users.views.usersView import SetActiveCompany, SetActiveFinancialYear, CurrentUserApiView, UserCreateView, \
     UserUpdateView, UserDestroyView, UserListView, UserChangePasswordView, SendVerificationCodeForForgetPasswordView, \
@@ -25,4 +26,7 @@ urlpatterns = [
 
     url(r'^setActiveCompany$', SetActiveCompany.as_view(), name='set-active-company'),
     url(r'^setActiveFinancialYear$', SetActiveFinancialYear.as_view(), name='set-active-financial-year'),
+
+    url(r'^cities$', CityListCreateView.as_view(), name='list-create-city'),
+    url(r'^cities/(?P<pk>[0-9]+)$', CityDetailView.as_view(), name='detail-city'),
 ]

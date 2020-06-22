@@ -3,7 +3,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from companies.serializers import FinancialYearSerializer, CompanySerializer
-from users.models import Role, User
+from users.models import Role, User, City
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -65,4 +65,11 @@ class PermissionListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Permission
+        fields = '__all__'
+
+
+class CitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = City
         fields = '__all__'

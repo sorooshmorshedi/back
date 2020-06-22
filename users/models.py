@@ -104,3 +104,16 @@ class PhoneVerification(models.Model):
         elif raise_exception:
             raise ValidationError("شماره یا کد تایید اشتباه است")
         return None
+
+
+class City(models.Model):
+    name = models.CharField(unique=True, max_length=255)
+
+    class Meta:
+        default_permissions = ()
+        permissions = (
+            ('get.city', 'مشاهده شهر'),
+            ('create.city', 'تعریف شهر'),
+            ('update.city', 'ویرایش شهر'),
+            ('delete.city', 'حذف شهر'),
+        )
