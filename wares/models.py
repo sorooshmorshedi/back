@@ -113,10 +113,10 @@ class WareLevel(BaseModel):
 class Ware(BaseModel):
     FIFO = 'f'
     WEIGHTED_MEAN = 'wm'
-    PRICING_TYPES = {
+    PRICING_TYPES = (
         (FIFO, 'فایفو'),
         (WEIGHTED_MEAN, 'میانگین موزون'),
-    }
+    )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
     name = models.CharField(max_length=150)

@@ -57,7 +57,9 @@ INSTALLED_APPS = [
     'cheques',
     'factors',
     'reports',
-    'home'
+    'home',
+
+    '_dashtbashi',
 
 ]
 

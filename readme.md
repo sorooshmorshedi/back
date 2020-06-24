@@ -7,7 +7,10 @@
 * fields: postal_code
 * methods: get_new_code
 
-# PDF Export Ubuntu Commands
+### Apps
+* _* apps are add-on apps
+
+# PDF Export Ubuntu Installation Commands
     wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz 
     tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
     sudo cp wkhtmltox/bin/wk* /usr/local/bin/

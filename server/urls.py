@@ -45,13 +45,8 @@ urlpatterns = [
     url(r'^factors/', include('factors.urls')),
     url(r'^reports/', include('reports.urls')),
 
-    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
 
-    url('docs', schema_view, name="docs"),
-    path('raw', get_schema_view(
-        title="Your Project",
-        description="API for all things …"
-    ), name='openapi-schema'),
+    url(r'^dashtbashi/', include('_dashtbashi.urls')),
 
 ]
