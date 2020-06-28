@@ -51,7 +51,8 @@ def PHONE(**kwargs):
     )
 
 
-EXPLANATION = models.CharField(max_length=255, blank=True, null=True)
+def EXPLANATION():
+    return models.CharField(max_length=255, blank=True, null=True)
 
 
 def is_valid_melli_code(value):

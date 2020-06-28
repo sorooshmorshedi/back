@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
-from _dashtbashi.models import Driver, Car, Driving
-from wares.models import Unit, Warehouse, WareLevel, Ware, WareInventory
+from _dashtbashi.models import Driver, Car, Driving, AssociationCommission, Remittance, Lading
+from accounts.accounts.serializers import AccountListRetrieveSerializer
+from users.serializers import CitySerializer
+from wares.serializers import WareListRetrieveSerializer
 
 
 class DriverSerializer(serializers.ModelSerializer):
@@ -12,8 +14,20 @@ class DriverSerializer(serializers.ModelSerializer):
 
 
 class CarSerializer(serializers.ModelSerializer):
+    car_number_str = serializers.SerializerMethodField()
+
+    def get_car_number_str(self, obj: Car):
+        return obj.car_number_str
+
     class Meta:
         model = Car
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class AssociationCommissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssociationCommission
         fields = '__all__'
         read_only_fields = ('financial_year',)
 
@@ -32,9 +46,48 @@ class DrivingListRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj: Driving):
-        return "{} : {}".format(obj.driver.name, obj.car.car_number)
+        return "{} : {}".format(obj.driver.name, obj.car.car_number_str)
 
     class Meta:
         model = Driving
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class RemittanceCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Remittance
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
+    ware = WareListRetrieveSerializer(read_only=True)
+    origin = CitySerializer(read_only=True)
+    destination = CitySerializer(read_only=True)
+    contractor = AccountListRetrieveSerializer(read_only=True)
+
+    class Meta:
+        model = Remittance
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class LadingCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lading
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class LadingListRetrieveSerializer(serializers.ModelSerializer):
+    remittance = RemittanceListRetrieveSerializer(read_only=True)
+    driving = DrivingListRetrieveSerializer(read_only=True)
+    lading_contractor = AccountListRetrieveSerializer(read_only=True)
+    lading_ware = WareListRetrieveSerializer(read_only=True)
+    associationCommission = AssociationCommissionSerializer(read_only=True)
+
+    class Meta:
+        model = Lading
         fields = '__all__'
         read_only_fields = ('financial_year',)

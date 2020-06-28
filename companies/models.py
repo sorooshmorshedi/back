@@ -23,7 +23,7 @@ class Company(BaseModel):
     postal_code = POSTAL_CODE(blank=True, null=True)
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
-    explanation = EXPLANATION
+    explanation = EXPLANATION()
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)
