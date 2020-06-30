@@ -109,8 +109,8 @@ class Driving(BaseModel):
         )
 
 
-class AssociationCommission(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='associationCommissions')
+class Association(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='associations')
     name = models.CharField(max_length=150)
     price = DECIMAL()
     explanation = EXPLANATION()
@@ -118,10 +118,10 @@ class AssociationCommission(BaseModel):
     class Meta(BaseModel.Meta):
         backward_financial_year = True
         permissions = (
-            ('get.associationCommission', 'مشاهده کمیسیون انجمن'),
-            ('create.associationCommission', 'تعریف کمیسیون انجمن'),
-            ('update.associationCommission', 'ویرایش کمیسیون انجمن'),
-            ('delete.associationCommission', 'حذف کمیسیون انجمن'),
+            ('get.association', 'مشاهده کمیسیون انجمن'),
+            ('create.association', 'تعریف کمیسیون انجمن'),
+            ('update.association', 'ویرایش کمیسیون انجمن'),
+            ('delete.association', 'حذف کمیسیون انجمن'),
         )
 
 
@@ -186,6 +186,32 @@ def upload_attachment_to(instance, filename):
     return 'modules/dashtbashi/{}-{}'.format(filename, str(random.getrandbits(128)))
 
 
+class LadingBillSeries(BaseModel):
+    serial = models.CharField(max_length=100)
+
+    from_bill_number = models.IntegerField()
+    to_bill_number = models.IntegerField()
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.ladingBillSeries', 'مشاهده سری بارنامه'),
+            ('create.ladingBillSeries', 'تعریف سری بارنامه'),
+            ('update.ladingBillSeries', 'ویرایش سری بارنامه'),
+            ('delete.ladingBillSeries', 'حذف سری بارنامه'),
+        )
+
+
+class LadingBillNumber(BaseModel):
+    series = models.ForeignKey(LadingBillSeries, on_delete=models.CASCADE, related_name='numbers')
+    number = models.IntegerField()
+    is_revoked = models.BooleanField(default=False)
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('revoke.ladingBillNumber', 'ابطال شماره بارنامه'),
+        )
+
+
 class Lading(RemittanceMixin):
     COMPANY = 'cmp'
     CONTRACTOR = 'cnt'
@@ -215,22 +241,25 @@ class Lading(RemittanceMixin):
     lading_explanation = EXPLANATION()
     lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
 
-    bill_number = models.IntegerField()
+    billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='ladings')
     bill_date = jmodels.jDateField()
     bill_price = DECIMAL()
 
     bill_explanation = EXPLANATION()
     bill_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
 
-    associationCommission = models.ForeignKey(AssociationCommission, on_delete=models.PROTECT, related_name='ladings',
-                                              null=True, blank=True)
+    association = models.ForeignKey(Association, on_delete=models.PROTECT, related_name='ladings', null=True,
+                                    blank=True)
+    association_price = DECIMAL()
+
     receive_type = models.CharField(max_length=2, choices=RECEIVE_TYPES, null=True, blank=True)
 
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
-    origin = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingOrigins')
-    destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingDestinations')
+    origin = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingOrigins', null=True, blank=True)
+    destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingDestinations', null=True,
+                                    blank=True)
 
     class Meta(BaseModel.Meta):
         permissions = (

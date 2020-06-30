@@ -1,16 +1,20 @@
-from typing import Type
+from typing import Type, Any
 
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
-from _dashtbashi.models import Driver, Car, Driving, AssociationCommission, Remittance, Lading
+from _dashtbashi.filters import LadingBillSeriesFilter
+from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, LadingBillNumber
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
-    DrivingListRetrieveSerializer, AssociationCommissionSerializer, RemittanceListRetrieveSerializer, \
-    RemittanceCreateUpdateSerializer, LadingListRetrieveSerializer, LadingCreateUpdateSerializer
+    DrivingListRetrieveSerializer, AssociationSerializer, RemittanceListRetrieveSerializer, \
+    RemittanceCreateUpdateSerializer, LadingListRetrieveSerializer, LadingCreateUpdateSerializer, \
+    LadingBillSeriesSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_new_code, get_object_by_code
 
@@ -55,16 +59,53 @@ class DrivingModelView(viewsets.ModelViewSet):
         )
 
 
-class AssociationCommissionModelView(viewsets.ModelViewSet):
+class AssociationModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'associationCommission'
-    queryset = AssociationCommission.objects.all()
-    serializer_class = AssociationCommissionSerializer
+    permission_base_codename = 'association'
+    queryset = Association.objects.all()
+    serializer_class = AssociationSerializer
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
             financial_year=self.request.user.active_financial_year
         )
+
+
+class LadingBillSeriesModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_base_codename = 'ladingBillSeries'
+    queryset = LadingBillSeries.objects.all()
+    serializer_class = LadingBillSeriesSerializer
+    filterset_class = LadingBillSeriesFilter
+    pagination_class = LimitOffsetPagination
+    page_size = 15
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        print(page)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class LadingBillSeriesByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_base_codename = 'ladingBillSeries'
+
+    def get(self, request):
+        item = get_object_by_code(
+            LadingBillSeries.objects.all(),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(LadingBillSeriesSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
 class RemittanceModelView(viewsets.ModelViewSet):
@@ -136,3 +177,14 @@ class LadingByPositionView(APIView):
         if lading:
             return Response(LadingListRetrieveSerializer(instance=lading).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class RevokeLadingBillNumber(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_codename = 'revoke.ladingBillNumber'
+
+    def post(self, request):
+        ladingBillNumber = get_object_or_404(LadingBillNumber, pk=request.data.get('id'))
+        ladingBillNumber.is_revoked = request.data.get('is_revoked')
+        ladingBillNumber.save()
+        return Response()

@@ -1,6 +1,8 @@
+from typing import Any
+
 from rest_framework import serializers
 
-from _dashtbashi.models import Driver, Car, Driving, AssociationCommission, Remittance, Lading
+from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, LadingBillNumber
 from accounts.accounts.serializers import AccountListRetrieveSerializer
 from users.serializers import CitySerializer
 from wares.serializers import WareListRetrieveSerializer
@@ -25,9 +27,9 @@ class CarSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year',)
 
 
-class AssociationCommissionSerializer(serializers.ModelSerializer):
+class AssociationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AssociationCommission
+        model = Association
         fields = '__all__'
         read_only_fields = ('financial_year',)
 
@@ -52,6 +54,47 @@ class DrivingListRetrieveSerializer(serializers.ModelSerializer):
         model = Driving
         fields = '__all__'
         read_only_fields = ('financial_year',)
+
+
+class LadingBillNumberCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LadingBillNumber
+        fields = '__all__'
+
+
+class LadingBillSeriesSerializer(serializers.ModelSerializer):
+    numbers = LadingBillNumberCreateUpdateSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = LadingBillSeries
+        fields = '__all__'
+
+    def create(self, validated_data: Any) -> Any:
+        instance = super().create(validated_data)
+        self.create_lading_bill_numbers(instance)
+        return instance
+
+    def update(self, instance: LadingBillSeries, validated_data: Any) -> Any:
+        instance = super().update(instance, validated_data)
+        instance.numbers.all().delete()
+        self.create_lading_bill_numbers(instance)
+        return instance
+
+    @staticmethod
+    def create_lading_bill_numbers(instance: LadingBillSeries):
+        for i in range(instance.from_bill_number, instance.to_bill_number + 1):
+            LadingBillNumber.objects.create(
+                series=instance,
+                number=i
+            )
+
+
+class LadingBillNumberListRetrieveSerializer(serializers.ModelSerializer):
+    series = LadingBillSeriesSerializer(read_only=True)
+
+    class Meta:
+        model = LadingBillNumber
+        fields = '__all__'
 
 
 class RemittanceCreateUpdateSerializer(serializers.ModelSerializer):
@@ -85,7 +128,8 @@ class LadingListRetrieveSerializer(serializers.ModelSerializer):
     driving = DrivingListRetrieveSerializer(read_only=True)
     lading_contractor = AccountListRetrieveSerializer(read_only=True)
     lading_ware = WareListRetrieveSerializer(read_only=True)
-    associationCommission = AssociationCommissionSerializer(read_only=True)
+    association = AssociationSerializer(read_only=True)
+    billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
 
     class Meta:
         model = Lading
