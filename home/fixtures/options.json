@@ -1,0 +1,12 @@
+[
+  {
+    "model": "home.option",
+    "pk": 1,
+    "fields": {
+      "name": "درصد کمیسیون شرکت از بارگیری شرکت نفت",
+      "codename": "companyCommissionFromOilCompanyLading",
+      "usage": "dashtbashi",
+      "value": "6"
+    }
+  }
+]
