@@ -9,7 +9,7 @@ from helpers.models import BaseModel
 class Chequebook(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='chequebooks')
 
-    code = models.IntegerField(unique=True)
+    serial = models.CharField(max_length=255, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequebook')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequebook', blank=True,
                                      null=True)
@@ -20,11 +20,10 @@ class Chequebook(BaseModel):
     serial_to = models.IntegerField()
 
     def __str__(self):
-        return "{0} - {1}".format(self.code, self.explanation[0:30])
+        return "{0} - {1}".format(self.account.title, self.serial, )
 
     class Meta(BaseModel.Meta):
         verbose_name = 'دفتر چک'
-        ordering = ['code', ]
         permissions = (
             ('get.chequebook', 'مشاهده دفتر چک'),
             ('create.chequebook', 'تعریف دفتر چک'),

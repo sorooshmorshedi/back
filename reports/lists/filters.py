@@ -60,7 +60,7 @@ class ChequebookFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'account__name': ['icontains'],
-            'code': ['icontains'],
+            'serial': ['icontains'],
             'serial_from': ['icontains'],
             'serial_to': ['icontains'],
             'explanation': ['icontains'],
