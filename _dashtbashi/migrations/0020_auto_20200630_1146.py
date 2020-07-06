@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lading',
             name='billNumber',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='ladings', to='_dashtbashi.LadingBillNumber'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='ladings', to='_dashtbashi.LadingBillNumber'),
             preserve_default=False,
         ),
     ]
