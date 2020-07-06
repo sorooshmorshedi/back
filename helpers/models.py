@@ -76,4 +76,4 @@ def MELLI_CODE(**kwargs):
 
 
 def DECIMAL(**kwargs):
-    return models.DecimalField(max_digits=24, decimal_places=0, default=0, **kwargs)
+    return models.DecimalField(max_digits=24, decimal_places=6, default=0, **kwargs)

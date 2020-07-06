@@ -2,7 +2,8 @@ from typing import Any
 
 from rest_framework import serializers
 
-from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, LadingBillNumber
+from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
+    LadingBillNumber, OilCompanyLading, OilCompanyLadingItem
 from accounts.accounts.serializers import AccountListRetrieveSerializer
 from users.serializers import CitySerializer
 from wares.serializers import WareListRetrieveSerializer
@@ -133,5 +134,29 @@ class LadingListRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lading
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class OilCompanyLadingItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OilCompanyLadingItem
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class OilCompanyLadingCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OilCompanyLading
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class OilCompanyLadingListRetrieveSerializer(serializers.ModelSerializer):
+    items = OilCompanyLadingItemSerializer(read_only=True, many=True)
+    car = CarSerializer(read_only=True)
+
+    class Meta:
+        model = OilCompanyLading
         fields = '__all__'
         read_only_fields = ('financial_year',)

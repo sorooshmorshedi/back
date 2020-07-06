@@ -8,5 +8,15 @@
       "usage": "dashtbashi",
       "value": "6"
     }
+  },
+  {
+    "model": "home.option",
+    "pk": 2,
+    "fields": {
+      "name": "درصد مالیات",
+      "codename": "taxPercent",
+      "usage": "all",
+      "value": "9"
+    }
   }
 ]

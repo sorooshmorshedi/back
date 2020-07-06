@@ -38,18 +38,18 @@ class Driver(BaseModel):
 
 
 class Car(BaseModel):
-    COMPANY = 'c'
+    PARTNERSHIP = 'p'
     OTHER = 'o'
     RAHMAN = 'rn'
     RAHIM = 'rm'
     EBRAHIM = 'e'
 
     OWNERS = (
-        (COMPANY, 'شرکت'),
+        (PARTNERSHIP, 'شراکتی'),
         (OTHER, 'دیگر'),
-        (RAHMAN, 'رحمان'),
-        (RAHIM, 'رحیم'),
-        (EBRAHIM, 'ابراهیم')
+        (RAHMAN, 'حاج رحمان'),
+        (RAHIM, 'حاج رحیم'),
+        (EBRAHIM, 'حاج ابراهیم')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cars')
@@ -146,8 +146,8 @@ class RemittanceMixin(BaseModel):
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT)
     contractor_price = DECIMAL()
     contractor = models.ForeignKey(Account, on_delete=models.PROTECT)
-    tip_price = DECIMAL()
-    tip_payer = models.CharField(max_length=3, choices=TIP_PAYERS)
+    driver_tip_price = DECIMAL()
+    driver_tip_payer = models.CharField(max_length=3, choices=TIP_PAYERS)
     lading_bill_difference = DECIMAL()
     remittance_payment_method = models.CharField(max_length=3, choices=REMITTANCE_PAYMENT_METHODS)
     fare_price = DECIMAL()
@@ -247,6 +247,7 @@ class Lading(RemittanceMixin):
 
     bill_explanation = EXPLANATION()
     bill_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
+    cargo_tip_price = DECIMAL()
 
     association = models.ForeignKey(Association, on_delete=models.PROTECT, related_name='ladings', null=True,
                                     blank=True)
@@ -268,3 +269,41 @@ class Lading(RemittanceMixin):
             ('update.lading', 'ویرایش بارگیری'),
             ('delete.lading', 'حذف بارگیری'),
         )
+
+
+class OilCompanyLading(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='oilCompanyLadings')
+    explanation = EXPLANATION()
+    date = jmodels.jDateField()
+    export_date = jmodels.jDateField()
+
+    car = models.ForeignKey(Car, on_delete=models.PROTECT, related_name='oilCompanyLadings')
+
+    created_at = jmodels.jDateTimeField(auto_now=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True)
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.oilCompanyLading', 'مشاهده بارگیری شرکت نفت'),
+            ('create.oilCompanyLading', 'تعریف بارگیری شرکت نفت'),
+            ('update.oilCompanyLading', 'ویرایش بارگیری شرکت نفت'),
+            ('delete.oilCompanyLading', 'حذف بارگیری شرکت نفت'),
+        )
+
+
+class OilCompanyLadingItem(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    oilCompanyLading = models.ForeignKey(OilCompanyLading, on_delete=models.CASCADE, related_name='items')
+
+    pure_price = DECIMAL()
+    tax_value = DECIMAL(null=True, blank=True)
+    tax_percent = models.IntegerField(default=0, null=True, blank=True)
+    complication_value = DECIMAL(null=True, blank=True)
+    complication_percent = models.IntegerField(default=0, null=True, blank=True)
+
+    company_commission = DECIMAL()
+    car_income = DECIMAL()
+
+    class Meta(BaseModel.Meta):
+        pass
