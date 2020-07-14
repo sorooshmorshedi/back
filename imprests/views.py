@@ -9,10 +9,9 @@ from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from imprests.models import ImprestSettlement
-from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementItemListRetrieveSerializer, \
-    ImprestSettlementListRetrieveSerializer, ImprestSettlementItemCreateUpdateSerializer
+from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementListRetrieveSerializer, \
+    ImprestSettlementItemCreateUpdateSerializer
 from transactions.models import Transaction
-from transactions.serializers import TransactionListRetrieveSerializer
 
 
 class ImprestSettlementModelView(viewsets.ModelViewSet):
@@ -93,7 +92,7 @@ class ImprestSettlementByPositionView(APIView):
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
-class GetAccountNotFilledImprestsView(APIView):
+class GetAccountNotSettledImprestsView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'imprestTransaction'
 
