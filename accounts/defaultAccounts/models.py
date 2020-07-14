@@ -11,6 +11,7 @@ class DefaultAccount(BaseModel):
     RECEIVE_AND_PAYMENT = 'receiveAndPayment'
     FACTOR = 'factor'
     CLOSE_ACCOUNTS = 'closeAccounts'
+    IMPREST = 'imprest'
     OTHER = 'other'
     USAGES = (
         (RECEIVE, 'دریافت'),
@@ -18,6 +19,7 @@ class DefaultAccount(BaseModel):
         (RECEIVE_AND_PAYMENT, 'دریافت و پرداخت'),
         (FACTOR, 'فاکتور'),
         (CLOSE_ACCOUNTS, 'بستن حساب ها'),
+        (IMPREST, 'تنخواه'),
         (OTHER, 'دیگر')
     )
 
@@ -33,7 +35,7 @@ class DefaultAccount(BaseModel):
                                    blank=True, null=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
-    nickname = models.CharField(unique=True, max_length=50, null=True, blank=True)
+    codename = models.CharField(unique=True, max_length=50, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -45,12 +47,12 @@ class DefaultAccount(BaseModel):
         )
 
     def __str__(self):
-        return "{} {}".format(self.name, self.nickname)
+        return "{} {}".format(self.name, self.codename)
 
     @staticmethod
-    def get(nickname):
-        return DefaultAccount.objects.get(nickname=nickname)
+    def get(codename):
+        return DefaultAccount.objects.get(codename=codename)
 
 
 def getDefaultAccount(pn):
-    return DefaultAccount.objects.get(nickname=pn)
+    return DefaultAccount.objects.get(codename=pn)

@@ -45,6 +45,8 @@ urlpatterns = [
     url(r'^factors/', include('factors.urls')),
     url(r'^reports/', include('reports.urls')),
 
+    url(r'^imprests/', include('imprests.urls')),
+
     path('admin/', admin.site.urls),
 
     url(r'^dashtbashi/', include('_dashtbashi.urls')),

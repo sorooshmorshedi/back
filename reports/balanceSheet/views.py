@@ -45,7 +45,7 @@ class BalanceSheetView(APIView):
 
         for at in accountTypes:
             remain = getRemain(at, allAccounts)
-            res[at.nickname] = {
+            res[at.codename] = {
                 'name': at.name,
                 'remain': remain,
                 'accounts': TypeReportAccountSerializer(getAccounts(at, allAccounts), many=True).data

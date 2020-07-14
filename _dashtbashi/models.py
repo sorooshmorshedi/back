@@ -1,8 +1,10 @@
+from typing import Optional, Union, Sequence
+
 from django.contrib.postgres.fields.array import ArrayField
 from django.db import models
 from django_jalali.db import models as jmodels
 
-from accounts.accounts.models import Account
+from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from companies.models import FinancialYear
 from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel
 from users.models import City
@@ -25,6 +27,8 @@ class Driver(BaseModel):
     bank_name = models.CharField(max_length=150, null=True, blank=True)
     iban = models.CharField(max_length=150, null=True, blank=True)
     explanation = EXPLANATION()
+
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='driver', null=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -73,6 +77,15 @@ class Car(BaseModel):
     owner = models.CharField(max_length=2, choices=OWNERS)
     explanation = EXPLANATION()
 
+    # just for Rahman
+    expenseAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carExpense', null=True)
+
+    # just for Rahman
+    incomeAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carIncome', null=True)
+
+    payableAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carPayable', null=True)
+    receivableAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carReceivable', null=True)
+
     class Meta(BaseModel.Meta):
         backward_financial_year = True
 
@@ -87,6 +100,26 @@ class Car(BaseModel):
     def car_number_str(self):
         return "{} {} {} ایران {}".format(*self.car_number)
 
+    def save(
+            self,
+            force_insert: bool = ...,
+            force_update: bool = ...,
+            using: Optional[str] = ...,
+            update_fields: Optional[Union[Sequence[str], str]] = ...,
+    ) -> None:
+        save_result = super(Car, self).save(force_insert, force_update, using, update_fields)
+
+        # Create Accounts Here
+        # parent = Account()
+        # Account.objects.create(
+        #     name="{}".format(self.car_number_str),
+        #     parent=parent,
+        #     code=parent.get_new_child_code(),
+        #     level=Account.TAFSILI
+        # )
+
+        return save_result
+
 
 class Driving(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='drivings')
@@ -97,7 +130,9 @@ class Driving(BaseModel):
     commission = DECIMAL()
     reward = DECIMAL()
     family = DECIMAL()
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='drivings')
+
+    floatAccountRelation = models.ForeignKey(FloatAccountRelation, on_delete=models.PROTECT, related_name='driving',
+                                             null=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -296,7 +331,8 @@ class OilCompanyLadingItem(BaseModel):
 
     oilCompanyLading = models.ForeignKey(OilCompanyLading, on_delete=models.CASCADE, related_name='items')
 
-    pure_price = DECIMAL()
+    gross_price = DECIMAL()
+    insurance_price = DECIMAL()
     tax_value = DECIMAL(null=True, blank=True)
     tax_percent = models.IntegerField(default=0, null=True, blank=True)
     complication_value = DECIMAL(null=True, blank=True)

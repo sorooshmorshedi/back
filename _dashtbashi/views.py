@@ -1,11 +1,10 @@
-from typing import Type, Any
+from typing import Type
 
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
@@ -19,7 +18,7 @@ from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCrea
     LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemSerializer, \
     OilCompanyLadingListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_new_code, get_object_by_code
+from helpers.functions import get_object_by_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 

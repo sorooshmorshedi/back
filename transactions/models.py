@@ -15,9 +15,11 @@ from sanads.models import Sanad, newSanadCode, clearSanad
 class Transaction(BaseModel):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
+    IMPREST = 'imprest'
     TYPES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
+        (IMPREST, 'پرداخت تنخواه'),
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactions')
@@ -52,6 +54,11 @@ class Transaction(BaseModel):
             ('create.paymentTransaction', 'تعریف پرداخت'),
             ('update.paymentTransaction', 'ویرایش پرداخت'),
             ('delete.paymentTransaction', 'حذف پرداخت'),
+
+            ('get.imprestTransaction', 'مشاهده پرداخت تنخواه'),
+            ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
+            ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
+            ('delete.imprestTransaction', 'حذف پرداخت تنخواه'),
         )
 
     def sync(self, user, data):

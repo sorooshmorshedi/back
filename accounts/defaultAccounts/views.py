@@ -34,7 +34,7 @@ class DefaultAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
     def destroy(self, request, *args, **kwargs):
         da = self.get_object()
-        if da.nickname:
+        if da.codename:
             raise serializers.ValidationError('این پیشفرض غیر قابل حذف می باشد')
         return super().destroy(request, *args, **kwargs)
 

@@ -79,7 +79,7 @@ class AccountType(BaseModel):
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accountTypes')
     name = models.CharField(max_length=100)
-    nickname = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    codename = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
     usage = models.CharField(max_length=30, choices=ACCOUNT_TYPE_USAGES, blank=True)
 
@@ -87,7 +87,7 @@ class AccountType(BaseModel):
         backward_financial_year = True
 
     def __str__(self):
-        return "{} - {} - {} - {}".format(self.name, self.nature, self.usage, self.nickname)
+        return "{} - {} - {} - {}".format(self.name, self.nature, self.usage, self.codename)
 
 
 class Account(BaseModel):

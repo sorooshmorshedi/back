@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'factors',
     'reports',
     'home',
+    'imprests',
 
     '_dashtbashi',
 

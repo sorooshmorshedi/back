@@ -9,14 +9,14 @@ from accounts.defaultAccounts.models import DefaultAccount
 class DefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultAccount
-        read_only_fields = ('id', 'nickname',)
+        read_only_fields = ('id', 'codename',)
         exclude = ('financial_year',)
 
     def validate(self, data):
         defaultAccount = self.instance
         account = data.get('account')
         if defaultAccount:
-            if account.level != defaultAccount.level:
+            if account.level != defaultAccount.account_level:
                 raise serializers.ValidationError("سطح حساب اشتباه می باشد")
 
         if account.level == Account.TAFSILI:
