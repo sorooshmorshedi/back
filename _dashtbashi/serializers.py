@@ -127,8 +127,8 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
 class LadingListRetrieveSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)
     driving = DrivingListRetrieveSerializer(read_only=True)
-    lading_contractor = AccountListRetrieveSerializer(read_only=True)
-    lading_ware = WareListRetrieveSerializer(read_only=True)
+    contractor = AccountListRetrieveSerializer(read_only=True)
+    ware = WareListRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
 
