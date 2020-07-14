@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
-from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter
+from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
@@ -158,6 +158,7 @@ class LadingModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'lading'
     queryset = Lading.objects.all()
+    filterset_class = LadingFilter
 
     def get_serializer_class(self) -> Type[BaseSerializer]:
         if self.request.method.lower() == 'get':
