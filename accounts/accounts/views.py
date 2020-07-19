@@ -183,11 +183,6 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         else:
             return AccountListRetrieveSerializer
 
-    def retrieve(self, request, **kwargs):
-        account = self.get_object()
-        serializer = AccountListRetrieveSerializer(account)
-        return Response(serializer.data)
-
     def destroy(self, request, *args, **kwargs):
         account = self.get_object()
         if account.can_delete():

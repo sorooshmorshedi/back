@@ -1,14 +1,21 @@
 import re
 
+from django_jalali.db import models as jmodels
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, MinLengthValidator
+from django.core.validators import RegexValidator
 from django.db import models
 import django.db.models.options as options
+
+from helpers.functions import get_current_user
 
 options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year',)
 
 
 class BaseManager(models.Manager):
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset
 
     def inFinancialYear(self, financial_year=None):
         from helpers.functions import get_current_user
@@ -25,6 +32,10 @@ class BaseManager(models.Manager):
 
 
 class BaseModel(models.Model):
+    created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True)
+    created_at = jmodels.jDateTimeField(auto_now=True, null=True)
+    updated_at = jmodels.jDateTimeField(auto_now_add=True, null=True)
+
     class Meta:
         abstract = True
         permissions = ()
@@ -33,6 +44,10 @@ class BaseModel(models.Model):
         backward_financial_year = False
 
     objects = BaseManager()
+
+    def save(self, *args, **kwargs) -> None:
+        self.created_by = get_current_user()
+        super().save(*args, **kwargs)
 
 
 def POSTAL_CODE(**kwargs):

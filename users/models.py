@@ -8,10 +8,11 @@ from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company, FinancialYear
+from helpers.models import BaseModel
 from helpers.sms import Sms
 
 
-class Role(models.Model):
+class Role(BaseModel):
     company = models.ForeignKey(Company, related_name='roles', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
@@ -26,7 +27,7 @@ class Role(models.Model):
         )
 
 
-class User(AbstractUser):
+class User(AbstractUser, BaseModel):
     active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany',
                                        blank=True, null=True)
     active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users',
@@ -60,7 +61,7 @@ class User(AbstractUser):
         return self.roles.filter(company=company, permissions__codename=permission_codename).exists()
 
 
-class PhoneVerification(models.Model):
+class PhoneVerification(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verificationCodes', null=True, blank=True)
     code = models.CharField(max_length=12)
     phone = models.CharField(max_length=11)
@@ -106,7 +107,7 @@ class PhoneVerification(models.Model):
         return None
 
 
-class City(models.Model):
+class City(BaseModel):
     name = models.CharField(unique=True, max_length=255)
 
     class Meta:
