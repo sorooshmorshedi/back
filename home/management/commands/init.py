@@ -9,5 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         os.chdir("home/fixtures")
         fixtures = os.listdir()
+        fixtures.sort()
         for fixture in fixtures:
+            print(fixture)
             call_command('loaddata', fixture)
