@@ -25,8 +25,10 @@ from helpers.views.MassRelatedCUD import MassRelatedCUD
 class DriverModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'driver'
-    queryset = Driver.objects.all()
     serializer_class = DriverSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return Driver.objects.hasAccess(self.request.method)
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
@@ -37,8 +39,10 @@ class DriverModelView(viewsets.ModelViewSet):
 class CarModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'car'
-    queryset = Car.objects.all()
     serializer_class = CarSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return Car.objects.hasAccess(self.request.method)
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
@@ -49,7 +53,9 @@ class CarModelView(viewsets.ModelViewSet):
 class DrivingModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'driving'
-    queryset = Driving.objects.all()
+
+    def get_queryset(self) -> QuerySet:
+        return Driving.objects.hasAccess(self.request.method)
 
     def get_serializer_class(self) -> Type[BaseSerializer]:
         if self.request.method.lower() == 'get':
@@ -65,8 +71,10 @@ class DrivingModelView(viewsets.ModelViewSet):
 class AssociationModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'association'
-    queryset = Association.objects.all()
     serializer_class = AssociationSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return Association.objects.hasAccess(self.request.method)
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
@@ -77,17 +85,18 @@ class AssociationModelView(viewsets.ModelViewSet):
 class LadingBillSeriesModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'ladingBillSeries'
-    queryset = LadingBillSeries.objects.all()
     serializer_class = LadingBillSeriesSerializer
     filterset_class = LadingBillSeriesFilter
     pagination_class = LimitOffsetPagination
     page_size = 15
 
+    def get_queryset(self) -> QuerySet:
+        return LadingBillSeries.objects.hasAccess(self.request.method)
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
-        print(page)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -102,7 +111,7 @@ class LadingBillSeriesByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            LadingBillSeries.objects.all(),
+            LadingBillSeries.objects.hasAccess(request.method),
             request.GET.get('position'),
             request.GET.get('id')
         )
@@ -114,10 +123,12 @@ class LadingBillSeriesByPositionView(APIView):
 class RemittanceModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'remittance'
-    queryset = Remittance.objects.all()
     filterset_class = RemittanceFilter
     pagination_class = LimitOffsetPagination
     page_size = 15
+
+    def get_queryset(self) -> QuerySet:
+        return Remittance.objects.hasAccess(self.request.method)
 
     def get_serializer_class(self) -> Type[BaseSerializer]:
         if self.request.method.lower() == 'get':
@@ -136,7 +147,7 @@ class RemittanceByPositionView(APIView):
 
     def get(self, request):
         remittance = get_object_by_code(
-            Remittance.objects.inFinancialYear(),
+            Remittance.objects.hasAccess(request.method),
             request.GET.get('position'),
             request.GET.get('id')
         )
@@ -150,15 +161,17 @@ class RemittanceByCodeView(APIView):
     permission_base_codename = 'remittance'
 
     def get(self, request):
-        remittance = get_object_or_404(Remittance, code=request.GET.get('code'))
+        remittance = get_object_or_404(Remittance.objects.hasAccess(request.method), code=request.GET.get('code'))
         return Response(RemittanceListRetrieveSerializer(instance=remittance).data)
 
 
 class LadingModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_base_codename = 'lading'
-    queryset = Lading.objects.all()
     filterset_class = LadingFilter
+
+    def get_queryset(self) -> QuerySet:
+        return Lading.objects.hasAccess(self.request.method)
 
     def get_serializer_class(self) -> Type[BaseSerializer]:
         if self.request.method.lower() == 'get':
@@ -177,7 +190,7 @@ class LadingByPositionView(APIView):
 
     def get(self, request):
         lading = get_object_by_code(
-            Lading.objects.inFinancialYear(),
+            Lading.objects.hasAccess(request.method),
             request.GET.get('position'),
             request.GET.get('id')
         )
@@ -191,7 +204,8 @@ class RevokeLadingBillNumber(APIView):
     permission_codename = 'revoke.ladingBillNumber'
 
     def post(self, request):
-        ladingBillNumber = get_object_or_404(LadingBillNumber, pk=request.data.get('id'))
+        ladingBillNumber = get_object_or_404(LadingBillNumber.objects.hasAccess(request.method),
+                                             pk=request.data.get('id'))
         ladingBillNumber.is_revoked = request.data.get('is_revoked')
         ladingBillNumber.save()
         return Response()
@@ -203,7 +217,7 @@ class OilCompanyLadingModelView(viewsets.ModelViewSet):
     serializer_class = OilCompanyLadingCreateUpdateSerializer
 
     def get_queryset(self) -> QuerySet:
-        return OilCompanyLading.objects.inFinancialYear()
+        return OilCompanyLading.objects.hasAccess(self.request.method)
 
     # def retrieve(self, request, pk=None, *args, **kwargs):
     #     queryset = self.get_queryset()
@@ -267,7 +281,7 @@ class OilCompanyLadingByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            OilCompanyLading.objects.all(),
+            OilCompanyLading.objects.hasAccess(request.method),
             request.GET.get('position'),
             request.GET.get('id')
         )

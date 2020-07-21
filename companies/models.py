@@ -36,6 +36,7 @@ class Company(BaseModel):
             return None
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'company'
         permissions = (
             ('get.company', 'مشاهده شرکت'),
             ('create.company', 'تعریف شرکت'),

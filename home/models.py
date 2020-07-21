@@ -10,6 +10,7 @@ class Option(BaseModel):
     value = models.TextField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'option'
         permissions = (
             ('get.option', 'مشاهده تنظیمات'),
             ('update.option', 'ویرایش تنظیمات'),

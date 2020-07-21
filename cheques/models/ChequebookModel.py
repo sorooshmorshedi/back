@@ -9,6 +9,7 @@ from helpers.models import BaseModel
 class Chequebook(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='chequebooks')
 
+    code = models.IntegerField()
     serial = models.CharField(max_length=255, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='chequebook')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='chequebook', blank=True,
@@ -24,11 +25,16 @@ class Chequebook(BaseModel):
 
     class Meta(BaseModel.Meta):
         verbose_name = 'دفتر چک'
+        permission_basename = 'chequebook'
         permissions = (
             ('get.chequebook', 'مشاهده دفتر چک'),
             ('create.chequebook', 'تعریف دفتر چک'),
             ('update.chequebook', 'ویرایش دفتر چک'),
             ('delete.chequebook', 'حذف دفتر چک'),
+
+            ('getOwn.chequebook', 'مشاهده دفتر چک های خود'),
+            ('updateOwn.chequebook', 'ویرایش دفتر چک های خود'),
+            ('deleteOwn.chequebook', 'حذف دفتر چک های خود'),
         )
 
     def save(self, *args, **kwargs):

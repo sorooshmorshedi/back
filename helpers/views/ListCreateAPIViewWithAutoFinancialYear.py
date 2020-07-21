@@ -3,12 +3,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 
+from helpers.auth import BasicCRUDPermission
+
 
 class ListCreateAPIViewWithAutoFinancialYear(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     def get_queryset(self):
-        return self.serializer_class.Meta.model.objects.inFinancialYear()
+        return self.serializer_class.Meta.model.objects.hasAccess(self.request.method)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

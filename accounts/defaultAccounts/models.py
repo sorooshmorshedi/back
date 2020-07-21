@@ -39,11 +39,16 @@ class DefaultAccount(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'defaultAccount'
         permissions = (
             ('get.defaultAccount', 'مشاهده حساب های پیشفرض'),
             ('create.defaultAccount', 'تعریف حساب پیشفرض'),
             ('update.defaultAccount', 'ویرایش حساب پیشفرض'),
             ('delete.defaultAccount', 'حذف حساب پیشفرض'),
+
+            ('getOwn.defaultAccount', 'مشاهده حساب های پیشفرض خود'),
+            ('updateOwn.defaultAccount', 'ویرایش حساب پیشفرض خود'),
+            ('deleteOwn.defaultAccount', 'حذف حساب پیشفرض خود'),
         )
 
     def __str__(self):

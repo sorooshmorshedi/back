@@ -18,11 +18,16 @@ class FloatAccountGroup(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'floatAccountGroup'
         permissions = (
             ('get.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه'),
             ('create.floatAccountGroup', 'تعریف گروه حساب شناور / مرکز هزینه'),
             ('update.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه'),
             ('delete.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه'),
+
+            ('getOwn.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه خود'),
+            ('updateOwn.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه خود'),
+            ('deleteOwn.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه خود'),
         )
 
     def __str__(self):
@@ -49,11 +54,16 @@ class FloatAccount(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'floatAccount'
         permissions = (
             ('get.floatAccount', 'مشاهده حساب های شناور'),
             ('create.floatAccount', 'تعریف حساب شناور'),
             ('update.floatAccount', 'ویرایش حساب شناور'),
             ('delete.floatAccount', 'حذف حساب شناور'),
+
+            ('getOwn.floatAccount', 'مشاهده حساب های شناور خود'),
+            ('updateOwn.floatAccount', 'ویرایش حساب شناور خود'),
+            ('deleteOwn.floatAccount', 'حذف حساب شناور خود'),
         )
 
 
@@ -177,6 +187,7 @@ class Account(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['code']
         backward_financial_year = True
+
         permissions = (
             ('get.account', 'مشاهده حساب ها'),
 
@@ -195,6 +206,20 @@ class Account(BaseModel):
             ('create.account3', 'تعریف تفصیلی'),
             ('update.account3', 'ویرایش تفصیلی'),
             ('delete.account3', 'حذف تفصیلی'),
+
+            ('getOwn.account', 'مشاهده حساب ها خود'),
+
+            ('updateOwn.account0', 'ویرایش گروه خود'),
+            ('deleteOwn.account0', 'حذف گروه خود'),
+
+            ('updateOwn.account1', 'ویرایش کل خود'),
+            ('deleteOwn.account1', 'حذف کل خود'),
+
+            ('updateOwn.account2', 'ویرایش معین خود'),
+            ('deleteOwn.account2', 'حذف معین خود'),
+
+            ('updateOwn.account3', 'ویرایش تفصیلی خود'),
+            ('deleteOwn.account3', 'حذف تفصیلی خود'),
         )
 
     @property

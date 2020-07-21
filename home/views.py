@@ -16,8 +16,7 @@ class TimeView(APIView):
 
 
 class OptionListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'option'
+    permission_classes = (IsAuthenticated,)
     queryset = Option.objects.all()
     serializer_class = OptionSerializer
 

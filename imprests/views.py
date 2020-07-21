@@ -20,7 +20,7 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
     serializer_class = ImprestSettlementListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
-        return ImprestSettlement.objects.inFinancialYear()
+        return ImprestSettlement.objects.hasAccess()
 
     def create(self, request, *args, **kwargs):
         data = request.data

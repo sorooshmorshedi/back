@@ -48,7 +48,7 @@ class ChequeListView(generics.ListAPIView):
 
 class ChequebookListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = "get.chequebook"
+    permission_codename = ("get.chequebook", )
     serializer_class = ChequebookListSerializer
     filterset_class = ChequebookFilter
     ordering_fields = '__all__'
@@ -60,7 +60,7 @@ class ChequebookListView(generics.ListAPIView):
 
 class SanadListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = "get.sanad"
+    permission_codename = ("get.sanad", )
     serializer_class = SanadSerializer
     filterset_class = SanadFilter
     ordering_fields = '__all__'

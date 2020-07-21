@@ -15,10 +15,33 @@ class RoleSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'company',)
 
 
+class ContentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = '__all__'
+
+
+class PermissionListSerializer(serializers.ModelSerializer):
+    content_type = ContentTypeSerializer()
+    contentType = content_type
+
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+
+class RoleWithPermissionListSerializer(serializers.ModelSerializer):
+    permissions = PermissionListSerializer(many=True)
+
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
 class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_company = CompanySerializer()
     active_financial_year = FinancialYearSerializer()
-    roles = RoleSerializer(many=True)
+    roles = RoleWithPermissionListSerializer(many=True)
     name = serializers.SerializerMethodField()
 
     def get_name(self, obj: User):
@@ -53,23 +76,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'roles', 'is_active')
 
 
-class ContentTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContentType
-        fields = '__all__'
-
-
-class PermissionListSerializer(serializers.ModelSerializer):
-    content_type = ContentTypeSerializer()
-    contentType = content_type
-
-    class Meta:
-        model = Permission
-        fields = '__all__'
-
-
 class CitySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = City
         fields = '__all__'

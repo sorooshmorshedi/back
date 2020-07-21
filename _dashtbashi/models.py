@@ -32,12 +32,16 @@ class Driver(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
-
+        permission_basename = 'driver'
         permissions = (
             ('get.driver', 'مشاهده راننده'),
             ('create.driver', 'تعریف راننده'),
             ('update.driver', 'ویرایش راننده'),
             ('delete.driver', 'حذف راننده'),
+
+            ('getOwn.driver', 'مشاهده راننده های خود'),
+            ('updateOwn.driver', 'ویرایش راننده های خود'),
+            ('deleteOwn.driver', 'حذف راننده های خود'),
         )
 
 
@@ -88,26 +92,24 @@ class Car(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
-
+        permission_basename = 'car'
         permissions = (
             ('get.car', 'مشاهده ماشین'),
             ('create.car', 'تعریف ماشین'),
             ('update.car', 'ویرایش ماشین'),
             ('delete.car', 'حذف ماشین'),
+
+            ('getOwn.car', 'مشاهده ماشین های خود'),
+            ('updateOwn.car', 'ویرایش ماشین های خود'),
+            ('deleteOwn.car', 'حذف ماشین های خود'),
         )
 
     @property
     def car_number_str(self):
         return "{} {} {} ایران {}".format(*self.car_number)
 
-    def save(
-            self,
-            force_insert: bool = ...,
-            force_update: bool = ...,
-            using: Optional[str] = ...,
-            update_fields: Optional[Union[Sequence[str], str]] = ...,
-    ) -> None:
-        save_result = super(Car, self).save(force_insert, force_update, using, update_fields)
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
 
         # Create Accounts Here
         # parent = Account()
@@ -117,8 +119,6 @@ class Car(BaseModel):
         #     code=parent.get_new_child_code(),
         #     level=Account.TAFSILI
         # )
-
-        return save_result
 
 
 class Driving(BaseModel):
@@ -136,11 +136,16 @@ class Driving(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'driving'
         permissions = (
             ('get.driving', 'مشاهده انتصاب راننده به ماشین'),
             ('create.driving', 'تعریف انتصاب راننده به ماشین'),
             ('update.driving', 'ویرایش انتصاب راننده به ماشین'),
             ('delete.driving', 'حذف انتصاب راننده به ماشین'),
+
+            ('getOwn.driving', 'مشاهده انتصاب راننده به ماشین خود'),
+            ('updateOwn.driving', 'ویرایش انتصاب راننده به ماشین خود'),
+            ('deleteOwn.driving', 'حذف انتصاب راننده به ماشین خود'),
         )
 
 
@@ -152,11 +157,16 @@ class Association(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'association'
         permissions = (
             ('get.association', 'مشاهده کمیسیون انجمن'),
             ('create.association', 'تعریف کمیسیون انجمن'),
             ('update.association', 'ویرایش کمیسیون انجمن'),
             ('delete.association', 'حذف کمیسیون انجمن'),
+
+            ('getOwn.association', 'مشاهده کمیسیون انجمن های خود'),
+            ('updateOwn.association', 'ویرایش کمیسیون انجمن های خود'),
+            ('deleteOwn.association', 'حذف کمیسیون انجمن های خود'),
         )
 
 
@@ -187,7 +197,7 @@ class RemittanceMixin(BaseModel):
     remittance_payment_method = models.CharField(max_length=3, choices=REMITTANCE_PAYMENT_METHODS)
     fare_price = DECIMAL()
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         abstract = True
 
 
@@ -208,11 +218,16 @@ class Remittance(RemittanceMixin):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+        permission_basename = 'remittance'
         permissions = (
             ('get.remittance', 'مشاهده حواله'),
             ('create.remittance', 'تعریف حواله'),
             ('update.remittance', 'ویرایش حواله'),
             ('delete.remittance', 'حذف حواله'),
+
+            ('getOwn.remittance', 'مشاهده حواله های خود'),
+            ('updateOwn.remittance', 'ویرایش حواله های خود'),
+            ('deleteOwn.remittance', 'حذف حواله های خود'),
         )
 
 
@@ -228,11 +243,16 @@ class LadingBillSeries(BaseModel):
     to_bill_number = models.IntegerField()
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'ladingBillSeries'
         permissions = (
             ('get.ladingBillSeries', 'مشاهده سری بارنامه'),
             ('create.ladingBillSeries', 'تعریف سری بارنامه'),
             ('update.ladingBillSeries', 'ویرایش سری بارنامه'),
             ('delete.ladingBillSeries', 'حذف سری بارنامه'),
+
+            ('getOwn.ladingBillSeries', 'مشاهده سری بارنامه های خود'),
+            ('updateOwn.ladingBillSeries', 'ویرایش سری بارنامه های خود'),
+            ('deleteOwn.ladingBillSeries', 'حذف سری بارنامه های خود'),
         )
 
 
@@ -242,8 +262,10 @@ class LadingBillNumber(BaseModel):
     is_revoked = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'ladingBillNumber'
         permissions = (
             ('revoke.ladingBillNumber', 'ابطال شماره بارنامه'),
+            ('revokeOwn.ladingBillNumber', 'ابطال شماره بارنامه خود'),
         )
 
 

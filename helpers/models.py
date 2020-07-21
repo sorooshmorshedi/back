@@ -8,23 +8,53 @@ import django.db.models.options as options
 
 from helpers.functions import get_current_user
 
-options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year',)
+options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year', 'permission_basename')
 
 
 class BaseManager(models.Manager):
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
+    def hasAccess(self, method, permission_basename=None, financial_year=None):
+        user = get_current_user()
+
+        if hasattr(self.model, 'financial_year'):
+            queryset = self.inFinancialYear(financial_year)
+        else:
+            queryset = super().get_queryset()
+
+        if not permission_basename:
+            permission_basename = self.model._meta.permission_basename
+
+        if not permission_basename:
+            raise Exception("Please set permission_basename in model Meta class")
+
+        operation = ""
+        method = method.upper()
+        if method == 'POST':
+            operation = "create"
+        if method == 'GET':
+            operation = "get"
+        if method == 'PUT':
+            operation = "update"
+        if method == 'DELETE':
+            operation = "delete"
+
+        if (
+                not user.has_perm("{}.{}".format(operation, permission_basename))
+                and user.has_perm("{}Own.{}".format(operation, permission_basename))
+        ):
+            queryset = queryset.filter(created_by=user)
+
         return queryset
 
     def inFinancialYear(self, financial_year=None):
         from helpers.functions import get_current_user
+        qs = super().get_queryset()
+
         user = get_current_user()
 
         if not financial_year:
             financial_year = user.active_financial_year
 
-        qs = super().get_queryset()
         if self.model._meta.backward_financial_year:
             return qs.filter(financial_year__id__lte=financial_year.id)
         else:
@@ -42,11 +72,13 @@ class BaseModel(models.Model):
         default_permissions = ()
         ordering = ['pk']
         backward_financial_year = False
+        permission_basename = None
 
     objects = BaseManager()
 
     def save(self, *args, **kwargs) -> None:
-        self.created_by = get_current_user()
+        if not self.pk:
+            self.created_by = get_current_user()
         super().save(*args, **kwargs)
 
 

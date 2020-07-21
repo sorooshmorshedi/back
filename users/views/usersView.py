@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework import status, generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -19,36 +20,44 @@ class CurrentUserApiView(APIView):
 class UserListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'user'
-    queryset = User.objects.all()
     serializer_class = UserListRetrieveSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return User.objects.hasAccess('get')
 
 
 class UserCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'user'
-    queryset = User.objects.all()
     serializer_class = UserCreateSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return User.objects.hasAccess('post')
 
 
 class UserUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'user'
-    queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return User.objects.hasAccess('put')
 
 
 class UserDestroyView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission, DeleteUserPermission)
     permission_base_codename = 'user'
-    queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return User.objects.hasAccess('delete')
 
 
 class UserChangePasswordView(APIView):
     permission_classes = (IsAuthenticated, ChangePasswordPermission)
 
     def post(self, request):
-        user = get_object_or_404(User, pk=request.data.get('user'))
+        user = get_object_or_404(User.objects.hasAccess(), pk=request.data.get('user'))
         user.set_password(request.data.get('password'))
         user.save()
         return Response([])

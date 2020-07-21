@@ -17,11 +17,16 @@ class Unit(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'unit'
         permissions = (
             ('get.unit', 'مشاهده واحد'),
             ('create.unit', 'تعریف واحد'),
             ('update.unit', 'ویرایش واحد'),
             ('delete.unit', 'حذف واحد'),
+
+            ('getOwn.unit', 'مشاهده واحد های خود'),
+            ('updateOwn.unit', 'ویرایش واحد های خود'),
+            ('deleteOwn.unit', 'حذف واحد های خود'),
         )
 
     def __str__(self):
@@ -35,11 +40,16 @@ class Warehouse(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'warehouse'
         permissions = (
             ('get.warehouse', 'مشاهده انبار'),
             ('create.warehouse', 'تعریف انبار'),
             ('update.warehouse', 'ویرایش انبار'),
             ('delete.warehouse', 'حذف انبار'),
+
+            ('getOwn.warehouse', 'مشاهده انبار های خود'),
+            ('updateOwn.warehouse', 'ویرایش انبار های خود'),
+            ('deleteOwn.warehouse', 'حذف انبار های خود'),
         )
 
     def __str__(self):
@@ -68,11 +78,16 @@ class WareLevel(BaseModel):
     class Meta(BaseModel.Meta):
         backward_financial_year = True
         unique_together = ('name', 'level')
+        permission_basename = 'wareLevel'
         permissions = (
             ('get.wareLevel', 'مشاهده سطح کالا'),
             ('create.wareLevel', 'تعریف سطح کالا'),
             ('update.wareLevel', 'ویرایش سطح کالا'),
             ('delete.wareLevel', 'حذف سطح کالا'),
+
+            ('getOwn.wareLevel', 'مشاهده سطح کالا های خود'),
+            ('updateOwn.wareLevel', 'ویرایش سطح کالا های خود'),
+            ('deleteOwn.wareLevel', 'حذف سطح کالا های خود'),
         )
 
     def __str__(self):
@@ -147,13 +162,18 @@ class Ware(BaseModel):
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
         backward_financial_year = True
+        permission_basename = 'ware'
         permissions = (
             ('get.ware', 'مشاهده کالا'),
             ('create.ware', 'تعریف کالا'),
             ('update.ware', 'ویرایش کالا'),
             ('delete.ware', 'حذف کالا'),
-
             ('get.wareInventory', 'مشاهده موجودی کالا'),
+
+            ('getOwn.ware', 'مشاهده کالا های خود'),
+            ('updateOwn.ware', 'ویرایش کالا های خود'),
+            ('deleteOwn.ware', 'حذف کالا های خود'),
+            ('getOwn.wareInventory', 'مشاهده موجودی کالا های خود'),
         )
 
     def has_factorItem(self):

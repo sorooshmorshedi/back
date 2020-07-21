@@ -110,7 +110,7 @@ def get_account_permission_base_codename(view):
         else:
             return "account0"
     else:
-        account = view.get_object()
+        account = Account.objects.get(**view.kwargs)
         return "account{}".format(account.level)
 
 
@@ -121,6 +121,12 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     @property
     def permission_base_codename(self):
         return get_account_permission_base_codename(self)
+
+    def get_queryset(self):
+        return Account.objects.hasAccess(
+            self.request.method,
+            get_account_permission_base_codename(self)
+        )
 
     def perform_create(self, serializer):
 
@@ -182,6 +188,12 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
             return AccountCreateUpdateSerializer
         else:
             return AccountListRetrieveSerializer
+
+    def get_queryset(self):
+        return Account.objects.hasAccess(
+            self.request.method,
+            get_account_permission_base_codename(self)
+        )
 
     def destroy(self, request, *args, **kwargs):
         account = self.get_object()

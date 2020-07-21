@@ -330,7 +330,17 @@ class FactorExpense(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     class Meta(BaseModel.Meta):
-        pass
+        permission_basename = 'factorExpenses'
+        permissions = (
+            ('get.factorExpenses', 'مشاهده هزینه های فاکتور'),
+            ('create.factorExpenses', 'تعریف هزینه های فاکتور'),
+            ('update.factorExpenses', 'ویرایش هزینه های فاکتور'),
+            ('delete.factorExpenses', 'حذف هزینه های فاکتور'),
+
+            ('getOwn.factorExpenses', 'مشاهده هزینه های فاکتور خود'),
+            ('updateOwn.factorExpenses', 'ویرایش هزینه های فاکتور خود'),
+            ('deleteOwn.factorExpenses', 'حذف هزینه های فاکتور خود'),
+        )
 
 
 class FactorPayment(BaseModel):

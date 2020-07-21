@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Permission
+from django.db.models import QuerySet
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,7 +12,7 @@ from users.serializers import RoleSerializer, PermissionListSerializer
 
 
 class PermissionListView(APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         queryset = Permission.objects.all().order_by('pk')
@@ -33,8 +34,10 @@ class PermissionListView(APIView):
 class RoleListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'role'
-    queryset = Role.objects.all()
     serializer_class = RoleSerializer
+
+    def get_queryset(self):
+        return Role.objects.hasAccess(self.request.method)
 
 
 class RoleCreateView(generics.CreateAPIView):
@@ -52,12 +55,16 @@ class RoleCreateView(generics.CreateAPIView):
 class RoleUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'role'
-    queryset = Role.objects.all()
     serializer_class = RoleSerializer
+
+    def get_queryset(self):
+        return Role.objects.hasAccess(self.request.method)
 
 
 class RoleDestroyView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_base_codename = 'role'
-    queryset = Role.objects.all()
     serializer_class = RoleSerializer
+
+    def get_queryset(self):
+        return Role.objects.hasAccess(self.request.method)

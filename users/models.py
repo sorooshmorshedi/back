@@ -1,14 +1,14 @@
 import random
 from datetime import timedelta
 import jdatetime
-from django.contrib.auth.models import AbstractUser, Permission, Group
+from django.contrib.auth.models import AbstractUser, Permission, Group, UserManager
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company, FinancialYear
-from helpers.models import BaseModel
+from helpers.models import BaseModel, BaseManager
 from helpers.sms import Sms
 
 
@@ -17,14 +17,22 @@ class Role(BaseModel):
     name = models.CharField(max_length=255)
     permissions = models.ManyToManyField(Permission, blank=True, related_name='roles')
 
-    class Meta:
-        default_permissions = ()
+    class Meta(BaseModel.Meta):
+        permission_basename = 'role'
         permissions = (
             ('get.role', 'مشاهده نقش'),
             ('create.role', 'تعریف نقش'),
             ('update.role', 'ویرایش نقش'),
             ('delete.role', 'حذف نقش'),
+
+            ('getOwn.role', 'مشاهده نقش خود'),
+            ('updateOwn.role', 'ویرایش نقش خود'),
+            ('deleteOwn.role', 'حذف نقش خود'),
         )
+
+
+class MyUserManager(UserManager, BaseManager):
+    pass
 
 
 class User(AbstractUser, BaseModel):
@@ -37,16 +45,25 @@ class User(AbstractUser, BaseModel):
 
     roles = models.ManyToManyField(Role, related_name='users')
 
+    objects = MyUserManager()
+
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
         default_permissions = ()
+
+        permission_basename = 'user'
         permissions = (
             ('get.user', 'مشاهده کاربر'),
             ('create.user', 'تعریف کاربر'),
             ('update.user', 'ویرایش کاربر'),
             ('delete.user', 'حذف کاربر'),
-
             ('changePassword.user', 'تغییر کلمه عبور کاربران'),
+
+            ('getOwn.user', 'مشاهده کاربران خود'),
+            ('updateOwn.user', 'ویرایش کاربران خود'),
+            ('deleteOwn.user', 'حذف کاربران خود'),
+            ('changePasswordOwn.user', 'تغییر کلمه عبور کاربران خود'),
+
         )
 
     def has_perm(self, permission_codename, company=None):
@@ -58,7 +75,14 @@ class User(AbstractUser, BaseModel):
         if not company:
             company = self.active_company
 
-        return self.roles.filter(company=company, permissions__codename=permission_codename).exists()
+        queryset = self.roles.filter(permissions__codename=permission_codename)
+
+        # Allow all users to get list of companies
+        permission_parts = permission_codename.split('.')
+        if permission_parts[0] == 'get' and permission_parts[1] == Company._meta.permission_basename:
+            return queryset.exists()
+
+        return queryset.filter(company=company).exists()
 
 
 class PhoneVerification(BaseModel):
@@ -76,7 +100,7 @@ class PhoneVerification(BaseModel):
     def __str__(self):
         return "user: {}, phone: {}, code: {}, datetime: {}".format(self.user, self.phone, self.code, self.created_at)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         get_latest_by = 'id'
 
     @staticmethod
@@ -110,7 +134,7 @@ class PhoneVerification(BaseModel):
 class City(BaseModel):
     name = models.CharField(unique=True, max_length=255)
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         default_permissions = ()
         permissions = (
             ('get.city', 'مشاهده شهر'),

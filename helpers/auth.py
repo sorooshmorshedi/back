@@ -10,7 +10,13 @@ class BasicCRUDPermission(BasePermission):
 
         permission_codename = getattr(view, 'permission_codename', None)
 
-        if not permission_codename:
+        permission_codenames = []
+        if permission_codename:
+            permission_codenames.append(permission_codename)
+
+            operation = permission_codename.split('.')[0]
+            permission_codenames.append(permission_codename.replace(operation, "{}Own".format(operation)))
+        else:
             base_codename = getattr(view, 'permission_base_codename', None)
             if not base_codename:
                 raise Exception(
@@ -19,28 +25,34 @@ class BasicCRUDPermission(BasePermission):
 
             method = request.method
 
-            operation = ''
+            operations = []
             if method == 'POST':
-                operation = "create"
+                operations.append("create")
             if method == 'GET':
-                operation = "get"
+                operations.append("get")
+                operations.append("getOwn")
             if method == 'PUT':
-                operation = "update"
+                operations.append("update")
+                operations.append("updateOwn")
             if method == 'DELETE':
-                operation = "delete"
+                operations.append("delete")
+                operations.append("deleteOwn")
 
-            permission_codename = "{}.{}".format(operation, base_codename)
+            for operation in operations:
+                permission_codenames.append("{}.{}".format(operation, base_codename))
 
-        has_perm = user.has_perm(permission_codename)
-        if has_perm:
-            return True
+        for permission_codename in permission_codenames:
+            has_perm = user.has_perm(permission_codename)
+            if has_perm:
+                return True
+
+        permission_codename = permission_codenames[0]
+        permission = Permission.objects.filter(codename=permission_codename).first()
+        if permission:
+            self.message = "شما اجازه این عملیات را ندارید: {}".format(permission.name)
         else:
-            permission = Permission.objects.filter(codename=permission_codename).first()
-            if permission:
-                self.message = "شما اجازه این عملیات را ندارید: {}".format(permission.name)
-            else:
-                self.message = "not found permission: {}".format(permission_codename)
-            return False
+            self.message = "not found permission: {}".format(permission_codename)
+        return False
 
 
 class TokenAuthSupportQueryString(TokenAuthentication):
