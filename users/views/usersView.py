@@ -19,7 +19,7 @@ class CurrentUserApiView(APIView):
 
 class UserListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'user'
+    permission_basename = 'user'
     serializer_class = UserListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
@@ -28,7 +28,7 @@ class UserListView(generics.ListAPIView):
 
 class UserCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'user'
+    permission_basename = 'user'
     serializer_class = UserCreateSerializer
 
     def get_queryset(self) -> QuerySet:
@@ -37,7 +37,7 @@ class UserCreateView(generics.CreateAPIView):
 
 class UserUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'user'
+    permission_basename = 'user'
     serializer_class = UserUpdateSerializer
 
     def get_queryset(self) -> QuerySet:
@@ -46,7 +46,7 @@ class UserUpdateView(generics.UpdateAPIView):
 
 class UserDestroyView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission, DeleteUserPermission)
-    permission_base_codename = 'user'
+    permission_basename = 'user'
     serializer_class = UserUpdateSerializer
 
     def get_queryset(self) -> QuerySet:

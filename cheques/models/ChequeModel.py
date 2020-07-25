@@ -51,7 +51,7 @@ class Cheque(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=30, choices=CHEQUE_STATUSES)
     received_or_paid = models.CharField(max_length=10, choices=((RECEIVED, 'دریافتنی'), (PAID, 'پرداختنی')))
-    type = models.CharField(max_length=1, choices=CHEQUE_TYPES, blank=True)
+    type = models.CharField(max_length=2, choices=CHEQUE_TYPES, blank=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)

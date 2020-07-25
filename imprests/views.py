@@ -16,11 +16,11 @@ from transactions.models import Transaction
 
 class ImprestSettlementModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'imprestSettlement'
+    permission_basename = 'imprestSettlement'
     serializer_class = ImprestSettlementListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
-        return ImprestSettlement.objects.hasAccess()
+        return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -79,7 +79,7 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
 
 class ImprestSettlementByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'imprestSettlement'
+    permission_basename = 'imprestSettlement'
 
     def get(self, request):
         item = get_object_by_code(
@@ -94,7 +94,7 @@ class ImprestSettlementByPositionView(APIView):
 
 class GetAccountNotSettledImprestsView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'imprestTransaction'
+    permission_basename = 'imprestTransaction'
 
     def get(self, request):
         imprests = Transaction.objects.inFinancialYear().filter(

@@ -1,11 +1,10 @@
 from django.conf.urls import url
-from sanads.views import SanadListCreate, SanadDetail, newCodeForSanad, ReorderSanadsApiView, GetSanadByCodeView
+from sanads.views import SanadListCreate, SanadDetail, ReorderSanadsApiView, SanadByPositionView
 
 urlpatterns = [
 
     url(r'^$', SanadListCreate.as_view(), name=''),
-    url(r'^(?P<pk>[0-9]+)$', SanadDetail.as_view(), name=''),
-    url(r'^newCode$', newCodeForSanad, name=''),
-    url(r'^getSanadByCode$', GetSanadByCodeView.as_view(), name=''),
+    url(r'^(?P<pk>[0-9]+)/$', SanadDetail.as_view(), name=''),
+    url(r'^byPosition$', SanadByPositionView.as_view(), name=''),
     url(r'^reorder$', ReorderSanadsApiView.as_view(), name=''),
 ]

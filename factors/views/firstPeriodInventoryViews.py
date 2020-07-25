@@ -31,7 +31,7 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
 
 class FirstPeriodInventoryView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'firstPeriodInventory'
+    permission_basename = 'firstPeriodInventory'
 
     def get(self, request):
         factor = Factor.get_first_period_inventory()

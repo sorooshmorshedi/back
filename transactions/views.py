@@ -9,12 +9,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from helpers.auth import BasicCRUDPermission
+from helpers.functions import get_object_by_code
 from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
 
 
-def get_transaction_permission_base_codename(transaction_type):
+def get_transaction_permission_basename(transaction_type):
     if transaction_type == Transaction.RECEIVE:
         return "receiveTransaction"
     else:
@@ -26,8 +27,8 @@ class TransactionCreateView(generics.CreateAPIView):
     serializer_class = TransactionCreateUpdateSerializer
 
     @property
-    def permission_base_codename(self):
-        return get_transaction_permission_base_codename(self.request.data.get('type'))
+    def permission_basename(self):
+        return get_transaction_permission_basename(self.request.data.get('type'))
 
     def get_queryset(self):
         return Transaction.objects.inFinancialYear()
@@ -36,7 +37,7 @@ class TransactionCreateView(generics.CreateAPIView):
         user = request.user
 
         data = request.data
-        transaction_data = data.get('transaction')
+        transaction_data = data.get('item')
 
         sanad = Sanad.objects.inFinancialYear().filter(code=transaction_data.get('sanad_code')).first()
 
@@ -62,8 +63,8 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TransactionCreateUpdateSerializer
 
     @property
-    def permission_base_codename(self):
-        return get_transaction_permission_base_codename(self.get_object().type)
+    def permission_basename(self):
+        return get_transaction_permission_basename(self.get_object().type)
 
     def get_queryset(self):
         return Transaction.objects.inFinancialYear()
@@ -74,7 +75,7 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
         user = request.user
 
         data = request.data
-        transaction_data = data.get('transaction')
+        transaction_data = data.get('item')
 
         serializer = TransactionCreateUpdateSerializer(instance=transaction, data=transaction_data)
         serializer.is_valid(raise_exception=True)
@@ -101,29 +102,19 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response()
 
 
-@api_view(['get'])
-def newCodeForTransaction(request):
-    codes = Transaction.newCodes(request.user)
-    return Response(codes)
-
-
-class GetTransactionByCodeView(APIView):
+class TransactionByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    serializer_class = TransactionCreateUpdateSerializer
 
     @property
-    def permission_base_codename(self):
-        return get_transaction_permission_base_codename(self.request.GET.get('type'))
+    def permission_basename(self):
+        return get_transaction_permission_basename(self.request.GET.get('type'))
 
     def get(self, request):
-        if 'code' not in request.GET:
-            return Response(['کد وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-        if 'type' not in request.GET:
-            return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-
-        code = request.GET['code']
-        type = request.GET['type']
-        queryset = Transaction.objects.inFinancialYear().all()
-        transaction = get_object_or_404(queryset, code=code, type=type)
-        serializer = TransactionListRetrieveSerializer(transaction)
-        return Response(serializer.data)
+        item = get_object_by_code(
+            Transaction.objects.hasAccess(request.method, self.permission_basename).filter(type=request.GET.get('type')),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(TransactionListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)

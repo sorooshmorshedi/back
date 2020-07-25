@@ -11,12 +11,13 @@ from accounts.accounts.models import Account, FloatAccount
 from cheques.permissions import SubmitChequePermission, ChangeChequeStatusPermission
 from cheques.serializers import *
 from helpers.auth import BasicCRUDPermission
+from helpers.functions import get_object_by_code
 from sanads.models import clearSanad, Sanad
 
 
 class ChequebookModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'chequebook'
+    permission_basename = 'chequebook'
     serializer_class = ChequebookCreateUpdateSerializer
 
     def get_queryset(self):
@@ -48,7 +49,7 @@ class ChequebookModelView(viewsets.ModelViewSet):
 """
 class ChequebookByPositionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'chequebook'
+    permission_basename = 'chequebook'
 
     def get(self, request):
         if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
@@ -135,7 +136,7 @@ class SubmitChequeApiView(APIView):
         return cheque
 
 
-def get_cheque_permission_base_codename(received_or_paid):
+def get_cheque_permission_basename(received_or_paid):
     if received_or_paid == Cheque.RECEIVED:
         return "receivedCheque"
     else:
@@ -148,8 +149,8 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChequeListRetrieveSerializer
 
     @property
-    def permission_base_codename(self):
-        return get_cheque_permission_base_codename(self.get_object().received_or_paid)
+    def permission_basename(self):
+        return get_cheque_permission_basename(self.get_object().received_or_paid)
 
     def update(self, request, *args, **kwargs):
 
@@ -222,37 +223,21 @@ class ChequeByPositionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_base_codename(self):
+    def permission_basename(self):
         received_or_paid = self.request.GET.get('received_or_paid')
-        return get_cheque_permission_base_codename(received_or_paid)
+        return get_cheque_permission_basename(received_or_paid)
 
     def get(self, request):
-        if 'received_or_paid' not in request.GET:
-            return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-        if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
-            return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-
-        received_or_paid = request.GET['received_or_paid']
-        id = request.GET.get('id', None)
-        position = request.GET['position']
-        queryset = Cheque.objects.inFinancialYear().filter(received_or_paid=received_or_paid)
-
-        try:
-            if position == 'next':
-                cheque = queryset.filter(pk__gt=id).order_by('id')[0]
-            elif position == 'prev':
-                if id:
-                    queryset = queryset.filter(pk__lt=id)
-                cheque = queryset.order_by('-id')[0]
-            elif position == 'first':
-                cheque = queryset.order_by('id')[0]
-            elif position == 'last':
-                cheque = queryset.order_by('-id')[0]
-        except IndexError:
-            return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
-
-        serializer = ChequeListRetrieveSerializer(cheque)
-        return Response(serializer.data)
+        item = get_object_by_code(
+            Cheque.objects.hasAccess(request.method, self.permission_basename).filter(
+                received_or_paid=request.GET.get('received_or_paid')
+            ),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(ChequeListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
 class ChangeChequeStatus(APIView):
@@ -301,7 +286,7 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
     serializer_class = StatusChangeSerializer
 
     @property
-    def permission_base_codename(self):
+    def permission_basename(self):
         status_change = self.get_object()
         cheque = status_change.cheque
         if cheque.received_or_paid == Cheque.RECEIVED:

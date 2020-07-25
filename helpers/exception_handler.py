@@ -11,6 +11,7 @@ labels = {
     'mobile': 'موبایل',
     'phone': 'موبایل',
     'account': 'حساب',
+    'date': 'تاریخ',
 
     # Cheque
     'serial_from': 'از شماره سریال',
@@ -34,9 +35,12 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None and response.status_code != status.HTTP_500_INTERNAL_SERVER_ERROR:
-
         errors = []
-        message = response.data.get('detail')
+        data = response.data
+        if isinstance(data, list):
+            message = data[0]
+        else:
+            message = data.get('detail')
         if not message:
             for field, value in response.data.items():
                 errors.append({
@@ -45,7 +49,7 @@ def custom_exception_handler(exc, context):
                 })
         else:
             errors.append({
-                'field': None,
+                'field': '',
                 'messages': [message]
             })
 

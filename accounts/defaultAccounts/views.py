@@ -13,7 +13,7 @@ from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIVi
 @method_decorator(csrf_exempt, name='dispatch')
 class DefaultAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'defaultAccount'
+    permission_basename = 'defaultAccount'
     serializer_class = DefaultAccountSerializer
 
     def list(self, request, *ergs, **kwargs):
@@ -24,7 +24,7 @@ class DefaultAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class DefaultAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'defaultAccount'
+    permission_basename = 'defaultAccount'
     serializer_class = DefaultAccountSerializer
 
     def retrieve(self, request, **kwargs):

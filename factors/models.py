@@ -214,8 +214,8 @@ class Factor(BaseModel):
         from factors.serializers import FactorItemSerializer
         from factors.serializers import FactorExpenseSerializer
 
-        factor_items_data = data.get('factor_items')
-        factor_expenses_data = data.get('factor_expenses')
+        factor_items_data = data.get('items')
+        factor_expenses_data = data.get('expenses')
 
         MassRelatedCUD(
             user,
@@ -426,8 +426,6 @@ class FactorItem(BaseModel):
 class Transfer(BaseModel):
     code = models.IntegerField()
     date = jmodels.jDateField()
-    created_at = jmodels.jDateTimeField(auto_now=True)
-    updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     input_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='input_transfer')
     output_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='output_transfer')

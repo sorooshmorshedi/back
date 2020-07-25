@@ -23,6 +23,6 @@ class OptionListView(generics.ListAPIView):
 
 class OptionUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'option'
+    permission_basename = 'option'
     queryset = Option.objects.all()
     serializer_class = OptionSerializer

@@ -17,10 +17,10 @@ class BasicCRUDPermission(BasePermission):
             operation = permission_codename.split('.')[0]
             permission_codenames.append(permission_codename.replace(operation, "{}Own".format(operation)))
         else:
-            base_codename = getattr(view, 'permission_base_codename', None)
+            base_codename = getattr(view, 'permission_basename', None)
             if not base_codename:
                 raise Exception(
-                    "permission_base_codename does not found, declare permission_base_codename or permission_codename in view"
+                    "permission_basename does not found, declare permission_basename or permission_codename in view"
                 )
 
             method = request.method

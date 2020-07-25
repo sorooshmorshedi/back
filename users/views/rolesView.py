@@ -33,7 +33,7 @@ class PermissionListView(APIView):
 
 class RoleListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'role'
+    permission_basename = 'role'
     serializer_class = RoleSerializer
 
     def get_queryset(self):
@@ -42,7 +42,7 @@ class RoleListView(generics.ListAPIView):
 
 class RoleCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'role'
+    permission_basename = 'role'
     queryset = Role.objects.all()
     serializer_class = RoleSerializer
 
@@ -54,7 +54,7 @@ class RoleCreateView(generics.CreateAPIView):
 
 class RoleUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'role'
+    permission_basename = 'role'
     serializer_class = RoleSerializer
 
     def get_queryset(self):
@@ -63,7 +63,7 @@ class RoleUpdateView(generics.UpdateAPIView):
 
 class RoleDestroyView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'role'
+    permission_basename = 'role'
     serializer_class = RoleSerializer
 
     def get_queryset(self):

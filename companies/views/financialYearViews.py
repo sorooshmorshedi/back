@@ -297,6 +297,6 @@ class MoveFinancialYearView(APIView):
 
 class FinancialYearModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'financialYear'
+    permission_basename = 'financialYear'
     queryset = FinancialYear.objects.all()
     serializer_class = FinancialYearSerializer

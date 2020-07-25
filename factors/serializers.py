@@ -205,7 +205,7 @@ class TransferCreateSerializer(serializers.ModelSerializer):
             'explanation': explanation,
             'is_definite': True,
             'definition_date': now(),
-            'time': ''
+            'time': now()
         }
         input_factor = Factor.objects.create(**factor_data, type=Factor.INPUT_TRANSFER)
         input_factor.save()

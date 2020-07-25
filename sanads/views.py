@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from helpers.auth import BasicCRUDPermission
 from helpers.db import queryset_iterator
+from helpers.functions import get_object_by_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.serializers import *
 
@@ -18,7 +19,7 @@ from sanads.serializers import *
 @method_decorator(csrf_exempt, name='dispatch')
 class SanadListCreate(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'sanad'
+    permission_basename = 'sanad'
     serializer_class = SanadSerializer
 
     def get_queryset(self):
@@ -32,7 +33,7 @@ class SanadListCreate(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        sanad_data = data.get('sanad')
+        sanad_data = data.get('item')
         items_data = data.get('items')
 
         serializer = SanadSerializer(data=sanad_data)
@@ -61,7 +62,7 @@ class SanadListCreate(generics.ListCreateAPIView):
 
 class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'sanad'
+    permission_basename = 'sanad'
     serializer_class = SanadSerializer
 
     def get_queryset(self):
@@ -76,7 +77,7 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         user = request.user
         data = request.data
-        sanad_data = data.get('sanad')
+        sanad_data = data.get('item')
         items_data = data.get('items')
 
         serializer = SanadSerializer(instance=self.get_object(), data=sanad_data)
@@ -116,21 +117,17 @@ class ReorderSanadsApiView(APIView):
         return Response([])
 
 
-@api_view(['get'])
-def newCodeForSanad(request):
-    return Response(newSanadCode())
-
-
-class GetSanadByCodeView(APIView):
+class SanadByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'sanad'
+    permission_codename = 'get.sanad'
 
     def get(self, request):
-        if 'code' not in request.GET:
-            return Response(['کد سند وارد نشده است'], status.HTTP_400_BAD_REQUEST)
+        item = get_object_by_code(
+            Sanad.objects.hasAccess(request.method, 'sanad'),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(SanadListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
-        code = request.GET['code']
-        queryset = Sanad.objects.inFinancialYear().all()
-        sanad = get_object_or_404(queryset, code=code)
-        serializer = SanadListRetrieveSerializer(sanad)
-        return Response(serializer.data)

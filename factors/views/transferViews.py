@@ -10,12 +10,13 @@ from factors.helpers import getInventoryCount
 from factors.models import Transfer, FactorItem
 from factors.serializers import TransferListRetrieveSerializer, TransferCreateSerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.functions import get_object_by_code
 from wares.models import Ware, Warehouse
 
 
 class TransferModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'transfer'
+    permission_basename = 'transfer'
 
     serializer_class = TransferListRetrieveSerializer
 
@@ -120,29 +121,14 @@ class TransferModelView(viewsets.ModelViewSet):
 
 class GetTransferByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'transfer'
+    permission_basename = 'transfer'
 
     def get(self, request):
-        if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
-            return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-
-        id = request.GET.get('id', None)
-        position = request.GET['position']
-        queryset = Transfer.objects.inFinancialYear()
-
-        try:
-            if position == 'next':
-                factor = queryset.filter(pk__gt=id).order_by('id')[0]
-            elif position == 'prev':
-                if id:
-                    queryset = queryset.filter(pk__lt=id)
-                factor = queryset.order_by('-id')[0]
-            elif position == 'first':
-                factor = queryset.order_by('id')[0]
-            elif position == 'last':
-                factor = queryset.order_by('-id')[0]
-        except IndexError:
-            return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
-
-        serializer = TransferListRetrieveSerializer(factor)
-        return Response(serializer.data)
+        item = get_object_by_code(
+            Transfer.objects.hasAccess(request.method, self.permission_basename),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(TransferListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)

@@ -17,7 +17,7 @@ from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIVi
 class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountSerializer
-    permission_base_codename = 'floatAccount'
+    permission_basename = 'floatAccount'
 
     def created(self, instance, request):
         syncFloatAccountGroups = request.data.pop('syncFloatAccountGroups', [])
@@ -35,7 +35,7 @@ class FloatAccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountSerializer
-    permission_base_codename = 'floatAccount'
+    permission_basename = 'floatAccount'
 
     def get_queryset(self):
         user = self.request.user
@@ -69,7 +69,7 @@ class FloatAccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
-    permission_base_codename = 'floatAccountGroup'
+    permission_basename = 'floatAccountGroup'
 
     def get_queryset(self):
         user = self.request.user
@@ -88,7 +88,7 @@ class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
 class FloatAccountGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = FloatAccountGroupSerializer
-    permission_base_codename = 'floatAccountGroup'
+    permission_basename = 'floatAccountGroup'
 
 
 class AccountTypeList(generics.ListCreateAPIView):
@@ -97,7 +97,7 @@ class AccountTypeList(generics.ListCreateAPIView):
     serializer_class = AccountTypeSerializer
 
 
-def get_account_permission_base_codename(view):
+def get_account_permission_basename(view):
     method = view.request.method.lower()
 
     if method == 'get':
@@ -119,13 +119,13 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     serializer_class = AccountCreateUpdateSerializer
 
     @property
-    def permission_base_codename(self):
-        return get_account_permission_base_codename(self)
+    def permission_basename(self):
+        return get_account_permission_basename(self)
 
     def get_queryset(self):
         return Account.objects.hasAccess(
             self.request.method,
-            get_account_permission_base_codename(self)
+            get_account_permission_basename(self)
         )
 
     def perform_create(self, serializer):
@@ -179,8 +179,8 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_base_codename(self):
-        return get_account_permission_base_codename(self)
+    def permission_basename(self):
+        return get_account_permission_basename(self)
 
     def get_serializer_class(self):
         method = self.request.method.lower()
@@ -192,7 +192,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     def get_queryset(self):
         return Account.objects.hasAccess(
             self.request.method,
-            get_account_permission_base_codename(self)
+            get_account_permission_basename(self)
         )
 
     def destroy(self, request, *args, **kwargs):

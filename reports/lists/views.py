@@ -3,14 +3,14 @@ from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
-from cheques.views import get_cheque_permission_base_codename
+from cheques.views import get_cheque_permission_basename
 from factors.serializers import TransferListRetrieveSerializer
 from factors.views.factorViews import get_factor_permission_codename
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *
 from transactions.models import Transaction
-from transactions.views import get_transaction_permission_base_codename
+from transactions.views import get_transaction_permission_basename
 
 
 class TransactionListView(generics.ListAPIView):
@@ -18,7 +18,7 @@ class TransactionListView(generics.ListAPIView):
 
     @property
     def permission_codename(self):
-        return "get.{}".format(get_transaction_permission_base_codename(self.request.GET.get('type')))
+        return "get.{}".format(get_transaction_permission_basename(self.request.GET.get('type')))
 
     serializer_class = TransactionListSerializer
     filterset_class = TransactionFilter
@@ -35,7 +35,7 @@ class ChequeListView(generics.ListAPIView):
     @property
     def permission_codename(self):
         received_or_paid = self.request.GET.get('received_or_paid')
-        return "get.{}".format(get_cheque_permission_base_codename(received_or_paid))
+        return "get.{}".format(get_cheque_permission_basename(received_or_paid))
 
     serializer_class = ChequeListSerializer
     filterset_class = ChequeFilter
@@ -48,7 +48,7 @@ class ChequeListView(generics.ListAPIView):
 
 class ChequebookListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = ("get.chequebook", )
+    permission_codename = "get.chequebook"
     serializer_class = ChequebookListSerializer
     filterset_class = ChequebookFilter
     ordering_fields = '__all__'
@@ -60,7 +60,7 @@ class ChequebookListView(generics.ListAPIView):
 
 class SanadListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = ("get.sanad", )
+    permission_codename = "get.sanad"
     serializer_class = SanadSerializer
     filterset_class = SanadFilter
     ordering_fields = '__all__'

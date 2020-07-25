@@ -37,7 +37,7 @@ def exportTest(request):
 
 class ExportVerifiersModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_base_codename = 'exportVerifier'
+    permission_basename = 'exportVerifier'
     serializer_class = ExportVerifierSerializer
 
     def get_queryset(self):

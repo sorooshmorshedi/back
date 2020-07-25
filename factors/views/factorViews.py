@@ -12,7 +12,7 @@ from accounts.defaultAccounts.models import getDefaultAccount
 from factors.helpers import getInventoryCount
 from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_object_by_code
 from sanads.models import clearSanad, newSanadCode
 from factors.serializers import *
 from server.settings import TESTING
@@ -22,7 +22,7 @@ from wares.models import WareInventory, Ware
 class ExpenseModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     serializer_class = ExpenseSerializer
-    permission_base_codename = 'expense'
+    permission_basename = 'expense'
 
     def get_queryset(self):
         return Expense.objects.inFinancialYear()
@@ -62,9 +62,9 @@ class FactorModelView(viewsets.ModelViewSet):
     serializer_class = FactorCreateUpdateSerializer
 
     @property
-    def permission_base_codename(self):
+    def permission_basename(self):
         if self.request.method.lower() == 'post':
-            factor_data = self.request.data['factor']
+            factor_data = self.request.data['item']
             factor_type = factor_data.get('type')
         else:
             factor_type = self.get_object().type
@@ -88,7 +88,7 @@ class FactorModelView(viewsets.ModelViewSet):
         data = request.data
         user = request.user
 
-        factor_data = data['factor']
+        factor_data = data['item']
 
         serializer = FactorCreateUpdateSerializer(data=factor_data)
         serializer.is_valid(raise_exception=True)
@@ -119,7 +119,7 @@ class FactorModelView(viewsets.ModelViewSet):
         if is_definite:
             DefiniteFactor.undoDefinition(user, factor)
 
-        serialized = FactorCreateUpdateSerializer(instance=factor, data=data['factor'])
+        serialized = FactorCreateUpdateSerializer(instance=factor, data=data['item'])
         serialized.is_valid(raise_exception=True)
         serialized.save()
 
@@ -196,17 +196,11 @@ class FactorModelView(viewsets.ModelViewSet):
         return res
 
 
-@api_view(['get'])
-def newCodesForFactor(request):
-    res = Factor.newCodes()
-    return Response(res)
-
-
 class NotPaidFactorsView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_base_codename(self):
+    def permission_basename(self):
 
         transaction_type = self.request.GET.get('transactionType')
         if transaction_type == Transaction.RECEIVE:
@@ -255,36 +249,18 @@ class GetFactorByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_base_codename(self):
+    def permission_basename(self):
         return get_factor_permission_codename(self.request.GET.get('type'))
 
     def get(self, request):
-        if 'type' not in request.GET:
-            return Response(['نوع وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-        if 'position' not in request.GET or request.GET['position'] not in ('next', 'prev', 'first', 'last'):
-            return Response(['موقعیت وارد نشده است'], status.HTTP_400_BAD_REQUEST)
-
-        type = request.GET['type']
-        id = request.GET.get('id', None)
-        position = request.GET['position']
-        queryset = Factor.objects.inFinancialYear().filter(type=type)
-
-        try:
-            if position == 'next':
-                factor = queryset.filter(pk__gt=id).order_by('id')[0]
-            elif position == 'prev':
-                if id:
-                    queryset = queryset.filter(pk__lt=id)
-                factor = queryset.order_by('-id')[0]
-            elif position == 'first':
-                factor = queryset.order_by('id')[0]
-            elif position == 'last':
-                factor = queryset.order_by('-id')[0]
-        except IndexError:
-            return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
-
-        serializer = FactorListRetrieveSerializer(factor)
-        return Response(serializer.data)
+        item = get_object_by_code(
+            Factor.objects.hasAccess(request.method, self.permission_basename).filter(type=request.GET['type']),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(FactorListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
 def check_inventory(user, factor_items, consider_old_count):
@@ -340,7 +316,7 @@ def check_inventory(user, factor_items, consider_old_count):
 
 
 class DefiniteFactor(APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, pk):
         user = request.user

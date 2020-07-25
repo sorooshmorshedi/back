@@ -7,13 +7,13 @@ from users.serializers import CitySerializer
 
 class CityListCreateView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'city'
+    permission_basename = 'city'
     queryset = City.objects.all()
     serializer_class = CitySerializer
 
 
 class CityDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'city'
+    permission_basename = 'city'
     queryset = City.objects.all()
     serializer_class = CitySerializer

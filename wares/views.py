@@ -16,7 +16,7 @@ from wares.serializers import *
 @method_decorator(csrf_exempt, name='dispatch')
 class WarehouseListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'warehouse'
+    permission_basename = 'warehouse'
     serializer_class = WarehouseSerializer
 
     def perform_create(self, serializer: WarehouseSerializer) -> None:
@@ -25,19 +25,19 @@ class WarehouseListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class WarehouseDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'warehouse'
+    permission_basename = 'warehouse'
     serializer_class = WarehouseSerializer
 
 
 class UnitDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'unit'
+    permission_basename = 'unit'
     serializer_class = UnitSerializer
 
 
 class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'unit'
+    permission_basename = 'unit'
     serializer_class = UnitSerializer
 
     def perform_create(self, serializer: UnitSerializer) -> None:
@@ -46,7 +46,7 @@ class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'ware'
+    permission_basename = 'ware'
     serializer_class = WareSerializer
 
     def list(self, request, *ergs, **kwargs):
@@ -66,7 +66,7 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'ware'
+    permission_basename = 'ware'
     serializer_class = WareSerializer
 
     def retrieve(self, request, **kwargs):
@@ -92,13 +92,13 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
 class WareLevelDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'wareLevel'
+    permission_basename = 'wareLevel'
     serializer_class = WareLevelSerializer
 
 
 class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_base_codename = 'wareLevel'
+    permission_basename = 'wareLevel'
     serializer_class = WareLevelSerializer
 
     def perform_create(self, serializer: WareLevelSerializer) -> None:
