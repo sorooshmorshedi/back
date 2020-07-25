@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser, Permission, Group, UserMana
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django_jalali.db import models as jmodels
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from companies.models import Company, FinancialYear
 from helpers.models import BaseModel, BaseManager
@@ -83,6 +83,18 @@ class User(AbstractUser, BaseModel):
             return queryset.exists()
 
         return queryset.filter(company=company).exists()
+
+    def has_object_perm(self, instance: BaseModel, permission_codename, company=None, raise_exception=False):
+        has_perm = self.has_perm(permission_codename, company)
+        if not has_perm and instance.created_by == self:
+            operation = permission_codename.split('.')[0]
+            permission_codename.replace(operation, "{}Own".format(operation))
+            has_perm = self.has_perm(permission_codename, company)
+
+        if not has_perm and raise_exception:
+            raise PermissionDenied()
+
+        return has_perm
 
 
 class PhoneVerification(BaseModel):

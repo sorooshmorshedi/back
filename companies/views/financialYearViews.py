@@ -1,4 +1,5 @@
 import jdatetime
+from django.db.models import QuerySet
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -130,6 +131,8 @@ class CloseFinancialYearView(APIView):
         user = request.user
 
         target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
+
+        user.has_object_perm(user.active_financial_year, self.permission_codename, raise_exception=True)
 
         if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_definite=True).exists():
             raise ValidationError("ابتدا فاکتور های قطعی سال مالی جدید را پاک نمایید")
@@ -268,6 +271,9 @@ class CancelFinancialYearClosingView(APIView):
 
     def post(self, request):
         financial_year = request.user.active_financial_year
+
+        request.user.has_object_perm(active_financial_year, self.permission_codename, raise_exception=True)
+
         if financial_year.is_closed:
             financial_year.delete_closing_sanads()
 
@@ -281,6 +287,8 @@ class MoveFinancialYearView(APIView):
 
     def post(self, request):
         target_financial_year = get_object_or_404(FinancialYear, pk=request.data.get('target_financial_year'))
+
+        request.user.has_object_perm(request.useractive_financial_year, self.permission_codename, raise_exception=True)
 
         self.sanad = target_financial_year.get_opening_sanad()
 
@@ -298,5 +306,7 @@ class MoveFinancialYearView(APIView):
 class FinancialYearModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'financialYear'
-    queryset = FinancialYear.objects.all()
     serializer_class = FinancialYearSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return FinancialYear.objects.hasAccess(self.request.method)

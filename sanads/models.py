@@ -41,11 +41,17 @@ class Sanad(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+        permission_basename = 'sanad'
         permissions = (
             ('get.sanad', 'مشاهده سند'),
             ('create.sanad', 'تعریف سند'),
             ('update.sanad', 'ویرایش سند'),
             ('delete.sanad', 'حذف سند'),
+
+            ('getOwn.sanad', 'مشاهده سند های خود'),
+            ('updateOwn.sanad', 'ویرایش سند های خود'),
+            ('deleteOwn.sanad', 'حذف سند های خود'),
+
             ('reorder.sanad', 'مرتب کردن کد اسناد بر اساس تاریخ'),
         )
 

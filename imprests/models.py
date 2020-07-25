@@ -29,11 +29,16 @@ class ImprestSettlement(BaseModel):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+        permission_basename = 'imprestSettlement'
         permissions = (
             ('get.imprestSettlement', 'مشاهده تسویه تنخواه'),
             ('create.imprestSettlement', 'تعریف تسویه تنخواه'),
             ('update.imprestSettlement', 'ویرایش تسویه تنخواه'),
-            ('delete.imprestSettlement', 'حذف تسویه تنخواه')
+            ('delete.imprestSettlement', 'حذف تسویه تنخواه'),
+
+            ('getOwn.imprestSettlement', 'مشاهده تسویه تنخواه های خود'),
+            ('updateOwn.imprestSettlement', 'ویرایش تسویه تنخواه های خود'),
+            ('deleteOwn.imprestSettlement', 'حذف تسویه تنخواه های خود')
         )
 
     def update_settlement_data(self):

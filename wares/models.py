@@ -168,12 +168,10 @@ class Ware(BaseModel):
             ('create.ware', 'تعریف کالا'),
             ('update.ware', 'ویرایش کالا'),
             ('delete.ware', 'حذف کالا'),
-            ('get.wareInventory', 'مشاهده موجودی کالا'),
 
             ('getOwn.ware', 'مشاهده کالا های خود'),
             ('updateOwn.ware', 'ویرایش کالا های خود'),
             ('deleteOwn.ware', 'حذف کالا های خود'),
-            ('getOwn.wareInventory', 'مشاهده موجودی کالا های خود'),
         )
 
     def has_factorItem(self):

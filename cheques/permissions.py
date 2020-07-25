@@ -17,8 +17,10 @@ class SubmitChequePermission(BasePermission):
 class ChangeChequeStatusPermission(BasePermission):
     def has_permission(self, request, view):
         cheque = get_object_or_404(Cheque, pk=view.kwargs.get('pk'))
+        user = request.user
         if cheque.received_or_paid == Cheque.RECEIVED:
             codename = "changeStatus.receivedCheque"
         else:
             codename = "changeStatus.paidCheque"
-        return request.user.has_perm(codename)
+        return user.has_object_perm(cheque, codename)
+

@@ -83,7 +83,7 @@ class ImprestSettlementByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            ImprestSettlement.objects.all(),
+            ImprestSettlement.objects.hasAccess('get'),
             request.GET.get('position'),
             request.GET.get('id')
         )
@@ -97,7 +97,7 @@ class GetAccountNotSettledImprestsView(APIView):
     permission_basename = 'imprestTransaction'
 
     def get(self, request):
-        imprests = Transaction.objects.inFinancialYear().filter(
+        imprests = Transaction.objects.hasAccess('get', 'imprestTransaction').filter(
             account__id=request.GET.get('account'),
             floatAccount__id=request.GET.get('floatAccount'),
             costCenter__id=request.GET.get('costCenter'),

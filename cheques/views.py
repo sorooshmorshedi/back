@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework import generics
 from rest_framework import status
 from rest_framework import viewsets
@@ -21,7 +22,7 @@ class ChequebookModelView(viewsets.ModelViewSet):
     serializer_class = ChequebookCreateUpdateSerializer
 
     def get_queryset(self):
-        return Chequebook.objects.inFinancialYear()
+        return Chequebook.objects.hasAccess(self.request.method)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -145,12 +146,14 @@ def get_cheque_permission_basename(received_or_paid):
 
 class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    queryset = Cheque.objects.all()
     serializer_class = ChequeListRetrieveSerializer
 
     @property
     def permission_basename(self):
         return get_cheque_permission_basename(self.get_object().received_or_paid)
+
+    def get_queryset(self) -> QuerySet:
+        return Cheque.objects.hasAccess(self.request.method, self.permission_basename)
 
     def update(self, request, *args, **kwargs):
 
@@ -295,7 +298,7 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
             return "paidChequeStatusChange"
 
     def get_queryset(self):
-        return StatusChange.objects.inFinancialYear()
+        return StatusChange.objects.hasAccess(self.request.method, self.permission_basename)
 
     def perform_destroy(self, instance: StatusChange):
 

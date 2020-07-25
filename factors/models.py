@@ -33,11 +33,16 @@ class Expense(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        permission_basename = 'expense'
         permissions = (
             ('get.expense', 'مشاهده هزینه فاکتور'),
             ('create.expense', 'تعریف هزینه  فاکتور'),
             ('update.expense', 'ویرایش هزینه فاکتور'),
             ('delete.expense', 'حذف هزینه فاکتور'),
+
+            ('getOwn.expense', 'مشاهده هزینه های فاکتور خود'),
+            ('updateOwn.expense', 'ویرایش هزینه های فاکتور خود'),
+            ('deleteOwn.expense', 'حذف هزینه های فاکتور خود'),
         )
 
 
@@ -122,6 +127,29 @@ class Factor(BaseModel):
             ('get.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده'),
             ('get.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده'),
 
+            ('getOwn.buyFactor', 'مشاهده فاکتور خرید خود'),
+            ('updateOwn.buyFactor', 'ویرایش فاکتور های خرید خود'),
+            ('deleteOwn.buyFactor', 'حذف فاکتور های خرید خود'),
+            ('definiteOwn.buyFactor', 'قطعی کردن فاکتور های خرید خود'),
+
+            ('getOwn.saleFactor', 'مشاهده فاکتور های فروش خود'),
+            ('updateOwn.saleFactor', 'ویرایش فاکتور های فروش خود'),
+            ('deleteOwn.saleFactor', 'حذف فاکتور های فروش خود'),
+            ('definiteOwn.saleFactor', 'قطعی کردن فاکتور های فروش خود'),
+
+            ('getOwn.backFromSaleFactor', 'مشاهده فاکتور های برگشت از فروش خود'),
+            ('updateOwn.backFromSaleFactor', 'ویرایش فاکتور های برگشت از فروش خود'),
+            ('deleteOwn.backFromSaleFactor', 'حذف فاکتور های برگشت از فروش خود'),
+            ('definiteOwn.backFromSaleFactor', 'قطعی کردن فاکتور های برگشت از فروش خود'),
+
+            ('getOwn.backFromBuyFactor', 'مشاهده فاکتور های برگشت از خرید خود'),
+            ('updateOwn.backFromBuyFactor', 'ویرایش فاکتور های برگشت از خرید خود'),
+            ('deleteOwn.backFromBuyFactor', 'حذف فاکتور های برگشت از خرید خود'),
+            ('definiteOwn.backFromBuyFactor', 'قطعی کردن فاکتور های برگشت از خرید خود'),
+
+            ('getOwn.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده خود'),
+            ('getOwn.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده خود'),
+
             ('get.firstPeriodInventory', 'مشاهده موجودی اول دوره'),
             ('update.firstPeriodInventory', 'ثبت موجودی اول دوره'),
 
@@ -169,7 +197,7 @@ class Factor(BaseModel):
 
     @property
     def label(self):
-        return "فاکتور {}".format(self.get_type_label)
+        return "فاکتور های {}".format(self.get_type_label)
 
     @property
     def type_label(self):
@@ -434,9 +462,14 @@ class Transfer(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'transfer'
         permissions = (
             ('get.transfer', 'مشاهده انتقال'),
             ('create.transfer', 'تعریف انتقال'),
             ('update.transfer', 'ویرایش انتقال'),
             ('delete.transfer', 'حذف انتقال'),
+
+            ('getOwn.transfer', 'مشاهده انتقال های خود'),
+            ('updateOwn.transfer', 'ویرایش انتقال های خود'),
+            ('deleteOwn.transfer', 'حذف انتقال های خود'),
         )

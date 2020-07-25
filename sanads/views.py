@@ -23,7 +23,7 @@ class SanadListCreate(generics.ListCreateAPIView):
     serializer_class = SanadSerializer
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear()
+        return Sanad.objects.hasAccess(self.request.method)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -66,7 +66,7 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SanadSerializer
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear()
+        return Sanad.objects.hasAccess(self.request.method)
 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
@@ -130,4 +130,3 @@ class SanadByPositionView(APIView):
         if item:
             return Response(SanadListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
-

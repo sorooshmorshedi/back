@@ -42,6 +42,10 @@ class Company(BaseModel):
             ('create.company', 'تعریف شرکت'),
             ('update.company', 'ویرایش شرکت'),
             ('delete.company', 'حذف شرکت'),
+
+            ('getOwn.company', 'مشاهده شرکت های خود'),
+            ('updateOwn.company', 'ویرایش شرکت های خود'),
+            ('deleteOwn.company', 'حذف شرکت های خود'),
         )
 
     def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
@@ -51,8 +55,6 @@ class Company(BaseModel):
 
 
 class FinancialYear(BaseModel):
-    objects = models.Manager()
-
     name = models.CharField(unique=True, max_length=150)
     start = jmodels.jDateField()
     end = jmodels.jDateField()
@@ -76,6 +78,7 @@ class FinancialYear(BaseModel):
         return "{} {} ({})".format(self.company, self.name, self.id)
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'financialYear'
         permissions = (
             ('get.financialYear', 'مشاهده سال مالی'),
             ('create.financialYear', 'تعریف سال مالی'),
@@ -85,6 +88,14 @@ class FinancialYear(BaseModel):
             ('move.financialYear', 'انتقال سال مالی'),
             ('close.financialYear', 'بستن سال مالی'),
             ('cancelClosing.financialYear', 'لغو بستن سال مالی'),
+
+            ('getOwn.financialYear', 'مشاهده سال های مالی خود'),
+            ('updateOwn.financialYear', 'ویرایش سال های مالی خود'),
+            ('deleteOwn.financialYear', 'حذف سال های مالی خود'),
+
+            ('moveOwn.financialYear', 'انتقال سال های مالی خود'),
+            ('closeOwn.financialYear', 'بستن سال های مالی خود'),
+            ('cancelClosingOwn.financialYear', 'لغو بستن سال های مالی خود'),
         )
 
     def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:

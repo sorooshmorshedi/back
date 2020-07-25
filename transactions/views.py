@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 
 from rest_framework import generics, serializers
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -31,7 +30,7 @@ class TransactionCreateView(generics.CreateAPIView):
         return get_transaction_permission_basename(self.request.data.get('type'))
 
     def get_queryset(self):
-        return Transaction.objects.inFinancialYear()
+        return Transaction.objects.hasAccess(self.request.method, self.permission_basename)
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -67,7 +66,7 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
         return get_transaction_permission_basename(self.get_object().type)
 
     def get_queryset(self):
-        return Transaction.objects.inFinancialYear()
+        return Transaction.objects.hasAccess(self.request.method, self.permission_basename)
 
     def update(self, request, *args, **kwargs):
 

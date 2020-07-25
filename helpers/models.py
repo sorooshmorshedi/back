@@ -27,16 +27,17 @@ class BaseManager(models.Manager):
         if not permission_basename:
             raise Exception("Please set permission_basename in model Meta class")
 
-        operation = ""
         method = method.upper()
         if method == 'POST':
             operation = "create"
-        if method == 'GET':
+        elif method == 'GET':
             operation = "get"
-        if method == 'PUT':
+        elif method == 'PUT':
             operation = "update"
-        if method == 'DELETE':
+        elif method == 'DELETE':
             operation = "delete"
+        else:
+            operation = method
 
         if (
                 not user.has_perm("{}.{}".format(operation, permission_basename))

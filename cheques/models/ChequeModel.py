@@ -93,6 +93,18 @@ class Cheque(BaseModel):
 
             ('submit.paidCheque', 'ثبت چک پرداختی'),
             ('changeStatus.paidCheque', 'تغییر وضعیت پرداختی'),
+
+            ('getOwn.receivedCheque', 'مشاهده چک های دریافتی خود'),
+            ('updateOwn.receivedCheque', 'ویرایش چک های دریافتی خود'),
+            ('deleteOwn.receivedCheque', 'حذف چک های دریافتی خود'),
+
+            ('changeStatusOwn.receivedCheque', 'تغییر وضعیت های دریافتی خود'),
+
+            ('getOwn.paidCheque', 'مشاهده چک های پرداختی خود'),
+            ('updateOwn.paidCheque', 'ویرایش چک های پرداختی خود'),
+            ('deleteOwn.paidCheque', 'حذف چک های پرداختی خود'),
+
+            ('changeStatusOwn.paidCheque', 'تغییر وضعیت های پرداختی خود'),
         )
 
     def save(self, *args, **kwargs):

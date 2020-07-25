@@ -3,7 +3,6 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,7 +24,7 @@ class ExpenseModelView(viewsets.ModelViewSet):
     permission_basename = 'expense'
 
     def get_queryset(self):
-        return Expense.objects.inFinancialYear()
+        return Expense.objects.hasAccess(self.request.method)
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
@@ -43,7 +42,7 @@ class ExpenseModelView(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
-def get_factor_permission_codename(factor_type):
+def get_factor_permission_basename(factor_type):
     base_codename = ''
     if factor_type == Factor.BUY:
         base_codename = 'buy'
@@ -68,10 +67,10 @@ class FactorModelView(viewsets.ModelViewSet):
             factor_type = factor_data.get('type')
         else:
             factor_type = self.get_object().type
-        return get_factor_permission_codename(factor_type)
+        return get_factor_permission_basename(factor_type)
 
     def get_queryset(self):
-        return Factor.objects.inFinancialYear()
+        return Factor.objects.hasAccess(self.request.method, self.permission_basename)
 
     # Disabled
     def list(self, request, *ergs, **kwargs):
@@ -232,7 +231,7 @@ class NotPaidFactorsView(APIView):
             account_id = request.GET['accountId']
             filters &= Q(account=account_id)
 
-        qs = Factor.objects.inFinancialYear() \
+        qs = Factor.objects.hasAccess('get', self.permission_basename) \
             .exclude(sanad__bed=0) \
             .filter(filters) \
             .distinct() \
@@ -250,7 +249,7 @@ class GetFactorByPositionView(APIView):
 
     @property
     def permission_basename(self):
-        return get_factor_permission_codename(self.request.GET.get('type'))
+        return get_factor_permission_basename(self.request.GET.get('type'))
 
     def get(self, request):
         item = get_object_by_code(
@@ -316,7 +315,16 @@ def check_inventory(user, factor_items, consider_old_count):
 
 
 class DefiniteFactor(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_codename(self):
+        if self.request.method.lower() == 'post':
+            factor_data = self.request.data['item']
+            factor_type = factor_data.get('type')
+        else:
+            factor_type = self.get_object().type
+        return "definite.".format(get_factor_permission_basename(factor_type))
 
     def post(self, request, pk):
         user = request.user
@@ -360,6 +368,8 @@ class DefiniteFactor(APIView):
     @staticmethod
     def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
+        permission_codename = "definite.".format(get_factor_permission_basename(factor.type))
+        user.has_object_perm(factor, permission_codename, raise_exception=True)
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad

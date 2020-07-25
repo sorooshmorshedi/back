@@ -204,8 +204,12 @@ class RevokeLadingBillNumber(APIView):
     permission_codename = 'revoke.ladingBillNumber'
 
     def post(self, request):
-        ladingBillNumber = get_object_or_404(LadingBillNumber.objects.hasAccess(request.method),
-                                             pk=request.data.get('id'))
+        ladingBillNumber = get_object_or_404(
+            LadingBillNumber.objects.hasAccess(request.method),
+            pk=request.data.get('id')
+        )
+        request.user.has_object_perm(ladingBillNumber, self.permission_codename, raise_exception=True)
+
         ladingBillNumber.is_revoked = request.data.get('is_revoked')
         ladingBillNumber.save()
         return Response()

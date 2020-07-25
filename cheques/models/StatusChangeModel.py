@@ -45,6 +45,10 @@ class StatusChange(BaseModel):
             ('delete.receivedChequeStatusChange', 'حذف تغییر وضعیت های چک دریافتی'),
 
             ('delete.paidChequeStatusChange', 'حذف تغییر وضعیت های چک پرداختی'),
+
+            ('deleteOwn.receivedChequeStatusChange', 'حذف تغییر وضعیت های چک دریافتی خود'),
+
+            ('deleteOwn.paidChequeStatusChange', 'حذف تغییر وضعیت های چک پرداختی خود'),
         )
 
     def _createSanad(self, user):
