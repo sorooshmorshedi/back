@@ -320,6 +320,7 @@ class Lading(RemittanceMixin):
                                     blank=True)
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'lading'
         permissions = (
             ('get.lading', 'مشاهده بارگیری'),
             ('create.lading', 'تعریف بارگیری'),
@@ -340,6 +341,7 @@ class OilCompanyLading(BaseModel):
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     class Meta(BaseModel.Meta):
+        permission_basename = 'oilCompanyLading'
         permissions = (
             ('get.oilCompanyLading', 'مشاهده بارگیری شرکت نفت'),
             ('create.oilCompanyLading', 'تعریف بارگیری شرکت نفت'),
