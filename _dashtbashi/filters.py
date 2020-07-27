@@ -10,6 +10,8 @@ class LadingFilter(filters.FilterSet):
         model = Lading
         fields = {
             'driving': ['exact'],
+            'remittance': ['exact'],
+            'is_paid': ['exact'],
         }
         filter_overrides = {
             jmodels.jDateField: {

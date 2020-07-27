@@ -3,8 +3,10 @@ from typing import Any
 from rest_framework import serializers
 
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
-    LadingBillNumber, OilCompanyLading, OilCompanyLadingItem
+    LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
 from accounts.accounts.serializers import AccountListRetrieveSerializer
+from transactions.models import Transaction
+from transactions.serializers import TransactionListRetrieveSerializer
 from users.serializers import CitySerializer
 from wares.serializers import WareListRetrieveSerializer
 
@@ -160,3 +162,24 @@ class OilCompanyLadingListRetrieveSerializer(serializers.ModelSerializer):
         model = OilCompanyLading
         fields = '__all__'
         read_only_fields = ('financial_year',)
+
+
+class OtherDriverPaymentCreateUpdateSerializer(serializers.ModelSerializer):
+    ladings = serializers.PrimaryKeyRelatedField(many=True, queryset=Lading.objects.all())
+    imprests = serializers.PrimaryKeyRelatedField(many=True, queryset=Transaction.objects.all())
+
+    class Meta:
+        model = OtherDriverPayment
+        fields = '__all__'
+        read_only_fields = ('code', 'financial_year', 'payment')
+
+
+class OtherDriverPaymentListRetrieveSerializer(serializers.ModelSerializer):
+    driving = DrivingListRetrieveSerializer()
+    ladings = LadingListRetrieveSerializer(many=True)
+    imprests = TransactionListRetrieveSerializer(many=True)
+    payment = TransactionListRetrieveSerializer(many=False)
+
+    class Meta:
+        model = OtherDriverPayment
+        fields = '__all__'

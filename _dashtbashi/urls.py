@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, AssociationModelView, \
     RemittanceModelView, RemittanceByPositionView, LadingModelView, LadingByPositionView, RemittanceByCodeView, \
     LadingBillSeriesModelView, LadingBillSeriesByPositionView, RevokeLadingBillNumber, OilCompanyLadingModelView, \
-    OilCompanyLadingByPositionView
+    OilCompanyLadingByPositionView, OtherDriverPaymentModelView
 
 router = DefaultRouter()
 router.register('drivers', DriverModelView, base_name='drivers')
@@ -16,6 +16,7 @@ router.register('ladingBillSeries', LadingBillSeriesModelView, base_name='lading
 router.register('remittances', RemittanceModelView, base_name='remittances')
 router.register('ladings', LadingModelView, base_name='ladings')
 router.register('oilCompanyLadings', OilCompanyLadingModelView, base_name='oilCompanyLadings')
+router.register('otherDriverPayments', OtherDriverPaymentModelView, base_name='otherDriverPayments')
 
 urlpatterns = router.urls
 

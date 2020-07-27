@@ -11,15 +11,18 @@ from rest_framework.views import APIView
 
 from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
-    LadingBillNumber, OilCompanyLading
+    LadingBillNumber, OilCompanyLading, OtherDriverPayment
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
     DrivingListRetrieveSerializer, AssociationSerializer, RemittanceListRetrieveSerializer, \
     RemittanceCreateUpdateSerializer, LadingListRetrieveSerializer, LadingCreateUpdateSerializer, \
     LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemSerializer, \
-    OilCompanyLadingListRetrieveSerializer
+    OilCompanyLadingListRetrieveSerializer, OtherDriverPaymentListRetrieveSerializer, \
+    OtherDriverPaymentCreateUpdateSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_object_by_code
+from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
+from transactions.models import Transaction
+from transactions.serializers import TransactionCreateUpdateSerializer
 
 
 class DriverModelView(viewsets.ModelViewSet):
@@ -291,4 +294,84 @@ class OilCompanyLadingByPositionView(APIView):
         )
         if item:
             return Response(OilCompanyLadingListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class OtherDriverPaymentModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'otherDriverPayment'
+    serializer_class = OtherDriverPaymentListRetrieveSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return OtherDriverPayment.objects.hasAccess(self.request.method)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        user = request.user
+
+        item_data = data['item']
+        payment_data = data['payment']
+
+        payment_data['account'] = 609
+        # payment_data['floatAccount'] = 609
+        payment_data['date'] = item_data['date']
+        payment_data['type'] = Transaction.PAYMENT
+
+        serializer = TransactionCreateUpdateSerializer(data=payment_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            financial_year=user.active_financial_year,
+            code=Transaction.newCodes(Transaction.PAYMENT),
+        )
+        payment = serializer.instance
+        payment.sync(user, payment_data)
+
+        serializer = OtherDriverPaymentCreateUpdateSerializer(data=item_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            financial_year=user.active_financial_year,
+            payment=payment,
+            code=get_new_code(OtherDriverPayment)
+        )
+
+        instance = serializer.instance
+
+        print(instance)
+
+        return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        user = request.user
+        form_data = request.data['form']
+        items_data = request.data['items']
+
+        serialized = self.serializer_class(instance=instance, data=form_data)
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        MassRelatedCUD(
+            user,
+            items_data.get('items'),
+            items_data.get('ids_to_delete'),
+            'otherDriverPayment',
+            instance.id,
+        ).sync()
+
+        return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+
+
+class OtherDriverPaymentByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'otherDriverPayment'
+
+    def get(self, request):
+        item = get_object_by_code(
+            OtherDriverPayment.objects.hasAccess(request.method),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(OtherDriverPaymentListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)

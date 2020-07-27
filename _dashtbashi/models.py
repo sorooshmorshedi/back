@@ -6,7 +6,8 @@ from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from companies.models import FinancialYear
-from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel
+from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE
+from transactions.models import Transaction
 from users.models import City
 from wares.models import Ware
 
@@ -318,6 +319,7 @@ class Lading(RemittanceMixin):
     origin = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingOrigins', null=True, blank=True)
     destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingDestinations', null=True,
                                     blank=True)
+    is_paid = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         permission_basename = 'lading'
@@ -367,3 +369,29 @@ class OilCompanyLadingItem(BaseModel):
 
     class Meta(BaseModel.Meta):
         pass
+
+
+class OtherDriverPayment(BaseModel):
+    code = models.IntegerField()
+    date = DATE()
+    explanation = EXPLANATION()
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='otherDriverPayments')
+    ladings = models.ManyToManyField(Lading, related_name='otherDriverPayment')
+    imprests = models.ManyToManyField(Transaction, related_name='otherDriverPaymentsAsImprest')
+    payment = models.ForeignKey(Transaction, related_name='otherDriverPayment', on_delete=models.PROTECT)
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        permission_basename = 'otherDriverPayment'
+        permissions = (
+            ('get.otherDriverPayment', 'مشاهده پرداخت رانندگان متفرقه '),
+            ('create.otherDriverPayment', 'تعریف پرداخت رانندگان متفرقه'),
+            ('update.otherDriverPayment', 'ویرایش پرداخت رانندگان متفرقه'),
+            ('delete.otherDriverPayment', 'حذف پرداخت رانندگان متفرقه'),
+
+            ('getOwn.otherDriverPayment', 'مشاهده پرداخت رانندگان متفرقه خود'),
+            ('updateOwn.otherDriverPayment', 'ویرایش پرداخت رانندگان متفرقه خود'),
+            ('deleteOwn.otherDriverPayment', 'حذف پرداخت رانندگان متفرقه خود'),
+        )
