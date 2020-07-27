@@ -64,8 +64,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("نوع حساب مشخص نشده است")
 
         if account_type == Account.PERSON:
-            person_type = data.get('person_type')
-            if not person_type:
+            if not data.get('buyer_or_seller'):
                 raise serializers.ValidationError("لطفا خریدار یا فروشنده را مشخص کنید")
 
         if self.instance and SanadItem.objects.filter(account=self.instance).exists():

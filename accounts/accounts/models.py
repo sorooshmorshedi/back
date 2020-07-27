@@ -121,11 +121,21 @@ class Account(BaseModel):
         (OTHER, 'دیگر')
     )
 
-    BUYER_PERSON = 'b'
-    SELLER_PERSON = 's'
+    BUYER = 'b'
+    SELLER = 's'
+    BUYER_OR_SELLER_CHOICES = (
+        (BUYER, 'خریدار'),
+        (SELLER, 'فروشنده'),
+    )
+
+    REAL = 'r'
+    LEGAL = 'l'
+    CONTRACTOR = 'c'
     PERSON_TYPES = (
-        (BUYER_PERSON, 'خریدار'),
-        (SELLER_PERSON, 'فروشنده'),
+        (REAL, 'حقیقی'),
+        (LEGAL, 'حقوقی'),
+        (CONTRACTOR, 'پیمانکاران'),
+        (OTHER, 'دیگر')
     )
 
     CODE_LENGTHS = [1, 2, 2, 4]
@@ -156,8 +166,9 @@ class Account(BaseModel):
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
     # Person fields
-    is_real = models.BooleanField(default=True)
-    person_type = models.CharField(choices=PERSON_TYPES, max_length=10, default="", blank="true")
+    person_type = models.CharField(choices=PERSON_TYPES, max_length=10, default="", blank=True)
+    buyer_or_seller = models.CharField(choices=BUYER_OR_SELLER_CHOICES, max_length=10, default="", blank=True)
+
     phone_1 = models.CharField(max_length=20, default="", blank=True)
     phone_2 = models.CharField(max_length=20, default="", blank=True)
     mobile = PHONE(null=True, blank=True)

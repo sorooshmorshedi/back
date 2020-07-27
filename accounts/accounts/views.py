@@ -138,20 +138,28 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
         else:
             parent = None
             if account_type == Account.BANK:
+
                 parent = DefaultAccount.get("bankParent").account
+
             elif account_type == Account.PERSON:
+
                 person_type = serializer.validated_data.get('person_type')
-                is_real = serializer.validated_data.get('is_real')
-                if person_type == Account.BUYER_PERSON:
-                    if is_real:
-                        parent = DefaultAccount.get("realBuyerParent").account
-                    else:
-                        parent = DefaultAccount.get("notRealBuyerParent").account
-                else:
-                    if is_real:
-                        parent = DefaultAccount.get("realSellerParent").account
-                    else:
-                        parent = DefaultAccount.get("notRealSellerParent").account
+                if person_type == Account.REAL:
+                    person_type = 'real'
+                elif person_type == Account.LEGAL:
+                    person_type = 'legal'
+                elif person_type == Account.CONTRACTOR:
+                    person_type = 'contractor'
+                elif person_type == Account.OTHER:
+                    person_type = 'other'
+
+                buyer_or_seller = serializer.validated_data.get('buyer_or_seller')
+                if buyer_or_seller == Account.BUYER:
+                    buyer_or_seller = 'Buyer'
+                elif buyer_or_seller == Account.SELLER:
+                    buyer_or_seller = 'Seller'
+
+                parent = DefaultAccount.get("{}{}Parent".format(person_type, buyer_or_seller)).account
 
             if parent:
                 code = parent.get_new_child_code()

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION
+from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager
 
 
 class Company(BaseModel):
@@ -24,6 +24,8 @@ class Company(BaseModel):
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
     explanation = EXPLANATION()
+
+    objects = BaseManager()
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)

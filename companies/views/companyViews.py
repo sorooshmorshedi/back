@@ -13,4 +13,4 @@ class CompanyModelView(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
 
     def get_queryset(self) -> QuerySet:
-        return Company.objects.prefetch_related('financial_years').hasAccess(self.request.method)
+        return Company.objects.hasAccess(self.request.method).prefetch_related('financial_years')
