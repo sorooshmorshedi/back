@@ -66,6 +66,7 @@ class BaseModel(models.Model):
     created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True)
     created_at = jmodels.jDateTimeField(auto_now=True, null=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True, null=True)
+    is_auto_created = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -81,6 +82,10 @@ class BaseModel(models.Model):
         if not self.pk:
             self.created_by = get_current_user()
         super().save(*args, **kwargs)
+
+
+def DATE(**kwargs):
+    return jmodels.jDateField(**kwargs)
 
 
 def POSTAL_CODE(**kwargs):

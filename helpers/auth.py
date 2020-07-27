@@ -23,7 +23,7 @@ class BasicCRUDPermission(BasePermission):
                     "permission_basename does not found, declare permission_basename or permission_codename in view"
                 )
 
-            method = request.method
+            method = request.method.upper()
 
             operations = []
             if method == 'POST':

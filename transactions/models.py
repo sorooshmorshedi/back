@@ -183,7 +183,7 @@ class Transaction(BaseModel):
         return super(Transaction, self).delete(*args, **kwargs)
 
     @staticmethod
-    def newCodes(user, transaction_type=None):
+    def newCodes(transaction_type=None):
         codes = {}
         for type in Transaction.TYPES:
             type = type[0]

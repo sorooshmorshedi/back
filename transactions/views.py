@@ -47,7 +47,7 @@ class TransactionCreateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(
             financial_year=user.active_financial_year,
-            code=Transaction.newCodes(request.user, transaction_data.get('type')),
+            code=Transaction.newCodes(transaction_data.get('type')),
             sanad=sanad
         )
         transaction = serializer.instance
@@ -63,7 +63,7 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
 
     @property
     def permission_basename(self):
-        return get_transaction_permission_basename(self.get_object().type)
+        return get_transaction_permission_basename(get_object_or_404(Transaction, pk=self.kwargs['pk']).type)
 
     def get_queryset(self):
         return Transaction.objects.hasAccess(self.request.method, self.permission_basename)
@@ -110,7 +110,8 @@ class TransactionByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            Transaction.objects.hasAccess(request.method, self.permission_basename).filter(type=request.GET.get('type')),
+            Transaction.objects.hasAccess(request.method, self.permission_basename).filter(
+                type=request.GET.get('type')),
             request.GET.get('position'),
             request.GET.get('id')
         )
