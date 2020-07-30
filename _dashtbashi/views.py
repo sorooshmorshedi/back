@@ -21,6 +21,7 @@ from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCrea
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
+from helpers.views.confirm_view import ConfirmView
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer
 
@@ -226,11 +227,11 @@ class OilCompanyLadingModelView(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         return OilCompanyLading.objects.hasAccess(self.request.method)
 
-    # def retrieve(self, request, pk=None, *args, **kwargs):
-    #     queryset = self.get_queryset()
-    #     instance = get_object_or_404(queryset, pk=pk)
-    #     serialized = (instance)
-    #     return Response(serialized.data)
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        queryset = self.get_queryset()
+        instance = get_object_or_404(queryset, pk=pk)
+        serialized = OilCompanyLadingListRetrieveSerializer(instance)
+        return Response(serialized.data)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -375,3 +376,27 @@ class OtherDriverPaymentByPositionView(APIView):
         if item:
             return Response(OtherDriverPaymentListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class ConfirmRemittance(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'remittance'
+    model = Remittance
+
+
+class ConfirmLading(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'lading'
+    model = Lading
+
+
+class ConfirmOilCompanyLading(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'oilCompanyLading'
+    model = OilCompanyLading
+
+
+class ConfirmOtherDriverPayment(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'otherDriverPayment'
+    model = OtherDriverPayment

@@ -1,5 +1,6 @@
 import re
 
+import jdatetime
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -82,6 +83,69 @@ class BaseModel(models.Model):
         if not self.pk:
             self.created_by = get_current_user()
         super().save(*args, **kwargs)
+
+
+class ConfirmationMixin(models.Model):
+    first_confirmed_at = jmodels.jDateTimeField(null=True, default=None)
+    first_confirmed_by = models.ForeignKey('users.User', on_delete=models.PROTECT,
+                                           related_name='first_%(class)sConfirmer', null=True)
+
+    second_confirmed_at = jmodels.jDateTimeField(null=True, default=None)
+    second_confirmed_by = models.ForeignKey('users.User', on_delete=models.PROTECT,
+                                            related_name='second_%(class)sConfirmer', null=True)
+
+    class Meta:
+        abstract = True
+
+    @property
+    def has_first_confirm_permission(self):
+        user = get_current_user()
+        first_confirm_permission_codename = "firstConfirm.{}".format(self._meta.permission_basename)
+        return user.has_object_perm(self, first_confirm_permission_codename)
+
+    @property
+    def has_second_confirm_permission(self):
+        user = get_current_user()
+        second_confirm_permission_codename = "secondConfirm.{}".format(self._meta.permission_basename)
+        return user.has_object_perm(self, second_confirm_permission_codename)
+
+    @property
+    def has_first_confirmation(self):
+        return self.first_confirmed_at is not None
+
+    @property
+    def has_second_confirmation(self):
+        return self.second_confirmed_at is not None
+
+    def can_confirm(self):
+
+        if self.first_confirmed_at is None:
+            if self.has_first_confirm_permission or self.has_second_confirm_permission:
+                return True
+        else:
+            if self.has_second_confirm_permission:
+                return True
+
+        return False
+
+    def confirm(self):
+        user = get_current_user()
+        if not self.has_first_confirmation:
+            self.first_confirmed_by = user
+            self.first_confirmed_at = jdatetime.datetime.now()
+        else:
+            self.second_confirmed_by = user
+            self.second_confirmed_at = jdatetime.datetime.now()
+        self.save()
+
+    def cancelConfirm(self):
+        if self.has_second_confirmation:
+            self.second_confirmed_by = None
+            self.second_confirmed_at = None
+        else:
+            self.first_confirmed_by = None
+            self.first_confirmed_at = None
+        self.save()
 
 
 def DATE(**kwargs):

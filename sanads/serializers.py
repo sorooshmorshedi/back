@@ -5,6 +5,7 @@ from factors.models import Factor
 
 from sanads.models import *
 from transactions.models import Transaction
+from users.serializers import UserListRetrieveSerializer, UserCreateSerializer
 
 
 class SanadItemSerializer(serializers.ModelSerializer):
@@ -61,6 +62,7 @@ class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
     factor = FactorWithTypeSerializer(read_only=True, many=False)
     transaction = TransactionWithTypeSerializer(read_only=True, many=False)
+    created_by = UserListRetrieveSerializer()
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'

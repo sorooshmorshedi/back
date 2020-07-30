@@ -1,12 +1,10 @@
-from typing import Optional, Union, Sequence
-
 from django.contrib.postgres.fields.array import ArrayField
 from django.db import models
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from companies.models import FinancialYear
-from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE
+from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
 from transactions.models import Transaction
 from users.models import City
 from wares.models import Ware
@@ -202,7 +200,7 @@ class RemittanceMixin(BaseModel):
         abstract = True
 
 
-class Remittance(RemittanceMixin):
+class Remittance(RemittanceMixin, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='remittances')
     code = models.IntegerField(unique=True)
     issue_date = jmodels.jDateField()
@@ -229,6 +227,11 @@ class Remittance(RemittanceMixin):
             ('getOwn.remittance', 'مشاهده حواله های خود'),
             ('updateOwn.remittance', 'ویرایش حواله های خود'),
             ('deleteOwn.remittance', 'حذف حواله های خود'),
+
+            ('firstConfirm.remittance', 'تایید اول حواله '),
+            ('secondConfirm.remittance', 'تایید دوم حواله '),
+            ('firstConfirmOwn.remittance', 'تایید اول حواله های خود'),
+            ('secondConfirmOwn.remittance', 'تایید دوم حواله های خود'),
         )
 
 
@@ -270,7 +273,7 @@ class LadingBillNumber(BaseModel):
         )
 
 
-class Lading(RemittanceMixin):
+class Lading(RemittanceMixin, ConfirmationMixin):
     COMPANY = 'cmp'
     CONTRACTOR = 'cnt'
     TIP_PAYERS = (
@@ -328,10 +331,19 @@ class Lading(RemittanceMixin):
             ('create.lading', 'تعریف بارگیری'),
             ('update.lading', 'ویرایش بارگیری'),
             ('delete.lading', 'حذف بارگیری'),
+
+            ('getOwn.lading', 'مشاهده بارگیری های خود'),
+            ('updateOwn.lading', 'ویرایش بارگیری های خود'),
+            ('deleteOwn.lading', 'حذف بارگیری های خود'),
+
+            ('firstConfirm.lading', 'تایید اول بارگیری '),
+            ('secondConfirm.lading', 'تایید دوم بارگیری '),
+            ('firstConfirmOwn.lading', 'تایید اول بارگیری های خود'),
+            ('secondConfirmOwn.lading', 'تایید دوم بارگیری های خود'),
         )
 
 
-class OilCompanyLading(BaseModel):
+class OilCompanyLading(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='oilCompanyLadings')
     explanation = EXPLANATION()
     date = jmodels.jDateField()
@@ -349,6 +361,15 @@ class OilCompanyLading(BaseModel):
             ('create.oilCompanyLading', 'تعریف بارگیری شرکت نفت'),
             ('update.oilCompanyLading', 'ویرایش بارگیری شرکت نفت'),
             ('delete.oilCompanyLading', 'حذف بارگیری شرکت نفت'),
+
+            ('getOwn.oilCompanyLading', 'مشاهده بارگیری شرکت نفت خود'),
+            ('updateOwn.oilCompanyLading', 'ویرایش بارگیری شرکت نفت خود'),
+            ('deleteOwn.oilCompanyLading', 'حذف بارگیری شرکت نفت خود'),
+
+            ('firstConfirm.oilCompanyLading', 'تایید اول بارگیری شرکت نفت '),
+            ('secondConfirm.oilCompanyLading', 'تایید دوم بارگیری شرکت نفت '),
+            ('firstConfirmOwn.oilCompanyLading', 'تایید اول بارگیری شرکت نفت خود'),
+            ('secondConfirmOwn.oilCompanyLading', 'تایید دوم بارگیری شرکت نفت خود'),
         )
 
 
@@ -371,7 +392,7 @@ class OilCompanyLadingItem(BaseModel):
         pass
 
 
-class OtherDriverPayment(BaseModel):
+class OtherDriverPayment(BaseModel, ConfirmationMixin):
     code = models.IntegerField()
     date = DATE()
     explanation = EXPLANATION()
@@ -394,4 +415,9 @@ class OtherDriverPayment(BaseModel):
             ('getOwn.otherDriverPayment', 'مشاهده پرداخت رانندگان متفرقه خود'),
             ('updateOwn.otherDriverPayment', 'ویرایش پرداخت رانندگان متفرقه خود'),
             ('deleteOwn.otherDriverPayment', 'حذف پرداخت رانندگان متفرقه خود'),
+
+            ('firstConfirm.otherDriverPayment', 'تایید اول پرداخت رانندگان متفرقه '),
+            ('secondConfirm.otherDriverPayment', 'تایید دوم پرداخت رانندگان متفرقه '),
+            ('firstConfirmOwn.otherDriverPayment', 'تایید اول پرداخت رانندگان متفرقه خود'),
+            ('secondConfirmOwn.otherDriverPayment', 'تایید دوم پرداخت رانندگان متفرقه خود'),
         )

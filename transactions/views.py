@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
+from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
@@ -118,3 +119,13 @@ class TransactionByPositionView(APIView):
         if item:
             return Response(TransactionListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class ConfirmTransaction(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    model = Transaction
+
+    @property
+    def permission_codename(self):
+        instance = self.get_object()
+        return get_transaction_permission_basename(instance.type)

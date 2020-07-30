@@ -5,11 +5,11 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from helpers.models import BaseModel
+from helpers.models import BaseModel, ConfirmationMixin
 from server.settings import TESTING
 
 
-class Sanad(BaseModel):
+class Sanad(BaseModel, ConfirmationMixin):
     TEMPORARY = 'temporary'
     DEFINITE = 'definite'
     SANAD_TYPES = (
@@ -51,6 +51,11 @@ class Sanad(BaseModel):
             ('getOwn.sanad', 'مشاهده سند های خود'),
             ('updateOwn.sanad', 'ویرایش سند های خود'),
             ('deleteOwn.sanad', 'حذف سند های خود'),
+
+            ('firstConfirm.sanad', 'تایید اول سند'),
+            ('secondConfirm.sanad', 'تایید دوم سند'),
+            ('firstConfirmOwn.sanad', 'تایید اول سند های خود'),
+            ('secondConfirmOwn.sanad', 'تایید دوم سند های خود'),
 
             ('reorder.sanad', 'مرتب کردن کد اسناد بر اساس تاریخ'),
         )

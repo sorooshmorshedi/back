@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
+from helpers.views.confirm_view import ConfirmView
 from imprests.models import ImprestSettlement
 from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementListRetrieveSerializer, \
     ImprestSettlementItemCreateUpdateSerializer
@@ -115,3 +116,9 @@ class GetAccountNotSettledImprestsView(APIView):
                 'imprestSettlement': ImprestSettlementListRetrieveSerializer(imprest.imprestSettlements.first()).data
             })
         return Response(result)
+
+
+class ConfirmImprest(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'imprestSettlement'
+    model = ImprestSettlement

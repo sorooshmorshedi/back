@@ -4,7 +4,7 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import getDefaultAccount
 from cheques.models.ChequebookModel import Chequebook
 from companies.models import FinancialYear
-from helpers.models import BaseModel
+from helpers.models import BaseModel, ConfirmationMixin
 
 CHEQUE_STATUSES = (
     ('blank', 'blank'),
@@ -19,7 +19,7 @@ CHEQUE_STATUSES = (
 )
 
 
-class Cheque(BaseModel):
+class Cheque(BaseModel, ConfirmationMixin):
     RECEIVED = 'r'
     PAID = 'p'
 
@@ -105,6 +105,16 @@ class Cheque(BaseModel):
             ('deleteOwn.paidCheque', 'حذف چک های پرداختی خود'),
 
             ('changeStatusOwn.paidCheque', 'تغییر وضعیت های پرداختی خود'),
+
+            ('firstConfirm.receivedCheque', 'تایید اول چک دریافتی'),
+            ('secondConfirm.receivedCheque', 'تایید دوم چک دریافتی'),
+            ('firstConfirmOwn.receivedCheque', 'تایید اول چک های دریافتی خود'),
+            ('secondConfirmOwn.receivedCheque', 'تایید دوم چک های دریافتی خود'),
+
+            ('firstConfirm.paidCheque', 'تایید اول چک پرداختی '),
+            ('secondConfirm.paidCheque', 'تایید دوم چک پرداختی '),
+            ('firstConfirmOwn.paidCheque', 'تایید اول چک های پرداختی خود'),
+            ('secondConfirmOwn.paidCheque', 'تایید دوم چک های پرداختی خود'),
         )
 
     def save(self, *args, **kwargs):

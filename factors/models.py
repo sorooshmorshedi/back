@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
-from helpers.models import BaseModel
+from helpers.models import BaseModel, ConfirmationMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -46,7 +46,7 @@ class Expense(BaseModel):
         )
 
 
-class Factor(BaseModel):
+class Factor(BaseModel, ConfirmationMixin):
     BUY = 'buy'
     SALE = 'sale'
     BACK_FROM_BUY = 'backFromBuy'
@@ -152,6 +152,26 @@ class Factor(BaseModel):
 
             ('get.firstPeriodInventory', 'مشاهده موجودی اول دوره'),
             ('update.firstPeriodInventory', 'ثبت موجودی اول دوره'),
+
+            ('firstConfirm.buyFactor', 'تایید اول فاکتور خرید '),
+            ('secondConfirm.buyFactor', 'تایید دوم فاکتور خرید '),
+            ('firstConfirmOwn.buyFactor', 'تایید اول فاکتور های خرید خود'),
+            ('secondConfirmOwn.buyFactor', 'تایید دوم فاکتور های خرید خود'),
+
+            ('firstConfirm.saleFactor', 'تایید اول فاکتور فروش '),
+            ('secondConfirm.saleFactor', 'تایید دوم فاکتور فروش '),
+            ('firstConfirmOwn.saleFactor', 'تایید اول فاکتور های فروش خود'),
+            ('secondConfirmOwn.saleFactor', 'تایید دوم فاکتور های فروش خود'),
+
+            ('firstConfirm.backFromBuyFactor', 'تایید اول فاکتور برگشت از خرید'),
+            ('secondConfirm.backFromBuyFactor', 'تایید دوم فاکتور برگشت از خرید'),
+            ('firstConfirmOwn.backFromBuyFactor', 'تایید اول فاکتور های برگشت از خرید خود'),
+            ('secondConfirmOwn.backFromBuyFactor', 'تایید دوم فاکتور های برگشت از خرید خود'),
+
+            ('firstConfirm.backFromSaleFromSaleFactor', 'تایید اول فاکتور برگشت از فروش '),
+            ('secondConfirm.backFromSaleFromSaleFactor', 'تایید دوم فاکتور برگشت از فروش '),
+            ('firstConfirmOwn.backFromSaleFromSaleFactor', 'تایید اول فاکتور های برگشت از فروش خود'),
+            ('secondConfirmOwn.backFromSaleFromSaleFactor', 'تایید دوم فاکتور های برگشت از فروش خود'),
 
         )
 

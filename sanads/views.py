@@ -1,11 +1,13 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from mypy.config_parser import Any
 
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,6 +15,7 @@ from helpers.auth import BasicCRUDPermission
 from helpers.db import queryset_iterator
 from helpers.functions import get_object_by_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
+from helpers.views.confirm_view import ConfirmView
 from sanads.serializers import *
 
 
@@ -130,3 +133,9 @@ class SanadByPositionView(APIView):
         if item:
             return Response(SanadListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class ConfirmSanad(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'sanad'
+    model = Sanad

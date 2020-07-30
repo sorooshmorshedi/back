@@ -12,6 +12,7 @@ from factors.helpers import getInventoryCount
 from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user, get_object_by_code
+from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, newSanadCode
 from factors.serializers import *
 from server.settings import TESTING
@@ -66,7 +67,7 @@ class FactorModelView(viewsets.ModelViewSet):
             factor_data = self.request.data['item']
             factor_type = factor_data.get('type')
         else:
-            factor_type = self.get_object().type
+            factor_type = Factor.objects.get(pk=self.kwargs['pk']).type
         return get_factor_permission_basename(factor_type)
 
     def get_queryset(self):
@@ -703,3 +704,12 @@ class DefiniteFactor(APIView):
 
         if is_used_in_next_years:
             raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
+
+
+class ConfirmFactor(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    model = Factor
+
+    @property
+    def permission_codename(self):
+        return get_factor_permission_basename(self.get_object().type)

@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from cheques.views import ChequebookModelView, ChequeApiView, \
     ChangeChequeStatus, DeleteStatusChangeView, \
-    SubmitChequeApiView, RevertChequeInFlowStatusView, ChequeByPositionApiView
+    SubmitChequeApiView, RevertChequeInFlowStatusView, ChequeByPositionApiView, ConfirmCheque
 
 router = DefaultRouter()
 router.register(r'chequebooks', ChequebookModelView, base_name='chequebooks')
@@ -12,6 +12,7 @@ urlpatterns = router.urls + [
     url(r'^cheques/(?P<pk>[0-9]+)$', ChequeApiView.as_view(), name='chequeDetail'),
     url(r'^cheques/submit', SubmitChequeApiView.as_view(), name='submitCheque'),
     url(r'^getChequeByPosition$', ChequeByPositionApiView.as_view(), name='getChequeByPosition'),
+    url(r'^cheques/(?P<pk>[0-9]+)/confirm$', ConfirmCheque.as_view(), name=''),
 
     # cheque id
     url(r'^cheques/changeStatus/(?P<pk>[0-9]+)$', ChangeChequeStatus.as_view(), name='changeChequeStatus'),

@@ -6,13 +6,13 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
-from helpers.models import BaseModel
+from helpers.models import BaseModel, ConfirmationMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
 
 
-class Transaction(BaseModel):
+class Transaction(BaseModel, ConfirmationMixin):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     IMPREST = 'imprest'
@@ -59,6 +59,22 @@ class Transaction(BaseModel):
             ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
             ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
             ('delete.imprestTransaction', 'حذف پرداخت تنخواه'),
+
+            ('firstConfirm.receiveTransaction', 'تایید اول دریافت '),
+            ('secondConfirm.receiveTransaction', 'تایید دوم دریافت '),
+            ('firstConfirmOwn.receiveTransaction', 'تایید اول دریافت های خود'),
+            ('secondConfirmOwn.receiveTransaction', 'تایید دوم دریافت های خود'),
+
+            ('firstConfirm.paymentTransaction', 'تایید اول پرداخت '),
+            ('secondConfirm.paymentTransaction', 'تایید دوم پرداخت '),
+            ('firstConfirmOwn.paymentTransaction', 'تایید اول پرداخت های خود'),
+            ('secondConfirmOwn.paymentTransaction', 'تایید دوم پرداخت های خود'),
+
+            ('firstConfirm.imprestTransaction', 'تایید اول تنخواه '),
+            ('secondConfirm.imprestTransaction', 'تایید دوم تنخواه '),
+            ('firstConfirmOwn.imprestTransaction', 'تایید اول تنخواه های خود'),
+            ('secondConfirmOwn.imprestTransaction', 'تایید دوم تنخواه های خود'),
+
         )
 
     def sync(self, user, data):

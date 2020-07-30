@@ -7,11 +7,11 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from helpers.models import BaseModel, DECIMAL, EXPLANATION
+from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin
 from transactions.models import Transaction
 
 
-class ImprestSettlement(BaseModel):
+class ImprestSettlement(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
     code = models.IntegerField()
     transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, related_name='imprestSettlements')
@@ -38,7 +38,12 @@ class ImprestSettlement(BaseModel):
 
             ('getOwn.imprestSettlement', 'مشاهده تسویه تنخواه های خود'),
             ('updateOwn.imprestSettlement', 'ویرایش تسویه تنخواه های خود'),
-            ('deleteOwn.imprestSettlement', 'حذف تسویه تنخواه های خود')
+            ('deleteOwn.imprestSettlement', 'حذف تسویه تنخواه های خود'),
+
+            ('firstConfirm.imprestSettlement', 'تایید اول تنخواه '),
+            ('secondConfirm.imprestSettlement', 'تایید دوم تنخواه '),
+            ('firstConfirmOwn.imprestSettlement', 'تایید اول تنخواه های خود'),
+            ('secondConfirmOwn.imprestSettlement', 'تایید دوم تنخواه های خود'),
         )
 
     def update_settlement_data(self):

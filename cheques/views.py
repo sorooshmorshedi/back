@@ -13,6 +13,7 @@ from cheques.permissions import SubmitChequePermission, ChangeChequeStatusPermis
 from cheques.serializers import *
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
+from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
 
 
@@ -150,7 +151,7 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
 
     @property
     def permission_basename(self):
-        return get_cheque_permission_basename(self.get_object().received_or_paid)
+        return get_cheque_permission_basename(get_object_or_404(Cheque, pk=self.kwargs.get('pk')).received_or_paid)
 
     def get_queryset(self) -> QuerySet:
         return Cheque.objects.hasAccess(self.request.method, self.permission_basename)
@@ -408,3 +409,11 @@ class RevertChequeInFlowStatusView(APIView):
         else:
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serialized.data, status=status.HTTP_200_OK)
+
+
+class ConfirmCheque(ConfirmView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    model = Cheque
+
+    def permission_codename(self):
+        return get_cheque_permission_basename(self.get_object().received_or_paid)
