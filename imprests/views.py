@@ -98,14 +98,11 @@ class GetAccountNotSettledImprestsView(APIView):
     permission_basename = 'imprestTransaction'
 
     def get(self, request):
-        imprests = Transaction.objects.hasAccess('get', 'imprestTransaction').filter(
-            account__id=request.GET.get('account'),
-            floatAccount__id=request.GET.get('floatAccount'),
-            costCenter__id=request.GET.get('costCenter'),
-            type=Transaction.IMPREST,
-        ).filter(
-            Q(imprestSettlements__isnull=True) | Q(imprestSettlements__is_settled=False)
-        ).all()
+        imprests = Transaction.get_not_settled_imprests_queryset(
+            request.GET.get('account'),
+            request.GET.get('floatAccount'),
+            request.GET.get('costCenter'),
+        )
 
         result = []
         for imprest in imprests:

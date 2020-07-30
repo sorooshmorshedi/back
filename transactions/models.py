@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Sum
+from django.db.models.query_utils import Q
 from django_jalali.db import models as jmodels
 
 from accounts.accounts.models import Account, FloatAccount
@@ -214,6 +215,21 @@ class Transaction(BaseModel, ConfirmationMixin):
             return codes[transaction_type]
         else:
             return codes
+
+    @staticmethod
+    def get_not_settled_imprests_queryset(account_id=None, floatAccount_id=None, costCenter_id=None):
+        queryset = Transaction.objects.hasAccess('get', 'imprestTransaction') \
+            .filter(type=Transaction.IMPREST) \
+            .filter(Q(imprestSettlements__isnull=True) | Q(imprestSettlements__is_settled=False))
+
+        if account_id:
+            queryset = queryset.filter(account__id=account_id)
+        if floatAccount_id:
+            queryset = queryset.filter(floatAccount__id=floatAccount_id)
+        if costCenter_id:
+            queryset = queryset.filter(costCenter__id=costCenter_id)
+
+        return queryset
 
 
 class TransactionItem(BaseModel):
