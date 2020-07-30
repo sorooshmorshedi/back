@@ -11,7 +11,7 @@ from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
 from imprests.models import ImprestSettlement
 from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementListRetrieveSerializer, \
-    ImprestSettlementItemCreateUpdateSerializer
+    ImprestSettlementItemCreateUpdateSerializer, ImprestListRetrieveSerializer
 from transactions.models import Transaction
 
 
@@ -112,7 +112,8 @@ class GetAccountNotSettledImprestsView(APIView):
                 'sum': imprest.sum,
                 'imprestSettlement': ImprestSettlementListRetrieveSerializer(imprest.imprestSettlements.first()).data
             })
-        return Response(result)
+
+        return Response(ImprestListRetrieveSerializer(imprests, many=True).data)
 
 
 class ConfirmImprest(ConfirmView):

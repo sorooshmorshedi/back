@@ -414,7 +414,7 @@ class OtherDriverPaymentReport(APIView):
         ladings = Lading.objects.hasAccess('get', 'lading').filter(remittance=remittance)
 
         # put accounts data
-        imprests = Transaction.get_not_settled_imprests_queryset() #.filter(account__in=(), floatAccount__in=())
+        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
 
         return Response({
             'ladings': LadingListRetrieveSerializer(ladings, many=True).data,

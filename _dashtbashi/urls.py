@@ -5,7 +5,7 @@ from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, A
     RemittanceModelView, RemittanceByPositionView, LadingModelView, LadingByPositionView, RemittanceByCodeView, \
     LadingBillSeriesModelView, LadingBillSeriesByPositionView, RevokeLadingBillNumber, OilCompanyLadingModelView, \
     OilCompanyLadingByPositionView, OtherDriverPaymentModelView, ConfirmRemittance, ConfirmLading, \
-    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentReport
+    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentReport, OtherDriverPaymentByPositionView
 
 router = DefaultRouter()
 router.register('drivers', DriverModelView, base_name='drivers')
@@ -32,6 +32,8 @@ urlpatterns += [
     url(r'^ladings/byPosition$', LadingByPositionView.as_view()),
 
     url(r'^oilCompanyLadings/byPosition$', OilCompanyLadingByPositionView.as_view()),
+
+    url(r'^otherDriverPayments/byPosition$', OtherDriverPaymentByPositionView.as_view()),
 
     url(r'^remittances/(?P<pk>[0-9]+)/confirm/$', ConfirmRemittance.as_view(), name=''),
     url(r'^ladings/(?P<pk>[0-9]+)/confirm/$', ConfirmLading.as_view(), name=''),

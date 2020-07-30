@@ -5,6 +5,7 @@ from rest_framework import serializers
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
 from accounts.accounts.serializers import AccountListRetrieveSerializer
+from imprests.serializers import ImprestListRetrieveSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
 from users.serializers import CitySerializer
@@ -177,7 +178,7 @@ class OtherDriverPaymentCreateUpdateSerializer(serializers.ModelSerializer):
 class OtherDriverPaymentListRetrieveSerializer(serializers.ModelSerializer):
     driving = DrivingListRetrieveSerializer()
     ladings = LadingListRetrieveSerializer(many=True)
-    imprests = TransactionListRetrieveSerializer(many=True)
+    imprests = ImprestListRetrieveSerializer(many=True)
     payment = TransactionListRetrieveSerializer(many=False)
 
     class Meta:
