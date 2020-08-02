@@ -1,6 +1,7 @@
 from typing import Type
 
 from django.db.models import QuerySet
+from django.db.models.query import Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
@@ -96,7 +97,12 @@ class LadingBillSeriesModelView(viewsets.ModelViewSet):
     page_size = 15
 
     def get_queryset(self) -> QuerySet:
-        return LadingBillSeries.objects.hasAccess(self.request.method)
+        return LadingBillSeries.objects.hasAccess(self.request.method).prefetch_related(
+            Prefetch(
+                'numbers',
+                LadingBillNumber.objects.filter(is_revoked=False, lading=None)
+            )
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

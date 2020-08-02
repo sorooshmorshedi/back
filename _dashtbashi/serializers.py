@@ -126,6 +126,12 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('financial_year',)
 
+    def validate(self, attrs):
+        remittance = attrs.get('remittance')
+        if remittance and remittance.is_finished:
+            raise serializers.ValidationError("بارگیری این حواله به پایان رسیده است")
+        return attrs
+
 
 class LadingListRetrieveSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)

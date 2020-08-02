@@ -207,8 +207,8 @@ class Remittance(RemittanceMixin, ConfirmationMixin):
     loading_date = jmodels.jDateField()
     end_date = jmodels.jDateField()
     amount = DECIMAL()
-    created_at = jmodels.jDateTimeField(auto_now=True)
-    updated_at = jmodels.jDateTimeField(auto_now_add=True)
+
+    is_finished = models.BooleanField(default=False)
 
     explanation = EXPLANATION()
 
@@ -302,7 +302,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     lading_explanation = EXPLANATION()
     lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
 
-    billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='ladings')
+    billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='lading')
     bill_date = jmodels.jDateField()
     bill_price = DECIMAL()
 
