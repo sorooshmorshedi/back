@@ -21,14 +21,7 @@ class PermissionListView(APIView):
         for app_label in excludes:
             queryset = queryset.exclude(content_type__app_label=app_label)
 
-        groups = {}
-        for permission in queryset:
-            model = permission.content_type.model
-            if model not in groups:
-                groups[model] = []
-            groups[model].append(PermissionListSerializer(permission).data)
-
-        return Response(groups)
+        return Response(PermissionListSerializer(queryset.all(), many=True).data)
 
 
 class RoleListView(generics.ListAPIView):
