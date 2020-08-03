@@ -46,6 +46,7 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
+    imprestSettlements = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Transaction
