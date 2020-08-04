@@ -1,5 +1,4 @@
 from django.db.models import QuerySet
-from django.db.models.query_utils import Q
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -65,8 +64,8 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
 
         MassRelatedCUD(
             user,
-            items_data.get('items'),
-            items_data.get('ids_to_delete'),
+            items_data.get('items', []),
+            items_data.get('ids_to_delete', []),
             'imprestSettlement',
             instance.id,
             ImprestSettlementItemCreateUpdateSerializer,

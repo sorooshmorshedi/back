@@ -1,8 +1,6 @@
-from typing import Optional, Union, Sequence
-
+import uuid
 from django.db import models
 from django_jalali.db import models as jmodels
-from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
@@ -59,6 +57,11 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
         self.save()
 
 
+def upload_to(instance, filename):
+    directory = instance.__class__.__name__
+    return "{}/{}-{}".format(directory, uuid.uuid1(), filename)
+
+
 class ImprestSettlementItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
     imprestSettlement = models.ForeignKey(ImprestSettlement, on_delete=models.CASCADE, related_name='items')
@@ -73,8 +76,10 @@ class ImprestSettlementItem(BaseModel):
                                    related_name="imprestSettlementItemsAsCostCenter", blank=True, null=True)
     value = DECIMAL()
 
+    attachment = models.FileField(upload_to=upload_to, null=True)
+
     def __str__(self):
-        return "{0} - {1}".format(self.imprestSettlement.code, self.explanation[0:30])
+        return "{0} - {1}".format(self.pk, self.explanation)
 
     class Meta(BaseModel.Meta):
         pass

@@ -17,8 +17,8 @@ class MassRelatedCUD:
             financial_year=None
     ):
         self.user = user
-        self.items = items
-        self.ids_to_delete = ids_to_delete
+        self.items = items or []
+        self.ids_to_delete = ids_to_delete or []
         self.parent_id = parent_id
         self.parent_field = parent_field
         self.create_serializer = create_serializer
@@ -49,6 +49,11 @@ class MassRelatedCUD:
 
         for item in items_to_update:
             instance = get_object_or_404(model.objects.inFinancialYear(), id=item['id'])
+
+            if item.get('delete_attachment', False):
+                instance.attachment.delete()
+                instance.attachment = None
+
             serializer = self.update_serializer(instance, data=item)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
