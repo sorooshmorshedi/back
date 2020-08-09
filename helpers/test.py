@@ -19,7 +19,7 @@ class MAPIClient(APIClient):
 
 
 class MTestCase(APITestCase):
-    fixtures = ['companies.json', 'accounts.json', 'users.json', 'wares.json']
+    fixtures = ['1-users.json', '2-companies.json', '3-accounts.json', '4-options.json', '5-wares.json']
     faker = Faker('fa_IR')
 
     def setUp(self):

@@ -110,14 +110,13 @@ class Car(BaseModel):
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
 
-        # Create Accounts Here
-        # parent = Account()
-        # Account.objects.create(
-        #     name="{}".format(self.car_number_str),
-        #     parent=parent,
-        #     code=parent.get_new_child_code(),
-        #     level=Account.TAFSILI
-        # )
+        parent = Account()
+        Account.objects.create(
+            name="{}".format(self.car_number_str),
+            parent=parent,
+            code=parent.get_new_child_code(),
+            level=Account.TAFSILI
+        )
 
 
 class Driving(BaseModel):

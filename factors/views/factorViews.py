@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.defaultAccounts.models import getDefaultAccount
+from accounts.defaultAccounts.models import DefaultAccount
 from factors.helpers import getInventoryCount
 from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
@@ -514,9 +514,9 @@ class DefiniteFactor(APIView):
             )
 
             sanad.items.create(
-                account=getDefaultAccount(account).account,
-                floatAccount=getDefaultAccount(account).floatAccount,
-                costCenter=getDefaultAccount(account).costCenter,
+                account=DefaultAccount.get(account).account,
+                floatAccount=DefaultAccount.get(account).floatAccount,
+                costCenter=DefaultAccount.get(account).costCenter,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -529,9 +529,9 @@ class DefiniteFactor(APIView):
         sanad = factor.sanad
         if factor.discountSum:
             sanad.items.create(
-                account=getDefaultAccount(account).account,
-                floatAccount=getDefaultAccount(account).floatAccount,
-                costCenter=getDefaultAccount(account).costCenter,
+                account=DefaultAccount.get(account).account,
+                floatAccount=DefaultAccount.get(account).floatAccount,
+                costCenter=DefaultAccount.get(account).costCenter,
                 bed=first_row_bed,
                 bes=first_row_bes,
                 explanation=explanation,
@@ -563,9 +563,9 @@ class DefiniteFactor(APIView):
                 financial_year=sanad.financial_year
             )
             sanad.items.create(
-                account=getDefaultAccount('tax').account,
-                floatAccount=getDefaultAccount('tax').floatAccount,
-                costCenter=getDefaultAccount('tax').costCenter,
+                account=DefaultAccount.get('tax').account,
+                floatAccount=DefaultAccount.get('tax').floatAccount,
+                costCenter=DefaultAccount.get('tax').costCenter,
                 bed=second_row_bed,
                 bes=second_row_bes,
                 explanation=explanation,
@@ -668,9 +668,9 @@ class DefiniteFactor(APIView):
                 bes = profit_and_loss_value
 
             sanad.items.create(
-                account=getDefaultAccount('profitAndLossFromBuying').account,
-                floatAccount=getDefaultAccount('profitAndLossFromBuying').floatAccount,
-                costCenter=getDefaultAccount('profitAndLossFromBuying').costCenter,
+                account=DefaultAccount.get('profitAndLossFromBuying').account,
+                floatAccount=DefaultAccount.get('profitAndLossFromBuying').floatAccount,
+                costCenter=DefaultAccount.get('profitAndLossFromBuying').costCenter,
                 bed=bed,
                 bes=bes,
                 explanation=explanation,

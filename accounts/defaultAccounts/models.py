@@ -35,7 +35,7 @@ class DefaultAccount(BaseModel):
                                    blank=True, null=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
-    codename = models.CharField(unique=True, max_length=50, null=True, blank=True)
+    codename = models.CharField(unique=True, max_length=255, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -57,7 +57,3 @@ class DefaultAccount(BaseModel):
     @staticmethod
     def get(codename):
         return DefaultAccount.objects.get(codename=codename)
-
-
-def getDefaultAccount(pn):
-    return DefaultAccount.objects.get(codename=pn)

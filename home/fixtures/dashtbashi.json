@@ -1,0 +1,366 @@
+[
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه ماشین های حمل و نقل حاج رحمان",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahmanCarsTransportationCost"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه ماشین های حمل و نقل شراکتی",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "partnershipCarsTransportationCost"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان حمل و نقل حاج رحیم",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForRahimTransportationDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان حمل و نقل حاج ابراهیم",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForEbrahimTransportationDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان حمل و نقل شراکتی",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForPartnershipTransportationDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان حمل و نقل سایر",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForOtherTransportationDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در حمل و نقل ماشین های حاج رحمان",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInRahmanTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در حمل و نقل ماشین های حاج رحیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInRahimTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در حمل و نقل ماشین های حاج ابراهیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInEbrahimTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در حمل و نقل ماشین های شراکتی",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInPartnershipTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در حمل و نقل ماشین های سایر",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInOtherTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب شرکت جهت حمل کالای خریداری شده",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyAccountForTransportingBoughtWare"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب شرکت جهت حمل کالای فروش رفته",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyAccountForTransportingSoldWare"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه انعام سایر رانندگان",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "otherDriversTipCost"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد اختلاف بارنامه",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "ladingBillDifferenceIncome"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "صندوق باربری",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "cargoFund"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "کارت خوان باربری",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "cargoPOS"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب دریافتنی باربری حاج رحمان",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahmanCargoReceivableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب دریافتنی باربری حاج رحیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahimCargoReceivableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب دریافتنی باربری حاج ابراهیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "ebrahimCargoReceivableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب دریافتنی باربری شراکتی",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "partnershipCargoReceivableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد باربری",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "cargoIncome"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی کارمند باربری",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "cargoEmployeePayableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب بارگیری شرکت نفت",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "oilCompanyLadingAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب درآمد ماشین های رنگی حاج رحمان",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahmanColoredCarsIncomeAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": null,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب درآمد ماشین های رنگی شراکتی",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "partnershipColoredCarsIncomeAccount"
+    }
+  }
+]

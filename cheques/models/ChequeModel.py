@@ -1,7 +1,7 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
-from accounts.defaultAccounts.models import getDefaultAccount
+from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequebookModel import Chequebook
 from companies.models import FinancialYear
 from helpers.models import BaseModel, ConfirmationMixin
@@ -174,7 +174,7 @@ class Cheque(BaseModel, ConfirmationMixin):
                     data['bedCostCenter'] = self.costCenter.id
 
             elif to_status == 'notPassed':
-                defaultAccount = getDefaultAccount('receivedCheque')
+                defaultAccount = DefaultAccount.get('receivedCheque')
                 lastAccount = defaultAccount.account
                 lastFloatAccount = defaultAccount.floatAccount
                 lastCostCenter = defaultAccount.costCenter
@@ -219,7 +219,7 @@ class Cheque(BaseModel, ConfirmationMixin):
                     data['besCostCenter'] = self.chequebook.costCenter.id
 
             elif to_status == 'notPassed':
-                defaultAccount = getDefaultAccount('paidCheque')
+                defaultAccount = DefaultAccount.get('paidCheque')
                 lastAccount = defaultAccount.account
                 lastFloatAccount = defaultAccount.floatAccount
                 lastCostCenter = defaultAccount.costCenter

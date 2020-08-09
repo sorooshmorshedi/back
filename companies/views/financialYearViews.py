@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, AccountType, AccountBalance
-from accounts.defaultAccounts.models import getDefaultAccount
+from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from companies.serializers import FinancialYearSerializer
 from factors.models import Factor
@@ -70,7 +70,7 @@ class ClosingHelpers:
         elif sanad_remain > 0:
             bes = sanad_remain
 
-        current_earnings_default_account = getDefaultAccount(defaultAccount)
+        current_earnings_default_account = DefaultAccount.get(defaultAccount)
 
         item = SanadItem(
             financial_year=sanad.financial_year,
@@ -185,7 +185,7 @@ class CloseFinancialYearView(APIView):
 
     @staticmethod
     def add_retained_earnings_sanad_item(sanad):
-        current_earnings_default_account = getDefaultAccount('currentEarnings').account
+        current_earnings_default_account = DefaultAccount.get('currentEarnings').account
         sanad_items = ClosingHelpers.create_sanad_items_with_balance(
             sanad,
             [current_earnings_default_account],
@@ -205,7 +205,7 @@ class CloseFinancialYearView(APIView):
 
     @staticmethod
     def add_closing_sanad_item(sanad):
-        closing_account_default_account = getDefaultAccount('closing')
+        closing_account_default_account = DefaultAccount.get('closing')
 
         sanad_items = []
 
@@ -244,8 +244,8 @@ class CloseFinancialYearView(APIView):
         sanad = target_financial_year.get_opening_sanad()
         clearSanad(sanad)
 
-        opening_default_account = getDefaultAccount('opening')
-        closing_default_account = getDefaultAccount('closing')
+        opening_default_account = DefaultAccount.get('opening')
+        closing_default_account = DefaultAccount.get('closing')
 
         sanad_items = []
         for sanad_item in current_financial_year.permanentsClosingSanad.items.all():
