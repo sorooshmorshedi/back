@@ -2,7 +2,8 @@ from django.contrib.postgres.fields.array import ArrayField
 from django.db import models
 from django_jalali.db import models as jmodels
 
-from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
+from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation, FloatAccountGroup
+from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
 from transactions.models import Transaction
@@ -43,6 +44,22 @@ class Driver(BaseModel):
             ('deleteOwn.driver', 'حذف راننده های خود'),
         )
 
+    def save(self, *args, **kwargs) -> None:
+        if self.floatAccount:
+            self.floatAccount.delete()
+
+        self.floatAccount = FloatAccount.objects.create(
+            name=self.name,
+            financial_year=self.financial_year,
+            is_auto_created=True,
+        )
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.floatAccount.delete()
+        return super(Driver, self).delete(*args, **kwargs)
+
 
 class Car(BaseModel):
     PARTNERSHIP = 'p'
@@ -81,13 +98,12 @@ class Car(BaseModel):
     explanation = EXPLANATION()
 
     # just for Rahman
-    expenseAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carExpense', null=True)
+    expenseAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carExpense', null=True)
 
     # just for Rahman
-    incomeAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carIncome', null=True)
+    incomeAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carIncome', null=True)
 
-    payableAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carPayable', null=True)
-    receivableAccount = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='carReceivable', null=True)
+    payableAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carPayable', null=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -108,15 +124,102 @@ class Car(BaseModel):
         return "{} {} {} ایران {}".format(*self.car_number)
 
     def save(self, *args, **kwargs) -> None:
+
+        if self.expenseAccount:
+            self.expenseAccount.delete()
+        if self.incomeAccount:
+            self.incomeAccount.delete()
+        if self.payableAccount:
+            floatAccountGroup = self.payableAccount.floatAccountGroup
+            self.payableAccount.delete()
+            floatAccountGroup.delete()
+
+        parents = []
+        if self.owner == self.RAHMAN:
+            parents.append({
+                'attr': 'expenseAccount',
+                'account': DefaultAccount.get('rahmanCarsTransportationExpense').account,
+                'hasFloatAccountGroup': False
+            })
+
+            parents.append({
+                'attr': 'incomeAccount',
+                'account': DefaultAccount.get('rahmanCarsTransportationIncome').account,
+                'hasFloatAccountGroup': True
+            })
+
+            parents.append({
+                'attr': 'payableAccount',
+                'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
+                'hasFloatAccountGroup': True
+            })
+        elif self.owner == self.PARTNERSHIP:
+            parents.append({
+                'attr': 'expenseAccount',
+                'account': DefaultAccount.get('partnershipCarsTransportationExpense').account,
+                'hasFloatAccountGroup': False
+            })
+
+            parents.append({
+                'attr': 'incomeAccount',
+                'account': DefaultAccount.get('partnershipCarsTransportationIncome').account,
+                'hasFloatAccountGroup': True
+            })
+
+            parents.append({
+                'attr': 'payableAccount',
+                'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
+                'hasFloatAccountGroup': True
+            })
+        elif self.owner == self.RAHIM:
+            parents.append({
+                'attr': 'payableAccount',
+                'account': DefaultAccount.get('partnershipAccountForRahimTransportationDrivers').account,
+                'hasFloatAccountGroup': True
+            })
+        elif self.owner == self.EBRAHIM:
+            parents.append({
+                'attr': 'payableAccount',
+                'account': DefaultAccount.get('partnershipAccountForEbrahimTransportationDrivers').account,
+                'hasFloatAccountGroup': True
+            })
+        elif self.owner == self.OTHER:
+            parents.append({
+                'attr': 'payableAccount',
+                'account': DefaultAccount.get('partnershipAccountForOtherTransportationDrivers').account,
+                'hasFloatAccountGroup': True
+            })
+
+        floatAccountGroup = FloatAccountGroup.objects.create(
+            name="رانندگان {}".format(self.car_number_str),
+            financial_year=self.financial_year,
+            is_auto_created=True,
+        )
+
+        for parent in parents:
+            parent_account = parent['account']
+
+            account = Account.objects.create(
+                name=self.car_number_str,
+                parent=parent_account,
+                code=parent_account.get_new_child_code(),
+                level=Account.TAFSILI,
+                floatAccountGroup=(floatAccountGroup if parent['hasFloatAccountGroup'] else None),
+                financial_year=self.financial_year,
+                is_auto_created=True,
+            )
+
+            setattr(self, parent['attr'], account)
+
         super().save(*args, **kwargs)
 
-        parent = Account()
-        Account.objects.create(
-            name="{}".format(self.car_number_str),
-            parent=parent,
-            code=parent.get_new_child_code(),
-            level=Account.TAFSILI
-        )
+    def delete(self, *args, **kwargs):
+        self.expenseAccount.delete()
+        self.incomeAccount.delete()
+        floatAccountGroup = self.payableAccount.floatAccountGroup
+        self.payableAccount.delete()
+        floatAccountGroup.delete()
+        return super().delete(*args, **kwargs)
 
 
 class Driving(BaseModel):
@@ -145,6 +248,22 @@ class Driving(BaseModel):
             ('updateOwn.driving', 'ویرایش انتصاب راننده به ماشین خود'),
             ('deleteOwn.driving', 'حذف انتصاب راننده به ماشین خود'),
         )
+
+    def save(self, *args, **kwargs) -> None:
+        if self.floatAccountRelation:
+            self.floatAccountRelation.delete()
+
+        self.floatAccountRelation = FloatAccountRelation.objects.create(
+            financial_year=self.financial_year,
+            floatAccount=self.driver.floatAccount,
+            floatAccountGroup=self.car.payableAccount.floatAccountGroup
+        )
+
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.floatAccountRelation.delete()
+        return super().delete(*args, **kwargs)
 
 
 class Association(BaseModel):
