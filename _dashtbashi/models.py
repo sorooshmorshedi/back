@@ -6,6 +6,7 @@ from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
+from sanads.models import Sanad
 from transactions.models import Transaction
 from users.models import City
 from wares.models import Ware
@@ -139,62 +140,47 @@ class Car(BaseModel):
             parents.append({
                 'attr': 'expenseAccount',
                 'account': DefaultAccount.get('rahmanCarsTransportationExpense').account,
-                'hasFloatAccountGroup': False
             })
 
             parents.append({
                 'attr': 'incomeAccount',
                 'account': DefaultAccount.get('rahmanCarsTransportationIncome').account,
-                'hasFloatAccountGroup': True
             })
 
             parents.append({
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
-                'hasFloatAccountGroup': True
             })
         elif self.owner == self.PARTNERSHIP:
             parents.append({
                 'attr': 'expenseAccount',
                 'account': DefaultAccount.get('partnershipCarsTransportationExpense').account,
-                'hasFloatAccountGroup': False
             })
 
             parents.append({
                 'attr': 'incomeAccount',
                 'account': DefaultAccount.get('partnershipCarsTransportationIncome').account,
-                'hasFloatAccountGroup': True
             })
 
             parents.append({
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
-                'hasFloatAccountGroup': True
             })
         elif self.owner == self.RAHIM:
             parents.append({
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('partnershipAccountForRahimTransportationDrivers').account,
-                'hasFloatAccountGroup': True
             })
         elif self.owner == self.EBRAHIM:
             parents.append({
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('partnershipAccountForEbrahimTransportationDrivers').account,
-                'hasFloatAccountGroup': True
             })
         elif self.owner == self.OTHER:
             parents.append({
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('partnershipAccountForOtherTransportationDrivers').account,
-                'hasFloatAccountGroup': True
             })
-
-        floatAccountGroup = FloatAccountGroup.objects.create(
-            name="رانندگان {}".format(self.car_number_str),
-            financial_year=self.financial_year,
-            is_auto_created=True,
-        )
 
         for parent in parents:
             parent_account = parent['account']
@@ -204,12 +190,22 @@ class Car(BaseModel):
                 parent=parent_account,
                 code=parent_account.get_new_child_code(),
                 level=Account.TAFSILI,
-                floatAccountGroup=(floatAccountGroup if parent['hasFloatAccountGroup'] else None),
                 financial_year=self.financial_year,
                 is_auto_created=True,
             )
 
             setattr(self, parent['attr'], account)
+
+        self.payableAccount.floatAccountGroup = FloatAccountGroup.objects.create(
+            name="رانندگان {}".format(self.car_number_str),
+            financial_year=self.financial_year,
+            is_auto_created=True,
+        )
+        self.payableAccount.save()
+
+        if self.expenseAccount:
+            self.expenseAccount.floatAccountGroup_id = 1
+            self.expenseAccount.save()
 
         super().save(*args, **kwargs)
 
@@ -392,20 +388,36 @@ class LadingBillNumber(BaseModel):
 
 
 class Lading(RemittanceMixin, ConfirmationMixin):
+    OTHER = 'o'
     COMPANY = 'cmp'
     CONTRACTOR = 'cnt'
+
+    CREDIT = 'cr'
+    CASH = 'cs'
+    POS = 'p'
+
+    BOUGHT = 'b'
+    SOLD = 's'
+
     TIP_PAYERS = (
         (COMPANY, 'شرکت'),
         (CONTRACTOR, 'پیمانکار')
     )
 
-    CREDIT = 'cr'
-    CASH = 'cs'
-    POS = 'p'
     RECEIVE_TYPES = (
         (CREDIT, 'نسیه'),
         (CASH, 'نقدی'),
         (POS, 'کارت خوان')
+    )
+
+    CONTRACTOR_TYPES = (
+        (COMPANY, 'شرکت'),
+        (OTHER, 'دیگر')
+    )
+
+    WARE_TYPES = (
+        (BOUGHT, 'خریداری شده'),
+        (SOLD, 'فروش رفتخ')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='ladings')
@@ -432,7 +444,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
                                     blank=True)
     association_price = DECIMAL()
 
-    receive_type = models.CharField(max_length=2, choices=RECEIVE_TYPES, null=True, blank=True)
+    receive_type = models.CharField(max_length=2, choices=RECEIVE_TYPES)
 
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
@@ -441,6 +453,17 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='ladingDestinations', null=True,
                                     blank=True)
     is_paid = models.BooleanField(default=False)
+
+    contractor_type = models.CharField(max_length=3, choices=CONTRACTOR_TYPES, default=OTHER)
+    ware_type = models.CharField(max_length=2, choices=WARE_TYPES, null=True)
+
+    lading_total_value = DECIMAL()
+    company_commission_income = DECIMAL()
+    car_income = DECIMAL()
+
+    lading_bill_total_value = DECIMAL()
+
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='ladings', blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         permission_basename = 'lading'
@@ -459,6 +482,11 @@ class Lading(RemittanceMixin, ConfirmationMixin):
             ('firstConfirmOwn.lading', 'تایید اول بارگیری های خود'),
             ('secondConfirmOwn.lading', 'تایید دوم بارگیری های خود'),
         )
+
+    def save(self, *args, **kwargs) -> None:
+        from _dashtbashi.sanads import LadingSanad
+        super().save(*args, **kwargs)
+        LadingSanad(self).update()
 
 
 class OilCompanyLading(BaseModel, ConfirmationMixin):

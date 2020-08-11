@@ -368,6 +368,20 @@
     "pk": 1027,
     "fields": {
       "financial_year": 1,
+      "name": "حساب پرداختنی انجمن",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "associationPayableAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1028,
+    "fields": {
+      "financial_year": 1,
       "name": "حساب بارگیری شرکت نفت",
       "account_level": 3,
       "account": 233,
@@ -379,7 +393,7 @@
   },
   {
     "model": "accounts.defaultaccount",
-    "pk": 1028,
+    "pk": 1029,
     "fields": {
       "financial_year": 1,
       "name": "حساب درآمد ماشین های رنگی حاج رحمان",
@@ -393,7 +407,7 @@
   },
   {
     "model": "accounts.defaultaccount",
-    "pk": 1029,
+    "pk": 1030,
     "fields": {
       "financial_year": 1,
       "name": "حساب درآمد ماشین های رنگی شراکتی",
@@ -403,6 +417,35 @@
       "costCenter": null,
       "usage": "dashtbashi",
       "codename": "partnershipColoredCarsIncomeAccount"
+    }
+  },
+  {
+    "model": "accounts.floataccountgroup",
+    "pk": 1,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه های ماشین ها",
+      "is_cost_center": false,
+      "is_auto_created": true
+    }
+  },
+  {
+    "model": "accounts.floataccount",
+    "pk": 1,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه ی انعام",
+      "is_cost_center": false,
+      "is_auto_created": true
+    }
+  },
+  {
+    "model": "accounts.floataccountrelation",
+    "pk": 36,
+    "fields": {
+      "financial_year": 1,
+      "floatAccountGroup": 1,
+      "floatAccount": 1
     }
   }
 ]

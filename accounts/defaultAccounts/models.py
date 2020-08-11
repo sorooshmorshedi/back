@@ -13,6 +13,9 @@ class DefaultAccount(BaseModel):
     CLOSE_ACCOUNTS = 'closeAccounts'
     IMPREST = 'imprest'
     OTHER = 'other'
+
+    DASHTBASHI = 'dashtbashi'
+
     USAGES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
@@ -20,7 +23,9 @@ class DefaultAccount(BaseModel):
         (FACTOR, 'فاکتور'),
         (CLOSE_ACCOUNTS, 'بستن حساب ها'),
         (IMPREST, 'تنخواه'),
-        (OTHER, 'دیگر')
+        (OTHER, 'دیگر'),
+
+        (DASHTBASHI, 'دشتبشی')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='financialYear')

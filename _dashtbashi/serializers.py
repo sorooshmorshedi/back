@@ -6,6 +6,7 @@ from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, La
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
 from accounts.accounts.serializers import AccountListRetrieveSerializer
 from imprests.serializers import ImprestListRetrieveSerializer
+from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
 from users.serializers import CitySerializer
@@ -140,6 +141,7 @@ class LadingListRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
+    sanad = SanadSerializer(read_only=True)
 
     class Meta:
         model = Lading

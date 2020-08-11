@@ -115,6 +115,10 @@ class SanadItem(BaseModel):
     class Meta(BaseModel.Meta):
         pass
 
+    def save(self, *args, **kwargs) -> None:
+        self.financial_year = self.sanad.financial_year
+        super(SanadItem, self).save(*args, **kwargs)
+
 
 def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
     sanad = instance.sanad
