@@ -23,8 +23,7 @@ class LadingSanad:
             clearSanad(sanad)
 
         if lading.remittance_payment_method == Lading.TO_COMPANY:
-
-            if lading.contractor == Lading.OTHER:
+            if lading.contractor_type == Lading.OTHER:
                 # 1 & 2 & 3 & 4 & 5 & 6
                 sanad.items.create(
                     bed=lading.lading_total_value,
