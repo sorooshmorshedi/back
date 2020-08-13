@@ -1,11 +1,12 @@
 import re
 
 import jdatetime
+from django.db.models.deletion import ProtectedError
 from django_jalali.db import models as jmodels
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 import django.db.models.options as options
+from rest_framework.exceptions import ValidationError
 
 from helpers.functions import get_current_user
 
@@ -83,6 +84,14 @@ class BaseModel(models.Model):
         if not self.pk:
             self.created_by = get_current_user()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        try:
+            result = super(BaseModel, self).delete(*args, **kwargs)
+        except ProtectedError as e:
+            raise ValidationError('ابتدا داده های وابسته را حذف نمایید')
+
+        return result
 
 
 class ConfirmationMixin(models.Model):
