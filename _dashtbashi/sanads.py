@@ -35,6 +35,9 @@ class LadingSanad:
                         bes=lading.company_commission_income,
                         account=DefaultAccount.get('companyCommissionIncomeInRahmanTransportationCars').account,
                     )
+                    print(lading.car_income)
+                    print(car.incomeAccount)
+                    print(driver.floatAccount)
                     sanad.items.create(
                         bes=lading.car_income,
                         account=car.incomeAccount,

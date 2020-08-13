@@ -6,7 +6,7 @@ from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
-from sanads.models import Sanad
+from sanads.models import Sanad, clearSanad
 from transactions.models import Transaction
 from users.models import City
 from wares.models import Ware
@@ -138,48 +138,57 @@ class Car(BaseModel):
         parents = []
         if self.owner == self.RAHMAN:
             parents.append({
+                'name': "هزینه ماشین {}".format(self.car_number_str),
                 'attr': 'expenseAccount',
                 'account': DefaultAccount.get('rahmanCarsTransportationExpense').account,
             })
 
             parents.append({
+                'name': "درآمد ماشین {}".format(self.car_number_str),
                 'attr': 'incomeAccount',
                 'account': DefaultAccount.get('rahmanCarsTransportationIncome').account,
             })
 
             parents.append({
+                'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
             })
         elif self.owner == self.PARTNERSHIP:
             parents.append({
+                'name': "هزینه ماشین {}".format(self.car_number_str),
                 'attr': 'expenseAccount',
                 'account': DefaultAccount.get('partnershipCarsTransportationExpense').account,
             })
 
             parents.append({
+                'name': "درآمد ماشین {}".format(self.car_number_str),
                 'attr': 'incomeAccount',
                 'account': DefaultAccount.get('partnershipCarsTransportationIncome').account,
             })
 
             parents.append({
+                'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
             })
         elif self.owner == self.RAHIM:
             parents.append({
+                'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('partnershipAccountForRahimTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForRahimTransportationDrivers').account,
             })
         elif self.owner == self.EBRAHIM:
             parents.append({
+                'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('partnershipAccountForEbrahimTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForEbrahimTransportationDrivers').account,
             })
         elif self.owner == self.OTHER:
             parents.append({
+                'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('partnershipAccountForOtherTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForOtherTransportationDrivers').account,
             })
 
         for parent in parents:
@@ -196,12 +205,17 @@ class Car(BaseModel):
 
             setattr(self, parent['attr'], account)
 
-        self.payableAccount.floatAccountGroup = FloatAccountGroup.objects.create(
+        float_account_group = FloatAccountGroup.objects.create(
             name="رانندگان {}".format(self.car_number_str),
             financial_year=self.financial_year,
             is_auto_created=True,
         )
+        self.payableAccount.floatAccountGroup = float_account_group
         self.payableAccount.save()
+
+        if self.incomeAccount:
+            self.incomeAccount.floatAccountGroup = float_account_group
+            self.incomeAccount.save()
 
         if self.expenseAccount:
             self.expenseAccount.floatAccountGroup_id = 1
@@ -487,6 +501,10 @@ class Lading(RemittanceMixin, ConfirmationMixin):
         from _dashtbashi.sanads import LadingSanad
         super().save(*args, **kwargs)
         LadingSanad(self).update()
+
+    def delete(self, *args, **kwargs):
+        clearSanad(self.sanad)
+        return super().delete(*args, **kwargs)
 
 
 class OilCompanyLading(BaseModel, ConfirmationMixin):
