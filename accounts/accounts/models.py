@@ -309,6 +309,9 @@ class AccountBalance(BaseModel):
     class Meta(BaseModel.Meta):
         pass
 
+    def __str__(self):
+        return "{}, Bed: {}, Bes: {}".format(self.account, self.bed, self.bes)
+
     @staticmethod
     def update_balance(account, bed_change=0, bes_change=0, floatAccount=None, costCenter=None):
         user = get_current_user()
@@ -320,7 +323,10 @@ class AccountBalance(BaseModel):
         )
         account_balance.bed += bed_change
         account_balance.bes += bes_change
-        account_balance.save()
+        if account_balance.bed == account_balance.bes == 0:
+            account_balance.delete()
+        else:
+            account_balance.save()
 
     @staticmethod
     def get_bed_bes(account=None, floatAccount=None, costCenter=None) -> tuple:
