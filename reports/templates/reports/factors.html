@@ -173,7 +173,7 @@
                             {% if show_warehouse %}
                                 <td>{{ item.warehouse.name | default:'-' }}</td>
                             {% endif %}
-                            <td>{{ item.count }}</td>
+                            <td>{{ item.count | money }}</td>
                             <td>{{ item.ware.unit.name }}</td>
                             {% if not hide_prices %}
                                 <td>{{ item.fee | money }}</td>

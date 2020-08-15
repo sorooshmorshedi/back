@@ -3,95 +3,102 @@
 {% load export_verifiers %}
 
 {% block content %}
-{% for sanad in forms %}
+    {% for sanad in forms %}
 
-{% if forloop.last %}
-<div>
-	{% else %}
-	<div class="break-after">
-		{% endif %}
+        {% if forloop.last %}
+            <div>
+        {% else %}
+            <div class="break-after">
+        {% endif %}
 
-		<div class="text-center">
-			<h3>
-				{{ company.name }}
-			</h3>
-		</div>
-		<div class="row">
-			<div class="col-sm-4">
-			</div>
-			<div class="col-sm-4 text-center">
-				{{ form_name }}
-			</div>
-			<div class="col-sm-4 text-left">
-				سال مالی: {{ financial_year.name }}
-			</div>
-		</div>
+    <div class="text-center">
+        <h3>
+            {{ company.name }}
+        </h3>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+        </div>
+        <div class="col-sm-4 text-center">
+            {{ form_name }}
+        </div>
+        <div class="col-sm-4 text-left">
+            سال مالی: {{ financial_year.name }}
+        </div>
+    </div>
 
-		<div class="row form-header">
-			<div class="col-sm-12">
-				<span>شماره سند: </span>
-				<span> {{ sanad.code }} </span>
-			</div>
-			<div class="col-sm-12">
-				<span>تاریخ سند: </span>
-				<span dir="ltr"> {{ sanad.date }} </span>
-			</div>
+    <div class="row form-header">
+        <div class="col-sm-12">
+            <span>شماره سند: </span>
+            <span> {{ sanad.code }} </span>
+        </div>
+        <div class="col-sm-12">
+            <span>تاریخ سند: </span>
+            <span dir="ltr"> {{ sanad.date }} </span>
+        </div>
 
-			<div class="col-sm-12">
-				<div class="row">
-					<span class="col-sm-2">توضیحات سند: </span>
-					<span class="col-sm-10"> {{ sanad.explanation | default:'-' }} </span>
-				</div>
-			</div>
-			<br>
-		</div>
-		<div class="row">
-			<div class="col-sm-12">
-				<table class="table table-bordered table-striped">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>شماره - نام حساب</th>
-							<th>توضیحات</th>
-							<th>تفضیلی شناور</th>
-							<th>مرکز هزینه</th>
-							<th>بدهکار</th>
-							<th>بستانکار</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for item in sanad.items.all %}
-						<tr>
-							<td>{{ forloop.counter }}</td>
-							<td>{{ item.account }}</td>
-							<td>{{ item.explanation | default:'-' }}</td>
-							<td>{{ item.floatAccount | default:'-' }}</td>
-							<td>{{ item.costCenter | default:'-' }}</td>
-							{% if item.valueType == 'bed' %}
-							<td>{{ item.value | money }}</td>
-							<td>{{ 0 }}</td>
-							{% else %}
-							<td>{{ 0 }}</td>
-							<td>{{ item.value | money }}</td>
-							{% endif %}
-						</tr>
-						{% endfor %}
-						<tr>
-							<td colspan="5"
-							    class="text-left">مجموع</td>
-							<td>{{ sanad.bed | money }}</td>
-							<td>{{ sanad.bes | money }}</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
+        <div class="col-sm-12">
+            <div class="row">
+                <span class="col-sm-2">توضیحات سند: </span>
+                <span class="col-sm-10"> {{ sanad.explanation | default:'-' }} </span>
+            </div>
+        </div>
+        <br>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>شماره - نام حساب</th>
+                    <th>توضیحات</th>
+                    {#                    {% if item.floatAccount %}#}
+                    <th>تفضیلی شناور</th>
+                    {#                    {% endif %}#}
+                    {#                    {% if item.costCenter %}#}
+                    <th>مرکز هزینه</th>
+                    {#                    {% endif %}#}
+                    <th>بدهکار</th>
+                    <th>بستانکار</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in sanad.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.account }}</td>
+                        <td>{{ item.explanation | default:'-' }}</td>
+                        {#                        {% if item.floatAccount %}#}
+                        <td>{{ item.floatAccount | default:'-' }}</td>
+                        {#                        {% endif %}#}
+                        {#                        {% if item.costCenter %}#}
+                        <td>{{ item.costCenter | default:'-' }}</td>
+                        {#                        {% endif %}#}
+                        <td>{{ item.bed | money }}</td>
+                        <td>{{ item.bes | money }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td
+                            {#                            colspan="{% colspan 3 sanad.floatAccount sanad.costCenter %}"#}
+                            colspan="5"
+                            class="text-left"
+                    >مجموع
+                    </td>
+                    <td>{{ sanad.bed | money }}</td>
+                    <td>{{ sanad.bes | money }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
-	</div>
+    </div>
 
-	{% endfor %}
+    {% endfor %}
 
-	{% show_verifiers verifier_form_name user %}
+    {% show_verifiers verifier_form_name user %}
 
-	{% endblock %}
+{% endblock %}
