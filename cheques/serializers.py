@@ -16,8 +16,8 @@ class StatusChangeSerializer(serializers.ModelSerializer):
     def validate(self, data):
         cheque = data['cheque']
 
-        if cheque.statusChanges.count() > 1:
-            raise serializers.ValidationError("ابتدا تغییر وضعیت های چک را پاک کنید")
+        # if cheque.statusChanges.count() > 1:
+        #     raise serializers.ValidationError("ابتدا تغییر وضعیت های چک را پاک کنید")
 
         if 'bedAccount' not in data or 'besAccount' not in data:
             raise serializers.ValidationError("حساب بدهکار و یا بستانکار انتخاب نشده است")

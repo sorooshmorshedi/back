@@ -150,6 +150,7 @@ def clearSanad(sanad):
         return
     sanad.explanation = ''
     sanad.type = 'manual'
+    sanad.createType = sanad.MANUAL
     sanad.is_auto_created = False
     sanad.save()
     for item in sanad.items.all():
