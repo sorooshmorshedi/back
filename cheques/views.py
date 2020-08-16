@@ -291,7 +291,7 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
 
     @property
     def permission_basename(self):
-        status_change = self.get_object()
+        status_change = get_object_or_404(StatusChange, pk=self.kwargs.get('pk'))
         cheque = status_change.cheque
         if cheque.received_or_paid == Cheque.RECEIVED:
             return "receivedChequeStatusChange"

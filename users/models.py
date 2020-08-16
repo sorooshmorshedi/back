@@ -36,11 +36,11 @@ class MyUserManager(UserManager, BaseManager):
 
 
 class User(AbstractUser, BaseModel):
-    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany',
-                                       blank=True, null=True)
-    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users',
-                                              blank=True, null=True)
+    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True)
+    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True)
 
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=11)
 
     roles = models.ManyToManyField(Role, related_name='users')

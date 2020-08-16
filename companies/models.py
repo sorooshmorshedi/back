@@ -81,6 +81,7 @@ class FinancialYear(BaseModel):
 
     class Meta(BaseModel.Meta):
         permission_basename = 'financialYear'
+        ordering = ('-id', )
         permissions = (
             ('get.financialYear', 'مشاهده سال مالی'),
             ('create.financialYear', 'تعریف سال مالی'),

@@ -72,27 +72,28 @@ class ChequebookFilter(filters.FilterSet):
         }
 
 
+BASE_FIELD_FILTERS = ('exact', 'in', 'icontains', 'lte', 'gte')
+
+
 class SanadFilter(filters.FilterSet):
     class Meta:
         model = Sanad
         fields = {
-            'id': ['exact'],
-            'code': ['exact', 'icontains'],
-            'bed': ['icontains'],
-            'bes': ['icontains'],
-            'explanation': ['icontains'],
-            'date': ['gte', 'lte'],
-            'type': ['exact'],
+            'id': ['exact', 'in'],
+            'code': BASE_FIELD_FILTERS,
+            'bed': BASE_FIELD_FILTERS,
+            'bes': BASE_FIELD_FILTERS,
+            'explanation': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
 
 class FactorFilter(filters.FilterSet):
-
     isPaid = filters.BooleanFilter(method='filterIsPaid')
 
     class Meta:
@@ -123,7 +124,6 @@ class FactorFilter(filters.FilterSet):
 
 
 class TransferFilter(filters.FilterSet):
-
     class Meta:
         model = Transfer
         fields = {
@@ -140,7 +140,6 @@ class TransferFilter(filters.FilterSet):
 
 
 class FactorItemFilter(filters.FilterSet):
-
     class Meta:
         model = FactorItem
         fields = {
@@ -163,4 +162,3 @@ class FactorItemFilter(filters.FilterSet):
                 'filter_class': django_filters.DateFilter,
             },
         }
-
