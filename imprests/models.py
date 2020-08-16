@@ -23,7 +23,7 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
     is_settled = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{0} - {1}".format(self.code, self.explanation[0:30])
+        return "{0} - {1}".format(self.code, self.explanation)
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
