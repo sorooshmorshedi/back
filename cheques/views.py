@@ -405,7 +405,7 @@ class RevertChequeInFlowStatusView(APIView):
             cheque.status = data['toStatus']
             cheque.save()
             serialized.save()
-            serialized.instance.createSanad(request.user)
+            clearSanad(serialized.instance.sanad)
         else:
             return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serialized.data, status=status.HTTP_200_OK)
