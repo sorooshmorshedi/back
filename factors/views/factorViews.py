@@ -392,7 +392,7 @@ class DefiniteFactor(APIView):
                 account = 'backFromBuy'
         else:
             first_row_bes = factor.sum
-            second_row_bes = factor.sum
+            second_row_bed = factor.sum
             if factor.type == Factor.BUY:
                 account = 'buy'
             else:
@@ -429,20 +429,20 @@ class DefiniteFactor(APIView):
         DefiniteFactor.submitDiscountSanadItems(
             user,
             factor,
-            first_row_bed,
-            first_row_bes,
-            second_row_bed,
-            second_row_bes,
+            factor.discountSum if first_row_bed != 0 else 0,
+            factor.discountSum if first_row_bes != 0 else 0,
+            factor.discountSum if second_row_bed != 0 else 0,
+            factor.discountSum if second_row_bes != 0 else 0,
             account,
             explanation
         )
         DefiniteFactor.submitTaxSanadItems(
             user,
             factor,
-            first_row_bed,
-            first_row_bes,
-            second_row_bed,
-            second_row_bes,
+            factor.taxSum if first_row_bed != 0 else 0,
+            factor.taxSum if first_row_bes != 0 else 0,
+            factor.taxSum if second_row_bed != 0 else 0,
+            factor.taxSum if second_row_bes != 0 else 0,
             account,
             explanation
         )
