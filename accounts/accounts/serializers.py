@@ -78,16 +78,26 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         data = validated_data.copy()
         account_type = data.get('type', None)
-        if account_type:
+        if not account_type:
             data['type'] = data['parent'].type
 
         return Account.objects.create(**data)
 
-    def update(self, instance, validated_data):
+    def update(self, instance: Account, validated_data):
+        old_type = instance.type
+
+        if old_type != validated_data.get('type', old_type) and SanadItem.objects.filter(
+                account__code__startswith=instance.code
+        ).count() != 0:
+            raise serializers.ValidationError("نوع حساب های دارای گردش غیر قابل ویرایش می باشد")
+
         res = super().update(instance, validated_data)
         if instance.level != 0:
             # update children when account's type changes
-            Account.objects.filter(code__startswith=instance.code).update(type=instance.type)
+            Account.objects.filter(
+                code__startswith=instance.code,
+                type=old_type
+            ).update(type=instance.type)
         return res
 
 
