@@ -17,7 +17,7 @@ class Driver(BaseModel):
     name = models.CharField(max_length=150)
     shenasname_number = models.CharField(max_length=150, null=True, blank=True)
     melli_code = MELLI_CODE(null=True, blank=True)
-    date_of_birth = jmodels.jDateTimeField(null=True, blank=True)
+    date_of_birth = jmodels.jDateField(null=True, blank=True)
     father_name = models.CharField(max_length=150, null=True, blank=True)
     driving_licence_number = models.CharField(max_length=150, null=True, blank=True)
     phone = PHONE(null=True, blank=True)
@@ -29,7 +29,7 @@ class Driver(BaseModel):
     iban = models.CharField(max_length=150, null=True, blank=True)
     explanation = EXPLANATION()
 
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='driver', null=True)
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.SET_NULL, related_name='driver', null=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
@@ -59,6 +59,7 @@ class Driver(BaseModel):
 
     def delete(self, *args, **kwargs):
         self.floatAccount.delete()
+        print('ha')
         return super(Driver, self).delete(*args, **kwargs)
 
 
