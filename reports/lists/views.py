@@ -61,10 +61,14 @@ class ChequebookListView(generics.ListAPIView):
 class SanadListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = "get.sanad"
+
     serializer_class = SanadSerializer
-    filterset_class = SanadFilter
-    ordering_fields = '__all__'
+
     pagination_class = LimitOffsetPagination
+
+    ordering_fields = '__all__'
+    filterset_class = SanadFilter
+    search_fields = SanadFilter.Meta.fields.keys()
 
     def get_queryset(self):
         return Sanad.objects.inFinancialYear().all()

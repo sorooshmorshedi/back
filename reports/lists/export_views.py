@@ -1,3 +1,8 @@
+from io import BytesIO
+
+import pandas
+import xlsxwriter
+from django.http.response import HttpResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
@@ -5,6 +10,7 @@ from wkhtmltopdf.views import PDFTemplateView
 from factors.serializers import TransferListRetrieveSerializer
 from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView
 from reports.models import ExportVerifier
+from sanads.models import Sanad
 from transactions.models import Transaction
 
 
@@ -31,8 +37,46 @@ class BaseExportView(PDFTemplateView):
         return context
 
     def export(self, request, export_type, *args, **kwargs):
-        pdf = export_type == 'pdf'
-        if pdf:
+        if export_type == 'xlsx':
+
+            sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+            with BytesIO() as b:
+                writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+                data = []
+
+                bordered_rows = []
+                i = 0
+                for form in self.get_context_data(user=request.user)['forms']:
+                    data += self.get_xlsx_data(form)
+
+                    bordered_rows.append([i, len(data) - 1])
+
+                    i = len(data) + 2
+
+                    data.append([])
+                    data.append([])
+
+                df = pandas.DataFrame(data)
+                df.to_excel(
+                    writer,
+                    sheet_name=sheet_name,
+                    index=False,
+                    header=False
+                )
+                workbook = writer.book
+                worksheet = writer.sheets[sheet_name]
+                worksheet.right_to_left()
+
+                border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+                for bordered_row in bordered_rows:
+                    worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                        bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                    ), {'type': 'no_errors', 'format': border_fmt})
+                writer.save()
+                return HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+        elif export_type == 'pdf':
             return super().get(request, user=request.user, *args, **kwargs)
         else:
             return render(request, self.template_name,
@@ -54,6 +98,32 @@ class SanadExportView(SanadListView, BaseExportView):
     def get(self, request, export_type, *args, **kwargs):
         return self.export(request, export_type, *args, **kwargs)
 
+    @staticmethod
+    def get_xlsx_data(sanad: Sanad):
+        data = [
+            [
+                "شماره: {}".format(sanad.code),
+                "تاریخ: {}".format(str(sanad.date)),
+                "توضیحات: {}".format(sanad.explanation)
+            ],
+            ['ردیف', 'حساب', 'شناور', 'مرکز هزینه', 'توضیحات', 'بدهکار', 'بستانکار']
+        ]
+        i = 0
+        for item in sanad.items.all():
+            i += 1
+            data.append([
+                i,
+                item.account.name,
+                item.floatAccount.name if item.floatAccount else ' - ',
+                item.costCenter.name if item.costCenter else ' - ',
+                item.explanation,
+                item.bed,
+                item.bes,
+            ])
+        data.append(['', '', '', '', 'جمع', sanad.bed, sanad.bes])
+
+        return data
+
 
 class FactorExportView(FactorListView, BaseExportView):
     filename = 'factors.pdf'
@@ -71,11 +141,11 @@ class FactorExportView(FactorListView, BaseExportView):
                 'verifier_form_name': ExportVerifier.FACTOR_BUY
             },
             'sale': {
-                'title':  'فاکتور فروش',
+                'title': 'فاکتور فروش',
                 'verifier_form_name': ExportVerifier.FACTOR_SALE
             },
             'backFromBuy': {
-                'title':  'فاکتور برگشت از خرید',
+                'title': 'فاکتور برگشت از خرید',
                 'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_BUY
             },
             'backFromSale': {
@@ -124,9 +194,9 @@ class TransferExportView(TransferListView, BaseExportView):
 
     def get_queryset(self):
         return TransferListRetrieveSerializer(
-                self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs,
-                many=True
-            ).data
+            self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs,
+            many=True
+        ).data
 
     def get(self, request, export_type, *args, **kwargs):
         self.context = {
@@ -163,4 +233,3 @@ class TransactionExportView(TransactionListView, BaseExportView):
             'verifier_form_name': verifier_form_name
         }
         return self.export(request, export_type, *args, **kwargs)
-
