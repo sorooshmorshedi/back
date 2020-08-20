@@ -18,14 +18,28 @@ labels = {
     'serial_to': 'تا شماره سریال',
 
     # Ware
+    'ware': 'کالا',
     'unit': 'واحد شمارش',
     'category': 'دسته بندی',
     'pricingType': 'نوع قیمت گذاری',
     'price': 'قیمت',
 
     # Other
+    'code': 'شماره',
     'form': 'فرم',
     'post': 'سمت',
+
+    # Dashtbashi
+    'destination': 'مقصد',
+    'origin': 'مبدا',
+    'contractor': 'پیمانکار',
+    'end_date': 'تاریخ پایان',
+    'loading_date': 'تاریخ بارگیری',
+    'issue_date': 'تاریخ صدور',
+    'remittance_payment_method': 'روش پرداخت مبلغ حواله',
+    'driver_tip_payer': 'پرداخت کننده انعام',
+
+
 }
 
 
