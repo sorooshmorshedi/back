@@ -142,7 +142,6 @@ class Transaction(BaseModel, ConfirmationMixin):
 
         sanad.explanation = self.explanation
         sanad.date = self.date
-        sanad.type = Sanad.TEMPORARY
         sanad.save()
 
         typeNames = []

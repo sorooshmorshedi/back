@@ -124,7 +124,6 @@ class StatusChange(BaseModel):
             costCenter=self.besCostCenter,
             financial_year=sanad.financial_year
         )
-        sanad.type = 'temporary'
         sanad.save()
 
         return sanad

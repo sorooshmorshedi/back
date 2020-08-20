@@ -7,7 +7,7 @@ from sanads.models import SanadItem, Sanad
 class SanadLedgerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
-        fields = ('code', 'date', 'type')
+        fields = ('code', 'date', )
 
 
 class AccountLedgerSerializer(serializers.ModelSerializer):

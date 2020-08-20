@@ -159,7 +159,6 @@ class BillListView(APIView):
 
             row = {
                 'form_name': 'سند',
-                'type': sanad.type,
                 'date': str(sanad.date),
                 'sanad': sanad.id,
                 'explanation': "{}".format(item.explanation),

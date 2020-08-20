@@ -477,7 +477,6 @@ class DefiniteFactor(APIView):
             clearSanad(sanad)
             sanad.date = factor.date
             sanad.createType = Sanad.AUTO
-            sanad.type = Sanad.TEMPORARY
             sanad.explanation = factor.explanation
         sanad.save()
 
