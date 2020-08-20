@@ -30,8 +30,8 @@ class Sanad(BaseModel, ConfirmationMixin):
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
-    type = models.CharField(max_length=20, choices=SANAD_TYPES)
-    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default=MANUAL, verbose_name="نوع ثبت")
+    type = models.CharField(max_length=20, choices=SANAD_TYPES, default=TEMPORARY)
+    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default=MANUAL)
 
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بدهکار")
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
