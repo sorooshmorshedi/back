@@ -138,7 +138,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'fa-ir'
 
 TIME_ZONE = 'Asia/Tehran'
@@ -163,6 +162,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
     ),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.ScopedRateThrottle',

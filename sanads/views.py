@@ -53,6 +53,8 @@ class SanadListCreate(generics.ListCreateAPIView):
             SanadItemSerializer,
         ).sync()
 
+        serializer.instance.update_values()
+
         is_confirmed = data.get('_confirmed')
         if not is_confirmed:
             serializer.instance.check_account_balance_confirmations()
@@ -93,6 +95,8 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
             SanadItemSerializer,
             SanadItemSerializer,
         ).sync()
+
+        serializer.instance.update_values()
 
         is_confirmed = data.get('_confirmed')
         if not is_confirmed:

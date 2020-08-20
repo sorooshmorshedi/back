@@ -64,6 +64,15 @@ class Sanad(BaseModel, ConfirmationMixin):
     def isEmpty(self):
         return self.items.count() == 0
 
+    def update_values(self):
+        bed = bes = 0
+        for item in self.items.all():
+            bed += item.bed
+            bes += item.bes
+        self.bed = bed
+        self.bes = bes
+        self.save()
+
     def check_account_balance_confirmations(self):
 
         for item in self.items.all():
@@ -87,6 +96,11 @@ class Sanad(BaseModel, ConfirmationMixin):
                             account.max_bes
                         ))
 
+    def delete(self, *args, **kwargs):
+        for item in self.items.all():
+            item.delete()
+        return super(Sanad, self).delete(*args, **kwargs)
+
 
 class SanadItem(BaseModel):
     BED = 'bed'
@@ -97,7 +111,7 @@ class SanadItem(BaseModel):
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanad_items')
-    sanad = models.ForeignKey(Sanad, on_delete=models.CASCADE, related_name='items', verbose_name='سند')
+    sanad = models.ForeignKey(Sanad, on_delete=models.PROTECT, related_name='items', verbose_name='سند')
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='sanadItems', verbose_name='حساب')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='sanadItems', blank=True,
                                      null=True, verbose_name='حساب شناور')
@@ -118,31 +132,6 @@ class SanadItem(BaseModel):
     def save(self, *args, **kwargs) -> None:
         self.financial_year = self.sanad.financial_year
         super(SanadItem, self).save(*args, **kwargs)
-
-
-def updateSanadValues(sender, instance, raw, using, update_fields, **kwargs):
-    sanad = instance.sanad
-
-    if instance.id:
-        sanadItem = SanadItem.objects.get(pk=instance.id)
-        sanad.bed -= sanadItem.bed
-        sanad.bes -= sanadItem.bes
-
-    sanad.bed += instance.bed
-    sanad.bes += instance.bes
-
-    sanad.save()
-
-
-def updateSanadValuesOnDelete(sender, instance, using, **kwargs):
-    sanad = instance.sanad
-    sanad.bed -= instance.bed
-    sanad.bes -= instance.bes
-    sanad.save()
-
-
-signals.pre_save.connect(receiver=updateSanadValues, sender=SanadItem)
-signals.pre_delete.connect(receiver=updateSanadValuesOnDelete, sender=SanadItem)
 
 
 def clearSanad(sanad):
