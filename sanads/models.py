@@ -1,4 +1,3 @@
-from django.db.models import signals
 from django.db import models
 from accounts.accounts.models import Account, FloatAccount
 from django_jalali.db import models as jmodels
@@ -10,27 +9,12 @@ from server.settings import TESTING
 
 
 class Sanad(BaseModel, ConfirmationMixin):
-    TEMPORARY = 'temporary'
-    DEFINITE = 'definite'
-    SANAD_TYPES = (
-        (TEMPORARY, 'موقت'),
-        (DEFINITE, 'قطعی'),
-    )
-
-    AUTO = 'auto'
-    MANUAL = 'manual'
-    SANAD_CREATE_TYPES = (
-        (AUTO, 'خودکار'),
-        (MANUAL, 'دستی')
-    )
-
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(verbose_name="شماره سند")
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
-    createType = models.CharField(max_length=20, choices=SANAD_CREATE_TYPES, default=MANUAL)
 
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بدهکار")
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
@@ -137,7 +121,6 @@ def clearSanad(sanad):
     if not sanad:
         return
     sanad.explanation = ''
-    sanad.createType = sanad.MANUAL
     sanad.is_auto_created = False
     sanad.save()
     for item in sanad.items.all():

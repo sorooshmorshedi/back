@@ -127,7 +127,7 @@ class Transaction(BaseModel, ConfirmationMixin):
 
     def _createSanad(self, user):
         sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year,
-                      date=self.date, createType=Sanad.AUTO)
+                      date=self.date, is_auto_created=True)
         sanad.save()
         self.sanad = sanad
         self.save()

@@ -130,7 +130,7 @@ class FirstPeriodInventoryView(APIView):
         if not sanad:
             sanad = Sanad(code=newSanadCode(financial_year), date=first_period_inventory.date,
                           explanation=first_period_inventory.explanation,
-                          createType=Sanad.AUTO, financial_year=financial_year)
+                          is_auto_created=True, financial_year=financial_year)
             sanad.save()
             first_period_inventory.sanad = sanad
             first_period_inventory.save()

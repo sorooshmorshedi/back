@@ -20,7 +20,7 @@ class SanadItemSerializer(serializers.ModelSerializer):
         return data
 
     def update(self, instance, validated_data):
-        if instance.sanad.createType == 'auto':
+        if instance.sanad.is_auto_created:
             raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
         return super(SanadItemSerializer, self).update(instance, validated_data)
 
@@ -41,7 +41,7 @@ class SanadSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year', 'code')
 
     def update(self, instance, validated_data):
-        if instance.createType == 'auto':
+        if instance.is_auto_created:
             raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
         return super(SanadSerializer, self).update(instance, validated_data)
 
