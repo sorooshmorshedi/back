@@ -92,6 +92,8 @@ class Factor(BaseModel, ConfirmationMixin):
 
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
+
+    has_tax = models.BooleanField(default=False)
     taxValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
 
