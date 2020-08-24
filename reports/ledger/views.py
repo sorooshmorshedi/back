@@ -22,7 +22,7 @@ class LedgerListView(generics.ListAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        qs = SanadItem.objects.hasAccess(self.request.method, use_financial_year=False)
+        qs = SanadItem.objects.hasAccess(self.request.method, 'get.ledgerReport', use_financial_year=False)
 
         order_sanads_by = self.request.GET.copy().get('order_sanads_by', None)
 
