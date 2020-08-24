@@ -3,12 +3,10 @@ from rest_framework.routers import DefaultRouter
 
 from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView
 from reports.balanceSheet.views import BalanceSheetView
-from reports.bill.views import BillListView
 from reports.buySale.views import BuySaleView
 from reports.incomeStatement.views import IncomeStatementView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView
-from reports.journal.views import JournalListView
 from reports.ledger.views import LedgerListView
 from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView
 from reports.lists.views import *
@@ -41,8 +39,6 @@ urlpatterns += [
     url(r'^balance/floatsByGroup$', FloatAccountBalanceByGroupView.as_view(), name=''),
     url(r'^balance/floats$', FloatAccountBalanceView.as_view(), name=''),
     url(r'^ledger$', LedgerListView.as_view(), name=''),
-    url(r'^bill$', BillListView.as_view(), name=''),
-    url(r'^journal$', JournalListView.as_view(), name=''),
     url(r'^export$', exportTest, name=''),
     url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),

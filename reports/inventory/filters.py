@@ -26,7 +26,7 @@ class InventoryFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -41,7 +41,7 @@ class AllWaresInventoryFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 

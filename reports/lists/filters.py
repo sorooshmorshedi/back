@@ -6,6 +6,7 @@ from django_jalali.db import models as jmodels
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, FactorItem, Transfer
+from helpers.filters import BASE_FIELD_FILTERS
 from sanads.models import Sanad
 from transactions.models import Transaction
 
@@ -24,7 +25,7 @@ class TransactionFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -49,7 +50,7 @@ class ChequeFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -67,12 +68,9 @@ class ChequebookFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
-
-
-BASE_FIELD_FILTERS = ('exact', 'in', 'icontains', 'lte', 'gte')
 
 
 class SanadFilter(filters.FilterSet):
@@ -112,7 +110,7 @@ class FactorFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -134,7 +132,7 @@ class TransferFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -159,6 +157,6 @@ class FactorItemFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }

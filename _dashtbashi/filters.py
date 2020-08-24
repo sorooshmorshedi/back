@@ -15,7 +15,7 @@ class LadingFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -28,7 +28,7 @@ class LadingBillSeriesFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
 
@@ -41,6 +41,6 @@ class RemittanceFilter(filters.FilterSet):
         }
         filter_overrides = {
             jmodels.jDateField: {
-                'filter_class': django_filters.DateFilter,
+                'filter_class': django_filters.CharFilter,
             },
         }
