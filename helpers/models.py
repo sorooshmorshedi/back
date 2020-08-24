@@ -15,10 +15,10 @@ options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year', 'per
 
 class BaseManager(models.Manager):
 
-    def hasAccess(self, method, permission_basename=None, financial_year=None):
+    def hasAccess(self, method, permission_basename=None, use_financial_year=True, financial_year=None):
         user = get_current_user()
 
-        if hasattr(self.model, 'financial_year'):
+        if hasattr(self.model, 'financial_year') and use_financial_year:
             queryset = self.inFinancialYear(financial_year)
         else:
             queryset = super().get_queryset()
