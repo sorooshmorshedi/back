@@ -468,7 +468,6 @@ class DefiniteFactor(APIView):
                 code=newSanadCode(),
                 date=factor.date,
                 is_auto_created=True,
-                type=Sanad.TEMPORARY,
                 explanation=factor.explanation,
                 financial_year=user.active_financial_year
             )
