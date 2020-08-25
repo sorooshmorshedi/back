@@ -177,23 +177,10 @@ class WarehouseInventorySerializer(serializers.ModelSerializer):
 
 
 class AllWarehousesInventorySerializer(serializers.ModelSerializer):
-    input = serializers.SerializerMethodField()
-    output = serializers.SerializerMethodField()
-    remain = serializers.SerializerMethodField()
-
-    def get_input(self, obj):
-        return obj.input_count or 0
-
-    def get_output(self, obj):
-        return obj.output_count or 0
-
-    def get_remain(self, obj):
-        input_count = obj.input_count or 0
-        output_count = obj.output_count or 0
-        return input_count - output_count
+    input_count = serializers.IntegerField()
+    output_count = serializers.IntegerField()
+    remaining_count = serializers.IntegerField()
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'input', 'output', 'remain')
-
-
+        fields = ('id', 'name', 'input_count', 'output_count', 'remaining_count')

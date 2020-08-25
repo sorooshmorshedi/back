@@ -3,6 +3,7 @@ from django_filters import rest_framework as filters
 from factors.models import FactorItem
 from django_jalali.db import models as jmodels
 
+from helpers.filters import BASE_FIELD_FILTERS
 from wares.models import Ware
 
 
@@ -12,7 +13,7 @@ class InventoryFilter(filters.FilterSet):
         fields = {
             'ware': ['exact'],
             'ware__code': ['gte', 'lte'],
-            'ware__name': ['icontains'],
+            'ware__name': BASE_FIELD_FILTERS,
 
             'warehouse': ['exact'],
             'warehouse__name': ['icontains'],
@@ -44,5 +45,3 @@ class AllWaresInventoryFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
-
-
