@@ -71,7 +71,7 @@ class SanadListView(generics.ListAPIView):
     search_fields = SanadFilter.Meta.fields.keys()
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().all()
+        return Sanad.objects.inFinancialYear().order_by('code').all()
 
 
 class UnbalancedSanadListView(SanadListView):
@@ -79,7 +79,7 @@ class UnbalancedSanadListView(SanadListView):
     permission_codename = "get.sanad"
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().filter(~Q(bed=F('bes')))
+        return Sanad.objects.inFinancialYear().order_by('code').filter(~Q(bed=F('bes')))
 
 
 class EmptySanadListView(SanadListView):
@@ -87,7 +87,8 @@ class EmptySanadListView(SanadListView):
     permission_codename = "get.sanad"
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().annotate(items_count=Count('items')).filter(items_count=0)
+        return Sanad.objects.inFinancialYear().annotate(items_count=Count('items')).filter(items_count=0).order_by(
+            'code')
 
 
 class FactorListView(generics.ListAPIView):

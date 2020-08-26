@@ -137,6 +137,7 @@ class FirstPeriodInventoryView(APIView):
 
         if sanad.items.count():
             clearSanad(sanad)
+            sanad.is_auto_created = True
 
         sanad.items.create(
             account=Account.get_inventory_account(user),

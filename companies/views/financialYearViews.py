@@ -149,17 +149,20 @@ class CloseFinancialYearView(APIView):
 
         sanad = current_financial_year.temporaryClosingSanad
         clearSanad(sanad)
+        sanad.is_auto_created = True
         CloseFinancialYearView.add_temporaries_sanad_items(sanad)
         CloseFinancialYearView.add_current_earnings_sanad_item(sanad)
         sanad.save()
 
         sanad = current_financial_year.currentEarningsClosingSanad
         clearSanad(sanad)
+        sanad.is_auto_created = True
         CloseFinancialYearView.add_retained_earnings_sanad_item(sanad)
         sanad.save()
 
         sanad = current_financial_year.permanentsClosingSanad
         clearSanad(sanad)
+        sanad.is_auto_created = True
         CloseFinancialYearView.add_permanents_sanad_items(sanad)
         CloseFinancialYearView.add_closing_sanad_item(sanad)
         sanad.save()
@@ -243,6 +246,7 @@ class CloseFinancialYearView(APIView):
 
         sanad = target_financial_year.get_opening_sanad()
         clearSanad(sanad)
+        sanad.is_auto_created = True
 
         opening_default_account = DefaultAccount.get('opening')
         closing_default_account = DefaultAccount.get('closing')

@@ -21,6 +21,7 @@ class LadingSanad:
             return
         else:
             clearSanad(sanad)
+            sanad.is_auto_created = True
 
         sanad_items = []
 

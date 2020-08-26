@@ -140,6 +140,7 @@ class Transaction(BaseModel, ConfirmationMixin):
 
         clearSanad(sanad)
 
+        sanad.is_auto_created = True
         sanad.explanation = self.explanation
         sanad.date = self.date
         sanad.save()
