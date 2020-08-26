@@ -277,9 +277,9 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
             )
             data.append({
                 'name': 'جمع',
-                'input': totals['total_input_count'],
-                'output': totals['total_output_count'],
-                'remain': totals['total_input_count'] - totals['total_output_count']
+                'input_count': totals['total_input_count'],
+                'output_count': totals['total_output_count'],
+                'remaining_count': totals['total_input_count'] - totals['total_output_count']
             })
 
         response = paginator.get_paginated_response(data)
