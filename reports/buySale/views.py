@@ -87,7 +87,9 @@ class BuySaleView(generics.ListAPIView):
         report_type = Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
 
         queryset = self.filter_queryset(queryset=self.get_queryset())
-        queryset = queryset.order_by(params.get('ordering'))
+        ordering = params.get('ordering')
+        if ordering:
+            queryset = queryset.order_by(ordering)
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
