@@ -29,7 +29,9 @@ class LedgerListView(generics.ListAPIView):
         if order_sanads_by:
             qs = qs.order_by('sanad__{}'.format(order_sanads_by))
         else:
-            qs = qs.order_by(self.request.GET.copy().get('ordering', None))
+            ordering = self.request.GET.copy().get('ordering', None)
+            if ordering:
+                qs = qs.order_by(ordering)
 
         qs = qs.annotate(
             sanad_date=F('sanad__date'),
