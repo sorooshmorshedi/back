@@ -83,6 +83,7 @@ class SanadFilter(filters.FilterSet):
             'bes': BASE_FIELD_FILTERS,
             'explanation': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
+            'is_auto_created': ['exact'],
         }
         filter_overrides = {
             jmodels.jDateField: {
