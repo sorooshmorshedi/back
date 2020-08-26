@@ -47,6 +47,9 @@ def addSum(queryset, data, report_type):
     remain_total_value = remain_value - remain_discount
 
     data.append({
+        'warehouse': {
+            'name': 'جمع'
+        },
         'count': remain_count,
         'value': remain_value,
         'discount': remain_discount,
@@ -65,9 +68,10 @@ class BuySaleView(generics.ListAPIView):
             return 'get.buyReport'
 
     serializer_class = BuySaleSerializer
+    pagination_class = LimitOffsetPagination
+
     filterset_class = FactorItemFilter
     ordering_fields = '__all__'
-    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         return FactorItem.objects.inFinancialYear() \
@@ -75,17 +79,15 @@ class BuySaleView(generics.ListAPIView):
             .prefetch_related('factor__account') \
             .prefetch_related('ware') \
             .prefetch_related('warehouse') \
-            .order_by('id') \
             .all()
 
     def list(self, request, *args, **kwargs):
-        params = self.request.GET
+        params = self.request.GET.copy()
 
         report_type = Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
 
-        factor_items = self.get_queryset()
-
-        queryset = self.filterset_class(params, queryset=factor_items).qs
+        queryset = self.filter_queryset(queryset=self.get_queryset())
+        queryset = queryset.order_by(params.get('ordering'))
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
@@ -97,5 +99,4 @@ class BuySaleView(generics.ListAPIView):
             addSum(queryset, data, report_type)
 
         response = paginator.get_paginated_response(data)
-        # print(len(connection.queries))
         return response

@@ -18,8 +18,6 @@ class BuySaleSerializer(serializers.ModelSerializer):
         return self.format_value(obj, obj.value)
 
     def get_discount(self, obj):
-        if obj.factor.type in (Factor.BACK_FROM_BUY, Factor.SALE):
-            return -obj.discount
         return obj.discount
 
     def get_total_value(self, obj):

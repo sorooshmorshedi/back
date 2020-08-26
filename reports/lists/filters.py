@@ -143,17 +143,17 @@ class FactorItemFilter(filters.FilterSet):
         fields = {
             'ware': ['exact'],
             'warehouse': ['exact'],
+            'warehouse__name': BASE_FIELD_FILTERS,
             'factor__type': ['exact', 'in'],
             'id': ['exact'],
-            'factor__code': ['exact'],
+            'factor__code': BASE_FIELD_FILTERS,
             'factor__is_definite': ['exact'],
-            'factor__date': ['gte', 'lte'],
-            'factor__account__name': ['icontains'],
-            'warehouse__name': ['icontains'],
+            'factor__date': BASE_FIELD_FILTERS,
+            'factor__account__name': BASE_FIELD_FILTERS,
             'count': ['exact'],
             'fee': ['exact'],
-            'factor__explanation': ['icontains'],
-            'explanation': ['icontains'],
+            'factor__explanation': BASE_FIELD_FILTERS,
+            'explanation': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
