@@ -48,7 +48,13 @@ class StatusChangeSerializer(serializers.ModelSerializer):
 
 
 class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
-    sanad = SanadListRetrieveSerializer(read_only=True, many=False)
+    sanad = serializers.SerializerMethodField()
+
+    def get_sanad(self, obj: StatusChange):
+        if obj.sanad:
+            return SanadListRetrieveSerializer(obj.sanad).data
+        if obj.cheque.transactionItem:
+            return SanadListRetrieveSerializer(obj.cheque.transactionItem.transaction.sanad).data
 
     class Meta:
         model = StatusChange
@@ -121,6 +127,9 @@ class ChequeListRetrieveSerializer(serializers.ModelSerializer):
     chequebook = ChequebookListRetrieveSerializer(read_only=True, many=False)
 
     title = serializers.SerializerMethodField()
+
+    # transaction = serializers.IntegerField(source="transactionItem.transaction.id")
+    # transactionSanad = SanadListRetrieveSerializer(source="transactionItem.transaction.id")
 
     def get_title(self, obj):
         if obj.chequebook:
