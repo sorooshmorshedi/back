@@ -106,7 +106,7 @@ class SanadExportView(SanadListView, BaseExportView):
                 "تاریخ: {}".format(str(sanad.date)),
                 "توضیحات: {}".format(sanad.explanation)
             ],
-            ['ردیف', 'حساب', 'شناور', 'مرکز هزینه', 'توضیحات', 'بدهکار', 'بستانکار']
+            ['ردیف', 'حساب', 'شناور', 'مرکز هزینه و درآمد', 'توضیحات', 'بدهکار', 'بستانکار']
         ]
         i = 0
         for item in sanad.items.all():

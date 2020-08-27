@@ -24,6 +24,6 @@ class AccountValidator:
             costCenter = data.get(cost_center_key)
             if not costCenter:
                 raise serializers.ValidationError(
-                    "مرکز هزینه برای حساب های دارای گروه گروه مرکز هزینه باید انتخاب گردد")
+                    "مرکز هزینه و درآمد برای حساب های دارای گروه گروه مرکز هزینه و درآمد باید انتخاب گردد")
             if account.costCenterGroup not in list(costCenter.floatAccountGroups.all()):
-                raise serializers.ValidationError("مرکز هزینه انتخاب شده باید مطعلق به گروه مرکز هزینه حساب باشد")
+                raise serializers.ValidationError("مرکز هزینه و درآمد انتخاب شده باید مطعلق به گروه مرکز هزینه و درآمد حساب باشد")

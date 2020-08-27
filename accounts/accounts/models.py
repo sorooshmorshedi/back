@@ -20,14 +20,14 @@ class FloatAccountGroup(BaseModel):
         backward_financial_year = True
         permission_basename = 'floatAccountGroup'
         permissions = (
-            ('get.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه'),
-            ('create.floatAccountGroup', 'تعریف گروه حساب شناور / مرکز هزینه'),
-            ('update.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه'),
-            ('delete.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه'),
+            ('get.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه و درآمد'),
+            ('create.floatAccountGroup', 'تعریف گروه حساب شناور / مرکز هزینه و درآمد'),
+            ('update.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه و درآمد'),
+            ('delete.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه و درآمد'),
 
-            ('getOwn.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه خود'),
-            ('updateOwn.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه خود'),
-            ('deleteOwn.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه خود'),
+            ('getOwn.floatAccountGroup', 'مشاهده گروه های حساب شناور / مرکز هزینه و درآمد خود'),
+            ('updateOwn.floatAccountGroup', 'ویرایش گروه حساب شناور / مرکز هزینه و درآمد خود'),
+            ('deleteOwn.floatAccountGroup', 'حذف گروه حساب شناور / مرکز هزینه و درآمد خود'),
         )
 
     def __str__(self):

@@ -71,7 +71,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             if self.instance.floatAccountGroup != data.get('floatAccountGroup'):
                 raise serializers.ValidationError("گروه حساب شناور برای حساب دارای گردش غیر قابل ویرایش می باشد")
             if self.instance.costCenterGroup != data.get('costCenterGroup'):
-                raise serializers.ValidationError("گروه مرکز هزینه برای حساب دارای گردش غیر قابل ویرایش می باشد")
+                raise serializers.ValidationError("گروه مرکز هزینه و درآمد برای حساب دارای گردش غیر قابل ویرایش می باشد")
 
         return data
 

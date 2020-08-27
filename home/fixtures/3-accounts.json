@@ -13779,8 +13779,6 @@
       "updated_at": "2019-02-21",
       "level": 3,
       "type": 14,
-      "costCenterGroup": 4,
-      "floatAccountGroup": 2,
       "parent": 55,
       "buyer_or_seller": "",
       "person_type": "",
@@ -13825,7 +13823,6 @@
       "level": 3,
       "type": 16,
       "costCenterGroup": null,
-      "floatAccountGroup": 1,
       "parent": 65,
       "buyer_or_seller": "",
       "person_type": "",
@@ -20124,8 +20121,6 @@
       "updated_at": "2020-03-10",
       "level": 3,
       "type": null,
-      "costCenterGroup": 5,
-      "floatAccountGroup": 2,
       "parent": 55,
       "buyer_or_seller": "",
       "person_type": "",
@@ -20170,7 +20165,6 @@
       "level": 3,
       "type": null,
       "costCenterGroup": null,
-      "floatAccountGroup": 1,
       "parent": 55,
       "buyer_or_seller": "",
       "person_type": "",
@@ -20788,7 +20782,6 @@
       "name": "\u067e\u06cc\u0634\u0641\u0631\u0636 \u0634\u0646\u0627\u0648\u0631",
       "explanation": "\u0634\u0633\u06cc\u0628",
       "account": 491,
-      "floatAccount": 7,
       "costCenter": null,
       "usage": "receiveAndPayment",
       "codename": null
@@ -20802,7 +20795,6 @@
       "name": "\u0686\u0645",
       "explanation": null,
       "account": 491,
-      "floatAccount": 7,
       "costCenter": null,
       "usage": "factor",
       "codename": null
@@ -20816,7 +20808,6 @@
       "name": "\u0686\u0645 2",
       "explanation": null,
       "account": 491,
-      "floatAccount": 7,
       "costCenter": null,
       "usage": "closeAccounts",
       "codename": null
@@ -20830,25 +20821,11 @@
       "name": "\u0634\u0646\u0627\u0648\u0631",
       "explanation": null,
       "account": 491,
-      "floatAccount": 7,
       "costCenter": null,
       "usage": "closeAccounts",
       "codename": null
-    }
-  },
-  {
-    "model": "accounts.defaultaccount",
-    "pk": 21,
-    "fields": {
-      "financial_year": 1,
-      "name": "asdf",
-      "explanation": null,
-      "account": 491,
-      "floatAccount": 7,
-      "costCenter": 12,
-      "usage": "factor",
-      "codename": null
-    }
+    },
+    "floatAccount": 7
   },
   {
     "model": "accounts.defaultaccount",
