@@ -1,7 +1,7 @@
 from django.db.models.aggregates import Max
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import *
 from sanads.serializers import SanadSerializer
@@ -21,7 +21,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
 
 class ExpenseListRetrieveSerializer(ExpenseSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
 
@@ -37,7 +37,7 @@ class FactorExpenseSerializer(serializers.ModelSerializer):
 
 
 class FactorExpenseListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     expense = ExpenseListRetrieveSerializer(read_only=True, many=False)
@@ -117,7 +117,7 @@ class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
 
 
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
@@ -138,7 +138,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
 
 
 class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     payments = FactorPaymentSerializer(read_only=True, many=True)

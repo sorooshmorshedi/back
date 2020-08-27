@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
-from accounts.accounts.serializers import AccountListRetrieveSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer
 from imprests.serializers import ImprestListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
@@ -113,7 +113,7 @@ class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListRetrieveSerializer(read_only=True)
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
-    contractor = AccountListRetrieveSerializer(read_only=True)
+    contractor = AccountRetrieveSerializer(read_only=True)
 
     class Meta:
         model = Remittance
@@ -137,7 +137,7 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
 class LadingListRetrieveSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)
     driving = DrivingListRetrieveSerializer(read_only=True)
-    contractor = AccountListRetrieveSerializer(read_only=True)
+    contractor = AccountRetrieveSerializer(read_only=True)
     ware = WareListRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)

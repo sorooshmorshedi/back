@@ -2,7 +2,7 @@ from typing import Any
 
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
 from imprests.models import ImprestSettlementItem, ImprestSettlement
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
@@ -10,7 +10,7 @@ from transactions.serializers import TransactionListRetrieveSerializer, Transact
 
 
 class ImprestSettlementItemListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
 
@@ -45,7 +45,7 @@ class ImprestSettlementListRetrieveSerializer(serializers.ModelSerializer):
 
 
 class ImprestListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
     imprestSettlements = ImprestSettlementCreateUpdateSerializer(many=True)

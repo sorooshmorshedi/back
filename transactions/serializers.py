@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountListRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from cheques.serializers import ChequeListRetrieveSerializer
@@ -20,7 +20,7 @@ class TransactionItemCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class TransactionItemListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     type = DefaultAccountListRetrieveSerializer(read_only=True, many=False)
@@ -43,7 +43,7 @@ class TransactionCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class TransactionListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountListRetrieveSerializer(read_only=True, many=False)
+    account = AccountRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
     imprestSettlements = serializers.PrimaryKeyRelatedField(many=True, read_only=True)

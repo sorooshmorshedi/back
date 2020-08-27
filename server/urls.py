@@ -22,7 +22,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
-from helpers.views.TestView import TestView
+from helpers.views.TestApiView import TestApiView
 from server import settings
 
 ...
@@ -31,7 +31,7 @@ from server import settings
 schema_view = get_schema_view(title='Users API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
 
 urlpatterns = [
-                  url('test', TestView.as_view()),
+                  url('test', TestApiView.as_view()),
 
                   url(r'^home/', include('home.urls')),
 

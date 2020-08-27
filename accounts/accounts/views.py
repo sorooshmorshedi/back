@@ -177,8 +177,8 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
-        queryset = AccountListRetrieveSerializer.setup_eager_loading(queryset)
-        serializer = AccountListRetrieveSerializer(queryset, many=True)
+        queryset = AccountListSerializer.setup_eager_loading(queryset)
+        serializer = AccountListSerializer(queryset, many=True)
         res = Response(serializer.data)
         return res
 
@@ -195,7 +195,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         if method == 'put':
             return AccountCreateUpdateSerializer
         else:
-            return AccountListRetrieveSerializer
+            return AccountRetrieveSerializer
 
     def get_queryset(self):
         return Account.objects.hasAccess(

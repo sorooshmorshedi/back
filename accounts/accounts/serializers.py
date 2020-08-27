@@ -47,8 +47,7 @@ class AccountTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountType
-        fields = '__all__'
-        read_only_fields = ['financial_year']
+        fields = ('id', 'title', 'name')
 
 
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
@@ -71,7 +70,8 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             if self.instance.floatAccountGroup != data.get('floatAccountGroup'):
                 raise serializers.ValidationError("گروه حساب شناور برای حساب دارای گردش غیر قابل ویرایش می باشد")
             if self.instance.costCenterGroup != data.get('costCenterGroup'):
-                raise serializers.ValidationError("گروه مرکز هزینه و درآمد برای حساب دارای گردش غیر قابل ویرایش می باشد")
+                raise serializers.ValidationError(
+                    "گروه مرکز هزینه و درآمد برای حساب دارای گردش غیر قابل ویرایش می باشد")
 
         return data
 
@@ -101,7 +101,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
         return res
 
 
-class AccountListRetrieveSerializer(serializers.ModelSerializer):
+class AccountRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
     costCenterGroup = FloatAccountGroupSerializer(read_only=True)
@@ -141,6 +141,32 @@ class AccountListRetrieveSerializer(serializers.ModelSerializer):
     @cached_property
     def balances(self):
         return AccountBalance.objects.inFinancialYear().prefetch_related('account').all()
+
+
+class AccountListSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
+    costCenterGroup = FloatAccountGroupSerializer(read_only=True)
+    type = AccountTypeSerializer(read_only=True)
+
+    def get_title(self, obj):
+        return obj.title
+
+    class Meta:
+        model = Account
+        read_only_fields = ('financial_year', 'code', 'level')
+        fields = (
+            'id', 'title', 'floatAccountGroup', 'costCenterGroup', 'type',
+            'name', 'code', 'level', 'person_type', 'buyer_or_seller', 'parent', 'account_type'
+        )
+
+    @staticmethod
+    def setup_eager_loading(queryset):
+        queryset = queryset \
+            .prefetch_related('floatAccountGroup') \
+            .prefetch_related('costCenterGroup') \
+            .prefetch_related('type')
+        return queryset
 
 
 # Other
