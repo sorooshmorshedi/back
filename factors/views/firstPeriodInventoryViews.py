@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account
 from factors.models import Factor
 from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
-from factors.views.factorViews import DefiniteFactor
+from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_current_user
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -20,13 +20,13 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
             financial_year=self.financial_year
         )
         for item in serializer.instance:
-            DefiniteFactor.updateInventoryOnFactorItemSave(item, self.financial_year)
+            DefiniteFactor.updateInventory(item)
 
     def perform_update(self, serializer):
         serializer.save(
             financial_year=self.financial_year
         )
-        DefiniteFactor.updateInventoryOnFactorItemSave(serializer.instance, self.financial_year)
+        DefiniteFactor.updateInventory(serializer.instance)
 
 
 class FirstPeriodInventoryView(APIView):

@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
-from helpers.models import BaseModel, ConfirmationMixin
+from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -52,8 +52,16 @@ class Factor(BaseModel, ConfirmationMixin):
     BACK_FROM_BUY = 'backFromBuy'
     BACK_FROM_SALE = 'backFromSale'
     FIRST_PERIOD_INVENTORY = 'fpi'
+
     INPUT_TRANSFER = 'it'
     OUTPUT_TRANSFER = 'ot'
+
+    INPUT_ADJUSTMENT = 'ia'
+    OUTPUT_ADJUSTMENT = 'oa'
+    ADJUSTMENT_TYPES = (
+        (INPUT_ADJUSTMENT, 'رسید تعدیل انبار'),
+        (OUTPUT_ADJUSTMENT, 'حواله تعدیل انبار'),
+    )
 
     FACTOR_TYPES = (
         (BUY, 'خرید'),
@@ -63,13 +71,14 @@ class Factor(BaseModel, ConfirmationMixin):
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
         (INPUT_TRANSFER, 'وارده از انتقال'),
         (OUTPUT_TRANSFER, 'صادره با انتقال'),
+        *ADJUSTMENT_TYPES
     )
 
     BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
-    INPUT_GROUP = (*BUY_GROUP, INPUT_TRANSFER)
-    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER)
+    INPUT_GROUP = (*BUY_GROUP, INPUT_TRANSFER, INPUT_ADJUSTMENT)
+    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER, OUTPUT_ADJUSTMENT)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField(blank=True, null=True)
@@ -416,7 +425,10 @@ class FactorItem(BaseModel):
 
     count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
+
+    # Used for undo definition for output factors to increase inventory
     fees = JSONField(default=get_empty_array)
+
     remain_fees = JSONField(default=get_empty_array)
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
@@ -466,11 +478,19 @@ class FactorItem(BaseModel):
         return self.value - self.discount
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if not self.factor.is_editable:
+            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
+
         self.discountValue = self.discount
         self.calculated_output_value = 0
         for fee in self.fees:
             self.calculated_output_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, *args, **kwargs):
+        if not self.factor.is_editable:
+            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
+        return super().delete(**args, **kwargs)
 
 
 class Transfer(BaseModel):
@@ -494,4 +514,29 @@ class Transfer(BaseModel):
             ('getOwn.transfer', 'مشاهده انتقال های خود'),
             ('updateOwn.transfer', 'ویرایش انتقال های خود'),
             ('deleteOwn.transfer', 'حذف انتقال های خود'),
+        )
+
+
+class Adjustment(BaseModel):
+    code = models.IntegerField()
+    date = jmodels.jDateField()
+
+    type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
+    factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
+    sanad = models.ForeignKey(Sanad, on_delete=models.PROTECT, related_name='adjustment', null=True)
+    explanation = EXPLANATION()
+
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    class Meta(BaseModel.Meta):
+        permission_basename = 'adjustment'
+        permissions = (
+            ('get.adjustment', 'مشاهده تعدیل '),
+            ('create.adjustment', 'تعریف تعدیل '),
+            ('update.adjustment', 'ویرایش تعدیل '),
+            ('delete.adjustment', 'حذف تعدیل '),
+
+            ('getOwn.adjustment', 'مشاهده تعدیل های خود'),
+            ('updateOwn.adjustment', 'ویرایش تعدیل های خود'),
+            ('deleteOwn.adjustment', 'حذف تعدیل های خود'),
         )

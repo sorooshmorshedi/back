@@ -5,7 +5,7 @@ import jdatetime
 from accounts.tests.test_accounts import AccountTest
 from factors.models import Factor, FactorItem
 from factors.tests.test_factors import FactorTest
-from factors.views.factorViews import DefiniteFactor
+from factors.views.definite_factor import DefiniteFactor
 from users.models import User
 
 from django.urls.base import reverse

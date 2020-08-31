@@ -4,8 +4,11 @@ from rest_framework import serializers
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import *
+from factors.views.definite_factor import DefiniteFactor
+from helpers.functions import get_current_user, get_new_code
 from sanads.serializers import SanadSerializer
 from transactions.serializers import TransactionSerializerForPayment
+from wares.models import WareInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 from django.utils.timezone import now
 
@@ -134,7 +137,7 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactorPayment
         fields = '__all__'
-        read_only_fields = ('financial_year', )
+        read_only_fields = ('financial_year',)
 
 
 class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
@@ -185,15 +188,11 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transfer
-        # fields = ('id', 'code', 'explanation', 'date', 'items')
         fields = '__all__'
 
 
 class TransferCreateSerializer(serializers.ModelSerializer):
     items = serializers.ListField()
-
-    def validate(self, attrs):
-        return attrs
 
     def create(self, validated_data):
         financial_year = validated_data['financial_year']
@@ -246,3 +245,86 @@ class TransferCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = ('id', 'financial_year', 'explanation', 'date', 'items')
+
+
+class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
+    items = serializers.SerializerMethodField()
+
+    def get_items(self, obj):
+        return FactorItemRetrieveSerializer(
+            obj.factor.items.order_by('id').prefetch_related('ware').prefetch_related('warehouse'),
+            many=True
+        ).data
+
+    class Meta:
+        model = Adjustment
+        fields = '__all__'
+
+
+class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
+    items = serializers.ListField()
+
+    class Meta:
+        model = Adjustment
+        exclude = ('financial_year', 'factor', 'code')
+
+    def create(self, validated_data, **kwargs):
+
+        financial_year = get_current_user().active_financial_year
+
+        adjustment_type = validated_data.get('type')
+        date = validated_data['date']
+        explanation = validated_data.get('explanation', '')
+
+        factor_data = {
+            'financial_year': financial_year,
+            'date': date,
+            'explanation': explanation,
+            'is_definite': True,
+            'definition_date': now(),
+            'time': now()
+        }
+        factor = Factor.objects.create(**factor_data, type=adjustment_type)
+        factor.save()
+
+        for item in validated_data['items']:
+
+            fee = None
+            if adjustment_type == Factor.INPUT_ADJUSTMENT:
+                try:
+                    fee = float(WareInventory.get_remain_fees(item['ware'])[0]['fee'])
+                except IndexError:
+                    raise serializers.ValidationError("هیچ فاکتوری برای این کالا ثبت نشده است")
+            elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
+                fee = 0
+
+            item_data = {
+                'financial_year': financial_year,
+                'explanation': explanation,
+                'count': item['count'],
+                'fee': fee,
+                'ware': Ware.objects.get(pk=item['ware']),
+                'warehouse': Warehouse.objects.get(pk=item['warehouse'])
+            }
+            factor.items.create(**item_data)
+
+        DefiniteFactor.updateFactorInventory(factor)
+
+        code = Adjustment.objects.filter(type=adjustment_type).aggregate(Max('code'))['code__max']
+        if code:
+            code += 1
+        else:
+            code = 1
+
+        adjustment_data = {
+            'financial_year': financial_year,
+            'factor': factor,
+            'date': date,
+            'explanation': explanation,
+            'code': code,
+            'type': adjustment_type
+        }
+
+        adjustment = Adjustment.objects.create(**adjustment_data)
+
+        return adjustment

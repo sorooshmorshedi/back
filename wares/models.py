@@ -291,49 +291,28 @@ class WareInventory(BaseModel):
                 ware.unit
             ))
 
-        for ware_balance in ware_balances:
-            if ware_balance.count == count:
-                ware_balance.delete()
-                break
-            elif ware_balance.count < count:
-                count -= ware_balance.count
-                ware_balance.delete()
-            elif ware_balance.count > count:
-                ware_balance.count -= count
-                ware_balance.save()
-                break
-
-    @staticmethod
-    def get_fees(ware: Ware, warehouse: Warehouse, count, financial_year=None):
-        if not financial_year:
-            user = get_current_user()
-            financial_year = user.active_financial_year
-
-        ware_balances = WareInventory.objects.filter(
-            ware=ware,
-            warehouse=warehouse,
-            financial_year=financial_year
-        )
-
         fees = []
-
         for ware_balance in ware_balances:
-
-            if count == 0:
-                break
 
             fee = {
                 'fee': float(ware_balance.fee),
             }
+
             if ware_balance.count == count:
                 fee['count'] = float(ware_balance.count)
-                count = 0
+                ware_balance.delete()
+                break
+
             elif ware_balance.count < count:
-                fee['count'] = float(ware_balance.count)
                 count -= ware_balance.count
+                fee['count'] = float(ware_balance.count)
+                ware_balance.delete()
+
             elif ware_balance.count > count:
+                ware_balance.count -= count
                 fee['count'] = float(count)
-                count = 0
+                ware_balance.save()
+                break
 
             fees.append(fee)
 

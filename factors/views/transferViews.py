@@ -35,7 +35,6 @@ class TransferModelView(viewsets.ModelViewSet):
         self.delete_transfer_object()
         return Response({}, status=status.HTTP_200_OK)
 
-    @transaction.atomic()
     def update(self, request, *args, **kwargs):
         self.delete_transfer_object()
 
