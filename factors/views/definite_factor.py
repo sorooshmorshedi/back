@@ -71,6 +71,7 @@ class DefiniteFactor(APIView):
     @staticmethod
     def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
+        from factors.views.factorViews import get_factor_permission_basename
         permission_codename = "definite.".format(get_factor_permission_basename(factor.type))
         user.has_object_perm(factor, permission_codename, raise_exception=True)
 
