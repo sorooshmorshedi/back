@@ -6,7 +6,8 @@ from accounts.accounts.validators import AccountValidator
 from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
 from helpers.functions import get_current_user, get_new_code
-from sanads.serializers import SanadSerializer
+from sanads.models import newSanadCode, clearSanad
+from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
 from transactions.serializers import TransactionSerializerForPayment
 from wares.models import WareInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
@@ -249,6 +250,7 @@ class TransferCreateSerializer(serializers.ModelSerializer):
 
 class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
+    sanad = SanadListRetrieveSerializer()
 
     def get_items(self, obj):
         return FactorItemRetrieveSerializer(
@@ -268,9 +270,9 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         model = Adjustment
         exclude = ('financial_year', 'factor', 'code')
 
-    def create(self, validated_data, **kwargs):
-
-        financial_year = get_current_user().active_financial_year
+    def _update_factor_and_sanad(self, validated_data, factor: Factor = None, sanad: Sanad = None):
+        user = get_current_user()
+        financial_year = user.active_financial_year
 
         adjustment_type = validated_data.get('type')
         date = validated_data['date']
@@ -282,12 +284,34 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'explanation': explanation,
             'is_definite': True,
             'definition_date': now(),
-            'time': now()
+            'time': now(),
+            'is_auto_created': True
         }
-        factor = Factor.objects.create(**factor_data, type=adjustment_type)
-        factor.save()
+        if factor:
+            Factor.objects.filter(pk=factor.id).update(**factor_data)
+            for item in factor.items.all():
+                DefiniteFactor.updateInventory(item, True)
+                item.delete()
+        else:
+            factor = Factor.objects.create(**factor_data, type=adjustment_type)
+            factor.save()
 
-        for item in validated_data['items']:
+        sanad_data = {
+            'financial_year': financial_year,
+            'date': date,
+            'explanation': explanation,
+            'is_auto_created': True,
+            'code': newSanadCode()
+        }
+        if sanad:
+            clearSanad(sanad)
+        else:
+            print('new sanad ', validated_data)
+            sanad = Sanad.objects.create(**sanad_data)
+            sanad.save()
+
+        items_data = validated_data.get('items')
+        for item in items_data:
 
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
@@ -310,21 +334,42 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
         DefiniteFactor.updateFactorInventory(factor)
 
+        bed_account = bes_account = None
+        if adjustment_type == Factor.INPUT_ADJUSTMENT:
+            bed_account = Account.get_inventory_account(user)
+            bes_account = Account.get_cost_of_sold_wares_account(user)
+        elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
+            bes_account = Account.get_inventory_account(user)
+            bed_account = Account.get_cost_of_sold_wares_account(user)
+
+        for item in factor.items.all():
+            sanad.items.create(
+                account=bed_account,
+                bed=item.calculated_value
+            )
+            sanad.items.create(
+                account=bes_account,
+                bes=item.calculated_value
+            )
+
+        return factor, sanad
+
+    def create(self, validated_data, **kwargs):
+        adjustment_type = validated_data.get('type')
+        factor, sanad = self._update_factor_and_sanad(validated_data)
+
         code = Adjustment.objects.filter(type=adjustment_type).aggregate(Max('code'))['code__max']
         if code:
             code += 1
         else:
             code = 1
 
-        adjustment_data = {
-            'financial_year': financial_year,
-            'factor': factor,
-            'date': date,
-            'explanation': explanation,
-            'code': code,
-            'type': adjustment_type
-        }
-
-        adjustment = Adjustment.objects.create(**adjustment_data)
+        validated_data.pop('items')
+        adjustment = Adjustment.objects.create(**validated_data, factor=factor, sanad=sanad, code=code)
 
         return adjustment
+
+    def update(self, instance: Adjustment, validated_data):
+        instance.factor, instance.sanad = self._update_factor_and_sanad(validated_data, instance.factor, instance.sanad)
+        res = super().update(instance, validated_data)
+        return res

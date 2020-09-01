@@ -25,14 +25,12 @@ class AdjustmentModelView(viewsets.ModelViewSet):
         return Response({}, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        self.delete_object()
-
         data = request.data
 
-        serialized = AdjustmentCreateUpdateSerializer(data=data['adjustment'])
+        serialized = AdjustmentCreateUpdateSerializer(instance=self.get_object(), data=data['adjustment'])
         serialized.is_valid(raise_exception=True)
         serialized.save(
-            financial_year=request.user.active_financial_year.id
+            financial_year=request.user.active_financial_year
         )
 
         adjustment = serialized.instance
@@ -46,7 +44,7 @@ class AdjustmentModelView(viewsets.ModelViewSet):
         serialized = AdjustmentCreateUpdateSerializer(data=data['adjustment'])
         serialized.is_valid(raise_exception=True)
         serialized.save(
-            financial_year=request.user.active_financial_year.id
+            financial_year=request.user.active_financial_year
         )
 
         adjustment = serialized.instance

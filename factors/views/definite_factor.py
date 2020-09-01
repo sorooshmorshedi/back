@@ -43,26 +43,14 @@ class DefiniteFactor(APIView):
         factor.definition_date = None
         factor.save()
 
-        financial_year = user.active_financial_year
-
         for factor_item in factor.items.all():
 
             ware = factor_item.ware
-            warehouse = factor_item.warehouse
 
             if ware.isService:
                 continue
 
-            if factor_item.factor.type in Factor.INPUT_GROUP:
-                WareInventory.decrease_inventory(ware, warehouse, factor_item.count, financial_year, revert=True)
-            else:
-                ware = factor_item.ware
-                if ware.pricingType == Ware.FIFO:
-                    fees = factor_item.fees.copy()
-                    fees.reverse()
-                    for fee in fees:
-                        WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], financial_year,
-                                                         revert=True)
+            DefiniteFactor.updateInventory(factor_item, True)
 
             factor_item.fees = []
             factor_item.remain_fees = []
@@ -188,7 +176,7 @@ class DefiniteFactor(APIView):
             DefiniteFactor.updateInventory(item)
 
     @staticmethod
-    def updateInventory(item: FactorItem):
+    def updateInventory(item: FactorItem, revert=False):
 
         factor = item.factor
         ware = item.ware
@@ -206,22 +194,31 @@ class DefiniteFactor(APIView):
         if is_used_in_next_years:
             raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
 
-        if factor.type in Factor.OUTPUT_GROUP:
-            item.fees = WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year)
-            item.save()
+        if not revert:
+            if factor.type in Factor.OUTPUT_GROUP:
+                item.fees = WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year)
+                item.save()
 
-        elif factor.type in Factor.INPUT_GROUP:
-            fee = item.fee
-            if factor.type == Factor.BACK_FROM_SALE:
-                fee = float(WareInventory.get_remain_fees(ware)[-1]['fee'])
+            elif factor.type in Factor.INPUT_GROUP:
+                fee = item.fee
+                if factor.type == Factor.BACK_FROM_SALE:
+                    fee = float(WareInventory.get_remain_fees(ware)[-1]['fee'])
+                item.fees = [{
+                    'fee': float(fee),
+                    'count': float(item.count)
+                }]
+                item.save()
+                WareInventory.increase_inventory(ware, warehouse, item.count, fee, factor.financial_year)
 
-            item.fees = [{
-                'fee': float(fee),
-                'count': float(item.count)
-            }]
-            item.save()
-
-            WareInventory.increase_inventory(ware, warehouse, item.count, fee, factor.financial_year)
+        else:
+            if item.factor.type in Factor.INPUT_GROUP:
+                WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year, revert=True)
+            else:
+                fees = item.fees.copy()
+                fees.reverse()
+                for fee in fees:
+                    WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], factor.financial_year,
+                                                     revert=True)
 
         item.remain_fees = WareInventory.get_remain_fees(item.ware)
         item.save()

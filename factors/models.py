@@ -340,12 +340,12 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @property
     def is_last_definite_factor(self):
-        count = Factor.objects \
-            .filter(financial_year=self.financial_year,
-                    is_definite=self.is_definite,
-                    definition_date__gt=self.definition_date
-                    ) \
-            .count()
+        self.refresh_from_db()
+        count = Factor.objects.filter(
+            financial_year=self.financial_year,
+            is_definite=True,
+            definition_date__gt=self.definition_date
+        ).count()
         if count == 0:
             return True
         else:
@@ -491,7 +491,7 @@ class FactorItem(BaseModel):
     def delete(self, *args, **kwargs):
         if not self.factor.is_editable:
             raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
-        return super().delete(**args, **kwargs)
+        return super().delete(*args, **kwargs)
 
 
 class Transfer(BaseModel):
