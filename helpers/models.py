@@ -41,13 +41,13 @@ class BaseManager(models.Manager):
         else:
             operation = method
 
-        if (
-                not user.has_perm("{}.{}".format(operation, permission_basename))
-                and user.has_perm("{}Own.{}".format(operation, permission_basename))
-        ):
-            queryset = queryset.filter(created_by=user)
+        if user.has_perm("{}.{}".format(operation, permission_basename)):
+            return queryset
+        else:
+            if user.has_perm("{}Own.{}".format(operation, permission_basename)):
+                return queryset.filter(created_by=user)
 
-        return queryset
+        return queryset.none()
 
     def inFinancialYear(self, financial_year=None):
         from helpers.functions import get_current_user
