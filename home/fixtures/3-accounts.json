@@ -17160,7 +17160,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین بانک",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 55,
       "floatAccount": null,
@@ -17175,7 +17175,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص حقیقی خریدار",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 65,
       "floatAccount": null,
@@ -17190,7 +17190,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص حقوقی خریدار",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 66,
       "floatAccount": null,
@@ -17205,11 +17205,10 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص حقیقی فروشنده",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 115,
       "floatAccount": null,
-      "account_level": 3,
       "costCenter": null,
       "usage": "other",
       "codename": "realSellerParent"
@@ -17221,7 +17220,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص حقوقی فروشنده",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 493,
       "floatAccount": null,
@@ -17236,7 +17235,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص پیمانکار فروشنده",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 493,
       "floatAccount": null,
@@ -17251,7 +17250,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین دیگر اشخاص فروشنده",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 493,
       "floatAccount": null,
@@ -17266,7 +17265,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین شخص پیمانکار خریدار",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 493,
       "floatAccount": null,
@@ -17281,7 +17280,7 @@
     "fields": {
       "financial_year": 1,
       "name": "معین دیگر اشخاص خریدار",
-      "account_level": 3,
+      "account_level": 2,
       "explanation": "",
       "account": 493,
       "floatAccount": null,
