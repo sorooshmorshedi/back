@@ -158,7 +158,7 @@ class Account(BaseModel):
 
     level = models.IntegerField(choices=ACCOUNT_LEVELS)
 
-    type = models.ForeignKey(AccountType, on_delete=models.SET_NULL, related_name='accounts', blank=True, null=True)
+    type = models.ForeignKey(AccountType, on_delete=models.PROTECT, related_name='accounts')
     costCenterGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT,
                                         related_name='accountsAsCostCenter', blank=True, null=True)
     floatAccountGroup = models.ForeignKey(FloatAccountGroup, on_delete=models.PROTECT, related_name='accounts',

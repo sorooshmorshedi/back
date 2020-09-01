@@ -12,6 +12,7 @@ labels = {
     'phone': 'موبایل',
     'account': 'حساب',
     'date': 'تاریخ',
+    'type': 'نوع',
 
     # Cheque
     'serial_from': 'از شماره سریال',
