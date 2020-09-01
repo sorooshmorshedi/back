@@ -208,9 +208,20 @@ class DefiniteFactor(APIView):
 
         if factor.type in Factor.OUTPUT_GROUP:
             item.fees = WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year)
+            item.save()
 
         elif factor.type in Factor.INPUT_GROUP:
-            WareInventory.increase_inventory(ware, warehouse, item.count, item.fee, factor.financial_year)
+            fee = item.fee
+            if factor.type == Factor.BACK_FROM_SALE:
+                fee = float(WareInventory.get_remain_fees(ware)[-1]['fee'])
+
+            item.fees = [{
+                'fee': float(fee),
+                'count': float(item.count)
+            }]
+            item.save()
+
+            WareInventory.increase_inventory(ware, warehouse, item.count, fee, factor.financial_year)
 
         item.remain_fees = WareInventory.get_remain_fees(item.ware)
         item.save()
@@ -314,7 +325,7 @@ class DefiniteFactor(APIView):
         sanad = factor.sanad
         value = 0
         for item in factor.items.all():
-            value += item.calculated_output_value
+            value += item.calculated_value
 
         sanad.items.create(
             account=Account.get_cost_of_sold_wares_account(user),
@@ -335,7 +346,7 @@ class DefiniteFactor(APIView):
         value = 0
 
         for item in factor.items.all():
-            value += item.calculated_output_value
+            value += item.calculated_value
 
         sanad.items.create(
             account=Account.get_inventory_account(user),
@@ -355,7 +366,7 @@ class DefiniteFactor(APIView):
         sanad = factor.sanad
         value = 0
         for item in factor.items.all():
-            value += item.calculated_output_value
+            value += item.calculated_value
 
         sanad.items.create(
             account=factor.account,

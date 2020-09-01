@@ -434,8 +434,9 @@ class FactorItem(BaseModel):
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
     explanation = models.CharField(max_length=255, blank=True)
 
-    # These field are not warehouse wised
-    calculated_output_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
+    # this is used for inventory reports and sanads.
+    # it's equals to fees count * fees fee
+    calculated_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
 
     def __str__(self):
         return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(
@@ -482,9 +483,9 @@ class FactorItem(BaseModel):
             raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
 
         self.discountValue = self.discount
-        self.calculated_output_value = 0
+        self.calculated_value = 0
         for fee in self.fees:
-            self.calculated_output_value += fee['count'] * fee['fee']
+            self.calculated_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
 
     def delete(self, *args, **kwargs):

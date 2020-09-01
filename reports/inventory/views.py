@@ -21,16 +21,15 @@ def addSum(queryset, data):
         'input': {
             'count': queryset.filter(factor__type__in=Factor.BUY_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=Factor.BUY_GROUP).aggregate(
-                value=Sum(F('fee') * F('count'), output_field=DecimalField())
-            )['value'],
+            'value': queryset.filter(factor__type__in=Factor.BUY_GROUP).aggregate(value=Sum('calculated_value'))[
+                'value'
+            ]
         },
         'output': {
             'count': queryset.filter(factor__type__in=Factor.SALE_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
             'value': queryset.filter(factor__type__in=Factor.SALE_GROUP).aggregate(
-                # value=Sum(F('fee') * F('count'), output_field=DecimalField())
-                value=Sum('calculated_output_value')
+                value=Sum('calculated_value')
             )['value'],
         }
     })
@@ -112,7 +111,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
             ), 0),
             output_count=Coalesce(Sum('factorItems__count', filter=output_filter), 0),
             output_value=Coalesce(Sum(
-                F('factorItems__calculated_output_value'),
+                F('factorItems__calculated_value'),
                 filter=output_filter,
                 output_field=DecimalField()
             ), 0)
