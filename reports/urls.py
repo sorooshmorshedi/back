@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^lists/factors$', FactorListView.as_view(), name=''),
     url(r'^lists/transfers$', TransferListView.as_view(), name=''),
     url(r'^lists/factorItems$', FactorItemListView.as_view(), name=''),
+    url(r'^lists/adjustments$', AdjustmentListView.as_view(), name=''),
 ]
 
 # Lists Export

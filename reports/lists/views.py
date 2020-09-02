@@ -4,7 +4,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from cheques.views import get_cheque_permission_basename
-from factors.serializers import TransferListRetrieveSerializer
+from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
 from factors.views.factorViews import get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
@@ -26,7 +26,7 @@ class TransactionListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Transaction.objects.inFinancialYear().all()
+        return Transaction.objects.hasAccess('get').all()
 
 
 class ChequeListView(generics.ListAPIView):
@@ -43,7 +43,7 @@ class ChequeListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Cheque.objects.inFinancialYear().all()
+        return Cheque.objects.hasAccess('get').all()
 
 
 class ChequebookListView(generics.ListAPIView):
@@ -55,7 +55,7 @@ class ChequebookListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Chequebook.objects.inFinancialYear().all()
+        return Chequebook.objects.hasAccess('get').all()
 
 
 class SanadListView(generics.ListAPIView):
@@ -71,7 +71,7 @@ class SanadListView(generics.ListAPIView):
     search_fields = SanadFilter.Meta.fields.keys()
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().order_by('code').all()
+        return Sanad.objects.hasAccess('get').order_by('code').all()
 
 
 class UnbalancedSanadListView(SanadListView):
@@ -79,7 +79,7 @@ class UnbalancedSanadListView(SanadListView):
     permission_codename = "get.sanad"
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().order_by('code').filter(~Q(bed=F('bes')))
+        return Sanad.objects.hasAccess('get').order_by('code').filter(~Q(bed=F('bes')))
 
 
 class EmptySanadListView(SanadListView):
@@ -87,7 +87,7 @@ class EmptySanadListView(SanadListView):
     permission_codename = "get.sanad"
 
     def get_queryset(self):
-        return Sanad.objects.inFinancialYear().annotate(items_count=Count('items')).filter(items_count=0).order_by(
+        return Sanad.objects.hasAccess('get').annotate(items_count=Count('items')).filter(items_count=0).order_by(
             'code')
 
 
@@ -104,7 +104,7 @@ class FactorListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Factor.objects.inFinancialYear().prefetch_related('items').prefetch_related('account').all()
+        return Factor.objects.hasAccess('get').prefetch_related('items').prefetch_related('account').all()
 
 
 class TransferListView(generics.ListAPIView):
@@ -116,7 +116,7 @@ class TransferListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Transfer.objects.inFinancialYear().all()
+        return Transfer.objects.hasAccess('get').all()
 
 
 class FactorItemListView(generics.ListAPIView):
@@ -132,8 +132,20 @@ class FactorItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear() \
+        return FactorItem.objects.hasAccess('get') \
             .prefetch_related('factor__account') \
             .prefetch_related('ware') \
             .prefetch_related('warehouse') \
             .all()
+
+
+class AdjustmentListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = "get.adjustment"
+    serializer_class = AdjustmentListRetrieveSerializer
+    filterset_class = AdjustmentFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Adjustment.objects.hasAccess('get').all()

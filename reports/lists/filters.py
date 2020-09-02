@@ -5,7 +5,7 @@ from django_jalali.db import models as jmodels
 
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
-from factors.models import Factor, FactorItem, Transfer
+from factors.models import Factor, FactorItem, Transfer, Adjustment
 from helpers.filters import BASE_FIELD_FILTERS
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -161,3 +161,21 @@ class FactorItemFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
+
+
+class AdjustmentFilter(filters.FilterSet):
+    class Meta:
+        model = Adjustment
+        fields = {
+            'id': ['exact'],
+            'type': ['exact'],
+            'code': ['gte', 'lte', 'exact'],
+            'date': ['gte', 'lte'],
+            'explanation': ['icontains'],
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
