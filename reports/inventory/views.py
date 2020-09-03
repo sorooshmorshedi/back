@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from factors.models import FactorItem, Factor
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter
 from reports.inventory.serializers import WareInventorySerializer, AllWaresInventorySerializer, \
     WarehouseInventorySerializer, AllWarehousesInventorySerializer
@@ -35,6 +36,48 @@ def addSum(queryset, data):
     })
 
 
+ware_common_headers = [
+    'مقدار وارده',
+    'فی وارده',
+    'مبلغ وارده',
+    'مقدار صادره',
+    'فی صادره',
+    'مبلغ صادره',
+    'مقدار مانده',
+    'فی مانده',
+    'مبلغ مانده',
+]
+
+
+def get_ware_common_columns(item):
+    return [
+        item['input']['count'],
+        item['input']['fee'],
+        item['input']['value'],
+        item['output']['count'],
+        item['output']['fee'],
+        item['output']['value'],
+        item['remain']['count'],
+        item['remain']['fee'],
+        item['remain']['value'],
+    ]
+
+
+warehouse_common_headers = [
+    'مقدار وارده',
+    'مقدار صادره',
+    'مقدار مانده',
+]
+
+
+def get_warehouse_common_columns(item):
+    return [
+        item['input'],
+        item['output'],
+        item['remain'],
+    ]
+
+
 class WareInventoryListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.wareInventoryReport'
@@ -50,14 +93,12 @@ class WareInventoryListView(generics.ListAPIView):
             .prefetch_related('factor__sanad') \
             .order_by('factor__definition_date', 'id')
 
+        queryset = self.filter_queryset(queryset)
+
         return queryset
 
     def list(self, request, *args, **kwargs):
-        params = self.request.GET
-
-        factor_items = self.get_queryset()
-
-        queryset = self.filter_class(params, queryset=factor_items).qs
+        queryset = self.get_queryset()
 
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
@@ -70,6 +111,43 @@ class WareInventoryListView(generics.ListAPIView):
 
         response = paginator.get_paginated_response(data)
         return response
+
+
+class WareInventoryExportView(WareInventoryListView):
+    def get(self, request, **kwargs):
+        queryset = self.get_queryset()
+        items = self.serializer_class(queryset, many=True).data
+        addSum(queryset, items)
+
+        data = [[
+            '#',
+            'تاریخ',
+            'نوع فاکتور',
+            'شماره فاکتور',
+            'شرح فاکتور',
+            'نام حساب',
+            *ware_common_headers
+        ]]
+
+        for item in items[:-1]:
+            data.append([
+                items.index(item) + 1,
+                item['factor']['date'],
+                item['factor']['code'],
+                item['factor']['explanation'],
+                item['factor']['account']['name'],
+                *get_ware_common_columns(item)
+            ])
+
+        item = items[-1]
+        data.append([
+            '', '', '', '',
+            item['factor']['explanation'],
+            '',
+            *get_ware_common_columns(item)
+        ])
+
+        return get_xlsx_response('Ware Inventory', data)
 
 
 class AllWaresInventoryListView(generics.ListAPIView):
@@ -119,6 +197,32 @@ class AllWaresInventoryListView(generics.ListAPIView):
 
         return queryset
 
+    def add_sum(self, queryset, data):
+        totals = queryset.aggregate(
+            total_input_count=Sum('input_count'),
+            total_input_value=Sum('input_value'),
+            total_output_count=Sum('output_count'),
+            total_output_value=Sum('output_value'),
+        )
+        data.append({
+            'name': 'مجموع',
+            'input': {
+                'count': totals['total_input_count'],
+                'fee': ' - ',
+                'value': totals['total_input_value']
+            },
+            'output': {
+                'count': totals['total_output_count'],
+                'fee': ' - ',
+                'value': totals['total_output_value']
+            },
+            'remain': {
+                'count': totals['total_input_count'] - totals['total_output_count'],
+                'fee': ' - ',
+                'value': totals['total_input_value'] - totals['total_output_value']
+            },
+        })
+
     def list(self, request, *args, **kwargs):
         params = self.request.GET
 
@@ -133,33 +237,39 @@ class AllWaresInventoryListView(generics.ListAPIView):
         data = serializer.data
 
         if len(data) and paginator.offset + paginator.limit >= paginator.count:
-            totals = queryset.aggregate(
-                total_input_count=Sum('input_count'),
-                total_input_value=Sum('input_value'),
-                total_output_count=Sum('output_count'),
-                total_output_value=Sum('output_value'),
-            )
-            data.append({
-                'name': 'مجموع',
-                'input': {
-                    'count': totals['total_input_count'],
-                    'fee': ' - ',
-                    'value': totals['total_input_value']
-                },
-                'output': {
-                    'count': totals['total_output_count'],
-                    'fee': ' - ',
-                    'value': totals['total_output_value']
-                },
-                'remain': {
-                    'count': totals['total_input_count'] - totals['total_output_count'],
-                    'fee': ' - ',
-                    'value': totals['total_input_value'] - totals['total_output_value']
-                },
-            })
+            self.add_sum(queryset, data)
 
         response = paginator.get_paginated_response(data)
         return response
+
+
+class AllWaresInventoryExportView(AllWaresInventoryListView):
+    def get(self, request, **kwargs):
+        queryset = self.get_queryset()
+        items = self.serializer_class(queryset, many=True).data
+        self.add_sum(queryset, items)
+
+        data = [[
+            '#',
+            'کالا',
+            *ware_common_headers
+        ]]
+
+        for item in items[:-1]:
+            data.append([
+                items.index(item) + 1,
+                item['name'],
+                *get_ware_common_columns(item)
+            ])
+
+        item = items[-1]
+        data.append([
+            '',
+            item['name'],
+            *get_ware_common_columns(item)
+        ])
+
+        return get_xlsx_response('All Wares Inventory', data)
 
 
 class WarehouseInventoryListView(generics.ListAPIView):
@@ -194,6 +304,18 @@ class WarehouseInventoryListView(generics.ListAPIView):
 
         return queryset
 
+    def add_sum(self, data):
+        data.append({
+            'factor': {
+                'account': {
+                    'name': 'جمع'
+                }
+            },
+            'input': data[-1]['cumulative_count']['input'],
+            'output': data[-1]['cumulative_count']['output'],
+            'remain': data[-1]['remain']
+        })
+
     def list(self, request, *args, **kwargs):
         params = self.request.GET
 
@@ -208,20 +330,56 @@ class WarehouseInventoryListView(generics.ListAPIView):
         data = serializer.data
 
         if len(data) and paginator.offset + paginator.limit >= paginator.count:
-            data.append({
-                'factor': {
-                    'account': {
-                        'name': 'جمع'
-                    }
-                },
-                'input': data[-1]['cumulative_count']['input'],
-                'output': data[-1]['cumulative_count']['output'],
-                'remain': data[-1]['remain']
-            })
+            self.add_sum(data)
 
         response = paginator.get_paginated_response(data)
-        # print(len(connection.queries))
         return response
+
+
+class WarehouseInventoryExportView(WarehouseInventoryListView):
+    def get(self, request, **kwargs):
+        queryset = self.get_queryset()
+        items = self.serializer_class(queryset, many=True).data
+        self.add_sum(items)
+
+        data = [[
+            '#',
+            'تاریخ',
+            'نوع فاکتور',
+            'عطف فاکتور',
+            'شماره فاکتور',
+            'شرح فاکتور',
+            'انبار',
+            'نام حساب',
+            *warehouse_common_headers
+        ]]
+
+        for item in items[:-1]:
+            print(item['factor'])
+
+            account = item['factor']['account']
+            account_name = account['name'] if account else ' - '
+
+            data.append([
+                items.index(item) + 1,
+                item['factor']['date'],
+                Factor.get_type_label(item['factor']['type']),
+                item['factor']['id'],
+                item['factor']['code'],
+                item['factor']['explanation'],
+                item['warehouse']['name'],
+                account_name,
+                *get_warehouse_common_columns(item)
+            ])
+
+        item = items[-1]
+        data.append([
+            '', '', '', '', '', '', '',
+            item['factor']['account']['name'],
+            *get_warehouse_common_columns(item)
+        ])
+
+        return get_xlsx_response('Warehouse Inventory', data)
 
 
 class AllWarehousesInventoryListView(generics.ListAPIView):
@@ -250,15 +408,27 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
             output_filter &= Q(factorItems__warehouse=warehouse)
 
         queryset = Ware.objects.inFinancialYear().annotate(
-            input_count=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
-            output_count=Coalesce(Sum('factorItems__count', filter=output_filter), 0)
+            input=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
+            output=Coalesce(Sum('factorItems__count', filter=output_filter), 0)
         )
 
         queryset = queryset.annotate(
-            remaining_count=Coalesce(F('input_count') - F('output_count'), 0)
+            remain=Coalesce(F('input') - F('output'), 0)
         )
 
         return queryset
+
+    def add_sum(self, queryset, data):
+        totals = queryset.aggregate(
+            total_input_count=Sum('input'),
+            total_output_count=Sum('output'),
+        )
+        data.append({
+            'name': 'جمع',
+            'input': totals['total_input_count'],
+            'output': totals['total_output_count'],
+            'remain': totals['total_input_count'] - totals['total_output_count']
+        })
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -270,16 +440,36 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         data = serializer.data
 
         if len(data) and paginator.offset + paginator.limit >= paginator.count:
-            totals = queryset.aggregate(
-                total_input_count=Sum('input_count'),
-                total_output_count=Sum('output_count'),
-            )
-            data.append({
-                'name': 'جمع',
-                'input_count': totals['total_input_count'],
-                'output_count': totals['total_output_count'],
-                'remaining_count': totals['total_input_count'] - totals['total_output_count']
-            })
+            self.add_sum(queryset, data)
 
         response = paginator.get_paginated_response(data)
         return response
+
+
+class AllWarehousesInventoryExportView(AllWarehousesInventoryListView):
+    def get(self, request, **kwargs):
+        queryset = self.get_queryset()
+        items = self.serializer_class(queryset, many=True).data
+        self.add_sum(queryset, items)
+
+        data = [[
+            '#',
+            'کالا',
+            *warehouse_common_headers
+        ]]
+
+        for item in items[:-1]:
+            data.append([
+                items.index(item) + 1,
+                item['name'],
+                *get_warehouse_common_columns(item)
+            ])
+
+        item = items[-1]
+        data.append([
+            '',
+            item['name'],
+            *get_warehouse_common_columns(item)
+        ])
+
+        return get_xlsx_response('All Warehouses Inventory', data)

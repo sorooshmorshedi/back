@@ -177,10 +177,10 @@ class WarehouseInventorySerializer(serializers.ModelSerializer):
 
 
 class AllWarehousesInventorySerializer(serializers.ModelSerializer):
-    input_count = serializers.IntegerField()
-    output_count = serializers.IntegerField()
-    remaining_count = serializers.IntegerField()
+    input = serializers.IntegerField()
+    output = serializers.IntegerField()
+    remain = serializers.IntegerField()
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'input_count', 'output_count', 'remaining_count')
+        fields = ('id', 'name', 'input', 'output', 'remain')

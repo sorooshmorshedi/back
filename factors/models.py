@@ -228,11 +228,15 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @property
     def label(self):
-        return "فاکتور های {}".format(self.get_type_label)
+        return "فاکتور های {}".format(self.type_label)
+
+    @staticmethod
+    def get_type_label(factor_type):
+        return [t[1] for t in Factor.FACTOR_TYPES if t[0] == factor_type][0]
 
     @property
     def type_label(self):
-        return [t[1] for t in Factor.FACTOR_TYPES if t[0] == self.type][0]
+        return self.get_type_label(self.type)
 
     @property
     def remain(self):

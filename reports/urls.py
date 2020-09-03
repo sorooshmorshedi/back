@@ -7,7 +7,8 @@ from reports.balanceSheet.views import BalanceSheetView
 from reports.buySale.views import BuySaleView
 from reports.incomeStatement.views import IncomeStatementView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
-    AllWarehousesInventoryListView
+    AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
+    AllWarehousesInventoryExportView
 from reports.sanadItems.views import SanadItemListView, SanadItemExportView
 from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView
 from reports.lists.views import *
@@ -57,9 +58,15 @@ urlpatterns += [
     url(r'^inventory/ware/all$', AllWaresInventoryListView.as_view(), name=''),
     url(r'^inventory/warehouse$', WarehouseInventoryListView.as_view(), name=''),
     url(r'^inventory/warehouse/all$', AllWarehousesInventoryListView.as_view(), name=''),
+
+    url(r'^inventory/ware/all/(?P<export_type>\S+)', AllWaresInventoryExportView.as_view(), name=''),
+    url(r'^inventory/ware/(?P<export_type>\S+)', WareInventoryExportView.as_view(), name=''),
+
+    url(r'^inventory/warehouse/all/(?P<export_type>\S+)', AllWarehousesInventoryExportView.as_view(), name=''),
+    url(r'^inventory/warehouse/(?P<export_type>\S+)', WarehouseInventoryExportView.as_view(), name=''),
 ]
 
 # Other
 router = DefaultRouter()
-router.register('exportVerifiers', ExportVerifiersModelView, base_name='export-verifiersgt')
+router.register('exportVerifiers', ExportVerifiersModelView, base_name='export-verifiers')
 urlpatterns += router.urls
