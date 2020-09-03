@@ -9,21 +9,25 @@ from rest_framework.response import Response
 
 from helpers.auth import BasicCRUDPermission
 from helpers.exports import get_xlsx_response
-from reports.ledger.filters import SanadItemLedgerFilter
-from reports.ledger.serializers import SanadItemLedgerSerializer
+from reports.sanadItems.filters import SanadItemLedgerFilter
+from reports.sanadItems.serializers import SanadItemLedgerSerializer
 from sanads.models import SanadItem
 
+"""
+Used for sanadItems, journal & bill reports
+"""
 
-class LedgerListView(generics.ListAPIView):
+
+class SanadItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'get.ledgerReport'
+    permission_codename = 'get.sanadItems'
     serializer_class = SanadItemLedgerSerializer
     filterset_class = SanadItemLedgerFilter
     pagination_class = LimitOffsetPagination
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        qs = SanadItem.objects.hasAccess(self.request.method, 'get.ledgerReport', use_financial_year=False)
+        qs = SanadItem.objects.hasAccess(self.request.method, 'get.sanadItemsReport', use_financial_year=False)
 
         order_sanads_by = self.request.GET.copy().get('order_sanads_by', None)
 
@@ -100,10 +104,10 @@ class LedgerListView(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class LedgerExportView(LedgerListView):
+class SanadItemExportView(SanadItemListView):
 
     def get(self, request, **kwargs):
-        sheet_name = 'ledger.xlsx'
+        sheet_name = 'sanadItems.xlsx'
 
         data = [[
             '#',

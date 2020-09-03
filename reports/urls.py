@@ -7,7 +7,7 @@ from reports.buySale.views import BuySaleView
 from reports.incomeStatement.views import IncomeStatementView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView
-from reports.ledger.views import LedgerListView, LedgerExportView
+from reports.sanadItems.views import SanadItemListView, SanadItemExportView
 from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView
 from reports.lists.views import *
 from reports.views import exportTest, ExportVerifiersModelView
@@ -39,13 +39,13 @@ urlpatterns += [
     url(r'^balance$', AccountBalanceView.as_view(), name=''),
     url(r'^balance/floatsByGroup$', FloatAccountBalanceByGroupView.as_view(), name=''),
     url(r'^balance/floats$', FloatAccountBalanceView.as_view(), name=''),
-    url(r'^ledger$', LedgerListView.as_view(), name=''),
+    url(r'^sanadItems$', SanadItemListView.as_view(), name=''),
     url(r'^export$', exportTest, name=''),
     url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
     url(r'^buySale$', BuySaleView.as_view(), name=''),
 
-    url(r'^ledger/(?P<export_type>\S+)', LedgerExportView.as_view(), name=''),
+    url(r'^sanadItems/(?P<export_type>\S+)', SanadItemExportView.as_view(), name=''),
 
     url(r'^inventory/ware$', WareInventoryListView.as_view(), name=''),
     url(r'^inventory/ware/all$', AllWaresInventoryListView.as_view(), name=''),

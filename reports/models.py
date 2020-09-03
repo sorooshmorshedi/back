@@ -13,7 +13,6 @@ class Report(BaseModel):
             ('get.floatAccountBalanceByGroupReport', 'مشاهده تراز شناور بر اساس گروه'),
             ('get.floatAccountBalanceReport', 'مشاهده تراز شناور'),
             ('get.balanceSheetReport', 'مشاهده ترازنامه'),
-            ('get.billReport', 'مشاهده صورت حساب تفصیلی'),
             ('get.buyReport', 'مشاهده گزارش خرید'),
             ('get.saleReport', 'مشاهده گزارش فروش'),
             ('get.incomeStatementReport', 'مشاهده گزارش سود و زیان تفصیلی'),
@@ -21,8 +20,8 @@ class Report(BaseModel):
             ('get.allWaresInventoryReport', 'مشاهده کاردکس همه کالا ها'),
             ('get.warehouseInventoryReport', 'مشاهده کاردکس انبار'),
             ('get.allWarehousesInventoryReport', 'مشاهده کاردکس همه انبار ها'),
-            ('get.journalReport', 'مشاهده دفتر روزنامه'),
-            ('get.ledgerReport', 'مشاهده دفتر کل، معین، تفصیلی'),
+
+            ('get.sanadItemsReport', 'مشاهده گزارشات ردیف اسناد (دفتر روزنامه، صورت حساب تفصیلی و دفاتر حساب ها)'),
         )
 
 
