@@ -5,9 +5,14 @@ import xlsxwriter
 from django.http.response import HttpResponse
 
 
-def get_xlsx_response(sheet_name, data):
+def get_xlsx_response(file_name, data):
     with BytesIO() as b:
         writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+
+        if not file_name.endswith('.xlsx'):
+            file_name = "{}.xlsx".format(file_name)
+
+        sheet_name = 'Sheet1'
 
         df = pandas.DataFrame(data)
         df.to_excel(
@@ -26,4 +31,6 @@ def get_xlsx_response(sheet_name, data):
         ), {'type': 'no_errors', 'format': border_fmt})
         writer.save()
 
-        return HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+        response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(file_name)
+        return response

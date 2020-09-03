@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView
+from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView, \
+    AccountBalanceExportView, FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
 from reports.balanceSheet.views import BalanceSheetView
 from reports.buySale.views import BuySaleView
 from reports.incomeStatement.views import IncomeStatementView
@@ -39,13 +40,18 @@ urlpatterns += [
     url(r'^balance$', AccountBalanceView.as_view(), name=''),
     url(r'^balance/floatsByGroup$', FloatAccountBalanceByGroupView.as_view(), name=''),
     url(r'^balance/floats$', FloatAccountBalanceView.as_view(), name=''),
+
+    url(r'^balance/floats/(?P<export_type>\S+)', FloatAccountBalanceExportView.as_view(), name=''),
+    url(r'^balance/floatsByGroup/(?P<export_type>\S+)', FloatAccountBalanceByGroupExportView.as_view(), name=''),
+    url(r'^balance/(?P<export_type>\S+)', AccountBalanceExportView.as_view(), name=''),
+
     url(r'^sanadItems$', SanadItemListView.as_view(), name=''),
+    url(r'^sanadItems/(?P<export_type>\S+)', SanadItemExportView.as_view(), name=''),
+
     url(r'^export$', exportTest, name=''),
     url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
     url(r'^buySale$', BuySaleView.as_view(), name=''),
-
-    url(r'^sanadItems/(?P<export_type>\S+)', SanadItemExportView.as_view(), name=''),
 
     url(r'^inventory/ware$', WareInventoryListView.as_view(), name=''),
     url(r'^inventory/ware/all$', AllWaresInventoryListView.as_view(), name=''),

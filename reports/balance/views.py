@@ -8,16 +8,62 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
 from accounts.accounts.serializers import AccountTypeSerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
     BalanceFloatAccountGroupSerializer
 from reports.filters import get_account_sanad_items_filter
+
+common_headers = [
+    'گردش بدهکار',
+    'گردش بستانکار',
+    'مانده بدهکار',
+    'مانده بستانکار'
+]
+
+
+def get_common_columns(obj, is_dict=False):
+    if is_dict:
+        return [
+            obj['bed_sum'],
+            obj['bes_sum'],
+            obj['bed_remain'],
+            obj['bes_remain'],
+        ]
+    return [
+        obj.bed_sum,
+        obj.bes_sum,
+        obj.bed_remain,
+        obj.bes_remain,
+    ]
+
+
+def get_common_columns_sum(objs, is_dict=False):
+    bed_sum = bes_sum = bed_remain = bes_remain = 0
+    for obj in objs:
+
+        if is_dict:
+            bed_sum += obj['bed_sum']
+            bes_sum += obj['bes_sum']
+            bed_remain += obj['bed_remain']
+            bes_remain += obj['bes_remain']
+        else:
+            bed_sum += obj.bed_sum
+            bes_sum += obj.bes_sum
+            bed_remain += obj.bed_remain
+            bes_remain += obj.bes_remain
+    return [
+        bed_sum,
+        bes_sum,
+        bed_remain,
+        bes_remain,
+    ]
 
 
 class AccountBalanceView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.accountBalanceReport'
 
-    def get(self, request):
+    def get_accounts(self, request):
         filters = get_account_sanad_items_filter(request)
 
         accounts = Account.objects.inFinancialYear() \
@@ -90,15 +136,47 @@ class AccountBalanceView(APIView):
                         floatAccount.bed_remain = 0
                     account._costCenters.append(BalanceFloatAccountSerializer(floatAccount).data)
 
+        return accounts
+
+    def get(self, request):
+        accounts = self.get_accounts(request)
         res = Response(BalanceAccountSerializer(accounts, many=True).data)
         return res
+
+
+class AccountBalanceExportView(AccountBalanceView):
+
+    def get(self, request, **kwargs):
+        accounts = self.get_accounts(request)
+
+        data = [[
+            '#',
+            'کد حساب',
+            'نام حساب',
+            *common_headers
+        ]]
+        for account in accounts:
+            data.append([
+                account.code,
+                account.name,
+                *get_common_columns(account)
+            ])
+
+        data.append([
+            '', '',
+            'جمع',
+            *get_common_columns_sum(accounts)
+        ])
+
+        return get_xlsx_response('account balance', data)
 
 
 class FloatAccountBalanceByGroupView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.floatAccountBalanceByGroupReport'
 
-    def get(self, request):
+    def get_accounts_data(self, request):
+
         filters = get_account_sanad_items_filter(request)
 
         is_cost_center = request.GET.get('is_cost_center') == 'true'
@@ -180,15 +258,54 @@ class FloatAccountBalanceByGroupView(APIView):
                 account['bes_remain'] = -remain
                 account['bed_remain'] = 0
 
-        res = Response(res)
         return res
+
+    def get(self, request):
+        data = self.get_accounts_data(request)
+        res = Response(data)
+        return res
+
+
+class FloatAccountBalanceByGroupExportView(FloatAccountBalanceByGroupView):
+
+    def get(self, request, **kwargs):
+        accounts_data = self.get_accounts_data(request)
+        is_cost_center = request.GET.get('is_cost_center') == 'true'
+
+        if is_cost_center:
+            column_label = "مرکز هزینه و درآمد"
+            file_name = "Cost & Income Center By Group Balance"
+        else:
+            column_label = "شناور"
+            file_name = "Float By Group Balance"
+
+        data = [[
+            '#',
+            'گروه',
+            column_label,
+            *common_headers
+        ]]
+        for account in accounts_data:
+            data.append([
+                account['group_name'],
+                account['float_account_name'],
+                *get_common_columns(account, True)
+            ])
+
+        data.append([
+            '', '',
+            'جمع',
+            *get_common_columns_sum(accounts_data, True)
+        ])
+
+        return get_xlsx_response(file_name, data)
 
 
 class FloatAccountBalanceView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.floatAccountBalanceReport'
 
-    def get(self, request):
+    def get_accounts_data(self, request):
         filters = get_account_sanad_items_filter(request)
 
         is_cost_center = request.GET.get('is_cost_center') == 'true'
@@ -222,5 +339,44 @@ class FloatAccountBalanceView(APIView):
                 account['bes_remain'] = -remain
                 account['bed_remain'] = 0
 
+        return res
+
+    def get(self, request):
+        res = self.get_accounts_data(request)
+
         res = Response(res)
         return res
+
+
+class FloatAccountBalanceExportView(FloatAccountBalanceView):
+
+    def get(self, request, **kwargs):
+        accounts_data = self.get_accounts_data(request)
+
+        is_cost_center = request.GET.get('is_cost_center') == 'true'
+
+        if is_cost_center:
+            column_label = "مرکز هزینه و درآمد"
+            file_name = "Cost & Income Center Balance"
+        else:
+            column_label = "شناور"
+            file_name = "Float Balance"
+
+        data = [[
+            '#',
+            column_label,
+            *common_headers
+        ]]
+        for account in accounts_data:
+            data.append([
+                account['float_account_name'],
+                *get_common_columns(account, True)
+            ])
+
+        data.append([
+            '',
+            'جمع',
+            *get_common_columns_sum(accounts_data, True)
+        ])
+
+        return get_xlsx_response(file_name, data)
