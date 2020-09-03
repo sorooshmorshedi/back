@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView, \
     AccountBalanceExportView, FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
 from reports.balanceSheet.views import BalanceSheetView
-from reports.buySale.views import BuySaleView
+from reports.buySale.views import BuySaleView, BuySaleExportView
 from reports.incomeStatement.views import IncomeStatementView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
@@ -52,7 +52,9 @@ urlpatterns += [
     url(r'^export$', exportTest, name=''),
     url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
+
     url(r'^buySale$', BuySaleView.as_view(), name=''),
+    url(r'^buySale/(?P<export_type>\S+)', BuySaleExportView.as_view(), name=''),
 
     url(r'^inventory/ware$', WareInventoryListView.as_view(), name=''),
     url(r'^inventory/ware/all$', AllWaresInventoryListView.as_view(), name=''),

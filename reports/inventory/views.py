@@ -355,8 +355,6 @@ class WarehouseInventoryExportView(WarehouseInventoryListView):
         ]]
 
         for item in items[:-1]:
-            print(item['factor'])
-
             account = item['factor']['account']
             account_name = account['name'] if account else ' - '
 

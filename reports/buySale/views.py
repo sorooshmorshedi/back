@@ -4,6 +4,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 from reports.buySale.serializers import BuySaleSerializer
 from reports.lists.filters import *
 from reports.lists.serializers import *
@@ -74,23 +75,30 @@ class BuySaleView(generics.ListAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        return FactorItem.objects.inFinancialYear() \
+        qs = FactorItem.objects.inFinancialYear() \
             .filter(factor__is_definite=True) \
             .prefetch_related('factor__account') \
             .prefetch_related('ware') \
             .prefetch_related('warehouse') \
             .all()
 
-    def list(self, request, *args, **kwargs):
         params = self.request.GET.copy()
-
-        report_type = Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
-
-        queryset = self.filter_queryset(queryset=self.get_queryset())
         ordering = params.get('ordering')
         if ordering:
-            queryset = queryset.order_by(ordering)
+            qs = qs.order_by(ordering)
 
+        qs = self.filter_queryset(queryset=qs)
+
+        return qs
+
+    @property
+    def report_type(self):
+        params = self.request.GET.copy()
+        return Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
+
+    def list(self, request, *args, **kwargs):
+
+        queryset = self.get_queryset()
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
 
@@ -98,7 +106,67 @@ class BuySaleView(generics.ListAPIView):
         data = serializer.data
 
         if len(data) and paginator.offset + paginator.limit >= paginator.count:
-            addSum(queryset, data, report_type)
+            addSum(queryset, data, self.report_type)
 
         response = paginator.get_paginated_response(data)
         return response
+
+
+class BuySaleExportView(BuySaleView):
+    def get(self, request, **kwargs):
+        queryset = self.get_queryset()
+        items = self.serializer_class(queryset, many=True).data
+        addSum(queryset, items, self.report_type)
+
+        data = [[
+            '#',
+            'تاریخ',
+            'نوع فاکتور',
+            'عطف فاکتور',
+            'شماره فاکتور',
+            'خریدار/فروشنده',
+            'انبار',
+            'تعداد',
+            'فی',
+            'مبلغ',
+            'تخفیف',
+            'مبلغ کل',
+            'شرح فاکتور',
+            'توضیحات',
+        ]]
+
+        for item in items[:-1]:
+            print(item['factor']['account'], item['factor']['type'])
+            data.append([
+                items.index(item) + 1,
+                item['factor']['date'],
+                Factor.get_type_label(item['factor']['type']),
+                item['factor']['id'],
+                item['factor']['code'],
+                item['factor']['account']['name'],
+                item['warehouse']['name'],
+                item['count'],
+                item['fee'],
+                item['value'],
+                item['discount'],
+                item['total_value'],
+                item['factor']['explanation'],
+                item['explanation'],
+            ])
+
+        item = items[-1]
+        data.append([
+            '', '', '', '', '', '', '',
+            item['warehouse']['name'],
+            item['count'],
+            item['value'],
+            item['discount'],
+            item['total_value'],
+        ])
+
+        if self.report_type == Factor.BUY:
+            file_name = "Buy Report"
+        else:
+            file_name = "Sale Report"
+
+        return get_xlsx_response(file_name, data)
