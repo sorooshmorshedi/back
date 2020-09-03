@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 from reports.ledger.filters import SanadItemLedgerFilter
 from reports.ledger.serializers import SanadItemLedgerSerializer
 from sanads.models import SanadItem
@@ -43,6 +44,13 @@ class LedgerListView(generics.ListAPIView):
         qs = qs.annotate(
             comulative_bed=Window(expression=Sum('bed'), order_by=order_by),
             comulative_bes=Window(expression=Sum('bes'), order_by=order_by)
+        )
+
+        previous_sum = self.get_previous_sum()
+
+        qs = qs.annotate(
+            previous_bed=Value(previous_sum['bed'], IntegerField()),
+            previous_bes=Value(previous_sum['bes'], IntegerField())
         )
 
         return qs
@@ -83,13 +91,6 @@ class LedgerListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        previous_sum = self.get_previous_sum()
-
-        queryset = queryset.annotate(
-            previous_bed=Value(previous_sum['bed'], IntegerField()),
-            previous_bes=Value(previous_sum['bes'], IntegerField())
-        )
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -97,3 +98,52 @@ class LedgerListView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class LedgerExportView(LedgerListView):
+
+    def get(self, request, **kwargs):
+        sheet_name = 'ledger.xlsx'
+
+        data = [[
+            '#',
+            'تاریخ',
+            'شماره سند',
+            'شرح',
+            'حساب',
+            'بدهکار',
+            'بستانکار',
+            'مانده',
+            'تشخیص'
+        ]]
+
+        rows = self.serializer_class(self.get_queryset(), many=True).data
+        row = None
+        for row in rows:
+            sanad = row['sanad']
+            data.append([
+                rows.index(row) + 1,
+                sanad['date'],
+                sanad['code'],
+                row['explanation'],
+                row['account']['code'] + " " + row['account']['name'],
+                row['bed'],
+                row['bes'],
+                row['remain'],
+                row['remain_type'],
+            ])
+
+        if row:
+            data.append([
+                '',
+                '',
+                '',
+                '',
+                'مجموع',
+                row['comulative_bed'],
+                row['comulative_bes'],
+                row['remain'],
+                row['remain_type'],
+            ])
+
+        return get_xlsx_response(sheet_name, data)
