@@ -5,7 +5,7 @@ from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroup
     AccountBalanceExportView, FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
 from reports.balanceSheet.views import BalanceSheetView
 from reports.buySale.views import BuySaleView, BuySaleExportView
-from reports.incomeStatement.views import IncomeStatementView
+from reports.incomeStatement.views import IncomeStatementView, IncomeStatementExportView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
     AllWarehousesInventoryExportView
@@ -50,7 +50,10 @@ urlpatterns += [
     url(r'^sanadItems/(?P<export_type>\S+)', SanadItemExportView.as_view(), name=''),
 
     url(r'^export$', exportTest, name=''),
+
     url(r'^incomeStatement$', IncomeStatementView.as_view(), name=''),
+    url(r'^incomeStatement/(?P<export_type>\S+)$', IncomeStatementExportView.as_view(), name=''),
+
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
 
     url(r'^buySale$', BuySaleView.as_view(), name=''),

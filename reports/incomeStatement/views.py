@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from accounts.accounts.models import AccountType, Account
 from accounts.accounts.serializers import TypeReportAccountSerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 from reports.filters import get_account_sanad_items_filter
 
 
@@ -31,8 +32,8 @@ def getRemain(accountType, allAccounts):
 
 
 def getSerialized(pName, allAccounts):
-    at = getType(pName)
-    remain = getRemain(at, allAccounts)
+    account_type = getType(pName)
+    remain = getRemain(account_type, allAccounts)
 
     subPrefix = (
         'backFromSaleAndDiscounts',
@@ -46,29 +47,29 @@ def getSerialized(pName, allAccounts):
     )
 
     hasPrefix = False
-    prefix = None
+    prefix = ''
     prefixColor = None
 
-    if at.codename in subPrefix:
+    if account_type.codename in subPrefix:
         hasPrefix = True
         prefix = 'کسر می شود:'
         prefixColor = 'red'
 
-    if at.codename in addPrefix:
+    if account_type.codename in addPrefix:
         hasPrefix = True
         prefix = 'اضافه می شود:'
         prefixColor = 'blue'
 
     return {
         'type': {
-            'name': at.name,
+            'name': account_type.name,
             'hasPrefix': hasPrefix,
-            'pName': at.codename,
+            'pName': account_type.codename,
             'prefix': prefix,
             'prefixColor': prefixColor
         },
         'remain': remain,
-        'accounts': TypeReportAccountSerializer(getAccounts(at, allAccounts), many=True).data
+        'accounts': TypeReportAccountSerializer(getAccounts(account_type, allAccounts), many=True).data
     }
 
 
@@ -76,10 +77,10 @@ class IncomeStatementView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.incomeStatementReport'
 
-    def get(self, request):
+    def generate_report(self, request):
         getType.accountTypes = AccountType.objects.all()
 
-        res = []
+        rows = []
         dateFilter = get_account_sanad_items_filter(request)
 
         allAccounts = list(Account.objects.inFinancialYear() \
@@ -88,68 +89,62 @@ class IncomeStatementView(APIView):
                                      Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
                                      ).filter(level=3).order_by('code'))
 
-        usingTypes = (
-            'sale',
-            'backFromSaleAndDiscounts',
-            'soldProductValue',
-            'operatingCosts',
-            'nonOperatingIncomes',
-            'nonOperatingCosts',
-        )
-
         t = getSerialized('sale', allAccounts)
-        res.append(t)
+        rows.append(t)
         sale = t['remain']
 
         t = getSerialized('backFromSaleAndDiscounts', allAccounts)
-        res.append(t)
+        rows.append(t)
         backFromSaleAndDiscounts = t['remain']
 
         netSales = sale - backFromSaleAndDiscounts
         t = ({
             'type': {
                 'name': 'فروش خالص',
+                'prefix': '',
                 'pName': None
             },
             'remain': netSales,
         })
-        res.append(t)
+        rows.append(t)
 
         t = getSerialized('soldProductValue', allAccounts)
         soldProductValue = t['remain']
-        res.append(t)
+        rows.append(t)
 
         grossIncome = netSales - soldProductValue
         t = ({
             'type': {
                 'name': 'سود (زیان) ناخالص',
+                'prefix': '',
                 'pName': None
             },
             'remain': grossIncome,
         })
-        res.append(t)
+        rows.append(t)
 
         t = getSerialized('operatingCosts', allAccounts)
         operatingCosts = t['remain']
-        res.append(t)
+        rows.append(t)
 
         operatingIncome = grossIncome - operatingCosts
         t = ({
             'type': {
                 'name': 'سود (زیان) عملیاتی',
+                'prefix': '',
                 'pName': None
             },
             'remain': operatingIncome
         })
-        res.append(t)
+        rows.append(t)
 
         t = getSerialized('nonOperatingIncomes', allAccounts)
         nonOperatingIncomes = t['remain']
-        res.append(t)
+        rows.append(t)
 
         t = getSerialized('nonOperatingCosts', allAccounts)
         nonOperatingCosts = t['remain']
-        res.append(t)
+        rows.append(t)
 
         specialIncome = operatingIncome \
                         + nonOperatingIncomes \
@@ -157,11 +152,53 @@ class IncomeStatementView(APIView):
         t = ({
             'type': {
                 'name': 'سود (زیان) ویژه',
+                'prefix': '',
                 'pName': None
             },
             'remain': specialIncome
         })
-        res.append(t)
+        rows.append(t)
 
+        return rows
+
+    def get(self, request):
+        res = self.generate_report(request)
         res = Response(res)
         return res
+
+
+class IncomeStatementExportView(IncomeStatementView):
+    def get(self, request, **kwargs):
+        rows = [[
+            "#",
+            "شرح",
+            "مبلغ",
+        ]]
+
+        i = 0
+        data = self.generate_report(request)
+        get_detailed = request.GET.get('detailed') == 'true'
+
+        if get_detailed:
+            rows[0].append("")
+
+        for row in data:
+            i += 1
+            rows.append([
+                i,
+                "{} {}".format(row['type']['prefix'], row['type']['name']),
+                row['remain']
+            ])
+
+            if get_detailed and 'accounts' in row:
+                j = 0
+                for account in row['accounts']:
+                    j += 1
+                    rows.append([
+                        "",
+                        j,
+                        account['title'],
+                        account['remain']
+                    ])
+
+        return get_xlsx_response("Income Statement", rows)
