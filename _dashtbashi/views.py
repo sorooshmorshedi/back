@@ -23,7 +23,6 @@ from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
-from imprests.serializers import ImprestListRetrieveSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer
 
@@ -409,20 +408,3 @@ class ConfirmOtherDriverPayment(ConfirmView):
     model = OtherDriverPayment
 
 
-class OtherDriverPaymentReport(APIView):
-    # permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    # permission_basename = 'otherDriverPayment'
-
-    def get(self, request):
-        data = request.GET
-        remittance = get_object_or_404(Remittance.objects.hasAccess('get'), pk=data.get('remittance'))
-
-        ladings = Lading.objects.hasAccess('get', 'lading').filter(remittance=remittance)
-
-        # put accounts data
-        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
-
-        return Response({
-            'ladings': LadingListRetrieveSerializer(ladings, many=True).data,
-            'imprests': ImprestListRetrieveSerializer(imprests, many=True).data,
-        })

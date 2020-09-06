@@ -1,11 +1,12 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
+from _dashtbashi.report_views import RemittanceReportView, OtherDriverPaymentReport, LadingBillSeriesListView
 from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, AssociationModelView, \
     RemittanceModelView, RemittanceByPositionView, LadingModelView, LadingByPositionView, RemittanceByCodeView, \
     LadingBillSeriesModelView, LadingBillSeriesByPositionView, RevokeLadingBillNumber, OilCompanyLadingModelView, \
     OilCompanyLadingByPositionView, OtherDriverPaymentModelView, ConfirmRemittance, ConfirmLading, \
-    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentReport, OtherDriverPaymentByPositionView
+    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentByPositionView
 
 router = DefaultRouter()
 router.register('drivers', DriverModelView, base_name='drivers')
@@ -40,6 +41,8 @@ urlpatterns += [
     url(r'^oilCompanyLadings/(?P<pk>[0-9]+)/confirm/$', ConfirmOilCompanyLading.as_view(), name=''),
     url(r'^otherDriverPayments/(?P<pk>[0-9]+)/confirm/$', ConfirmOtherDriverPayment.as_view(), name=''),
 
-    url(r'^otherDriverPaymentsReport$', OtherDriverPaymentReport.as_view(), name=''),
+    url(r'^report/otherDriverPayments$', OtherDriverPaymentReport.as_view(), name=''),
+    url(r'^report/remittances/$', RemittanceReportView.as_view()),
+    url(r'^report/ladingBillSeriesList/$', LadingBillSeriesListView.as_view()),
 
 ]
