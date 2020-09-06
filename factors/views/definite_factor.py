@@ -9,9 +9,8 @@ from accounts.accounts.models import Account
 from accounts.defaultAccounts.models import DefaultAccount
 from factors.models import Factor, FactorItem
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_current_user
 from sanads.models import clearSanad, Sanad, newSanadCode
-from wares.models import WareInventory, Ware
+from wares.models import WareInventory
 
 
 class DefiniteFactor(APIView):

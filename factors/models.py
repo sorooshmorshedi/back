@@ -545,3 +545,16 @@ class Adjustment(BaseModel):
             ('updateOwn.adjustment', 'ویرایش تعدیل های خود'),
             ('deleteOwn.adjustment', 'حذف تعدیل های خود'),
         )
+
+
+def get_factor_permission_basename(factor_type):
+    base_codename = ''
+    if factor_type == Factor.BUY:
+        base_codename = 'buy'
+    elif factor_type == Factor.SALE:
+        base_codename = 'sale'
+    elif factor_type == Factor.BACK_FROM_BUY:
+        base_codename = 'backFromBuy'
+    elif factor_type == Factor.BACK_FROM_SALE:
+        base_codename = 'backFromSale'
+    return "{}Factor".format(base_codename)
