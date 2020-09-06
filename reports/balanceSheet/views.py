@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from accounts.accounts.models import AccountType, Account
 from accounts.accounts.serializers import TypeReportAccountSerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.exports import get_xlsx_response
 
 from reports.filters import get_account_sanad_items_filter
 
@@ -30,8 +31,7 @@ class BalanceSheetView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.balanceSheetReport'
 
-    def get(self, request):
-        # print(len(connection.queries))
+    def get_data(self, request):
         res = {}
         dateFilter = get_account_sanad_items_filter(request)
 
@@ -118,6 +118,95 @@ class BalanceSheetView(APIView):
             'name': 'جمع بدهی ها و حقوق صاحبان سهام',
             'remain': remain
         }
-        # print(len(connection.queries))
 
+        return res
+
+    def get(self, request):
+        res = self.get_data(request)
         return Response(res)
+
+
+class BalanceSheetExportView(BalanceSheetView):
+    def get(self, request, **kwargs):
+        data = self.get_data(request)
+
+        def r(key):
+            return [
+                data[key]['name'],
+                data[key]['remain']
+            ]
+
+        rows = [[
+            "دارایی ها",
+            "",
+            "بدهی ها و حقوق صاحبان سهام",
+            ""
+        ], [
+            "دارایی های جاری",
+            "",
+            "بدهی های جاری",
+            "",
+        ], [
+            *r('cacheAndBank'),
+            *r('businessAccountsAndPayableDocuments'),
+        ], [
+            *r('shortTimeInvestments'),
+            *r('otherAccountsAndPayableDocuments'),
+        ], [
+            *r('commercialAccountsAndReceivables'),
+            *r('prepayments'),
+        ], [
+            *r('otherAccountsAndReceivables'),
+            *r('saveTypes'),
+        ], [
+            *r('inventories'),
+            *r('paidDividends'),
+        ], [
+            *r('ordersAndPrepayments'),
+            *r('receivableFunds'),
+        ], [
+            *r('totalCurrentAssets'),
+            *r('totalCurrentDebt'),
+        ], [
+            "دارایی های غیر جاری",
+            "",
+            "بدهی های غیر جاری",
+            "",
+        ], [
+            *r('evidentFixedAssets'),
+            *r('longtermAccountsAndPayableDocuments'),
+        ], [
+            *r('notEvidentAssets'),
+            *r('longtermReceivableFunds'),
+        ], [
+            *r('longTimeInvestments'),
+            *r('savedEndingServiceBenefits'),
+        ], [
+            *r('otherAssets'),
+            *r('totalNotCurrentDebt'),
+        ], [
+            *r('totalNotCurrentAssets'),
+            *r('totalDebt'),
+        ], [
+            *r('totalAssets'),
+            "حقوق صاحبان سهام",
+            ""
+        ], [
+            "", "",
+            *r('fund'),
+        ], [
+            "", "",
+            *r('savings'),
+        ], [
+            "", "",
+            *r('accumulatedProfit'),
+        ], [
+            "", "",
+            *r('equitiesSum'),
+        ], [
+            "", "",
+            *r('totalDebtsAndEquities'),
+        ],
+        ]
+
+        return get_xlsx_response('Balance Sheet', rows)

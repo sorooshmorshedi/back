@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from cheques.views import get_cheque_permission_basename
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
-from factors.views.factorViews import get_factor_permission_basename
+from factors.models import get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *
@@ -96,7 +96,11 @@ class FactorListView(generics.ListAPIView):
 
     @property
     def permission_codename(self):
-        return "get.{}".format(get_factor_permission_basename(self.request.GET.get('type')))
+        return "get.{}".format(get_factor_permission_basename(self.type))
+
+    @property
+    def type(self):
+        return self.request.GET.get('type')
 
     serializer_class = FactorListCreateUpdateSerializer
     filterset_class = FactorFilter
@@ -104,7 +108,10 @@ class FactorListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Factor.objects.hasAccess('get').prefetch_related('items').prefetch_related('account').all()
+        return Factor.objects.hasAccess(
+            'get',
+            permission_basename=get_factor_permission_basename(self.type)
+        ).prefetch_related('items').prefetch_related('account').all()
 
 
 class TransferListView(generics.ListAPIView):
