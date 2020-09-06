@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Sum
+from django.db.models.aggregates import Max
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
@@ -319,28 +320,13 @@ class Factor(BaseModel, ConfirmationMixin):
             return None
 
     @staticmethod
-    def newCodes(factor_type=None):
-        codes = {}
-        for type in Factor.FACTOR_TYPES:
-            type = type[0]
-            if factor_type:
-                if type != factor_type:
-                    continue
-
-            codes[type] = {}
-            try:
-                last_factor = Factor.objects.inFinancialYear() \
-                    .filter(type=type, is_definite=1).latest('code')
-                codes[type]['code'] = last_factor.code + 1
-                codes[type]['last_id'] = last_factor.pk
-            except:
-                codes[type]['code'] = 1
-                codes[type]['last_id'] = 0
-
-        if factor_type:
-            return codes[factor_type]['code']
+    def new_code(factor_type):
+        code = Factor.objects.filter(type=factor_type).aggregate(Max('code'))['code__max']
+        if code:
+            code += 1
         else:
-            return codes
+            code = 1
+        return code
 
     @property
     def is_last_definite_factor(self):

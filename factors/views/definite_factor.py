@@ -38,6 +38,7 @@ class DefiniteFactor(APIView):
         clearSanad(sanad)
 
         sanad.is_auto_created = True
+        factor.code = None
         factor.is_definite = False
         factor.definition_date = None
         factor.save()
@@ -64,6 +65,8 @@ class DefiniteFactor(APIView):
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
+        factor.code = Factor.new_code(factor_type=factor.type)
+        factor.save()
 
         DefiniteFactor.updateFactorInventory(factor)
 

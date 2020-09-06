@@ -89,8 +89,7 @@ class FactorModelView(viewsets.ModelViewSet):
         serializer = FactorCreateUpdateSerializer(data=factor_data)
         serializer.is_valid(raise_exception=True)
         serializer.save(
-            financial_year=user.active_financial_year,
-            code=Factor.newCodes(factor_type=factor_data.get('type'))
+            financial_year=user.active_financial_year
         )
 
         factor = serializer.instance
