@@ -81,7 +81,9 @@ class LadingBillSeriesListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
     filterset_class = LadingBillSeriesFilter
     ordering_fields = '__all__'
-    queryset = LadingBillSeries.objects.hasAccess('get').all()
+
+    def get_queryset(self):
+        return LadingBillSeries.objects.hasAccess('get').all()
 
 
 class LadingsReportView(generics.ListAPIView):
@@ -93,7 +95,9 @@ class LadingsReportView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
     filterset_class = LadingFilter
     ordering_fields = '__all__'
-    queryset = Lading.objects.hasAccess('get').all()
+
+    def get_queryset(self):
+        return Lading.objects.hasAccess('get').all()
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -126,4 +130,5 @@ class OilCompanyLadingReportView(generics.ListAPIView):
     filterset_class = OilCompanyLadingFilter
     ordering_fields = '__all__'
 
-    queryset = OilCompanyLading.objects.hasAccess('get').all()
+    def get_queryset(self):
+        return OilCompanyLading.objects.hasAccess('get').all()
