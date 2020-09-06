@@ -2,7 +2,7 @@ import django_filters
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
-from _dashtbashi.models import LadingBillSeries, Remittance, Lading
+from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading
 from helpers.filters import BASE_FIELD_FILTERS
 
 
@@ -13,6 +13,15 @@ class LadingFilter(filters.FilterSet):
             'driving': ['exact'],
             'remittance': ['exact'],
             'is_paid': ['exact'],
+            'id': BASE_FIELD_FILTERS,
+            'remittance__code': BASE_FIELD_FILTERS,
+            'origin__name': ['exact', 'icontains'],
+            'destination__name': ['exact', 'icontains'],
+            'contractor__name': ['exact', 'icontains'],
+            'ware__name': BASE_FIELD_FILTERS,
+            'driving__driver__name': BASE_FIELD_FILTERS,
+            'billNumber__number': BASE_FIELD_FILTERS,
+            'bill_price': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -48,6 +57,21 @@ class RemittanceFilter(filters.FilterSet):
             'origin__name': ['exact', 'icontains'],
             'destination__name': ['exact', 'icontains'],
             'contractor__name': ['exact', 'icontains'],
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class OilCompanyLadingFilter(filters.FilterSet):
+    class Meta:
+        model = OilCompanyLading
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+            'export_date': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {

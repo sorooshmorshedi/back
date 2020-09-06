@@ -198,6 +198,7 @@ class Car(BaseModel):
             account = Account.objects.create(
                 name=self.car_number_str,
                 parent=parent_account,
+                type=parent_account.type,
                 code=parent_account.get_new_child_code(),
                 level=Account.TAFSILI,
                 financial_year=self.financial_year,

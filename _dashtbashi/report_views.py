@@ -5,14 +5,33 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter
-from _dashtbashi.models import Remittance, Lading, LadingBillSeries
+from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, LadingFilter, OilCompanyLadingFilter
+from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading
 from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListRetrieveSerializer, \
-    LadingBillSeriesSerializer
+    LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import add_sum
 from imprests.serializers import ImprestListRetrieveSerializer
 from transactions.models import Transaction
+
+
+class OtherDriverPaymentReport(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'otherDriverPayment'
+
+    def get(self, request):
+        data = request.GET
+        remittance = get_object_or_404(Remittance.objects.hasAccess('get'), pk=data.get('remittance'))
+
+        ladings = Lading.objects.hasAccess('get', 'lading').filter(remittance=remittance)
+
+        # put accounts data
+        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
+
+        return Response({
+            'ladings': LadingListRetrieveSerializer(ladings, many=True).data,
+            'imprests': ImprestListRetrieveSerializer(imprests, many=True).data,
+        })
 
 
 class RemittanceReportView(generics.ListAPIView):
@@ -53,25 +72,6 @@ class RemittanceReportView(generics.ListAPIView):
         return response
 
 
-class OtherDriverPaymentReport(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_basename = 'otherDriverPayment'
-
-    def get(self, request):
-        data = request.GET
-        remittance = get_object_or_404(Remittance.objects.hasAccess('get'), pk=data.get('remittance'))
-
-        ladings = Lading.objects.hasAccess('get', 'lading').filter(remittance=remittance)
-
-        # put accounts data
-        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
-
-        return Response({
-            'ladings': LadingListRetrieveSerializer(ladings, many=True).data,
-            'imprests': ImprestListRetrieveSerializer(imprests, many=True).data,
-        })
-
-
 class LadingBillSeriesListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'ladingBillSeries'
@@ -82,3 +82,48 @@ class LadingBillSeriesListView(generics.ListAPIView):
     filterset_class = LadingBillSeriesFilter
     ordering_fields = '__all__'
     queryset = LadingBillSeries.objects.hasAccess('get').all()
+
+
+class LadingsReportView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'lading'
+
+    serializer_class = LadingListRetrieveSerializer
+
+    pagination_class = LimitOffsetPagination
+    filterset_class = LadingFilter
+    ordering_fields = '__all__'
+    queryset = Lading.objects.hasAccess('get').all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            data = serializer.data
+            response = self.get_paginated_response(data)
+        else:
+            response = Response({})
+
+        sum_fields = [
+            'contractor_price',
+            'fare_price',
+            'bill_price'
+        ]
+        add_sum(response, sum_fields, queryset, page)
+
+        return response
+
+
+class OilCompanyLadingReportView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'oilCompanyLading'
+
+    serializer_class = OilCompanyLadingListRetrieveSerializer
+
+    pagination_class = LimitOffsetPagination
+    filterset_class = OilCompanyLadingFilter
+    ordering_fields = '__all__'
+
+    queryset = OilCompanyLading.objects.hasAccess('get').all()
