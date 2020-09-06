@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "financial_year": 1,
-      "name": "\u0634\u0628",
+      "name": "عدد",
       "explanation": null
     }
   },
@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
       "financial_year": 1,
-      "name": "\u0646\u0641\u0631",
+      "name": "کیلو",
       "explanation": null
     }
   },
@@ -22,43 +22,7 @@
     "pk": 3,
     "fields": {
       "financial_year": 1,
-      "name": "\u0639\u062f\u062f",
-      "explanation": null
-    }
-  },
-  {
-    "model": "wares.unit",
-    "pk": 4,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06a9\u06cc\u0644\u0648",
-      "explanation": null
-    }
-  },
-  {
-    "model": "wares.unit",
-    "pk": 5,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06af\u0631\u0645",
-      "explanation": null
-    }
-  },
-  {
-    "model": "wares.unit",
-    "pk": 6,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u067e\u0631\u0633",
-      "explanation": null
-    }
-  },
-  {
-    "model": "wares.unit",
-    "pk": 7,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0644\u06cc\u0648\u0627\u0646",
+      "name": "کارتن 24 تایی",
       "explanation": null
     }
   },
@@ -67,7 +31,7 @@
     "pk": 1,
     "fields": {
       "financial_year": 1,
-      "name": "\u0647\u062a\u0644 \u0639\u0645\u0627\u0631\u062a \u0647\u0641\u062a \u0631\u0646\u06af",
+      "name": "انبار یک",
       "explanation": null
     }
   },
@@ -76,7 +40,7 @@
     "pk": 2,
     "fields": {
       "financial_year": 1,
-      "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
+      "name": "نبار دو",
       "explanation": ""
     }
   },
@@ -85,26 +49,8 @@
     "pk": 3,
     "fields": {
       "financial_year": 1,
-      "name": "\u0631\u0633\u062a\u0648\u0631\u0627\u0646",
+      "name": "انبار سه",
       "explanation": null
-    }
-  },
-  {
-    "model": "wares.warehouse",
-    "pk": 4,
-    "fields": {
-      "financial_year": 1,
-      "name": "a",
-      "explanation": "ha"
-    }
-  },
-  {
-    "model": "wares.warehouse",
-    "pk": 5,
-    "fields": {
-      "financial_year": 1,
-      "name": "b",
-      "explanation": "ha"
     }
   },
   {
@@ -112,7 +58,7 @@
     "pk": 1,
     "fields": {
       "financial_year": 1,
-      "name": "\u0627\u062a\u0627\u0642 \u0647\u0627",
+      "name": "ماهیت یک",
       "explanation": null,
       "code": "10",
       "parent": null,
@@ -124,7 +70,7 @@
     "pk": 2,
     "fields": {
       "financial_year": 1,
-      "name": "\u0627\u062a\u0627\u0642 \u0647\u0627",
+      "name": "گروه یک",
       "explanation": null,
       "code": "1001",
       "parent": 1,
@@ -136,7 +82,7 @@
     "pk": 3,
     "fields": {
       "financial_year": 1,
-      "name": "\u062f\u0648 \u062a\u062e\u062a\u0647",
+      "name": "دسته بندی یک",
       "explanation": null,
       "code": "100101",
       "parent": 2,
@@ -148,238 +94,10 @@
     "pk": 4,
     "fields": {
       "financial_year": 1,
-      "name": "\u0633\u0647 \u062a\u062e\u062a\u0647",
+      "name": "دسته بندی دو",
       "explanation": null,
       "code": "100102",
       "parent": 2,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 5,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647",
-      "explanation": null,
-      "code": "100103",
-      "parent": 2,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 6,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062a\u0634\u06a9 \u0627\u0638\u0627\u0641\u0647 \u062f\u0631 \u0627\u062a\u0627\u0642 \u0647\u0627",
-      "explanation": null,
-      "code": "100104",
-      "parent": 2,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 7,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
-      "explanation": null,
-      "code": "12",
-      "parent": null,
-      "level": 0
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 8,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0648\u0634\u06cc\u062f\u0646\u06cc",
-      "explanation": null,
-      "code": "1201",
-      "parent": 7,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 9,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0648\u0634\u0627\u0628\u0647",
-      "explanation": null,
-      "code": "120101",
-      "parent": 8,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 10,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
-      "explanation": null,
-      "code": "1202",
-      "parent": 7,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 11,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u06cc\u06cc",
-      "explanation": null,
-      "code": "120201",
-      "parent": 10,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 12,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0647\u0632\u06cc\u0646\u0647",
-      "explanation": null,
-      "code": "13",
-      "parent": null,
-      "level": 0
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 13,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0647\u0632\u06cc\u0646\u0647",
-      "explanation": null,
-      "code": "1301",
-      "parent": 12,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 14,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0647\u0632\u06cc\u0646\u0647",
-      "explanation": null,
-      "code": "130101",
-      "parent": 13,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 15,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0631\u0633\u062a\u0648\u0631\u0627\u0646",
-      "explanation": null,
-      "code": "14",
-      "parent": null,
-      "level": 0
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 16,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0631\u0633\u062a\u0648\u0631\u0627\u0646",
-      "explanation": null,
-      "code": "1401",
-      "parent": 15,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 17,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0647\u0627\u0631",
-      "explanation": null,
-      "code": "140101",
-      "parent": 16,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 18,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0634\u0627\u0645",
-      "explanation": null,
-      "code": "140102",
-      "parent": 16,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 19,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0648\u0634\u06cc\u062f\u0646\u06cc",
-      "explanation": null,
-      "code": "140103",
-      "parent": 16,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 20,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0634\u0631\u0628\u062a\u062e\u0627\u0646\u0647",
-      "explanation": null,
-      "code": "140104",
-      "parent": 16,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 21,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u0633\u0631 \u0648 \u0633\u0627\u0644\u0627\u062f",
-      "explanation": null,
-      "code": "140105",
-      "parent": 16,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 22,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u0648\u062a\u062e\u062a\u0647",
-      "explanation": null,
-      "code": "1002",
-      "parent": 1,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 23,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u0648\u062a\u062e\u062a\u0647 \u06a9\u0627\u0645\u0644",
-      "explanation": null,
-      "code": "100201",
-      "parent": 22,
       "level": 2
     }
   },
@@ -388,10 +106,9 @@
     "pk": 1,
     "fields": {
       "financial_year": 1,
-      "name": "\u062f\u0648 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644",
+      "name": "کالای یک",
       "code": "100101001",
       "barcode": "12",
-      "explanation": "asdf",
       "isDisabled": false,
       "price": "2100000",
       "pricingType": "f",
@@ -413,7 +130,7 @@
     "pk": 2,
     "fields": {
       "financial_year": 1,
-      "name": "\u062f\u0648 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
+      "name": "کالای دو",
       "code": "100101002",
       "barcode": null,
       "explanation": null,
@@ -438,7 +155,7 @@
     "pk": 3,
     "fields": {
       "financial_year": 1,
-      "name": "\u0633\u0647 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u0633\u06cc\u0646\u06af\u0644",
+      "name": "کالای سه",
       "code": "100102001",
       "barcode": null,
       "explanation": null,
@@ -451,7 +168,7 @@
       "maxInventory": null,
       "created_at": "1398-12-20",
       "updated_at": "1397-12-28",
-      "category": 4,
+      "category": 3,
       "warehouse": 1,
       "unit": 1,
       "supplier": null,
@@ -463,7 +180,7 @@
     "pk": 4,
     "fields": {
       "financial_year": 1,
-      "name": "\u0633\u0647 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u0633\u06cc\u0646\u06af\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
+      "name": "کالای چهار",
       "code": "100102002",
       "barcode": null,
       "explanation": null,
@@ -481,806 +198,6 @@
       "unit": 1,
       "supplier": null,
       "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 5,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u062f\u0648 \u0633\u06cc\u0646\u06af\u0644",
-      "code": "100103001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "4000000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-28",
-      "updated_at": "1397-12-28",
-      "category": 5,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 6,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0647\u0627\u0631 \u062a\u062e\u062a\u0647 \u062f\u0628\u0644 \u0648 \u062f\u0648 \u0633\u06cc\u0646\u06af\u0644 - \u0633\u0631\u0648\u06cc\u0633 \u0645\u0634\u062a\u0631\u06a9",
-      "code": "100103002",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "3200000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-28",
-      "updated_at": "1397-12-28",
-      "category": 5,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 7,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0648\u0634\u0627\u0628\u0647 \u067e\u067e\u0633\u06cc",
-      "code": "120101001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "15000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-28",
-      "updated_at": "1397-12-28",
-      "category": 9,
-      "warehouse": 2,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 8,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062e\u06cc\u0627\u0631\u0634\u0648\u0631 \u06af\u0627\u0644\u0646\u06cc",
-      "code": "120201001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "380000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-28",
-      "updated_at": "1397-12-28",
-      "category": 11,
-      "warehouse": 2,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 9,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0644\u0648 \u062e\u0648\u0631\u0634\u062a \u0631\u0648\u0632",
-      "code": "140101001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "180000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 10,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06a9\u0644\u0645 \u067e\u0644\u0648 \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "140101002",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "200000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 11,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06a9\u062a\u0647 \u06af\u0648\u062c\u0647",
-      "code": "140101003",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "200000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 12,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u0645\u067e\u062e\u062a \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "140101004",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "200000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 13,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0644\u0648 \u06a9\u0628\u0627\u0628 \u062a\u0627\u0628\u0647 \u0627\u06cc",
-      "code": "140101005",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "350000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 14,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u06cc\u0632\u06cc \u0633\u0646\u06af\u06cc",
-      "code": "140101006",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "350000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 17,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 15,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062f\u0648 \u067e\u06cc\u0627\u0632\u0647 \u0622\u0644\u0648",
-      "code": "140102001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "100000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 18,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 16,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06a9\u0634\u06a9 \u0628\u0627\u062f\u0645\u062c\u0627\u0646",
-      "code": "140102002",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "100000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 18,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 17,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u06a9\u0648\u06a9\u0648 \u0633\u0628\u0632\u06cc",
-      "code": "140102003",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "150000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 18,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 18,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062e\u0648\u0631\u0627\u06a9 \u06a9\u0628\u0627\u0628 \u062a\u0627\u0628\u0647 \u0627\u06cc",
-      "code": "140102004",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "260000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 18,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 19,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0639\u062f\u0633\u06cc",
-      "code": "140102005",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "100000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 18,
-      "warehouse": 3,
-      "unit": 6,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 20,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062d\u0644\u0648\u0627 \u0632\u0639\u0641\u0631\u0627\u0646\u06cc",
-      "code": "140105001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "50000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 21,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0646\u0627\u0646 \u067e\u0646\u06cc\u0631 \u0633\u0628\u0632\u06cc",
-      "code": "140105002",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "70000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 22,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0633\u0627\u0644\u0627\u062f \u0634\u06cc\u0631\u0627\u0632\u06cc",
-      "code": "140105003",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 23,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0633\u0627\u0644\u0627\u062f \u0641\u0635\u0644",
-      "code": "140105004",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "70000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 24,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0645\u0627\u0633\u062a  \u0648 \u062e\u06cc\u0627\u0631",
-      "code": "140105005",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 25,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062a\u0631\u0634\u06cc \u0628\u0627\u062f\u0645\u062c\u0627\u0646",
-      "code": "140105006",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 21,
-      "warehouse": 3,
-      "unit": 3,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 27,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0627\u06cc \u0633\u06cc\u0627\u0647",
-      "code": "140104001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "20000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 28,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0686\u0627\u06cc \u0632\u0639\u0641\u0631\u0627\u0646",
-      "code": "140104002",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "25000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 29,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0639\u0631\u0642 \u0628\u06cc\u062f\u0645\u0634\u06a9 \u0646\u0633\u062a\u0631\u0646 \u0628\u0627 \u062e\u0627\u06a9\u0634\u06cc\u0631",
-      "code": "140104003",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 30,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0639\u0631\u0642 \u0628\u0647\u0627\u0631 \u0646\u0627\u0631\u0646\u062c",
-      "code": "140104004",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 31,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0634\u0631\u0628\u062a \u0622\u0644\u0628\u0627\u0644\u0648/\u0628\u0647 \u0644\u06cc\u0645\u0648/\u0622\u0628\u0644\u06cc\u0645\u0648/\u0633\u06a9\u0646\u062c\u0628\u06cc\u0646",
-      "code": "140104005",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "40000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 32,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0633\u06a9\u0646\u062c\u0628\u06cc\u0646 \u062e\u06cc\u0627\u0631",
-      "code": "140104006",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "60000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1397-12-29",
-      "updated_at": "1397-12-29",
-      "category": 20,
-      "warehouse": 3,
-      "unit": 7,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 33,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0627\u062a\u0627\u0642 \u0644\u0628 \u0622\u0628",
-      "code": "100101003",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "2000000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-12-20",
-      "updated_at": "1399-01-12",
-      "category": 3,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 34,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u0633\u0646\u06af \u0633\u06cc\u0627\u0647",
-      "code": "100101004",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "500000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-02-02",
-      "updated_at": "1398-01-03",
-      "category": 3,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 35,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062a\u0634\u06a9",
-      "code": "100104001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "1000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-01-09",
-      "updated_at": "1398-01-09",
-      "category": 6,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 36,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062a\u062a\u0633",
-      "code": "100101005",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "1500",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-02-16",
-      "updated_at": "1398-02-16",
-      "category": 3,
-      "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
-      "isService": false
-    }
-  },
-  {
-    "model": "wares.ware",
-    "pk": 37,
-    "fields": {
-      "financial_year": 1,
-      "name": "\u062e\u062f\u0645\u062a \u06cc\u06a9",
-      "code": "100201001",
-      "barcode": null,
-      "explanation": null,
-      "isDisabled": false,
-      "price": "150000",
-      "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-12-17",
-      "updated_at": "1398-12-08",
-      "category": 23,
-      "warehouse": null,
-      "unit": 1,
-      "supplier": null,
-      "isService": true
     }
   }
 ]
