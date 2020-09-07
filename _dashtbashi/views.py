@@ -319,8 +319,6 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
         item_data = data['item']
         payment_data = data['payment']
 
-        payment_data['account'] = 609
-        # payment_data['floatAccount'] = 609
         payment_data['date'] = item_data['date']
         payment_data['type'] = Transaction.PAYMENT
 

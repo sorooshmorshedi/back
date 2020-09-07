@@ -18,3 +18,12 @@
     tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
     sudo cp wkhtmltox/bin/wk* /usr/local/bin/
     sudo apt-get install libxrender1
+
+# Notes
+
+## Sanad
+* after creating / updating sanad you should call `update_values` method to updating `sanad.bed` & `sanad.bes`
+* `clearSanad` make sanad an empty manual sanad and it can be used by user again
+
+## Imprest
+* you should add imprest moein account to imprest default accounts
