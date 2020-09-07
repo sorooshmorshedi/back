@@ -195,6 +195,8 @@ class Transaction(BaseModel, ConfirmationMixin):
                 financial_year=sanad.financial_year
             )
 
+        sanad.update_values()
+
     def delete(self, *args, **kwargs):
         clearSanad(self.sanad)
         return super(Transaction, self).delete(*args, **kwargs)
