@@ -130,8 +130,8 @@ class FactorItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_codename(self):
-        return "get.{}".format(get_factor_permission_basename(self.request.GET.get('type')))
+    def permission_basename(self):
+        return get_factor_permission_basename(self.request.GET.get('type'))
 
     serializer_class = FactorItemListSerializer
     filterset_class = FactorItemFilter
@@ -139,7 +139,7 @@ class FactorItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return FactorItem.objects.hasAccess('get') \
+        return FactorItem.objects.hasAccess('get', self.permission_basename) \
             .prefetch_related('factor__account') \
             .prefetch_related('ware') \
             .prefetch_related('warehouse') \
