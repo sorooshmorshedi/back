@@ -54,7 +54,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = '__all__'
-        read_only_fields = ('financial_year', 'code', 'level')
+        read_only_fields = ('financial_year', 'code', 'level', 'type')
 
     def validate(self, data):
 
@@ -77,9 +77,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = validated_data.copy()
-        account_type = data.get('type', None)
-        if not account_type:
-            data['type'] = data['parent'].type
+        data['type'] = data.get('type', None) or data['parent'].type
 
         return Account.objects.create(**data)
 
