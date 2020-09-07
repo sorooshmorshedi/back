@@ -1,8 +1,10 @@
+from django.db.models.aggregates import Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -103,6 +105,13 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
             serializer.instance.check_account_balance_confirmations()
 
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
+
+    def delete(self, *args, **kwargs):
+        sanad = self.get_object()
+        if sanad.id != Sanad.objects.aggregate(last_id=Max('id'))['last_id']:
+            raise ValidationError("سند غیر قبل حذف می باشد")
+        return super().delete(*args, **kwargs)
+
 
 
 class ReorderSanadsApiView(APIView):

@@ -117,7 +117,7 @@ class SanadItem(BaseModel):
         super(SanadItem, self).save(*args, **kwargs)
 
 
-def clearSanad(sanad):
+def clearSanad(sanad: Sanad):
     if not sanad:
         return
     sanad.explanation = ''
@@ -125,6 +125,8 @@ def clearSanad(sanad):
     sanad.save()
     for item in sanad.items.all():
         item.delete()
+
+    sanad.update_values()
 
 
 def newSanadCode(financial_year=None):
