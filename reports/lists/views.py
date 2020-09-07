@@ -20,10 +20,6 @@ class TransactionListView(generics.ListAPIView):
     def permission_basename(self):
         return get_transaction_permission_basename(self.request.GET.get('type'))
 
-    @property
-    def permission_codename(self):
-        return "get.{}".format(self.permission_basename)
-
     serializer_class = TransactionListSerializer
     filterset_class = TransactionFilter
     ordering_fields = '__all__'
@@ -37,9 +33,9 @@ class ChequeListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
-    def permission_codename(self):
+    def permission_basename(self):
         received_or_paid = self.request.GET.get('received_or_paid')
-        return "get.{}".format(get_cheque_permission_basename(received_or_paid))
+        return get_cheque_permission_basename(received_or_paid)
 
     serializer_class = ChequeListSerializer
     filterset_class = ChequeFilter
@@ -47,7 +43,7 @@ class ChequeListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Cheque.objects.hasAccess('get').all()
+        return Cheque.objects.hasAccess('get', self.permission_basename).all()
 
 
 class ChequebookListView(generics.ListAPIView):
