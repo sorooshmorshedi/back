@@ -27,7 +27,7 @@ class BaseManager(models.Manager):
             permission_basename = self.model._meta.permission_basename
 
         if not permission_basename:
-            raise Exception("Please set permission_basename in {} Meta class".format(self))
+            raise Exception("Please set permission_basename in {} Meta class or pass it to method".format(self))
 
         method = method.upper()
         if method == 'POST':

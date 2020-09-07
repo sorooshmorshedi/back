@@ -69,7 +69,6 @@ class BasicObjectPermission(BasePermission):
 class BasicCRUDPermission(BasicObjectPermission):
 
     def has_permission(self, request, view):
-        return True
         user = request.user
 
         permission_codenames = get_codenames(request, view)
