@@ -162,8 +162,6 @@ class FactorExportView(FactorListView, BaseExportView):
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
 
-        pre_factor = True
-
         form_name = names[factorType]['title']
 
         if pre_factor:
