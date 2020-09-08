@@ -1,5 +1,7 @@
 from django import template
 
+from factors.models import Factor
+
 register = template.Library()
 
 
@@ -22,3 +24,8 @@ def colspan(initial_count, *args):
         if arg:
             count += 1
     return count
+
+
+@register.simple_tag
+def factor_title(factor: Factor):
+    return "{}فاکتور {}".format("پیش " if not factor.is_definite else "", Factor.get_type_label(factor.type))

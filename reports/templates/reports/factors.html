@@ -19,14 +19,14 @@
         </div>
         <div class="row">
             <div class="col-xs-12 text-center" style="font-size: 1.3em">
-                {{ form_name }}
+                {% factor_title factor %}
             </div>
         </div>
 
         <div class="row form-header">
             <div class="col-xs-12 text-left">
                 <span>شماره : </span>
-                <span> {{ factor.code }} </span>
+                <span> {{ factor.code | default:"-" }} </span>
             </div>
             <div class="col-xs-12 text-left">
                 <span>تاریخ : </span>
