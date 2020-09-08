@@ -18,12 +18,13 @@ class DefiniteFactor(APIView):
 
     @property
     def permission_codename(self):
-        if self.request.method.lower() == 'post':
+        if self.request.method.lower() == 'post' and 'item' in self.request.data:
             factor_data = self.request.data['item']
             factor_type = factor_data.get('type')
         else:
-            factor_type = self.get_object().type
+            factor_type = Factor.objects.get(pk=self.kwargs['pk']).type
         from factors.views.factorViews import get_factor_permission_basename
+
         return "definite.".format(get_factor_permission_basename(factor_type))
 
     def post(self, request, pk):
