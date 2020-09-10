@@ -65,8 +65,10 @@ class AccountBalanceView(APIView):
 
     def get_accounts(self, request):
         filters = get_account_sanad_items_filter(request)
+        account_code_starts_with = request.GET.get('account_code_starts_with', '')
 
         accounts = Account.objects.inFinancialYear() \
+            .filter(code__startswith=account_code_starts_with) \
             .annotate(bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0)) \
             .annotate(bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0)) \
             .prefetch_related('floatAccountGroup').prefetch_related('costCenterGroup').prefetch_related('type') \
