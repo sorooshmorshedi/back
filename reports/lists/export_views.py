@@ -156,16 +156,12 @@ class FactorExportView(FactorListView, BaseExportView):
 
         factorType = request.GET.get('type', None)
         summarized = request.GET.get('summarized', 'false') == 'true'
-        pre_factor = request.GET.get('pre_factor', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
 
         form_name = names[factorType]['title']
-
-        if pre_factor:
-            form_name = "پیش {}".format(form_name)
 
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
@@ -179,7 +175,6 @@ class FactorExportView(FactorListView, BaseExportView):
             'summarized': summarized,
             'hide_remain': hide_remain,
             'hide_prices': hide_prices,
-            'pre_factor': pre_factor
         }
         return self.export(request, export_type, *args, **kwargs)
 

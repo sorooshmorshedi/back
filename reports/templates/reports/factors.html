@@ -12,31 +12,39 @@
         {% endif %}
 
     {% if not hide_factor %}
-        <div class="text-center">
-            <h3>
-                {{ company.name }}
-            </h3>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 text-center" style="font-size: 1.3em">
-                {% factor_title factor %}
-            </div>
-        </div>
+        <div class="row mb-5">
+            <div class="col-xs-3">
+                <div class="row form-header">
+                    <div class="col-xs-12 text-right">
+                        <span>عطف : </span>
+                        <span> {{ factor.id }} </span>
+                    </div>
+                    <div class="col-xs-12 text-right">
+                        <span>شماره : </span>
+                        <span> {{ factor.code | default:"-" }} </span>
+                    </div>
+                    <div class="col-xs-12 text-right">
+                        <span>تاریخ : </span>
+                        <span dir="ltr"> {{ factor.date }} </span>
+                    </div>
+                    <div class="col-xs-12 text-right">
+                        <span>ساعت : </span>
+                        <span dir="ltr"> {{ factor.time | date:"G:i" }} </span>
+                    </div>
 
-        <div class="row form-header">
-            <div class="col-xs-12 text-left">
-                <span>شماره : </span>
-                <span> {{ factor.code | default:"-" }} </span>
+                </div>
             </div>
-            <div class="col-xs-12 text-left">
-                <span>تاریخ : </span>
-                <span dir="ltr"> {{ factor.date }} </span>
+            <div class="col-xs-6">
+                <div class="text-center">
+                    <h3>
+                        {{ company.name }}
+                    </h3>
+                </div>
+                <div class="text-center" style="font-size: 1.3em">
+                    {% factor_title factor %}
+                </div>
             </div>
-            <div class="col-xs-12 text-left">
-                <span>ساعت : </span>
-                <span dir="ltr"> {{ factor.time | date:"G:i" }} </span>
-            </div>
-
+            <div class="col-xs-3"></div>
         </div>
 
         <!-- seller in sale factor -->
@@ -46,7 +54,7 @@
                     <span>فروشنده: </span>
                     <span> {{ company.name }} </span>
                 </div>
-                {% if not summarized and not pre_factor %}
+                {% if not summarized %}
                     <div class="col-xs-3">
                         <span> کد اقتصادی: </span>
                         <span> {{ company.eghtesadi_code | default:'-' }} </span>
@@ -54,10 +62,6 @@
                     <div class="col-xs-3">
                         <span> شماره ملی: </span>
                         <span> {{ company.shenase | default:'-' }} </span>
-                    </div>
-                    <div class="col-xs-3">
-                        <span>کد پستی: </span>
-                        <span> {{ company.postal_code | default:'-' }} </span>
                     </div>
                 {% endif %}
                 <div class="col-xs-3">
@@ -80,7 +84,7 @@
                         <span> {{ factor.account }} </span>
                     {% endif %}
                 </div>
-                {% if not summarized and not pre_factor %}
+                {% if not summarized %}
                     <div class="col-xs-3">
                         <span> کد اقتصادی: </span>
                         <span> {{ factor.account.person.eghtesadiCode | default:'-' }} </span>
@@ -88,10 +92,6 @@
                     <div class="col-xs-3">
                         <span> شماره ملی: </span>
                         <span> {{ factor.account.person.meli_code | default:'-' }} </span>
-                    </div>
-                    <div class="col-xs-3">
-                        <span>کد پستی: </span>
-                        <span> {{ factor.account.person.postalCode | default:'-' }} </span>
                     </div>
                 {% endif %}
                 <div class="col-xs-3">
@@ -126,10 +126,6 @@
                     <span> شماره ملی: </span>
                     <span> {{ factor.account.person.meli_code | default:'-' }} </span>
                 </div>
-                <div class="col-xs-3">
-                    <span>بیجک: </span>
-                    <span> {{ factor.bijak | default:'-' }} </span>
-                </div>
             </div>
         {% endif %}
 
@@ -161,7 +157,8 @@
                             <th>جمع</th>
                             <th>تخفیف (مبلغ)</th>
                             <th>تخفیف درصد</th>
-                            <th>جمع کل پس از تخفیف</th>
+
+                            <th>جمع فاکتور</th>
                         {% endif %}
                     </tr>
                     </thead>
@@ -180,55 +177,47 @@
                                 <td>{{ item.value | money }}</td>
                                 <td>{{ item.discountValue | money }}</td>
                                 <td>{{ item.discountPercent }}</td>
+
                                 <td>{{ item.totalValue | money }}</td>
+
                             {% endif %}
                         </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if not hide_prices %}
-                <div class="col-xs-6 col-xs-offset-6">
-                    <table class="table table-bordered table-striped">
-                        <tbody>
+                    {% if not hide_prices %}
                         <tr>
-                            <th>جمع</th>
+                            <th colspan="{% colspan 5 show_warehouse %}">
+                                جمع فاکتور
+                            </th>
                             <td>{{ factor.sum | money }}</td>
-                        </tr>
-                        <tr>
-                            <th>تخفیف</th>
-                            <td>{{ factor.discountSum | money }}</td>
-                        </tr>
-                        <tr>
-                            <th>مبلغ فاکتور پس از تخفیف</th>
-                            <td>{{ factor.sumAfterDiscount | money }}</td>
-                        </tr>
-                        <tr>
-                            <th>مالیات</th>
-                            <td>{{ factor.taxSum | money }}</td>
-                        </tr>
-                        <tr>
-                            <th>مبلغ کل فاکتور</th>
+                            <td colspan="2">{{ factor.discountSum | money }}</td>
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
+                        {% if factor.has_tax %}
+                            <tr>
+                                <th>مالیات</th>
+                                <td>{{ factor.taxSum | money }}</td>
+                            </tr>
+                        {% endif %}
                         {% if not hide_remain %}
                             <tr>
+                                <td colspan="{% colspan 7 show_warehouse factor.has_tax factor.has_tax %}"></td>
                                 <th>{{ factor.remain.before_factor_title }}</th>
                                 <td>{{ factor.remain.before_factor | money }}</td>
                             </tr>
                             <tr>
+                                <td colspan="{% colspan 7 show_warehouse factor.has_tax factor.has_tax %}"></td>
                                 <th>{{ factor.remain.after_factor_title }}</th>
                                 <td>{{ factor.remain.after_factor | money }}</td>
                             </tr>
                         {% endif %}
-                        </tbody>
-                    </table>
-                </div>
-            {% endif %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     {% endif %}
 
-    {% if not hide_prices and not hide_expenses and not pre_factor and factor.expenses.all %}
+    {% if not hide_prices and not hide_expenses and factor.expenses.all %}
         <div class="break-after"></div>
 
         <div class="row form-header">

@@ -40,7 +40,7 @@ class ChequeFilter(filters.FilterSet):
             'date': ['gte', 'lte'],
             'due': ['gte', 'lte'],
             'value': ['exact'],
-            'status': ['exact'],
+            'status': BASE_FIELD_FILTERS,
             'bankName': ['icontains'],
             'type': ['exact'],
             'received_or_paid': ['exact'],
