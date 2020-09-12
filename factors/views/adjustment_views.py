@@ -29,9 +29,7 @@ class AdjustmentModelView(viewsets.ModelViewSet):
 
         serialized = AdjustmentCreateUpdateSerializer(instance=self.get_object(), data=data['adjustment'])
         serialized.is_valid(raise_exception=True)
-        serialized.save(
-            financial_year=request.user.active_financial_year
-        )
+        serialized.save()
 
         adjustment = serialized.instance
 
@@ -41,11 +39,11 @@ class AdjustmentModelView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
 
-        serialized = AdjustmentCreateUpdateSerializer(data=data['adjustment'])
+        serialized = AdjustmentCreateUpdateSerializer(data=data['adjustment'], context={
+            'financial_year': request.user.active_financial_year
+        })
         serialized.is_valid(raise_exception=True)
-        serialized.save(
-            financial_year=request.user.active_financial_year
-        )
+        serialized.save()
 
         adjustment = serialized.instance
 
@@ -55,8 +53,8 @@ class AdjustmentModelView(viewsets.ModelViewSet):
     def delete_object(self):
         instance = self.get_object()
         factor = instance.factor
-        if not factor.is_last_definite_factor:
-            raise ValidationError('تعدیل غیر قابل ویرایش می باشد')
+        if not factor.is_deletable:
+            raise ValidationError('تعدیل غیر قابل حذف می باشد')
         DefiniteFactor.undoDefinition(self.request.user, factor)
         instance.delete()
         factor.delete()

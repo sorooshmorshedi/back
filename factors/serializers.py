@@ -192,11 +192,76 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TransferCreateSerializer(serializers.ModelSerializer):
+class TransferCreateUpdateSerializer(serializers.ModelSerializer):
     items = serializers.ListField()
 
+    class Meta:
+        model = Transfer
+        fields = ('id', 'explanation', 'date', 'items')
+
+    def sync(self, instance: Transfer, validated_data):
+        explanation = validated_data.get('explanation', '')
+        output_factor = instance.output_factor
+        input_factor = instance.input_factor
+
+        input_factor.verify_items(validated_data['items'])
+        output_factor.verify_items(validated_data['items'])
+
+        DefiniteFactor.updateFactorInventory(input_factor, revert=True)
+        DefiniteFactor.updateFactorInventory(output_factor, revert=True)
+
+        input_factor.items.all().delete()
+        output_factor.items.all().delete()
+
+        for item in validated_data['items']:
+            ware = Ware.objects.get(pk=item['ware'])
+            input_warehouse = Warehouse.objects.get(pk=item['input_warehouse'])
+            output_warehouse = Warehouse.objects.get(pk=item['output_warehouse'])
+
+            item_data = {
+                'financial_year': instance.financial_year,
+                'explanation': explanation,
+                'count': item['count'],
+                'fee': 0,
+                'ware': ware,
+            }
+
+            # move ware out
+            output_factor_item = output_factor.items.create(
+                **item_data,
+                warehouse=output_warehouse
+            )
+            fees = WareInventory.decrease_inventory(
+                ware,
+                output_warehouse,
+                Decimal(output_factor_item.count),
+            )
+            output_factor_item.remain_fees = WareInventory.get_remain_fees(ware)
+
+            # move wares in
+            input_factor_item = input_factor.items.create(
+                **item_data,
+                warehouse=input_warehouse
+            )
+            for fee in fees:
+                WareInventory.increase_inventory(ware, input_warehouse, fee['count'], fee['fee'])
+            input_factor_item.remain_fees = WareInventory.get_remain_fees(ware)
+
+        transfer_data = {
+            'input_factor': input_factor,
+            'output_factor': output_factor,
+            'date': validated_data['date'],
+            'explanation': explanation,
+        }
+
+        instance.update(**transfer_data)
+
+        validated_data.pop('items')
+
+        return instance
+
     def create(self, validated_data):
-        financial_year = validated_data['financial_year']
+        financial_year = self.context['financial_year']
         date = validated_data['date']
         explanation = validated_data.get('explanation', '')
         factor_data = {
@@ -205,24 +270,13 @@ class TransferCreateSerializer(serializers.ModelSerializer):
             'explanation': explanation,
             'is_definite': True,
             'definition_date': now(),
-            'time': now()
+            'time': now(),
+            'is_auto_created': True
         }
         input_factor = Factor.objects.create(**factor_data, type=Factor.INPUT_TRANSFER)
         input_factor.save()
         output_factor = Factor.objects.create(**factor_data, type=Factor.OUTPUT_TRANSFER)
         output_factor.save()
-
-        for item in validated_data['items']:
-            item_data = {
-                'financial_year': financial_year,
-                'explanation': explanation,
-                'count': item['count'],
-                'fee': 0,
-                'ware': Ware.objects.get(pk=item['ware'])
-
-            }
-            input_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['input_warehouse']))
-            output_factor.items.create(**item_data, warehouse=Warehouse.objects.get(pk=item['output_warehouse']))
 
         code = Transfer.objects.aggregate(Max('code'))['code__max']
         if code:
@@ -241,11 +295,27 @@ class TransferCreateSerializer(serializers.ModelSerializer):
 
         transfer = Transfer.objects.create(**transfer_data)
 
+        self.sync(transfer, validated_data)
+
         return transfer
 
-    class Meta:
-        model = Transfer
-        fields = ('id', 'financial_year', 'explanation', 'date', 'items')
+    def update(self, instance: Transfer, validated_data):
+        input_factor = instance.input_factor
+        output_factor = instance.output_factor
+
+        date = validated_data['date']
+        explanation = validated_data.get('explanation', '')
+        factor_data = {
+            'date': date,
+            'time': now(),
+            'explanation': explanation,
+        }
+        input_factor.update(**factor_data)
+        output_factor.update(**factor_data)
+
+        self.sync(instance, validated_data)
+
+        return instance
 
 
 class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
@@ -270,49 +340,17 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         model = Adjustment
         exclude = ('financial_year', 'factor', 'code')
 
-    def _update_factor_and_sanad(self, validated_data, factor: Factor = None, sanad: Sanad = None):
+    def sync(self, instance: Adjustment, validated_data):
         user = get_current_user()
         financial_year = user.active_financial_year
+        adjustment_type = instance.type
 
-        adjustment_type = validated_data.get('type')
-        date = validated_data['date']
-        explanation = validated_data.get('explanation', '')
+        # Sync factor
+        factor = instance.factor
+        DefiniteFactor.updateFactorInventory(factor, revert=True)
 
-        factor_data = {
-            'financial_year': financial_year,
-            'date': date,
-            'explanation': explanation,
-            'is_definite': True,
-            'definition_date': now(),
-            'time': now(),
-            'is_auto_created': True
-        }
-        if factor:
-            Factor.objects.filter(pk=factor.id).update(**factor_data)
-            for item in factor.items.all():
-                DefiniteFactor.updateInventory(item, True)
-                item.delete()
-        else:
-            factor = Factor.objects.create(**factor_data, type=adjustment_type)
-            factor.save()
-
-        sanad_data = {
-            'financial_year': financial_year,
-            'date': date,
-            'explanation': explanation,
-            'is_auto_created': True,
-            'code': newSanadCode()
-        }
-        if sanad:
-            clearSanad(sanad)
-        else:
-            print('new sanad ', validated_data)
-            sanad = Sanad.objects.create(**sanad_data)
-            sanad.save()
-
-        items_data = validated_data.get('items')
-        for item in items_data:
-
+        factor_items_data = []
+        for item in validated_data.get('items'):
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
                 try:
@@ -322,17 +360,30 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
                 fee = 0
 
-            item_data = {
+            factor_items_data.append({
                 'financial_year': financial_year,
-                'explanation': explanation,
                 'count': item['count'],
                 'fee': fee,
                 'ware': Ware.objects.get(pk=item['ware']),
                 'warehouse': Warehouse.objects.get(pk=item['warehouse'])
-            }
+
+            })
+
+        factor.verify_items(list(map(lambda o: {
+            'count': o['count'],
+            'fee': o['fee'],
+            'ware': o['ware'].id,
+        }, factor_items_data)))
+        factor.items.all().delete()
+
+        for item_data in factor_items_data:
             factor.items.create(**item_data)
 
         DefiniteFactor.updateFactorInventory(factor)
+
+        # Sync sanad
+        sanad = instance.sanad
+        clearSanad(sanad)
 
         bed_account = bes_account = None
         if adjustment_type == Factor.INPUT_ADJUSTMENT:
@@ -352,11 +403,33 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
                 bes=item.calculated_value
             )
 
-        return factor, sanad
-
     def create(self, validated_data, **kwargs):
+        financial_year = self.context['financial_year']
         adjustment_type = validated_data.get('type')
-        factor, sanad = self._update_factor_and_sanad(validated_data)
+        date = validated_data['date']
+        explanation = validated_data.get('explanation', '')
+
+        factor_data = {
+            'financial_year': financial_year,
+            'date': date,
+            'explanation': explanation,
+            'is_definite': True,
+            'definition_date': now(),
+            'time': now(),
+            'is_auto_created': True,
+            'type': adjustment_type
+        }
+        factor = Factor.objects.create(**factor_data)
+        factor.save()
+
+        sanad_data = {
+            'financial_year': financial_year,
+            'date': date,
+            'explanation': explanation,
+            'is_auto_created': True,
+            'code': newSanadCode()
+        }
+        sanad = Sanad.objects.create(**sanad_data)
 
         code = Adjustment.objects.filter(type=adjustment_type).aggregate(Max('code'))['code__max']
         if code:
@@ -364,12 +437,44 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         else:
             code = 1
 
-        validated_data.pop('items')
-        adjustment = Adjustment.objects.create(**validated_data, factor=factor, sanad=sanad, code=code)
+        adjustment_data = {
+            'type': adjustment_type,
+            'code': code,
+            'date': date,
+            'financial_year': financial_year,
+            'factor': factor,
+            'sanad': sanad,
+            'explanation': explanation
+        }
+        adjustment = Adjustment.objects.create(**adjustment_data)
+
+        self.sync(adjustment, validated_data)
 
         return adjustment
 
     def update(self, instance: Adjustment, validated_data):
-        instance.factor, instance.sanad = self._update_factor_and_sanad(validated_data, instance.factor, instance.sanad)
-        res = super().update(instance, validated_data)
-        return res
+        date = validated_data['date']
+        explanation = validated_data.get('explanation', '')
+
+        factor_data = {
+            'date': date,
+            'explanation': explanation,
+            'time': now(),
+        }
+        instance.factor.update(**factor_data)
+
+        sanad_data = {
+            'date': date,
+            'explanation': explanation,
+        }
+        instance.sanad.update(**sanad_data)
+
+        adjustment_data = {
+            'date': date,
+            'explanation': explanation
+        }
+        instance.update(**adjustment_data)
+
+        self.sync(instance, validated_data)
+
+        return super().update(instance, validated_data)

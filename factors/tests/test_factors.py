@@ -45,7 +45,6 @@ class FactorTest(MTestCase):
                     "discountValue": 0,
                     "discountPercent": 0,
                     "fee": "1600000",
-                    "is_editable": True,
                     "ware": ware.id,
                     "warehouse": 1,
                     "count": "2"

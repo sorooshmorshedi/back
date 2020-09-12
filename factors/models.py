@@ -274,6 +274,48 @@ class Factor(BaseModel, ConfirmationMixin):
         }
         return res
 
+    def verify_items(self, items_data, ids_to_delete=()):
+
+        if self.is_definite:
+
+            # Verify item deletions
+            for item in FactorItem.objects.filter(id__in=ids_to_delete):
+                if not item.is_editable:
+                    raise ValidationError("ردیف غیر قابل حذف می باشد")
+
+            rows_to_verify = items_data.copy()
+
+            for row in rows_to_verify.copy():
+
+                # skip not changed items
+                is_not_changed = False
+                for item in self.items.all():
+                    if (
+                            row['ware'] == item.ware_id
+                            and Decimal(row['count']) == item.count
+                            and Decimal(row.get('fee', 0)) == item.fee
+                    ):
+                        is_not_changed = True
+                        break
+
+                if is_not_changed:
+                    continue
+
+                # Verify new or changed items
+                count = FactorItem.objects.filter(
+                    ware_id=row['ware'],
+                    financial_year=self.financial_year,
+                    factor__is_definite=True,
+                    factor__definition_date__gt=self.definition_date
+                ).count()
+
+                if count == 0:
+                    continue
+
+                raise ValidationError("ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1))
+
+        pass
+
     def sync(self, user, data):
         from factors.serializers import FactorItemSerializer
         from factors.serializers import FactorExpenseSerializer
@@ -301,16 +343,6 @@ class Factor(BaseModel, ConfirmationMixin):
             FactorExpenseSerializer
 
         ).sync()
-
-    def check_inventory(self):
-        for item in self.items.all():
-            ware = item.ware
-            warehouse = item.warehouse
-
-            count = ware.get_inventory_count(warehouse)
-
-            if count < 0:
-                raise ValidationError("موجودی انبار برای کالای {} کافی نیست.".format(ware))
 
     @staticmethod
     def get_first_period_inventory(financial_year=None):
@@ -342,24 +374,7 @@ class Factor(BaseModel, ConfirmationMixin):
             return False
 
     @property
-    def is_output_after_this(self):
-        count = Factor.objects \
-            .filter(financial_year=self.financial_year,
-                    type__in=Factor.OUTPUT_GROUP,
-                    created_at__gte=self.definition_date
-                    ) \
-            .count()
-        return count
-
-    @property
     def is_deletable(self):
-        if self.is_definite:
-            return self.is_last_definite_factor
-        else:
-            return True
-
-    @property
-    def is_editable(self):
         if self.is_definite:
             return self.is_last_definite_factor
         else:
@@ -407,6 +422,14 @@ def get_empty_array():
 
 
 class FactorItem(BaseModel):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initial_ware = self.ware
+        self.initial_warehouse = self.warehouse
+        self.initial_count = self.count
+        self.initial_fee = self.fee
+
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_items')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
@@ -468,20 +491,29 @@ class FactorItem(BaseModel):
     def totalValue(self):
         return self.value - self.discount
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if not self.factor.is_editable:
-            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
+    @property
+    def is_ware_last_definite_factor_item(self):
+        count = FactorItem.objects.filter(
+            ware=self.ware,
+            warehouse=self.warehouse,
+            financial_year=self.financial_year,
+            factor__is_definite=True,
+            factor__definition_date__gt=self.factor.definition_date
+        ).count()
+        return count == 0
 
+    @property
+    def is_editable(self):
+        if self.factor.is_definite:
+            return self.is_ware_last_definite_factor_item
+        return True
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.discountValue = self.discount
         self.calculated_value = 0
         for fee in self.fees:
             self.calculated_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
-
-    def delete(self, *args, **kwargs):
-        if not self.factor.is_editable:
-            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
-        return super().delete(*args, **kwargs)
 
 
 class Transfer(BaseModel):

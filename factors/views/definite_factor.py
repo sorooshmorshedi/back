@@ -41,7 +41,6 @@ class DefiniteFactor(APIView):
         sanad.is_auto_created = True
         factor.code = None
         factor.is_definite = False
-        factor.definition_date = None
         factor.save()
 
         for factor_item in factor.items.all():
@@ -58,7 +57,7 @@ class DefiniteFactor(APIView):
             factor_item.save()
 
     @staticmethod
-    def definiteFactor(user, pk, perform_inventory_check=True, is_confirmed=False):
+    def definiteFactor(user, pk, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
         from factors.views.factorViews import get_factor_permission_basename
         permission_codename = "definite.".format(get_factor_permission_basename(factor.type))
@@ -67,6 +66,7 @@ class DefiniteFactor(APIView):
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
         factor.code = Factor.new_code(factor_type=factor.type)
+        factor.is_definite = True
         factor.save()
 
         DefiniteFactor.updateFactorInventory(factor)
@@ -140,16 +140,8 @@ class DefiniteFactor(APIView):
         )
         DefiniteFactor.submitExpenseSanadItems(factor, explanation)
 
-        factor.definition_date = now()
-        factor.sanad = sanad
-        factor.is_definite = True
-        factor.save()
-
         if not is_confirmed:
             sanad.check_account_balance_confirmations()
-
-        if perform_inventory_check and factor.type in Factor.SALE_GROUP:
-            factor.check_inventory()
 
         return factor
 
@@ -174,9 +166,9 @@ class DefiniteFactor(APIView):
         return sanad
 
     @staticmethod
-    def updateFactorInventory(factor: Factor):
+    def updateFactorInventory(factor: Factor, revert=False):
         for item in factor.items.order_by('id').all():
-            DefiniteFactor.updateInventory(item)
+            DefiniteFactor.updateInventory(item, revert)
 
     @staticmethod
     def updateInventory(item: FactorItem, revert=False):

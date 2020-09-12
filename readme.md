@@ -25,5 +25,12 @@
 * after creating / updating sanad you should call `update_values` method to updating `sanad.bed` & `sanad.bes`
 * `clearSanad` make sanad an empty manual sanad and it can be used by user again
 
+## Factor
+* after creating / updating factor you should call `factor.sync` to sync factor items and factor expenses
+* factor doesn't effect inventory until you definite it or call `DefiniteFactor.updateFactorInventory` (you should call that with `revert=True` before updating a factor)
+* before updating a factor you should verify items by `factor.verify_items` method by passing items data and item ids to delete to it. 
+Verifying means for each item check if it changed or not, if we have newer items on it's ware raise an exception
+* ware inventory validation performs in `increase_inventory` & `decrease_inventory` of `WareInventory`
+
 ## Imprest
 * you should add imprest moein account to imprest default accounts

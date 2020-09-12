@@ -284,7 +284,7 @@ class WareInventory(BaseModel):
             ware_balances = ware_balances.order_by('order')
 
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
-        if current_inventory_count < count:
+        if not revert and current_inventory_count < count:
             raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
                 ware,
                 "{0:g}".format(float(current_inventory_count)),

@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -43,8 +44,7 @@ class FirstPeriodInventoryView(APIView):
     def post(self, request):
 
         if Factor.objects.inFinancialYear().filter(type__in=Factor.SALE_GROUP).count():
-            return Response({'non_field_errors': ['لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید']},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError('لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید')
 
         first_period_inventory = self.set_first_period_inventory(request.data)
 
@@ -69,8 +69,8 @@ class FirstPeriodInventoryView(APIView):
         if not financial_year:
             financial_year = user.active_financial_year
 
-        factor_data = data['factor']
-        factor_items_data = data.get('factor_items')
+        factor_data = data['item']
+        factor_items_data = data.get('items')
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
@@ -96,6 +96,7 @@ class FirstPeriodInventoryView(APIView):
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
+            first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
             serializer = FactorCreateUpdateSerializer(instance=first_period_inventory, data=factor_data)
         else:
             serializer = FactorCreateUpdateSerializer(data=factor_data)

@@ -104,11 +104,10 @@ class FactorModelView(viewsets.ModelViewSet):
 
         factor = self.get_object()
 
-        if not factor.is_editable:
-            raise ValidationError('فاکتور غیر قابل ویرایش می باشد')
-
         data = request.data
         user = request.user
+
+        factor.verify_items(data['items']['items'], data['items']['ids_to_delete'])
 
         is_definite = factor.is_definite
         if is_definite:
@@ -121,8 +120,7 @@ class FactorModelView(viewsets.ModelViewSet):
         factor.sync(user, data)
 
         if is_definite:
-            DefiniteFactor.definiteFactor(user, factor.pk, perform_inventory_check=True,
-                                          is_confirmed=request.data.get('_confirmed'))
+            DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))
 
         self.check_confirmations(request, factor)
 
