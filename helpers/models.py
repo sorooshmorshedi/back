@@ -93,6 +93,11 @@ class BaseModel(models.Model):
 
         return result
 
+    def update(self, **kwargs) -> None:
+        for key in kwargs.keys():
+            setattr(self, key, kwargs[key])
+        self.save()
+
 
 class ConfirmationMixin(models.Model):
     first_confirmed_at = jmodels.jDateTimeField(null=True, default=None)
