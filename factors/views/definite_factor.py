@@ -66,7 +66,11 @@ class DefiniteFactor(APIView):
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
         factor.code = Factor.new_code(factor_type=factor.type)
+
         factor.is_definite = True
+        if not factor.definition_date:
+            factor.definition_date = now()
+
         factor.save()
 
         DefiniteFactor.updateFactorInventory(factor)
