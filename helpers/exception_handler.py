@@ -39,7 +39,9 @@ labels = {
     'issue_date': 'تاریخ صدور',
     'remittance_payment_method': 'روش پرداخت مبلغ حواله',
     'driver_tip_payer': 'پرداخت کننده انعام',
-
+    'lading_number': 'شماره بارگیری',
+    'billNumber': 'شماره بارنامه',
+    'receive_type': 'نحوه دریافت',
 
 }
 
