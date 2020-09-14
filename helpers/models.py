@@ -18,6 +18,9 @@ class BaseManager(models.Manager):
     def hasAccess(self, method, permission_basename=None, use_financial_year=True, financial_year=None):
         user = get_current_user()
 
+        if not user:
+            return super().get_queryset()
+
         if hasattr(self.model, 'financial_year') and use_financial_year:
             queryset = self.inFinancialYear(financial_year)
         else:
@@ -54,6 +57,9 @@ class BaseManager(models.Manager):
         qs = super().get_queryset()
 
         user = get_current_user()
+
+        if not user:
+            return super().get_queryset()
 
         if not financial_year:
             financial_year = user.active_financial_year
