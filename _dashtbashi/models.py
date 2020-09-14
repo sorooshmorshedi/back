@@ -373,6 +373,8 @@ def upload_attachment_to(instance, filename):
 class LadingBillSeries(BaseModel):
     serial = models.CharField(max_length=100)
 
+    date = DATE()
+
     from_bill_number = models.IntegerField()
     to_bill_number = models.IntegerField()
 
