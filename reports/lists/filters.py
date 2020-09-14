@@ -38,7 +38,7 @@ class ChequeFilter(filters.FilterSet):
             'serial': ['icontains'],
             'explanation': ['icontains'],
             'date': ['gte', 'lte'],
-            'due': ['gte', 'lte'],
+            'due': BASE_FIELD_FILTERS,
             'value': ['exact'],
             'status': BASE_FIELD_FILTERS,
             'bankName': ['icontains'],
