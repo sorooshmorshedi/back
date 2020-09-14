@@ -488,8 +488,15 @@ class FactorItem(BaseModel):
             return self.discountValue
 
     @property
+    def tax(self):
+        if self.factor.taxPercent:
+            return self.value * self.factor.taxPercent / 100
+        else:
+            return 0
+
+    @property
     def totalValue(self):
-        return self.value - self.discount
+        return self.value - self.discount + self.tax
 
     @property
     def is_ware_last_definite_factor_item(self):
