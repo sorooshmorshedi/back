@@ -450,7 +450,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     lading_explanation = EXPLANATION()
     lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
 
-    billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='lading')
+    billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='lading', null=True)
     bill_date = jmodels.jDateField()
     bill_price = DECIMAL()
 
