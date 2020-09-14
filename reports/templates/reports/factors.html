@@ -157,7 +157,9 @@
                             <th>جمع</th>
                             <th>تخفیف (مبلغ)</th>
                             <th>تخفیف درصد</th>
-
+                            {% if factor.has_tax %}
+                                <th>مالیات</th>
+                            {% endif %}
                             <th>جمع فاکتور</th>
                         {% endif %}
                     </tr>
@@ -178,6 +180,10 @@
                                 <td>{{ item.discountValue | money }}</td>
                                 <td>{{ item.discountPercent }}</td>
 
+                                {% if factor.has_tax %}
+                                    <td>{{ item.tax | money }}</td>
+                                {% endif %}
+
                                 <td>{{ item.totalValue | money }}</td>
 
                             {% endif %}
@@ -190,22 +196,21 @@
                             </th>
                             <td>{{ factor.sum | money }}</td>
                             <td colspan="2">{{ factor.discountSum | money }}</td>
+
+                            {% if factor.has_tax %}
+                                <td>{{ factor.taxSum | money }}</td>
+                            {% endif %}
+
                             <td>{{ factor.totalSum | money }}</td>
                         </tr>
-                        {% if factor.has_tax %}
-                            <tr>
-                                <th>مالیات</th>
-                                <td>{{ factor.taxSum | money }}</td>
-                            </tr>
-                        {% endif %}
                         {% if not hide_remain %}
                             <tr>
-                                <td colspan="{% colspan 7 show_warehouse factor.has_tax factor.has_tax %}"></td>
+                                <td colspan="{% colspan 6 show_warehouse factor.has_tax factor.has_tax %}"></td>
                                 <th>{{ factor.remain.before_factor_title }}</th>
                                 <td>{{ factor.remain.before_factor | money }}</td>
                             </tr>
                             <tr>
-                                <td colspan="{% colspan 7 show_warehouse factor.has_tax factor.has_tax %}"></td>
+                                <td colspan="{% colspan 6 show_warehouse factor.has_tax factor.has_tax %}"></td>
                                 <th>{{ factor.remain.after_factor_title }}</th>
                                 <td>{{ factor.remain.after_factor | money }}</td>
                             </tr>
