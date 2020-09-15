@@ -54,6 +54,8 @@ class Factor(BaseModel, ConfirmationMixin):
     BACK_FROM_SALE = 'backFromSale'
     FIRST_PERIOD_INVENTORY = 'fpi'
 
+    CONSUMPTION_WARE = 'cw'
+
     INPUT_TRANSFER = 'it'
     OUTPUT_TRANSFER = 'ot'
 
@@ -72,6 +74,7 @@ class Factor(BaseModel, ConfirmationMixin):
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
         (INPUT_TRANSFER, 'وارده از انتقال'),
         (OUTPUT_TRANSFER, 'صادره با انتقال'),
+        (CONSUMPTION_WARE, 'حواله کالای مصرفی'),
         *ADJUSTMENT_TYPES
     )
 
@@ -79,7 +82,7 @@ class Factor(BaseModel, ConfirmationMixin):
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
     INPUT_GROUP = (*BUY_GROUP, INPUT_TRANSFER, INPUT_ADJUSTMENT)
-    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER, OUTPUT_ADJUSTMENT)
+    OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER, OUTPUT_ADJUSTMENT, CONSUMPTION_WARE)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     code = models.IntegerField(blank=True, null=True)
@@ -136,6 +139,12 @@ class Factor(BaseModel, ConfirmationMixin):
             ('delete.backFromBuyFactor', 'حذف فاکتور برگشت از خرید'),
             ('definite.backFromBuyFactor', 'قطعی کردن برگشت از خرید'),
 
+            ('get.consumptionWareFactor', 'مشاهده حواله کالای مصرفی'),
+            ('create.consumptionWareFactor', 'تعریف حواله کالای مصرفی'),
+            ('update.consumptionWareFactor', 'ویرایش حواله کالای مصرفی'),
+            ('delete.consumptionWareFactor', 'حذف حواله کالای مصرفی'),
+            ('definite.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی'),
+
             ('get.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده'),
             ('get.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده'),
 
@@ -158,6 +167,11 @@ class Factor(BaseModel, ConfirmationMixin):
             ('updateOwn.backFromBuyFactor', 'ویرایش فاکتور های برگشت از خرید خود'),
             ('deleteOwn.backFromBuyFactor', 'حذف فاکتور های برگشت از خرید خود'),
             ('definiteOwn.backFromBuyFactor', 'قطعی کردن فاکتور های برگشت از خرید خود'),
+
+            ('getOwn.consumptionWareFactor', 'مشاهده حواله کالای مصرفی خود'),
+            ('updateOwn.consumptionWareFactor', 'ویرایش حواله کالای مصرفی خود'),
+            ('deleteOwn.consumptionWareFactor', 'حذف حواله کالای مصرفی خود'),
+            ('definiteOwn.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی خود'),
 
             ('getOwn.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده خود'),
             ('getOwn.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده خود'),
@@ -184,6 +198,11 @@ class Factor(BaseModel, ConfirmationMixin):
             ('secondConfirm.backFromSaleFromSaleFactor', 'تایید دوم فاکتور برگشت از فروش '),
             ('firstConfirmOwn.backFromSaleFromSaleFactor', 'تایید اول فاکتور های برگشت از فروش خود'),
             ('secondConfirmOwn.backFromSaleFromSaleFactor', 'تایید دوم فاکتور های برگشت از فروش خود'),
+
+            ('firstConfirm.consumptionWareFactor', 'تایید اولحواله کالای مصرفی'),
+            ('secondConfirm.consumptionWareFactor', 'تایید دومحواله کالای مصرفی'),
+            ('firstConfirmOwn.consumptionWareFactor', 'تایید اول حواله کالای مصرفی خود'),
+            ('secondConfirmOwn.consumptionWareFactor', 'تایید دوم حواله کالای مصرفی خود'),
 
         )
 
