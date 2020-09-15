@@ -8,7 +8,7 @@ register = template.Library()
 @register.filter(is_safe=True)
 def money(value):
     try:
-        str_value = '{:,}'.format(value)
+        str_value = '{:,}'.format(float(value))
     except ValueError:
         return value
     if '.' in str_value:
