@@ -26,16 +26,14 @@ class Report(BaseModel):
 
 
 class ExportVerifier(BaseModel):
-    SANAD = 'S'
-    FACTOR_BUY = 'FB'
-    FACTOR_SALE = 'FS'
-    FACTOR_BACK_FROM_BUY = 'FBFB'
-    FACTOR_BACK_FROM_SALE = 'FBFS'
+    SANAD = 's'
+    FACTOR_BUY = 'fb'
+    FACTOR_SALE = 'fs'
+    FACTOR_BACK_FROM_BUY = 'fbfb'
+    FACTOR_BACK_FROM_SALE = 'fbfs'
     CONSUMPTION_WARE_REMITTANCE = 'cwr'
-    RECEIPT = 'RT'
-    REMITTANCE = 'RC'
-    TRANSACTION_RECEIVE = 'TR'
-    TRANSACTION_PAYMENT = 'TP'
+    TRANSACTION_RECEIVE = 'tr'
+    TRANSACTION_PAYMENT = 'tp'
     TRANSFER = 't'
     INPUT_ADJUSTMENT = 'ia'
     OUTPUT_ADJUSTMENT = 'oa'
@@ -46,8 +44,6 @@ class ExportVerifier(BaseModel):
         (FACTOR_SALE, 'فاکتور فروش'),
         (FACTOR_BACK_FROM_BUY, 'فاکتور برگشت از خرید'),
         (FACTOR_BACK_FROM_SALE, 'فاکتور برگشت از فروش'),
-        (RECEIPT, 'رسید'),
-        (REMITTANCE, 'حواله'),
         (TRANSACTION_RECEIVE, 'دریافت'),
         (TRANSACTION_PAYMENT, 'پرداخت'),
         (TRANSFER, 'انتقال'),

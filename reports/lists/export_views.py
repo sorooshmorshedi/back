@@ -159,7 +159,7 @@ class FactorExportView(FactorListView, BaseExportView):
             },
             'cw': {
                 'title': 'حواله کالای مصرفی',
-                'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
+                'verifier_form_name': ExportVerifier.CONSUMPTION_WARE_REMITTANCE
             },
         }
 
