@@ -7,8 +7,10 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from wkhtmltopdf.views import PDFTemplateView
-from factors.serializers import TransferListRetrieveSerializer
-from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView
+
+from factors.models import Factor
+from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
+from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView, AdjustmentListView
 from reports.models import ExportVerifier
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -154,7 +156,11 @@ class FactorExportView(FactorListView, BaseExportView):
             'backFromSale': {
                 'title': 'فاکتور برگشت از فروش',
                 'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
-            }
+            },
+            'cw': {
+                'title': 'حواله کالای مصرفی',
+                'verifier_form_name': ExportVerifier.FACTOR_BACK_FROM_SALE
+            },
         }
 
         factorType = request.GET.get('type', None)
@@ -163,6 +169,11 @@ class FactorExportView(FactorListView, BaseExportView):
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
+
+        if factorType == Factor.CONSUMPTION_WARE:
+            hide_expenses = True
+            hide_remain = True
+            hide_prices = True
 
         form_name = names[factorType]['title']
 
@@ -198,6 +209,32 @@ class TransferExportView(TransferListView, BaseExportView):
         self.context = {
             'form_name': 'انتقال',
             'verifier_form_name': ExportVerifier.TRANSFER
+        }
+        return self.export(request, export_type, *args, **kwargs)
+
+
+class AdjustmentExportView(AdjustmentListView, BaseExportView):
+    filename = 'adjustments.pdf'
+    template_name = 'reports/adjustments.html'
+    context = {}
+    pagination_class = None
+
+    def get_queryset(self):
+        return AdjustmentListRetrieveSerializer(
+            self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs,
+            many=True
+        ).data
+
+    def get(self, request, export_type, *args, **kwargs):
+        adjustment_type = request.GET.get('type', None)
+        if adjustment_type == 'ia':
+            form_name = 'رسید تعدیل انبار'
+        else:
+            form_name = 'حواله تعدیل انبار'
+
+        self.context = {
+            'form_name': form_name,
+            'verifier_form_name': adjustment_type
         }
         return self.export(request, export_type, *args, **kwargs)
 

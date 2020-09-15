@@ -10,7 +10,8 @@ from reports.inventory.views import WareInventoryListView, AllWaresInventoryList
     AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
     AllWarehousesInventoryExportView
 from reports.sanadItems.views import SanadItemListView, SanadItemExportView
-from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView
+from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView, \
+    AdjustmentExportView
 from reports.lists.views import *
 from reports.views import exportTest, ExportVerifiersModelView
 
@@ -34,6 +35,7 @@ urlpatterns += [
     url(r'^lists/factors/(?P<export_type>\S+)', FactorExportView.as_view(), name=''),
     url(r'^lists/transfers/(?P<export_type>\S+)', TransferExportView.as_view(), name=''),
     url(r'^lists/transactions/(?P<export_type>\S+)', TransactionExportView.as_view(), name=''),
+    url(r'^lists/adjustments/(?P<export_type>\S+)', AdjustmentExportView.as_view(), name=''),
 ]
 
 # Reports
