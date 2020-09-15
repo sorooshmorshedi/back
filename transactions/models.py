@@ -126,8 +126,7 @@ class Transaction(BaseModel, ConfirmationMixin):
         return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
     def _createSanad(self, user):
-        sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year,
-                      date=self.date, is_auto_created=True)
+        sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year, date=self.date)
         sanad.save()
         self.sanad = sanad
         self.save()

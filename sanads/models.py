@@ -19,6 +19,8 @@ class Sanad(BaseModel, ConfirmationMixin):
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بدهکار")
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
 
+    is_auto_created = models.BooleanField(default=True)
+
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
 

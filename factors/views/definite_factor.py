@@ -155,7 +155,6 @@ class DefiniteFactor(APIView):
             sanad = Sanad(
                 code=newSanadCode(),
                 date=factor.date,
-                is_auto_created=True,
                 explanation=factor.explanation,
                 financial_year=user.active_financial_year
             )

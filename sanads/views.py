@@ -42,7 +42,8 @@ class SanadListCreate(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(
             financial_year=user.active_financial_year,
-            code=newSanadCode()
+            code=newSanadCode(),
+            is_auto_created=False,
         )
 
         MassRelatedCUD(

@@ -59,7 +59,6 @@ class StatusChange(BaseModel):
                 sanad = Sanad(
                     code=newSanadCode(),
                     date=self.date,
-                    is_auto_created=True,
                     financial_year=user.active_financial_year,
                 )
                 sanad.save()
