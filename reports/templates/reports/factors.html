@@ -192,7 +192,7 @@
                     {% if not hide_prices %}
                         <tr>
                             <th colspan="{% colspan 5 show_warehouse %}">
-                                جمع فاکتور
+                                جمع
                             </th>
                             <td>{{ factor.sum | money }}</td>
                             <td colspan="2">{{ factor.discountSum | money }}</td>
@@ -205,12 +205,12 @@
                         </tr>
                         {% if not hide_remain %}
                             <tr>
-                                <td colspan="{% colspan 6 show_warehouse factor.has_tax factor.has_tax %}"></td>
+                                <td colspan="{% colspan 7 show_warehouse factor.has_tax %}"></td>
                                 <th>{{ factor.remain.before_factor_title }}</th>
                                 <td>{{ factor.remain.before_factor | money }}</td>
                             </tr>
                             <tr>
-                                <td colspan="{% colspan 6 show_warehouse factor.has_tax factor.has_tax %}"></td>
+                                <td colspan="{% colspan 7 show_warehouse factor.has_tax %}"></td>
                                 <th>{{ factor.remain.after_factor_title }}</th>
                                 <td>{{ factor.remain.after_factor | money }}</td>
                             </tr>
