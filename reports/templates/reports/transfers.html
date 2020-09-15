@@ -64,7 +64,7 @@
                             <td>{{ forloop.counter }}</td>
                             <td>{{ item.ware.name }}</td>
                             <td>{{ item.input_warehouse.name }}</td>
-                            <td>{{ item.count }}</td>
+                            <td>{{ item.count | money }}</td>
                             <td>{{ item.ware.unit.name }}</td>
                             <td>{{ item.output_warehouse.name }}</td>
                             <td>{{ item.explanation }}</td>
