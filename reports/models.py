@@ -31,11 +31,14 @@ class ExportVerifier(BaseModel):
     FACTOR_SALE = 'FS'
     FACTOR_BACK_FROM_BUY = 'FBFB'
     FACTOR_BACK_FROM_SALE = 'FBFS'
+    CONSUMPTION_WARE_REMITTANCE = 'cwr'
     RECEIPT = 'RT'
     REMITTANCE = 'RC'
     TRANSACTION_RECEIVE = 'TR'
     TRANSACTION_PAYMENT = 'TP'
     TRANSFER = 't'
+    INPUT_ADJUSTMENT = 'ia'
+    OUTPUT_ADJUSTMENT = 'oa'
 
     FORMS = (
         (SANAD, 'سند'),
@@ -48,6 +51,9 @@ class ExportVerifier(BaseModel):
         (TRANSACTION_RECEIVE, 'دریافت'),
         (TRANSACTION_PAYMENT, 'پرداخت'),
         (TRANSFER, 'انتقال'),
+        (CONSUMPTION_WARE_REMITTANCE, 'حواله کالای مصرفی'),
+        (INPUT_ADJUSTMENT, 'رسید تعدیل انبار'),
+        (OUTPUT_ADJUSTMENT, 'حواله تعدیل انبار'),
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='export_verifiers')
