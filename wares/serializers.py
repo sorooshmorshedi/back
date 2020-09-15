@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from helpers.functions import get_current_user
 from wares.models import Unit, Warehouse, WareLevel, Ware, WareInventory
 
 
@@ -49,7 +51,11 @@ class WareInventoryListSerializer(serializers.ModelSerializer):
 class WareListRetrieveSerializer(WareSerializer):
     unit = UnitSerializer(read_only=True)
     warehouse = WarehouseSerializer(read_only=True)
-    inventory = WareInventoryListSerializer(read_only=True, many=True)
+    inventory = serializers.SerializerMethodField()
+
+    def get_inventory(self, obj: Ware):
+        qs = obj.inventory.filter(financial_year=get_current_user().active_financial_year).all()
+        return WareInventoryListSerializer(qs, many=True).data
 
     class Meta(WareSerializer.Meta):
         pass
