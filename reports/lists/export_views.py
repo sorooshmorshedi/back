@@ -75,7 +75,10 @@ class BaseExportView(PDFTemplateView):
                         bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
                     ), {'type': 'no_errors', 'format': border_fmt})
                 writer.save()
-                return HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+                response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+                response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+                return response
+
         elif export_type == 'pdf':
             return super().get(request, user=request.user, *args, **kwargs)
         else:
