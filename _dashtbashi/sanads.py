@@ -183,45 +183,45 @@ class LadingSanad:
                 'floatAccount': driver.floatAccount,
             })
 
-            # Lading Bill Sanads
+        # Lading Bill Sanads
 
-            bed_account = None
-            bed_float_account = None
-            if lading.receive_type == Lading.CASH:
-                bed_account = DefaultAccount.get('cargoFund').account
-            elif lading.receive_type == Lading.POS:
-                bed_account = DefaultAccount.get('cargoPOS').account
-            elif lading.receive_type == Lading.CREDIT:
-                if car.owner == Car.RAHMAN:
-                    bed_account = DefaultAccount.get('rahmanCargoReceivableAccount').account
-                elif car.owner == Car.RAHIM:
-                    bed_account = DefaultAccount.get('rahimCargoReceivableAccount').account
-                elif car.owner == Car.EBRAHIM:
-                    bed_account = DefaultAccount.get('ebrahimCargoReceivableAccount').account
-                elif car.owner == Car.PARTNERSHIP:
-                    bed_account = DefaultAccount.get('partnershipCargoReceivableAccount').account
-                else:
-                    bed_account = car.payableAccount
-                    bed_float_account = driver.floatAccount
+        bed_account = None
+        bed_float_account = None
+        if lading.receive_type == Lading.CASH:
+            bed_account = DefaultAccount.get('cargoFund').account
+        elif lading.receive_type == Lading.POS:
+            bed_account = DefaultAccount.get('cargoPOS').account
+        elif lading.receive_type == Lading.CREDIT:
+            if car.owner == Car.RAHMAN:
+                bed_account = DefaultAccount.get('rahmanCargoReceivableAccount').account
+            elif car.owner == Car.RAHIM:
+                bed_account = DefaultAccount.get('rahimCargoReceivableAccount').account
+            elif car.owner == Car.EBRAHIM:
+                bed_account = DefaultAccount.get('ebrahimCargoReceivableAccount').account
+            elif car.owner == Car.PARTNERSHIP:
+                bed_account = DefaultAccount.get('partnershipCargoReceivableAccount').account
+            else:
+                bed_account = car.payableAccount
+                bed_float_account = driver.floatAccount
 
-            sanad_items.append({
-                'bed': lading.lading_bill_total_value,
-                'account': bed_account,
-                'floatAccount': bed_float_account,
-            })
+        sanad_items.append({
+            'bed': lading.lading_bill_total_value,
+            'account': bed_account,
+            'floatAccount': bed_float_account,
+        })
 
-            sanad_items.append({
-                'bes': lading.bill_price,
-                'account': DefaultAccount.get('cargoIncome').account,
-            })
-            sanad_items.append({
-                'bes': lading.cargo_tip_price,
-                'account': DefaultAccount.get('cargoEmployeePayableAccount').account,
-            })
-            sanad_items.append({
-                'bes': lading.association_price,
-                'account': DefaultAccount.get('associationPayableAccount').account,
-            })
+        sanad_items.append({
+            'bes': lading.bill_price,
+            'account': DefaultAccount.get('cargoIncome').account,
+        })
+        sanad_items.append({
+            'bes': lading.cargo_tip_price,
+            'account': DefaultAccount.get('cargoEmployeePayableAccount').account,
+        })
+        sanad_items.append({
+            'bes': lading.association_price,
+            'account': DefaultAccount.get('associationPayableAccount').account,
+        })
 
         for sanad_item in sanad_items:
             if sanad_item.get('bed', 0) == sanad_item.get('bes', 0) == 0:
