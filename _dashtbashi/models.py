@@ -274,8 +274,10 @@ class Driving(BaseModel):
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.floatAccountRelation.delete()
-        return super().delete(*args, **kwargs)
+        float_account_relation = self.floatAccountRelation
+        res = super().delete(*args, **kwargs)
+        float_account_relation.delete()
+        return res
 
 
 class Association(BaseModel):
@@ -396,6 +398,7 @@ class LadingBillNumber(BaseModel):
     series = models.ForeignKey(LadingBillSeries, on_delete=models.CASCADE, related_name='numbers')
     number = models.IntegerField()
     is_revoked = models.BooleanField(default=False)
+    revoked_at = DATE(null=True)
 
     class Meta(BaseModel.Meta):
         permission_basename = 'ladingBillNumber'
