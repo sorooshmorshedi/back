@@ -89,7 +89,7 @@ class LadingSanad:
             # 7 & 8
             sanad_items.append({
                 'bed': lading.company_commission_income,
-                'account': DefaultAccount.get('companyCommissionIncomeInOtherTransportationCars').account,
+                'account': lading.contractor,
             })
 
             if car.owner == Car.OTHER:
