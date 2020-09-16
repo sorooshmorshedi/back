@@ -3,14 +3,14 @@ from typing import Type
 from django.db.models import QuerySet
 from django.db.models.query import Prefetch
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
-from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter
+from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter, LadingBillNumberFilter
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OtherDriverPayment
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
@@ -18,7 +18,7 @@ from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCrea
     RemittanceCreateUpdateSerializer, LadingListRetrieveSerializer, LadingCreateUpdateSerializer, \
     LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemSerializer, \
     OilCompanyLadingListRetrieveSerializer, OtherDriverPaymentListRetrieveSerializer, \
-    OtherDriverPaymentCreateUpdateSerializer
+    OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -209,11 +209,11 @@ class LadingByPositionView(APIView):
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
-class RevokeLadingBillNumber(APIView):
+class RevokeLadingBillNumberView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_codename = 'revoke.ladingBillNumber'
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         ladingBillNumber = get_object_or_404(
             LadingBillNumber.objects.hasAccess(request.method),
             pk=request.data.get('id')
@@ -221,8 +221,23 @@ class RevokeLadingBillNumber(APIView):
         request.user.has_object_perm(ladingBillNumber, self.permission_codename, raise_exception=True)
 
         ladingBillNumber.is_revoked = request.data.get('is_revoked')
+        ladingBillNumber.revoked_at = request.data.get('date')
         ladingBillNumber.save()
+
         return Response()
+
+
+class LadingBillNumberListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_codename = 'get.ladingBillSeries'
+    serializer_class = LadingBillNumberListRetrieveSerializer
+
+    ordering_fields = '__all__'
+    filterset_class = LadingBillNumberFilter
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self) -> QuerySet:
+        return LadingBillNumber.objects.all()
 
 
 class OilCompanyLadingModelView(viewsets.ModelViewSet):
@@ -404,5 +419,3 @@ class ConfirmOtherDriverPayment(ConfirmView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_basename = 'otherDriverPayment'
     model = OtherDriverPayment
-
-

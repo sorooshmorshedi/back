@@ -3,12 +3,11 @@ from rest_framework.routers import DefaultRouter
 
 from _dashtbashi.report_views import RemittanceReportView, OtherDriverPaymentReport, LadingBillSeriesListView, \
     LadingsReportView, OilCompanyLadingReportView
-from _dashtbashi.serializers import LadingListRetrieveSerializer
 from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, AssociationModelView, \
     RemittanceModelView, RemittanceByPositionView, LadingModelView, LadingByPositionView, RemittanceByCodeView, \
-    LadingBillSeriesModelView, LadingBillSeriesByPositionView, RevokeLadingBillNumber, OilCompanyLadingModelView, \
+    LadingBillSeriesModelView, LadingBillSeriesByPositionView, RevokeLadingBillNumberView, OilCompanyLadingModelView, \
     OilCompanyLadingByPositionView, OtherDriverPaymentModelView, ConfirmRemittance, ConfirmLading, \
-    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentByPositionView
+    ConfirmOilCompanyLading, ConfirmOtherDriverPayment, OtherDriverPaymentByPositionView, LadingBillNumberListView
 
 router = DefaultRouter()
 router.register('drivers', DriverModelView, base_name='drivers')
@@ -27,7 +26,8 @@ urlpatterns = router.urls
 urlpatterns += [
     url(r'^ladingBillSeries/byPosition$', LadingBillSeriesByPositionView.as_view()),
 
-    url(r'^ladingBillNumbers/revoke$', RevokeLadingBillNumber.as_view()),
+    url(r'^ladingBillNumbers/revoke$', RevokeLadingBillNumberView.as_view()),
+    url(r'^ladingBillNumbers$', LadingBillNumberListView.as_view()),
 
     url(r'^remittances/byPosition$', RemittanceByPositionView.as_view()),
     url(r'^remittances/byCode$', RemittanceByCodeView.as_view()),

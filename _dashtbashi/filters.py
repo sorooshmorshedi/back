@@ -2,7 +2,7 @@ import django_filters
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
-from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading
+from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading, LadingBillNumber
 from helpers.filters import BASE_FIELD_FILTERS
 
 
@@ -38,6 +38,22 @@ class LadingBillSeriesFilter(filters.FilterSet):
             'serial': BASE_FIELD_FILTERS,
             'from_bill_number': BASE_FIELD_FILTERS,
             'to_bill_number': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class LadingBillNumberFilter(filters.FilterSet):
+    class Meta:
+        model = LadingBillNumber
+        fields = {
+            'series__serial': BASE_FIELD_FILTERS,
+            'number': BASE_FIELD_FILTERS,
+            'is_revoked': ['exact'],
+            'revoked_at': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
