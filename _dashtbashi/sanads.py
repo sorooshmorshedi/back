@@ -120,7 +120,8 @@ class LadingSanad:
             if car.owner == Car.RAHMAN:
                 sanad_items.append({
                     'bes': lading.car_income,
-                    'account': DefaultAccount.get('rahmanCarsTransportationIncome').account,
+                    'account': car.incomeAccount,
+                    'floatAccount': driver.floatAccount
                 })
 
             if car.owner == Car.PARTNERSHIP:
