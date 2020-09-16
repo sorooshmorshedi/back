@@ -250,6 +250,7 @@ class Driving(BaseModel):
     class Meta(BaseModel.Meta):
         backward_financial_year = True
         permission_basename = 'driving'
+        unique_together = ('driver', 'car')
         permissions = (
             ('get.driving', 'مشاهده انتصاب راننده به ماشین'),
             ('create.driving', 'تعریف انتصاب راننده به ماشین'),
