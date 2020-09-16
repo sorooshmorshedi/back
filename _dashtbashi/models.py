@@ -462,7 +462,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
                                     blank=True)
     association_price = DECIMAL()
 
-    receive_type = models.CharField(max_length=2, choices=RECEIVE_TYPES)
+    receive_type = models.CharField(max_length=2, choices=RECEIVE_TYPES, null=True, blank=True)
 
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
