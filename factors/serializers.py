@@ -9,6 +9,7 @@ from helpers.functions import get_current_user, get_new_code
 from sanads.models import newSanadCode, clearSanad
 from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
 from transactions.serializers import TransactionSerializerForPayment
+from users.serializers import UserListRetrieveSerializer
 from wares.models import WareInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 from django.utils.timezone import now
@@ -128,6 +129,7 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     items = FactorItemRetrieveSerializer(read_only=True, many=True)
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
+    created_by = UserListRetrieveSerializer(read_only=True)
 
     class Meta:
         model = Factor
