@@ -15,13 +15,14 @@ class LadingSanad:
         sanad = self.lading.sanad
         if not sanad:
             sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.lading.financial_year,
-                                         date=self.lading.lading_date, is_auto_created=True)
+                                         date=self.lading.lading_date)
             lading.sanad = sanad
             lading.save()
             return
         else:
             clearSanad(sanad)
             sanad.is_auto_created = True
+            sanad.save()
 
         sanad_items = []
 
