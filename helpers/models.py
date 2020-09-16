@@ -95,7 +95,12 @@ class BaseModel(models.Model):
         try:
             result = super(BaseModel, self).delete(*args, **kwargs)
         except ProtectedError as e:
-            raise ValidationError('ابتدا داده های وابسته را حذف نمایید')
+            obj = e.protected_objects[0]
+            raise ValidationError({
+                'non_field_error': 'ابتدا داده های وابسته را حذف نمایید',
+                'related_id': obj.id,
+                'related_class': obj.__class__.__name__
+            })
 
         return result
 
