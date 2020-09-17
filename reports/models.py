@@ -22,6 +22,8 @@ class Report(BaseModel):
             ('get.allWarehousesInventoryReport', 'مشاهده کاردکس همه انبار ها'),
 
             ('get.sanadItemsReport', 'مشاهده گزارشات ردیف اسناد (دفتر روزنامه، صورت حساب تفصیلی و دفاتر حساب ها)'),
+
+            ('get.accountsCodingReport', 'مشاهده گزارش کدینگ حساب ها'),
         )
 
 
