@@ -160,6 +160,7 @@ class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
 
 class TransferListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     def get_items(self, obj):
         input_items = obj.input_factor.items.order_by('id') \
@@ -323,6 +324,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
     sanad = SanadListRetrieveSerializer()
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     def get_items(self, obj):
         return FactorItemRetrieveSerializer(

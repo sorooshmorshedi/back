@@ -9,7 +9,7 @@ from imprests.serializers import ImprestListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
-from users.serializers import CitySerializer
+from users.serializers import CitySerializer, UserListRetrieveSerializer
 from wares.serializers import WareListRetrieveSerializer
 
 
@@ -114,6 +114,7 @@ class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
     contractor = AccountRetrieveSerializer(read_only=True)
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     class Meta:
         model = Remittance
@@ -142,6 +143,7 @@ class LadingListRetrieveSerializer(serializers.ModelSerializer):
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
     sanad = SanadSerializer(read_only=True)
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     class Meta:
         model = Lading
@@ -166,6 +168,7 @@ class OilCompanyLadingCreateUpdateSerializer(serializers.ModelSerializer):
 class OilCompanyLadingListRetrieveSerializer(serializers.ModelSerializer):
     items = OilCompanyLadingItemSerializer(read_only=True, many=True)
     car = CarSerializer(read_only=True)
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     class Meta:
         model = OilCompanyLading
@@ -188,6 +191,7 @@ class OtherDriverPaymentListRetrieveSerializer(serializers.ModelSerializer):
     ladings = LadingListRetrieveSerializer(many=True)
     imprests = ImprestListRetrieveSerializer(many=True)
     payment = TransactionListRetrieveSerializer(many=False)
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     class Meta:
         model = OtherDriverPayment

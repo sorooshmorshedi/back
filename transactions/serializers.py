@@ -6,6 +6,7 @@ from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSeria
 from cheques.serializers import ChequeListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import *
+from users.serializers import UserListRetrieveSerializer
 
 
 class TransactionItemCreateUpdateSerializer(serializers.ModelSerializer):
@@ -47,6 +48,7 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
     imprestSettlements = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    created_by = UserListRetrieveSerializer(many=False, read_only=True)
 
     class Meta:
         model = Transaction
