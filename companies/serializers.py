@@ -12,10 +12,7 @@ class FinancialYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialYear
         fields = '__all__'
-
-    def validate(self, attrs):
-        # todo: validate company id
-        return attrs
+        read_only_fields = ('company',)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -23,4 +20,4 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = '__all__'
+        exclude = ('superuser',)

@@ -10,7 +10,7 @@ from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager
 
 
 class Company(BaseModel):
-    name = models.CharField(unique=True, max_length=150)
+    name = models.CharField(max_length=150)
     address1 = models.CharField(max_length=255, blank=True, null=True)
     address2 = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
@@ -25,7 +25,7 @@ class Company(BaseModel):
     shenase = models.CharField(max_length=20, blank=True, null=True)
     explanation = EXPLANATION()
 
-    objects = BaseManager()
+    superuser = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='companies')
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)
@@ -57,7 +57,7 @@ class Company(BaseModel):
 
 
 class FinancialYear(BaseModel):
-    name = models.CharField(unique=True, max_length=150)
+    name = models.CharField(max_length=150)
     start = jmodels.jDateField()
     end = jmodels.jDateField()
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
@@ -80,8 +80,9 @@ class FinancialYear(BaseModel):
         return "{} {} ({})".format(self.company, self.name, self.id)
 
     class Meta(BaseModel.Meta):
+        unique_together = ('company', 'name')
         permission_basename = 'financialYear'
-        ordering = ('-id', )
+        ordering = ('-id',)
         permissions = (
             ('get.financialYear', 'مشاهده سال مالی'),
             ('create.financialYear', 'تعریف سال مالی'),

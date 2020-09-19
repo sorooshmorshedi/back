@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from django.db.models.query_utils import Q
 from rest_framework import status, generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -23,7 +24,9 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
-        return User.objects.hasAccess('get')
+        return User.objects.hasAccess('get').filter(
+            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
+        )
 
 
 class UserCreateView(generics.CreateAPIView):
@@ -34,6 +37,12 @@ class UserCreateView(generics.CreateAPIView):
     def get_queryset(self) -> QuerySet:
         return User.objects.hasAccess('post')
 
+    def perform_create(self, serializer: UserCreateSerializer) -> None:
+        user = self.request.user
+        serializer.save(
+            superuser=user.get_superuser()
+        )
+
 
 class UserUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -41,7 +50,9 @@ class UserUpdateView(generics.UpdateAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_queryset(self) -> QuerySet:
-        return User.objects.hasAccess('put')
+        return User.objects.hasAccess('put').filter(
+            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
+        )
 
 
 class UserDestroyView(generics.DestroyAPIView):
@@ -50,14 +61,21 @@ class UserDestroyView(generics.DestroyAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_queryset(self) -> QuerySet:
-        return User.objects.hasAccess('delete')
+        return User.objects.hasAccess('delete').filter(
+            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
+        )
 
 
 class UserChangePasswordView(APIView):
     permission_classes = (IsAuthenticated, ChangePasswordPermission)
 
     def post(self, request):
-        user = get_object_or_404(User.objects.hasAccess('get', 'user'), pk=request.data.get('user'))
+        user = get_object_or_404(
+            User.objects.hasAccess('get', 'user').filter(
+                Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
+            ),
+            pk=request.data.get('user')
+        )
         request.user.has_object_perm(user, 'changePassword', raise_exception=True)
         user.set_password(request.data.get('password'))
         user.save()

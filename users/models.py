@@ -36,14 +36,19 @@ class MyUserManager(UserManager, BaseManager):
 
 
 class User(AbstractUser, BaseModel):
-    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True)
-    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True)
+    superuser = models.ForeignKey('self', on_delete=models.CASCADE, related_name='users', null=True, blank=True)
+
+    def get_superuser(self):
+        return self.superuser or self
+
+    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True, blank=True)
+    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True, blank=True)
 
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=11)
 
-    roles = models.ManyToManyField(Role, related_name='users')
+    roles = models.ManyToManyField(Role, related_name='users', blank=True)
 
     objects = MyUserManager()
 

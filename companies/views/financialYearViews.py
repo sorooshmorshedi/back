@@ -314,3 +314,44 @@ class FinancialYearModelView(viewsets.ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         return FinancialYear.objects.hasAccess(self.request.method)
+
+    def perform_create(self, serializer: FinancialYearSerializer) -> None:
+        serializer.save(
+            company=self.request.user.active_company
+        )
+        self.move_data(serializer.instance)
+
+    def move_data(self, new_financial_year):
+        base_financial_year = FinancialYear.objects.get(pk=1)
+
+        """
+            Be careful about models with relationships
+        """
+
+        """
+            Moving accounts
+        """
+        accounts_map = {}
+        if Account.objects.inFinancialYear(new_financial_year).count() == 0:
+            base_accounts = Account.objects.inFinancialYear(base_financial_year).order_by('level').all()
+            for account in base_accounts:
+                key = account.pk
+
+                account.pk = None
+                account.financial_year = new_financial_year
+                if account.parent:
+                    account.parent_id = accounts_map[account.parent_id]
+
+                account.save()
+
+                accounts_map[key] = account.pk
+
+        """
+            Moving default accounts
+        """
+        if DefaultAccount.objects.inFinancialYear(new_financial_year).count() == 0:
+            for default_account in DefaultAccount.objects.inFinancialYear(base_financial_year).all():
+                default_account.pk = None
+                default_account.financial_year = new_financial_year
+                default_account.account_id = accounts_map[default_account.account_id]
+                default_account.save()

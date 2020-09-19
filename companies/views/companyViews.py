@@ -13,4 +13,12 @@ class CompanyModelView(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
 
     def get_queryset(self) -> QuerySet:
-        return Company.objects.hasAccess(self.request.method).prefetch_related('financial_years')
+        return Company.objects.hasAccess(self.request.method).prefetch_related('financial_years').filter(
+            superuser=self.request.user.get_superuser()
+        )
+
+    def perform_create(self, serializer: CompanySerializer) -> None:
+        user = self.request.user
+        serializer.save(
+            superuser=user.get_superuser()
+        )

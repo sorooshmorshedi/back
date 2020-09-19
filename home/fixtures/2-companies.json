@@ -3,6 +3,7 @@
     "model": "companies.company",
     "pk": 1,
     "fields": {
+      "superuser": 1,
       "name": "\u0646\u0627\u0645 \u0634\u0631\u06a9\u062a",
       "address1": null,
       "address2": null,
