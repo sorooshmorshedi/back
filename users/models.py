@@ -1,7 +1,8 @@
 import random
 from datetime import timedelta
 import jdatetime
-from django.contrib.auth.models import AbstractUser, Permission, Group, UserManager
+from django.contrib.auth.models import AbstractUser, Permission, UserManager
+from django.contrib.postgres.fields.array import ArrayField
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django_jalali.db import models as jmodels
@@ -41,14 +42,18 @@ class User(AbstractUser, BaseModel):
     def get_superuser(self):
         return self.superuser or self
 
-    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True, blank=True)
-    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True, blank=True)
+    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True,
+                                       blank=True)
+    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True,
+                                              blank=True)
 
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=11)
 
     roles = models.ManyToManyField(Role, related_name='users', blank=True)
+
+    modules = ArrayField(models.CharField(max_length=30), default=list, blank=True)
 
     objects = MyUserManager()
 

@@ -40,7 +40,8 @@ class UserCreateView(generics.CreateAPIView):
     def perform_create(self, serializer: UserCreateSerializer) -> None:
         user = self.request.user
         serializer.save(
-            superuser=user.get_superuser()
+            superuser=user.get_superuser(),
+            modules=user.modules
         )
 
 
