@@ -64,6 +64,8 @@ class BaseManager(models.Manager):
         if not financial_year:
             financial_year = user.active_financial_year
 
+        qs = qs.filter(financial_year__company=financial_year.company)
+
         if self.model._meta.backward_financial_year:
             return qs.filter(financial_year__id__lte=financial_year.id)
         else:
