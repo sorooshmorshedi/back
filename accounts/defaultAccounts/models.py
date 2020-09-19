@@ -40,10 +40,11 @@ class DefaultAccount(BaseModel):
                                    blank=True, null=True)
     usage = models.CharField(choices=USAGES, max_length=20)
 
-    codename = models.CharField(unique=True, max_length=255, null=True, blank=True)
+    codename = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        unique_together = ('financial_year', 'codename')
         permission_basename = 'defaultAccount'
         permissions = (
             ('get.defaultAccount', 'مشاهده حساب های پیشفرض'),
@@ -61,4 +62,4 @@ class DefaultAccount(BaseModel):
 
     @staticmethod
     def get(codename):
-        return DefaultAccount.objects.get(codename=codename)
+        return DefaultAccount.objects.inFinancialYear().get(codename=codename)
