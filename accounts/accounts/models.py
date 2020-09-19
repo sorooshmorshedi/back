@@ -87,7 +87,6 @@ class AccountType(BaseModel):
         (NONE, 'هیچ کدام')
     )
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accountTypes')
     name = models.CharField(max_length=100)
     codename = models.CharField(max_length=255, unique=True, blank=True, null=True)
     nature = models.CharField(max_length=3, choices=(('bed', 'بدهکار'), ('bes', 'بستانکار'), ('non', 'خنثی')))
