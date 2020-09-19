@@ -42,6 +42,7 @@ labels = {
     'lading_number': 'شماره بارگیری',
     'billNumber': 'شماره بارنامه',
     'receive_type': 'نحوه دریافت',
+    'owner': 'مالک',
 
 }
 
