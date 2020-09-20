@@ -78,10 +78,20 @@ class Car(BaseModel):
         (EBRAHIM, 'حاج ابراهیم')
     )
 
+    TRANSPORTATION = 't'
+    COLORED = 'c'
+
+    CONTRACT_TYPES = (
+        (TRANSPORTATION, 'حمل و نقل'),
+        (COLORED, 'رنگی')
+    )
+
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cars')
 
+    contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=TRANSPORTATION)
+
     car_number = ArrayField(base_field=models.CharField(max_length=3), size=4)
-    type = models.CharField(max_length=100, null=True, blank=True)
+    car_type = models.CharField(max_length=100, null=True, blank=True)
     system = models.CharField(max_length=100, null=True, blank=True)
     model = models.CharField(max_length=100, null=True, blank=True)
     capacity = models.CharField(max_length=100, null=True, blank=True)
@@ -136,60 +146,62 @@ class Car(BaseModel):
             self.payableAccount.delete()
             floatAccountGroup.delete()
 
+        contract_type = "Transportation" if self.contract_type == self.TRANSPORTATION else "Colored"
+
         parents = []
         if self.owner == self.RAHMAN:
             parents.append({
                 'name': "هزینه ماشین {}".format(self.car_number_str),
                 'attr': 'expenseAccount',
-                'account': DefaultAccount.get('rahmanCarsTransportationExpense').account,
+                'account': DefaultAccount.get('rahmanCars{}Expense'.format(contract_type)).account,
             })
 
             parents.append({
                 'name': "درآمد ماشین {}".format(self.car_number_str),
                 'attr': 'incomeAccount',
-                'account': DefaultAccount.get('rahmanCarsTransportationIncome').account,
+                'account': DefaultAccount.get('rahmanCars{}Income'.format(contract_type)).account,
             })
 
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
             })
         elif self.owner == self.PARTNERSHIP:
             parents.append({
                 'name': "هزینه ماشین {}".format(self.car_number_str),
                 'attr': 'expenseAccount',
-                'account': DefaultAccount.get('partnershipCarsTransportationExpense').account,
+                'account': DefaultAccount.get('partnershipCars{}Expense'.format(contract_type)).account,
             })
 
             parents.append({
                 'name': "درآمد ماشین {}".format(self.car_number_str),
                 'attr': 'incomeAccount',
-                'account': DefaultAccount.get('partnershipCarsTransportationIncome').account,
+                'account': DefaultAccount.get('partnershipCars{}Income'.format(contract_type)).account,
             })
 
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahmanTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
             })
         elif self.owner == self.RAHIM:
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahimTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForRahim{}Drivers'.format(contract_type)).account,
             })
         elif self.owner == self.EBRAHIM:
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForEbrahimTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForEbrahim{}Drivers'.format(contract_type)).account,
             })
         elif self.owner == self.OTHER:
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForOtherTransportationDrivers').account,
+                'account': DefaultAccount.get('payableAccountForOther{}Drivers'.format(contract_type)).account,
             })
 
         for parent in parents:

@@ -1,4 +1,5 @@
 [
+
   {
     "model": "accounts.defaultaccount",
     "pk": 1001,
@@ -417,6 +418,132 @@
       "costCenter": null,
       "usage": "dashtbashi",
       "codename": "partnershipColoredCarsIncomeAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1031,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه ماشین های حمل و نقل حاج رحمان",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahmanCarsColoredExpense"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1032,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه ماشین های حمل و نقل شراکتی",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "partnershipCarsColoredExpense"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "0k": 1033,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد ماشین های رنگی حاج رحمان",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "rahmanCarsColoredIncome"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1034,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد ماشین های رنگی شراکتی",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "partnershipCarsColoredIncome"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1035,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان رنگی حاج رحمان",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForRahmanColoredDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1036,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان رنگی حاج رحیم",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForRahimColoredDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1037,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان رنگی حاج ابراهیم",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForEbrahimColoredDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1038,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان رنگی شراکتی",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForPartnershipColoredDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1039,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پرداختنی رانندگان رنگی سایر",
+      "account_level": 2,
+      "account": 55,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "payableAccountForOtherColoredDrivers"
     }
   },
   {
