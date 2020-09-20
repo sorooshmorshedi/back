@@ -31,11 +31,9 @@ class Sanad(BaseModel, ConfirmationMixin):
             ('get.sanad', 'مشاهده سند'),
             ('create.sanad', 'تعریف سند'),
             ('update.sanad', 'ویرایش سند'),
-            ('delete.sanad', 'حذف سند'),
 
             ('getOwn.sanad', 'مشاهده سند های خود'),
             ('updateOwn.sanad', 'ویرایش سند های خود'),
-            ('deleteOwn.sanad', 'حذف سند های خود'),
 
             ('firstConfirm.sanad', 'تایید اول سند'),
             ('secondConfirm.sanad', 'تایید دوم سند'),

@@ -65,7 +65,7 @@ class SanadListCreate(generics.ListCreateAPIView):
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
 
-class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
+class SanadDetail(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_basename = 'sanad'
     serializer_class = SanadSerializer
@@ -106,13 +106,6 @@ class SanadDetail(generics.RetrieveUpdateDestroyAPIView):
             serializer.instance.check_account_balance_confirmations()
 
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
-
-    def delete(self, *args, **kwargs):
-        sanad = self.get_object()
-        if sanad.id != Sanad.objects.aggregate(last_id=Max('id'))['last_id']:
-            raise ValidationError("سند غیر قبل حذف می باشد")
-        return super().delete(*args, **kwargs)
-
 
 
 class ReorderSanadsApiView(APIView):

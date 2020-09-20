@@ -43,6 +43,7 @@ labels = {
     'billNumber': 'شماره بارنامه',
     'receive_type': 'نحوه دریافت',
     'owner': 'مالک',
+    'driving': 'حمل کننده'
 
 }
 
