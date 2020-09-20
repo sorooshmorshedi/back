@@ -1,6 +1,7 @@
 from typing import Type
 
 from django.db.models import QuerySet
+from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
@@ -237,7 +238,13 @@ class LadingBillNumberListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self) -> QuerySet:
-        return LadingBillNumber.objects.all()
+        only_not_used = self.request.GET.copy().get('not_used', False) == 'true'
+        qs = LadingBillNumber.objects.all()
+        if only_not_used:
+            qs = qs.annotate(
+                has_lading=Exists(Lading.objects.filter(billNumber=OuterRef('pk')))
+            ).filter(has_lading=False)
+        return qs
 
 
 class OilCompanyLadingModelView(viewsets.ModelViewSet):
