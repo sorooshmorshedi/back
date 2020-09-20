@@ -13,10 +13,10 @@ class SanadItemLedgerFilter(filters.FilterSet):
             'account': ['exact', 'in'],
             'account__code': ['startswith'] + BASE_FIELD_FILTERS,
             'account__name': BASE_FIELD_FILTERS,
+            'account__floatAccountGroup': ['exact'],
+            'account__costCenterGroup': ['exact'],
 
             'floatAccount': ['exact', 'in'],
-            'floatAccount__floatAccountGroups': ['exact'],
-            'costCenter__floatAccountGroups': ['exact'],
 
             'sanad__date': BASE_FIELD_FILTERS,
             'sanad__code': BASE_FIELD_FILTERS,
