@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 import jdatetime
 from django.db.models.deletion import ProtectedError
@@ -221,3 +222,9 @@ def MELLI_CODE(**kwargs):
 
 def DECIMAL(**kwargs):
     return models.DecimalField(max_digits=24, decimal_places=6, default=0, **kwargs)
+
+
+def upload_to(instance, filename):
+    app = instance._meta.app_label
+    model = instance.__class__.__name__
+    return "{}/{}/{}-{}".format(app, model, datetime.now().timestamp(), filename)

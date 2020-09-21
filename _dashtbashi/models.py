@@ -5,8 +5,7 @@ from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation, FloatAccountGroup
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
-from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
-from imprests.models import upload_to
+from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin, upload_to
 from sanads.models import Sanad, clearSanad
 from transactions.models import Transaction
 from users.models import City

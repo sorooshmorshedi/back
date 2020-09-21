@@ -1,12 +1,10 @@
-from datetime import datetime
-
 from django.db import models
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin
+from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin, upload_to
 from transactions.models import Transaction
 
 
@@ -56,12 +54,6 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
         self.is_settled = settled_value == self.transaction.sum
         self.settled_value = settled_value
         self.save()
-
-
-def upload_to(instance, filename):
-    app = instance._meta.app_label
-    model = instance.__class__.__name__
-    return "{}/{}/{}-{}".format(app, model, datetime.now().timestamp(), filename)
 
 
 class ImprestSettlementItem(BaseModel):
