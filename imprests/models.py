@@ -1,4 +1,5 @@
-import uuid
+from datetime import datetime
+
 from django.db import models
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
@@ -58,8 +59,9 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
 
 
 def upload_to(instance, filename):
-    directory = instance.__class__.__name__
-    return "{}/{}-{}".format(directory, uuid.uuid1(), filename)
+    app = instance._meta.app_label
+    model = instance.__class__.__name__
+    return "{}/{}/{}-{}".format(app, model, datetime.now().timestamp(), filename)
 
 
 class ImprestSettlementItem(BaseModel):
