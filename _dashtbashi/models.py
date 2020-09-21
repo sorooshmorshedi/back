@@ -6,6 +6,7 @@ from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin
+from imprests.models import upload_to
 from sanads.models import Sanad, clearSanad
 from transactions.models import Transaction
 from users.models import City
@@ -464,14 +465,14 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     destination_amount = DECIMAL()
 
     lading_explanation = EXPLANATION()
-    lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
+    lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_to)
 
     billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='lading', null=True)
     bill_date = jmodels.jDateField()
     bill_price = DECIMAL()
 
     bill_explanation = EXPLANATION()
-    bill_attachment = models.FileField(null=True, blank=True, upload_to=upload_attachment_to)
+    bill_attachment = models.FileField(null=True, blank=True, upload_to=upload_to)
     cargo_tip_price = DECIMAL()
 
     association = models.ForeignKey(Association, on_delete=models.PROTECT, related_name='ladings', null=True,
