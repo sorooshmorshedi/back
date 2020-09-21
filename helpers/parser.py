@@ -58,10 +58,17 @@ class NestedMultipartParser(parsers.MultiPartParser):
 
     def parse(self, stream, media_type=None, parser_context=None):
         result = super().parse(stream=stream, media_type=media_type, parser_context=parser_context)
+
+        is_nested = len([key for key, value in result.data.items() if '[' in key]) != 0
+
+        if not is_nested:
+            return result
+
         data = {}
         for key, value in result.data.items():
             self.set_value(data, key, value)
         for key, value in result.files.items():
+            data.pop(key, None)
             self.set_value(data, key, value)
             self.set_value(data, key, value)
         return parsers.DataAndFiles(data, result.files)
