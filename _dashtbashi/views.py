@@ -22,6 +22,7 @@ from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCrea
     OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
+from helpers.models import manage_files
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
 from transactions.models import Transaction
@@ -192,11 +193,7 @@ class LadingModelView(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        file_fields = ['lading_attachment', 'bill_attachment']
-        for file_field in file_fields:
-            if request.data.get('delete_{}'.format(file_field), False):
-                getattr(instance, file_field).delete()
-                setattr(instance, file_field, None)
+        manage_files(instance, request.data, ['lading_attachment', 'bill_attachment'])
 
         return super().update(request, *args, **kwargs)
 

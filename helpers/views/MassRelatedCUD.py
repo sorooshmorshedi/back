@@ -2,6 +2,8 @@ from typing import List
 
 from rest_framework.generics import get_object_or_404
 
+from helpers.models import manage_files
+
 
 class MassRelatedCUD:
 
@@ -50,9 +52,7 @@ class MassRelatedCUD:
         for item in items_to_update:
             instance = get_object_or_404(model.objects.inFinancialYear(), id=item['id'])
 
-            if item.get('delete_attachment', False):
-                instance.attachment.delete()
-                instance.attachment = None
+            manage_files(instance, item, ['attachment'])
 
             serializer = self.update_serializer(instance, data=item)
             serializer.is_valid(raise_exception=True)

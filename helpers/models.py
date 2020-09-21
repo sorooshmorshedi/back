@@ -228,3 +228,10 @@ def upload_to(instance, filename):
     app = instance._meta.app_label
     model = instance.__class__.__name__
     return "{}/{}/{}-{}".format(app, model, datetime.now().timestamp(), filename)
+
+
+def manage_files(instance, data, file_fields):
+    for file_field in file_fields:
+        if data.get('delete_{}'.format(file_field), False):
+            getattr(instance, file_field).delete()
+            setattr(instance, file_field, None)
