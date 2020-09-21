@@ -169,6 +169,7 @@ class OilCompanyLadingListRetrieveSerializer(serializers.ModelSerializer):
     items = OilCompanyLadingItemSerializer(read_only=True, many=True)
     car = CarSerializer(read_only=True)
     created_by = UserListRetrieveSerializer(many=False, read_only=True)
+    sanad = SanadSerializer(read_only=True)
 
     class Meta:
         model = OilCompanyLading

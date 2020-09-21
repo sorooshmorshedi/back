@@ -397,13 +397,13 @@
     "pk": 1029,
     "fields": {
       "financial_year": 1,
-      "name": "حساب درآمد ماشین های رنگی حاج رحمان",
+      "name": "حساب درآمد ماشین های شرکت نفت حاج رحمان",
       "account_level": 3,
       "account": 233,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "rahmanColoredCarsIncomeAccount"
+      "codename": "rahmanOilCompanyCarsIncomeAccount"
     }
   },
   {
@@ -411,13 +411,13 @@
     "pk": 1030,
     "fields": {
       "financial_year": 1,
-      "name": "حساب درآمد ماشین های رنگی شراکتی",
+      "name": "حساب درآمد ماشین های شرکت نفت شراکتی",
       "account_level": 3,
       "account": 233,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "partnershipColoredCarsIncomeAccount"
+      "codename": "partnershipOilCompanyCarsIncomeAccount"
     }
   },
   {
@@ -425,13 +425,13 @@
     "pk": 1031,
     "fields": {
       "financial_year": 1,
-      "name": "هزینه ماشین های حمل و نقل حاج رحمان",
+      "name": "هزینه ماشین های شرکت نفت حاج رحمان",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "rahmanCarsColoredExpense"
+      "codename": "rahmanCarsOilCompanyExpense"
     }
   },
   {
@@ -439,27 +439,27 @@
     "pk": 1032,
     "fields": {
       "financial_year": 1,
-      "name": "هزینه ماشین های حمل و نقل شراکتی",
+      "name": "هزینه ماشین های شرکت نفت شراکتی",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "partnershipCarsColoredExpense"
+      "codename": "partnershipCarsOilCompanyExpense"
     }
   },
   {
     "model": "accounts.defaultaccount",
-    "0k": 1033,
+    "pk": 1033,
     "fields": {
       "financial_year": 1,
-      "name": "درآمد ماشین های رنگی حاج رحمان",
+      "name": "درآمد ماشین های شرکت نفت حاج رحمان",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "rahmanCarsColoredIncome"
+      "codename": "rahmanCarsOilCompanyIncome"
     }
   },
   {
@@ -467,13 +467,13 @@
     "pk": 1034,
     "fields": {
       "financial_year": 1,
-      "name": "درآمد ماشین های رنگی شراکتی",
+      "name": "درآمد ماشین های شکرت نفت شراکتی",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "partnershipCarsColoredIncome"
+      "codename": "partnershipCarsOilCompanyIncome"
     }
   },
   {
@@ -481,13 +481,13 @@
     "pk": 1035,
     "fields": {
       "financial_year": 1,
-      "name": "حساب پرداختنی رانندگان رنگی حاج رحمان",
+      "name": "حساب پرداختنی رانندگان شرکت نفت حاج رحمان",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "payableAccountForRahmanColoredDrivers"
+      "codename": "payableAccountForRahmanOilCompanyDrivers"
     }
   },
   {
@@ -495,13 +495,13 @@
     "pk": 1036,
     "fields": {
       "financial_year": 1,
-      "name": "حساب پرداختنی رانندگان رنگی حاج رحیم",
+      "name": "حساب پرداختنی رانندگان شرکت نفت حاج رحیم",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "payableAccountForRahimColoredDrivers"
+      "codename": "payableAccountForRahimOilCompanyDrivers"
     }
   },
   {
@@ -509,13 +509,13 @@
     "pk": 1037,
     "fields": {
       "financial_year": 1,
-      "name": "حساب پرداختنی رانندگان رنگی حاج ابراهیم",
+      "name": "حساب پرداختنی رانندگان شرکت نفت حاج ابراهیم",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "payableAccountForEbrahimColoredDrivers"
+      "codename": "payableAccountForEbrahimOilCompanyDrivers"
     }
   },
   {
@@ -523,13 +523,13 @@
     "pk": 1038,
     "fields": {
       "financial_year": 1,
-      "name": "حساب پرداختنی رانندگان رنگی شراکتی",
+      "name": "حساب پرداختنی رانندگان شرکت نفت شراکتی",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "payableAccountForPartnershipColoredDrivers"
+      "codename": "payableAccountForPartnershipOilCompanyDrivers"
     }
   },
   {
@@ -537,15 +537,100 @@
     "pk": 1039,
     "fields": {
       "financial_year": 1,
-      "name": "حساب پرداختنی رانندگان رنگی سایر",
+      "name": "حساب پرداختنی رانندگان شرکت نفت سایر",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "payableAccountForOtherColoredDrivers"
+      "codename": "payableAccountForOtherOilCompanyDrivers"
     }
   },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1040,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در بارگیری شرکت نفت ماشین های حاج رحمان",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInRahmanOilCompanyTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1041,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در بارگیری شرکت نفت ماشین های حاج رحیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInRahimOilCompanyTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1042,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در بارگیری شرکت نفت ماشین های حاج ابراهیم",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInEbrahimOilCompanyTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1043,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در بارگیری شرکت نفت ماشین های شراکتی",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInPartnershipOilCompanyTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1044,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد کمیسیون شرکت در بارگیری شرکت نفت ماشین های سایر",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "companyCommissionIncomeInOtherOilCompanyTransportationCars"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1045,
+    "fields": {
+      "financial_year": 1,
+      "name": "مالیات ارزش افزوده بارگیری شرکت نفت",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "oilCompanyLadingTax"
+    }
+  },
+
   {
     "model": "accounts.floataccountgroup",
     "pk": 1,

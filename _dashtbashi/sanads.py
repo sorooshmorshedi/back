@@ -1,4 +1,4 @@
-from _dashtbashi.models import Lading, Car
+from _dashtbashi.models import Lading, Car, OilCompanyLading
 from accounts.defaultAccounts.models import DefaultAccount
 from sanads.models import clearSanad, Sanad, newSanadCode
 
@@ -223,6 +223,86 @@ class LadingSanad:
         sanad_items.append({
             'bes': lading.association_price,
             'account': DefaultAccount.get('associationPayableAccount').account,
+        })
+
+        for sanad_item in sanad_items:
+            if sanad_item.get('bed', 0) == sanad_item.get('bes', 0) == 0:
+                continue
+
+            sanad.items.create(
+                **sanad_item
+            )
+
+
+class OilCompanyLadingSanad:
+    def __init__(self, oilCompanyLading: OilCompanyLading):
+        self.oilCompanyLading = oilCompanyLading
+
+    def update(self):
+        oil_company_lading = self.oilCompanyLading
+        car = self.oilCompanyLading.driving.car
+        driver = self.oilCompanyLading.driving.driver
+
+        sanad = self.oilCompanyLading.sanad
+        if not sanad:
+            sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.oilCompanyLading.financial_year,
+                                         date=self.oilCompanyLading.date)
+            oil_company_lading.sanad = sanad
+            oil_company_lading.save()
+            return
+        else:
+            clearSanad(sanad)
+            sanad.is_auto_created = True
+            sanad.save()
+
+        sanad_items = []
+
+        sanad_items.append({
+            'bed': oil_company_lading.total_value,
+            'account': DefaultAccount.get('oilCompanyLadingAccount').account,
+        })
+
+        if car.owner == Car.RAHMAN:
+            sanad_items.append({
+                'bes': oil_company_lading.company_commission,
+                'account': DefaultAccount.get('companyCommissionIncomeInRahmanOilCompanyTransportationCars').account,
+            })
+
+        elif car.owner == Car.PARTNERSHIP:
+            sanad_items.append({
+                'bes': oil_company_lading.company_commission,
+                'account': DefaultAccount.get(
+                    'companyCommissionIncomeInPartnershipOilCompanyTransportationCars').account,
+            })
+
+        elif car.owner == Car.EBRAHIM:
+            sanad_items.append({
+                'bes': oil_company_lading.company_commission,
+                'account': DefaultAccount.get('companyCommissionIncomeInEbrahimOilCompanyTransportationCars').account,
+                'floatAccount': driver.floatAccount
+            })
+
+        elif car.owner == Car.RAHIM:
+            sanad_items.append({
+                'bes': oil_company_lading.company_commission,
+                'account': DefaultAccount.get('companyCommissionIncomeInRahimOilCompanyTransportationCars').account,
+            })
+
+        elif car.owner == Car.OTHER:
+            sanad_items.append({
+                'bes': oil_company_lading.company_commission,
+                'account': DefaultAccount.get('companyCommissionIncomeInOtherOilCompanyTransportationCars').account,
+            })
+
+        sanad_items.append({
+            'bes': oil_company_lading.car_income,
+            'account': car.payableAccount,
+            'floatAccount': driver.floatAccount
+        })
+
+        sanad_items.append({
+            'bes': oil_company_lading.tax_price + oil_company_lading.complication_price,
+            'account': DefaultAccount.get('oilCompanyLadingTax').account,
         })
 
         for sanad_item in sanad_items:

@@ -79,11 +79,11 @@ class Car(BaseModel):
     )
 
     TRANSPORTATION = 't'
-    COLORED = 'c'
+    OilCompany = 'o'
 
     CONTRACT_TYPES = (
         (TRANSPORTATION, 'حمل و نقل'),
-        (COLORED, 'رنگی')
+        (OilCompany, 'شرکت نفت')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cars')
@@ -146,7 +146,7 @@ class Car(BaseModel):
             self.payableAccount.delete()
             floatAccountGroup.delete()
 
-        contract_type = "Transportation" if self.contract_type == self.TRANSPORTATION else "Colored"
+        contract_type = "Transportation" if self.contract_type == self.TRANSPORTATION else "OilCompany"
 
         parents = []
         if self.owner == self.RAHMAN:
@@ -532,11 +532,21 @@ class OilCompanyLading(BaseModel, ConfirmationMixin):
     explanation = EXPLANATION()
     date = jmodels.jDateField()
     export_date = jmodels.jDateField()
+    month = models.IntegerField()
 
-    car = models.ForeignKey(Car, on_delete=models.PROTECT, related_name='oilCompanyLadings')
+    driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='oilCompanyLadings')
+
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='oilCompanyLadings', blank=True,
+                                 null=True)
 
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
+
+    total_value = DECIMAL()
+    company_commission = DECIMAL()
+    car_income = DECIMAL()
+    tax_price = DECIMAL()
+    complication_price = DECIMAL()
 
     class Meta(BaseModel.Meta):
         permission_basename = 'oilCompanyLading'
@@ -556,6 +566,15 @@ class OilCompanyLading(BaseModel, ConfirmationMixin):
             ('secondConfirmOwn.oilCompanyLading', 'تایید دوم بارگیری شرکت نفت خود'),
         )
 
+    def save(self, *args, **kwargs) -> None:
+        from _dashtbashi.sanads import OilCompanyLadingSanad
+        super().save(*args, **kwargs)
+        OilCompanyLadingSanad(self).update()
+
+    def delete(self, *args, **kwargs):
+        clearSanad(self.sanad)
+        return super().delete(*args, **kwargs)
+
 
 class OilCompanyLadingItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
@@ -568,6 +587,13 @@ class OilCompanyLadingItem(BaseModel):
     tax_percent = models.IntegerField(default=0, null=True, blank=True)
     complication_value = DECIMAL(null=True, blank=True)
     complication_percent = models.IntegerField(default=0, null=True, blank=True)
+
+    origin = models.ForeignKey(City, on_delete=models.PROTECT, related_name='oilCompanyLadingOrigins')
+    destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='oilCompanyLadingDestinations')
+    weight = DECIMAL()
+    date = jmodels.jDateField()
+
+    company_commission_percent = models.IntegerField(default=0)
 
     company_commission = DECIMAL()
     car_income = DECIMAL()

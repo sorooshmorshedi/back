@@ -101,7 +101,9 @@ class LadingBillSeriesModelView(viewsets.ModelViewSet):
         return LadingBillSeries.objects.hasAccess(self.request.method).prefetch_related(
             Prefetch(
                 'numbers',
-                LadingBillNumber.objects.filter(is_revoked=False, lading=None)
+                LadingBillNumber.objects.annotate(
+                    is_free=~Exists(Lading.objects.filter(billNumber=OuterRef('pk')))
+                ).filter(is_free=True, is_revoked=False, lading=None)
             )
         )
 
