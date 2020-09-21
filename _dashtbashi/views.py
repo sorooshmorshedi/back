@@ -189,6 +189,17 @@ class LadingModelView(viewsets.ModelViewSet):
             return LadingListRetrieveSerializer
         return LadingCreateUpdateSerializer
 
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        file_fields = ['lading_attachment', 'bill_attachment']
+        for file_field in file_fields:
+            if request.data.get('delete_{}'.format(file_field), False):
+                getattr(instance, file_field).delete()
+                setattr(instance, file_field, None)
+
+        return super().update(request, *args, **kwargs)
+
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
             financial_year=self.request.user.active_financial_year,
