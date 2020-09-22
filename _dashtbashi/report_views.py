@@ -118,6 +118,8 @@ class LadingsReportView(generics.ListAPIView):
             'lading_bill_difference',
             'origin_amount',
             'destination_amount',
+            'cargo_tip_price',
+            'association_price'
         ]
         add_sum(response, sum_fields, queryset, page)
 
