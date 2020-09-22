@@ -5,6 +5,7 @@ from django.db.models.expressions import Exists, OuterRef
 from django.db.models.query import Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -117,6 +118,19 @@ class LadingBillSeriesModelView(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def is_editable(self):
+        instance = self.get_object()
+        if Lading.objects.filter(billNumber__series=instance).exists():
+            raise ValidationError("قبل از ویرایش سری بارنامه بارگیری های آن را حذف کنید")
+
+    def update(self, *args, **kwargs):
+        self.is_editable()
+        return super().update(*args, **kwargs)
+
+    def destroy(self, *args, **kwargs):
+        self.is_editable()
+        return super().destroy(*args, **kwargs)
 
 
 class LadingBillSeriesByPositionView(APIView):
