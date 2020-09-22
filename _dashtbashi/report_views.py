@@ -113,7 +113,11 @@ class LadingsReportView(generics.ListAPIView):
         sum_fields = [
             'contractor_price',
             'fare_price',
-            'bill_price'
+            'bill_price',
+            'driver_tip_price',
+            'lading_bill_difference',
+            'origin_amount',
+            'destination_amount',
         ]
         add_sum(response, sum_fields, queryset, page)
 
