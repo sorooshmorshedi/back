@@ -2,7 +2,8 @@ import django_filters
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
-from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading, LadingBillNumber
+from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading, LadingBillNumber, \
+    OilCompanyLadingItem
 from helpers.filters import BASE_FIELD_FILTERS
 
 
@@ -111,6 +112,42 @@ class OilCompanyLadingFilter(filters.FilterSet):
             'id': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'export_date': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class OilCompanyLadingItemFilter(filters.FilterSet):
+    class Meta:
+        model = OilCompanyLadingItem
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+
+            'oilCompanyLading__date': BASE_FIELD_FILTERS,
+            'oilCompanyLading__export_date': BASE_FIELD_FILTERS,
+
+            'gross_price': BASE_FIELD_FILTERS,
+            'insurance_price': BASE_FIELD_FILTERS,
+
+            'tax_value': BASE_FIELD_FILTERS,
+            'tax_percent': BASE_FIELD_FILTERS,
+
+            'complication_value': BASE_FIELD_FILTERS,
+            'complication_percent': BASE_FIELD_FILTERS,
+
+            'origin__name': BASE_FIELD_FILTERS,
+            'destination__name': BASE_FIELD_FILTERS,
+            'weight': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+
+            'company_commission_percent': BASE_FIELD_FILTERS,
+
+            'company_commission': BASE_FIELD_FILTERS,
+            'car_income': BASE_FIELD_FILTERS,
+
         }
         filter_overrides = {
             jmodels.jDateField: {
