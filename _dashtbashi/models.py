@@ -460,7 +460,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
 
     lading_number = models.IntegerField()
     lading_date = jmodels.jDateField()
-    original_amount = DECIMAL()
+    origin_amount = DECIMAL()
     destination_amount = DECIMAL()
 
     lading_explanation = EXPLANATION()

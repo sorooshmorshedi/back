@@ -42,7 +42,7 @@ class LadingFilter(filters.FilterSet):
             'origin__name': ['exact', 'icontains'],
             'destination__name': ['exact', 'icontains'],
 
-            'original_amount': BASE_FIELD_FILTERS,
+            'origin_amount': BASE_FIELD_FILTERS,
             'destination_amount': BASE_FIELD_FILTERS,
 
         }
