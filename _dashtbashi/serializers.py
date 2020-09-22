@@ -148,6 +148,8 @@ class LadingListRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
+    origin = CitySerializer(read_only=True)
+    destination = CitySerializer(read_only=True)
     sanad = SanadSerializer(read_only=True)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 

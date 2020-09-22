@@ -11,21 +11,40 @@ class LadingFilter(filters.FilterSet):
         model = Lading
         fields = {
             'driving': ['exact'],
+            'driving__driver__name': BASE_FIELD_FILTERS,
+            'driving__car__owner': BASE_FIELD_FILTERS,
+
             'remittance': ['exact'],
             'is_paid': ['exact'],
             'id': BASE_FIELD_FILTERS,
             'remittance__code': BASE_FIELD_FILTERS,
-            'origin__name': ['exact', 'icontains'],
-            'destination__name': ['exact', 'icontains'],
+
             'contractor__name': ['exact', 'icontains'],
             'ware__name': BASE_FIELD_FILTERS,
-            'driving__driver__name': BASE_FIELD_FILTERS,
+
             'billNumber__number': BASE_FIELD_FILTERS,
+            'billNumber__series__serial': BASE_FIELD_FILTERS,
+
             'bill_price': BASE_FIELD_FILTERS,
+            'cargo_tip_price': BASE_FIELD_FILTERS,
+            'driver_tip_price': BASE_FIELD_FILTERS,
+            'lading_bill_difference': BASE_FIELD_FILTERS,
             'lading_number': BASE_FIELD_FILTERS,
             'lading_date': BASE_FIELD_FILTERS,
             'lading_total_value': BASE_FIELD_FILTERS,
             'lading_bill_total_value': BASE_FIELD_FILTERS,
+
+            'association__name': BASE_FIELD_FILTERS,
+            'association_price': BASE_FIELD_FILTERS,
+
+            'receive_type': BASE_FIELD_FILTERS,
+
+            'origin__name': ['exact', 'icontains'],
+            'destination__name': ['exact', 'icontains'],
+
+            'original_amount': BASE_FIELD_FILTERS,
+            'destination_amount': BASE_FIELD_FILTERS,
+
         }
         filter_overrides = {
             jmodels.jDateField: {
