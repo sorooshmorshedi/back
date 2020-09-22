@@ -1,15 +1,14 @@
-from django.db.models.aggregates import Max
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
-from helpers.functions import get_current_user, get_new_code
+from helpers.functions import get_current_user
 from sanads.models import newSanadCode, clearSanad
 from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
 from transactions.serializers import TransactionSerializerForPayment
-from users.serializers import UserListRetrieveSerializer
+from users.serializers import UserListRetrieveSerializer, UserSimpleSerializer
 from wares.models import WareInventory
 from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
 from django.utils.timezone import now
@@ -160,7 +159,7 @@ class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
 
 class TransferListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
-    created_by = UserListRetrieveSerializer(many=False, read_only=True)
+    created_by = UserSimpleSerializer(many=False, read_only=True)
 
     def get_items(self, obj):
         input_items = obj.input_factor.items.order_by('id') \
@@ -324,7 +323,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
     sanad = SanadListRetrieveSerializer()
-    created_by = UserListRetrieveSerializer(many=False, read_only=True)
+    created_by = UserSimpleSerializer(many=False, read_only=True)
 
     def get_items(self, obj):
         return FactorItemRetrieveSerializer(

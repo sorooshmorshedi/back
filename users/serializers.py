@@ -38,6 +38,17 @@ class RoleWithPermissionListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserSimpleSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj: User):
+        return obj.first_name + ' ' + obj.last_name
+
+    class Meta:
+        model = get_user_model()
+        exclude = ('password',)
+
+
 class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_company = CompanySerializer()
     active_financial_year = FinancialYearSerializer()

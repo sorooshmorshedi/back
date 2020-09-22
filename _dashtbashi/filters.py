@@ -22,6 +22,10 @@ class LadingFilter(filters.FilterSet):
             'driving__driver__name': BASE_FIELD_FILTERS,
             'billNumber__number': BASE_FIELD_FILTERS,
             'bill_price': BASE_FIELD_FILTERS,
+            'lading_number': BASE_FIELD_FILTERS,
+            'lading_date': BASE_FIELD_FILTERS,
+            'lading_total_value': BASE_FIELD_FILTERS,
+            'lading_bill_total_value': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
