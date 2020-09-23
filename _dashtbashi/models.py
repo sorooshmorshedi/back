@@ -115,6 +115,7 @@ class Car(BaseModel):
     # just for Rahman
     incomeAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carIncome', null=True)
 
+    imprestAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carImprest', null=True)
     payableAccount = models.ForeignKey(Account, on_delete=models.SET_NULL, related_name='carPayable', null=True)
 
     class Meta(BaseModel.Meta):
@@ -141,6 +142,8 @@ class Car(BaseModel):
             self.expenseAccount.delete()
         if self.incomeAccount:
             self.incomeAccount.delete()
+        if self.imprestAccount:
+            self.imprestAccount.delete()
         if self.payableAccount:
             floatAccountGroup = self.payableAccount.floatAccountGroup
             self.payableAccount.delete()
@@ -167,6 +170,12 @@ class Car(BaseModel):
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
             })
+
+            parents.append({
+                'name': "حساب تنخواه {}".format(self.car_number_str),
+                'attr': 'imprestAccount',
+                'account': DefaultAccount.get('imprestAccountForRahman{}Drivers'.format(contract_type)).account,
+            })
         elif self.owner == self.PARTNERSHIP:
             parents.append({
                 'name': "هزینه ماشین {}".format(self.car_number_str),
@@ -183,7 +192,13 @@ class Car(BaseModel):
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
+                'account': DefaultAccount.get('payableAccountForPartnership{}Drivers'.format(contract_type)).account,
+            })
+
+            parents.append({
+                'name': "حساب تنخواه {}".format(self.car_number_str),
+                'attr': 'imprestAccount',
+                'account': DefaultAccount.get('imprestAccountForPartnership{}Drivers'.format(contract_type)).account,
             })
         elif self.owner == self.RAHIM:
             parents.append({
@@ -191,17 +206,32 @@ class Car(BaseModel):
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForRahim{}Drivers'.format(contract_type)).account,
             })
+            parents.append({
+                'name': "حساب تنخواه {}".format(self.car_number_str),
+                'attr': 'imprestAccount',
+                'account': DefaultAccount.get('imprestAccountForRahim{}Drivers'.format(contract_type)).account,
+            })
         elif self.owner == self.EBRAHIM:
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForEbrahim{}Drivers'.format(contract_type)).account,
             })
+            parents.append({
+                'name': "حساب تنخواه {}".format(self.car_number_str),
+                'attr': 'imprestAccount',
+                'account': DefaultAccount.get('imprestAccountForEbrahim{}Drivers'.format(contract_type)).account,
+            })
         elif self.owner == self.OTHER:
             parents.append({
                 'name': "حساب پرداختنی {}".format(self.car_number_str),
                 'attr': 'payableAccount',
                 'account': DefaultAccount.get('payableAccountForOther{}Drivers'.format(contract_type)).account,
+            })
+            parents.append({
+                'name': "حساب تنخواه {}".format(self.car_number_str),
+                'attr': 'imprestAccount',
+                'account': DefaultAccount.get('imprestAccountForOther{}Drivers'.format(contract_type)).account,
             })
 
         for parent in parents:
@@ -224,8 +254,12 @@ class Car(BaseModel):
             financial_year=self.financial_year,
             is_auto_created=True,
         )
+
         self.payableAccount.floatAccountGroup = float_account_group
         self.payableAccount.save()
+
+        self.imprestAccount.floatAccountGroup = float_account_group
+        self.imprestAccount.save()
 
         if self.incomeAccount:
             self.incomeAccount.floatAccountGroup = float_account_group
@@ -240,6 +274,7 @@ class Car(BaseModel):
     def delete(self, *args, **kwargs):
         self.expenseAccount.delete()
         self.incomeAccount.delete()
+        self.imprestAccount.delete()
         floatAccountGroup = self.payableAccount.floatAccountGroup
         self.payableAccount.delete()
         floatAccountGroup.delete()
