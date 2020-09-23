@@ -112,6 +112,17 @@ class OilCompanyLadingFilter(filters.FilterSet):
             'id': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'export_date': BASE_FIELD_FILTERS,
+            'gross_price': BASE_FIELD_FILTERS,
+            'insurance_price': BASE_FIELD_FILTERS,
+            'complication_price': BASE_FIELD_FILTERS,
+            'total_value': BASE_FIELD_FILTERS,
+            'company_commission': BASE_FIELD_FILTERS,
+            'car_income': BASE_FIELD_FILTERS,
+            'weight': BASE_FIELD_FILTERS,
+            'month': BASE_FIELD_FILTERS,
+
+            'driving__car': ['exact'],
+            'driving__driver': ['exact'],
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -125,9 +136,6 @@ class OilCompanyLadingItemFilter(filters.FilterSet):
         model = OilCompanyLadingItem
         fields = {
             'id': BASE_FIELD_FILTERS,
-
-            'oilCompanyLading__date': BASE_FIELD_FILTERS,
-            'oilCompanyLading__export_date': BASE_FIELD_FILTERS,
 
             'gross_price': BASE_FIELD_FILTERS,
             'insurance_price': BASE_FIELD_FILTERS,
@@ -147,6 +155,12 @@ class OilCompanyLadingItemFilter(filters.FilterSet):
 
             'company_commission': BASE_FIELD_FILTERS,
             'car_income': BASE_FIELD_FILTERS,
+            'complication_price': BASE_FIELD_FILTERS,
+            'total_value': BASE_FIELD_FILTERS,
+
+            'oilCompanyLading__month': BASE_FIELD_FILTERS,
+            'oilCompanyLading__driving__car': ['exact'],
+            'oilCompanyLading__driving__driver': ['exact'],
 
         }
         filter_overrides = {

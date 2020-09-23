@@ -5,10 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, LadingFilter, OilCompanyLadingFilter
-from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading
+from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, LadingFilter, OilCompanyLadingFilter, \
+    OilCompanyLadingItemFilter
+from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading, OilCompanyLadingItem
 from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListSerializer, \
-    LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer
+    LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer, OilCompanyLadingItemSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import add_sum
 from imprests.serializers import ImprestListRetrieveSerializer
@@ -138,3 +139,17 @@ class OilCompanyLadingReportView(generics.ListAPIView):
 
     def get_queryset(self):
         return OilCompanyLading.objects.hasAccess('get').all()
+
+
+class OilCompanyLadingItemReportView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'oilCompanyLading'
+
+    serializer_class = OilCompanyLadingItemSerializer
+
+    pagination_class = LimitOffsetPagination
+    filterset_class = OilCompanyLadingItemFilter
+    ordering_fields = '__all__'
+
+    def get_queryset(self):
+        return OilCompanyLadingItem.objects.hasAccess('get', 'oilCompanyLading').all()

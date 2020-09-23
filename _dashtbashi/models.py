@@ -594,6 +594,9 @@ class OilCompanyLading(BaseModel, ConfirmationMixin):
     car_income = DECIMAL()
     tax_price = DECIMAL()
     complication_price = DECIMAL()
+    gross_price = DECIMAL()
+    insurance_price = DECIMAL()
+    weight = DECIMAL()
 
     class Meta(BaseModel.Meta):
         permission_basename = 'oilCompanyLading'
@@ -634,6 +637,8 @@ class OilCompanyLadingItem(BaseModel):
     tax_percent = models.IntegerField(default=0, null=True, blank=True)
     complication_value = DECIMAL(null=True, blank=True)
     complication_percent = models.IntegerField(default=0, null=True, blank=True)
+    total_value = DECIMAL()
+    complication_price = DECIMAL()
 
     origin = models.ForeignKey(City, on_delete=models.PROTECT, related_name='oilCompanyLadingOrigins')
     destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='oilCompanyLadingDestinations')
