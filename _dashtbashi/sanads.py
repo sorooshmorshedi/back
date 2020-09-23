@@ -39,7 +39,6 @@ class LadingSanad:
                 sanad_items.append({
                     'bed': lading.lading_total_value,
                     'account': lading.contractor,
-                    'exp': ""
                 })
 
                 if car.owner == Car.RAHMAN:
