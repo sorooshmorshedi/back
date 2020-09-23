@@ -154,7 +154,7 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
             required_fields += ['ware', 'contractor', 'lading_number', 'remittance_payment_method', 'driver_tip_payer']
 
         if 'b' in attrs.get('type'):
-            required_fields += ['billNumber', 'bill_price']
+            required_fields += ['billNumber', 'bill_price', 'receive_type']
 
         for field in required_fields:
             if not attrs.get(field):
