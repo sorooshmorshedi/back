@@ -200,9 +200,15 @@ class LadingRetrieveSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year',)
 
 
-class OilCompanyLadingItemSerializer(serializers.ModelSerializer):
+class OilCompanyLadingItemCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OilCompanyLadingItem
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
 
-    month = serializers.CharField(source='oilCompanyLading.month')
+
+class OilCompanyLadingItemListRetrieveSerializer(serializers.ModelSerializer):
+    month = serializers.CharField(source='oilCompanyLading.month', read_only=True)
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
 
@@ -220,7 +226,7 @@ class OilCompanyLadingCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class OilCompanyLadingListRetrieveSerializer(serializers.ModelSerializer):
-    items = OilCompanyLadingItemSerializer(read_only=True, many=True)
+    items = OilCompanyLadingItemListRetrieveSerializer(read_only=True, many=True)
     car = CarSerializer(read_only=True)
     created_by = UserSimpleSerializer(many=False, read_only=True)
     sanad = SanadSerializer(read_only=True)

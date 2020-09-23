@@ -18,7 +18,7 @@ from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, La
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
     DrivingListRetrieveSerializer, AssociationSerializer, RemittanceListRetrieveSerializer, \
     RemittanceCreateUpdateSerializer, LadingListSerializer, LadingCreateUpdateSerializer, \
-    LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemSerializer, \
+    LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemCreateUpdateSerializer, \
     OilCompanyLadingListRetrieveSerializer, OtherDriverPaymentListRetrieveSerializer, \
     OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListSerializer, LadingRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
@@ -309,8 +309,8 @@ class OilCompanyLadingModelView(viewsets.ModelViewSet):
             items_data.get('ids_to_delete'),
             'oilCompanyLading',
             serializer.instance.id,
-            OilCompanyLadingItemSerializer,
-            OilCompanyLadingItemSerializer,
+            OilCompanyLadingItemCreateUpdateSerializer,
+            OilCompanyLadingItemCreateUpdateSerializer,
         ).sync()
 
         return Response(OilCompanyLadingListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
@@ -332,8 +332,8 @@ class OilCompanyLadingModelView(viewsets.ModelViewSet):
             items_data.get('ids_to_delete'),
             'oilCompanyLading',
             instance.id,
-            OilCompanyLadingItemSerializer,
-            OilCompanyLadingItemSerializer,
+            OilCompanyLadingItemCreateUpdateSerializer,
+            OilCompanyLadingItemCreateUpdateSerializer,
         ).sync()
 
         return Response(OilCompanyLadingListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)

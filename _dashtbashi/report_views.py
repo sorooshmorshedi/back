@@ -9,7 +9,8 @@ from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, Lading
     OilCompanyLadingItemFilter
 from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading, OilCompanyLadingItem
 from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListSerializer, \
-    LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer, OilCompanyLadingItemSerializer
+    LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer, OilCompanyLadingItemCreateUpdateSerializer, \
+    OilCompanyLadingItemListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import add_sum
 from imprests.serializers import ImprestListRetrieveSerializer
@@ -145,7 +146,7 @@ class OilCompanyLadingItemReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'oilCompanyLading'
 
-    serializer_class = OilCompanyLadingItemSerializer
+    serializer_class = OilCompanyLadingItemListRetrieveSerializer
 
     pagination_class = LimitOffsetPagination
     filterset_class = OilCompanyLadingItemFilter
