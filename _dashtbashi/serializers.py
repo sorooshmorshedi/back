@@ -161,7 +161,7 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
                 error_body = {field: [ErrorDetail(_("This field is required."), code="required")]}
                 raise serializers.ValidationError(error_body)
 
-        return attrs
+        return super(LadingCreateUpdateSerializer, self).validate(attrs)
 
 
 class LadingListSerializer(serializers.ModelSerializer):

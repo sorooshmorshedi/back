@@ -234,7 +234,7 @@ class LadingByPositionView(APIView):
             request.GET.get('id')
         )
         if lading:
-            return Response(LadingListSerializer(instance=lading).data)
+            return Response(LadingRetrieveSerializer(instance=lading).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
