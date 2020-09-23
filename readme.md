@@ -34,3 +34,15 @@ Verifying means for each item check if it changed or not, if we have newer items
 
 ## Imprest
 * you should add imprest moein account to imprest default accounts
+
+## Helpers
+* queryset
+    * `add_sum`: adds sum for passed fields to `response.data.sum` for queryset and `response.data.page_sum` for page
+
+* db
+    * `bulk_create`: inserts multiple rows into database in one query
+    * `queryset_iterator`: returns generator of queryset, useful to iterate large rows
+
+* exports
+    * `get_xlsx_response`: generates an xlsx download response from provided data, data structure is 2D array :)
+    

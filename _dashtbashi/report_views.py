@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, LadingFilter, OilCompanyLadingFilter
 from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading
-from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListRetrieveSerializer, \
+from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListSerializer, \
     LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import add_sum
@@ -29,7 +29,7 @@ class OtherDriverPaymentReport(APIView):
         imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
 
         return Response({
-            'ladings': LadingListRetrieveSerializer(ladings, many=True).data,
+            'ladings': LadingListSerializer(ladings, many=True).data,
             'imprests': ImprestListRetrieveSerializer(imprests, many=True).data,
         })
 
@@ -90,7 +90,7 @@ class LadingsReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'lading'
 
-    serializer_class = LadingListRetrieveSerializer
+    serializer_class = LadingListSerializer
 
     pagination_class = LimitOffsetPagination
     filterset_class = LadingFilter

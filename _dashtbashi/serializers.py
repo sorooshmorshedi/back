@@ -100,8 +100,16 @@ class LadingBillSeriesSimpleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LadingBillNumberListRetrieveSerializer(serializers.ModelSerializer):
+class LadingBillNumberListSerializer(serializers.ModelSerializer):
     series = LadingBillSeriesSimpleSerializer(read_only=True)
+
+    class Meta:
+        model = LadingBillNumber
+        fields = '__all__'
+
+
+class LadingBillNumberRetrieveSerializer(serializers.ModelSerializer):
+    series = LadingBillSeriesSerializer(read_only=True)
 
     class Meta:
         model = LadingBillNumber
@@ -141,13 +149,31 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class LadingListRetrieveSerializer(serializers.ModelSerializer):
+class LadingListSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)
     driving = DrivingListRetrieveSerializer(read_only=True)
     contractor = AccountRetrieveSerializer(read_only=True)
     ware = WareListRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
-    billNumber = LadingBillNumberListRetrieveSerializer(read_only=True)
+    billNumber = LadingBillNumberListSerializer(read_only=True)
+    origin = CitySerializer(read_only=True)
+    destination = CitySerializer(read_only=True)
+    sanad = SanadSerializer(read_only=True)
+    created_by = UserSimpleSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Lading
+        fields = '__all__'
+        read_only_fields = ('financial_year',)
+
+
+class LadingRetrieveSerializer(serializers.ModelSerializer):
+    remittance = RemittanceListRetrieveSerializer(read_only=True)
+    driving = DrivingListRetrieveSerializer(read_only=True)
+    contractor = AccountRetrieveSerializer(read_only=True)
+    ware = WareListRetrieveSerializer(read_only=True)
+    association = AssociationSerializer(read_only=True)
+    billNumber = LadingBillNumberRetrieveSerializer(read_only=True)
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
     sanad = SanadSerializer(read_only=True)
@@ -197,7 +223,7 @@ class OtherDriverPaymentCreateUpdateSerializer(serializers.ModelSerializer):
 
 class OtherDriverPaymentListRetrieveSerializer(serializers.ModelSerializer):
     driving = DrivingListRetrieveSerializer()
-    ladings = LadingListRetrieveSerializer(many=True)
+    ladings = LadingListSerializer(many=True)
     imprests = ImprestListRetrieveSerializer(many=True)
     payment = TransactionListRetrieveSerializer(many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)

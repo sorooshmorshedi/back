@@ -17,10 +17,10 @@ from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, La
     LadingBillNumber, OilCompanyLading, OtherDriverPayment
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
     DrivingListRetrieveSerializer, AssociationSerializer, RemittanceListRetrieveSerializer, \
-    RemittanceCreateUpdateSerializer, LadingListRetrieveSerializer, LadingCreateUpdateSerializer, \
+    RemittanceCreateUpdateSerializer, LadingListSerializer, LadingCreateUpdateSerializer, \
     LadingBillSeriesSerializer, OilCompanyLadingCreateUpdateSerializer, OilCompanyLadingItemSerializer, \
     OilCompanyLadingListRetrieveSerializer, OtherDriverPaymentListRetrieveSerializer, \
-    OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListRetrieveSerializer
+    OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListSerializer, LadingRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.models import manage_files
@@ -203,7 +203,11 @@ class LadingModelView(viewsets.ModelViewSet):
 
     def get_serializer_class(self) -> Type[BaseSerializer]:
         if self.request.method.lower() == 'get':
-            return LadingListRetrieveSerializer
+            if 'pk' in self.kwargs:
+                return LadingRetrieveSerializer
+            else:
+                return LadingListSerializer
+
         return LadingCreateUpdateSerializer
 
     def update(self, request, *args, **kwargs):
@@ -230,7 +234,7 @@ class LadingByPositionView(APIView):
             request.GET.get('id')
         )
         if lading:
-            return Response(LadingListRetrieveSerializer(instance=lading).data)
+            return Response(LadingListSerializer(instance=lading).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 
@@ -255,7 +259,7 @@ class RevokeLadingBillNumberView(APIView):
 class LadingBillNumberListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_codename = 'get.ladingBillSeries'
-    serializer_class = LadingBillNumberListRetrieveSerializer
+    serializer_class = LadingBillNumberListSerializer
 
     ordering_fields = '__all__'
     filterset_class = LadingBillNumberFilter
