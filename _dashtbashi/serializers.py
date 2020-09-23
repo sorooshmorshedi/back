@@ -1,6 +1,8 @@
 from typing import Any
 
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
 
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
@@ -146,6 +148,19 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         remittance = attrs.get('remittance')
         if remittance and remittance.is_finished:
             raise serializers.ValidationError("بارگیری این حواله به پایان رسیده است")
+
+        required_fields = []
+        if 'l' in attrs.get('type'):
+            required_fields += ['ware', 'contractor', 'lading_number', 'remittance_payment_method', 'driver_tip_payer']
+
+        if 'b' in attrs.get('type'):
+            required_fields += ['billNumber', 'bill_price']
+
+        for field in required_fields:
+            if not attrs.get(field):
+                error_body = {field: [ErrorDetail(_("This field is required."), code="required")]}
+                raise serializers.ValidationError(error_body)
+
         return attrs
 
 

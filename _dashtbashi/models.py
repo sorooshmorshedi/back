@@ -332,13 +332,13 @@ class RemittanceMixin(BaseModel):
         (COMPANY_PAYS, "کمیسیون و کرایه با شرکت")
     )
 
-    ware = models.ForeignKey(Ware, on_delete=models.PROTECT)
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, null=True)
     contractor_price = DECIMAL()
-    contractor = models.ForeignKey(Account, on_delete=models.PROTECT)
+    contractor = models.ForeignKey(Account, on_delete=models.PROTECT, null=True)
     driver_tip_price = DECIMAL()
-    driver_tip_payer = models.CharField(max_length=3, choices=TIP_PAYERS)
+    driver_tip_payer = models.CharField(max_length=3, choices=TIP_PAYERS, null=True)
     lading_bill_difference = DECIMAL()
-    remittance_payment_method = models.CharField(max_length=3, choices=REMITTANCE_PAYMENT_METHODS)
+    remittance_payment_method = models.CharField(max_length=3, choices=REMITTANCE_PAYMENT_METHODS, null=True)
     fare_price = DECIMAL()
 
     class Meta(BaseModel.Meta):
@@ -454,11 +454,23 @@ class Lading(RemittanceMixin, ConfirmationMixin):
         (SOLD, 'فروش رفتخ')
     )
 
+    LADING = 'l'
+    LADING_AND_BILL = 'lb'
+    BILL = 'b'
+
+    LADING_TYPES = (
+        (LADING, 'بارگیری'),
+        (LADING_AND_BILL, 'بارگیری و بارنامه دولتی'),
+        (BILL, 'بارنامه دولتی')
+    )
+
+    type = models.CharField(max_length=2, choices=LADING_TYPES)
+
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='ladings')
     remittance = models.ForeignKey(Remittance, on_delete=models.PROTECT, related_name='ladings', null=True, blank=True)
     driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='ladings')
 
-    lading_number = models.IntegerField()
+    lading_number = models.IntegerField(null=True)
     lading_date = jmodels.jDateField()
     origin_amount = DECIMAL()
     destination_amount = DECIMAL()

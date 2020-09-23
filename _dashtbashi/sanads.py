@@ -26,12 +26,12 @@ class LadingSanad:
 
         sanad_items = []
 
-        base_exp = "{}, {}, {}, {},".format(
-            lading.billNumber.number,
-            lading.billNumber.series.serial,
-            car.car_number_str,
-            driver.name,
-        )
+        # base_exp = "{}, {}, {}, {},".format(
+        #     lading.billNumber.number,
+        #     lading.billNumber.series.serial,
+        #     car.car_number_str,
+        #     driver.name,
+        # )
 
         if lading.remittance_payment_method == Lading.TO_COMPANY:
             if lading.contractor_type == Lading.OTHER:
