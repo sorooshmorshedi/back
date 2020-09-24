@@ -506,7 +506,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='ladings')
 
     lading_number = models.IntegerField(null=True)
-    lading_date = jmodels.jDateField()
+    lading_date = jmodels.jDateField(null=True)
     origin_amount = DECIMAL()
     destination_amount = DECIMAL()
 
@@ -514,7 +514,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
     lading_attachment = models.FileField(null=True, blank=True, upload_to=upload_to)
 
     billNumber = models.ForeignKey(LadingBillNumber, on_delete=models.PROTECT, related_name='lading', null=True)
-    bill_date = jmodels.jDateField()
+    bill_date = jmodels.jDateField(null=True)
     bill_price = DECIMAL()
 
     bill_explanation = EXPLANATION()
