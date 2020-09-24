@@ -12,6 +12,9 @@ class LadingSanad:
         car = self.lading.driving.car
         driver = self.lading.driving.driver
 
+        contract_type = "Transportation" if car.contract_type == car.TRANSPORTATION else "OilCompany"
+        print(contract_type)
+
         sanad = self.lading.sanad
         if not sanad:
             sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.lading.financial_year,
@@ -30,20 +33,20 @@ class LadingSanad:
             lading.origin.name,
             lading.destination.name,
             lading.contractor.name,
-            lading.lading_date
+            str(lading.lading_date)
         )
         sanad.save()
 
         sanad_items = []
 
         def get_explanation(fee):
-            return "{}, {}, {}, {}, {}, {}, {}, {}".format(
+            return "{}, {}, {}, {}, {:g}, {:g}, {}, {}".format(
                 lading.id,
                 lading.lading_number,
                 car.car_number_str,
                 driver.name,
-                fee,
-                lading.destination_amount,
+                float(fee),
+                float(lading.destination_amount),
                 lading.ware.name,
                 lading.destination.name
             )
@@ -60,27 +63,29 @@ class LadingSanad:
                 if car.owner == Car.RAHMAN:
                     sanad_items.append({
                         'bes': lading.company_commission_income,
-                        'account': DefaultAccount.get('companyCommissionIncomeInRahmanTransportationCars').account,
-                        'explanation': get_explanation(lading.fare_price)
+                        'account': DefaultAccount.get(
+                            'companyCommissionIncomeInRahman{}Cars'.format(contract_type)).account,
+                        'explanation': get_explanation(lading.company_commission_income)
                     })
                     sanad_items.append({
                         'bes': lading.car_income,
                         'account': car.incomeAccount,
                         'floatAccount': driver.floatAccount,
-                        'explanation': get_explanation(lading.company_commission_income)
+                        'explanation': get_explanation(lading.fare_price)
                     })
 
                 elif car.owner == Car.PARTNERSHIP:
                     sanad_items.append({
                         'bes': lading.company_commission_income,
-                        'account': DefaultAccount.get('companyCommissionIncomeInPartnershipTransportationCars').account,
-                        'explanation': get_explanation(lading.fare_price)
+                        'account': DefaultAccount.get(
+                            'companyCommissionIncomeInPartnership{}Cars'.format(contract_type)).account,
+                        'explanation': get_explanation(lading.company_commission_income)
                     })
                     sanad_items.append({
                         'bes': lading.car_income,
                         'account': car.incomeAccount,
                         'floatAccount': driver.floatAccount,
-                        'explanation': get_explanation(lading.company_commission_income)
+                        'explanation': get_explanation(lading.fare_price)
                     })
 
                 elif car.owner == Car.EBRAHIM:
@@ -88,33 +93,35 @@ class LadingSanad:
                         'bes': lading.lading_total_value,
                         'account': car.payableAccount,
                         'floatAccount': driver.floatAccount,
-                        'explanation': get_explanation(lading.company_commission_income)
+                        'explanation': get_explanation(lading.fare_price)
                     })
 
                 elif car.owner == Car.RAHIM:
                     sanad_items.append({
                         'bes': lading.company_commission_income,
-                        'account': DefaultAccount.get('companyCommissionIncomeInRahimTransportationCars').account,
-                        'explanation': get_explanation(lading.fare_price)
+                        'account': DefaultAccount.get(
+                            'companyCommissionIncomeInRahim{}Cars'.format(contract_type)).account,
+                        'explanation': get_explanation(lading.company_commission_income)
                     })
                     sanad_items.append({
                         'bes': lading.car_income,
                         'account': car.payableAccount,
                         'floatAccount': driver.floatAccount,
-                        'explanation': get_explanation(lading.company_commission_income)
+                        'explanation': get_explanation(lading.fare_price)
                     })
 
                 elif car.owner == Car.OTHER:
                     sanad_items.append({
                         'bes': lading.company_commission_income,
-                        'account': DefaultAccount.get('companyCommissionIncomeInOtherTransportationCars').account,
-                        'explanation': get_explanation(lading.fare_price)
+                        'account': DefaultAccount.get(
+                            'companyCommissionIncomeInOther{}Cars'.format(contract_type)).account,
+                        'explanation': get_explanation(lading.company_commission_income)
                     })
                     sanad_items.append({
                         'bes': lading.car_income,
                         'account': car.payableAccount,
                         'floatAccount': driver.floatAccount,
-                        'explanation': get_explanation(lading.company_commission_income)
+                        'explanation': get_explanation(lading.fare_price)
                     })
 
         elif lading.remittance_payment_method == Lading.TO_COMPANY_AND_DRIVER:
@@ -128,15 +135,16 @@ class LadingSanad:
             if car.owner == Car.OTHER:
                 sanad_items.append({
                     'bes': lading.company_commission_income,
-                    'account': DefaultAccount.get('companyCommissionIncomeInOtherTransportationCars').account,
-                    'explanation': get_explanation(lading.company_commission_income)
+                    'account': DefaultAccount.get('companyCommissionIncomeInOther{}Cars'.format(contract_type)).account,
+                    'explanation': get_explanation(lading.fare_price)
                 })
 
             if car.owner == Car.EBRAHIM:
                 sanad_items.append({
                     'bes': lading.company_commission_income,
-                    'account': DefaultAccount.get('companyCommissionIncomeInEbrahimTransportationCars').account,
-                    'explanation': get_explanation(lading.company_commission_income)
+                    'account': DefaultAccount.get(
+                        'companyCommissionIncomeInEbrahim{}Cars'.format(contract_type)).account,
+                    'explanation': get_explanation(lading.fare_price)
                 })
 
         elif lading.remittance_payment_method == Lading.COMPANY_PAYS and lading.contractor_type == Lading.COMPANY:
@@ -165,7 +173,7 @@ class LadingSanad:
             if car.owner == Car.PARTNERSHIP:
                 sanad_items.append({
                     'bes': lading.car_income,
-                    'account': DefaultAccount.get('partnershipCarsTransportationIncome').account,
+                    'account': DefaultAccount.get('partnershipCars{}Income'.format(contract_type)).account,
                     'explanation': get_explanation(lading.contractor_price)
                 })
 
@@ -243,7 +251,7 @@ class LadingSanad:
                 lading.driving.car.car_number_str,
                 lading.billNumber.number,
                 lading.billNumber.series.serial,
-                lading.bill_date,
+                str(lading.bill_date),
             )
 
         bed_account = None
@@ -305,6 +313,7 @@ class OilCompanyLadingSanad:
         oil_company_lading = self.oilCompanyLading
         car = self.oilCompanyLading.driving.car
         driver = self.oilCompanyLading.driving.driver
+        contract_type = "Transportation" if car.contract_type == car.TRANSPORTATION else "OilCompany"
 
         sanad = self.oilCompanyLading.sanad
         if not sanad:
@@ -340,7 +349,8 @@ class OilCompanyLadingSanad:
         if car.owner == Car.RAHMAN:
             sanad_items.append({
                 'bes': oil_company_lading.company_commission,
-                'account': DefaultAccount.get('companyCommissionIncomeInRahmanOilCompanyTransportationCars').account,
+                'account': DefaultAccount.get(
+                    'companyCommissionIncomeInRahmanOilCompany{}Cars'.format(contract_type)).account,
                 'explanation': explanation
             })
 
@@ -348,14 +358,15 @@ class OilCompanyLadingSanad:
             sanad_items.append({
                 'bes': oil_company_lading.company_commission,
                 'account': DefaultAccount.get(
-                    'companyCommissionIncomeInPartnershipOilCompanyTransportationCars').account,
+                    'companyCommissionIncomeInPartnershipOilCompany{}Cars'.format(contract_type)).account,
                 'explanation': explanation
             })
 
         elif car.owner == Car.EBRAHIM:
             sanad_items.append({
                 'bes': oil_company_lading.company_commission,
-                'account': DefaultAccount.get('companyCommissionIncomeInEbrahimOilCompanyTransportationCars').account,
+                'account': DefaultAccount.get(
+                    'companyCommissionIncomeInEbrahimOilCompany{}Cars'.format(contract_type)).account,
                 'floatAccount': driver.floatAccount,
                 'explanation': explanation
             })
@@ -363,14 +374,16 @@ class OilCompanyLadingSanad:
         elif car.owner == Car.RAHIM:
             sanad_items.append({
                 'bes': oil_company_lading.company_commission,
-                'account': DefaultAccount.get('companyCommissionIncomeInRahimOilCompanyTransportationCars').account,
+                'account': DefaultAccount.get(
+                    'companyCommissionIncomeInRahimOilCompany{}Cars'.format(contract_type)).account,
                 'explanation': explanation
             })
 
         elif car.owner == Car.OTHER:
             sanad_items.append({
                 'bes': oil_company_lading.company_commission,
-                'account': DefaultAccount.get('companyCommissionIncomeInOtherOilCompanyTransportationCars').account,
+                'account': DefaultAccount.get(
+                    'companyCommissionIncomeInOtherOilCompany{}Cars'.format(contract_type)).account,
                 'explanation': explanation
             })
 

@@ -556,7 +556,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "companyCommissionIncomeInRahmanOilCompanyTransportationCars"
+      "codename": "companyCommissionIncomeInRahmanOilCompanyCars"
     }
   },
   {
@@ -570,7 +570,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "companyCommissionIncomeInRahimOilCompanyTransportationCars"
+      "codename": "companyCommissionIncomeInRahimOilCompanyCars"
     }
   },
   {
@@ -584,7 +584,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "companyCommissionIncomeInEbrahimOilCompanyTransportationCars"
+      "codename": "companyCommissionIncomeInEbrahimOilCompanyCars"
     }
   },
   {
@@ -598,7 +598,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "companyCommissionIncomeInPartnershipOilCompanyTransportationCars"
+      "codename": "companyCommissionIncomeInPartnershipOilCompanyCars"
     }
   },
   {
@@ -612,7 +612,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "companyCommissionIncomeInOtherOilCompanyTransportationCars"
+      "codename": "companyCommissionIncomeInOtherOilCompanyCars"
     }
   },
   {
