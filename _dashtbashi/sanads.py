@@ -1,5 +1,6 @@
 from _dashtbashi.models import Lading, Car, OilCompanyLading
 from accounts.defaultAccounts.models import DefaultAccount
+from helpers.functions import float_to_str
 from sanads.models import clearSanad, Sanad, newSanadCode
 
 
@@ -13,7 +14,6 @@ class LadingSanad:
         driver = self.lading.driving.driver
 
         contract_type = "Transportation" if car.contract_type == car.TRANSPORTATION else "OilCompany"
-        print(contract_type)
 
         sanad = self.lading.sanad
         if not sanad:
@@ -40,13 +40,13 @@ class LadingSanad:
         sanad_items = []
 
         def get_explanation(fee):
-            return "{}, {}, {}, {}, {:g}, {:g}, {}, {}".format(
+            return "{}, {}, {}, {}, {}, {}, {}, {}".format(
                 lading.id,
                 lading.lading_number,
                 car.car_number_str,
                 driver.name,
-                float(fee),
-                float(lading.destination_amount),
+                float_to_str(fee),
+                float_to_str(lading.destination_amount),
                 lading.ware.name,
                 lading.destination.name
             )

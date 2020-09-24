@@ -53,3 +53,29 @@ def get_object_by_code(queryset, position, object_id=None):
         return item
     except IndexError:
         return None
+
+
+def float_to_str(f):
+    float_string = repr(float(f))
+    if 'e' in float_string:  # detect scientific notation
+        digits, exp = float_string.split('e')
+        digits = digits.replace('.', '').replace('-', '')
+        exp = int(exp)
+        zero_padding = '0' * (abs(int(exp)) - 1)  # minus 1 for decimal point in the sci notation
+        sign = '-' if f < 0 else ''
+        if exp > 0:
+            float_string = '{}{}{}.0'.format(sign, digits, zero_padding)
+        else:
+            float_string = '{}0.{}{}'.format(sign, zero_padding, digits)
+    return add_separator(float_string.strip('0').strip('.'))
+
+
+def add_separator(value):
+    try:
+        str_value = '{:,}'.format(float(value))
+    except ValueError:
+        return value
+    if '.' in str_value:
+        str_value = str_value.strip('0')
+    str_value = str_value.strip('.')
+    return str_value

@@ -1,20 +1,14 @@
 from django import template
 
 from factors.models import Factor
+from helpers.functions import add_separator
 
 register = template.Library()
 
 
 @register.filter(is_safe=True)
 def money(value):
-    try:
-        str_value = '{:,}'.format(float(value))
-    except ValueError:
-        return value
-    if '.' in str_value:
-        str_value = str_value.strip('0')
-    str_value = str_value.strip('.')
-    return str_value
+    return add_separator(value)
 
 
 @register.simple_tag
