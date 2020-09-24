@@ -236,13 +236,15 @@ class LadingSanad:
 
         # Lading Bill Sanads
 
-        explanation = "{} {}, {}, {}".format(
-            lading.driving.driver.name,
-            lading.driving.car.car_number_str,
-            lading.billNumber.number,
-            lading.billNumber.series.serial,
-            lading.bill_date,
-        )
+        explanation = ""
+        if lading.billNumber:
+            explanation = "{} {}, {}, {}".format(
+                lading.driving.driver.name,
+                lading.driving.car.car_number_str,
+                lading.billNumber.number,
+                lading.billNumber.series.serial,
+                lading.bill_date,
+            )
 
         bed_account = None
         bed_float_account = None
