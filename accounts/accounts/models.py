@@ -236,20 +236,6 @@ class Account(BaseModel):
     def title(self):
         return "{0} - {1}".format(self.code, self.name)
 
-    @property
-    def bed(self):
-        bed, bes = AccountBalance.get_bed_bes(account=self)
-        return bed
-
-    @property
-    def bes(self):
-        bed, bes = AccountBalance.get_bed_bes(account=self)
-        return bes
-
-    @property
-    def balance(self):
-        return AccountBalance.get_balance(account=self)
-
     def can_delete(self):
         return self.level != 0 and self.sanadItems.count() == 0
 
@@ -291,6 +277,19 @@ class Account(BaseModel):
     @staticmethod
     def get_cost_of_sold_wares_account(user):
         return Account.objects.inFinancialYear().get(code='701010001')
+
+    def get_balance(self):
+        bed = bes = 0
+        balances = AccountBalance.objects.inFinancialYear().filter(account__code__startswith=self.code).all()
+        for balance in balances:
+            bed += balance.bed
+            bes = + balance.bes
+        remain = abs(bed - bes)
+        return {
+            'bed': bed,
+            'bes': bes,
+            'remain': remain
+        }
 
 
 class AccountBalance(BaseModel):

@@ -108,17 +108,7 @@ class AccountRetrieveSerializer(serializers.ModelSerializer):
     balance = serializers.SerializerMethodField()
 
     def get_balance(self, obj: Account):
-        bed = bes = 0
-        for balance in self.balances:
-            if balance.account.code.startswith(obj.code):
-                bed += balance.bed
-                bes = + balance.bes
-        remain = abs(bed - bes)
-        return {
-            'bed': bed,
-            'bes': bes,
-            'remain': remain
-        }
+        return obj.get_balance()
 
     def get_title(self, obj):
         return obj.title
@@ -135,10 +125,6 @@ class AccountRetrieveSerializer(serializers.ModelSerializer):
             .prefetch_related('costCenterGroup') \
             .prefetch_related('type')
         return queryset
-
-    @cached_property
-    def balances(self):
-        return AccountBalance.objects.inFinancialYear().prefetch_related('account').all()
 
 
 class AccountListSerializer(serializers.ModelSerializer):
