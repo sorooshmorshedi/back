@@ -1,5 +1,3 @@
-from typing import Any, Tuple, Dict
-
 import jdatetime
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ObjectDoesNotExist
@@ -50,10 +48,10 @@ class Company(BaseModel):
             ('deleteOwn.company', 'حذف شرکت های خود'),
         )
 
-    def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+    def delete(self, *args, **kwargs):
         if self.usersActiveCompany.all().count() != 0:
             raise ValidationError("این شرکت برای بعضی از کاربران فعال است")
-        return super().delete(using, keep_parents)
+        return super().delete(*args, **kwargs)
 
 
 class FinancialYear(BaseModel):
@@ -102,10 +100,10 @@ class FinancialYear(BaseModel):
             ('cancelClosingOwn.financialYear', 'لغو بستن سال های مالی خود'),
         )
 
-    def delete(self, using: Any = ..., keep_parents: bool = ...) -> Tuple[int, Dict[str, int]]:
+    def delete(self, *args, **kwargs):
         if self.users.all().count() != 0:
             raise ValidationError("این سال مالی برای بعضی از کاربران فعال است")
-        return super().delete(using, keep_parents)
+        return super().delete(*args, **kwargs)
 
     @property
     def is_closed(self):

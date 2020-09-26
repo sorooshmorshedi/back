@@ -31,7 +31,7 @@ def get_codenames(request, view):
         if method == 'GET':
             operations.append("get")
             operations.append("getOwn")
-        if method == 'PUT':
+        if method in ('PUT', 'PATCH'):
             operations.append("update")
             operations.append("updateOwn")
         if method == 'DELETE':
@@ -77,6 +77,8 @@ class BasicCRUDPermission(BasicObjectPermission):
             has_perm = user.has_perm(permission_codename)
             if has_perm:
                 return True
+
+        print(permission_codenames)
 
         permission_codename = permission_codenames[0]
         permission = Permission.objects.filter(codename=permission_codename).first()

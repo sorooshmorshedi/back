@@ -27,7 +27,7 @@ class FactorTest(MTestCase):
         ware = Ware.objects.first()
 
         return {
-            "factor": {
+            "item": {
                 "taxPercent": 0,
                 "taxValue": 0,
                 "discountPercent": 0,
@@ -40,7 +40,7 @@ class FactorTest(MTestCase):
                 "costCenter": cost_center_id,
                 "type": "buy"
             },
-            "factor_items": {
+            "items": {
                 "items": [{
                     "discountValue": 0,
                     "discountPercent": 0,
@@ -51,7 +51,7 @@ class FactorTest(MTestCase):
                 }],
                 "ids_to_delete": []
             },
-            "factor_expenses": {
+            "expenses": {
                 "items": [],
                 "ids_to_delete": []
             }
@@ -87,6 +87,7 @@ class FactorTest(MTestCase):
             floatAccount_id=float_account_id,
             costCenter_id=cost_center_id,
             date=jdatetime.date.today(),
+            time=jdatetime.datetime.now().strftime('%H:%m'),
             financial_year=financial_year
         )
         return factor

@@ -1,3 +1,6 @@
+import datetime
+
+import jdatetime
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -55,8 +58,8 @@ class FirstPeriodInventoryView(APIView):
     def set_first_period_inventory(data, financial_year=None):
         """
         :param data: {
-            factor: {...},
-            factor_items: {
+            : {...},
+            items: {
                 items: [{..}, ...},
                 ids_to_delete: []
         }

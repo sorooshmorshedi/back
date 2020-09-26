@@ -94,11 +94,11 @@ class ClosingHelpers:
             first_period_inventory.delete()
 
         data = {
-            'factor': {
+            'item': {
                 'date': jdatetime.date.today(),
-                'time': jdatetime.datetime.now(),
+                'time': jdatetime.datetime.now().strftime('%H:%m'),
             },
-            'factor_items': {
+            'items': {
                 'items': [],
                 'ids_to_delete': []
             }
@@ -115,7 +115,7 @@ class ClosingHelpers:
                 'count': inventory.count,
             })
 
-        data['factor_items']['items'] = items
+        data['items']['items'] = items
 
         FirstPeriodInventoryView.set_first_period_inventory(data, target_financial_year)
 
@@ -313,7 +313,7 @@ class FinancialYearModelView(viewsets.ModelViewSet):
     serializer_class = FinancialYearSerializer
 
     def get_queryset(self) -> QuerySet:
-        return FinancialYear.objects.hasAccess(self.request.method)
+        return FinancialYear.objects.hasAccess(self.request.method, self.permission_basename)
 
     def perform_create(self, serializer: FinancialYearSerializer) -> None:
         serializer.save(

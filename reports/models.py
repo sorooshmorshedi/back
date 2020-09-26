@@ -4,8 +4,8 @@ from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
-class Report(BaseModel):
-    class Meta(BaseModel.Meta):
+class Report(models.Model):
+    class Meta:
         managed = False
 
         permissions = (

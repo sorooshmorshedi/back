@@ -27,7 +27,7 @@ class CompanyTest(MTestCase):
 
         company_name = self.faker.name()
 
-        company = CompanyTest.create_company(company_name)
+        company = CompanyTest.create_company(user, company_name)
 
         response = self.client.get(reverse('company-detail', args=[company.id]))
 
@@ -39,7 +39,7 @@ class CompanyTest(MTestCase):
     def test_update_companies(self):
         user = UserTest.get_user()
         self.client.force_authenticate(user)
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
 
         new_company_name = 'alia {}'.format(random.random())
 
@@ -55,16 +55,17 @@ class CompanyTest(MTestCase):
     def test_delete_companies(self):
         user = UserTest.get_user()
         self.client.force_authenticate(user)
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
 
         response = self.client.delete(reverse('company-detail', args=[company.id]))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     @staticmethod
-    def create_company(name=None):
+    def create_company(user, name=None):
         name = name if name else MTestCase.faker.name()
         company = Company(
+            superuser=user,
             name=name,
         )
         company.save()

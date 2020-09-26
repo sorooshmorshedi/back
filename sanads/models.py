@@ -61,7 +61,11 @@ class Sanad(BaseModel, ConfirmationMixin):
         for item in self.items.all():
             account = item.account
 
-            balance = account.bed - account.bes
+            balance = account.get_balance()
+            bed = balance['bed']
+            bes = balance['bes']
+
+            balance = bed - bes
 
             if balance > 0:
                 if account.max_bed and account.max_bed < balance:

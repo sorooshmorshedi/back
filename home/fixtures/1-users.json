@@ -9,6 +9,8 @@
       "username": "admin",
       "first_name": "مدیر",
       "last_name": "سیستم",
+      "active_company": 1,
+      "active_financial_year": 1,
       "email": "",
       "is_staff": true,
       "is_active": true,

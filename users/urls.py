@@ -14,7 +14,7 @@ urlpatterns = [
     url(r'^list$', UserListView.as_view(), name='list-users'),
 
     url(r'^sendVerificationCodeForForgetPassword$', SendVerificationCodeForForgetPasswordView.as_view()),
-    url(r'^changePasswordByVerificationCode$', ChangePasswordByVerificationCodeView.as_view(), name='list-users'),
+    url(r'^changePasswordByVerificationCode$', ChangePasswordByVerificationCodeView.as_view()),
 
     url(r'^roles/create$', RoleCreateView.as_view(), name='create-role'),
     url(r'^roles/update/(?P<pk>[0-9]+)$', RoleUpdateView.as_view(), name='update-role'),

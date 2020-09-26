@@ -4,7 +4,7 @@ import jdatetime
 from django.urls import reverse
 from rest_framework import status
 
-from companies.models import Company, FinancialYear
+from companies.models import FinancialYear
 from companies.tests.test_companies import CompanyTest
 from helpers.test import MTestCase
 from users.tests.test_users import UserTest
@@ -13,7 +13,7 @@ from users.tests.test_users import UserTest
 class FinancialYearTest(MTestCase):
     def test_create_financial_year(self):
         user = UserTest.get_user()
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
         self.client.force_authenticate(user)
 
         name = self.faker.name()
@@ -32,7 +32,7 @@ class FinancialYearTest(MTestCase):
     def test_retrieve_financial_year(self):
         user = UserTest.get_user()
         self.client.force_authenticate(user)
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
         financial_year = FinancialYearTest.create_financial_year(company)
 
         response = self.client.get(reverse('financial-year-detail', args=[financial_year.id]))
@@ -45,7 +45,7 @@ class FinancialYearTest(MTestCase):
     def test_update_financial_year(self):
         user = UserTest.get_user()
         self.client.force_authenticate(user)
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
         financial_year = FinancialYearTest.create_financial_year(company)
 
         new_name = 'sep {}'.format(random.random())
@@ -62,7 +62,7 @@ class FinancialYearTest(MTestCase):
     def test_delete_financial_year(self):
         user = UserTest.get_user()
         self.client.force_authenticate(user)
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
         financial_year = FinancialYearTest.create_financial_year(company)
 
         response = self.client.delete(reverse('financial-year-detail', args=[financial_year.id]))

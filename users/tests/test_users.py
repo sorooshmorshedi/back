@@ -15,7 +15,10 @@ class UserTest(MTestCase):
 
         response = self.client.post(reverse('create-user'), data={
             'username': 'mmd',
-            'password': '1234'
+            'password': '1234',
+            'first_name': 'mohammad',
+            'last_name': 'mostafaee',
+            'phone': '09307468674',
         })
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -28,6 +31,10 @@ class UserTest(MTestCase):
 
         response = self.client.put(reverse('update-user', args=[user.id]), data={
             'username': 'mmd',
+            'password': '1234',
+            'first_name': 'mohammad',
+            'last_name': 'mostafaee',
+            'phone': '09307468674',
         })
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -46,8 +53,8 @@ class UserTest(MTestCase):
         self.client.logout()
 
     def test_user_change_password(self):
-        self.client.force_authenticate(UserTest.get_user())
-        user = self.create_user()
+        user = UserTest.get_user()
+        self.client.force_authenticate(user)
 
         response = self.client.post(reverse('change-user-password'), data={
             'user': user.id,
@@ -65,10 +72,13 @@ class UserTest(MTestCase):
         for i in range(3):
             UserTest.create_user()
 
+        for i in range(1):
+            UserTest.create_user(superuser=user)
+
         response = self.client.get(reverse('list-users'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(len(response.data), 2)
 
         self.client.logout()
 
@@ -87,7 +97,7 @@ class UserTest(MTestCase):
         self.client.force_authenticate(user)
 
         from companies.tests.test_companies import CompanyTest
-        company = CompanyTest.create_company()
+        company = CompanyTest.create_company(user)
 
         response = self.client.post(reverse('set-active-company'), data={
             'company': company.id
@@ -108,13 +118,14 @@ class UserTest(MTestCase):
         return user
 
     @staticmethod
-    def create_user(username=None, password=None):
-        if not username:
-            username = "{} - {}".format(MTestCase.faker.name(), random.random())
-            password = MTestCase.faker.name()
+    def create_user(username=None, password=None, phone=None, superuser=None):
         user = User.objects.create(
-            username=username
+            username=username or "{} - {}".format(MTestCase.faker.name(), random.random()),
+            phone=phone or MTestCase.get_fake_phone_number(),
+            first_name=MTestCase.faker.name(),
+            last_name=MTestCase.faker.name(),
+            superuser=superuser,
         )
-        user.set_password(password)
+        user.set_password(password or MTestCase.faker.name())
         user.save()
         return user

@@ -8,7 +8,8 @@ from rest_framework.views import APIView
 from helpers.auth import BasicCRUDPermission
 from users.models import User, PhoneVerification
 from users.permissions import DeleteUserPermission, ChangePasswordPermission
-from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer
+from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer, \
+    UserDeleteSerializer
 
 
 class CurrentUserApiView(APIView):
@@ -59,9 +60,10 @@ class UserUpdateView(generics.UpdateAPIView):
 class UserDestroyView(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission, DeleteUserPermission)
     permission_basename = 'user'
-    serializer_class = UserUpdateSerializer
+    serializer_class = UserDeleteSerializer
 
     def get_queryset(self) -> QuerySet:
+        return User.objects.all()
         return User.objects.hasAccess('delete').filter(
             Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
         )
