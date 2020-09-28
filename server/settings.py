@@ -185,3 +185,7 @@ MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'users.User'
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
