@@ -66,6 +66,9 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             if not data.get('buyer_or_seller'):
                 raise serializers.ValidationError("لطفا خریدار یا فروشنده را مشخص کنید")
 
+            if not data.get('person_type'):
+                raise serializers.ValidationError("لطفا نوع شخص را مشخص کنید")
+
         if self.instance and SanadItem.objects.filter(account=self.instance).exists():
             if self.instance.floatAccountGroup != data.get('floatAccountGroup'):
                 raise serializers.ValidationError("گروه حساب شناور برای حساب دارای گردش غیر قابل ویرایش می باشد")
