@@ -12,7 +12,8 @@ from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
-from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter, LadingBillNumberFilter
+from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter, LadingBillNumberFilter, \
+    OtherDriverPaymentFilter
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OtherDriverPayment
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
@@ -358,6 +359,9 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'otherDriverPayment'
     serializer_class = OtherDriverPaymentListRetrieveSerializer
+    pagination_class = LimitOffsetPagination
+    filterset_class = OtherDriverPaymentFilter
+    ordering_fields = '__all__'
 
     def get_queryset(self) -> QuerySet:
         return OtherDriverPayment.objects.hasAccess(self.request.method)

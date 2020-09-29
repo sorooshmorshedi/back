@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
 from _dashtbashi.models import LadingBillSeries, Remittance, Lading, OilCompanyLading, LadingBillNumber, \
-    OilCompanyLadingItem
+    OilCompanyLadingItem, OtherDriverPayment
 from helpers.filters import BASE_FIELD_FILTERS
 
 
@@ -162,6 +162,23 @@ class OilCompanyLadingItemFilter(filters.FilterSet):
             'oilCompanyLading__driving__car': ['exact'],
             'oilCompanyLading__driving__driver': ['exact'],
 
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class OtherDriverPaymentFilter(filters.FilterSet):
+    class Meta:
+        model = OtherDriverPayment
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'code': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+            'driving__driver__name': BASE_FIELD_FILTERS,
+            'explanation': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
