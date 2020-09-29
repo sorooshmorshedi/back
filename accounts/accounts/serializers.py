@@ -54,7 +54,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = '__all__'
-        read_only_fields = ('financial_year', 'code', 'level', 'type')
+        read_only_fields = ('financial_year', 'code', 'level')
 
     def validate(self, data):
 
@@ -92,6 +92,7 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
         ).count() != 0:
             raise serializers.ValidationError("نوع حساب های دارای گردش غیر قابل ویرایش می باشد")
 
+        print(validated_data)
         res = super().update(instance, validated_data)
         if instance.level != 0:
             # update children when account's type changes
