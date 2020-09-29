@@ -1,4 +1,6 @@
 import random
+from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
 import jdatetime
 from django.contrib.auth.models import AbstractUser, Permission, UserManager
@@ -7,7 +9,6 @@ from django.db import models
 from django.shortcuts import get_object_or_404
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError, PermissionDenied
-
 from companies.models import Company, FinancialYear
 from helpers.models import BaseModel, BaseManager
 from helpers.sms import Sms
@@ -56,6 +57,20 @@ class User(AbstractUser, BaseModel):
     modules = ArrayField(models.CharField(max_length=30), default=list, blank=True)
 
     objects = MyUserManager()
+
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9]+$',
+                message='نام کاربری باید از حدوف و اعداد انگلیسی تشکیل شود'
+            )
+        ],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+    )
 
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
