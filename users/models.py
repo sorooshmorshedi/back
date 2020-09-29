@@ -169,7 +169,7 @@ class PhoneVerification(BaseModel):
 
 
 class City(BaseModel):
-    name = models.CharField(unique=True, max_length=255)
+    name = models.CharField(max_length=255)
 
     class Meta(BaseModel.Meta):
         default_permissions = ()

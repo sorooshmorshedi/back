@@ -12,7 +12,7 @@ from helpers.models import BaseModel
 
 class Unit(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='units')
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
@@ -35,7 +35,7 @@ class Unit(BaseModel):
 
 class Warehouse(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouses')
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
@@ -71,7 +71,7 @@ class WareLevel(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wareLevels')
     name = models.CharField(max_length=100)
     explanation = models.CharField(max_length=255, blank=True, null=True)
-    code = models.CharField(max_length=50, unique=True)
+    code = models.CharField(max_length=50)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
     level = models.IntegerField(choices=WARE_LEVELS)
 
@@ -135,8 +135,8 @@ class Ware(BaseModel):
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
     name = models.CharField(max_length=150)
-    code = models.CharField(max_length=50, unique=True)
-    barcode = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    code = models.CharField(max_length=50)
+    barcode = models.CharField(max_length=50, blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     isDisabled = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=24, decimal_places=0, null=True)

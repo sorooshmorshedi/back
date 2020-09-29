@@ -382,7 +382,7 @@ class RemittanceMixin(BaseModel):
 
 class Remittance(RemittanceMixin, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='remittances')
-    code = models.IntegerField(unique=True)
+    code = models.IntegerField()
     issue_date = jmodels.jDateField()
     loading_date = jmodels.jDateField()
     end_date = jmodels.jDateField()
