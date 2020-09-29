@@ -47,7 +47,7 @@ class DefiniteFactor(APIView):
 
             ware = factor_item.ware
 
-            if ware.isService:
+            if ware.is_service:
                 continue
 
             DefiniteFactor.updateInventory(factor_item, True)
@@ -180,7 +180,7 @@ class DefiniteFactor(APIView):
         ware = item.ware
         warehouse = item.warehouse
 
-        if item.ware.isService:
+        if item.ware.is_service:
             return
 
         is_used_in_next_years = FactorItem.objects.filter(

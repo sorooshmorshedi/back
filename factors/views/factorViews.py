@@ -149,7 +149,7 @@ class FactorModelView(viewsets.ModelViewSet):
             if for_delete:
                 is_output = not is_output
 
-            if not ware.isService:
+            if not ware.is_service:
                 balance = ware.get_inventory_count(warehouse)
                 if is_output:
                     if ware.minInventory and balance - count < ware.minInventory:

@@ -81,7 +81,7 @@ class FactorItemSerializer(serializers.ModelSerializer):
         ware = attrs.get('ware')
         warehouse = attrs.get('warehouse')
 
-        if not ware.isService and not warehouse:
+        if not ware.is_service and not warehouse:
             raise serializers.ValidationError("انبار اجباری می باشد")
 
         return super(FactorItemSerializer, self).validate(attrs)

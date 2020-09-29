@@ -154,7 +154,7 @@ class Ware(BaseModel):
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
-    isService = models.BooleanField(default=False)
+    is_service = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
