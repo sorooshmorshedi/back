@@ -640,7 +640,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForRahmanOilCompanyDrivers"
+      "codename": "imprestAccountForRahmanTransportationDrivers"
     }
   },
   {
@@ -654,7 +654,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForRahimOilCompanyDrivers"
+      "codename": "imprestAccountForRahimTransportationDrivers"
     }
   },
   {
@@ -668,7 +668,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForEbrahimOilCompanyDrivers"
+      "codename": "imprestAccountForEbrahimTransportationDrivers"
     }
   },
   {
@@ -682,7 +682,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForPartnershipOilCompanyDrivers"
+      "codename": "imprestAccountForPartnershipTransportationDrivers"
     }
   },
   {
@@ -696,7 +696,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForOtherOilCompanyDrivers"
+      "codename": "imprestAccountForOtherTransportationDrivers"
     }
   },
   {
@@ -710,7 +710,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForRahmanTransportationDrivers"
+      "codename": "imprestAccountForRahmanOilCompanyDrivers"
     }
   },
   {
@@ -724,7 +724,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForRahimTransportationDrivers"
+      "codename": "imprestAccountForRahimOilCompanyDrivers"
     }
   },
   {
@@ -738,7 +738,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForEbrahimTransportationDrivers"
+      "codename": "imprestAccountForEbrahimOilCompanyDrivers"
     }
   },
   {
@@ -752,7 +752,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForPartnershipTransportationDrivers"
+      "codename": "imprestAccountForPartnershipOilCompanyDrivers"
     }
   },
   {
@@ -766,7 +766,7 @@
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "imprestAccountForOtherTransportationDrivers"
+      "codename": "imprestAccountForOtherOilCompanyDrivers"
     }
   },
   {
