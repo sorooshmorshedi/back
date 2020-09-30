@@ -103,7 +103,7 @@ class DefiniteFactor(APIView):
             "از" if factor.type in Factor.BUY_GROUP else "به"
         )
 
-        if factor.type != Factor.BACK_FROM_BUY:
+        if factor.type not in (Factor.BACK_FROM_BUY, Factor.CONSUMPTION_WARE):
             DefiniteFactor.submitSumSanadItems(
                 user,
                 factor,
@@ -115,7 +115,7 @@ class DefiniteFactor(APIView):
                 explanation
             )
 
-        if factor.type == Factor.SALE:
+        if factor.type in (Factor.SALE, Factor.CONSUMPTION_WARE):
             DefiniteFactor.submitSaleSanadItems(user, factor, explanation)
         elif factor.type == Factor.BACK_FROM_SALE:
             DefiniteFactor.submitBackFromSaleSanadItems(user, factor, explanation)
@@ -322,8 +322,18 @@ class DefiniteFactor(APIView):
         for item in factor.items.all():
             value += item.calculated_value
 
+        bed_account = Account.get_cost_of_sold_wares_account(user)
+        bed_float_account = None
+        bed_cost_center = None
+        if factor.type == Factor.CONSUMPTION_WARE:
+            bed_account = factor.account
+            bed_float_account = factor.floatAccount
+            bed_cost_center = factor.costCenter
+
         sanad.items.create(
-            account=Account.get_cost_of_sold_wares_account(user),
+            account=bed_account,
+            floatAccount=bed_float_account,
+            costCenter=bed_cost_center,
             bed=value,
             explanation=explanation,
             financial_year=sanad.financial_year
