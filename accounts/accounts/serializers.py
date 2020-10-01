@@ -51,10 +51,11 @@ class AccountTypeSerializer(serializers.ModelSerializer):
 
 
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Account
         fields = '__all__'
-        read_only_fields = ('financial_year', 'code', 'level')
+        read_only_fields = ('financial_year', 'code', 'level', 'type')
 
     def validate(self, data):
 
@@ -77,30 +78,6 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
                     "گروه مرکز هزینه و درآمد برای حساب دارای گردش غیر قابل ویرایش می باشد")
 
         return data
-
-    def create(self, validated_data):
-        data = validated_data.copy()
-        data['type'] = data.get('type', None) or data['parent'].type
-
-        return Account.objects.create(**data)
-
-    def update(self, instance: Account, validated_data):
-        old_type = instance.type
-
-        if old_type != validated_data.get('type', old_type) and SanadItem.objects.filter(
-                account__code__startswith=instance.code
-        ).count() != 0:
-            raise serializers.ValidationError("نوع حساب های دارای گردش غیر قابل ویرایش می باشد")
-
-        print(validated_data)
-        res = super().update(instance, validated_data)
-        if instance.level != 0:
-            # update children when account's type changes
-            Account.objects.filter(
-                code__startswith=instance.code,
-                type=old_type
-            ).update(type=instance.type)
-        return res
 
 
 class AccountRetrieveSerializer(serializers.ModelSerializer):

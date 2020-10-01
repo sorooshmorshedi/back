@@ -73,12 +73,15 @@ class UserChangePasswordView(APIView):
     permission_classes = (IsAuthenticated, ChangePasswordPermission)
 
     def post(self, request):
-        user = get_object_or_404(
-            User.objects.hasAccess('get', 'user').filter(
-                Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
-            ),
-            pk=request.data.get('user')
-        )
+        user = request.user
+
+        qs = User.objects.hasAccess('get', 'user')
+        if not user.is_staff:
+            qs.filter(
+                Q(superuser=user.get_superuser()) | Q(id=user.id)
+            )
+
+        user = get_object_or_404(qs, pk=request.data.get('user'))
         request.user.has_object_perm(user, 'changePassword', raise_exception=True)
         user.set_password(request.data.get('password'))
         user.save()

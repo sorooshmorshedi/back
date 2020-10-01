@@ -129,7 +129,6 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
         )
 
     def perform_create(self, serializer):
-
         parent = serializer.validated_data.get('parent')
         account_type = serializer.validated_data.get('account_type')
         if parent:
@@ -168,11 +167,18 @@ class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
                 code = Account.get_new_group_code()
                 level = 0
 
+        type = serializer.initial_data.get('type')
+        if type:
+            type = AccountType.objects.get(pk=type)
+        else:
+            type = parent.type
+
         serializer.save(
             financial_year=self.request.user.active_financial_year,
             parent=parent,
             code=code,
-            level=level
+            level=level,
+            type=type
         )
 
     def list(self, request, *ergs, **kwargs):
@@ -202,6 +208,38 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
             self.request.method,
             get_account_permission_basename(self)
         )
+
+    def perform_update(self, serializer: AccountCreateUpdateSerializer) -> None:
+
+        instance = self.get_object()
+        old_type = instance.type
+        new_type = self.request.data.get('type')
+
+        print(old_type, old_type.id)
+        print(new_type)
+
+        if new_type:
+            new_type = AccountType.objects.get(pk=new_type)
+        else:
+            new_type = old_type
+
+        if old_type != new_type and SanadItem.objects.filter(
+                account__code__startswith=instance.code
+        ).count() != 0:
+            raise serializers.ValidationError("نوع حساب های دارای گردش غیر قابل ویرایش می باشد")
+
+        serializer.save(
+            type=new_type
+        )
+
+        instance = serializer.instance
+
+        if instance.level != 0:
+            # update children when account's type changes
+            Account.objects.filter(
+                code__startswith=instance.code,
+                type=new_type
+            ).update(type=instance.type)
 
     def destroy(self, request, *args, **kwargs):
         account = self.get_object()

@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'home',
     'imprests',
 
+    'sobhan_admin',
+
     '_dashtbashi',
 
 ]

@@ -31,25 +31,29 @@ from server import settings
 schema_view = get_schema_view(title='Users API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
 
 urlpatterns = [
-                  url('test', TestApiView.as_view()),
+    url('test', TestApiView.as_view()),
 
-                  url(r'^home/', include('home.urls')),
+    url(r'^home/', include('home.urls')),
 
-                  url(r'^login$', obtain_auth_token, name='login'),
-                  url(r'^users/', include('users.urls')),
-                  url(r'^companies/', include('companies.urls')),
-                  url(r'^accounts/', include('accounts.urls')),
-                  url(r'^wares/', include('wares.urls')),
-                  url(r'^sanads/', include('sanads.urls')),
-                  url(r'^transactions/', include('transactions.urls')),
-                  url(r'^cheques/', include('cheques.urls')),
-                  url(r'^factors/', include('factors.urls')),
-                  url(r'^reports/', include('reports.urls')),
+    url(r'^login$', obtain_auth_token, name='login'),
+    url(r'^users/', include('users.urls')),
+    url(r'^companies/', include('companies.urls')),
+    url(r'^accounts/', include('accounts.urls')),
+    url(r'^wares/', include('wares.urls')),
+    url(r'^sanads/', include('sanads.urls')),
+    url(r'^transactions/', include('transactions.urls')),
+    url(r'^cheques/', include('cheques.urls')),
+    url(r'^factors/', include('factors.urls')),
+    url(r'^reports/', include('reports.urls')),
 
-                  url(r'^imprests/', include('imprests.urls')),
+    url(r'^imprests/', include('imprests.urls')),
 
-                  path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
 
-                  url(r'^dashtbashi/', include('_dashtbashi.urls')),
+    url('sobhanAdmin/', include('sobhan_admin.urls')),
 
-              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    url(r'^dashtbashi/', include('_dashtbashi.urls')),
+
+]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
