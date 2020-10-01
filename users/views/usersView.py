@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from helpers.auth import BasicCRUDPermission
 from users.models import User, PhoneVerification
-from users.permissions import DeleteUserPermission, ChangePasswordPermission
+from users.permissions import DeleteUserPermission, ChangePasswordPermission, UserLimit
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer, \
     UserDeleteSerializer
 
@@ -31,7 +31,7 @@ class UserListView(generics.ListAPIView):
 
 
 class UserCreateView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission, UserLimit)
     permission_basename = 'user'
     serializer_class = UserCreateSerializer
 

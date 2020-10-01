@@ -40,8 +40,19 @@ class MyUserManager(UserManager, BaseManager):
 class User(AbstractUser, BaseModel):
     superuser = models.ForeignKey('self', on_delete=models.CASCADE, related_name='users', null=True, blank=True)
 
-    def get_superuser(self):
-        return self.superuser or self
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^[a-zA-Z0-9]+$',
+                message='نام کاربری باید از حدوف و اعداد انگلیسی تشکیل شود'
+            )
+        ],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+    )
 
     active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True,
                                        blank=True)
@@ -56,21 +67,10 @@ class User(AbstractUser, BaseModel):
 
     modules = ArrayField(models.CharField(max_length=30), default=list, blank=True)
 
-    objects = MyUserManager()
+    max_companies = models.IntegerField(default=0)
+    max_users = models.IntegerField(default=0)
 
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        validators=[
-            RegexValidator(
-                regex='^[a-zA-Z0-9]+$',
-                message='نام کاربری باید از حدوف و اعداد انگلیسی تشکیل شود'
-            )
-        ],
-        error_messages={
-            'unique': _("A user with that username already exists."),
-        },
-    )
+    objects = MyUserManager()
 
     class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
@@ -90,6 +90,9 @@ class User(AbstractUser, BaseModel):
             ('changePasswordOwn.user', 'تغییر کلمه عبور کاربران خود'),
 
         )
+
+    def get_superuser(self):
+        return self.superuser or self
 
     def has_perm(self, permission_codename, company=None):
         if not self.is_active:
