@@ -25,7 +25,8 @@ class DriverSerializer(serializers.ModelSerializer):
 class CarSerializer(serializers.ModelSerializer):
     car_number_str = serializers.SerializerMethodField()
 
-    def get_car_number_str(self, obj: Car):
+    @staticmethod
+    def get_car_number_str(obj: Car):
         return "{} - {}".format(obj.car_number_str, [owner[1] for owner in Car.OWNERS if owner[0] == obj.owner][0])
 
     class Meta:

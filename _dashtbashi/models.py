@@ -46,20 +46,19 @@ class Driver(BaseModel):
         )
 
     def save(self, *args, **kwargs) -> None:
-        if self.floatAccount:
-            self.floatAccount.delete()
-
-        self.floatAccount = FloatAccount.objects.create(
-            name=self.name,
-            financial_year=self.financial_year,
-            is_auto_created=True,
-        )
+        if not self.id:
+            self.floatAccount = FloatAccount.objects.create(
+                name=self.name,
+                financial_year=self.financial_year,
+                is_auto_created=True,
+            )
+        else:
+            self.floatAccount.update(name=self.name)
 
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         self.floatAccount.delete()
-        print('ha')
         return super(Driver, self).delete(*args, **kwargs)
 
 
@@ -138,136 +137,128 @@ class Car(BaseModel):
 
     def save(self, *args, **kwargs) -> None:
 
-        if self.expenseAccount:
-            self.expenseAccount.delete()
-        if self.incomeAccount:
-            self.incomeAccount.delete()
-        if self.imprestAccount:
-            self.imprestAccount.delete()
-        if self.payableAccount:
-            floatAccountGroup = self.payableAccount.floatAccountGroup
-            self.payableAccount.delete()
-            floatAccountGroup.delete()
+        if not self.id:
+            contract_type = "Transportation" if self.contract_type == self.TRANSPORTATION else "OilCompany"
 
-        contract_type = "Transportation" if self.contract_type == self.TRANSPORTATION else "OilCompany"
+            parents = []
+            if self.owner == self.RAHMAN:
+                parents.append({
+                    'name': "هزینه ماشین {}".format(self.car_number_str),
+                    'attr': 'expenseAccount',
+                    'account': DefaultAccount.get('rahmanCars{}Expense'.format(contract_type)).account,
+                })
 
-        parents = []
-        if self.owner == self.RAHMAN:
-            parents.append({
-                'name': "هزینه ماشین {}".format(self.car_number_str),
-                'attr': 'expenseAccount',
-                'account': DefaultAccount.get('rahmanCars{}Expense'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "درآمد ماشین {}".format(self.car_number_str),
+                    'attr': 'incomeAccount',
+                    'account': DefaultAccount.get('rahmanCars{}Income'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "درآمد ماشین {}".format(self.car_number_str),
-                'attr': 'incomeAccount',
-                'account': DefaultAccount.get('rahmanCars{}Income'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "حساب پرداختنی {}".format(self.car_number_str),
+                    'attr': 'payableAccount',
+                    'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "حساب پرداختنی {}".format(self.car_number_str),
-                'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahman{}Drivers'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "حساب تنخواه {}".format(self.car_number_str),
+                    'attr': 'imprestAccount',
+                    'account': DefaultAccount.get('imprestAccountForRahman{}Drivers'.format(contract_type)).account,
+                })
+            elif self.owner == self.PARTNERSHIP:
+                parents.append({
+                    'name': "هزینه ماشین {}".format(self.car_number_str),
+                    'attr': 'expenseAccount',
+                    'account': DefaultAccount.get('partnershipCars{}Expense'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "حساب تنخواه {}".format(self.car_number_str),
-                'attr': 'imprestAccount',
-                'account': DefaultAccount.get('imprestAccountForRahman{}Drivers'.format(contract_type)).account,
-            })
-        elif self.owner == self.PARTNERSHIP:
-            parents.append({
-                'name': "هزینه ماشین {}".format(self.car_number_str),
-                'attr': 'expenseAccount',
-                'account': DefaultAccount.get('partnershipCars{}Expense'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "درآمد ماشین {}".format(self.car_number_str),
+                    'attr': 'incomeAccount',
+                    'account': DefaultAccount.get('partnershipCars{}Income'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "درآمد ماشین {}".format(self.car_number_str),
-                'attr': 'incomeAccount',
-                'account': DefaultAccount.get('partnershipCars{}Income'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "حساب پرداختنی {}".format(self.car_number_str),
+                    'attr': 'payableAccount',
+                    'account': DefaultAccount.get(
+                        'payableAccountForPartnership{}Drivers'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "حساب پرداختنی {}".format(self.car_number_str),
-                'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForPartnership{}Drivers'.format(contract_type)).account,
-            })
+                parents.append({
+                    'name': "حساب تنخواه {}".format(self.car_number_str),
+                    'attr': 'imprestAccount',
+                    'account': DefaultAccount.get(
+                        'imprestAccountForPartnership{}Drivers'.format(contract_type)).account,
+                })
+            elif self.owner == self.RAHIM:
+                parents.append({
+                    'name': "حساب پرداختنی {}".format(self.car_number_str),
+                    'attr': 'payableAccount',
+                    'account': DefaultAccount.get('payableAccountForRahim{}Drivers'.format(contract_type)).account,
+                })
+                parents.append({
+                    'name': "حساب تنخواه {}".format(self.car_number_str),
+                    'attr': 'imprestAccount',
+                    'account': DefaultAccount.get('imprestAccountForRahim{}Drivers'.format(contract_type)).account,
+                })
+            elif self.owner == self.EBRAHIM:
+                parents.append({
+                    'name': "حساب پرداختنی {}".format(self.car_number_str),
+                    'attr': 'payableAccount',
+                    'account': DefaultAccount.get('payableAccountForEbrahim{}Drivers'.format(contract_type)).account,
+                })
+                parents.append({
+                    'name': "حساب تنخواه {}".format(self.car_number_str),
+                    'attr': 'imprestAccount',
+                    'account': DefaultAccount.get('imprestAccountForEbrahim{}Drivers'.format(contract_type)).account,
+                })
+            elif self.owner == self.OTHER:
+                parents.append({
+                    'name': "حساب پرداختنی {}".format(self.car_number_str),
+                    'attr': 'payableAccount',
+                    'account': DefaultAccount.get('payableAccountForOther{}Drivers'.format(contract_type)).account,
+                })
+                parents.append({
+                    'name': "حساب تنخواه {}".format(self.car_number_str),
+                    'attr': 'imprestAccount',
+                    'account': DefaultAccount.get('imprestAccountForOther{}Drivers'.format(contract_type)).account,
+                })
 
-            parents.append({
-                'name': "حساب تنخواه {}".format(self.car_number_str),
-                'attr': 'imprestAccount',
-                'account': DefaultAccount.get('imprestAccountForPartnership{}Drivers'.format(contract_type)).account,
-            })
-        elif self.owner == self.RAHIM:
-            parents.append({
-                'name': "حساب پرداختنی {}".format(self.car_number_str),
-                'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForRahim{}Drivers'.format(contract_type)).account,
-            })
-            parents.append({
-                'name': "حساب تنخواه {}".format(self.car_number_str),
-                'attr': 'imprestAccount',
-                'account': DefaultAccount.get('imprestAccountForRahim{}Drivers'.format(contract_type)).account,
-            })
-        elif self.owner == self.EBRAHIM:
-            parents.append({
-                'name': "حساب پرداختنی {}".format(self.car_number_str),
-                'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForEbrahim{}Drivers'.format(contract_type)).account,
-            })
-            parents.append({
-                'name': "حساب تنخواه {}".format(self.car_number_str),
-                'attr': 'imprestAccount',
-                'account': DefaultAccount.get('imprestAccountForEbrahim{}Drivers'.format(contract_type)).account,
-            })
-        elif self.owner == self.OTHER:
-            parents.append({
-                'name': "حساب پرداختنی {}".format(self.car_number_str),
-                'attr': 'payableAccount',
-                'account': DefaultAccount.get('payableAccountForOther{}Drivers'.format(contract_type)).account,
-            })
-            parents.append({
-                'name': "حساب تنخواه {}".format(self.car_number_str),
-                'attr': 'imprestAccount',
-                'account': DefaultAccount.get('imprestAccountForOther{}Drivers'.format(contract_type)).account,
-            })
+            for parent in parents:
+                parent_account = parent['account']
 
-        for parent in parents:
-            parent_account = parent['account']
+                account = Account.objects.create(
+                    name=self.car_number_str,
+                    parent=parent_account,
+                    type=parent_account.type,
+                    code=parent_account.get_new_child_code(),
+                    level=Account.TAFSILI,
+                    financial_year=self.financial_year,
+                    is_auto_created=True,
+                )
 
-            account = Account.objects.create(
-                name=self.car_number_str,
-                parent=parent_account,
-                type=parent_account.type,
-                code=parent_account.get_new_child_code(),
-                level=Account.TAFSILI,
+                setattr(self, parent['attr'], account)
+
+            float_account_group = FloatAccountGroup.objects.create(
+                name="رانندگان {}".format(self.car_number_str),
                 financial_year=self.financial_year,
                 is_auto_created=True,
             )
 
-            setattr(self, parent['attr'], account)
+            self.payableAccount.floatAccountGroup = float_account_group
+            self.payableAccount.save()
 
-        float_account_group = FloatAccountGroup.objects.create(
-            name="رانندگان {}".format(self.car_number_str),
-            financial_year=self.financial_year,
-            is_auto_created=True,
-        )
+            self.imprestAccount.floatAccountGroup = float_account_group
+            self.imprestAccount.save()
 
-        self.payableAccount.floatAccountGroup = float_account_group
-        self.payableAccount.save()
+            if self.incomeAccount:
+                self.incomeAccount.floatAccountGroup = float_account_group
+                self.incomeAccount.save()
 
-        self.imprestAccount.floatAccountGroup = float_account_group
-        self.imprestAccount.save()
-
-        if self.incomeAccount:
-            self.incomeAccount.floatAccountGroup = float_account_group
-            self.incomeAccount.save()
-
-        if self.expenseAccount:
-            self.expenseAccount.floatAccountGroup_id = 1
-            self.expenseAccount.save()
+            if self.expenseAccount:
+                self.expenseAccount.floatAccountGroup_id = 1
+                self.expenseAccount.save()
 
         super().save(*args, **kwargs)
 
@@ -310,14 +301,12 @@ class Driving(BaseModel):
         )
 
     def save(self, *args, **kwargs) -> None:
-        if self.floatAccountRelation:
-            self.floatAccountRelation.delete()
-
-        self.floatAccountRelation = FloatAccountRelation.objects.create(
-            financial_year=self.financial_year,
-            floatAccount=self.driver.floatAccount,
-            floatAccountGroup=self.car.payableAccount.floatAccountGroup
-        )
+        if not self.id:
+            self.floatAccountRelation = FloatAccountRelation.objects.create(
+                financial_year=self.financial_year,
+                floatAccount=self.driver.floatAccount,
+                floatAccountGroup=self.car.payableAccount.floatAccountGroup
+            )
 
         super().save(*args, **kwargs)
 
