@@ -393,34 +393,6 @@
   },
   {
     "model": "accounts.defaultaccount",
-    "pk": 1029,
-    "fields": {
-      "financial_year": 1,
-      "name": "حساب درآمد ماشین های شرکت نفت حاج رحمان",
-      "account_level": 3,
-      "account": 233,
-      "floatAccount": null,
-      "costCenter": null,
-      "usage": "dashtbashi",
-      "codename": "rahmanOilCompanyCarsIncomeAccount"
-    }
-  },
-  {
-    "model": "accounts.defaultaccount",
-    "pk": 1030,
-    "fields": {
-      "financial_year": 1,
-      "name": "حساب درآمد ماشین های شرکت نفت شراکتی",
-      "account_level": 3,
-      "account": 233,
-      "floatAccount": null,
-      "costCenter": null,
-      "usage": "dashtbashi",
-      "codename": "partnershipOilCompanyCarsIncomeAccount"
-    }
-  },
-  {
-    "model": "accounts.defaultaccount",
     "pk": 1031,
     "fields": {
       "financial_year": 1,
@@ -466,7 +438,7 @@
     "pk": 1034,
     "fields": {
       "financial_year": 1,
-      "name": "درآمد ماشین های شکرت نفت شراکتی",
+      "name": "درآمد ماشین های شرکت نفت شراکتی",
       "account_level": 2,
       "account": 55,
       "floatAccount": null,
