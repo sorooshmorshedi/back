@@ -3,6 +3,7 @@ from factors.tests.test_factors import FactorTest
 from factors.views.definite_factor import DefiniteFactor
 from users.models import User
 from helpers.test import MTestCase
+from users.tests.test_users import UserTest
 from wares.models import Ware, WareInventory
 
 
@@ -10,7 +11,7 @@ class InventoryTest(MTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = User.objects.first()
+        cls.user = UserTest.get_user()
 
     def test_inventory(self):
         self.client.force_authenticate(self.user)

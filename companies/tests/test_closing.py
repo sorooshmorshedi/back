@@ -6,13 +6,14 @@ from sanads.tests.test_sanads import SanadTest
 from users.models import User
 
 from helpers.test import MTestCase
+from users.tests.test_users import UserTest
 
 
 class ClosingTest(MTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        user = User.objects.first()
+        user = UserTest.get_user()
         cls.user = user
 
         cls.bank_account = Account.objects.get(code='101010001')

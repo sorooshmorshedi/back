@@ -107,6 +107,7 @@ class FirstPeriodInventoryView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(
             code=0,
+            temporary_code=0,
             financial_year=financial_year
         )
 

@@ -38,7 +38,7 @@ class SanadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
         fields = '__all__'
-        read_only_fields = ('financial_year', 'code')
+        read_only_fields = ('financial_year', 'code', 'local_id')
 
     def update(self, instance, validated_data):
         if instance.is_auto_created:

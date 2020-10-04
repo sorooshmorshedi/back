@@ -78,6 +78,7 @@ class SanadFilter(filters.FilterSet):
         model = Sanad
         fields = {
             'id': ['exact', 'in'],
+            'local_id': ['exact', 'in'],
             'code': BASE_FIELD_FILTERS,
             'bed': BASE_FIELD_FILTERS,
             'bes': BASE_FIELD_FILTERS,
@@ -99,6 +100,7 @@ class FactorFilter(filters.FilterSet):
         model = Factor
         fields = {
             'id': ['exact'],
+            'temporary_code': ['icontains'],
             'code': ['icontains'],
             'isPaid': ['exact'],
             'date': ['gte', 'lte'],

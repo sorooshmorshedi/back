@@ -7,6 +7,7 @@ from django.urls.base import reverse
 from rest_framework import status
 
 from helpers.test import MTestCase
+from users.tests.test_users import UserTest
 
 
 class ChequebookTest(MTestCase):
@@ -24,7 +25,7 @@ class ChequebookTest(MTestCase):
         }
 
     def test_chequebook(self):
-        user = User.objects.first()
+        user = UserTest.get_user()
         self.client.force_authenticate(user)
 
         chequebook_id = self._test_create_chequebook()

@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.aggregates import Max
+from django.db.models.functions.comparison import Coalesce
+
 from accounts.accounts.models import Account, FloatAccount
 from django_jalali.db import models as jmodels
 
@@ -11,6 +14,7 @@ from server.settings import TESTING
 class Sanad(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(verbose_name="شماره سند")
+    local_id = models.BigIntegerField()
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateTimeField(auto_now=True)
@@ -26,6 +30,7 @@ class Sanad(BaseModel, ConfirmationMixin):
 
     class Meta(BaseModel.Meta):
         ordering = ['-code', ]
+        unique_together = ('code', 'financial_year')
         permission_basename = 'sanad'
         permissions = (
             ('get.sanad', 'مشاهده سند'),
@@ -82,6 +87,14 @@ class Sanad(BaseModel, ConfirmationMixin):
                             account.title,
                             account.max_bes
                         ))
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.local_id:
+            self.local_id = Sanad.objects.inFinancialYear(self.financial_year).aggregate(
+                local_id=Coalesce(Max('local_id'), 0)
+            )['local_id'] + 1
+
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         for item in self.items.all():
