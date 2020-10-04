@@ -74,7 +74,7 @@ class BaseManager(models.Manager):
 
 
 class BaseModel(models.Model):
-    created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True)
+    created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='own_%(class)s')
     created_at = jmodels.jDateTimeField(auto_now=True, null=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True, null=True)
     is_auto_created = models.BooleanField(default=False)
