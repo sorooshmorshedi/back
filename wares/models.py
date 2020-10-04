@@ -113,7 +113,10 @@ class WareLevel(BaseModel):
     @staticmethod
     def get_new_nature_code():
         code = WareLevel.objects.inFinancialYear().filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
-        code = int(code) + 1
+        if code:
+            code = int(code) + 1
+        else:
+            code = 0
 
         if code < 9:
             code += 10
