@@ -10,7 +10,7 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AdminUserSerializer(serializers.ModelSerializer):
+class AdminUserCreateSerializer(serializers.ModelSerializer):
     profile = AdminProfileSerializer(allow_null=True, required=False)
 
     class Meta:
@@ -29,8 +29,10 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
         return user
 
-    def update(self, instance: User, validated_data):
-        profile_data = validated_data.pop('profile')
-        res = super().update(instance, validated_data)
-        instance.profile.update(**profile_data)
-        return res
+
+class AdminUserUpdateSerializer(serializers.ModelSerializer):
+    profile = AdminProfileSerializer(allow_null=True, required=False)
+
+    class Meta:
+        model = User
+        fields = '__all__'

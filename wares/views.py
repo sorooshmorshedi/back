@@ -57,7 +57,6 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
     def perform_create(self, serializer: WareSerializer) -> None:
         category = serializer.validated_data.get('category')
         code = category.get_new_child_code()
-        print(category.code, code)
         serializer.save(
             code=code,
             financial_year=self.request.user.active_financial_year

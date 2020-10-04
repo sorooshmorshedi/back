@@ -77,7 +77,6 @@ class WareLevel(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
-        unique_together = ('name', 'level')
         permission_basename = 'wareLevel'
         permissions = (
             ('get.wareLevel', 'مشاهده سطح کالا'),
@@ -104,6 +103,7 @@ class WareLevel(BaseModel):
         if last_child:
             last_child_code = last_child.code
 
+        print(self.code, last_child_code)
         return get_new_child_code(
             self.code,
             self.CODE_LENGTHS[self.level + 1],
@@ -112,7 +112,7 @@ class WareLevel(BaseModel):
 
     @staticmethod
     def get_new_nature_code():
-        code = WareLevel.objects.filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
+        code = WareLevel.objects.inFinancialYear().filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
         code = int(code) + 1
 
         if code < 9:

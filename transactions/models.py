@@ -44,7 +44,7 @@ class Transaction(BaseModel, ConfirmationMixin):
 
     class Meta(BaseModel.Meta):
         ordering = ['code', ]
-        unique_together = ('code', 'type')
+        unique_together = ('code', 'type', 'financial_year')
         permissions = (
             ('get.receiveTransaction', 'مشاهده دریافت'),
             ('create.receiveTransaction', 'تعریف دریافت'),

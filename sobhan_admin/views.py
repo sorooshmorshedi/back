@@ -1,19 +1,19 @@
-from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 
-from sobhan_admin.serializers import AdminUserSerializer
+from sobhan_admin.serializers import AdminUserCreateSerializer, AdminUserUpdateSerializer
 from users.models import User
 
 
 class AdminUsersView(ModelViewSet):
-    serializer_class = AdminUserSerializer
     queryset = User.objects.filter(superuser=None).all()
 
-    def perform_create(self, serializer: AdminUserSerializer) -> None:
+    def get_serializer_class(self):
+        if self.request.method.lower() == 'post':
+            return AdminUserCreateSerializer
+        return AdminUserUpdateSerializer
+
+    def perform_create(self, serializer) -> None:
         serializer.save(
             superuser=None,
             is_superuser=True
         )
-        # instance = serializer.instance
-        # instance.is_superuser = True
-        # instance.save()
