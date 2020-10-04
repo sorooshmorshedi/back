@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
+from django.db.models.functions.comparison import Coalesce
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
@@ -85,6 +86,7 @@ class Factor(BaseModel, ConfirmationMixin):
     OUTPUT_GROUP = (*SALE_GROUP, OUTPUT_TRANSFER, OUTPUT_ADJUSTMENT, CONSUMPTION_WARE)
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
+    temporary_code = models.IntegerField()
     code = models.IntegerField(blank=True, null=True)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
@@ -371,13 +373,18 @@ class Factor(BaseModel, ConfirmationMixin):
             return None
 
     @staticmethod
-    def new_code(factor_type):
-        code = Factor.objects.filter(type=factor_type).aggregate(Max('code'))['code__max']
-        if code:
-            code += 1
-        else:
-            code = 1
-        return code
+    def get_new_code(factor_type):
+        data = Factor.objects.filter(type=factor_type).aggregate(
+            code=Coalesce(Max('code'), 1),
+        )
+        return data['code']
+
+    @staticmethod
+    def get_new_temporary_code(factor_type):
+        data = Factor.objects.filter(type=factor_type, is_definite=False).aggregate(
+            temporary_code=Coalesce(Max('temporary_code'), 1),
+        )
+        return data['temporary_code']
 
     @property
     def is_last_definite_factor(self):

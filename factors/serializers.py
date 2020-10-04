@@ -55,7 +55,7 @@ class FactorCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
-        read_only_fields = ['id', 'code', 'financial_year']
+        read_only_fields = ['id', 'temporary_code', 'code', 'financial_year']
         extra_kwargs = {
             "account": {
                 "error_messages": {
@@ -275,9 +275,19 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             'time': now(),
             'is_auto_created': True
         }
-        input_factor = Factor.objects.create(**factor_data, type=Factor.INPUT_TRANSFER)
+        input_factor = Factor.objects.create(
+            **factor_data,
+            type=Factor.INPUT_TRANSFER,
+            temporary_code=Factor.get_new_temporary_code(Factor.INPUT_TRANSFER),
+            code=Factor.get_new_code(Factor.INPUT_TRANSFER),
+        )
         input_factor.save()
-        output_factor = Factor.objects.create(**factor_data, type=Factor.OUTPUT_TRANSFER)
+        output_factor = Factor.objects.create(
+            **factor_data,
+            type=Factor.OUTPUT_TRANSFER,
+            temporary_code=Factor.get_new_code(Factor.OUTPUT_TRANSFER),
+            code=Factor.get_new_temporary_code(Factor.OUTPUT_TRANSFER)
+        )
         output_factor.save()
 
         code = Transfer.objects.aggregate(Max('code'))['code__max']
@@ -414,6 +424,8 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
         factor_data = {
             'financial_year': financial_year,
+            'temporary_code': Factor.get_new_temporary_code(adjustment_type),
+            'code': Factor.get_new_code(adjustment_type),
             'date': date,
             'explanation': explanation,
             'is_definite': True,

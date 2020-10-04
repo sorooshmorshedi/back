@@ -114,7 +114,17 @@ class UserTest(MTestCase):
 
     @staticmethod
     def get_user():
+        from companies.models import Company
+
         user = User.objects.filter(is_superuser=True).first()
+
+        if not user.active_company:
+            company = Company.objects.first()
+            financial_year = company.financial_years.first()
+            user.active_company = company
+            user.active_financial_year = financial_year
+            user.save()
+
         return user
 
     @staticmethod

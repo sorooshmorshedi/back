@@ -10,6 +10,7 @@ from django.urls.base import reverse
 from rest_framework import status
 
 from helpers.test import MTestCase
+from users.tests.test_users import UserTest
 from wares.models import Ware
 from wares.tests import WareTest
 
@@ -18,7 +19,7 @@ class FactorTest(MTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = User.objects.first()
+        cls.user = UserTest.get_user()
 
     @property
     def data(self):
@@ -84,6 +85,7 @@ class FactorTest(MTestCase):
         factor = Factor.objects.create(
             type=factor_type,
             account=account,
+            temporary_code=Factor.get_new_temporary_code(factor_type),
             floatAccount_id=float_account_id,
             costCenter_id=cost_center_id,
             date=jdatetime.date.today(),
