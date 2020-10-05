@@ -1,19 +1,49 @@
+from typing import Any
+
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from sobhan_admin.serializers import AdminUserCreateSerializer, AdminUserUpdateSerializer
+from sobhan_admin.models import Profile
+from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer
 from users.models import User
+from users.serializers import UserCreateSerializer, UserUpdateSerializer
 
 
 class AdminUsersView(ModelViewSet):
     queryset = User.objects.filter(superuser=None).all()
+    serializer_class = AdminUserListRetrieveSerializer
 
-    def get_serializer_class(self):
-        if self.request.method.lower() == 'post':
-            return AdminUserCreateSerializer
-        return AdminUserUpdateSerializer
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        data = request.data
+        profile_data = data.pop('profile')
 
-    def perform_create(self, serializer) -> None:
+        serializer = UserCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
         serializer.save(
             superuser=None,
             is_superuser=True
         )
+
+        profile_serializer = AdminProfileSerializer(data=profile_data)
+        profile_serializer.is_valid(raise_exception=True)
+        profile_serializer.save(
+            user=serializer.instance
+        )
+
+        return Response(AdminUserListRetrieveSerializer(serializer.instance).data)
+
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        user = self.get_object()
+        data = request.data
+        profile_data = data.pop('profile')
+
+        serializer = UserUpdateSerializer(user, data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        profile_serializer = AdminProfileSerializer(serializer.instance.profile, data=profile_data)
+        profile_serializer.is_valid(raise_exception=True)
+        profile_serializer.save()
+
+        return Response(AdminUserListRetrieveSerializer(serializer.instance).data)

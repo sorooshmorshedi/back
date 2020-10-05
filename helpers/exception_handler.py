@@ -2,6 +2,12 @@ from rest_framework import status
 from rest_framework.views import exception_handler
 
 labels = {
+    # Admin
+    'company_name': 'نام شرکت',
+    'business_type': 'نوع کسب و کار',
+    'sale_date': 'تاریخ فروش',
+    'selling_type': 'نوع فروش',
+
     # User
     'username': 'نام کاربری',
 
