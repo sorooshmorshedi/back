@@ -30,7 +30,7 @@ class RoleListView(generics.ListAPIView):
     serializer_class = RoleSerializer
 
     def get_queryset(self):
-        return Role.objects.hasAccess(self.request.method)
+        return Role.objects.hasAccess(self.request.method).filter(company=self.request.user.active_company)
 
 
 class RoleCreateView(generics.CreateAPIView):
@@ -51,7 +51,7 @@ class RoleUpdateView(generics.UpdateAPIView):
     serializer_class = RoleSerializer
 
     def get_queryset(self):
-        return Role.objects.hasAccess(self.request.method)
+        return Role.objects.hasAccess(self.request.method).filter(company=self.request.user.active_company)
 
 
 class RoleDestroyView(generics.DestroyAPIView):
@@ -60,4 +60,4 @@ class RoleDestroyView(generics.DestroyAPIView):
     serializer_class = RoleSerializer
 
     def get_queryset(self):
-        return Role.objects.hasAccess(self.request.method)
+        return Role.objects.hasAccess(self.request.method).filter(company=self.request.user.active_company)
