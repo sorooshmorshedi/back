@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
 from sobhan_admin.permissions import IsStaff
-from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer
+from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer, AdminUserCreateSerializer, \
+    AdminUserUpdateSerializer
 from users.models import User
-from users.serializers import UserCreateSerializer, UserUpdateSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
@@ -36,7 +36,7 @@ class AdminUsersView(ModelViewSet):
         data = request.data
         profile_data = data.pop('profile')
 
-        serializer = UserCreateSerializer(data=data)
+        serializer = AdminUserCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save(
             superuser=None,
@@ -56,12 +56,14 @@ class AdminUsersView(ModelViewSet):
         data = request.data
         profile_data = data.pop('profile')
 
-        serializer = UserUpdateSerializer(user, data=data)
+        serializer = AdminUserUpdateSerializer(user, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        profile_serializer = AdminProfileSerializer(serializer.instance.profile, data=profile_data)
+        profile_serializer = AdminProfileSerializer(user.profile, data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
-        profile_serializer.save()
+        profile_serializer.save(
+            user=user
+        )
 
         return Response(AdminUserListRetrieveSerializer(serializer.instance).data)
