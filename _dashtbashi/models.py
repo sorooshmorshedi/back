@@ -229,7 +229,7 @@ class Car(BaseModel):
                 parent_account = parent['account']
 
                 account = Account.objects.create(
-                    name=self.car_number_str,
+                    name=parent['name'],
                     parent=parent_account,
                     type=parent_account.type,
                     code=parent_account.get_new_child_code(),
