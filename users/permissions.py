@@ -23,5 +23,5 @@ class UserLimit(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
             user = request.user.get_superuser()
-            return user.users.count() < user.max_users
+            return user.users.count() + 1 < user.max_users
         return True
