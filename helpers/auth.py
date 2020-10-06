@@ -41,6 +41,9 @@ def get_codenames(request, view):
         for operation in operations:
             permission_codenames.append("{}.{}".format(operation, base_codename))
 
+    if len(permission_codenames) == 0:
+        raise Exception("Set Permission On: {}".format(view.__class__))
+
     return permission_codenames
 
 
@@ -48,6 +51,10 @@ class BasicObjectPermission(BasePermission):
 
     def has_object_permission(self, request: Request, view: View, obj: BaseModel) -> bool:
         user = request.user
+
+        if request.method == 'OPTIONS':
+            return True
+
         codenames = get_codenames(request, view)
 
         if user.has_perm(codenames[0]):
@@ -71,14 +78,15 @@ class BasicCRUDPermission(BasicObjectPermission):
     def has_permission(self, request, view):
         user = request.user
 
+        if request.method == 'OPTIONS':
+            return True
+
         permission_codenames = get_codenames(request, view)
 
         for permission_codename in permission_codenames:
             has_perm = user.has_perm(permission_codename)
             if has_perm:
                 return True
-
-        print(permission_codenames)
 
         permission_codename = permission_codenames[0]
         permission = Permission.objects.filter(codename=permission_codename).first()

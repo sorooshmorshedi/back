@@ -46,7 +46,7 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        exclude = ('password',)
+        fields = ('id', 'first_name', 'last_name', 'name')
 
 
 class UserListRetrieveSerializer(serializers.ModelSerializer):

@@ -74,7 +74,17 @@ class SanadDetail(generics.RetrieveUpdateAPIView):
         return Sanad.objects.hasAccess(self.request.method)
 
     def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().prefetch_related(
+            'created_by',
+            'items',
+            'items__account',
+            'items__account__floatAccountGroup',
+            'items__account__costCenterGroup',
+            'items__floatAccount',
+            'items__costCenter',
+            'items__floatAccount__floatAccountGroups',
+            'items__costCenter__floatAccountGroups',
+        )
         sanad = get_object_or_404(queryset, pk=pk)
         serializer = SanadListRetrieveSerializer(sanad)
         return Response(serializer.data)

@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import Factor
 
 from sanads.models import *
 from transactions.models import Transaction
-from users.serializers import UserListRetrieveSerializer, UserCreateSerializer
+from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserSimpleSerializer
 
 
 class SanadItemSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class SanadItemSerializer(serializers.ModelSerializer):
 
 
 class SanadItemListRetrieveSerializer(SanadItemSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
+    account = AccountListSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
 
@@ -62,7 +62,7 @@ class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
     factor = FactorWithTypeSerializer(read_only=True, many=False)
     transaction = TransactionWithTypeSerializer(read_only=True, many=False)
-    created_by = UserListRetrieveSerializer()
+    created_by = UserSimpleSerializer()
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'
