@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountListSerializer, FloatAccountSerializer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.models import DefaultAccount
 
@@ -26,7 +26,7 @@ class DefaultAccountSerializer(serializers.ModelSerializer):
 
 
 class DefaultAccountListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountRetrieveSerializer(read_only=True)
+    account = AccountListSerializer(read_only=True)
     floatAccount = FloatAccountSerializer(read_only=True)
     costCenter = FloatAccountSerializer(read_only=True)
 
