@@ -7,6 +7,7 @@ router.register('users', AdminUsersView, base_name='admin-users')
 
 urlpatterns = [
     url('^login$', AdminLoginView.as_view(), name='admin-login'),
+
 ]
 
 urlpatterns += router.urls

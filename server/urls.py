@@ -24,6 +24,7 @@ from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 from helpers.views.TestApiView import TestApiView
 from server import settings
+import debug_toolbar
 
 ...
 
@@ -53,6 +54,8 @@ urlpatterns = [
     url('sobhanAdmin/', include('sobhan_admin.urls')),
 
     url(r'^dashtbashi/', include('_dashtbashi.urls')),
+
+    path('__debug__/', include(debug_toolbar.urls)),
 
 ]
 

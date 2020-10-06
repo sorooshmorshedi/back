@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admindocs',
 
+    'debug_toolbar',
+
     'rest_framework',
     'corsheaders',
     'django_filters',
@@ -81,6 +83,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
     'helpers.middlewares.ModifyRequestMiddleware.ModifyRequestMiddleware',
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 
 ]
 
@@ -177,3 +181,13 @@ TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale'),
 )
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+    '185.239.105.10'
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+}
+
