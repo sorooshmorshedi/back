@@ -117,13 +117,16 @@ class UserTest(MTestCase):
         from companies.models import Company
 
         user = User.objects.filter(is_superuser=True).first()
+        user.max_users = 100
+        user.max_companies = 100
 
         if not user.active_company:
             company = Company.objects.first()
             financial_year = company.financial_years.first()
             user.active_company = company
             user.active_financial_year = financial_year
-            user.save()
+
+        user.save()
 
         return user
 
