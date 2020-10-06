@@ -51,7 +51,7 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
     def list(self, request, *ergs, **kwargs):
         queryset = self.get_queryset()
-        serializer = WareListRetrieveSerializer(queryset, many=True)
+        serializer = WareListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer: WareSerializer) -> None:
@@ -70,7 +70,7 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
     def retrieve(self, request, **kwargs):
         ware = self.get_object()
-        serializer = WareListRetrieveSerializer(ware)
+        serializer = WareRetrieveSerializer(ware)
         return Response(serializer.data)
 
     def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:

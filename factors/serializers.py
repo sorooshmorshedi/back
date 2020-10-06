@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
 from accounts.accounts.validators import AccountValidator
 from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
@@ -10,7 +10,7 @@ from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
 from transactions.serializers import TransactionSerializerForPayment
 from users.serializers import UserListRetrieveSerializer, UserSimpleSerializer
 from wares.models import WareInventory
-from wares.serializers import WareListRetrieveSerializer, WarehouseSerializer
+from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, WarehouseSimpleSerializer
 from django.utils.timezone import now
 
 
@@ -104,12 +104,12 @@ class FactorItemSerializer(serializers.ModelSerializer):
 
 
 class FactorItemRetrieveSerializer(serializers.ModelSerializer):
-    ware = WareListRetrieveSerializer(read_only=True, many=False)
-    warehouse = WarehouseSerializer(read_only=True, many=False)
+    ware = WareListSerializer(read_only=True, many=False)
+    warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
 
     class Meta:
         model = FactorItem
-        fields = '__all__'
+        fields = ('id', 'ware', 'warehouse', 'count', 'fee', 'discountValue', 'discountPercent', 'explanation',)
 
 
 class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
@@ -121,14 +121,14 @@ class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
 
 
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
+    account = AccountListSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     expenses = FactorExpenseListRetrieveSerializer(read_only=True, many=True)
     items = FactorItemRetrieveSerializer(read_only=True, many=True)
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
-    created_by = UserListRetrieveSerializer(read_only=True)
+    created_by = UserSimpleSerializer(read_only=True)
 
     class Meta:
         model = Factor
@@ -173,7 +173,7 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
             input_item = input_items[i]
             output_item = output_items[i]
 
-            ware = WareListRetrieveSerializer(input_item.ware).data
+            ware = WareRetrieveSerializer(input_item.ware).data
             count = input_item.count
             explanation = input_item.explanation
             output_warehouse = WarehouseSerializer(output_item.warehouse).data

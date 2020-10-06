@@ -28,6 +28,17 @@ class WarehouseSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year',)
 
 
+class WarehouseSimpleSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj):
+        return str(obj.id) + ' - ' + obj.name
+
+    class Meta:
+        model = Warehouse
+        fields = ('id', 'name', 'title')
+
+
 class WareSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
@@ -48,7 +59,7 @@ class WareInventoryListSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class WareListRetrieveSerializer(WareSerializer):
+class WareRetrieveSerializer(WareSerializer):
     unit = UnitSerializer(read_only=True)
     warehouse = WarehouseSerializer(read_only=True)
     inventory = serializers.SerializerMethodField()
@@ -59,6 +70,15 @@ class WareListRetrieveSerializer(WareSerializer):
 
     class Meta(WareSerializer.Meta):
         pass
+
+
+class WareListSerializer(WareSerializer):
+    unit_name = serializers.CharField(source='unit.name')
+    warehouse = WarehouseSimpleSerializer(read_only=True)
+
+    class Meta:
+        model = Ware
+        fields = ('id', 'name', 'unit_name', 'warehouse')
 
 
 class WareLevelSerializer(serializers.ModelSerializer):

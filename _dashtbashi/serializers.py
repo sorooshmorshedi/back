@@ -12,7 +12,7 @@ from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
 from users.serializers import CitySerializer, UserSimpleSerializer
-from wares.serializers import WareListRetrieveSerializer
+from wares.serializers import WareRetrieveSerializer
 
 
 class DriverSerializer(serializers.ModelSerializer):
@@ -127,7 +127,7 @@ class RemittanceCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
-    ware = WareListRetrieveSerializer(read_only=True)
+    ware = WareRetrieveSerializer(read_only=True)
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
     contractor = AccountRetrieveSerializer(read_only=True)
@@ -170,7 +170,7 @@ class LadingListSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)
     driving = DrivingListRetrieveSerializer(read_only=True)
     contractor = AccountRetrieveSerializer(read_only=True)
-    ware = WareListRetrieveSerializer(read_only=True)
+    ware = WareRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberListSerializer(read_only=True)
     origin = CitySerializer(read_only=True)
@@ -188,7 +188,7 @@ class LadingRetrieveSerializer(serializers.ModelSerializer):
     remittance = RemittanceListRetrieveSerializer(read_only=True)
     driving = DrivingListRetrieveSerializer(read_only=True)
     contractor = AccountRetrieveSerializer(read_only=True)
-    ware = WareListRetrieveSerializer(read_only=True)
+    ware = WareRetrieveSerializer(read_only=True)
     association = AssociationSerializer(read_only=True)
     billNumber = LadingBillNumberRetrieveSerializer(read_only=True)
     origin = CitySerializer(read_only=True)
