@@ -375,16 +375,16 @@ class Factor(BaseModel, ConfirmationMixin):
     @staticmethod
     def get_new_code(factor_type):
         data = Factor.objects.filter(type=factor_type).aggregate(
-            code=Coalesce(Max('code'), 1),
+            code=Coalesce(Max('code'), 0),
         )
-        return data['code']
+        return data['code'] + 1
 
     @staticmethod
     def get_new_temporary_code(factor_type):
         data = Factor.objects.filter(type=factor_type, is_definite=False).aggregate(
-            temporary_code=Coalesce(Max('temporary_code'), 1),
+            temporary_code=Coalesce(Max('temporary_code'), 0),
         )
-        return data['temporary_code']
+        return data['temporary_code'] + 1
 
     @property
     def is_last_definite_factor(self):
