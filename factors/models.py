@@ -381,7 +381,7 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @staticmethod
     def get_new_temporary_code(factor_type):
-        data = Factor.objects.inFinancialYear().filter(type=factor_type, is_definite=False).aggregate(
+        data = Factor.objects.inFinancialYear().filter(type=factor_type).aggregate(
             temporary_code=Coalesce(Max('temporary_code'), 0),
         )
         return data['temporary_code'] + 1
