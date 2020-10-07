@@ -105,11 +105,14 @@ class GetAccountNotSettledImprestsView(APIView):
 
         result = []
         for imprest in imprests:
+            settlement_data = None
+            if hasattr(imprest, 'imprestSettlement'):
+                settlement_data = ImprestSettlementListRetrieveSerializer(imprest.imprestSettlement).data
             result.append({
                 'transaction': imprest.id,
                 'code': imprest.code,
                 'sum': imprest.sum,
-                'imprestSettlement': ImprestSettlementListRetrieveSerializer(imprest.imprestSettlements.first()).data
+                'imprestSettlement': settlement_data
             })
 
         return Response(ImprestListRetrieveSerializer(imprests, many=True).data)

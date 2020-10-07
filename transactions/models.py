@@ -221,7 +221,7 @@ class Transaction(BaseModel, ConfirmationMixin):
     def get_not_settled_imprests_queryset(account_id=None, floatAccount_id=None, costCenter_id=None):
         queryset = Transaction.objects.hasAccess('get', 'imprestTransaction') \
             .filter(type=Transaction.IMPREST) \
-            .filter(Q(imprestSettlements__isnull=True) | Q(imprestSettlements__is_settled=False))
+            .filter(Q(imprestSettlement=None) | Q(imprestSettlement__is_settled=False))
 
         if account_id:
             queryset = queryset.filter(account__id=account_id)

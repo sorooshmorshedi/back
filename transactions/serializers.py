@@ -45,9 +45,11 @@ class TransactionCreateUpdateSerializer(serializers.ModelSerializer):
 
 class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListSerializer(read_only=True, many=False)
+    floatAccount = FloatAccountSerializer(read_only=True, many=False)
+    costCenter = FloatAccountSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
-    imprestSettlements = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    imprestSettlement = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
     class Meta:

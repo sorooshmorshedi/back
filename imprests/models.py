@@ -12,7 +12,7 @@ from transactions.models import Transaction
 class ImprestSettlement(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
     code = models.IntegerField()
-    transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, related_name='imprestSettlements')
+    transaction = models.OneToOneField(Transaction, on_delete=models.PROTECT, related_name='imprestSettlement')
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='imprestSettlement', blank=True,
                                  null=True)
     explanation = EXPLANATION()

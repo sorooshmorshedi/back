@@ -6,6 +6,7 @@ from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import ChequebookListRetrieveSerializer
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorCreateUpdateSerializer
+from imprests.serializers import ImprestSettlementSimpleSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from wares.models import Ware, Warehouse
@@ -32,6 +33,7 @@ class WarehouseSimpleSerializer(serializers.ModelSerializer):
 class TransactionListSerializer(serializers.ModelSerializer):
     account = AccountSimpleSerializer(read_only=True, many=False)
     sanad = SanadSerializer(read_only=True, many=False)
+    imprestSettlement = ImprestSettlementSimpleSerializer(read_only=True, many=False)
 
     class Meta:
         model = Transaction

@@ -45,11 +45,17 @@ class ImprestSettlementListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ImprestSettlementSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImprestSettlement
+        fields = '__all__'
+
+
 class ImprestListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountRetrieveSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
-    imprestSettlements = ImprestSettlementCreateUpdateSerializer(many=True)
+    imprestSettlement = ImprestSettlementSimpleSerializer(many=False)
 
     class Meta:
         model = Transaction
