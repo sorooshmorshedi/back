@@ -87,11 +87,13 @@ class WareInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear() \
-            .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
-            .prefetch_related('factor__account') \
-            .prefetch_related('factor__sanad') \
-            .order_by('factor__definition_date', 'id')
+        queryset = FactorItem.objects.inFinancialYear().filter(
+            factor__is_definite=True,
+            factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP, Factor.INPUT_ADJUSTMENT, Factor.OUTPUT_ADJUSTMENT)
+        ).prefetch_related(
+            'factor__account',
+            'factor__sanad'
+        ).order_by('factor__definition_date', 'id')
 
         queryset = self.filter_queryset(queryset)
 
@@ -164,7 +166,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
                 ware_id=OuterRef('ware_id')
             ).filter(
                 factor__is_definite=True,
-                factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)
+                factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP, Factor.INPUT_ADJUSTMENT, Factor.OUTPUT_ADJUSTMENT)
             ).order_by('factor__definition_date').values_list('id', flat=True)[:1]
         )
 
@@ -281,17 +283,18 @@ class WarehouseInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = FactorItem.objects.inFinancialYear() \
-            .filter(factor__is_definite=True) \
-            .prefetch_related('factor__account') \
-            .prefetch_related('factor__sanad') \
-            .prefetch_related('warehouse') \
-            .order_by('factor__definition_date', 'id') \
-            .annotate(
+        queryset = FactorItem.objects.inFinancialYear().filter(
+            factor__is_definite=True
+        ).prefetch_related(
+            'factor__account',
+            'factor__sanad',
+            'warehouse'
+        ).order_by(
+            'factor__definition_date', 'id'
+        ).annotate(
             definition_date=F('factor__definition_date'),
             type=F('factor__type')
-        ) \
-            .annotate(
+        ).annotate(
             cumulative_input_count=Window(
                 expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
                 order_by=[F('definition_date').asc(), F('id').asc()]

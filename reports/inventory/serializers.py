@@ -28,8 +28,8 @@ class WareInventorySerializer(serializers.ModelSerializer):
     remain = serializers.SerializerMethodField()
 
     def get_input(self, obj):
-        if obj.factor.type in Factor.BUY_GROUP:
-            if obj.factor.type == Factor.BACK_FROM_SALE:
+        if obj.factor.type in (*Factor.BUY_GROUP, Factor.INPUT_ADJUSTMENT):
+            if obj.factor.type in (Factor.BACK_FROM_SALE, Factor.INPUT_ADJUSTMENT):
                 value = obj.calculated_value
                 fee = '-'
             else:
@@ -52,7 +52,7 @@ class WareInventorySerializer(serializers.ModelSerializer):
             fee = round(obj.remain_value / obj.remain_count, 2)
         else:
             fee = '-'
-        if obj.factor.type in Factor.SALE_GROUP:
+        if obj.factor.type in (*Factor.SALE_GROUP, Factor.OUTPUT_ADJUSTMENT):
             return {
                 'count': obj.count,
                 'fee': fee,
