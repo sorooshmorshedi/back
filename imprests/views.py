@@ -47,7 +47,7 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
             ImprestSettlementItemCreateUpdateSerializer
         ).sync()
 
-        instance.update_settlement_data()
+        instance.sync()
 
         return Response(ImprestSettlementListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 
@@ -72,7 +72,7 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
             ImprestSettlementItemCreateUpdateSerializer
         ).sync()
 
-        instance.update_settlement_data()
+        instance.sync()
 
         return Response(ImprestSettlementListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 

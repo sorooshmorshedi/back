@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin, upload_to
+from sanads.models import Sanad
 from transactions.models import Transaction
 
 
@@ -12,6 +13,8 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
     code = models.IntegerField()
     transaction = models.ForeignKey(Transaction, on_delete=models.PROTECT, related_name='imprestSettlements')
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='imprestSettlement', blank=True,
+                                 null=True)
     explanation = EXPLANATION()
     date = jmodels.jDateField()
 
@@ -43,7 +46,7 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
             ('secondConfirmOwn.imprestSettlement', 'تایید دوم تنخواه های خود'),
         )
 
-    def update_settlement_data(self):
+    def sync(self):
         settled_value = 0
         for item in self.items.all():
             settled_value += item.value
@@ -54,6 +57,10 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
         self.is_settled = settled_value == self.transaction.sum
         self.settled_value = settled_value
         self.save()
+
+        from imprests.sanads import ImprestSettlementSanad
+        sanad = ImprestSettlementSanad(self)
+        sanad.update()
 
 
 class ImprestSettlementItem(BaseModel):

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
 from imprests.models import ImprestSettlementItem, ImprestSettlement
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
@@ -9,7 +9,7 @@ from users.serializers import UserSimpleSerializer
 
 
 class ImprestSettlementItemListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
+    account = AccountListSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
 
@@ -37,6 +37,7 @@ class ImprestSettlementCreateUpdateSerializer(serializers.ModelSerializer):
 class ImprestSettlementListRetrieveSerializer(serializers.ModelSerializer):
     items = ImprestSettlementItemListRetrieveSerializer(read_only=True, many=True)
     transaction = TransactionListRetrieveSerializer(read_only=True)
+    sanad = SanadSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
     class Meta:

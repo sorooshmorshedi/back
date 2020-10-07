@@ -79,3 +79,11 @@ def add_separator(value):
         str_value = str_value.strip('0')
     str_value = str_value.strip('.')
     return str_value
+
+
+def get_object_accounts(obj):
+    return {
+        'account': obj.account,
+        'floatAccount': obj.floatAccount,
+        'costCenter': obj.costCenter
+    }
