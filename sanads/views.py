@@ -1,4 +1,5 @@
 from django.db.models.aggregates import Max
+from django.db.models.expressions import F
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
@@ -125,11 +126,14 @@ class ReorderSanadsApiView(APIView):
     def post(self, request):
         qs = Sanad.objects.inFinancialYear()
 
-        code = 1
+        max_code = qs.aggregate(max_code=Max('code'))['max_code']
+        code = max_code + 1
         for sanad in queryset_iterator(qs, key='date'):
             sanad.code = code
             sanad.save()
             code += 1
+
+        qs.update(code=F('code') - max_code)
 
         return Response([])
 
