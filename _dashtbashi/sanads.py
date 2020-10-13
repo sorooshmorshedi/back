@@ -202,7 +202,7 @@ class LadingSanad:
 
             # 11 & 12
             if lading.driver_tip_payer == Lading.COMPANY:
-                if car.owner == Car.RAHMAN:
+                if car.owner in (Car.RAHMAN, Car.PARTNERSHIP):
                     sanad_items.append({
                         'bed': lading.driver_tip_price,
                         'account': car.expenseAccount,
@@ -398,12 +398,20 @@ class OilCompanyLadingSanad:
                 'explanation': explanation
             })
 
-        sanad_items.append({
-            'bes': oil_company_lading.car_income,
-            'account': car.payableAccount,
-            'floatAccount': driver.floatAccount,
-            'explanation': explanation
-        })
+        if car.owner in (Car.EBRAHIM, Car.RAHIM, Car.OTHER):
+            sanad_items.append({
+                'bes': oil_company_lading.car_income,
+                'account': car.payableAccount,
+                'floatAccount': driver.floatAccount,
+                'explanation': explanation
+            })
+        else:
+            sanad_items.append({
+                'bes': oil_company_lading.car_income,
+                'account': car.incomeAccount,
+                'floatAccount': driver.floatAccount,
+                'explanation': explanation
+            })
 
         sanad_items.append({
             'bes': oil_company_lading.tax_price + oil_company_lading.complication_price,
