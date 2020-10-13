@@ -26,7 +26,11 @@ class CarSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_car_number_str(obj: Car):
-        return "{} - {}".format(obj.car_number_str, [owner[1] for owner in Car.OWNERS if owner[0] == obj.owner][0])
+        return "{} - - {} - - {}".format(
+            obj.car_number_str,
+            [owner[1] for owner in Car.OWNERS if owner[0] == obj.owner][0],
+            [contract_type[1] for contract_type in Car.CONTRACT_TYPES if contract_type[0] == obj.contract_type][0],
+        )
 
     class Meta:
         model = Car
