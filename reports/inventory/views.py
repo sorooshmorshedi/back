@@ -49,17 +49,18 @@ def addSum(queryset, data):
         }
     })
 
-    ware_common_headers = [
-        'مقدار وارده',
-        'فی وارده',
-        'مبلغ وارده',
-        'مقدار صادره',
-        'فی صادره',
-        'مبلغ صادره',
-        'مقدار مانده',
-        'فی مانده',
-        'مبلغ مانده',
-    ]
+
+ware_common_headers = [
+    'مقدار وارده',
+    'فی وارده',
+    'مبلغ وارده',
+    'مقدار صادره',
+    'فی صادره',
+    'مبلغ صادره',
+    'مقدار مانده',
+    'فی مانده',
+    'مبلغ مانده',
+]
 
 
 def get_ware_common_columns(item):
@@ -221,6 +222,20 @@ class AllWaresInventoryListView(generics.ListAPIView):
                 output_field=DecimalField()
             ), 0)
         )
+
+        queryset = queryset.annotate(
+            remain_count=Coalesce(F('input_count') - F('output_count'), 0)
+        )
+
+        status = self.request.GET.get('status', 'all')
+        if status == 'withRemain':
+            queryset = queryset.filter(~Q(remain_count=0))
+        elif status == 'withoutRemain':
+            queryset = queryset.filter(remain_count=0)
+        elif status == 'withTransaction':
+            queryset = queryset.filter(~Q(input_count=0) | ~Q(output_count=0))
+        elif status == 'withoutTransaction':
+            queryset = queryset.filter(input_count=0, output_count=0)
 
         return queryset
 
@@ -429,13 +444,17 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
             factorItems__factor__type__in=Factor.OUTPUT_GROUP
         )
 
+        queryset = Ware.objects.inFinancialYear()
+
         if warehouse:
             input_filter &= Q(factorItems__warehouse_id=warehouse)
             output_filter &= Q(factorItems__warehouse_id=warehouse)
 
-        queryset = Ware.objects.inFinancialYear().filter(
-            Q(warehouse_id=warehouse) | Q(factorItems__warehouse_id=warehouse)
-        ).annotate(
+            queryset = queryset.filter(
+                Q(warehouse_id=warehouse) | Q(factorItems__warehouse_id=warehouse)
+            )
+
+        queryset = queryset.annotate(
             input=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
             output=Coalesce(Sum('factorItems__count', filter=output_filter), 0)
         )
@@ -443,6 +462,16 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         queryset = queryset.annotate(
             remain=Coalesce(F('input') - F('output'), 0)
         )
+
+        status = self.request.GET.get('status', 'all')
+        if status == 'withRemain':
+            queryset = queryset.filter(~Q(remain=0))
+        elif status == 'withoutRemain':
+            queryset = queryset.filter(remain=0)
+        elif status == 'withTransaction':
+            queryset = queryset.filter(~Q(input=0) | ~Q(output=0))
+        elif status == 'withoutTransaction':
+            queryset = queryset.filter(input=0, output=0)
 
         return queryset
 
