@@ -430,10 +430,12 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         )
 
         if warehouse:
-            input_filter &= Q(factorItems__warehouse=warehouse)
-            output_filter &= Q(factorItems__warehouse=warehouse)
+            input_filter &= Q(factorItems__warehouse_id=warehouse)
+            output_filter &= Q(factorItems__warehouse_id=warehouse)
 
-        queryset = Ware.objects.inFinancialYear().annotate(
+        queryset = Ware.objects.inFinancialYear().filter(
+            Q(warehouse_id=warehouse) | Q(factorItems__warehouse_id=warehouse)
+        ).annotate(
             input=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
             output=Coalesce(Sum('factorItems__count', filter=output_filter), 0)
         )
