@@ -20,33 +20,46 @@ def addSum(queryset, data):
         },
         'remain': data[-1]['remain'],
         'input': {
-            'count': queryset.filter(factor__type__in=Factor.BUY_GROUP).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=(
+                *Factor.BUY_GROUP,
+                Factor.INPUT_ADJUSTMENT
+            )).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=Factor.BUY_GROUP).aggregate(value=Sum('calculated_value'))[
+            'value': queryset.filter(factor__type__in=(
+                *Factor.BUY_GROUP,
+                Factor.INPUT_ADJUSTMENT
+            )).aggregate(value=Sum('calculated_value'))[
                 'value'
             ]
         },
         'output': {
-            'count': queryset.filter(factor__type__in=Factor.SALE_GROUP).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=(
+                *Factor.SALE_GROUP,
+                Factor.OUTPUT_ADJUSTMENT,
+                Factor.CONSUMPTION_WARE
+            )).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=Factor.SALE_GROUP).aggregate(
+            'value': queryset.filter(factor__type__in=(
+                *Factor.SALE_GROUP,
+                Factor.OUTPUT_ADJUSTMENT,
+                Factor.CONSUMPTION_WARE
+            )).aggregate(
                 value=Sum('calculated_value')
             )['value'],
         }
     })
 
-
-ware_common_headers = [
-    'مقدار وارده',
-    'فی وارده',
-    'مبلغ وارده',
-    'مقدار صادره',
-    'فی صادره',
-    'مبلغ صادره',
-    'مقدار مانده',
-    'فی مانده',
-    'مبلغ مانده',
-]
+    ware_common_headers = [
+        'مقدار وارده',
+        'فی وارده',
+        'مبلغ وارده',
+        'مقدار صادره',
+        'فی صادره',
+        'مبلغ صادره',
+        'مقدار مانده',
+        'فی مانده',
+        'مبلغ مانده',
+    ]
 
 
 def get_ware_common_columns(item):
@@ -89,7 +102,13 @@ class WareInventoryListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = FactorItem.objects.inFinancialYear().filter(
             factor__is_definite=True,
-            factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP, Factor.INPUT_ADJUSTMENT, Factor.OUTPUT_ADJUSTMENT)
+            factor__type__in=(
+                *Factor.SALE_GROUP,
+                *Factor.BUY_GROUP,
+                Factor.INPUT_ADJUSTMENT,
+                Factor.OUTPUT_ADJUSTMENT,
+                Factor.CONSUMPTION_WARE
+            )
         ).prefetch_related(
             'factor__account',
             'factor__sanad'
@@ -166,7 +185,13 @@ class AllWaresInventoryListView(generics.ListAPIView):
                 ware_id=OuterRef('ware_id')
             ).filter(
                 factor__is_definite=True,
-                factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP, Factor.INPUT_ADJUSTMENT, Factor.OUTPUT_ADJUSTMENT)
+                factor__type__in=(
+                    *Factor.SALE_GROUP,
+                    *Factor.BUY_GROUP,
+                    Factor.INPUT_ADJUSTMENT,
+                    Factor.OUTPUT_ADJUSTMENT,
+                    Factor.CONSUMPTION_WARE
+                )
             ).order_by('factor__definition_date').values_list('id', flat=True)[:1]
         )
 

@@ -52,7 +52,7 @@ class WareInventorySerializer(serializers.ModelSerializer):
             fee = round(obj.remain_value / obj.remain_count, 2)
         else:
             fee = '-'
-        if obj.factor.type in (*Factor.SALE_GROUP, Factor.OUTPUT_ADJUSTMENT):
+        if obj.factor.type in (*Factor.SALE_GROUP, Factor.OUTPUT_ADJUSTMENT, Factor.CONSUMPTION_WARE):
             return {
                 'count': obj.count,
                 'fee': fee,
