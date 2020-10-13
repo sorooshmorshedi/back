@@ -78,7 +78,7 @@ class WareListSerializer(WareSerializer):
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'unit_name', 'warehouse')
+        fields = ('id', 'name', 'unit_name', 'warehouse', 'price')
 
 
 class WareLevelSerializer(serializers.ModelSerializer):
