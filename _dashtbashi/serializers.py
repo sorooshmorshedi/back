@@ -7,7 +7,6 @@ from rest_framework.exceptions import ErrorDetail
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
 from accounts.accounts.serializers import AccountRetrieveSerializer
-from imprests.serializers import ImprestListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
@@ -253,7 +252,7 @@ class OtherDriverPaymentCreateUpdateSerializer(serializers.ModelSerializer):
 class OtherDriverPaymentListRetrieveSerializer(serializers.ModelSerializer):
     driving = DrivingListRetrieveSerializer()
     ladings = LadingListSerializer(many=True)
-    imprests = ImprestListRetrieveSerializer(many=True)
+    imprests = TransactionListRetrieveSerializer(many=True)
     payment = TransactionListRetrieveSerializer(many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 

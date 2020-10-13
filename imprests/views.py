@@ -9,15 +9,14 @@ from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
 from imprests.models import ImprestSettlement
-from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementListRetrieveSerializer, \
-    ImprestSettlementItemCreateUpdateSerializer, ImprestListRetrieveSerializer
-from transactions.models import Transaction
+from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementItemCreateUpdateSerializer
+from transactions.serializers import TransactionListRetrieveSerializer
 
 
 class ImprestSettlementModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'imprestSettlement'
-    serializer_class = ImprestSettlementListRetrieveSerializer
+    serializer_class = TransactionListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
         return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename)
@@ -49,7 +48,10 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
 
         instance.sync()
 
-        return Response(ImprestSettlementListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+        return Response(
+            TransactionListRetrieveSerializer(instance=instance.transaction).data,
+            status=status.HTTP_200_OK
+        )
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -74,7 +76,10 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
 
         instance.sync()
 
-        return Response(ImprestSettlementListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+        return Response(
+            TransactionListRetrieveSerializer(instance=instance.transaction).data,
+            status=status.HTTP_200_OK
+        )
 
 
 class ImprestSettlementByPositionView(APIView):
@@ -88,34 +93,8 @@ class ImprestSettlementByPositionView(APIView):
             request.GET.get('id')
         )
         if item:
-            return Response(ImprestSettlementListRetrieveSerializer(instance=item).data)
+            return Response(TransactionListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
-
-
-class GetAccountNotSettledImprestsView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_basename = 'imprestTransaction'
-
-    def get(self, request):
-        imprests = Transaction.get_not_settled_imprests_queryset(
-            request.GET.get('account'),
-            request.GET.get('floatAccount'),
-            request.GET.get('costCenter'),
-        )
-
-        result = []
-        for imprest in imprests:
-            settlement_data = None
-            if hasattr(imprest, 'imprestSettlement'):
-                settlement_data = ImprestSettlementListRetrieveSerializer(imprest.imprestSettlement).data
-            result.append({
-                'transaction': imprest.id,
-                'code': imprest.code,
-                'sum': imprest.sum,
-                'imprestSettlement': settlement_data
-            })
-
-        return Response(ImprestListRetrieveSerializer(imprests, many=True).data)
 
 
 class ConfirmImprest(ConfirmView):

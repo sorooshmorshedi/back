@@ -13,8 +13,8 @@ from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingList
     OilCompanyLadingItemListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import add_sum
-from imprests.serializers import ImprestListRetrieveSerializer
 from transactions.models import Transaction
+from transactions.serializers import TransactionListRetrieveSerializer
 
 
 class OtherDriverPaymentReport(APIView):
@@ -32,7 +32,7 @@ class OtherDriverPaymentReport(APIView):
 
         return Response({
             'ladings': LadingListSerializer(ladings, many=True).data,
-            'imprests': ImprestListRetrieveSerializer(imprests, many=True).data,
+            'imprests': TransactionListRetrieveSerializer(imprests, many=True).data,
         })
 
 

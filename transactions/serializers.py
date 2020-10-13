@@ -4,6 +4,7 @@ from accounts.accounts.serializers import FloatAccountSerializer, AccountListSer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from cheques.serializers import ChequeListRetrieveSerializer
+from imprests.serializers import ImprestSettlementListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import *
 from users.serializers import UserSimpleSerializer
@@ -49,7 +50,7 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
-    imprestSettlement = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    imprestSettlement = ImprestSettlementListRetrieveSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
     class Meta:

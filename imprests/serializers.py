@@ -1,10 +1,8 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
+from accounts.accounts.serializers import FloatAccountSerializer, AccountListSerializer
 from imprests.models import ImprestSettlementItem, ImprestSettlement
 from sanads.serializers import SanadSerializer
-from transactions.models import Transaction
-from transactions.serializers import TransactionListRetrieveSerializer, TransactionItemListRetrieveSerializer
 from users.serializers import UserSimpleSerializer
 
 
@@ -36,7 +34,6 @@ class ImprestSettlementCreateUpdateSerializer(serializers.ModelSerializer):
 
 class ImprestSettlementListRetrieveSerializer(serializers.ModelSerializer):
     items = ImprestSettlementItemListRetrieveSerializer(read_only=True, many=True)
-    transaction = TransactionListRetrieveSerializer(read_only=True)
     sanad = SanadSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
@@ -48,15 +45,4 @@ class ImprestSettlementListRetrieveSerializer(serializers.ModelSerializer):
 class ImprestSettlementSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImprestSettlement
-        fields = '__all__'
-
-
-class ImprestListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
-    items = TransactionItemListRetrieveSerializer(read_only=True, many=True)
-    sanad = SanadSerializer(read_only=True, many=False)
-    imprestSettlement = ImprestSettlementSimpleSerializer(many=False)
-
-    class Meta:
-        model = Transaction
         fields = '__all__'
