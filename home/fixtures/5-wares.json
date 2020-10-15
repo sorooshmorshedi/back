@@ -5,7 +5,9 @@
     "fields": {
       "financial_year": 1,
       "name": "عدد",
-      "explanation": null
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -14,7 +16,9 @@
     "fields": {
       "financial_year": 1,
       "name": "کیلو",
-      "explanation": null
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -23,7 +27,9 @@
     "fields": {
       "financial_year": 1,
       "name": "کارتن 24 تایی",
-      "explanation": null
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -32,7 +38,9 @@
     "fields": {
       "financial_year": 1,
       "name": "انبار یک",
-      "explanation": null
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -41,7 +49,9 @@
     "fields": {
       "financial_year": 1,
       "name": "نبار دو",
-      "explanation": ""
+      "explanation": "",
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -50,55 +60,9 @@
     "fields": {
       "financial_year": 1,
       "name": "انبار سه",
-      "explanation": null
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 1,
-    "fields": {
-      "financial_year": 1,
-      "name": "ماهیت یک",
       "explanation": null,
-      "code": "10",
-      "parent": null,
-      "level": 0
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 2,
-    "fields": {
-      "financial_year": 1,
-      "name": "گروه یک",
-      "explanation": null,
-      "code": "1001",
-      "parent": 1,
-      "level": 1
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 3,
-    "fields": {
-      "financial_year": 1,
-      "name": "دسته بندی یک",
-      "explanation": null,
-      "code": "100101",
-      "parent": 2,
-      "level": 2
-    }
-  },
-  {
-    "model": "wares.warelevel",
-    "pk": 4,
-    "fields": {
-      "financial_year": 1,
-      "name": "دسته بندی دو",
-      "explanation": null,
-      "code": "100102",
-      "parent": 2,
-      "level": 2
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28"
     }
   },
   {
@@ -106,8 +70,65 @@
     "pk": 1,
     "fields": {
       "financial_year": 1,
+      "name": "ماهیت یک",
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28",
+      "code": "10",
+      "parent": null,
+      "level": 0
+    }
+  },
+  {
+    "model": "wares.ware",
+    "pk": 2,
+    "fields": {
+      "financial_year": 1,
+      "name": "گروه یک",
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28",
+      "code": "1001",
+      "parent": 1,
+      "level": 1
+    }
+  },
+  {
+    "model": "wares.ware",
+    "pk": 3,
+    "fields": {
+      "financial_year": 1,
+      "name": "دسته بندی یک",
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28",
+      "code": "100101",
+      "parent": 2,
+      "level": 2
+    }
+  },
+  {
+    "model": "wares.ware",
+    "pk": 4,
+    "fields": {
+      "financial_year": 1,
+      "name": "دسته بندی دو",
+      "explanation": null,
+      "created_at": "1397-12-28",
+      "updated_at": "1397-12-28",
+      "code": "100102",
+      "parent": 2,
+      "level": 2
+    }
+  },
+  {
+    "model": "wares.ware",
+    "pk": 5,
+    "fields": {
+      "financial_year": 1,
       "name": "کالای یک",
       "code": "100101001",
+      "level": 3,
       "barcode": "12",
       "isDisabled": false,
       "price": "2100000",
@@ -118,7 +139,7 @@
       "maxInventory": 15,
       "created_at": "1398-12-21",
       "updated_at": "1397-12-28",
-      "category": 3,
+      "parent": 3,
       "warehouse": 1,
       "unit": 1,
       "supplier": null,
@@ -127,11 +148,12 @@
   },
   {
     "model": "wares.ware",
-    "pk": 2,
+    "pk": 6,
     "fields": {
       "financial_year": 1,
       "name": "کالای دو",
       "code": "100101002",
+      "level": 3,
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -143,7 +165,7 @@
       "maxInventory": null,
       "created_at": "1398-12-03",
       "updated_at": "1397-12-28",
-      "category": 3,
+      "parent": 3,
       "warehouse": 1,
       "unit": 1,
       "supplier": null,
@@ -152,11 +174,12 @@
   },
   {
     "model": "wares.ware",
-    "pk": 3,
+    "pk": 7,
     "fields": {
       "financial_year": 1,
       "name": "کالای سه",
       "code": "100102001",
+      "level": 3,
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -168,7 +191,7 @@
       "maxInventory": null,
       "created_at": "1398-12-20",
       "updated_at": "1397-12-28",
-      "category": 3,
+      "parent": 4,
       "warehouse": 1,
       "unit": 1,
       "supplier": null,
@@ -177,11 +200,12 @@
   },
   {
     "model": "wares.ware",
-    "pk": 4,
+    "pk": 8,
     "fields": {
       "financial_year": 1,
       "name": "کالای چهار",
       "code": "100102002",
+      "level": 3,
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
@@ -193,7 +217,7 @@
       "maxInventory": null,
       "created_at": "1397-12-28",
       "updated_at": "1397-12-28",
-      "category": 4,
+      "parent": 4,
       "warehouse": 1,
       "unit": 1,
       "supplier": null,

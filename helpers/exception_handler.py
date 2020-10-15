@@ -30,6 +30,7 @@ labels = {
     'category': 'دسته بندی',
     'pricingType': 'نوع قیمت گذاری',
     'price': 'قیمت',
+    'warehouse': 'انبار',
 
     # Other
     'code': 'شماره',

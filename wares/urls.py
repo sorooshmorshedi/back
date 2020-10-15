@@ -1,12 +1,9 @@
 from django.conf.urls import url
 
-from wares.views import WareLevelListCreate, WareLevelDetail, WareListCreate, WareDetail, WarehouseListCreate, \
+from wares.views import WareListCreate, WareDetail, WarehouseListCreate, \
     UnitListCreate, UnitDetail, WarehouseDetail
 
 urlpatterns = [
-    url(r'^wareLevels$', WareLevelListCreate.as_view(), name='Wares'),
-    url(r'^wareLevels/(?P<pk>[0-9]+)$', WareLevelDetail.as_view(), name='WareDetail'),
-
     url(r'^wares$', WareListCreate.as_view(), name='Wares'),
     url(r'^wares/(?P<pk>[0-9]+)$', WareDetail.as_view(), name='WareDetail'),
 

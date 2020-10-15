@@ -55,8 +55,14 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
         return Response(serializer.data)
 
     def perform_create(self, serializer: WareSerializer) -> None:
-        category = serializer.validated_data.get('category')
-        code = category.get_new_child_code()
+        level = serializer.validated_data.get('level')
+
+        if level == Ware.NATURE:
+            code = Ware.get_new_nature_code()
+        else:
+            parent = serializer.validated_data.get('parent')
+            code = parent.get_new_child_code()
+
         serializer.save(
             code=code,
             financial_year=self.request.user.active_financial_year
@@ -87,26 +93,3 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
         return Response(['کالا های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
-
-
-class WareLevelDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'wareLevel'
-    serializer_class = WareLevelSerializer
-
-
-class WareLevelListCreate(ListCreateAPIViewWithAutoFinancialYear):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'wareLevel'
-    serializer_class = WareLevelSerializer
-
-    def perform_create(self, serializer: WareLevelSerializer) -> None:
-        parent = serializer.validated_data.get('parent')
-        if parent:
-            code = parent.get_new_child_code()
-        else:
-            code = WareLevel.get_new_nature_code()
-        serializer.save(
-            code=code,
-            financial_year=self.request.user.active_financial_year
-        )

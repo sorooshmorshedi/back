@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from helpers.functions import get_current_user
-from wares.models import Unit, Warehouse, WareLevel, Ware, WareInventory
+from helpers.serializers import validate_required_fields
+from wares.models import Unit, Warehouse, Ware, WareInventory
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -50,6 +51,12 @@ class WareSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('code', 'financial_year',)
 
+    def validate(self, attrs):
+        level = attrs.get('level')
+        if level == Ware.WARE:
+            validate_required_fields(attrs, ('warehouse', 'parent', 'unit', 'pricingType'))
+        return attrs
+
 
 class WareInventoryListSerializer(serializers.ModelSerializer):
     warehouse = WarehouseSerializer(many=False, read_only=True)
@@ -73,21 +80,9 @@ class WareRetrieveSerializer(WareSerializer):
 
 
 class WareListSerializer(WareSerializer):
-    unit_name = serializers.CharField(source='unit.name')
+    unit_name = serializers.CharField(source='unit.name', default='')
     warehouse = WarehouseSimpleSerializer(read_only=True)
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'unit_name', 'warehouse', 'price')
-
-
-class WareLevelSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
-
-    def get_title(self, obj):
-        return obj.code + ' - ' + obj.name
-
-    class Meta:
-        model = WareLevel
-        fields = '__all__'
-        read_only_fields = ('code', 'financial_year',)
+        fields = ('id', 'code', 'name', 'level', 'unit_name', 'warehouse', 'price')

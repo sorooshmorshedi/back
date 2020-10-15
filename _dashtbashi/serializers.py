@@ -1,12 +1,11 @@
 from typing import Any
 
-from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail
 
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
 from accounts.accounts.serializers import AccountRetrieveSerializer
+from helpers.serializers import validate_required_fields
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from transactions.serializers import TransactionListRetrieveSerializer
@@ -161,10 +160,7 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         if 'b' in attrs.get('type'):
             required_fields += ['billNumber', 'bill_price', 'receive_type', 'bill_date']
 
-        for field in required_fields:
-            if not attrs.get(field):
-                error_body = {field: [ErrorDetail(_("This field is required."), code="required")]}
-                raise serializers.ValidationError(error_body)
+        validate_required_fields(attrs, required_fields)
 
         return super(LadingCreateUpdateSerializer, self).validate(attrs)
 

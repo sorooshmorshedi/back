@@ -56,79 +56,20 @@ class Warehouse(BaseModel):
         return str(self.pk) + ' - ' + self.name
 
 
-class WareLevel(BaseModel):
+class Ware(BaseModel):
     CODE_LENGTHS = [2, 2, 2, 3]
 
     NATURE = 0
     GROUP = 1
     CATEGORY = 2
+    WARE = 3
     WARE_LEVELS = (
         (NATURE, 'nature'),
         (GROUP, 'group'),
         (CATEGORY, 'category'),
+        (WARE, 'ware'),
     )
 
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wareLevels')
-    name = models.CharField(max_length=100)
-    explanation = models.CharField(max_length=255, blank=True, null=True)
-    code = models.CharField(max_length=50)
-    parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
-    level = models.IntegerField(choices=WARE_LEVELS)
-
-    class Meta(BaseModel.Meta):
-        backward_financial_year = True
-        permission_basename = 'wareLevel'
-        permissions = (
-            ('get.wareLevel', 'مشاهده سطح کالا'),
-            ('create.wareLevel', 'تعریف سطح کالا'),
-            ('update.wareLevel', 'ویرایش سطح کالا'),
-            ('delete.wareLevel', 'حذف سطح کالا'),
-
-            ('getOwn.wareLevel', 'مشاهده سطح کالا های خود'),
-            ('updateOwn.wareLevel', 'ویرایش سطح کالا های خود'),
-            ('deleteOwn.wareLevel', 'حذف سطح کالا های خود'),
-        )
-
-    def __str__(self):
-        return str(self.pk) + ' - ' + self.name
-
-    def get_new_child_code(self):
-
-        last_child_code = None
-        if self.level == WareLevel.CATEGORY:
-            last_child = self.wares.order_by('-code').first()
-        else:
-            last_child = self.children.order_by('-code').first()
-
-        if last_child:
-            last_child_code = last_child.code
-
-        print(self.code, last_child_code)
-        return get_new_child_code(
-            self.code,
-            self.CODE_LENGTHS[self.level + 1],
-            last_child_code
-        )
-
-    @staticmethod
-    def get_new_nature_code():
-        code = WareLevel.objects.inFinancialYear().filter(level=WareLevel.NATURE).aggregate(Max('code'))['code__max']
-        if code:
-            code = int(code) + 1
-        else:
-            code = 0
-
-        if code < 9:
-            code += 10
-
-        if code >= 99:
-            from rest_framework import serializers
-            raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
-
-        return str(code)
-
-
-class Ware(BaseModel):
     FIFO = 'f'
     WEIGHTED_MEAN = 'wm'
     PRICING_TYPES = (
@@ -137,13 +78,16 @@ class Ware(BaseModel):
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
+
+    level = models.IntegerField(choices=WARE_LEVELS)
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50)
+
     barcode = models.CharField(max_length=50, blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     isDisabled = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=24, decimal_places=0, null=True)
-    pricingType = models.CharField(max_length=2, choices=PRICING_TYPES)
+    pricingType = models.CharField(max_length=2, choices=PRICING_TYPES, null=True, blank=True)
     minSale = models.IntegerField(blank=True, null=True)
     maxSale = models.IntegerField(blank=True, null=True)
     minInventory = models.IntegerField(blank=True, null=True)
@@ -152,12 +96,13 @@ class Ware(BaseModel):
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
-    category = models.ForeignKey(WareLevel, on_delete=models.PROTECT, related_name='wares')
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares')
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     is_service = models.BooleanField(default=False)
+
+    parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -176,6 +121,34 @@ class Ware(BaseModel):
             ('updateOwn.ware', 'ویرایش کالا های خود'),
             ('deleteOwn.ware', 'حذف کالا های خود'),
         )
+
+    def get_new_child_code(self):
+        last_child_code = None
+
+        last_child = self.children.order_by('-code').first()
+        if last_child:
+            last_child_code = last_child.code
+
+        return get_new_child_code(
+            self.code,
+            self.CODE_LENGTHS[self.level + 1],
+            last_child_code
+        )
+
+    @staticmethod
+    def get_new_nature_code():
+        code = int(Ware.objects.inFinancialYear().filter(level=Ware.NATURE).aggregate(
+            last_code=Max('code')
+        )['last_code']) + 1
+
+        if code < 9:
+            code += 10
+
+        if code >= 99:
+            from rest_framework import serializers
+            raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
+
+        return str(code)
 
     def has_factorItem(self):
         return self.factorItems.count() != 0
