@@ -474,7 +474,7 @@ class FactorItem(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
 
     # this is used for inventory reports and sanads.
-    # it's equals to fees count * fees fee
+    # it's equals to fee's count * fee's fee
     calculated_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
 
     def __str__(self):
