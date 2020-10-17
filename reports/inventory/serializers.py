@@ -165,4 +165,4 @@ class AllWarehousesInventorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'input', 'output', 'remain')
+        fields = ('id', 'code', 'name', 'input', 'output', 'remain')

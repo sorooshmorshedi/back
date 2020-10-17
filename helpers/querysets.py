@@ -1,5 +1,6 @@
 from django.db.models.aggregates import Sum
 from django.db.models.functions.comparison import Coalesce
+from django.db.models.query_utils import Q
 
 
 def add_sum(response, sum_fields, qs, page=None):

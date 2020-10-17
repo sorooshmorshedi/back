@@ -427,33 +427,41 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
     def get_queryset(self):
         warehouse = self.request.GET.get('warehouse', None)
 
-        input_filter = Q(
-            factorItems__factor__is_definite=True,
-            factorItems__factor__type__in=Factor.INPUT_GROUP
-        )
+        input_filter = {
+            'factorItems__factor__is_definite': True,
+            'factorItems__factor__type__in': Factor.INPUT_GROUP
+        }
 
-        output_filter = Q(
-            factorItems__factor__is_definite=True,
-            factorItems__factor__type__in=Factor.OUTPUT_GROUP
-        )
+        output_filter = {
+            'factorItems__factor__is_definite': True,
+            'factorItems__factor__type__in': Factor.OUTPUT_GROUP
+        }
 
         queryset = Ware.objects.inFinancialYear()
 
         if warehouse:
-            input_filter &= Q(factorItems__warehouse_id=warehouse)
-            output_filter &= Q(factorItems__warehouse_id=warehouse)
+            input_filter['factorItems__warehouse_id'] = warehouse
+            output_filter['factorItems__warehouse_id'] = warehouse
 
             queryset = queryset.filter(
-                Q(warehouse_id=warehouse) | Q(factorItems__warehouse_id=warehouse)
+                Q(warehouse_id=warehouse) |
+                Q(children__warehouse_id=warehouse) |
+                Q(children__children__warehouse_id=warehouse) |
+                Q(children__children__children__warehouse_id=warehouse) |
+                Q(factorItems__warehouse_id=warehouse) |
+                Q(children__factorItems__warehouse_id=warehouse) |
+                Q(children__children__factorItems__warehouse_id=warehouse) |
+                Q(children__children__children__factorItems__warehouse_id=warehouse)
             )
 
         queryset = queryset.annotate(
-            input=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
-            output=Coalesce(Sum('factorItems__count', filter=output_filter), 0)
+            input=get_deep_sum('factorItems__count', filters=input_filter),
+            output=get_deep_sum('factorItems__count', filters=output_filter)
         )
 
         queryset = queryset.annotate(
             remain=Coalesce(F('input') - F('output'), 0)
+
         )
 
         status = self.request.GET.get('status', 'all')
@@ -468,32 +476,34 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
 
         return queryset
 
-    def add_sum(self, queryset, data):
-        totals = queryset.aggregate(
-            total_input_count=Sum('input'),
-            total_output_count=Sum('output'),
-        )
-        data.append({
-            'name': 'جمع',
-            'input': totals['total_input_count'],
-            'output': totals['total_output_count'],
-            'remain': totals['total_input_count'] - totals['total_output_count']
-        })
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+def add_sum(self, queryset, data):
+    totals = queryset.aggregate(
+        total_input_count=Sum('input'),
+        total_output_count=Sum('output'),
+    )
+    data.append({
+        'name': 'جمع',
+        'input': totals['total_input_count'],
+        'output': totals['total_output_count'],
+        'remain': totals['total_input_count'] - totals['total_output_count']
+    })
 
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(queryset, request)
 
-        serializer = self.serializer_class(page, many=True)
-        data = serializer.data
+def list(self, request, *args, **kwargs):
+    queryset = self.filter_queryset(self.get_queryset())
 
-        if len(data) and paginator.offset + paginator.limit >= paginator.count:
-            self.add_sum(queryset, data)
+    paginator = self.pagination_class()
+    page = paginator.paginate_queryset(queryset, request)
 
-        response = paginator.get_paginated_response(data)
-        return response
+    serializer = self.serializer_class(page, many=True)
+    data = serializer.data
+
+    if len(data) and paginator.offset + paginator.limit >= paginator.count:
+        self.add_sum(queryset, data)
+
+    response = paginator.get_paginated_response(data)
+    return response
 
 
 class AllWarehousesInventoryExportView(AllWarehousesInventoryListView):
