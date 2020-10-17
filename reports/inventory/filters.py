@@ -36,9 +36,10 @@ class AllWaresInventoryFilter(filters.FilterSet):
     class Meta:
         model = Ware
         fields = {
-            'id': ['exact'],
-            'code': ['gte', 'lte'],
-            'name': ['icontains'],
+            'id': BASE_FIELD_FILTERS,
+            'code': BASE_FIELD_FILTERS,
+            'name': BASE_FIELD_FILTERS,
+            'level': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {

@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from factors.models import FactorItem, Factor
 from helpers.auth import BasicCRUDPermission
 from helpers.exports import get_xlsx_response
+from helpers.querysets import get_deep_sum
 from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter
 from reports.inventory.serializers import WareInventorySerializer, AllWaresInventorySerializer, \
     WarehouseInventorySerializer, AllWarehousesInventorySerializer
@@ -196,31 +197,23 @@ class AllWaresInventoryListView(generics.ListAPIView):
             ).order_by('factor__definition_date').values_list('id', flat=True)[:1]
         )
 
-        input_filter = Q(
-            factorItems__factor__is_definite=True,
-            factorItems__factor__type__in=Factor.BUY_GROUP
-        )
+        input_filter = {
+            'factorItems__factor__is_definite': True,
+            'factorItems__factor__type__in': Factor.BUY_GROUP
+        }
 
-        output_filter = Q(
-            factorItems__factor__is_definite=True,
-            factorItems__factor__type__in=Factor.SALE_GROUP
-        )
+        output_filter = {
+            'factorItems__factor__is_definite': True,
+            'factorItems__factor__type__in': Factor.SALE_GROUP
+        }
 
         queryset = Ware.objects.inFinancialYear().prefetch_related(
             Prefetch('factorItems', queryset=FactorItem.objects.filter(id__in=last_factor_item))
         ).annotate(
-            input_count=Coalesce(Sum('factorItems__count', filter=input_filter), 0),
-            input_value=Coalesce(Sum(
-                F('factorItems__fee') * F('factorItems__count'),
-                filter=input_filter,
-                output_field=DecimalField()
-            ), 0),
-            output_count=Coalesce(Sum('factorItems__count', filter=output_filter), 0),
-            output_value=Coalesce(Sum(
-                F('factorItems__calculated_value'),
-                filter=output_filter,
-                output_field=DecimalField()
-            ), 0)
+            input_count=get_deep_sum('factorItems__count', filters=input_filter),
+            input_value=get_deep_sum('factorItems__calculated_value', filters=input_filter),
+            output_count=get_deep_sum('factorItems__count', filters=output_filter),
+            output_value=get_deep_sum('factorItems__calculated_value', filters=output_filter),
         )
 
         queryset = queryset.annotate(

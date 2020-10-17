@@ -1,7 +1,6 @@
 from django.conf.urls import url
 
-from wares.views import WareListCreate, WareDetail, WarehouseListCreate, \
-    UnitListCreate, UnitDetail, WarehouseDetail
+from wares.views import WareListCreate, WareDetail, WarehouseListCreate, UnitListCreate, UnitDetail, WarehouseDetail
 
 urlpatterns = [
     url(r'^wares$', WareListCreate.as_view(), name='Wares'),

@@ -87,58 +87,40 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
     remain = serializers.SerializerMethodField()
 
     def get_input(self, obj):
-        if len(obj.factorItems.all()):
-            return {
-                'count': obj.input_count,
-                'fee': '-',
-                'value': obj.input_value
-            }
         return {
-            'count': 0,
-            'fee': 0,
-            'value': 0
+            'count': obj.input_count,
+            'fee': '-',
+            'value': obj.input_value
         }
 
     def get_output(self, obj):
-        if len(obj.factorItems.all()):
-            factorItem = obj.factorItems.all()[0]
-            if obj.pricingType == Ware.WEIGHTED_MEAN and factorItem.remain_count:
-                fee = factorItem.remain_value / factorItem.remain_count
-            else:
-                fee = '-'
-            return {
-                'count': obj.output_count,
-                'fee': fee,
-                'value': obj.output_value
-            }
+        factorItem = obj.factorItems.first
+        if factorItem and obj.pricingType == Ware.WEIGHTED_MEAN and factorItem.remain_count:
+            fee = factorItem.remain_value / factorItem.remain_count
+        else:
+            fee = '-'
         return {
-            'count': 0,
-            'fee': 0,
-            'value': 0
+            'count': obj.output_count,
+            'fee': fee,
+            'value': obj.output_value
         }
 
     def get_remain(self, obj):
-        if len(obj.factorItems.all()):
-            remain_count = obj.input_count - obj.output_count
-            remain_value = obj.input_value - obj.output_value
-            if obj.pricingType == Ware.WEIGHTED_MEAN and remain_count:
-                fee = remain_value / remain_count
-            else:
-                fee = '-'
-            return {
-                'count': remain_count,
-                'fee': fee,
-                'value': remain_value
-            }
+        remain_count = obj.input_count - obj.output_count
+        remain_value = obj.input_value - obj.output_value
+        if obj.pricingType == Ware.WEIGHTED_MEAN and remain_count:
+            fee = remain_value / remain_count
+        else:
+            fee = '-'
         return {
-            'count': 0,
-            'fee': 0,
-            'value': 0
+            'count': remain_count,
+            'fee': fee,
+            'value': remain_value
         }
 
     class Meta:
         model = Ware
-        fields = ('id', 'name', 'input', 'output', 'remain')
+        fields = ('id', 'code', 'name', 'input', 'output', 'remain')
 
 
 class WarehouseInventorySerializer(serializers.ModelSerializer):
