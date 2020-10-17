@@ -567,6 +567,7 @@ class OilCompanyLading(BaseModel, ConfirmationMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='oilCompanyLadings')
     explanation = EXPLANATION()
     date = jmodels.jDateField()
+    list_date = jmodels.jDateField()
     export_date = jmodels.jDateField()
     month = models.IntegerField()
 

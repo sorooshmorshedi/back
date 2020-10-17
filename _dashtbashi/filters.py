@@ -111,6 +111,7 @@ class OilCompanyLadingFilter(filters.FilterSet):
         fields = {
             'id': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
+            'list_date': BASE_FIELD_FILTERS,
             'export_date': BASE_FIELD_FILTERS,
             'gross_price': BASE_FIELD_FILTERS,
             'insurance_price': BASE_FIELD_FILTERS,
