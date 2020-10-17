@@ -1,11 +1,11 @@
-from django.db.models.aggregates import Max
+from django.db.models.aggregates import Count
 from django.db.models.expressions import F
+from django.db.models.query_utils import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_framework import generics
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -124,18 +124,32 @@ class ReorderSanadsApiView(APIView):
     permission_codename = 'reorder.sanad'
 
     def post(self, request):
-        qs = Sanad.objects.inFinancialYear()
+        qs = Sanad.objects.inFinancialYear().annotate(
+            items_count=Count('items')
+        )
+        order = request.data.get('order', None)
 
         max_code = qs.aggregate(max_code=Max('code'))['max_code']
         code = max_code + 1
-        for sanad in queryset_iterator(qs, key='date'):
-            sanad.code = code
-            sanad.save()
-            code += 1
+
+        if order is None:
+            self._update_sanads_code(code, qs, 'local_id')
+        else:
+            next_code = self._update_sanads_code(code, qs.filter(~Q(items_count=0)), order)
+            self._update_sanads_code(next_code, qs.filter(Q(items_count=0)), order)
 
         qs.update(code=F('code') - max_code)
 
         return Response([])
+
+    @staticmethod
+    def _update_sanads_code(from_code, qs, order):
+        next_code = from_code
+        for sanad in queryset_iterator(qs, key=order):
+            sanad.code = next_code
+            sanad.save()
+            next_code += 1
+        return next_code
 
 
 class SanadByPositionView(APIView):
