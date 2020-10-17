@@ -416,6 +416,8 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
                 bes=item.calculated_value
             )
 
+        sanad.update_values()
+
     def create(self, validated_data, **kwargs):
         financial_year = self.context['financial_year']
         adjustment_type = validated_data.get('type')

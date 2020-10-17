@@ -315,6 +315,8 @@ class LadingSanad:
                 **sanad_item
             )
 
+        sanad.update_values()
+
 
 class OilCompanyLadingSanad:
     def __init__(self, oilCompanyLading: OilCompanyLading):
@@ -426,3 +428,5 @@ class OilCompanyLadingSanad:
             sanad.items.create(
                 **sanad_item
             )
+
+        sanad.update_values()

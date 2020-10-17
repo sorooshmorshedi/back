@@ -147,6 +147,7 @@ class DefiniteFactor(APIView):
         if not is_confirmed:
             sanad.check_account_balance_confirmations()
 
+        sanad.update_values()
         return factor
 
     @staticmethod

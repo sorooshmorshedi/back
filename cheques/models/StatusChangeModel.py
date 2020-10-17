@@ -125,4 +125,6 @@ class StatusChange(BaseModel):
         )
         sanad.save()
 
+        sanad.update_values()
+
         return sanad
