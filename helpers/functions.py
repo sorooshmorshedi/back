@@ -1,5 +1,6 @@
 from typing import Type
 
+import jdatetime
 from django.db.models.base import Model
 
 
@@ -87,3 +88,20 @@ def get_object_accounts(obj):
         'floatAccount': obj.floatAccount,
         'costCenter': obj.costCenter
     }
+
+
+def date_to_str(date: jdatetime.date):
+    date = str(date).split('-')
+    return '/'.join(date)
+
+
+def sanad_exp(*args):
+    result = ""
+    for arg in args:
+        if isinstance(arg, jdatetime.date):
+            arg = date_to_str(arg)
+        else:
+            arg = str(arg)
+        result += arg + " "
+
+    return result[:-1]
