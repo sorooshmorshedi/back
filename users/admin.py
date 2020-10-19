@@ -7,7 +7,12 @@ from users.models import User, Role, PhoneVerification
 UserAdmin.fieldsets += (('ماژول ها', {'fields': ('modules',)}),)
 UserAdmin.fieldsets += (('active financial company', {'fields': ('active_company',)}),)
 
+
+class PermissionAdmin(admin.ModelAdmin):
+    search_fields = ('id', 'name', 'codename')
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Role)
-admin.site.register(Permission)
+admin.site.register(Permission, PermissionAdmin)
 admin.site.register(PhoneVerification)

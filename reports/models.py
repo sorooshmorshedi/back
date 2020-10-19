@@ -6,8 +6,7 @@ from helpers.models import BaseModel
 
 class Report(models.Model):
     class Meta:
-        managed = False
-
+        default_permissions = ()
         permissions = (
             ('get.accountBalanceReport', 'مشاهده تراز'),
             ('get.floatAccountBalanceByGroupReport', 'مشاهده تراز شناور بر اساس گروه'),
