@@ -186,6 +186,7 @@ class DefiniteFactor(APIView):
 
         is_used_in_next_years = FactorItem.objects.filter(
             factor__financial_year__start__gt=factor.financial_year.end,
+            factor__financial_year__company=factor.financial_year.company,
             factor__type__in=Factor.OUTPUT_GROUP,
             ware=ware
         ).exists()

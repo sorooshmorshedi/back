@@ -55,7 +55,7 @@ class FactorCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = '__all__'
-        read_only_fields = ['id', 'temporary_code', 'code', 'financial_year']
+        read_only_fields = ['id', 'temporary_code', 'code', 'definition_date', 'financial_year']
         extra_kwargs = {
             "account": {
                 "error_messages": {

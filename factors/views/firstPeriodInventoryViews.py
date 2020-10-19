@@ -1,8 +1,4 @@
-import datetime
-
-import jdatetime
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,9 +41,6 @@ class FirstPeriodInventoryView(APIView):
         return Response(serialized.data)
 
     def post(self, request):
-
-        if Factor.objects.inFinancialYear().filter(type__in=Factor.SALE_GROUP).count():
-            raise ValidationError('لطفا ابتدا فاکتور های فروش و برگشت از خرید را حذف کنید')
 
         first_period_inventory = self.set_first_period_inventory(request.data)
 
@@ -111,7 +104,9 @@ class FirstPeriodInventoryView(APIView):
             financial_year=financial_year
         )
 
-        first_period_inventory = serializer.instance
+        if not first_period_inventory:
+            first_period_inventory = serializer.instance
+            first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
 
         FirstPeriodInventoryItemMassRelatedCUD(
             user,
