@@ -211,12 +211,30 @@ class LadingModelView(viewsets.ModelViewSet):
 
         return LadingCreateUpdateSerializer
 
+    def create(self, request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(LadingListSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED,
+                        headers=headers)
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
         manage_files(instance, request.data, ['lading_attachment', 'bill_attachment'])
 
-        return super().update(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = LadingCreateUpdateSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(LadingRetrieveSerializer(instance=instance).data)
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
