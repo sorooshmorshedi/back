@@ -60,6 +60,7 @@ class StatusChange(BaseModel):
                     code=newSanadCode(),
                     date=self.date,
                     financial_year=user.active_financial_year,
+                    is_auto_created=True,
                 )
                 sanad.save()
                 self.sanad = sanad
@@ -123,6 +124,7 @@ class StatusChange(BaseModel):
             costCenter=self.besCostCenter,
             financial_year=sanad.financial_year
         )
+        sanad.date = self.date
         sanad.save()
 
         sanad.update_values()

@@ -496,6 +496,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
 
     lading_number = models.IntegerField(null=True)
     lading_date = jmodels.jDateField(null=True)
+    sanad_date = jmodels.jDateField(null=True)
     origin_amount = DECIMAL()
     destination_amount = DECIMAL()
 
@@ -585,6 +586,7 @@ class OilCompanyLading(BaseModel, ConfirmationMixin):
     tax_price = DECIMAL()
     complication_price = DECIMAL()
     gross_price = DECIMAL()
+    net_price = DECIMAL()
     insurance_price = DECIMAL()
     weight = DECIMAL()
 
