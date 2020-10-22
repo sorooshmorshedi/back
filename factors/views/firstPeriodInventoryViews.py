@@ -1,3 +1,4 @@
+import jdatetime
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -106,6 +107,8 @@ class FirstPeriodInventoryView(APIView):
 
         if not first_period_inventory:
             first_period_inventory = serializer.instance
+            first_period_inventory.definition_date = str(jdatetime.date.today())
+            first_period_inventory.save()
             first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
 
         FirstPeriodInventoryItemMassRelatedCUD(
