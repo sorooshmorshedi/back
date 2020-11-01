@@ -20,7 +20,7 @@ Used for sanadItems, journal & bill reports
 
 class SanadItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'get.sanadItems'
+    permission_codename = 'get.sanad'
     serializer_class = SanadItemLedgerSerializer
     filterset_class = SanadItemLedgerFilter
     pagination_class = LimitOffsetPagination
