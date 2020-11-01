@@ -6,6 +6,7 @@ from users.models import User, Role, PhoneVerification
 
 UserAdmin.fieldsets += (('ماژول ها', {'fields': ('modules',)}),)
 UserAdmin.fieldsets += (('active financial company', {'fields': ('active_company',)}),)
+UserAdmin.fieldsets += (('محدودیت ها', {'fields': ('max_companies', 'max_users',)}),)
 
 
 class PermissionAdmin(admin.ModelAdmin):
