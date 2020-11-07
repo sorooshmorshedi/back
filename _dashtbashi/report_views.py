@@ -90,7 +90,7 @@ class LadingBillSeriesListView(generics.ListAPIView):
 
 class LadingsReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'lading'
+    permission_codename = 'get.lading'
 
     serializer_class = LadingListSerializer
 
