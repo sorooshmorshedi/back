@@ -18,7 +18,7 @@ class LadingSanad:
         sanad = self.lading.sanad
         if not sanad:
             sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.lading.financial_year,
-                                         date=self.lading.lading_date or self.lading.bill_date)
+                                         date=self.lading.sanad_date or self.lading.bill_date)
             lading.sanad = sanad
             lading.save()
             return
