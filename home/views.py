@@ -12,7 +12,7 @@ from home.serializers import OptionSerializer
 
 class TimeView(APIView):
     def get(self, request):
-        return Response({'time': datetime.datetime.now()})
+        return Response({'time': datetime.datetime.now().timestamp()})
 
 
 class OptionListView(generics.ListAPIView):
