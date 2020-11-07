@@ -85,7 +85,7 @@ class BaseModel(models.Model):
         abstract = True
         permissions = ()
         default_permissions = ()
-        ordering = ['pk']
+        ordering = ['-pk']
         backward_financial_year = False
         permission_basename = None
 

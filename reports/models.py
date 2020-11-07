@@ -4,7 +4,7 @@ from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
-class Report(models.Model):
+class ReportPermissions(models.Model):
     class Meta:
         default_permissions = ()
         permissions = (

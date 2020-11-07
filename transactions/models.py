@@ -7,6 +7,7 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
+from helpers.functions import sanad_exp
 from helpers.models import BaseModel, ConfirmationMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
@@ -140,7 +141,35 @@ class Transaction(BaseModel, ConfirmationMixin):
         clearSanad(sanad)
 
         sanad.is_auto_created = True
-        sanad.explanation = self.explanation
+
+        explanation = ''
+        if self.type == self.RECEIVE:
+            explanation = sanad_exp(
+                'بابت دریافت',
+                'شماره',
+                self.code,
+                self.explanation
+            )
+        elif self.type == self.PAYMENT:
+            explanation = sanad_exp(
+                'بابت پرداخت',
+                'شماره',
+                self.code,
+                'مورخ',
+                self.date,
+                self.explanation
+            )
+        elif self.type == self.IMPREST:
+            explanation = sanad_exp(
+                'بابت پرداخت تنخواه شماره',
+                self.code,
+                'مورخ',
+                self.date,
+                'جهت',
+                self.explanation
+            )
+
+        sanad.explanation = explanation
         sanad.date = self.date
         sanad.save()
 
@@ -155,18 +184,46 @@ class Transaction(BaseModel, ConfirmationMixin):
             bed = 0
             bes = 0
 
+            row_explanation = ''
             if self.type == Transaction.RECEIVE:
                 bed = item.value
-                rp = 'دریافت'
+                row_explanation = sanad_exp(
+                    'بابت دریافت شماره',
+                    self.code,
+                    'به شماره پیگیری',
+                    item.documentNumber,
+                    'مورخ',
+                    item.date,
+                    item.explanation
+                )
             else:
                 bes = item.value
-                rp = 'پرداخت'
+                if self.type == Transaction.PAYMENT:
+                    row_explanation = sanad_exp(
+                        'بابت پرداخت شماره',
+                        self.code,
+                        'به شماره پیگیری',
+                        item.documentNumber,
+                        'مورخ',
+                        item.date,
+                        item.explanation
+                    )
+                elif self.type == Transaction.IMPREST:
+                    row_explanation = sanad_exp(
+                        'بابت پرداخت تنخواه شماره',
+                        self.code,
+                        'مورخ',
+                        item.date,
+                        'به شماره پیگیری',
+                        item.documentNumber,
+                        'جهت',
+                        item.explanation
+                    )
 
             sanad.items.create(
                 bed=bed,
                 bes=bes,
-                explanation="بابت {0} {1} به شماره مستند {2} به تاریخ {3}".format(rp, item.type.name,
-                                                                                  item.documentNumber, str(item.date)),
+                explanation=row_explanation,
                 account=item.account,
                 floatAccount=item.floatAccount,
                 costCenter=item.costCenter,
@@ -175,19 +232,39 @@ class Transaction(BaseModel, ConfirmationMixin):
 
         last_bed = 0
         last_bes = 0
+        last_row_explanation = ''
 
         if self.type == Transaction.RECEIVE:
             last_bes = totalValue
-            rp = 'دریافت'
+            last_row_explanation = sanad_exp(
+                'بابت واریز طی دریافت شماره',
+                self.code,
+                self.explanation
+            )
         else:
             last_bed = totalValue
-            rp = 'پرداخت'
+            if self.type == Transaction.PAYMENT:
+                last_row_explanation = sanad_exp(
+                    'بابت دریافت طی شماره پرداخت',
+                    self.code,
+                    'مورخ',
+                    self.date,
+                    self.explanation
+                )
+            elif self.type == Transaction.IMPREST:
+                last_row_explanation = sanad_exp(
+                    'بابت دریافت تنخواه شماره',
+                    self.code,
+                    'مورخ',
+                    self.date,
+                    self.explanation
+                )
 
         if len(self.items.all()) != 0:
             sanad.items.create(
                 bed=last_bed,
                 bes=last_bes,
-                explanation="بابت {0} {1} طی {0} شماره {2}".format(rp, ', '.join(typeNames), self.code),
+                explanation=last_row_explanation,
                 account=self.account,
                 floatAccount=self.floatAccount,
                 costCenter=self.costCenter,

@@ -71,7 +71,7 @@ class SanadListView(generics.ListAPIView):
     search_fields = SanadFilter.Meta.fields.keys()
 
     def get_queryset(self):
-        return Sanad.objects.hasAccess('get').order_by('code').all()
+        return Sanad.objects.hasAccess('get').order_by('-pk').all()
 
 
 class UnbalancedSanadListView(SanadListView):

@@ -15,7 +15,9 @@
       "date_joined": "2019-03-18T07:45:57.870Z",
       "phone": "09876543210",
       "groups": [],
-      "user_permissions": []
+      "user_permissions": [],
+      "max_users": 100,
+      "max_companies": 100
     }
   }
 ]
