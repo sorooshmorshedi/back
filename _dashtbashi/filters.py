@@ -18,6 +18,7 @@ class LadingFilter(filters.FilterSet):
             'remittance': ['exact'],
             'is_paid': ['exact'],
             'id': BASE_FIELD_FILTERS,
+            'local_id': BASE_FIELD_FILTERS,
             'remittance__code': BASE_FIELD_FILTERS,
 
             'contractor__name': ['exact', 'icontains'],
@@ -91,6 +92,7 @@ class RemittanceFilter(filters.FilterSet):
         model = Remittance
         fields = {
             'id': BASE_FIELD_FILTERS,
+            'local_id': BASE_FIELD_FILTERS,
             'code': BASE_FIELD_FILTERS,
             'issue_date': BASE_FIELD_FILTERS,
             'amount': BASE_FIELD_FILTERS,
@@ -110,6 +112,7 @@ class OilCompanyLadingFilter(filters.FilterSet):
         model = OilCompanyLading
         fields = {
             'id': BASE_FIELD_FILTERS,
+            'local_id': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'list_date': BASE_FIELD_FILTERS,
             'export_date': BASE_FIELD_FILTERS,
@@ -176,6 +179,7 @@ class OtherDriverPaymentFilter(filters.FilterSet):
         model = OtherDriverPayment
         fields = {
             'id': BASE_FIELD_FILTERS,
+            'local_id': BASE_FIELD_FILTERS,
             'code': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'driving__driver__name': BASE_FIELD_FILTERS,

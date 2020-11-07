@@ -2,7 +2,9 @@ import re
 from datetime import datetime
 
 import jdatetime
+from django.db.models.aggregates import Max
 from django.db.models.deletion import ProtectedError
+from django.db.models.functions.comparison import Coalesce
 from django_jalali.db import models as jmodels
 from django.core.validators import RegexValidator
 from django.db import models
@@ -174,6 +176,25 @@ class ConfirmationMixin(models.Model):
             self.first_confirmed_by = None
             self.first_confirmed_at = None
         self.save()
+
+
+class LocalIdMixin(models.Model):
+    local_id = models.BigIntegerField()
+
+    @property
+    def financial_year(self):
+        raise NotImplementedError()
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.local_id:
+            self.local_id = self.objects.inFinancialYear(self.financial_year).aggregate(
+                local_id=Coalesce(Max('local_id'), 0)
+            )['local_id'] + 1
+
+        super().save(*args, **kwargs)
 
 
 def DATE(**kwargs):

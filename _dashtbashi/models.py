@@ -5,7 +5,8 @@ from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount, FloatAccountRelation, FloatAccountGroup
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
-from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin, upload_to
+from helpers.models import MELLI_CODE, PHONE, EXPLANATION, DECIMAL, BaseModel, DATE, ConfirmationMixin, upload_to, \
+    LocalIdMixin
 from sanads.models import Sanad, clearSanad
 from transactions.models import Transaction
 from users.models import City
@@ -369,7 +370,7 @@ class RemittanceMixin(BaseModel):
         abstract = True
 
 
-class Remittance(RemittanceMixin, ConfirmationMixin):
+class Remittance(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='remittances')
     code = models.IntegerField()
     issue_date = jmodels.jDateField()
@@ -445,7 +446,7 @@ class LadingBillNumber(BaseModel):
         )
 
 
-class Lading(RemittanceMixin, ConfirmationMixin):
+class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     OTHER = 'o'
     COMPANY = 'cmp'
     CONTRACTOR = 'cnt'
@@ -564,7 +565,7 @@ class Lading(RemittanceMixin, ConfirmationMixin):
         return super().delete(*args, **kwargs)
 
 
-class OilCompanyLading(BaseModel, ConfirmationMixin):
+class OilCompanyLading(BaseModel, ConfirmationMixin, LocalIdMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='oilCompanyLadings')
     explanation = EXPLANATION()
     date = jmodels.jDateField()
@@ -646,7 +647,7 @@ class OilCompanyLadingItem(BaseModel):
         pass
 
 
-class OtherDriverPayment(BaseModel, ConfirmationMixin):
+class OtherDriverPayment(BaseModel, ConfirmationMixin, LocalIdMixin):
     code = models.IntegerField()
     date = DATE()
     explanation = EXPLANATION()
