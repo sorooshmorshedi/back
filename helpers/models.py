@@ -179,7 +179,7 @@ class ConfirmationMixin(models.Model):
 
 
 class LocalIdMixin(models.Model):
-    local_id = models.BigIntegerField()
+    local_id = models.BigIntegerField(null=True, blank=True, default=None)
 
     @property
     def financial_year(self):
@@ -189,11 +189,10 @@ class LocalIdMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if not self.local_id:
-            self.local_id = self.objects.inFinancialYear(self.financial_year).aggregate(
+        if not self.pk:
+            self.local_id = self.__class__.objects.inFinancialYear(self.financial_year).aggregate(
                 local_id=Coalesce(Max('local_id'), 0)
             )['local_id'] + 1
-
         super().save(*args, **kwargs)
 
 
