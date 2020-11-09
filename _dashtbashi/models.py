@@ -537,6 +537,10 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
 
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='ladings', blank=True, null=True)
 
+    @property
+    def commission_price(self):
+        return self.contractor_price - self.fare_price
+
     class Meta(BaseModel.Meta):
         permission_basename = 'lading'
         permissions = (
