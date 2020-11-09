@@ -1,8 +1,11 @@
 from django.db import models
 from django_jalali.db import models as jmodels
+from rest_framework.exceptions import ValidationError
+
 from accounts.accounts.models import Account, FloatAccount
 from cheques.models.ChequeModel import Cheque, CHEQUE_STATUSES
 from companies.models import FinancialYear
+from helpers.functions import sanad_exp
 from helpers.models import BaseModel
 from sanads.models import Sanad, newSanadCode, clearSanad
 
@@ -83,17 +86,39 @@ class StatusChange(BaseModel):
 
         due = "/".join(str(cheque.due).split("-"))
 
-        sanad.explanation = cheque.explanation
         sanad.date = cheque.date
 
-        if cheque.received_or_paid == Cheque.PAID:
-            received_or_paid = 'پرداخت'
-        else:
-            received_or_paid = 'دریافت'
+        base_explanation = sanad_exp(
+            "چک به شماره سریال",
+            cheque.serial,
+            "به تاریخ سررسید",
+            due,
+            "جهت",
+            cheque.explanation
+        )
 
         if self.toStatus == 'notPassed' and self.fromStatus != 'inFlow':
-            explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} از {3}".format(received_or_paid, cheque.serial,
-                                                                                    due, cheque.account.name)
+
+            if cheque.received_or_paid == Cheque.PAID:
+                explanation = sanad_exp(
+                    "بابت پرداخت",
+                    base_explanation,
+                )
+            else:
+                explanation = sanad_exp(
+                    "بابت دریافت",
+                    base_explanation,
+                )
+
+            bed_explanation = sanad_exp(
+                "بابت دریافت",
+                base_explanation
+            )
+            bes_explanation = sanad_exp(
+                "بابت پرداخت",
+                base_explanation
+            )
+
         else:
             newStatus = self.toStatus
             if self.fromStatus == 'inFlow' and newStatus in ('notPassed', 'bounced'):
@@ -107,11 +132,72 @@ class StatusChange(BaseModel):
                 'revoked': 'ابطال',
                 'transferred': 'انتقال چک',
             }
-            explanation = "بابت {0} چک شماره {1} به تاریخ سررسید {2} ".format(statuses[newStatus], cheque.serial, due)
+            if newStatus == 'passed':
+                if cheque.received_or_paid == Cheque.PAID:
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت پاس شدن",
+                        base_explanation,
+                    )
+                else:
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت وصول",
+                        base_explanation,
+                    )
+            elif newStatus == 'transferred':
+                explanation = sanad_exp(
+                    "بابت انتقال",
+                    base_explanation,
+                )
+                bed_explanation = sanad_exp(
+                    "بابت پرداخت طی انتقال",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp(
+                    "بابت انتقال چک",
+                    base_explanation,
+                )
+
+            elif newStatus == 'bounced':
+                explanation = bed_explanation = sanad_exp(
+                    "بابت برگشت",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp("بابت برگشت", base_explanation)
+
+            elif newStatus == 'cashed':
+                if cheque.received_or_paid == Cheque.PAID:
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت پرداخت نقدی",
+                        base_explanation,
+                    )
+                else:
+                    explanation = bed_explanation = sanad_exp(
+                        "بابت وصول نقدی",
+                        base_explanation,
+                    )
+                    bes_explanation = sanad_exp(
+                        "بابت پرداخت نقدی",
+                        base_explanation,
+                    )
+
+            elif newStatus == 'inFlow':
+                explanation = bed_explanation = bes_explanation = sanad_exp(
+                    "بابت درجریان قراردادن",
+                    base_explanation,
+                )
+
+            elif newStatus == 'revoked':
+                explanation = bed_explanation = sanad_exp(
+                    "بابت ابطال",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp("بابت برگشت", base_explanation)
+            else:
+                raise ValidationError("وضعیت جدید چک معتبر نمی باشد")
 
         sanad.items.create(
             bed=value,
-            explanation=explanation,
+            explanation=bed_explanation,
             account=self.bedAccount,
             floatAccount=self.bedFloatAccount,
             costCenter=self.bedCostCenter,
@@ -119,12 +205,13 @@ class StatusChange(BaseModel):
         )
         sanad.items.create(
             bes=value,
-            explanation=explanation,
+            explanation=bes_explanation,
             account=self.besAccount,
             costCenter=self.besCostCenter,
             financial_year=sanad.financial_year
         )
         sanad.date = self.date
+        sanad.explanation = explanation
         sanad.save()
 
         sanad.update_values()
