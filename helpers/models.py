@@ -116,13 +116,13 @@ class BaseModel(models.Model):
 
 
 class ConfirmationMixin(models.Model):
-    first_confirmed_at = jmodels.jDateTimeField(null=True, default=None)
+    first_confirmed_at = jmodels.jDateTimeField(null=True, default=None, blank=True)
     first_confirmed_by = models.ForeignKey('users.User', on_delete=models.PROTECT,
-                                           related_name='first_%(class)sConfirmer', null=True)
+                                           related_name='first_%(class)sConfirmer', null=True, blank=True)
 
-    second_confirmed_at = jmodels.jDateTimeField(null=True, default=None)
+    second_confirmed_at = jmodels.jDateTimeField(null=True, default=None, blank=True)
     second_confirmed_by = models.ForeignKey('users.User', on_delete=models.PROTECT,
-                                            related_name='second_%(class)sConfirmer', null=True)
+                                            related_name='second_%(class)sConfirmer', null=True, blank=True)
 
     class Meta:
         abstract = True
