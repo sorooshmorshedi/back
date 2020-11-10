@@ -19,7 +19,7 @@ from transactions.serializers import TransactionListRetrieveSerializer
 
 class OtherDriverPaymentReport(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_basename = 'otherDriverPayment'
+    permission_basename = 'get.otherDriverPayment'
 
     def get(self, request):
         data = request.GET
@@ -38,7 +38,7 @@ class OtherDriverPaymentReport(APIView):
 
 class RemittanceReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'remittance'
+    permission_codename = 'get.remittance'
 
     serializer_class = RemittanceListRetrieveSerializer
 
@@ -76,7 +76,7 @@ class RemittanceReportView(generics.ListAPIView):
 
 class LadingBillSeriesListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'ladingBillSeries'
+    permission_codename = 'get.ladingBillSeries'
 
     serializer_class = LadingBillSeriesSerializer
 
@@ -130,7 +130,7 @@ class LadingsReportView(generics.ListAPIView):
 
 class OilCompanyLadingReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'oilCompanyLading'
+    permission_codename = 'get.oilCompanyLading'
 
     serializer_class = OilCompanyLadingListRetrieveSerializer
 
@@ -144,7 +144,7 @@ class OilCompanyLadingReportView(generics.ListAPIView):
 
 class OilCompanyLadingItemReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_codename = 'oilCompanyLading'
+    permission_codename = 'get.oilCompanyLading'
 
     serializer_class = OilCompanyLadingItemListRetrieveSerializer
 
