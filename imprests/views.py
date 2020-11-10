@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from django.db.models.query import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
-from imprests.models import ImprestSettlement
+from imprests.models import ImprestSettlement, ImprestSettlementItem
 from imprests.serializers import ImprestSettlementCreateUpdateSerializer, ImprestSettlementItemCreateUpdateSerializer
 from transactions.serializers import TransactionListRetrieveSerializer
 
@@ -19,7 +20,9 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
     serializer_class = TransactionListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
-        return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename)
+        return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename).prefetch_related(
+            Prefetch('items', ImprestSettlementItem.objects.order_by('pk'))
+        )
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -88,7 +91,9 @@ class ImprestSettlementByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            ImprestSettlement.objects.hasAccess('get'),
+            ImprestSettlement.objects.hasAccess('get').prefetch_related(
+                Prefetch('items', ImprestSettlementItem.objects.order_by('pk'))
+            ),
             request.GET.get('position'),
             request.GET.get('id')
         )

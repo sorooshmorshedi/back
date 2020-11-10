@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db.models.query import Prefetch
 
 from rest_framework import generics, serializers
 from rest_framework import status
@@ -11,7 +12,7 @@ from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
-from transactions.models import Transaction
+from transactions.models import Transaction, TransactionItem
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
 
 
@@ -58,7 +59,7 @@ class TransactionCreateView(generics.CreateAPIView):
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_201_CREATED)
 
 
-class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
+class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     serializer_class = TransactionCreateUpdateSerializer
 
@@ -87,7 +88,9 @@ class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().prefetch_related(
+            Prefetch('items', TransactionItem.objects.order_by('pk'))
+        )
         transaction = get_object_or_404(queryset, pk=pk)
         serializer = TransactionListRetrieveSerializer(transaction)
         return Response(serializer.data)
@@ -112,7 +115,10 @@ class TransactionByPositionView(APIView):
     def get(self, request):
         item = get_object_by_code(
             Transaction.objects.hasAccess(request.method, self.permission_basename).filter(
-                type=request.GET.get('type')),
+                type=request.GET.get('type')
+            ).prefetch_related(
+                Prefetch('items', TransactionItem.objects.order_by('pk'))
+            ),
             request.GET.get('position'),
             request.GET.get('id')
         )

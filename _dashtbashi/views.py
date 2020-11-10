@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from _dashtbashi.filters import LadingBillSeriesFilter, RemittanceFilter, LadingFilter, LadingBillNumberFilter, \
     OtherDriverPaymentFilter
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
-    LadingBillNumber, OilCompanyLading, OtherDriverPayment
+    LadingBillNumber, OilCompanyLading, OtherDriverPayment, OilCompanyLadingItem
 from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCreateUpdateSerializer, \
     DrivingListRetrieveSerializer, AssociationSerializer, RemittanceListRetrieveSerializer, \
     RemittanceCreateUpdateSerializer, LadingListSerializer, LadingCreateUpdateSerializer, \
@@ -303,7 +303,9 @@ class OilCompanyLadingModelView(viewsets.ModelViewSet):
         return OilCompanyLading.objects.hasAccess(self.request.method)
 
     def retrieve(self, request, pk=None, *args, **kwargs):
-        queryset = self.get_queryset()
+        queryset = self.get_queryset().prefetch_related(
+            Prefetch('items', OilCompanyLadingItem.objects.order_by('pk'))
+        )
         instance = get_object_or_404(queryset, pk=pk)
         serialized = OilCompanyLadingListRetrieveSerializer(instance)
         return Response(serialized.data)
@@ -364,7 +366,9 @@ class OilCompanyLadingByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            OilCompanyLading.objects.hasAccess(request.method),
+            OilCompanyLading.objects.hasAccess(request.method).prefetch_related(
+                Prefetch('items', OilCompanyLadingItem.objects.order_by('pk'))
+            ),
             request.GET.get('position'),
             request.GET.get('id')
         )

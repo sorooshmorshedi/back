@@ -1,5 +1,6 @@
 from django.db.models.aggregates import Count
 from django.db.models.expressions import F
+from django.db.models.query import Prefetch
 from django.db.models.query_utils import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -66,7 +67,7 @@ class SanadListCreate(generics.ListCreateAPIView):
         return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
 
-class SanadDetail(generics.RetrieveUpdateAPIView):
+class SanadDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_basename = 'sanad'
     serializer_class = SanadSerializer
@@ -77,7 +78,7 @@ class SanadDetail(generics.RetrieveUpdateAPIView):
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset().prefetch_related(
             'created_by',
-            'items',
+            Prefetch('items', SanadItem.objects.order_by('pk')),
             'items__account',
             'items__account__floatAccountGroup',
             'items__account__costCenterGroup',
@@ -158,7 +159,9 @@ class SanadByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            Sanad.objects.hasAccess(request.method, 'sanad'),
+            Sanad.objects.hasAccess(request.method, 'sanad').prefetch_related(
+                Prefetch('items', SanadItem.objects.order_by('pk')),
+            ),
             request.GET.get('position'),
             request.GET.get('id')
         )

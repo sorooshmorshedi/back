@@ -1,10 +1,11 @@
+from django.db.models.query import Prefetch
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from factors.models import Adjustment
+from factors.models import Adjustment, FactorItem
 from factors.serializers import AdjustmentListRetrieveSerializer, AdjustmentCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
@@ -18,7 +19,9 @@ class AdjustmentModelView(viewsets.ModelViewSet):
     serializer_class = AdjustmentListRetrieveSerializer
 
     def get_queryset(self):
-        return Adjustment.objects.inFinancialYear()
+        return Adjustment.objects.inFinancialYear().prefetch_related(
+            Prefetch('factor.items', FactorItem.objects.order_by('pk'))
+        )
 
     def destroy(self, request, *args, **kwargs):
         self.delete_object()
@@ -68,7 +71,11 @@ class GetAdjustmentByPositionView(APIView):
         data = request.GET
 
         item = get_object_by_code(
-            Adjustment.objects.hasAccess(request.method, self.permission_basename).filter(type=data.get('type')),
+            Adjustment.objects.hasAccess(request.method, self.permission_basename).filter(
+                type=data.get('type')
+            ).prefetch_related(
+                Prefetch('factor.items', FactorItem.objects.order_by('pk'))
+            ),
             data.get('position'),
             data.get('id')
         )
