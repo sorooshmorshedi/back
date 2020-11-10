@@ -65,7 +65,11 @@ class DefiniteFactor(APIView):
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
-        factor.code = Factor.get_new_code(factor_type=factor.type)
+
+        if factor.type == Factor.FIRST_PERIOD_INVENTORY:
+            factor.code = 0
+        else:
+            factor.code = Factor.get_new_code(factor_type=factor.type)
 
         factor.is_definite = True
         if not factor.definition_date:
