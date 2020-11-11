@@ -47,11 +47,14 @@ class FirstPeriodInventoryView(APIView):
         return Response(serialized.data)
 
     def post(self, request):
+        return self.update_first_period_inventory(request)
 
+    def put(self, request):
+        return self.update_first_period_inventory(request)
+
+    def update_first_period_inventory(self, request):
         first_period_inventory = self.set_first_period_inventory(request.data)
-
-        res = Response(FactorListRetrieveSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
-        return res
+        return Response(FactorListRetrieveSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
 
     @staticmethod
     def set_first_period_inventory(data, financial_year=None):
@@ -77,6 +80,8 @@ class FirstPeriodInventoryView(APIView):
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
             DefiniteFactor.undoDefinition(user, first_period_inventory)
+            first_period_inventory.code = 0
+            first_period_inventory.save()
 
         first_period_inventory = FirstPeriodInventoryView._create_or_update_factor(factor_data, factor_items_data,
                                                                                    financial_year, user)

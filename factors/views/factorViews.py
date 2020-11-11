@@ -50,6 +50,8 @@ def get_factor_permission_basename(factor_type):
         base_codename = 'backFromBuy'
     elif factor_type == Factor.BACK_FROM_SALE:
         base_codename = 'backFromSale'
+    elif factor_type == Factor.FIRST_PERIOD_INVENTORY:
+        return 'firstPeriodInventory'
     return "{}Factor".format(base_codename)
 
 
@@ -105,7 +107,6 @@ class FactorModelView(viewsets.ModelViewSet):
         return res
 
     def update(self, request, *args, **kwargs):
-
         factor = self.get_object()
 
         data = request.data
