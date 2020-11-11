@@ -32,7 +32,12 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
 
 class FirstPeriodInventoryView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'firstPeriodInventory'
+
+    @property
+    def permission_codename(self):
+        if self.request.method.lower() == 'get':
+            return 'get.firstPeriodInventory'
+        return 'update.firstPeriodInventory'
 
     def get(self, request):
         factor = Factor.get_first_period_inventory()
