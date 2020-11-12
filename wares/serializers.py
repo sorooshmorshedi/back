@@ -85,4 +85,4 @@ class WareListSerializer(WareSerializer):
 
     class Meta:
         model = Ware
-        fields = ('id', 'code', 'name', 'level', 'unit_name', 'warehouse', 'price')
+        fields = ('id', 'code', 'name', 'level', 'unit_name', 'warehouse', 'price', 'parent')
