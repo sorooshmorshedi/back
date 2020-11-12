@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account
-from factors.models import Factor
-from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
+from factors.models import Factor, FactorItem
+from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer, \
+    Prefetch
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_current_user
@@ -54,7 +55,11 @@ class FirstPeriodInventoryView(APIView):
 
     def update_first_period_inventory(self, request):
         first_period_inventory = self.set_first_period_inventory(request.data)
-        return Response(FactorListRetrieveSerializer(instance=first_period_inventory).data, status=status.HTTP_200_OK)
+        return Response(FactorListRetrieveSerializer(
+            instance=Factor.objects.prefetch_related(
+                Prefetch('items', FactorItem.objects.order_by('pk'))
+            ).get(pk=first_period_inventory.id)
+        ).data, status=status.HTTP_200_OK)
 
     @staticmethod
     def set_first_period_inventory(data, financial_year=None):

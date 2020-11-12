@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
 from django.db.models.functions.comparison import Coalesce
+from django.db.models.query import Prefetch
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
@@ -368,7 +369,9 @@ class Factor(BaseModel, ConfirmationMixin):
     @staticmethod
     def get_first_period_inventory(financial_year=None):
         try:
-            return Factor.objects.inFinancialYear(financial_year).get(code=0)
+            return Factor.objects.inFinancialYear(financial_year).prefetch_related(
+                Prefetch('items', FactorItem.objects.order_by('pk'))
+            ).get(code=0)
         except Factor.DoesNotExist:
             return None
 
