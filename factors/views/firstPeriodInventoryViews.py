@@ -137,6 +137,8 @@ class FirstPeriodInventoryView(APIView):
             financial_year=financial_year
         ).sync()
 
+        first_period_inventory.refresh_from_db()
+
         for item in first_period_inventory.items.all():
             item.save()
 
