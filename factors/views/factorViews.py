@@ -1,6 +1,5 @@
 from django.db.models import F
 from django.db.models import Q
-from django.db.models.query import Prefetch
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import viewsets
@@ -38,21 +37,6 @@ class ExpenseModelView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         request.data['financial_year'] = request.user.active_financial_year.id
         return super().create(request, *args, **kwargs)
-
-
-def get_factor_permission_basename(factor_type):
-    base_codename = ''
-    if factor_type == Factor.BUY:
-        base_codename = 'buy'
-    elif factor_type == Factor.SALE:
-        base_codename = 'sale'
-    elif factor_type == Factor.BACK_FROM_BUY:
-        base_codename = 'backFromBuy'
-    elif factor_type == Factor.BACK_FROM_SALE:
-        base_codename = 'backFromSale'
-    elif factor_type == Factor.FIRST_PERIOD_INVENTORY:
-        return 'firstPeriodInventory'
-    return "{}Factor".format(base_codename)
 
 
 class FactorModelView(viewsets.ModelViewSet):

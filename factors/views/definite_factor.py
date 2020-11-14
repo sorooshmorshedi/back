@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account
 from accounts.defaultAccounts.models import DefaultAccount
-from factors.models import Factor, FactorItem
+from factors.models import Factor, FactorItem, get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from sanads.models import clearSanad, Sanad, newSanadCode
 from wares.models import WareInventory
@@ -23,7 +23,6 @@ class DefiniteFactor(APIView):
             factor_type = factor_data.get('type')
         else:
             factor_type = Factor.objects.get(pk=self.kwargs['pk']).type
-        from factors.views.factorViews import get_factor_permission_basename
 
         return "definite.{}".format(get_factor_permission_basename(factor_type))
 

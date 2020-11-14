@@ -611,4 +611,6 @@ def get_factor_permission_basename(factor_type):
         base_codename = 'backFromBuy'
     elif factor_type == Factor.BACK_FROM_SALE:
         base_codename = 'backFromSale'
+    elif factor_type == Factor.CONSUMPTION_WARE:
+        base_codename = 'consumptionWare'
     return "{}Factor".format(base_codename)
