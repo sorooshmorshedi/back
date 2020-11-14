@@ -25,7 +25,7 @@ class DefiniteFactor(APIView):
             factor_type = Factor.objects.get(pk=self.kwargs['pk']).type
         from factors.views.factorViews import get_factor_permission_basename
 
-        return "definite.".format(get_factor_permission_basename(factor_type))
+        return "definite.{}".format(get_factor_permission_basename(factor_type))
 
     def post(self, request, pk):
         user = request.user
@@ -59,9 +59,6 @@ class DefiniteFactor(APIView):
     @staticmethod
     def definiteFactor(user, pk, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
-        from factors.views.factorViews import get_factor_permission_basename
-        permission_codename = "definite.".format(get_factor_permission_basename(factor.type))
-        user.has_object_perm(factor, permission_codename, raise_exception=True)
 
         sanad = DefiniteFactor.getFactorSanad(user, factor)
         factor.sanad = sanad
