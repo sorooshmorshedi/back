@@ -15,7 +15,7 @@ from helpers.validators import ModelValidator
 class MAPIClient(APIClient):
     def force_authenticate(self, user: Optional[Model] = ..., token: Optional[Any] = ...) -> None:
         super(MAPIClient, self).force_authenticate(user, token)
-        ModifyRequestMiddleware.user = user
+        ModifyRequestMiddleware.thread_local = type('thread_local', (object,), {'user': user})
 
 
 class MTestCase(APITestCase):

@@ -6,8 +6,7 @@ from django.db.models.base import Model
 
 def get_current_user():
     from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
-
-    return ModifyRequestMiddleware.user
+    return ModifyRequestMiddleware.thread_local.user
 
 
 def get_new_child_code(parent_code, child_code_length, last_child_code=None):
