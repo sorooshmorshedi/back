@@ -1,10 +1,9 @@
 import datetime
-import json
 
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandParser
 
-from factors.models import FactorItem
+from factors.models import FactorItem, Factor
 from factors.views.definite_factor import DefiniteFactor
 from helpers.db import queryset_iterator, bulk_create
 from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
@@ -16,6 +15,9 @@ import os
 
 class Command(BaseCommand):
     help = 'refresh inventory'
+
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument('user_id', type=int)
 
     def __init__(self):
         super().__init__()
@@ -43,46 +45,28 @@ class Command(BaseCommand):
         with open(path, "w") as backup_file:
             backup_file.write(data)
 
-    def restore_backup(self):
-
-        os.chdir(self.backups_directory)
-        folders = os.listdir()
-        i = 0
-        for folder in folders:
-            print("({}) : {}".format(i, folder))
-            i += 1
-        selected_folder = folders[int(input("Enter folder: "))]
-
-        os.chdir("{}/{}".format(self.backups_directory, selected_folder))
-        files = os.listdir()
-        i = 0
-        for file in files:
-            print("({}) : {}".format(i, file))
-            i += 1
-        selected_file = files[int(input("Enter file: "))]
-
-        path = "{}/{}/{}".format(self.backups_directory, selected_folder, selected_file)
-
-        self.delete_inventories()
-        call_command("loaddata", path)
-
-    def delete_inventories(self):
-        print("Deleting all inventory records")
-        WareInventory.objects.all().delete()
+    def delete_inventories(self, user):
+        print("Deleting all inventory records in financial year #{}".format(user.active_financial_year.id))
+        WareInventory.objects.filter(financial_year=user.active_financial_year).delete()
 
     def handle(self, *args, **options):
-        print("Set admin use as performer user")
-        ModifyRequestMiddleware.thread_local = type('thread_local', (object,), {
-            'user': User.objects.filter(is_superuser=True, is_staff=True).first()
-        })
+        user = User.objects.get(pk=options['user_id'])
 
         self.backup_inventory()
 
-        self.delete_inventories()
+        print("Set {} as performer user".format(user.username))
+        ModifyRequestMiddleware.thread_local = type('thread_local', (object,), {
+            'user': user
+        })
 
-        print("Inserting inventory records")
-        qs = FactorItem.objects.filter(factor__is_definite=True).all()
-        for item in queryset_iterator(qs):
-            DefiniteFactor.updateInventory(item)
+        self.delete_inventories(user)
+
+        print("Undo + Redo definition")
+        qs = Factor.objects.filter(
+            financial_year=user.active_financial_year,
+            is_definite=True
+        ).all()
+        for factor in queryset_iterator(qs, key=('code', 'pk')):
+            DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=True)
 
         print("Done!")
