@@ -191,3 +191,35 @@ INTERNAL_IPS = [
 #     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 # }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '{}/debug.log'.format(BASE_DIR),
+        },
+        'tmp_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '{}/debug-tmp.log'.format(BASE_DIR),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'tmp': {
+            'handlers': ['tmp_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

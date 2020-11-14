@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import datetime
 
@@ -11,15 +12,19 @@ from django.db import models
 import django.db.models.options as options
 from rest_framework.exceptions import ValidationError
 
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, sanad_exp
 
 options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year', 'permission_basename')
+
+logger = logging.getLogger('tmp')
 
 
 class BaseManager(models.Manager):
 
     def hasAccess(self, method, permission_basename=None, use_financial_year=True, financial_year=None):
         user = get_current_user()
+
+        logger.debug(sanad_exp(user.username, user.active_financial_year, method, permission_basename))
 
         if not user:
             return super().get_queryset()
