@@ -232,7 +232,7 @@ class WareInventory(BaseModel):
 
     @staticmethod
     def increase_inventory(ware: Ware, warehouse: Warehouse, count, fee, financial_year=None, revert=False):
-        print("inc {}, fee: {}, revert:{}".format(count, fee, revert))
+        print("inc {} #{} from #{}, revert:{}".format(count, ware.id, warehouse.id, revert))
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
@@ -248,7 +248,7 @@ class WareInventory(BaseModel):
 
     @staticmethod
     def decrease_inventory(ware: Ware, warehouse: Warehouse, count, financial_year=None, revert=False):
-        print("dec {}, revert:{}".format(count, revert))
+        print("dec {} #{} from #{}, revert:{}".format(count, ware.id, warehouse.id, revert))
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
