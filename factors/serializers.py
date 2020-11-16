@@ -238,7 +238,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
                 output_warehouse,
                 Decimal(output_factor_item.count),
             )
-            output_factor_item.remain_fees = WareInventory.get_remain_fees(ware)
+            output_factor_item.remain_fees = WareInventory.get_remain_fees(ware, output_warehouse)
 
             # move wares in
             input_factor_item = input_factor.items.create(
@@ -247,7 +247,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             )
             for fee in fees:
                 WareInventory.increase_inventory(ware, input_warehouse, fee['count'], fee['fee'])
-            input_factor_item.remain_fees = WareInventory.get_remain_fees(ware)
+            input_factor_item.remain_fees = WareInventory.get_remain_fees(ware, input_warehouse)
 
         transfer_data = {
             'input_factor': input_factor,
@@ -367,7 +367,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
                 try:
-                    fee = float(WareInventory.get_remain_fees(item['ware'])[0]['fee'])
+                    fee = float(WareInventory.get_remain_fees(item['ware'], item['warehouse'])[0]['fee'])
                 except IndexError:
                     raise serializers.ValidationError("هیچ فاکتوری برای این کالا ثبت نشده است")
             elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:

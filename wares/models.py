@@ -314,13 +314,14 @@ class WareInventory(BaseModel):
         return ware_balance['count']
 
     @staticmethod
-    def get_remain_fees(ware: Ware, financial_year=None):
+    def get_remain_fees(ware: Ware, warehouse: Warehouse, financial_year=None):
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
 
         ware_inventories = WareInventory.objects.filter(
             ware=ware,
+            warehouse=warehouse,
             financial_year=financial_year
         )
 

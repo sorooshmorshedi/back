@@ -202,7 +202,7 @@ class DefiniteFactor(APIView):
             elif factor.type in Factor.INPUT_GROUP:
                 fee = item.fee
                 if factor.type == Factor.BACK_FROM_SALE:
-                    fee = float(WareInventory.get_remain_fees(ware)[-1]['fee'])
+                    fee = float(WareInventory.get_remain_fees(ware, warehouse)[-1]['fee'])
                 item.fees = [{
                     'fee': float(fee),
                     'count': float(item.count)
@@ -220,7 +220,7 @@ class DefiniteFactor(APIView):
                     WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], factor.financial_year,
                                                      revert=True)
 
-        item.remain_fees = WareInventory.get_remain_fees(item.ware)
+        item.remain_fees = WareInventory.get_remain_fees(item.ware, item.warehouse)
         item.save()
 
     @staticmethod
