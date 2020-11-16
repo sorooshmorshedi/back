@@ -66,7 +66,7 @@ class Command(BaseCommand):
             financial_year=user.active_financial_year,
             is_definite=True
         ).all()
-        for factor in queryset_iterator(qs, key=('code', 'pk')):
+        for factor in queryset_iterator(qs, key=('definition_date',)):
             DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=True)
 
         print("Done!")
