@@ -78,7 +78,7 @@ class SanadDetailView(generics.RetrieveUpdateAPIView):
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset().prefetch_related(
             'created_by',
-            Prefetch('items', SanadItem.objects.order_by('pk')),
+            'items',
             'items__account',
             'items__account__floatAccountGroup',
             'items__account__costCenterGroup',
@@ -159,9 +159,7 @@ class SanadByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            Sanad.objects.hasAccess(request.method, 'sanad').prefetch_related(
-                Prefetch('items', SanadItem.objects.order_by('pk')),
-            ),
+            Sanad.objects.hasAccess(request.method, 'sanad').prefetch_related('items'),
             request.GET.get('position'),
             request.GET.get('id')
         )

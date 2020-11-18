@@ -109,6 +109,8 @@ class WareInventoryListView(generics.ListAPIView):
                 *Factor.BUY_GROUP,
                 Factor.INPUT_ADJUSTMENT,
                 Factor.OUTPUT_ADJUSTMENT,
+                Factor.INPUT_TRANSFER,
+                Factor.OUTPUT_TRANSFER,
                 Factor.CONSUMPTION_WARE
             )
         ).prefetch_related(

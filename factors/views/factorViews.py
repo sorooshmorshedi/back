@@ -61,9 +61,7 @@ class FactorModelView(viewsets.ModelViewSet):
         return Response([])
 
     def retrieve(self, request, pk=None):
-        queryset = self.get_queryset().prefetch_related(
-            Prefetch('items', FactorItem.objects.order_by('pk'))
-        )
+        queryset = self.get_queryset()
         instance = get_object_or_404(queryset, pk=pk)
         serialized = FactorListRetrieveSerializer(instance)
         return Response(serialized.data)
@@ -238,8 +236,6 @@ class GetFactorByPositionView(APIView):
         item = get_object_by_code(
             Factor.objects.hasAccess(request.method, self.permission_basename).filter(
                 type=request.GET['type']
-            ).prefetch_related(
-                Prefetch('items', FactorItem.objects.order_by('pk'))
             ),
             request.GET.get('position'),
             request.GET.get('id')

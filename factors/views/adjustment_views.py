@@ -19,9 +19,7 @@ class AdjustmentModelView(viewsets.ModelViewSet):
     serializer_class = AdjustmentListRetrieveSerializer
 
     def get_queryset(self):
-        return Adjustment.objects.inFinancialYear().prefetch_related(
-            Prefetch('factor.items', FactorItem.objects.order_by('pk'))
-        )
+        return Adjustment.objects.inFinancialYear()
 
     def destroy(self, request, *args, **kwargs):
         self.delete_object()
@@ -73,8 +71,6 @@ class GetAdjustmentByPositionView(APIView):
         item = get_object_by_code(
             Adjustment.objects.hasAccess(request.method, self.permission_basename).filter(
                 type=data.get('type')
-            ).prefetch_related(
-                Prefetch('factor.items', FactorItem.objects.order_by('pk'))
             ),
             data.get('position'),
             data.get('id')

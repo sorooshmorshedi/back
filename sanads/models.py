@@ -123,11 +123,13 @@ class SanadItem(BaseModel):
 
     explanation = models.CharField(max_length=255, blank=True, verbose_name='توضیحات')
 
+    order = models.IntegerField(default=0)
+
     def __str__(self):
         return "{0} - {1}".format(self.sanad.code, self.explanation[0:30])
 
     class Meta(BaseModel.Meta):
-        pass
+        ordering = ('-order', 'pk')
 
     def save(self, *args, **kwargs) -> None:
         self.financial_year = self.sanad.financial_year

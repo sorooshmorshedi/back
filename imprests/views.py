@@ -20,9 +20,7 @@ class ImprestSettlementModelView(viewsets.ModelViewSet):
     serializer_class = TransactionListRetrieveSerializer
 
     def get_queryset(self) -> QuerySet:
-        return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename).prefetch_related(
-            Prefetch('items', ImprestSettlementItem.objects.order_by('pk'))
-        )
+        return ImprestSettlement.objects.hasAccess(self.request.method, self.permission_basename)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -91,9 +89,7 @@ class ImprestSettlementByPositionView(APIView):
 
     def get(self, request):
         item = get_object_by_code(
-            ImprestSettlement.objects.hasAccess('get').prefetch_related(
-                Prefetch('items', ImprestSettlementItem.objects.order_by('pk'))
-            ),
+            ImprestSettlement.objects.hasAccess('get'),
             request.GET.get('position'),
             request.GET.get('id')
         )

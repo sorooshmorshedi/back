@@ -369,9 +369,7 @@ class Factor(BaseModel, ConfirmationMixin):
     @staticmethod
     def get_first_period_inventory(financial_year=None):
         try:
-            return Factor.objects.inFinancialYear(financial_year).prefetch_related(
-                Prefetch('items', FactorItem.objects.order_by('pk'))
-            ).get(code=0)
+            return Factor.objects.inFinancialYear(financial_year).get(code=0)
         except Factor.DoesNotExist:
             return None
 
@@ -479,6 +477,8 @@ class FactorItem(BaseModel):
     # this is used for inventory reports and sanads.
     # it's equals to fee's count * fee's fee
     calculated_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
+
+    order = models.IntegerField(default=0)
 
     def __str__(self):
         return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(

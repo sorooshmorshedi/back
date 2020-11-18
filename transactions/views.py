@@ -88,9 +88,7 @@ class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
-        queryset = self.get_queryset().prefetch_related(
-            Prefetch('items', TransactionItem.objects.order_by('pk'))
-        )
+        queryset = self.get_queryset()
         transaction = get_object_or_404(queryset, pk=pk)
         serializer = TransactionListRetrieveSerializer(transaction)
         return Response(serializer.data)
@@ -116,8 +114,6 @@ class TransactionByPositionView(APIView):
         item = get_object_by_code(
             Transaction.objects.hasAccess(request.method, self.permission_basename).filter(
                 type=request.GET.get('type')
-            ).prefetch_related(
-                Prefetch('items', TransactionItem.objects.order_by('pk'))
             ),
             request.GET.get('position'),
             request.GET.get('id')

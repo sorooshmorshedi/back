@@ -206,7 +206,7 @@ class WareInventory(BaseModel):
     count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
     fee = models.DecimalField(max_digits=24, decimal_places=0)
 
-    order = models.IntegerField()
+    order = models.IntegerField(default=0)
 
     class Meta(BaseModel.Meta):
         ordering = ['order']

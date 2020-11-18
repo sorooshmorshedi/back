@@ -56,9 +56,7 @@ class FirstPeriodInventoryView(APIView):
     def update_first_period_inventory(self, request):
         first_period_inventory = self.set_first_period_inventory(request.data)
         return Response(FactorListRetrieveSerializer(
-            instance=Factor.objects.prefetch_related(
-                Prefetch('items', FactorItem.objects.order_by('pk'))
-            ).get(pk=first_period_inventory.id)
+            instance=Factor.objects.get(pk=first_period_inventory.id)
         ).data, status=status.HTTP_200_OK)
 
     @staticmethod
@@ -162,12 +160,12 @@ class FirstPeriodInventoryView(APIView):
         sanad.items.create(
             account=Account.get_inventory_account(user),
             bed=first_period_inventory.sum,
-            financial_year=financial_year
+            financial_year=financial_year,
         )
         sanad.items.create(
             account=Account.get_partners_account(user),
             bes=first_period_inventory.sum,
-            financial_year=financial_year
+            financial_year=financial_year,
         )
 
         return sanad

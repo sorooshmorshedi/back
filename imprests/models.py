@@ -79,6 +79,8 @@ class ImprestSettlementItem(BaseModel):
 
     attachment = models.FileField(upload_to=upload_to, null=True)
 
+    order = models.IntegerField(default=0)
+
     def __str__(self):
         return "{0} - {1}".format(self.pk, self.explanation)
 

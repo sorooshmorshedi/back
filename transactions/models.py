@@ -331,6 +331,8 @@ class TransactionItem(BaseModel):
 
     file = models.FileField(blank=True, null=True)
 
+    order = models.IntegerField(default=0)
+
     def __str__(self):
         return "{0} - {1}".format(self.transaction.code, self.explanation[0:30])
 
