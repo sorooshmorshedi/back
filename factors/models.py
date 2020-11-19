@@ -5,13 +5,13 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
 from django.db.models.functions.comparison import Coalesce
-from django.db.models.query import Prefetch
+from django.utils.timezone import now
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
-from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION
+from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -297,6 +297,12 @@ class Factor(BaseModel, ConfirmationMixin):
         return res
 
     def verify_items(self, items_data, ids_to_delete=()):
+        """
+        Sample input:
+        :param items_data: [{"ware": 1, "warehouse": 2, "count": 3, "fee": 4}, ...]
+        :param ids_to_delete: [1, 2, 3]
+        :return: None
+        """
 
         if self.is_definite:
 
@@ -314,6 +320,7 @@ class Factor(BaseModel, ConfirmationMixin):
                 for item in self.items.all():
                     if (
                             row['ware'] == item.ware_id
+                            and row['warehouse'] == item.warehouse_id
                             and Decimal(row['count']) == item.count
                             and Decimal(row.get('fee', 0)) == item.fee
                     ):
@@ -326,6 +333,7 @@ class Factor(BaseModel, ConfirmationMixin):
                 # Verify new or changed items
                 count = FactorItem.objects.filter(
                     ware_id=row['ware'],
+                    warehouse_id=row['warehouse'],
                     financial_year=self.financial_year,
                     factor__is_definite=True,
                     factor__definition_date__gt=self.definition_date

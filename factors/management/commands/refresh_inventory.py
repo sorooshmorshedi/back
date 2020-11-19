@@ -67,6 +67,6 @@ class Command(BaseCommand):
             is_definite=True
         ).all()
         for factor in queryset_iterator(qs, key=('definition_date',)):
-            DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=True)
+            DefiniteFactor.updateFactorInventory(factor)
 
         print("Done!")

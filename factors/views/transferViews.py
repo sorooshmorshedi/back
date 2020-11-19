@@ -2,14 +2,13 @@ from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.serializers import BaseSerializer
 from rest_framework.views import APIView
 
 from factors.models import Transfer
 from factors.serializers import TransferListRetrieveSerializer, TransferCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_object_by_code
+from helpers.functions import get_object_by_code, get_new_code
 
 
 class TransferModelView(viewsets.ModelViewSet):
@@ -32,8 +31,7 @@ class TransferModelView(viewsets.ModelViewSet):
 
         transfer = serialized.instance
 
-        res = Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
-        return res
+        return Response(TransferListRetrieveSerializer(instance=transfer).data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -42,7 +40,10 @@ class TransferModelView(viewsets.ModelViewSet):
             'financial_year': request.user.active_financial_year
         })
         serialized.is_valid(raise_exception=True)
-        serialized.save()
+        serialized.save(
+            financial_year=self.request.user.active_financial_year,
+            code=get_new_code(Transfer)
+        )
 
         transfer = serialized.instance
 

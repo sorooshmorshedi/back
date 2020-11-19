@@ -5,9 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.accounts.models import Account
-from factors.models import Factor, FactorItem
-from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer, \
-    Prefetch
+from factors.models import Factor
+from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_current_user

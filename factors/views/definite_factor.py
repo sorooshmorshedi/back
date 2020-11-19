@@ -184,14 +184,14 @@ class DefiniteFactor(APIView):
         if item.ware.is_service:
             return
 
-        is_used_in_next_years = FactorItem.objects.filter(
+        usage_in_next_years = FactorItem.objects.filter(
             factor__financial_year__start__gt=factor.financial_year.end,
             factor__financial_year__company=factor.financial_year.company,
             factor__type__in=Factor.OUTPUT_GROUP,
             ware=ware
-        ).exists()
+        )
 
-        if is_used_in_next_years:
+        if usage_in_next_years.exists():
             raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
 
         if not revert:

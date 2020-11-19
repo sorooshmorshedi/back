@@ -8,7 +8,7 @@ from helpers.functions import get_current_user
 from sanads.models import newSanadCode, clearSanad
 from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
 from transactions.serializers import TransactionSerializerForPayment
-from users.serializers import UserListRetrieveSerializer, UserSimpleSerializer
+from users.serializers import UserSimpleSerializer
 from wares.models import WareInventory
 from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, WarehouseSimpleSerializer
 from django.utils.timezone import now
@@ -206,8 +206,14 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         output_factor = instance.output_factor
         input_factor = instance.input_factor
 
-        input_factor.verify_items(validated_data['items'])
-        output_factor.verify_items(validated_data['items'])
+        input_items_data = []
+        output_items_data = []
+        for item in validated_data['items']:
+            input_items_data.append({**item, 'warehouse': item['input_warehouse']})
+            output_items_data.append({**item, 'warehouse': item['output_warehouse']})
+
+        input_factor.verify_items(input_items_data)
+        output_factor.verify_items(output_items_data)
 
         DefiniteFactor.updateFactorInventory(input_factor, revert=True)
         DefiniteFactor.updateFactorInventory(output_factor, revert=True)
@@ -224,30 +230,32 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
                 'financial_year': instance.financial_year,
                 'explanation': explanation,
                 'count': item['count'],
-                'fee': 0,
                 'ware': ware,
             }
 
             # move ware out
             output_factor_item = output_factor.items.create(
                 **item_data,
+                fee=0,
                 warehouse=output_warehouse
             )
-            fees = WareInventory.decrease_inventory(
-                ware,
-                output_warehouse,
-                Decimal(output_factor_item.count),
-            )
-            output_factor_item.remain_fees = WareInventory.get_remain_fees(ware, output_warehouse)
+            DefiniteFactor.updateFactorInventory(output_factor)
 
             # move wares in
-            input_factor_item = input_factor.items.create(
+            output_factor_item.refresh_from_db()
+            fee = 0
+            total_count = 0
+            for output_fee in output_factor_item.fees:
+                fee += output_fee['fee'] * output_fee['count']
+                total_count += output_fee['count']
+            fee /= total_count
+            input_factor.items.create(
                 **item_data,
-                warehouse=input_warehouse
+                fee=fee,
+                warehouse=input_warehouse,
             )
-            for fee in fees:
-                WareInventory.increase_inventory(ware, input_warehouse, fee['count'], fee['fee'])
-            input_factor_item.remain_fees = WareInventory.get_remain_fees(ware, input_warehouse)
+
+            DefiniteFactor.updateFactorInventory(input_factor)
 
         transfer_data = {
             'input_factor': input_factor,
@@ -386,6 +394,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'count': o['count'],
             'fee': o['fee'],
             'ware': o['ware'].id,
+            'warehouse': o['warehouse'].id,
         }, factor_items_data)))
         factor.items.all().delete()
 
