@@ -323,6 +323,8 @@ class DefiniteFactor(APIView):
         value = 0
         for item in factor.items.all():
             value += item.calculated_value
+            item.fee = item.calculated_value / item.count
+            item.save()
 
         bed_account = Account.get_cost_of_sold_wares_account(user)
         bed_float_account = None
