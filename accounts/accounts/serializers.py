@@ -49,7 +49,6 @@ class AccountTypeSerializer(serializers.ModelSerializer):
 
 
 class AccountCreateUpdateSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Account
         fields = '__all__'
@@ -68,12 +67,19 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
             if not data.get('person_type'):
                 raise serializers.ValidationError("لطفا نوع شخص را مشخص کنید")
 
-        if self.instance and SanadItem.objects.filter(account=self.instance).exists():
-            if self.instance.floatAccountGroup != data.get('floatAccountGroup'):
-                raise serializers.ValidationError("گروه حساب شناور برای حساب دارای گردش غیر قابل ویرایش می باشد")
-            if self.instance.costCenterGroup != data.get('costCenterGroup'):
-                raise serializers.ValidationError(
-                    "گروه مرکز هزینه و درآمد برای حساب دارای گردش غیر قابل ویرایش می باشد")
+        if self.instance and self.instance.has_turnover():
+            not_editable_fields = [{
+                'name': 'floatAccountGroup',
+                'title': 'گروه حساب شناور',
+            }, {
+                'name': 'costCenterGroup',
+                'title': 'گروه مرکز هزینه',
+            }]
+            for field in not_editable_fields:
+                if getattr(self.instance, field['name']) != data.get(field['name']):
+                    raise serializers.ValidationError(
+                        "{} برای حساب دارای گردش غیر قابل ویرایش می باشد".format(field['title'])
+                    )
 
         return data
 
