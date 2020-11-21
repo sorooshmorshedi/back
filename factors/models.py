@@ -472,7 +472,7 @@ class FactorItem(BaseModel):
                                   blank=True)
 
     count = models.DecimalField(max_digits=24, decimal_places=6)
-    fee = models.DecimalField(max_digits=24, decimal_places=0)
+    fee = models.DecimalField(max_digits=24, decimal_places=6)
 
     # Used for undo definition for output factors to increase inventory
     fees = JSONField(default=get_empty_array)
