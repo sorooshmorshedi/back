@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Type
 
 import jdatetime
@@ -99,6 +100,8 @@ def sanad_exp(*args):
     for arg in args:
         if isinstance(arg, jdatetime.date):
             arg = date_to_str(arg)
+        if isinstance(arg, Decimal):
+            arg = str(arg).rstrip('0').rstrip('.')
         else:
             arg = str(arg)
         result += arg + " "
