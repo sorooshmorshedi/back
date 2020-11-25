@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.aggregates import Max
 from django.db.models.functions.comparison import Coalesce
-from django.utils.timezone import now
+from django.db.models.query_utils import Q
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
@@ -332,12 +332,15 @@ class Factor(BaseModel, ConfirmationMixin):
 
                 # Verify new or changed items
                 count = FactorItem.objects.filter(
+                    ~Q(factor=self),
                     ware_id=row['ware'],
                     warehouse_id=row['warehouse'],
                     financial_year=self.financial_year,
                     factor__is_definite=True,
-                    factor__definition_date__gt=self.definition_date
-                ).count()
+                    factor__definition_date__gt=self.definition_date,
+                )
+                print(self, count)
+                count = count.count()
 
                 if count == 0:
                     continue
@@ -622,3 +625,45 @@ def get_factor_permission_basename(factor_type):
     elif factor_type == Factor.CONSUMPTION_WARE:
         base_codename = 'consumptionWare'
     return "{}Factor".format(base_codename)
+
+
+class WarehouseHandling(BaseModel, ConfirmationMixin):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlings')
+    code = models.IntegerField(blank=True, null=True)
+
+    start_date = jmodels.jDateField()
+    counting_date = jmodels.jDateField()
+    submit_date = jmodels.jDateField()
+    handler = models.CharField(max_length=200)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='warehouseHandlings')
+    ware_status = models.CharField(max_length=20)
+    explanation = EXPLANATION()
+
+    is_definite = models.BooleanField(default=False)
+    inputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsInput',
+                                        blank=True, null=True)
+    outputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsOutput',
+                                         blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        permission_basename = 'warehouseHandling'
+        permissions = (
+            ('get.warehouseHandling', 'مشاهده انبار گردانی'),
+            ('create.warehouseHandling', 'تعریف انبار گردانی'),
+            ('update.warehouseHandling', 'ویرایش انبار گردانی'),
+            ('delete.warehouseHandling', 'حذف انبار گردانی'),
+        )
+
+
+class WarehouseHandlingItem(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlingItems')
+    warehouseHandling = models.ForeignKey(WarehouseHandling, on_delete=models.CASCADE, related_name='items')
+    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='warehouseHandlingItems')
+    warehouse_remain = DECIMAL(null=True)
+    system_remain = DECIMAL(null=True)
+
+    order = models.IntegerField(default=0)
+
+    @property
+    def contradiction(self):
+        return self.warehouse_remain - self.system_remain

@@ -372,12 +372,13 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
         factor_items_data = []
         for item in validated_data.get('items'):
+            ware = Ware.objects.get(pk=item['ware'])
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
                 try:
                     fee = float(WareInventory.get_remain_fees(item['ware'], item['warehouse'])[0]['fee'])
                 except IndexError:
-                    raise serializers.ValidationError("هیچ فاکتوری برای این کالا ثبت نشده است")
+                    raise serializers.ValidationError("هیچ فاکتوری برای {} ثبت نشده است".format(ware.name))
             elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
                 fee = 0
 
@@ -385,7 +386,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
                 'financial_year': financial_year,
                 'count': item['count'],
                 'fee': fee,
-                'ware': Ware.objects.get(pk=item['ware']),
+                'ware': ware,
                 'warehouse': Warehouse.objects.get(pk=item['warehouse'])
 
             })
@@ -504,3 +505,36 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         self.sync(instance, validated_data)
 
         return super().update(instance, validated_data)
+
+
+class WarehouseHandlingItemCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WarehouseHandlingItem
+        fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
+
+
+class WarehouseHandlingItemListRetrieveSerializer(serializers.ModelSerializer):
+    ware = WareListSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = WarehouseHandlingItem
+        fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
+
+
+class WarehouseHandlingCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WarehouseHandling
+        fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
+
+
+class WarehouseHandlingListRetrieveSerializer(serializers.ModelSerializer):
+    items = WarehouseHandlingItemListRetrieveSerializer(many=True, read_only=True)
+    warehouse = WarehouseSimpleSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = WarehouseHandling
+        fields = '__all__'
+        read_only_fields = ['id', 'financial_year']

@@ -32,6 +32,9 @@ labels = {
     'price': 'قیمت',
     'warehouse': 'انبار',
 
+    # Factor
+    'handler': 'انبار گردان',
+
     # Other
     'code': 'شماره',
     'form': 'فرم',

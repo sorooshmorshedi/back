@@ -4,7 +4,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from cheques.views import get_cheque_permission_basename
-from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
+from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
+    WarehouseHandlingListRetrieveSerializer
 from factors.models import get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
@@ -156,3 +157,15 @@ class AdjustmentListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Adjustment.objects.hasAccess('get').all()
+
+
+class WarehouseHandlingListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = "get.warehouseHandling"
+    serializer_class = WarehouseHandlingListRetrieveSerializer
+    filterset_class = WarehouseHandlingFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return WarehouseHandling.objects.hasAccess('get').all()

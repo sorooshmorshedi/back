@@ -81,7 +81,7 @@ class FirstPeriodInventoryView(APIView):
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
-            DefiniteFactor.undoDefinition(user, first_period_inventory)
+            DefiniteFactor.undoDefinition( first_period_inventory)
             first_period_inventory.code = 0
             first_period_inventory.save()
 

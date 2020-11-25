@@ -3,6 +3,7 @@ from typing import Type
 
 import jdatetime
 from django.db.models.base import Model
+from django.db.models.query_utils import Q
 
 
 def get_current_user():
@@ -27,7 +28,7 @@ def get_new_child_code(parent_code, child_code_length, last_child_code=None):
 
 def get_new_code(model: Type[Model], max_length=None):
     try:
-        code = model.objects.inFinancialYear().latest('code').code + 1
+        code = model.objects.inFinancialYear().filter(~Q(code=None)).latest('code').code + 1
     except:
         return 1
 

@@ -22,7 +22,7 @@ class AdjustmentModelView(viewsets.ModelViewSet):
         return Adjustment.objects.inFinancialYear()
 
     def destroy(self, request, *args, **kwargs):
-        self.delete_object()
+        self.delete_adjustment(self.get_object())
         return Response({}, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
@@ -51,12 +51,12 @@ class AdjustmentModelView(viewsets.ModelViewSet):
         res = Response(AdjustmentListRetrieveSerializer(instance=adjustment).data, status=status.HTTP_200_OK)
         return res
 
-    def delete_object(self):
-        instance = self.get_object()
+    @staticmethod
+    def delete_adjustment(instance: Adjustment):
         factor = instance.factor
         if not factor.is_deletable:
             raise ValidationError('تعدیل غیر قابل حذف می باشد')
-        DefiniteFactor.undoDefinition(self.request.user, factor)
+        DefiniteFactor.undoDefinition(factor)
         instance.delete()
         factor.delete()
 

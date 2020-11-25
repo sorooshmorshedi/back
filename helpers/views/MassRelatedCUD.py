@@ -42,7 +42,7 @@ class MassRelatedCUD:
             item[self.parent_field] = self.parent_id
             if hasattr(self.create_serializer.Meta.model, 'order'):
                 item['order'] = self.items.index(item)
-            if 'id' in item:
+            if 'id' in item and item['id']:
                 items_to_update.append(item)
             else:
                 items_to_create.append(item)

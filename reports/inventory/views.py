@@ -428,14 +428,17 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
 
     def get_queryset(self):
         warehouse = self.request.GET.get('warehouse', None)
+        financial_year = self.request.user.active_financial_year
 
         input_filter = {
             'factorItems__factor__is_definite': True,
+            'factorItems__factor__financial_year': financial_year,
             'factorItems__factor__type__in': Factor.INPUT_GROUP
         }
 
         output_filter = {
             'factorItems__factor__is_definite': True,
+            'factorItems__factor__financial_year': financial_year,
             'factorItems__factor__type__in': Factor.OUTPUT_GROUP
         }
 
@@ -450,10 +453,21 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
                 Q(children__warehouse_id=warehouse) |
                 Q(children__children__warehouse_id=warehouse) |
                 Q(children__children__children__warehouse_id=warehouse) |
-                Q(factorItems__warehouse_id=warehouse) |
-                Q(children__factorItems__warehouse_id=warehouse) |
-                Q(children__children__factorItems__warehouse_id=warehouse) |
-                Q(children__children__children__factorItems__warehouse_id=warehouse)
+
+                (
+                        Q(factorItems__warehouse_id=warehouse) &
+                        Q(factorItems__factor__financial_year=financial_year)
+                ) | (
+                        Q(children__factorItems__warehouse_id=warehouse) &
+                        Q(children__factorItems__factor__financial_year=financial_year)
+                ) | (
+                        Q(children__children__factorItems__warehouse_id=warehouse) &
+                        Q(children__children__factorItems__factor__financial_year=financial_year)
+                ) | (
+                        Q(children__children__children__factorItems__warehouse_id=warehouse) &
+                        Q(children__children__factorItems__factor__financial_year=financial_year)
+                )
+
             )
 
         queryset = queryset.annotate(

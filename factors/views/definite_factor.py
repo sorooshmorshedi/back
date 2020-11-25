@@ -33,8 +33,8 @@ class DefiniteFactor(APIView):
         return Response(FactorListRetrieveSerializer(factor).data)
 
     @staticmethod
-    def undoDefinition(user, factor: Factor):
-        sanad = DefiniteFactor.getFactorSanad(user, factor)
+    def undoDefinition(factor: Factor):
+        sanad = DefiniteFactor.getFactorSanad(factor)
         clearSanad(sanad)
 
         sanad.is_auto_created = True
@@ -59,7 +59,7 @@ class DefiniteFactor(APIView):
     def definiteFactor(user, pk, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
 
-        sanad = DefiniteFactor.getFactorSanad(user, factor)
+        sanad = DefiniteFactor.getFactorSanad(factor)
         factor.sanad = sanad
 
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
@@ -151,13 +151,13 @@ class DefiniteFactor(APIView):
         return factor
 
     @staticmethod
-    def getFactorSanad(user, factor):
+    def getFactorSanad(factor: Factor):
         if not factor.sanad:
             sanad = Sanad(
                 code=newSanadCode(),
                 date=factor.date,
                 explanation=factor.explanation,
-                financial_year=user.active_financial_year
+                financial_year=factor.financial_year
             )
         else:
             sanad = factor.sanad

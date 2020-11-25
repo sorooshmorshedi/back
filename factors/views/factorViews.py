@@ -98,7 +98,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         is_definite = factor.is_definite
         if is_definite:
-            DefiniteFactor.undoDefinition(user, factor)
+            DefiniteFactor.undoDefinition( factor)
 
         serialized = FactorCreateUpdateSerializer(instance=factor, data=data['item'])
         serialized.is_valid(raise_exception=True)
@@ -170,7 +170,7 @@ class FactorModelView(viewsets.ModelViewSet):
         self.check_confirmations(request, factor, for_delete=True)
 
         if factor.is_definite:
-            DefiniteFactor.undoDefinition(request.user, factor)
+            DefiniteFactor.undoDefinition( factor)
 
         res = super().destroy(request, *args, **kwargs)
         return res

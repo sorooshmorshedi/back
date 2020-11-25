@@ -33,7 +33,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Update Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, buy_factor)
+        DefiniteFactor.undoDefinition( buy_factor)
         factor_item = buy_factor.items.all()[0]
         factor_item.count = 5
         factor_item.fee = 5
@@ -44,7 +44,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Add New Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, buy_factor)
+        DefiniteFactor.undoDefinition( buy_factor)
         FactorTest.create_factor_item(buy_factor, ware=ware_1, count=25, fee=25)
         DefiniteFactor.definiteFactor(self.user, buy_factor.id)
 
@@ -52,7 +52,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Delete Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, buy_factor)
+        DefiniteFactor.undoDefinition( buy_factor)
         buy_factor.items.first().delete()
         DefiniteFactor.definiteFactor(self.user, buy_factor.id)
 
@@ -73,7 +73,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Update Sale Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, sale_factor)
+        DefiniteFactor.undoDefinition( sale_factor)
         factor_item = sale_factor.items.all()[0]
         factor_item.count = 2
         factor_item.fee = 2
@@ -84,7 +84,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Add New Sale Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, sale_factor)
+        DefiniteFactor.undoDefinition( sale_factor)
         FactorTest.create_factor_item(sale_factor, ware=ware_1, count=16, fee=16)
         DefiniteFactor.definiteFactor(self.user, sale_factor.id)
 
@@ -92,7 +92,7 @@ class InventoryTest(MTestCase):
 
         # --- Test Delete Sale Factor Item
 
-        DefiniteFactor.undoDefinition(self.user, sale_factor)
+        DefiniteFactor.undoDefinition( sale_factor)
         sale_factor.items.first().delete()
         DefiniteFactor.definiteFactor(self.user, sale_factor.id)
 
