@@ -533,6 +533,7 @@ class WarehouseHandlingCreateUpdateSerializer(serializers.ModelSerializer):
 class WarehouseHandlingListRetrieveSerializer(serializers.ModelSerializer):
     items = WarehouseHandlingItemListRetrieveSerializer(many=True, read_only=True)
     warehouse = WarehouseSimpleSerializer(many=False, read_only=True)
+    created_by = UserSimpleSerializer(many=False, read_only=True)
 
     class Meta:
         model = WarehouseHandling

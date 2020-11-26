@@ -242,7 +242,7 @@ def MELLI_CODE(**kwargs):
 
 
 def DECIMAL(**kwargs):
-    return models.DecimalField(max_digits=24, decimal_places=6, default=0, **kwargs)
+    return models.DecimalField(max_digits=24, decimal_places=6, default=kwargs.pop('default', 0), **kwargs)
 
 
 def upload_to(instance, filename):

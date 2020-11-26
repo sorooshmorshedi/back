@@ -1,4 +1,5 @@
 from django.db.models import Q, Count
+from django.db.models.query import Prefetch
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -6,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from cheques.views import get_cheque_permission_basename
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
     WarehouseHandlingListRetrieveSerializer
-from factors.models import get_factor_permission_basename
+from factors.models import get_factor_permission_basename, WarehouseHandlingItem
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *
@@ -168,4 +169,6 @@ class WarehouseHandlingListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return WarehouseHandling.objects.hasAccess('get').all()
+        return WarehouseHandling.objects.hasAccess('get').prefetch_related(
+            Prefetch('items', WarehouseHandlingItem.objects.order_by('order'))
+        ).all()

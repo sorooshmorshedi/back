@@ -659,11 +659,13 @@ class WarehouseHandlingItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlingItems')
     warehouseHandling = models.ForeignKey(WarehouseHandling, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='warehouseHandlingItems')
-    warehouse_remain = DECIMAL(null=True)
-    system_remain = DECIMAL(null=True)
+    warehouse_remain = DECIMAL(null=True, default=None)
+    system_remain = DECIMAL(null=True, default=None)
 
     order = models.IntegerField(default=0)
 
     @property
     def contradiction(self):
-        return self.warehouse_remain - self.system_remain
+        if self.warehouse_remain:
+            return self.warehouse_remain - self.system_remain
+        return None

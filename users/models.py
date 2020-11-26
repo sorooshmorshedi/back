@@ -70,6 +70,10 @@ class User(AbstractUser, BaseModel):
     max_companies = models.IntegerField(default=0)
     max_users = models.IntegerField(default=0)
 
+    @property
+    def name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
     objects = MyUserManager()
 
     class Meta(AbstractUser.Meta):

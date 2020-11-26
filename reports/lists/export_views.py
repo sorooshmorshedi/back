@@ -8,9 +8,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from wkhtmltopdf.views import PDFTemplateView
 
-from factors.models import Factor
-from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
-from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView, AdjustmentListView
+from factors.models import Factor, WarehouseHandling
+from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
+    WarehouseHandlingListRetrieveSerializer
+from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView, \
+    AdjustmentListView, WarehouseHandlingListView
 from reports.models import ExportVerifier
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -35,6 +37,7 @@ class BaseExportView(PDFTemplateView):
         context['financial_year'] = user.active_financial_year
         context['user'] = user
         context['print_document'] = print_document
+        context['print_document'] = False
         context.update(self.context)
         return context
 
@@ -264,5 +267,22 @@ class TransactionExportView(TransactionListView, BaseExportView):
         self.context = {
             'form_name': formName[0][1],
             'verifier_form_name': verifier_form_name
+        }
+        return self.export(request, export_type, *args, **kwargs)
+
+
+class WarehouseHandlingExportView(WarehouseHandlingListView, BaseExportView):
+    filename = 'warehouse_handlings.pdf'
+    template_name = 'reports/warehouse_handling.html'
+    context = {}
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        self.context = {
+            'verifier_form_name': 'warehouseHandling',
+            'hide_remains': request.GET.get('hide_remains', 'false') == 'true'
         }
         return self.export(request, export_type, *args, **kwargs)
