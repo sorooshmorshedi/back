@@ -666,6 +666,6 @@ class WarehouseHandlingItem(BaseModel):
 
     @property
     def contradiction(self):
-        if self.warehouse_remain:
+        if self.warehouse_remain is not None:
             return self.warehouse_remain - self.system_remain
         return None

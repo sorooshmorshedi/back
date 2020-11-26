@@ -109,16 +109,18 @@ class WarehouseHandlingDefiniteView(APIView):
             if item.warehouse_remain is None:
                 raise ValidationError("موجودی شمارش شده همه ردیف ها را وارد کنید")
 
-            adjustment_item = {
-                'ware': item.ware.id,
-                'warehouse': instance.warehouse.id,
-                'count': abs(item.contradiction),
-                'is_auto_created': True
-            }
-            if item.contradiction > 0:
-                input_items.append(adjustment_item)
-            elif item.contradiction < 0:
-                output_items.append(adjustment_item)
+            contradiction = item.contradiction
+            if contradiction is not None:
+                adjustment_item = {
+                    'ware': item.ware.id,
+                    'warehouse': instance.warehouse.id,
+                    'count': abs(contradiction),
+                    'is_auto_created': True
+                }
+                if contradiction > 0:
+                    input_items.append(adjustment_item)
+                elif contradiction < 0:
+                    output_items.append(adjustment_item)
 
         adjustment_data = {
             'explanation': instance.explanation,
