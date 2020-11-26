@@ -238,7 +238,7 @@ class Account(BaseModel):
 
     def has_turnover(self):
         from sanads.models import SanadItem
-        return SanadItem.objects.filter(account=self).exists()
+        return SanadItem.objects.inFinancialYear().filter(account=self).exists()
 
     def can_delete(self):
         return self.level != 0 and self.sanadItems.count() == 0
