@@ -82,8 +82,8 @@ class WarehouseHandlingModelView(viewsets.ModelViewSet):
         instance.delete()
         output_adjustment = instance.outputAdjustment
         input_adjustment = instance.inputAdjustment
-        AdjustmentModelView.delete_adjustment(output_adjustment)
-        AdjustmentModelView.delete_adjustment(input_adjustment)
+        if output_adjustment: AdjustmentModelView.delete_adjustment(output_adjustment)
+        if input_adjustment: AdjustmentModelView.delete_adjustment(input_adjustment)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
