@@ -10,6 +10,7 @@ from factors.serializers import AdjustmentListRetrieveSerializer, AdjustmentCrea
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
+from sanads.models import clearSanad
 
 
 class AdjustmentModelView(viewsets.ModelViewSet):
@@ -54,11 +55,13 @@ class AdjustmentModelView(viewsets.ModelViewSet):
     @staticmethod
     def delete_adjustment(instance: Adjustment):
         factor = instance.factor
+        sanad = instance.sanad
         if not factor.is_deletable:
             raise ValidationError('تعدیل غیر قابل حذف می باشد')
         DefiniteFactor.undoDefinition(factor)
         instance.delete()
         factor.delete()
+        clearSanad(sanad)
 
 
 class GetAdjustmentByPositionView(APIView):
