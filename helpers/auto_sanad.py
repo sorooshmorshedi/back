@@ -29,6 +29,7 @@ class AutoSanad:
     def update(self, **kwargs):
         sanad = self.get_sanad(**kwargs)
         self.perform_update(self.instance, sanad)
+        sanad.update_values()
 
     def perform_update(self, instance: BaseModel, sanad):
         raise NotImplementedError()
