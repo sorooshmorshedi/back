@@ -426,6 +426,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
                 bes=item.calculated_value
             )
 
+        sanad.is_auto_created = True
         sanad.update_values()
 
     def create(self, validated_data, **kwargs):

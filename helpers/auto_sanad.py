@@ -16,7 +16,8 @@ class AutoSanad:
             sanad = Sanad.objects.create(
                 code=newSanadCode(),
                 financial_year=self.instance.financial_year,
-                date=date or self.instance.date
+                date=date or self.instance.date,
+                is_auto_created=True
             )
             self.instance.sanad = sanad
             self.instance.save()
