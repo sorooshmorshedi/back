@@ -37,7 +37,6 @@ class BaseExportView(PDFTemplateView):
         context['financial_year'] = user.active_financial_year
         context['user'] = user
         context['print_document'] = print_document
-        context['print_document'] = False
         context.update(self.context)
         return context
 
