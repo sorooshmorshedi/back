@@ -54,7 +54,7 @@ class TransferModelView(viewsets.ModelViewSet):
         instance = self.get_object()
         input_factor = instance.input_factor
         output_factor = instance.output_factor
-        if not input_factor.is_last_definite_factor and not output_factor.is_last_definite_factor:
+        if not input_factor.is_deletable and not output_factor.is_deletable:
             raise ValidationError('انتقال غیر قابل ویرایش می باشد')
         instance.delete()
 

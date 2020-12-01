@@ -399,22 +399,13 @@ class Factor(BaseModel, ConfirmationMixin):
         return data['temporary_code'] + 1
 
     @property
-    def is_last_definite_factor(self):
-        self.refresh_from_db()
-        count = Factor.objects.filter(
-            financial_year=self.financial_year,
-            is_definite=True,
-            definition_date__gt=self.definition_date
-        ).count()
-        if count == 0:
-            return True
-        else:
-            return False
-
-    @property
     def is_deletable(self):
+
         if self.is_definite:
-            return self.is_last_definite_factor
+            for item in self.items.all():
+                if not item.is_editable:
+                    return False
+            return True
         else:
             return True
 
