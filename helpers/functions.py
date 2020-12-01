@@ -97,6 +97,13 @@ def get_object_accounts(obj):
     }
 
 
+def get_object_account_names(obj):
+    arr = [obj.account.name]
+    if obj.floatAccount: arr.append(obj.floatAccount.name)
+    if obj.costCenter: arr.append(obj.costCenter.name)
+    return " - ".join(arr)
+
+
 def date_to_str(date: jdatetime.date):
     date = str(date).split('-')
     return '/'.join(date)

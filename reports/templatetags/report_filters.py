@@ -1,7 +1,7 @@
 from django import template
 
 from factors.models import Factor
-from helpers.functions import add_separator
+from helpers.functions import add_separator, get_object_account_names
 
 register = template.Library()
 
@@ -23,3 +23,8 @@ def colspan(initial_count, *args):
 @register.simple_tag
 def factor_title(factor: Factor):
     return "{}فاکتور {}".format("پیش " if not factor.is_definite else "", Factor.get_type_label(factor.type))
+
+
+@register.simple_tag
+def account_name(obj):
+    return get_object_account_names(obj)

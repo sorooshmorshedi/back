@@ -24,6 +24,10 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
     settled_value = DECIMAL()
     is_settled = models.BooleanField(default=False)
 
+    @property
+    def remain_value(self):
+        return self.transaction.sanad.bed - self.settled_value
+
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation)
 

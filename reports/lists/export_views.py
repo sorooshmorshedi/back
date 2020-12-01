@@ -5,12 +5,15 @@ import xlsxwriter
 from django.http.response import HttpResponse
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from wkhtmltopdf.views import PDFTemplateView
 
 from factors.models import Factor, WarehouseHandling
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
     WarehouseHandlingListRetrieveSerializer
+from helpers.functions import get_object_account_names
+from imprests.models import ImprestSettlement
 from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView, \
     AdjustmentListView, WarehouseHandlingListView
 from reports.models import ExportVerifier
@@ -285,3 +288,45 @@ class WarehouseHandlingExportView(WarehouseHandlingListView, BaseExportView):
             'hide_remains': request.GET.get('hide_remains', 'false') == 'true'
         }
         return self.export(request, export_type, *args, **kwargs)
+
+
+class ImprestSettlementExportView(TransactionListView, BaseExportView):
+    filename = 'imprestSettlement.pdf'
+    template_name = 'reports/imprest_settlement.html'
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    @staticmethod
+    def get_xlsx_data(imprest: Transaction):
+        settlement = imprest.imprestSettlement
+        data = [
+            [
+                "شماره: {}".format(settlement.code),
+                "تاریخ: {}".format(str(settlement.date)),
+                "تنخواه گردان: {}".format(imprest.account.name),
+                "شماره پرداخت تنخواه: {}".format(imprest.code),
+                "مبلغ تنخواه: {}".format(imprest.sanad.bed),
+                "تاریخ: {}".format(str(settlement.date)),
+                "توضیحات: {}".format(settlement.explanation)
+            ],
+            ['ردیف', 'تاریخ', 'شرح تنخواه', 'نام حساب', 'مبلغ']
+        ]
+        i = 0
+        for item in settlement.items.all():
+            i += 1
+            data.append([
+                i,
+                item.date,
+                item.explanation,
+                get_object_account_names(item),
+                item.value,
+            ])
+        data.append(['', '', '', 'جمع', settlement.settled_value])
+        data.append(['', '', '', 'اختلاف', imprest.sanad.bed - settlement.settled_value])
+
+        return data
