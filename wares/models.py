@@ -1,3 +1,5 @@
+import logging
+
 from django.db import models
 from django.db.models.aggregates import Sum, Max, Min
 from django.db.models.functions.comparison import Coalesce
@@ -208,6 +210,8 @@ class WareInventory(BaseModel):
 
     order = models.IntegerField(default=0)
 
+    logger = logging.getLogger('inventory')
+
     class Meta(BaseModel.Meta):
         ordering = ['order']
 
@@ -232,10 +236,15 @@ class WareInventory(BaseModel):
 
     @staticmethod
     def increase_inventory(ware: Ware, warehouse: Warehouse, count, fee, financial_year=None, revert=False):
-        print("inc {} #{} from #{}, revert:{}".format(count, ware.id, warehouse.id, revert))
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
+
+        log = "Financial Year #{}: inc {} #{} from #{}, revert:{}".format(
+            financial_year.id, count, ware.id, warehouse.id, revert
+        )
+        print(log)
+        WareInventory.logger.info(log)
 
         WareInventory.objects.create(
             ware=ware,
@@ -248,10 +257,15 @@ class WareInventory(BaseModel):
 
     @staticmethod
     def decrease_inventory(ware: Ware, warehouse: Warehouse, count, financial_year=None, revert=False):
-        print("dec {} #{} from #{}, revert:{}".format(count, ware.id, warehouse.id, revert))
         if not financial_year:
             user = get_current_user()
             financial_year = user.active_financial_year
+
+        log = "Financial Year #{}: dec {} #{} from #{}, revert:{}".format(
+            financial_year.id, count, ware.id, warehouse.id, revert
+        )
+        print(log)
+        WareInventory.logger.info(log)
 
         ware_balances = WareInventory.objects.filter(
             ware=ware,

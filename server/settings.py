@@ -204,6 +204,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': '{}/debug.log'.format(BASE_DIR),
         },
+        'inventory': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '{}/inventory.log'.format(BASE_DIR),
+        },
         'tmp_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
@@ -214,6 +219,11 @@ LOGGING = {
         'django': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'inventory': {
+            'handlers': ['inventory'],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'tmp': {
