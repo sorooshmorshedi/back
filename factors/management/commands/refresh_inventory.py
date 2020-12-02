@@ -1,11 +1,9 @@
 import datetime
-
-from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandParser
 
-from factors.models import FactorItem, Factor
+from factors.models import Factor
 from factors.views.definite_factor import DefiniteFactor
-from helpers.db import queryset_iterator, bulk_create
+from helpers.db import queryset_iterator
 from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
 from server.settings import BASE_DIR
 from users.models import User
