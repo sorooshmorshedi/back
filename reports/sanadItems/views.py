@@ -26,7 +26,7 @@ class SanadItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
     ordering_fields = '__all__'
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         qs = SanadItem.objects.hasAccess(self.request.method, 'sanadItemsReport', use_financial_year=False)
 
         order_sanads_by = self.request.GET.copy().get('order_sanads_by', None)
@@ -43,14 +43,20 @@ class SanadItemListView(generics.ListAPIView):
             sanad_code=F('sanad__code')
         )
 
-        order_by = [F('sanad__{}'.format(order_sanads_by or 'code')).asc(), F('id').asc()]
+        order_by = [F('sanad_{}'.format(order_sanads_by or 'code')).asc(), F('id').asc()]
 
         qs = qs.annotate(
             comulative_bed=Window(expression=Sum('bed'), order_by=order_by),
             comulative_bes=Window(expression=Sum('bes'), order_by=order_by)
         )
 
-        previous_sum = self.get_previous_sum()
+        if kwargs.get('getting_previous_sum', False):
+            previous_sum = self.get_previous_sum()
+        else:
+            previous_sum = {
+                'bed': 0,
+                'bes': 0,
+            }
 
         qs = self.filter_queryset(qs)
 
@@ -82,7 +88,7 @@ class SanadItemListView(generics.ListAPIView):
             del filters['sanad__code__gte']
 
         if has_range_filter:
-            result = self.get_queryset().filter(**filters).aggregate(
+            result = self.get_queryset(getting_previous_sum=True).filter(**filters).aggregate(
                 bed=Coalesce(Sum('bed'), 0),
                 bes=Coalesce(Sum('bes'), 0)
             )
