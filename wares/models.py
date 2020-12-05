@@ -206,7 +206,7 @@ class WareInventory(BaseModel):
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
     count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
-    fee = models.DecimalField(max_digits=24, decimal_places=0)
+    fee = models.DecimalField(max_digits=24, decimal_places=6)
 
     order = models.IntegerField(default=0)
 
