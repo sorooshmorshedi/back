@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Sum
+from django.db.models.functions.comparison import Coalesce
 from django.db.models.query_utils import Q
 from django_jalali.db import models as jmodels
 
@@ -118,9 +119,14 @@ class Transaction(BaseModel, ConfirmationMixin):
             FactorPaymentSerializer
         ).sync()
 
+        for payment in self.payments.all():
+            factor = payment.factor
+            factor.paidValue = factor.payments.aggregate(Sum('value'))['value__sum']
+            factor.save()
+
     @property
     def sum(self):
-        return TransactionItem.objects.filter(transaction=self).aggregate(Sum('value'))['value__sum']
+        return TransactionItem.objects.filter(transaction=self).aggregate(Coalesce(Sum('value'), 0))['value__sum']
 
     @property
     def label(self):
