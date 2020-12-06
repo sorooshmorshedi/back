@@ -126,7 +126,7 @@ class Transaction(BaseModel, ConfirmationMixin):
 
     @property
     def sum(self):
-        return TransactionItem.objects.filter(transaction=self).aggregate(Coalesce(Sum('value'), 0))['value__sum']
+        return TransactionItem.objects.filter(transaction=self).aggregate(sum=Coalesce(Sum('value'), 0))['sum']
 
     @property
     def label(self):
