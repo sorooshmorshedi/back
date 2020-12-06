@@ -498,14 +498,14 @@ class FactorItem(BaseModel):
         count = 0
         for fee in self.remain_fees:
             count += fee['count']
-        return count
+        return round(count, 2)
 
     @property
     def remain_value(self):
         value = 0
         for fee in self.remain_fees:
             value += fee['count'] * fee['fee']
-        return value
+        return round(value, 2)
 
     @property
     def value(self):
