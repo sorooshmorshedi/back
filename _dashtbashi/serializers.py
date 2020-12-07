@@ -135,6 +135,11 @@ class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
     contractor = AccountRetrieveSerializer(read_only=True)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
+    title = serializers.SerializerMethodField()
+
+    def get_title(self, obj: Remittance):
+        return "{} - {}".format(obj.code, obj.contractor.name)
+
     class Meta:
         model = Remittance
         fields = '__all__'
