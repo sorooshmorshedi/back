@@ -1,8 +1,28 @@
 from io import BytesIO
+from typing import Any, Dict
 
 import pandas
 import xlsxwriter
 from django.http.response import HttpResponse
+from django.shortcuts import render
+from wkhtmltopdf.views import PDFTemplateView
+
+
+class MPDFTemplateView(PDFTemplateView):
+    cmd_options = {
+        'margin-top': 3,
+        'footer-center': '[page]/[topage]'
+    }
+
+    context = None
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        if not self.context:
+            raise NotImplementedError("Define context or implement get_context_data method")
+        return self.context
+
+    def render(self, request):
+        return render(request, self.template_name, context=self.get_context_data(request=request))
 
 
 def get_xlsx_response(file_name, data):
