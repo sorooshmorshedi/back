@@ -1,6 +1,7 @@
 from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
+from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,10 +9,11 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
 from accounts.accounts.serializers import AccountTypeSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.exports import get_xlsx_response
+from helpers.exports import get_xlsx_response, MPDFTemplateView
 from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
     BalanceFloatAccountGroupSerializer
 from reports.filters import get_account_sanad_items_filter
+from reports.lists.export_views import BaseExportView
 
 common_headers = [
     'گردش بدهکار',
@@ -146,9 +148,23 @@ class AccountBalanceView(APIView):
         return res
 
 
-class AccountBalanceExportView(AccountBalanceView):
+class AccountBalanceExportView(AccountBalanceView, MPDFTemplateView):
+    filename = 'balance.pdf'
+    template_name = 'reports/balance_report.html'
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
+        export_type = kwargs.get('export_type')
+        if export_type == 'xlsx':
+            return self.get_xlsx(request)
+        elif export_type == 'pdf':
+            return super().get(request, user=request.user, *args, **kwargs)
+        else:
+            return self.render(request)
+
+    def get_context_data(self, request, **kwargs):
+        return self.get_accounts(request)
+
+    def get_xlsx(self, request):
         accounts = self.get_accounts(request)
 
         data = [[
@@ -224,7 +240,7 @@ class FloatAccountBalanceByGroupView(APIView):
 
             bed_sum = bes_sum = 0
             for floatAccount in floatAccounts:
-                if floatAccountGroup in floatAccount.floatAccountGroups.all():
+                if floatAccountGroup.id in [o.id for o in floatAccount.floatAccountGroups.all()]:
                     bed_sum += getattr(floatAccount, "bed_sum_{}".format(floatAccountGroup.id))
                     bes_sum += getattr(floatAccount, "bes_sum_{}".format(floatAccountGroup.id))
 
@@ -289,6 +305,7 @@ class FloatAccountBalanceByGroupExportView(FloatAccountBalanceByGroupView):
         ]]
         for account in accounts_data:
             data.append([
+                accounts_data.index(account),
                 account['group_name'],
                 account['float_account_name'],
                 *get_common_columns(account, True)
