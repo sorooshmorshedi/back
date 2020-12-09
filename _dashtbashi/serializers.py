@@ -138,7 +138,7 @@ class RemittanceListRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj: Remittance):
-        return "{} - {}".format(obj.code, obj.contractor.name)
+        return "{} - {}".format(obj.code, obj.contractor.name if obj.contractor else '')
 
     class Meta:
         model = Remittance
