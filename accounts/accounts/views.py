@@ -116,7 +116,7 @@ def get_account_permission_basename(view):
 
 class AccountListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = AccountCreateUpdateSerializer
+    serializer_class = AccountCreateSerializer
 
     @property
     def permission_basename(self):
@@ -199,7 +199,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     def get_serializer_class(self):
         method = self.request.method.lower()
         if method == 'put':
-            return AccountCreateUpdateSerializer
+            return AccountUpdateSerializer
         else:
             return AccountRetrieveSerializer
 
@@ -209,14 +209,11 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
             get_account_permission_basename(self)
         )
 
-    def perform_update(self, serializer: AccountCreateUpdateSerializer) -> None:
+    def perform_update(self, serializer: AccountUpdateSerializer) -> None:
 
         instance = self.get_object()
         old_type = instance.type
         new_type = self.request.data.get('type')
-
-        print(old_type, old_type.id)
-        print(new_type)
 
         if new_type:
             new_type = AccountType.objects.get(pk=new_type)

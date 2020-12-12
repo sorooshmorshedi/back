@@ -21,7 +21,6 @@ class FloatAccountSerializer(serializers.ModelSerializer):
 
 
 class FloatAccountGroupSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = FloatAccountGroup
         fields = '__all__'
@@ -48,7 +47,7 @@ class AccountTypeSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'name')
 
 
-class AccountCreateUpdateSerializer(serializers.ModelSerializer):
+class AccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = '__all__'
@@ -82,6 +81,13 @@ class AccountCreateUpdateSerializer(serializers.ModelSerializer):
                     )
 
         return data
+
+
+class AccountUpdateSerializer(AccountCreateSerializer):
+    class Meta:
+        model = Account
+        fields = '__all__'
+        read_only_fields = ('financial_year', 'code', 'level', 'type', 'account_type')
 
 
 class AccountRetrieveSerializer(serializers.ModelSerializer):
