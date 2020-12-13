@@ -287,7 +287,7 @@ class Account(BaseModel):
         balances = AccountBalance.objects.inFinancialYear().filter(account__code__startswith=self.code).all()
         for balance in balances:
             bed += balance.bed
-            bes = + balance.bes
+            bes += balance.bes
         remain = abs(bed - bes)
         return {
             'bed': bed,
