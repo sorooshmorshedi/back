@@ -1,3 +1,4 @@
+import functools
 from decimal import Decimal
 from typing import Type
 
@@ -121,3 +122,16 @@ def sanad_exp(*args):
         result += arg + " "
 
     return result[:-1]
+
+
+def rgetattr(obj, attr, *args):
+    def _getattr(obj, attr):
+        if isinstance(obj, object):
+            if hasattr(obj, attr):
+                return getattr(obj, attr, *args)
+            else:
+                return None
+        else:
+            return obj.get(attr, None)
+
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
