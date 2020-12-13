@@ -34,11 +34,7 @@ def addSum(queryset, data):
             ]
         },
         'output': {
-            'count': queryset.filter(factor__type__in=(
-                *Factor.SALE_GROUP,
-                Factor.OUTPUT_ADJUSTMENT,
-                Factor.CONSUMPTION_WARE
-            )).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
             'value': queryset.filter(factor__type__in=(
                 *Factor.SALE_GROUP,
