@@ -56,7 +56,7 @@ class AccountCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
 
         account_type = data.get('account_type', None)
-        if not account_type:
+        if not self.instance and not account_type:
             raise serializers.ValidationError("نوع حساب مشخص نشده است")
 
         if account_type == Account.PERSON:
@@ -86,8 +86,7 @@ class AccountCreateSerializer(serializers.ModelSerializer):
 class AccountUpdateSerializer(AccountCreateSerializer):
     class Meta:
         model = Account
-        fields = '__all__'
-        read_only_fields = ('financial_year', 'code', 'level', 'type', 'account_type')
+        exclude = ('financial_year', 'code', 'level', 'type', 'account_type')
 
 
 class AccountRetrieveSerializer(serializers.ModelSerializer):
