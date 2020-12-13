@@ -61,9 +61,9 @@ class DefaultAccount(BaseModel):
         return "{} {}".format(self.name, self.codename)
 
     @staticmethod
-    def get(codename):
+    def get(codename, financial_year=None):
         try:
-            return DefaultAccount.objects.inFinancialYear().get(codename=codename)
+            return DefaultAccount.objects.inFinancialYear(financial_year).get(codename=codename)
         except DefaultAccount.DoesNotExist as e:
             print(codename)
             raise e
