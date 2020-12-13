@@ -1,7 +1,7 @@
 from django import template
 
 from factors.models import Factor
-from helpers.functions import add_separator, get_object_account_names
+from helpers.functions import add_separator, get_object_account_names, rgetattr
 
 register = template.Library()
 
@@ -28,3 +28,13 @@ def factor_title(factor: Factor):
 @register.simple_tag
 def account_name(obj):
     return get_object_account_names(obj)
+
+
+@register.filter
+def get_item(obj, key):
+    value = rgetattr(obj, key)
+
+    if value is None:
+        value = '-'
+
+    return value
