@@ -13,6 +13,7 @@ class ImprestSettlementSanad(AutoSanad):
             'مورخ',
             instance.transaction.date
         )
+        sanad.date = instance.date
 
         sanad_items = []
         for item in instance.items.all():
