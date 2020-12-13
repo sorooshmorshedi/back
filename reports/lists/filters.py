@@ -16,10 +16,9 @@ class TransactionFilter(filters.FilterSet):
         model = Transaction
         fields = {
             'id': ['exact'],
-            'code': ['icontains'],
+            'code': BASE_FIELD_FILTERS,
             'account__name': ['exact', 'icontains'],
-            'sanad__bed': ['icontains'],
-            'date': ['gte', 'lte'],
+            'date': BASE_FIELD_FILTERS,
             'explanation': ['icontains'],
             'type': ['exact'],
             'sanad__bed': BASE_FIELD_FILTERS
