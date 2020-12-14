@@ -126,12 +126,12 @@ def sanad_exp(*args):
 
 def rgetattr(obj, attr, *args):
     def _getattr(obj, attr):
-        if isinstance(obj, object):
+        if isinstance(obj, dict):
+            return obj.get(attr, None)
+        else:
             if hasattr(obj, attr):
                 return getattr(obj, attr, *args)
             else:
                 return None
-        else:
-            return obj.get(attr, None)
 
     return functools.reduce(_getattr, [obj] + attr.split('.'))

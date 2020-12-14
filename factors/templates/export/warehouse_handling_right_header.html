@@ -1,0 +1,19 @@
+<div class="row form-header">
+    <div class="col-xs-12 text-right">
+        <span>شماره : </span>
+        <span> {{ form.code | default:"-" }} </span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>تاریخ آغاز : </span>
+        <span dir="ltr"> {{ form.start_date }} </span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>تاریخ شمارش : </span>
+        <span dir="ltr"> {{ form.counting_date }} </span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>تاریخ ثبت انبارگردانی : </span>
+        <span dir="ltr"> {{ form.submit_date }} </span>
+    </div>
+</div>
+

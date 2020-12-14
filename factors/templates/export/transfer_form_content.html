@@ -1,0 +1,43 @@
+{% load report_filters %}
+
+<div class="row">
+    <div class="col-xs-12 ">
+        <div class="row">
+            <span class="col-xs-2">شرح : </span>
+            <span class="col-xs-10"> {{ form.explanation | default:'-' }} </span>
+        </div>
+    </div>
+</div>
+
+<div class="row"
+     style="margin-top: 15px;">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>شرح</th>
+                <th>از انبار</th>
+                <th>تعداد</th>
+                <th>واحد</th>
+                <th>به انبار</th>
+                <th>توضیحات</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in form.items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.ware.name }}</td>
+                    <td>{{ item.input_warehouse.name }}</td>
+                    <td>{{ item.count | money }}</td>
+                    <td>{{ item.ware.unit.name }}</td>
+                    <td>{{ item.output_warehouse.name }}</td>
+                    <td>{{ item.explanation }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+

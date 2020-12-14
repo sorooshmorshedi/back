@@ -1,0 +1,120 @@
+{% extends 'reports/base.html' %}
+{% load report_filters %}
+{% load export_verifiers %}
+
+{% block content %}
+
+{% if forloop.last %}
+    <div>
+{% else %}
+    <div class="break-after">
+{% endif %}
+
+<div class="text-center">
+    <h3>
+        {{ company.name }}
+    </h3>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+    </div>
+    <div class="col-sm-4 text-center">
+        تراز حساب ها
+    </div>
+    <div class="col-sm-4 text-left">
+        سال مالی: {{ financial_year.name }}
+    </div>
+</div>
+
+<div class="row form-header">
+    <div class="col-sm-12">
+    </div>
+    <div class="col-sm-12">
+    </div>
+
+    <div class="col-sm-12">
+    </div>
+    <br>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>کد حساب</th>
+                <th>نام حساب</th>
+                {% if four_cols %}
+                    <th>گردش بدهکار</th>
+                    <th>گردش بستانکار</th>
+                {% endif %}
+                <th>مانده بدهکار</th>
+                <th>مانده بستانکار</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.account.code }}</td>
+                    <td>{{ item.account.name }}</td>
+                    {% if four_cols %}
+                        <td>{{ item.bed_sum | money }}</td>
+                        <td>{{ item.bes_sum | money }}</td>
+                    {% endif %}
+                    <td>{{ item.bed_remain | money }}</td>
+                    <td>{{ item.bes_remain | money }}</td>
+                </tr>
+
+                {% if show_float_accounts %}
+                    <tr>
+                        {% for sub_item in item._floatAccounts %}
+                            <td colspan="2"></td>
+                            <td>{{ sub_item.name }}</td>
+                            {% if four_cols %}
+                                <td>{{ item.bed_sum | money }}</td>
+                                <td>{{ item.bes_sum | money }}</td>
+                            {% endif %}
+                            <td>{{ item.bed_remain | money }}</td>
+                            <td>{{ item.bes_remain | money }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+
+                {% if show_cost_centers %}
+                    <tr>
+                        {% for sub_item in item._costCenters %}
+                            <td colspan="2"></td>
+                            <td>{{ sub_item.name }}</td>
+                            {% if four_cols %}
+                                <td>{{ item.bed_sum | money }}</td>
+                                <td>{{ item.bes_sum | money }}</td>
+                            {% endif %}
+                            <td>{{ item.bed_remain | money }}</td>
+                            <td>{{ item.bes_remain | money }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+
+            {% endfor %}
+            <tr>
+                <td colspan="3" class="text-left">مجموع</td>
+                <td>{{ sum.bed | money }}</td>
+                <td>{{ sum.bes | money }}</td>
+                {% if four_cols %}
+                    <td>{{ sum.bed_remain | money }}</td>
+                    <td>{{ sum.bes_remain | money }}</td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+</div>
+
+{% endfor %}
+
+{% show_verifiers verifier_form_name user %}
+

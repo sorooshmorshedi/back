@@ -286,6 +286,11 @@ class Driving(BaseModel):
     floatAccountRelation = models.ForeignKey(FloatAccountRelation, on_delete=models.PROTECT, related_name='driving',
                                              null=True)
 
+    @property
+    def title(self):
+        from _dashtbashi.serializers import CarSerializer
+        return "{} : {}".format(self.driver.name, CarSerializer.get_car_number_str(self.car))
+
     class Meta(BaseModel.Meta):
         backward_financial_year = True
         permission_basename = 'driving'

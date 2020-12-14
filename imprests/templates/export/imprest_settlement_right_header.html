@@ -1,0 +1,24 @@
+{% load report_filters %}
+
+<div class="row form-header">
+    <div class="col-xs-12 ">
+        <span>شماره : </span>
+        <span> {{ form.code }} </span>
+    </div>
+    <div class="col-xs-12 ">
+        <span>تاریخ : </span>
+        <span dir="ltr"> {{ form.date }} </span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>تنخواه گردان:</span>
+        <span dir="ltr"> {% account_name form %}  </span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>شماره پرداخت تنخواه:</span>
+        <span dir="ltr">{{ form.code }}</span>
+    </div>
+    <div class="col-xs-12 text-right mt-1">
+        <span>مبلغ تنخواه:</span>
+        <span dir="ltr">{{ form.sanad.bed }}</span>
+    </div>
+</div>

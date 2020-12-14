@@ -1,0 +1,237 @@
+{% load report_filters %}
+
+{% if not hide_form %}
+
+    <!-- seller in sale form -->
+    {% if form.type == 'sale' or form.type == 'backFromBuy' %}
+        <div class="row company part">
+            <div class="col-xs-12">
+                <span>فروشنده: </span>
+                <span> {{ company.name }} </span>
+            </div>
+            {% if not summarized %}
+                <div class="col-xs-3">
+                    <span> کد اقتصادی: </span>
+                    <span> {{ company.eghtesadi_code | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span> شماره ملی: </span>
+                    <span> {{ company.shenase | default:'-' }} </span>
+                </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span>آدرس: </span>
+                <span> {{ company.address1 | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span>تلفن: </span>
+                <span> {{ company.phone1 | default:'-' }} </span>
+            </div>
+        </div>
+        <hr>
+        <div class="row buyer part">
+            <div class="col-xs-12">
+                <span> خریدار: </span>
+                <span> {{ form.account }} </span>
+                {% if form.floatAccount %}
+                    <span> - </span>
+                    <span> حساب شناور: </span>
+                    <span> {{ form.account }} </span>
+                {% endif %}
+            </div>
+            {% if not summarized %}
+                <div class="col-xs-3">
+                    <span> کد اقتصادی: </span>
+                    <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span> شماره ملی: </span>
+                    <span> {{ form.account.person.meli_code | default:'-' }} </span>
+                </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span>آدرس: </span>
+                <span> {{ form.account.person.address1 | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span>تلفن: </span>
+                <span> {{ form.account.person.phone1 | default:'-' }} </span>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- seller in buy form -->
+    {% if form.type == 'buy' or form.type == 'backFromSale' %}
+        <div class="row seller">
+            <div class="col-xs-6">
+                <span> فروشنده: </span>
+                <span> {{ form.account }} </span>
+            </div>
+            {% if form.floatAccount %}
+                <div class="col-xs-6">
+                    <span> حساب شناور: </span>
+                    <span> {{ form.account }} </span>
+                </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span> کد اقتصادی: </span>
+                <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span> شماره ملی: </span>
+                <span> {{ form.account.person.meli_code | default:'-' }} </span>
+            </div>
+        </div>
+    {% endif %}
+
+    <hr>
+    <div class="row">
+        <div class="col-xs-12 ">
+            <div class="row">
+                <span class="col-xs-2">شرح : </span>
+                <span class="col-xs-10"> {{ form.explanation | default:'-' }} </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"
+         style="margin-top: 15px;">
+        <div class="col-xs-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>نام کالا</th>
+                    {% if show_warehouse %}
+                        <th>انبار</th>
+                    {% endif %}
+                    <th>تعداد</th>
+                    <th>واحد</th>
+                    {% if not hide_prices %}
+                        <th>قیمت واحد</th>
+                        <th>جمع</th>
+                        <th>تخفیف (مبلغ)</th>
+                        <th>تخفیف درصد</th>
+                        {% if form.has_tax %}
+                            <th>مالیات</th>
+                        {% endif %}
+                        <th>جمع فاکتور</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in form.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.ware }}</td>
+                        {% if show_warehouse %}
+                            <td>{{ item.warehouse.name | default:'-' }}</td>
+                        {% endif %}
+                        <td>{{ item.count | money }}</td>
+                        <td>{{ item.ware.unit.name }}</td>
+                        {% if not hide_prices %}
+                            <td>{{ item.fee | money }}</td>
+                            <td>{{ item.value | money }}</td>
+                            <td>{{ item.discountValue | money }}</td>
+                            <td>{{ item.discountPercent }}</td>
+
+                            {% if form.has_tax %}
+                                <td>{{ item.tax | money }}</td>
+                            {% endif %}
+
+                            <td>{{ item.totalValue | money }}</td>
+
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                {% if not hide_prices %}
+                    <tr>
+                        <th colspan="{% colspan 5 show_warehouse %}">
+                            جمع
+                        </th>
+                        <td>{{ form.sum | money }}</td>
+                        <td colspan="2">{{ form.discountSum | money }}</td>
+
+                        {% if form.has_tax %}
+                            <td>{{ form.taxSum | money }}</td>
+                        {% endif %}
+
+                        <td>{{ form.totalSum | money }}</td>
+                    </tr>
+                    {% if not hide_remain %}
+                        <tr>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <th>{{ form.remain.before_factor_title }}</th>
+                            <td>{{ form.remain.before_factor | money }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <th>{{ form.remain.after_factor_title }}</th>
+                            <td>{{ form.remain.after_factor | money }}</td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+{% if not hide_prices and not hide_expenses and form.expenses.all %}
+    <div class="break-after"></div>
+
+    <div class="row form-header">
+        <div class="col-xs-12 text-center">
+            <h4>هزینه های فاکتور</h4>
+        </div>
+        <div class="col-xs-12 text-left">
+            <span>شماره فاکتور: </span>
+            <span> {{ form.code }} </span>
+        </div>
+        <div class="col-xs-12 text-left">
+            <span>تاریخ : </span>
+            <span dir="ltr"> {{ form.date }} </span>
+        </div>
+        <div class="col-xs-12 text-left">
+            <span>ساعت : </span>
+            <span dir="ltr"> {{ form.time | date:"G:i" }} </span>
+        </div>
+    </div>
+
+    <div class="row"
+         style="margin-top: 15px;">
+        <div class="col-xs-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>نام هزینه ثابت</th>
+                    <th>مبلغ</th>
+                    <th>پرداخت کننده</th>
+                    <th>حساب شناور</th>
+                    <th>توضیحات</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in form.expenses.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.expense.name }}</td>
+                        <td>{{ item.value | money }}</td>
+                        <td>{{ item.account }}</td>
+                        <td>{{ item.floatAccount | default:'-' }}</td>
+                        <td>{{ item.explanation }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2">مجموع</td>
+                    <td>{{ form.expensesSum | money }}</td>
+                    <td colspan="3"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+

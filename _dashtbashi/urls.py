@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from _dashtbashi.export_views import LadingReportExportView
+from _dashtbashi.export_views import LadingReportExportView, OtherDriverPaymentListExportView, \
+    OtherDriverPaymentFormExportView
 from _dashtbashi.report_views import RemittanceReportView, OtherDriverPaymentReport, LadingBillSeriesListView, \
     LadingsReportView, OilCompanyLadingReportView, OilCompanyLadingItemReportView
 from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, AssociationModelView, \
@@ -52,5 +53,8 @@ urlpatterns += [
     url(r'^report/oilCompanyLadings/detailed$', OilCompanyLadingItemReportView.as_view()),
 
     url(r'^report/ladings/(?P<export_type>\S+)', LadingReportExportView.as_view(), name=''),
+    url(r'^report/otherDriverPayments/(?P<export_type>\S+)', OtherDriverPaymentListExportView.as_view()),
+
+    url(r'^export/otherDriverPayments/(?P<export_type>\S+)', OtherDriverPaymentFormExportView.as_view()),
 
 ]

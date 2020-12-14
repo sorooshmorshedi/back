@@ -1,0 +1,18 @@
+<div class="row form-header">
+    <div class="col-xs-12 text-right">
+        <span>عطف : </span>
+        <span> {{ form.id }} </span>
+    </div>
+    <div class="col-xs-12 text-right">
+        <span>شماره : </span>
+        <span> {{ form.code | default:"-" }} </span>
+    </div>
+    <div class="col-xs-12 ">
+        <span>تاریخ : </span>
+        <span dir="ltr"> {{ form.date }} </span>
+    </div>
+    <div class="col-xs-12 text-right">
+        <span>ساعت : </span>
+        <span dir="ltr"> {{ form.time | date:"G:i" }} </span>
+    </div>
+</div>

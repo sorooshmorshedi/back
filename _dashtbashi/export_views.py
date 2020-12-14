@@ -1,53 +1,55 @@
-import functools
 import json
 
-from _dashtbashi.report_views import LadingsReportView
+from django.db.models import QuerySet
+from django.shortcuts import render
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+
+from _dashtbashi.filters import OtherDriverPaymentFilter
+from _dashtbashi.models import OtherDriverPayment
+from _dashtbashi.report_views import LadingsReportView, OtherDriverPaymentReport
+from _dashtbashi.serializers import OtherDriverPaymentListRetrieveSerializer
+from _dashtbashi.views import OtherDriverPaymentModelView
+from helpers.auth import BasicCRUDPermission
 from helpers.exports import get_xlsx_response
-from reports.lists.export_views import BaseExportView
-
-title = "لیست بارگیری ها"
-
-
-def rgetattr(obj, attr, *args):
-    def _getattr(obj, attr):
-        if hasattr(obj, attr):
-            return getattr(obj, attr, *args)
-        else:
-            return None
-
-    return functools.reduce(_getattr, [obj] + attr.split('.'))
+from helpers.functions import rgetattr
+from reports.lists.export_views import BaseExportView, BaseListExportView
 
 
-class LadingReportExportView(LadingsReportView, BaseExportView):
+class LadingReportExportView(LadingsReportView, BaseListExportView):
     filename = 'ladings'
-    template_name = 'reports/lading.html'
+    pagination_class = None
+    title = "لیست بارگیری ها"
+
+    def get(self, request, *args, **kwargs):
+        return self.get_response(request, *args, **kwargs)
+
+
+class OtherDriverPaymentFormExportView(ListAPIView, BaseExportView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'otherDriverPayment'
+    serializer_class = OtherDriverPaymentListRetrieveSerializer
+    filterset_class = OtherDriverPaymentFilter
+    ordering_fields = '__all__'
+    filename = 'other-driver-payment'
+
+    context = {
+        'title': 'پرداخت رانندگان متفرقه',
+        'verifier_form_name': None
+    }
     pagination_class = None
 
     def get_queryset(self):
-        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
-
-    def get_context_data(self, user, print_document=False, **kwargs):
-        return {}
+        qs = OtherDriverPayment.objects.hasAccess(self.request.method)
+        return self.filterset_class(self.request.GET, queryset=qs).qs
 
     def get(self, request, export_type, *args, **kwargs):
-        headers = request.GET.get('headers', "[]")
-        headers = json.loads(headers)
-        return get_xlsx_response('ladings.xlsx', self.get_xlsx_data(self.get_queryset().all(), headers))
+        return self.export(request, export_type, *args, **kwargs)
 
-    @staticmethod
-    def get_xlsx_data(items, headers):
-        data = [
-            [title],
-            ['#'] + [header['text'] for header in headers]
-        ]
-        i = 0
-        for item in items.all():
-            i += 1
-            row = [i]
-            for header in headers:
-                row.append(
-                    rgetattr(item, header['value'])
-                )
-            data.append(row)
 
-        return data
+class OtherDriverPaymentListExportView(OtherDriverPaymentFormExportView, BaseListExportView):
+    filename = 'other-driver-payments'
+    title = "لیست پرداخت رانندگان متفرقه"
+
+    def get(self, request, *args, **kwargs):
+        return self.get_response(request, *args, **kwargs)

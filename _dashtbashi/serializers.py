@@ -58,7 +58,7 @@ class DrivingListRetrieveSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
     def get_title(self, obj: Driving):
-        return "{} : {}".format(obj.driver.name, CarSerializer.get_car_number_str(obj.car))
+        return obj.title
 
     class Meta:
         model = Driving

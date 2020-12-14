@@ -1,3 +1,5 @@
+import json
+import re
 from io import BytesIO
 
 import pandas
@@ -6,11 +8,13 @@ from django.http.response import HttpResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from wkhtmltopdf.views import PDFTemplateView
 
 from factors.models import Factor
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
-from helpers.functions import get_object_account_names
+from helpers.exports import get_xlsx_response
+from helpers.functions import get_object_account_names, rgetattr
 from reports.lists.views import SanadListView, FactorListView, TransactionListView, TransferListView, \
     AdjustmentListView, WarehouseHandlingListView
 from reports.models import ExportVerifier
@@ -18,10 +22,10 @@ from sanads.models import Sanad
 from transactions.models import Transaction
 
 
-class BaseExportView(PDFTemplateView):
-    # filename = 'my_pdf.pdf'
-    # template_name = 'reports/sanads.html'
+class BaseExportView(APIView, PDFTemplateView):
+    # filename = 'my_pdf'
 
+    template_name = 'export/form_export.html'
     cmd_options = {
         'margin-top': 3,
         'footer-center': '[page]/[topage]'
@@ -29,72 +33,168 @@ class BaseExportView(PDFTemplateView):
     queryset = None
     filterset_class = None
     context = {}
+    template_prefix = None
+
+    def get_template_prefix(self):
+        if self.template_prefix:
+            return self.template_prefix
+        return re.sub(r'(?<!^)(?=[A-Z])', '_', self.get_serializer().Meta.model.__name__).lower()
 
     def get_context_data(self, user, print_document=False, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['forms'] = self.get_queryset()
+        qs = self.get_queryset()
+
+        context['forms'] = qs
         context['company'] = user.active_company
         context['financial_year'] = user.active_financial_year
         context['user'] = user
         context['print_document'] = print_document
+
+        template_prefix = self.get_template_prefix()
+        context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
+        context['right_header_template'] = 'export/{}_right_header.html'.format(template_prefix)
+
         context.update(self.context)
+
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            i = 0
+            for form in self.get_context_data(user=request.user)['forms']:
+                data += self.get_xlsx_data(form)
+
+                bordered_rows.append([i, len(data) - 1])
+
+                i = len(data) + 2
+
+                data.append([])
+                data.append([])
+
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    def pdf_response(self, request, *args, **kwargs):
+        self.filename = "{}.pdf".format(self.filename)
+        return super().get(request, user=request.user, *args, **kwargs)
+
+    def print_response(self, request, *args, **kwargs):
+        return render(
+            request,
+            'export/form_export.html',
+            context=self.get_context_data(user=request.user, print_document=True)
+        )
 
     def export(self, request, export_type, *args, **kwargs):
         if export_type == 'xlsx':
-
-            sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
-
-            with BytesIO() as b:
-                writer = pandas.ExcelWriter(b, engine='xlsxwriter')
-                data = []
-
-                bordered_rows = []
-                i = 0
-                for form in self.get_context_data(user=request.user)['forms']:
-                    data += self.get_xlsx_data(form)
-
-                    bordered_rows.append([i, len(data) - 1])
-
-                    i = len(data) + 2
-
-                    data.append([])
-                    data.append([])
-
-                df = pandas.DataFrame(data)
-                df.to_excel(
-                    writer,
-                    sheet_name=sheet_name,
-                    index=False,
-                    header=False
-                )
-                workbook = writer.book
-                worksheet = writer.sheets[sheet_name]
-                worksheet.right_to_left()
-
-                border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
-
-                for bordered_row in bordered_rows:
-                    worksheet.conditional_format(xlsxwriter.utility.xl_range(
-                        bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
-                    ), {'type': 'no_errors', 'format': border_fmt})
-                writer.save()
-                response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
-                response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
-                return response
-
+            return self.xlsx_response(request, *args, **kwargs)
         elif export_type == 'pdf':
+            return self.pdf_response(request, *args, **kwargs)
+        else:
+            return self.print_response(request, *args, **kwargs)
+
+
+class BaseListExportView(PDFTemplateView):
+    """
+    Use this class after the list class, then override get method and call `get_response`
+    """
+    filename = None
+    title = None
+
+    template_name = 'export/list_export.html'
+    pagination_class = None
+
+    def get_headers(self):
+        headers = self.request.GET.get('headers', "[]")
+        headers = json.loads(headers)
+        return headers
+
+    def get_header_texts(self):
+        headers = self.get_headers()
+        return ['#'] + [header['text'] for header in headers]
+
+    def get_header_values(self):
+        headers = self.get_headers()
+        return [header['value'] for header in headers]
+
+    def get_rows(self):
+        return self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        context = {
+            'title': self.title,
+            'headers': self.get_header_texts(),
+            'values': self.get_header_values(),
+            'values_types': [header.get('type') for header in self.get_headers()],
+            'rows': self.get_rows(),
+            'print_document': print_document
+        }
+
+        return context
+
+    def get_response(self, request, *args, **kwargs):
+        export_type = kwargs.get('export_type')
+
+        if export_type == 'xlsx':
+            return get_xlsx_response('{}.xlsx'.format(self.filename), self.get_xlsx_data(self.get_queryset().all()))
+        elif export_type == 'pdf':
+            self.filename = "{}.pdf".format(self.filename)
             return super().get(request, user=request.user, *args, **kwargs)
         else:
-            return render(request, self.template_name,
-                          context=self.get_context_data(user=request.user, print_document=True))
+            return render(
+                request,
+                'export/list_export.html',
+                context=self.get_context_data(user=request.user, print_document=True)
+            )
+
+    def get_xlsx_data(self, items):
+        data = [
+            [self.title],
+            self.get_header_texts()
+        ]
+        i = 0
+        for item in items.all():
+            i += 1
+            row = [i]
+            for header in self.get_headers():
+                row.append(
+                    rgetattr(item, header['value'])
+                )
+            data.append(row)
+
+        return data
 
 
 class SanadExportView(SanadListView, BaseExportView):
-    filename = 'documents.pdf'
-    template_name = 'reports/sanads.html'
+    filename = 'documents'
+
     context = {
-        'form_name': 'سند حسابداری',
+        'title': 'سند حسابداری',
         'verifier_form_name': ExportVerifier.SANAD
     }
     pagination_class = None
@@ -133,8 +233,7 @@ class SanadExportView(SanadListView, BaseExportView):
 
 
 class FactorExportView(FactorListView, BaseExportView):
-    filename = 'factors.pdf'
-    template_name = 'reports/factors.html'
+    filename = 'factors'
     context = {}
     pagination_class = None
 
@@ -177,13 +276,13 @@ class FactorExportView(FactorListView, BaseExportView):
             hide_remain = True
             hide_prices = True
 
-        form_name = names[factorType]['title']
+        title = names[factorType]['title']
 
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
 
         self.context = {
-            'form_name': form_name,
+            'title': title,
             'verifier_form_name': names[factorType]['verifier_form_name'],
             'show_warehouse': factorType != 'sale',
             'hide_factor': hide_factor,
@@ -196,8 +295,7 @@ class FactorExportView(FactorListView, BaseExportView):
 
 
 class TransferExportView(TransferListView, BaseExportView):
-    filename = 'transfers.pdf'
-    template_name = 'reports/transfers.html'
+    filename = 'transfers'
     context = {}
     pagination_class = None
 
@@ -209,15 +307,14 @@ class TransferExportView(TransferListView, BaseExportView):
 
     def get(self, request, export_type, *args, **kwargs):
         self.context = {
-            'form_name': 'انتقال',
+            'title': 'انتقال',
             'verifier_form_name': ExportVerifier.TRANSFER
         }
         return self.export(request, export_type, *args, **kwargs)
 
 
 class AdjustmentExportView(AdjustmentListView, BaseExportView):
-    filename = 'adjustments.pdf'
-    template_name = 'reports/adjustments.html'
+    filename = 'adjustments'
     context = {}
     pagination_class = None
 
@@ -230,20 +327,19 @@ class AdjustmentExportView(AdjustmentListView, BaseExportView):
     def get(self, request, export_type, *args, **kwargs):
         adjustment_type = request.GET.get('type', None)
         if adjustment_type == 'ia':
-            form_name = 'رسید تعدیل انبار'
+            title = 'رسید تعدیل انبار'
         else:
-            form_name = 'حواله تعدیل انبار'
+            title = 'حواله تعدیل انبار'
 
         self.context = {
-            'form_name': form_name,
+            'title': title,
             'verifier_form_name': adjustment_type
         }
         return self.export(request, export_type, *args, **kwargs)
 
 
 class TransactionExportView(TransactionListView, BaseExportView):
-    filename = 'transactions.pdf'
-    template_name = 'reports/transactions.html'
+    filename = 'transactions'
     context = {}
     pagination_class = None
 
@@ -264,15 +360,13 @@ class TransactionExportView(TransactionListView, BaseExportView):
         if not formName:
             return Response(["Invalid type"], status=status.HTTP_400_BAD_REQUEST)
         self.context = {
-            'form_name': formName[0][1],
+            'title': formName[0][1],
             'verifier_form_name': verifier_form_name
         }
         return self.export(request, export_type, *args, **kwargs)
 
 
 class WarehouseHandlingExportView(WarehouseHandlingListView, BaseExportView):
-    filename = 'warehouse_handlings.pdf'
-    template_name = 'reports/warehouse_handling.html'
     context = {}
     pagination_class = None
 
@@ -281,6 +375,7 @@ class WarehouseHandlingExportView(WarehouseHandlingListView, BaseExportView):
 
     def get(self, request, export_type, *args, **kwargs):
         self.context = {
+            'title': 'انبارگردانی',
             'verifier_form_name': 'warehouseHandling',
             'hide_remains': request.GET.get('hide_remains', 'false') == 'true'
         }
@@ -288,9 +383,12 @@ class WarehouseHandlingExportView(WarehouseHandlingListView, BaseExportView):
 
 
 class ImprestSettlementExportView(TransactionListView, BaseExportView):
-    filename = 'imprestSettlement.pdf'
-    template_name = 'reports/imprest_settlement.html'
+    filename = 'imprestSettlement'
+    template_prefix = 'imprest_settlement'
     pagination_class = None
+    context = {
+        'title': 'تسویه تنخواه'
+    }
 
     def get_queryset(self):
         return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs

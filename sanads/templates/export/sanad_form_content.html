@@ -1,0 +1,48 @@
+{% load report_filters %}
+
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="row">
+            <span class="col-sm-2">توضیحات سند: </span>
+            <span class="col-sm-10"> {{ form.explanation | default:'-' }} </span>
+        </div>
+    </div>
+    <div class="col-sm-12 mt-3">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>کد و نام حساب</th>
+                <th>شرح ردیف</th>
+                <th>تفضیلی شناور</th>
+                <th>مرکز هزینه و درآمد</th>
+                <th>بدهکار</th>
+                <th>بستانکار</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in form.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.account }}</td>
+                    <td>{{ item.explanation | default:'-' }}</td>
+                    <td>{{ item.floatAccount | default:'-' }}</td>
+                    <td>{{ item.costCenter | default:'-' }}</td>
+                    <td>{{ item.bed | money }}</td>
+                    <td>{{ item.bes | money }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td
+                        colspan="5"
+                        class="text-left"
+                >مجموع
+                </td>
+                <td>{{ form.bed | money }}</td>
+                <td>{{ form.bes | money }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

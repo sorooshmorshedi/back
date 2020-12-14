@@ -1,0 +1,56 @@
+{% load report_filters %}
+
+
+<div class="row">
+    <div class="col-xs-4">
+        <span>انبار گردان:</span>
+        <span> {{ form.handler }} </span>
+    </div>
+    <div class="col-xs-4">
+        <span>انبار:</span>
+        <span> {{ form.warehouse.name }} </span>
+    </div>
+    <div class="col-xs-4">
+        <span>شرح:</span>
+        <span> {{ form.explanation }} </span>
+    </div>
+</div>
+
+<div class="row"
+     style="margin-top: 15px;">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>کد کالا</th>
+                <th>نام کالا</th>
+                <th>موجودی شمارش شده</th>
+                {% if not hide_remains %}
+                    <th>مانده سیستم</th>
+                    <th>مغایرت</th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in form.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.ware.code }}</td>
+                    <td>{{ item.ware.name }}</td>
+                    {% if item.warehouse_remain is not None and not hide_remains%}
+                        <td>{{ item.warehouse_remain | money }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if not hide_remains %}
+                        <td>{{ item.system_remain | money }}</td>
+                        <td class="ltr text-right">{{ item.contradiction | money }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+

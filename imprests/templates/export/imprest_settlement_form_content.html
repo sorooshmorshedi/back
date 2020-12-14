@@ -1,0 +1,50 @@
+{% load report_filters %}
+
+<div class="row">
+    <div class="col-xs-12 ">
+        <div class="row">
+            <span class="col-xs-2">شرح: </span>
+            <span class="col-xs-10"> {{ form.explanation | default:'-' }} </span>
+        </div>
+    </div>
+</div>
+
+<div class="row"
+     style="margin-top: 15px;">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>تاریخ</th>
+                <th>شرح تنخواه</th>
+                <th>نام حساب</th>
+                <th>مبلغ</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in form.imprestSettlement.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.explanation | default:'-' }}</td>
+                    <td>
+                        {% account_name item %}
+                    </td>
+                    <td>{{ item.value | money }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4">مجموع:</td>
+                <td>{{ form.imprestSettlement.settled_value | money }}</td>
+            </tr>
+            <tr>
+                <td colspan="4">اختلاف</td>
+                <td>{{ form.imprestSettlement.remain_value | money }}</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+

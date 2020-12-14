@@ -1,0 +1,70 @@
+{% load report_filters %}
+
+<div class="row">
+    <div class="col-sm-12">
+        <span>توضیحات: </span>
+        <span> {{ form.explanation | default:'-' }} </span>
+    </div>
+
+    <div class="col-sm-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>شماره حواله</th>
+                <th>تاریخ بارگیری</th>
+                <th>تاریخ بارنامه</th>
+                <th>نام پیمانکار</th>
+                <th>انعام</th>
+                <th>درآمد ماشین</th>
+                <th>بدهی باربری</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in form.ladings.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.remittance.code }}</td>
+                    <td>{{ row.lading_date }}</td>
+                    <td>{{ row.bill_date }}</td>
+                    <td>{{ row.contractor.name }}</td>
+                    <td>{{ row.driver_tip_price | money }}</td>
+                    <td>{{ row.car_income | money }}</td>
+                    <td>{{ row.cargo_debt | money }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-sm-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>شماره</th>
+                <th>حساب</th>
+                <th>تاریخ</th>
+                <th>مبلغ پرداختی</th>
+                <th>مبلغ دریافتی</th>
+                <th>مانده پرداخت نشده</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in form.imprests.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.code }}</td>
+                    <td>{% account_name row %}</td>
+                    <td>{{ row.transaction.date }}</td>
+                    <td>{{ row.sanad.bed | money }} </td>
+                    <td>{{ row.imprestSettlement.settled_value | money }}</td>
+                    <td>{{ row.imprestSettlement.remain_value | money }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
