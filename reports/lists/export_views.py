@@ -161,7 +161,7 @@ class BaseListExportView(PDFTemplateView):
         export_type = kwargs.get('export_type')
 
         if export_type == 'xlsx':
-            return get_xlsx_response('{}.xlsx'.format(self.filename), self.get_xlsx_data(self.get_queryset().all()))
+            return get_xlsx_response('{}.xlsx'.format(self.filename), self.get_xlsx_data(self.get_rows().all()))
         elif export_type == 'pdf':
             self.filename = "{}.pdf".format(self.filename)
             return super().get(request, user=request.user, *args, **kwargs)
