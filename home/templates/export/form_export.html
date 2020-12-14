@@ -11,7 +11,7 @@
 
 
         {% for form in forms %}
-            <div class="{{ forloop.last | yesno:"break-after" }}">
+            <div class="{{ forloop.last | yesno:",break-after" }}">
 
                 <div class="row mb-5">
                     <div class="col-xs-3 mt-5">
