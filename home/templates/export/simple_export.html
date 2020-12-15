@@ -12,11 +12,13 @@
 {% block body %}
     <body
             {% if print_document %}
-                {#                onload="print();"#}
+                onload="print();"
             {% endif %}
     >
     <div class="container-fluid rtl">
-        {% include 'export/wrapper.html' with right_header_template=right_header_template content_template=content_template user=user company=company form=form %}
+        {% include 'export/export_header.html' with right_header_template=right_header_template user=user company=company form=form %}
     </div>
+
+    {% include content_template with form=form %}
     </body>
 {% endblock %}

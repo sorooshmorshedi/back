@@ -1,18 +1,11 @@
-import json
-
-from django.db.models import QuerySet
-from django.shortcuts import render
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from _dashtbashi.filters import OtherDriverPaymentFilter
 from _dashtbashi.models import OtherDriverPayment
-from _dashtbashi.report_views import LadingsReportView, OtherDriverPaymentReport
+from _dashtbashi.report_views import LadingsReportView
 from _dashtbashi.serializers import OtherDriverPaymentListRetrieveSerializer
-from _dashtbashi.views import OtherDriverPaymentModelView
 from helpers.auth import BasicCRUDPermission
-from helpers.exports import get_xlsx_response
-from helpers.functions import rgetattr
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
 

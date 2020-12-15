@@ -12,30 +12,23 @@
 {% block body %}
     <body
             {% if print_document %}
-{#                onload="print();"#}
+                onload="print();"
             {% endif %}
     >
     <div class="container-fluid rtl">
 
-        <div class="row mb-5">
-            <div class="col-xs-3">
-                <div class="row form-header">
-                    <div class="col-sm-12">
+        {% include 'export/export_header.html' with right_header_template=right_header_template user=user company=company form=form %}
+
+        {% if additional_data %}
+            <div class="row mb-3">
+                {% for data in additional_data %}
+                    <div class="col-xs-6">
+                        <span>{{ data.text }}:</span>
+                        <span>{{ data.value }}</span>
                     </div>
-                </div>
+                {% endfor %}
             </div>
-            <div class="col-xs-6">
-                <div class="text-center">
-                    <h3>
-                        {{ company.name }}
-                    </h3>
-                </div>
-                <div class="text-center" style="font-size: 1.3em">
-                    {{ title }}
-                </div>
-            </div>
-            <div class="col-xs-3"></div>
-        </div>
+        {% endif %}
 
         <table class="table table-bordered table-striped">
             <thead>
@@ -50,7 +43,7 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     {% for value in values %}
-                        <td>{{ row | get_item:value }}</td>
+                        <td>{% get_item row value raw_headers %}</td>
                     {% endfor %}
                 </tr>
             {% endfor %}
