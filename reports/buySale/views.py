@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from helpers.auth import BasicCRUDPermission
 from helpers.exports import get_xlsx_response
 from reports.buySale.serializers import BuySaleSerializer
+from reports.lists.export_views import BaseListExportView
 from reports.lists.filters import *
 from reports.lists.serializers import *
 
@@ -58,12 +59,16 @@ def addSum(queryset, data, report_type):
     })
 
 
-class BuySaleView(generics.ListAPIView):
+class BuySaleReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     @property
+    def is_buy_report(self):
+        return not self.request.GET['factor__type__in'] == 'sale,backFromSale'
+
+    @property
     def permission_codename(self):
-        if self.request.GET['factor__type__in'] == 'sale,backFromSale':
+        if not self.is_buy_report:
             return 'get.saleReport'
         else:
             return 'get.buyReport'
@@ -93,8 +98,7 @@ class BuySaleView(generics.ListAPIView):
 
     @property
     def report_type(self):
-        params = self.request.GET.copy()
-        return Factor.SALE if params['factor__type__in'] == 'sale,backFromSale' else Factor.BUY
+        return Factor.BUY if self.is_buy_report else Factor.SALE
 
     def list(self, request, *args, **kwargs):
 
@@ -112,61 +116,32 @@ class BuySaleView(generics.ListAPIView):
         return response
 
 
-class BuySaleExportView(BuySaleView):
-    def get(self, request, **kwargs):
-        queryset = self.get_queryset()
-        items = self.serializer_class(queryset, many=True).data
-        addSum(queryset, items, self.report_type)
+class BuySaleReportExportView(BuySaleReportView, BaseListExportView):
+    filename = None
+    title = None
 
-        data = [[
-            '#',
-            'تاریخ',
-            'نوع فاکتور',
-            'عطف فاکتور',
-            'شماره فاکتور',
-            'خریدار/فروشنده',
-            'انبار',
-            'تعداد',
-            'فی',
-            'مبلغ',
-            'تخفیف',
-            'مبلغ کل',
-            'شرح فاکتور',
-            'توضیحات',
-        ]]
+    def get_additional_data(self):
+        item = self.get_queryset().first()
+        if item:
+            return [
+                {
+                    'text': 'کالا',
+                    'value': item.ware.name
+                },
+            ]
+        return []
 
-        for item in items[:-1]:
-            print(item['factor']['account'], item['factor']['type'])
-            data.append([
-                items.index(item) + 1,
-                item['factor']['date'],
-                Factor.get_type_label(item['factor']['type']),
-                item['factor']['id'],
-                item['factor']['code'],
-                item['factor']['account']['name'],
-                item['warehouse']['name'],
-                item['count'],
-                item['fee'],
-                item['value'],
-                item['discount'],
-                item['total_value'],
-                item['factor']['explanation'],
-                item['explanation'],
-            ])
+    def get_rows(self):
+        qs = super().get_rows()
+        data = self.serializer_class(qs, many=True).data
+        addSum(qs, data, self.report_type)
+        return data
 
-        item = items[-1]
-        data.append([
-            '', '', '', '', '', '', '',
-            item['warehouse']['name'],
-            item['count'],
-            item['value'],
-            item['discount'],
-            item['total_value'],
-        ])
-
-        if self.report_type == Factor.BUY:
-            file_name = "Buy Report"
+    def get(self, request, *args, **kwargs):
+        if self.is_buy_report:
+            self.filename = 'Buy Report'
+            self.title = 'گزارش خرید'
         else:
-            file_name = "Sale Report"
-
-        return get_xlsx_response(file_name, data)
+            self.title = 'گزارش فروش'
+            self.filename = 'Sale Report'
+        return self.get_response(request, *args, **kwargs)

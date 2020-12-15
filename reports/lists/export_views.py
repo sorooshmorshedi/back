@@ -125,9 +125,17 @@ class BaseListExportView(PDFTemplateView):
     """
     filename = None
     title = None
+    context = {}
 
     template_name = 'export/list_export.html'
     pagination_class = None
+
+    def get_additional_data(self):
+        """
+        Data to put above the table in text, value format
+        :return: array of {text: '...', value: '...'}
+        """
+        return []
 
     def get_headers(self):
         headers = self.request.GET.get('headers', "[]")
@@ -173,14 +181,19 @@ class BaseListExportView(PDFTemplateView):
 
     def get_context_data(self, user, print_document=False, **kwargs):
         context = {
+            'company': user.active_company,
+            'user': user,
             'title': self.title,
             'headers': self.get_header_texts(),
             'values': self.get_header_values(),
-            'values_types': [header.get('type') for header in self.get_headers()],
+            'raw_headers': self.get_headers(),
             'rows': self.get_rows(),
             'filters': self.get_filters(),
             'print_document': print_document,
+            'additional_data': self.get_additional_data()
         }
+
+        context.update(self.context)
 
         return context
 
@@ -202,6 +215,7 @@ class BaseListExportView(PDFTemplateView):
     def get_xlsx_data(self, items):
         data = [
             [self.title],
+            *[[data['text'], data['value']] for data in self.get_additional_data()],
             self.get_header_texts()
         ]
         i = 0

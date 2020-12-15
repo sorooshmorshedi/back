@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView, \
     AccountBalanceExportView, FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
 from reports.balanceSheet.views import BalanceSheetView, BalanceSheetExportView
-from reports.buySale.views import BuySaleView, BuySaleExportView
+from reports.buySale.views import BuySaleReportView, BuySaleReportExportView
 from reports.incomeStatement.views import IncomeStatementView, IncomeStatementExportView
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
@@ -62,8 +62,8 @@ urlpatterns += [
     url(r'^balanceSheet$', BalanceSheetView.as_view(), name=''),
     url(r'^balanceSheet/(?P<export_type>\S+)$', BalanceSheetExportView.as_view(), name=''),
 
-    url(r'^buySale$', BuySaleView.as_view(), name=''),
-    url(r'^buySale/(?P<export_type>\S+)', BuySaleExportView.as_view(), name=''),
+    url(r'^buySale$', BuySaleReportView.as_view(), name=''),
+    url(r'^buySale/(?P<export_type>\S+)', BuySaleReportExportView.as_view(), name=''),
 
     url(r'^inventory/ware$', WareInventoryListView.as_view(), name=''),
     url(r'^inventory/ware/all$', AllWaresInventoryListView.as_view(), name=''),

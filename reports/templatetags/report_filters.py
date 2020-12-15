@@ -30,11 +30,20 @@ def account_name(obj):
     return get_object_account_names(obj)
 
 
-@register.filter
-def get_item(obj, key):
+@register.simple_tag
+def get_item(obj, key, headers):
     value = rgetattr(obj, key)
 
     if value is None:
-        value = '-'
+        return '-'
+
+    header = [header for header in headers if header['value'] == key][0]
+    value_type = header.get('type', None)
+    if value_type == 'numeric':
+        return add_separator(value)
+    elif value_type == 'select':
+        print(key, value, header['items'])
+        return [item['text'] for item in header['items'] if item['value'] == value][0]
+
 
     return value
