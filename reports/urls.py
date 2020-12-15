@@ -9,7 +9,7 @@ from reports.incomeStatement.views import IncomeStatementView, IncomeStatementEx
 from reports.inventory.views import WareInventoryListView, AllWaresInventoryListView, WarehouseInventoryListView, \
     AllWarehousesInventoryListView, WareInventoryExportView, AllWaresInventoryExportView, WarehouseInventoryExportView, \
     AllWarehousesInventoryExportView
-from reports.sanadItems.views import SanadItemListView, SanadItemExportView
+from reports.sanadItems.views import SanadItemListView, SanadItemListExportView
 from reports.lists.export_views import SanadExportView, FactorExportView, TransactionExportView, TransferExportView, \
     AdjustmentExportView, WarehouseHandlingExportView, ImprestSettlementExportView
 from reports.lists.views import *
@@ -52,7 +52,7 @@ urlpatterns += [
     url(r'^balance/(?P<export_type>\S+)', AccountBalanceExportView.as_view(), name=''),
 
     url(r'^sanadItems$', SanadItemListView.as_view(), name=''),
-    url(r'^sanadItems/(?P<export_type>\S+)', SanadItemExportView.as_view(), name=''),
+    url(r'^sanadItems/(?P<export_type>\S+)', SanadItemListExportView.as_view(), name=''),
 
     url(r'^export$', exportTest, name=''),
 

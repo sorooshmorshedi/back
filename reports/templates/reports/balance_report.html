@@ -1,41 +1,5 @@
-{% extends 'reports/base.html' %}
 {% load report_filters %}
-{% load export_verifiers %}
 
-{% block content %}
-
-{% if forloop.last %}
-    <div>
-{% else %}
-    <div class="break-after">
-{% endif %}
-
-<div class="text-center">
-    <h3>
-        {{ company.name }}
-    </h3>
-</div>
-<div class="row">
-    <div class="col-sm-4">
-    </div>
-    <div class="col-sm-4 text-center">
-        تراز حساب ها
-    </div>
-    <div class="col-sm-4 text-left">
-        سال مالی: {{ financial_year.name }}
-    </div>
-</div>
-
-<div class="row form-header">
-    <div class="col-sm-12">
-    </div>
-    <div class="col-sm-12">
-    </div>
-
-    <div class="col-sm-12">
-    </div>
-    <br>
-</div>
 <div class="row">
     <div class="col-sm-12">
         <table class="table table-bordered table-striped">
@@ -56,8 +20,8 @@
             {% for item in items %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ item.account.code }}</td>
-                    <td>{{ item.account.name }}</td>
+                    <td>{{ item.code }}</td>
+                    <td>{{ item.name }}</td>
                     {% if four_cols %}
                         <td>{{ item.bed_sum | money }}</td>
                         <td>{{ item.bes_sum | money }}</td>
@@ -68,7 +32,7 @@
 
                 {% if show_float_accounts %}
                     <tr>
-                        {% for sub_item in item._floatAccounts %}
+                        {% for sub_item in item.floatAccounts_data %}
                             <td colspan="2"></td>
                             <td>{{ sub_item.name }}</td>
                             {% if four_cols %}
@@ -83,7 +47,7 @@
 
                 {% if show_cost_centers %}
                     <tr>
-                        {% for sub_item in item._costCenters %}
+                        {% for sub_item in item.costCenters_data %}
                             <td colspan="2"></td>
                             <td>{{ sub_item.name }}</td>
                             {% if four_cols %}
@@ -98,12 +62,12 @@
 
             {% endfor %}
             <tr>
-                <td colspan="3" class="text-left">مجموع</td>
-                <td>{{ sum.bed | money }}</td>
-                <td>{{ sum.bes | money }}</td>
+                <td colspan="3" >مجموع</td>
+                <td>{{ sum.0 | money }}</td>
+                <td>{{ sum.1 | money }}</td>
                 {% if four_cols %}
-                    <td>{{ sum.bed_remain | money }}</td>
-                    <td>{{ sum.bes_remain | money }}</td>
+                    <td>{{ sum.2 | money }}</td>
+                    <td>{{ sum.3 | money }}</td>
                 {% endif %}
             </tr>
             </tbody>
@@ -111,10 +75,4 @@
     </div>
 </div>
 
-
-</div>
-
-{% endfor %}
-
-{% show_verifiers verifier_form_name user %}
 

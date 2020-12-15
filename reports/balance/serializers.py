@@ -28,20 +28,20 @@ class BalanceAccountSerializer(serializers.ModelSerializer):
     bed_remain = serializers.IntegerField()
     bes_remain = serializers.IntegerField()
 
-    _floatAccountGroup = serializers.ReadOnlyField()
-    _floatAccounts = serializers.ReadOnlyField()
-    _costCenterGroup = serializers.ReadOnlyField()
-    _costCenters = serializers.ReadOnlyField()
-    _type = serializers.ReadOnlyField()
+    floatAccountGroup_data = serializers.ReadOnlyField()
+    floatAccounts_data = serializers.ReadOnlyField()
+    costCenterGroup_data = serializers.ReadOnlyField()
+    costCenters_data = serializers.ReadOnlyField()
+    type_data = serializers.ReadOnlyField()
 
     class Meta:
         model = Account
         fields = ('id', 'code', 'name', 'level', 'bed_sum', 'bes_sum', 'bed_remain', 'bes_remain',
-                  '_floatAccountGroup',
-                  '_floatAccounts',
-                  '_costCenterGroup',
-                  '_costCenters',
-                  '_type')
+                  'floatAccountGroup_data',
+                  'floatAccounts_data',
+                  'costCenterGroup_data',
+                  'costCenters_data',
+                  'type_data')
 
 
 class FloatBalanceSerializer(serializers.Serializer):

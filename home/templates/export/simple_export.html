@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load report_filters %}
+
+{% block tab_title %}
+    {{ title }}
+{% endblock %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <body
+            {% if print_document %}
+                {#                onload="print();"#}
+            {% endif %}
+    >
+    <div class="container-fluid rtl">
+        {% include 'export/wrapper.html' with right_header_template=right_header_template content_template=content_template user=user company=company form=form %}
+    </div>
+    </body>
+{% endblock %}

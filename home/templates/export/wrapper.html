@@ -1,0 +1,31 @@
+<div class="row mb-5">
+    <div class="col-xs-3 mt-5">
+        <div class="form-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <span>کاربر:</span>
+                    <span> {{ user.name }} </span>
+                </div>
+            </div>
+
+            {% if right_header_template %}
+                {% include right_header_template with form=form %}
+            {% endif %}
+
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <div class="text-center">
+            <h3>
+                {{ company.name }}
+            </h3>
+        </div>
+        <div class="text-center" style="font-size: 1.3em">
+            {{ title }}
+        </div>
+    </div>
+    <div class="col-xs-3"></div>
+</div>
+
+{% include content_template with form=form %}
+

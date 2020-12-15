@@ -1,10 +1,12 @@
 from django.db.models import Q
 from django.db.models import Sum
+from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from wkhtmltopdf.views import PDFTemplateView
 
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
 from accounts.accounts.serializers import AccountTypeSerializer
@@ -13,7 +15,7 @@ from helpers.exports import get_xlsx_response, MPDFTemplateView
 from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
     BalanceFloatAccountGroupSerializer
 from reports.filters import get_account_sanad_items_filter
-from reports.lists.export_views import BaseExportView
+from reports.lists.export_views import BaseExportView, BaseListExportView
 
 common_headers = [
     'گردش بدهکار',
@@ -68,13 +70,45 @@ class AccountBalanceView(APIView):
     def get_accounts(self, request):
         filters = get_account_sanad_items_filter(request)
         account_code_starts_with = request.GET.get('account_code_starts_with', '')
+        level = request.GET.get('level', None)
+        account_type = request.GET.get('account_type')
+        balance_status = request.GET.get('balance_status')
 
-        accounts = Account.objects.inFinancialYear() \
-            .filter(code__startswith=account_code_starts_with) \
-            .annotate(bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0)) \
-            .annotate(bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0)) \
-            .prefetch_related('floatAccountGroup').prefetch_related('costCenterGroup').prefetch_related('type') \
-            .order_by('code')
+        show_differences = request.GET.get('show_differences')
+
+        qs = Account.objects.inFinancialYear().annotate(
+            bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0),
+            bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0)
+        )
+
+        qs = qs.filter(code__startswith=account_code_starts_with, )
+
+        if level:
+            qs = qs.filter(level=level)
+
+        if balance_status == 'with_remain':
+            qs = qs.filter(~Q(bed_sum=F('bes_sum')))
+        elif balance_status == 'without_remain':
+            qs = qs.filter(bed_sum=F('bes_sum'))
+        elif balance_status == 'bed_remain':
+            qs = qs.filter(bed_sum__gt=F('bes_sum'))
+        elif balance_status == 'bes_remain':
+            qs = qs.filter(bes_sum__gt=F('bed_sum'))
+        elif balance_status == 'with_transaction':
+            qs = qs.filter(~Q(bes_sum=0, bed_sum=0))
+        elif balance_status == 'without_transaction':
+            qs = qs.filter(bes_sum=0, bed_sum=0)
+
+        if account_type == Account.BUYER:
+            qs = qs.filter(account_type=Account.PERSON, buyer_or_seller=Account.BUYER)
+        elif account_type == Account.SELLER:
+            qs = qs.filter(account_type=Account.PERSON, buyer_or_seller=Account.SELLER)
+        elif account_type == Account.BANK:
+            qs = qs.filter(account_type=Account.BANK)
+
+        accounts = qs.prefetch_related(
+            'floatAccountGroup', 'costCenterGroup', 'type'
+        ).order_by('code')
 
         for account in accounts:
             if account.level != 3:
@@ -94,14 +128,14 @@ class AccountBalanceView(APIView):
                 account.bes_remain = -remain
 
             if account.type:
-                account._type = AccountTypeSerializer(account.type).data
+                account.type_data = AccountTypeSerializer(account.type).data
             if account.floatAccountGroup:
-                account._floatAccountGroup = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
+                account.floatAccountGroup_data = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
             if account.costCenterGroup:
-                account._costCenterGroup = BalanceFloatAccountGroupSerializer(account.costCenterGroup).data
+                account.costCenterGroup_data = BalanceFloatAccountGroupSerializer(account.costCenterGroup).data
 
-            account._floatAccounts = []
-            account._costCenters = []
+            account.floatAccounts_data = []
+            account.costCenters_data = []
             if account.floatAccountGroup:
                 floatAccounts = FloatAccount.objects.inFinancialYear() \
                     .filter(floatAccountGroups__in=[account.floatAccountGroup]) \
@@ -119,7 +153,7 @@ class AccountBalanceView(APIView):
                     else:
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
-                    account._floatAccounts.append(BalanceFloatAccountSerializer(floatAccount).data)
+                    account.floatAccounts_data.append(BalanceFloatAccountSerializer(floatAccount).data)
 
             if account.costCenterGroup:
                 floatAccounts = FloatAccount.objects.inFinancialYear() \
@@ -138,7 +172,20 @@ class AccountBalanceView(APIView):
                     else:
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
-                    account._costCenters.append(BalanceFloatAccountSerializer(floatAccount).data)
+                    account.costCenters_data.append(BalanceFloatAccountSerializer(floatAccount).data)
+
+        accounts = list(accounts)
+        for account in accounts:
+            if show_differences:
+                nature = account.type.nature
+                if (
+                        account.bed_remain == account.bes_remain == 0
+                ) or (
+                        nature == 'bed' and account.bes_remain != 0
+                ) or (
+                        nature == 'bes' and account.bed_remain != 0
+                ):
+                    accounts.remove(account)
 
         return accounts
 
@@ -148,24 +195,34 @@ class AccountBalanceView(APIView):
         return res
 
 
-class AccountBalanceExportView(AccountBalanceView, MPDFTemplateView):
-    filename = 'balance.pdf'
-    template_name = 'reports/balance_report.html'
+class AccountBalanceExportView(AccountBalanceView, BaseExportView):
+    filename = 'account-balance.pdf'
+    template_name = 'export/simple_export.html'
 
-    def get(self, request, *args, **kwargs):
-        export_type = kwargs.get('export_type')
-        if export_type == 'xlsx':
-            return self.get_xlsx(request)
-        elif export_type == 'pdf':
-            return super().get(request, user=request.user, *args, **kwargs)
-        else:
-            return self.render(request)
+    def get_context_data(self, user, **kwargs):
+        data = self.request.GET.copy()
+        accounts = self.get_accounts(self.request)
 
-    def get_context_data(self, request, **kwargs):
-        return self.get_accounts(request)
+        context = {
+            'title': "تراز حساب ها",
+            'content_template': 'reports/balance_report.html',
+            'company': self.request.user.active_company,
+            'user': self.request.user,
+            'items': BalanceAccountSerializer(accounts, many=True).data,
+            'show_float_accounts': data.get('show_float_accounts') == 'true',
+            'show_cost_centers': data.get('show_cost_centers') == 'true',
+            'four_cols': data.get('cols_count') == '4',
+            'sum': get_common_columns_sum(accounts)
+        }
 
-    def get_xlsx(self, request):
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
         accounts = self.get_accounts(request)
+
+        context = self.get_context_data(request.user, **kwargs)
+        show_float_accounts = context['show_float_accounts']
+        show_cost_centers = context['show_cost_centers']
 
         data = [[
             '#',
@@ -175,10 +232,24 @@ class AccountBalanceExportView(AccountBalanceView, MPDFTemplateView):
         ]]
         for account in accounts:
             data.append([
+                accounts.index(account),
                 account.code,
                 account.name,
                 *get_common_columns(account)
             ])
+
+            sub_items = []
+            if show_float_accounts:
+                sub_items += account.floatAccounts_data
+            if show_cost_centers:
+                sub_items += account.costCenters_data
+
+            for item in sub_items:
+                data.append([
+                    '', '',
+                    item['name'],
+                    *get_common_columns(item, True)
+                ])
 
         data.append([
             '', '',
@@ -186,24 +257,29 @@ class AccountBalanceExportView(AccountBalanceView, MPDFTemplateView):
             *get_common_columns_sum(accounts)
         ])
 
-        return get_xlsx_response('account balance', data)
+        return get_xlsx_response('account-balance', data)
+
+    def get(self, *args, **kwargs):
+        return self.export(*args, **kwargs)
 
 
 class FloatAccountBalanceByGroupView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.floatAccountBalanceByGroupReport'
 
+    @property
+    def is_cost_center(self):
+        return self.request.GET.get('is_cost_center') == 'true'
+
     def get_accounts_data(self, request):
 
         filters = get_account_sanad_items_filter(request)
 
-        is_cost_center = request.GET.get('is_cost_center') == 'true'
-
-        floatAccounts = FloatAccount.objects.inFinancialYear().filter(is_cost_center=is_cost_center)
+        floatAccounts = FloatAccount.objects.inFinancialYear().filter(is_cost_center=self.is_cost_center)
         floatAccountGroups = FloatAccountGroup.objects.inFinancialYear().prefetch_related(
-            'floatAccounts').filter(is_cost_center=is_cost_center)
+            'floatAccounts').filter(is_cost_center=self.is_cost_center)
 
-        if is_cost_center:
+        if self.is_cost_center:
             sanad_item_key = "sanadItemsAsCostCenter"
             float_account_group_key = "costCenterGroup"
         else:
@@ -284,52 +360,89 @@ class FloatAccountBalanceByGroupView(APIView):
         return res
 
 
-class FloatAccountBalanceByGroupExportView(FloatAccountBalanceByGroupView):
+class FloatAccountBalanceByGroupExportView(FloatAccountBalanceByGroupView, BaseListExportView):
+    filename = None
 
-    def get(self, request, **kwargs):
-        accounts_data = self.get_accounts_data(request)
-        is_cost_center = request.GET.get('is_cost_center') == 'true'
-
-        if is_cost_center:
-            column_label = "مرکز هزینه و درآمد"
-            file_name = "Cost & Income Center By Group Balance"
+    @property
+    def title(self):
+        if self.is_cost_center:
+            return "تراز مراکز هزینه بر اساس گروه"
         else:
-            column_label = "شناور"
-            file_name = "Float By Group Balance"
+            return "تراز حساب های شناور بر اساس گروه"
 
-        data = [[
-            '#',
-            'گروه',
-            column_label,
-            *common_headers
-        ]]
-        for account in accounts_data:
-            data.append([
-                accounts_data.index(account),
-                account['group_name'],
-                account['float_account_name'],
-                *get_common_columns(account, True)
-            ])
+    def get_headers(self):
+        if self.is_cost_center:
+            text = "مرکز هزینه و درآمد"
+        else:
+            text = "حساب شناو"
+        headers = [
+            {
+                "text": "گروه " + text,
+                "value": "group_name",
+            },
+            {
+                "text": text,
+                "value": "float_account_name",
+            },
+            {
+                "text": "گردش بدهکار",
+                "value": "bed_sum",
+                "type": "numeric",
+            },
+            {
+                "text": "گردش بستانکار",
+                "value": "bes_sum",
+                "type": "numeric",
+            },
+            {
+                "text": "مانده بدهکار",
+                "value": "bed_remain",
+                "type": "numeric",
+            },
+            {
+                "text": "مانده بستانکار",
+                "value": "bes_remain",
+                "type": "numeric",
+            },
+        ]
+        return headers
 
-        data.append([
-            '', '',
-            'جمع',
-            *get_common_columns_sum(accounts_data, True)
-        ])
+    def get_rows(self):
+        accounts_data = list(self.get_accounts_data(self.request))
 
-        return get_xlsx_response(file_name, data)
+        rows_sum = get_common_columns_sum(accounts_data, True)
+        accounts_data.append({
+            'group_name': '',
+            'float_account_name': 'جمع',
+            'bed_sum': rows_sum[0],
+            'bes_sum': rows_sum[1],
+            'bed_remain': rows_sum[2],
+            'bes_remain': rows_sum[3],
+        })
+        return accounts_data
+
+    def get(self, request, *args, **kwargs):
+
+        if self.is_cost_center:
+            self.filename = "Cost & Income Center By Group Balance"
+        else:
+            self.filename = "Float By Group Balance"
+
+        return self.get_response(request, *args, **kwargs)
 
 
 class FloatAccountBalanceView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.floatAccountBalanceReport'
 
+    @property
+    def is_cost_center(self):
+        return self.request.GET.get('is_cost_center') == 'true'
+
     def get_accounts_data(self, request):
         filters = get_account_sanad_items_filter(request)
 
-        is_cost_center = request.GET.get('is_cost_center') == 'true'
-
-        if is_cost_center:
+        if self.is_cost_center:
             sanad_item_key = "sanadItemsAsCostCenter"
         else:
             sanad_item_key = "sanadItems"
@@ -337,7 +450,7 @@ class FloatAccountBalanceView(APIView):
         floatAccounts = FloatAccount.objects.inFinancialYear().annotate(
             bed_sum=Coalesce(Sum('{}__bed'.format(sanad_item_key), filter=filters), 0),
             bes_sum=Coalesce(Sum('{}__bes'.format(sanad_item_key), filter=filters), 0),
-        ).filter(is_cost_center=is_cost_center)
+        ).filter(is_cost_center=self.is_cost_center)
 
         res = []
         for floatAccount in floatAccounts:
@@ -367,35 +480,67 @@ class FloatAccountBalanceView(APIView):
         return res
 
 
-class FloatAccountBalanceExportView(FloatAccountBalanceView):
+class FloatAccountBalanceExportView(FloatAccountBalanceView, BaseListExportView):
+    filename = None
 
-    def get(self, request, **kwargs):
-        accounts_data = self.get_accounts_data(request)
-
-        is_cost_center = request.GET.get('is_cost_center') == 'true'
-
-        if is_cost_center:
-            column_label = "مرکز هزینه و درآمد"
-            file_name = "Cost & Income Center Balance"
+    @property
+    def title(self):
+        if self.is_cost_center:
+            return "تراز مراکز هزینه"
         else:
-            column_label = "شناور"
-            file_name = "Float Balance"
+            return "تراز حساب های شناور"
 
-        data = [[
-            '#',
-            column_label,
-            *common_headers
-        ]]
-        for account in accounts_data:
-            data.append([
-                account['float_account_name'],
-                *get_common_columns(account, True)
-            ])
+    def get_headers(self):
+        if self.is_cost_center:
+            text = "مرکز هزینه و درآمد"
+        else:
+            text = "حساب شناور"
+        headers = [
+            {
+                "text": text,
+                "value": "float_account_name",
+            },
+            {
+                "text": "گردش بدهکار",
+                "value": "bed_sum",
+                "type": "numeric",
+            },
+            {
+                "text": "گردش بستانکار",
+                "value": "bes_sum",
+                "type": "numeric",
+            },
+            {
+                "text": "مانده بدهکار",
+                "value": "bed_remain",
+                "type": "numeric",
+            },
+            {
+                "text": "مانده بستانکار",
+                "value": "bes_remain",
+                "type": "numeric",
+            },
+        ]
+        return headers
 
-        data.append([
-            '',
-            'جمع',
-            *get_common_columns_sum(accounts_data, True)
-        ])
+    def get_rows(self):
+        accounts_data = list(self.get_accounts_data(self.request))
 
-        return get_xlsx_response(file_name, data)
+        rows_sum = get_common_columns_sum(accounts_data, True)
+        accounts_data.append({
+            'float_account_name': 'جمع',
+            'bed_sum': rows_sum[0],
+            'bes_sum': rows_sum[1],
+            'bed_remain': rows_sum[2],
+            'bes_remain': rows_sum[3],
+        })
+        return accounts_data
+
+    def get(self, request, *args, **kwargs):
+
+        if self.is_cost_center:
+            self.filename = "Cost & Income Center Balance"
+        else:
+            self.filename = "Float Balance"
+
+        return self.get_response(request, *args, **kwargs)

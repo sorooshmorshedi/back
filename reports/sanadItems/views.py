@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from helpers.auth import BasicCRUDPermission
-from helpers.exports import get_xlsx_response
+from reports.lists.export_views import BaseListExportView
 from reports.sanadItems.filters import SanadItemLedgerFilter
 from reports.sanadItems.serializers import SanadItemLedgerSerializer
 from sanads.models import SanadItem
@@ -111,29 +111,22 @@ class SanadItemListView(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class SanadItemExportView(SanadItemListView):
+class SanadItemListExportView(SanadItemListView, BaseListExportView):
+    filename = 'sanad-items'
 
-    def get(self, request, **kwargs):
-        sheet_name = 'sanadItems.xlsx'
+    @property
+    def title(self):
+        return self.request.GET.get('title')
 
-        data = [[
-            '#',
-            'تاریخ',
-            'شماره سند',
-            'شرح',
-            'حساب',
-            'بدهکار',
-            'بستانکار',
-            'مانده',
-            'تشخیص'
-        ]]
-
-        rows = self.serializer_class(self.get_queryset(), many=True).data
+    def get_rows(self, *args, **kwargs):
+        data = self.serializer_class(self.get_queryset(), many=True).data
+        return data
         row = None
-        for row in rows:
+        rows = []
+        for row in data:
             sanad = row['sanad']
-            data.append([
-                rows.index(row) + 1,
+            rows.append([
+                data.index(row) + 1,
                 sanad['date'],
                 sanad['code'],
                 row['explanation'],
@@ -144,8 +137,10 @@ class SanadItemExportView(SanadItemListView):
                 row['remain_type'],
             ])
 
+        return rows
+
         if row:
-            data.append([
+            rows.append([
                 '',
                 '',
                 '',
@@ -157,4 +152,9 @@ class SanadItemExportView(SanadItemListView):
                 row['remain_type'],
             ])
 
-        return get_xlsx_response(sheet_name, data)
+        print(rows)
+
+        return rows
+
+    def get(self, request, *args, **kwargs):
+        return self.get_response(request, *args, **kwargs)

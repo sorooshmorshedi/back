@@ -24,8 +24,8 @@ from transactions.models import Transaction
 
 class BaseExportView(APIView, PDFTemplateView):
     # filename = 'my_pdf'
-
     template_name = 'export/form_export.html'
+
     cmd_options = {
         'margin-top': 3,
         'footer-center': '[page]/[topage]'
@@ -106,7 +106,7 @@ class BaseExportView(APIView, PDFTemplateView):
     def print_response(self, request, *args, **kwargs):
         return render(
             request,
-            'export/form_export.html',
+            self.template_name,
             context=self.get_context_data(user=request.user, print_document=True)
         )
 
@@ -143,7 +143,33 @@ class BaseListExportView(PDFTemplateView):
         return [header['value'] for header in headers]
 
     def get_rows(self):
-        return self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs
+        return self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs.all()
+
+    def get_filters(self):
+        filters = []
+        data = self.request.GET.copy()
+        data.pop('headers', None)
+        data.pop('token', None)
+        headers = self.get_headers()
+        keys = list(data.keys())
+        keys.sort()
+        for key in keys:
+            break
+            text = [header['text'] for header in headers if header['value'].replace('.', '__') in key][0]
+
+            value = data[key]
+            if key.endswith('gt') or key.endswith('gte'):
+                text = "از {}".format(text)
+            if key.endswith('lt') or key.endswith('lte'):
+                text = "تا {}".format(text)
+
+            filters.append({
+                'text': text,
+                'value': value
+            })
+            print(filters)
+
+        return filters
 
     def get_context_data(self, user, print_document=False, **kwargs):
         context = {
@@ -152,7 +178,8 @@ class BaseListExportView(PDFTemplateView):
             'values': self.get_header_values(),
             'values_types': [header.get('type') for header in self.get_headers()],
             'rows': self.get_rows(),
-            'print_document': print_document
+            'filters': self.get_filters(),
+            'print_document': print_document,
         }
 
         return context
@@ -161,7 +188,7 @@ class BaseListExportView(PDFTemplateView):
         export_type = kwargs.get('export_type')
 
         if export_type == 'xlsx':
-            return get_xlsx_response('{}.xlsx'.format(self.filename), self.get_xlsx_data(self.get_rows().all()))
+            return get_xlsx_response('{}.xlsx'.format(self.filename), self.get_xlsx_data(self.get_rows()))
         elif export_type == 'pdf':
             self.filename = "{}.pdf".format(self.filename)
             return super().get(request, user=request.user, *args, **kwargs)
@@ -178,7 +205,7 @@ class BaseListExportView(PDFTemplateView):
             self.get_header_texts()
         ]
         i = 0
-        for item in items.all():
+        for item in items:
             i += 1
             row = [i]
             for header in self.get_headers():
