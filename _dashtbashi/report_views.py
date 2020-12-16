@@ -19,7 +19,7 @@ from transactions.serializers import TransactionListRetrieveSerializer
 
 class OtherDriverPaymentReport(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
-    permission_basename = 'get.otherDriverPayment'
+    permission_basename = 'otherDriverPayment'
 
     def get(self, request):
         data = request.GET
