@@ -652,6 +652,18 @@ class OilCompanyLadingItem(BaseModel):
     company_commission = DECIMAL()
     car_income = DECIMAL()
 
+    @property
+    def month(self):
+        return self.oilCompanyLading.month
+
+    @property
+    def list_date(self):
+        return self.oilCompanyLading.list_date
+
+    @property
+    def driving(self):
+        return self.oilCompanyLading.driving
+
     class Meta(BaseModel.Meta):
         pass
 

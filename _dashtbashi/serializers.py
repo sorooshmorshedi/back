@@ -215,8 +215,10 @@ class OilCompanyLadingItemCreateUpdateSerializer(serializers.ModelSerializer):
 
 class OilCompanyLadingItemListRetrieveSerializer(serializers.ModelSerializer):
     month = serializers.CharField(source='oilCompanyLading.month', read_only=True)
+    list_date = serializers.CharField(source='oilCompanyLading.list_date', read_only=True)
     origin = CitySerializer(read_only=True)
     destination = CitySerializer(read_only=True)
+    driving = DrivingListRetrieveSerializer(source='oilCompanyLading.driving', read_only=True)
 
     class Meta:
         model = OilCompanyLadingItem

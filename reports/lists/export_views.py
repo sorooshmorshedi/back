@@ -41,14 +41,15 @@ class BaseExportView(APIView, PDFTemplateView):
         return re.sub(r'(?<!^)(?=[A-Z])', '_', self.get_serializer().Meta.model.__name__).lower()
 
     def get_context_data(self, user, print_document=False, **kwargs):
-        context = super().get_context_data(**kwargs)
         qs = self.get_queryset()
 
-        context['forms'] = qs
-        context['company'] = user.active_company
-        context['financial_year'] = user.active_financial_year
-        context['user'] = user
-        context['print_document'] = print_document
+        context = {
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user,
+            'print_document': print_document
+        }
 
         template_prefix = self.get_template_prefix()
         context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
@@ -175,12 +176,11 @@ class BaseListExportView(PDFTemplateView):
                 'text': text,
                 'value': value
             })
-            print(filters)
 
         return filters
 
     def get_context_data(self, user, print_document=False, **kwargs):
-        context = {
+        context = ({
             'company': user.active_company,
             'user': user,
             'title': self.title,
@@ -191,7 +191,7 @@ class BaseListExportView(PDFTemplateView):
             'filters': self.get_filters(),
             'print_document': print_document,
             'additional_data': self.get_additional_data()
-        }
+        })
 
         context.update(self.context)
 

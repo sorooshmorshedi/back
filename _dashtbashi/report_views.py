@@ -36,7 +36,7 @@ class OtherDriverPaymentReport(APIView):
         })
 
 
-class RemittanceReportView(generics.ListAPIView):
+class RemittanceListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.remittance'
 
@@ -88,7 +88,7 @@ class LadingBillSeriesListView(generics.ListAPIView):
         return LadingBillSeries.objects.hasAccess('get').all()
 
 
-class LadingsReportView(generics.ListAPIView):
+class LadingListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.lading'
 
@@ -128,7 +128,7 @@ class LadingsReportView(generics.ListAPIView):
         return response
 
 
-class OilCompanyLadingReportView(generics.ListAPIView):
+class OilCompanyLadingListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.oilCompanyLading'
 
@@ -142,7 +142,7 @@ class OilCompanyLadingReportView(generics.ListAPIView):
         return OilCompanyLading.objects.hasAccess('get').all()
 
 
-class OilCompanyLadingItemReportView(generics.ListAPIView):
+class OilCompanyLadingItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.oilCompanyLading'
 

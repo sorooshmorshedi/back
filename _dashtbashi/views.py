@@ -413,8 +413,6 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
 
         instance = serializer.instance
 
-        print(instance)
-
         return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
