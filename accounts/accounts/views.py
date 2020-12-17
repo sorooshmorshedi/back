@@ -242,5 +242,8 @@ class AccountDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         account = self.get_object()
         if account.can_delete():
             return super().destroy(request, *args, **kwargs)
-        return Response(['حساب های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'non_field_errors': ['حساب های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
+            'sanad_ids': [item.sanad.id for item in account.sanadItems.all()[:10]],
+            'item_ids': [item.id for item in account.sanadItems.all()[:10]],
+        }, status=status.HTTP_400_BAD_REQUEST)
