@@ -162,7 +162,7 @@ class FirstPeriodInventoryView(APIView):
             financial_year=financial_year,
         )
         sanad.items.create(
-            *get_object_accounts(first_period_inventory),
+            **get_object_accounts(first_period_inventory),
             bes=first_period_inventory.sum,
             financial_year=financial_year,
         )
