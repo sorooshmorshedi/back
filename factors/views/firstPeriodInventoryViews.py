@@ -9,7 +9,7 @@ from factors.models import Factor
 from factors.serializers import FactorListRetrieveSerializer, FactorCreateUpdateSerializer, FactorItemSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_object_accounts
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad, newSanadCode, clearSanad
 
@@ -62,7 +62,7 @@ class FirstPeriodInventoryView(APIView):
     def set_first_period_inventory(data, financial_year=None):
         """
         :param data: {
-            : {...},
+            item: {...},
             items: {
                 items: [{..}, ...},
                 ids_to_delete: []
@@ -102,7 +102,6 @@ class FirstPeriodInventoryView(APIView):
         factor_data.pop('sanad', None)
         factor_data['type'] = Factor.FIRST_PERIOD_INVENTORY
         factor_data['is_definite'] = 1
-        factor_data['account'] = Account.get_partners_account(user).id
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
@@ -163,7 +162,7 @@ class FirstPeriodInventoryView(APIView):
             financial_year=financial_year,
         )
         sanad.items.create(
-            account=Account.get_partners_account(user),
+            *get_object_accounts(first_period_inventory),
             bes=first_period_inventory.sum,
             financial_year=financial_year,
         )
