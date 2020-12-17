@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from _dashtbashi.filters import RemittanceFilter, LadingBillSeriesFilter, LadingFilter, OilCompanyLadingFilter, \
     OilCompanyLadingItemFilter
-from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading, OilCompanyLadingItem
+from _dashtbashi.models import Remittance, Lading, LadingBillSeries, OilCompanyLading, OilCompanyLadingItem, Car
 from _dashtbashi.serializers import RemittanceListRetrieveSerializer, LadingListSerializer, \
     LadingBillSeriesSerializer, OilCompanyLadingListRetrieveSerializer, OilCompanyLadingItemCreateUpdateSerializer, \
     OilCompanyLadingItemListRetrieveSerializer
@@ -25,10 +25,14 @@ class OtherDriverPaymentReport(APIView):
         data = request.GET
         remittance = get_object_or_404(Remittance.objects.hasAccess('get'), pk=data.get('remittance'))
 
-        ladings = Lading.objects.hasAccess('get', 'lading').filter(remittance=remittance)
+        ladings = Lading.objects.hasAccess('get', 'lading').filter(
+            remittance=remittance,
+            driving__car__owner=Car.OTHER
+        )
 
-        # put accounts data
-        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=(609,))
+        imprest_accounts = [lading.driving.car.payableAccount for lading in ladings]
+
+        imprests = Transaction.get_not_settled_imprests_queryset().filter(account__in=imprest_accounts)
 
         return Response({
             'ladings': LadingListSerializer(ladings, many=True).data,

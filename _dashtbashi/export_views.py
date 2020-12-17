@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from _dashtbashi.filters import OtherDriverPaymentFilter
-from _dashtbashi.models import OtherDriverPayment
+from _dashtbashi.models import OtherDriverPayment, Car
 from _dashtbashi.report_views import LadingListView, LadingBillSeriesListView, RemittanceListView, \
     OilCompanyLadingListView, OilCompanyLadingItemListView
 from _dashtbashi.serializers import OtherDriverPaymentListRetrieveSerializer
@@ -41,7 +41,7 @@ class OtherDriverPaymentFormExportView(ListAPIView, BaseExportView):
     pagination_class = None
 
     def get_queryset(self):
-        qs = OtherDriverPayment.objects.hasAccess(self.request.method)
+        qs = OtherDriverPayment.objects.hasAccess(self.request.method).filter(driving__car__owner=Car.OTHER)
         return self.filterset_class(self.request.GET, queryset=qs).qs
 
     def get(self, request, export_type, *args, **kwargs):
@@ -58,7 +58,7 @@ class OtherDriverPaymentListExportView(ListAPIView, BaseListExportView):
     title = "لیست پرداخت رانندگان متفرقه"
 
     def get_queryset(self):
-        qs = OtherDriverPayment.objects.hasAccess(self.request.method)
+        qs = OtherDriverPayment.objects.hasAccess(self.request.method).filter(driving__car__owner=Car.OTHER)
         return self.filterset_class(self.request.GET, queryset=qs).qs
 
     def get(self, request, *args, **kwargs):
