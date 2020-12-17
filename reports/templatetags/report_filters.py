@@ -42,8 +42,8 @@ def get_item(obj, key, headers):
     if value_type == 'numeric':
         return add_separator(value)
     elif value_type == 'select':
-        print(key, value, header['items'])
         return [item['text'] for item in header['items'] if item['value'] == value][0]
-
+    elif value_type == 'boolean':
+        return '&#10004;' if value else '&#10006;'
 
     return value
