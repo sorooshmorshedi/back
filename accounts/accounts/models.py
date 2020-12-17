@@ -298,7 +298,7 @@ class Account(BaseModel):
 
 class AccountBalance(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='accountsBalance')
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='balance')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='balance')
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='balance', blank=True,
                                      null=True)
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.CASCADE, related_name='balanceAsCostCenter',
