@@ -194,7 +194,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
 
         output_filter = {
             'factorItems__factor__is_definite': True,
-            'factorItems__factor__type__in': Factor.SALE_GROUP
+            'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE)
         }
 
         queryset = Ware.objects.inFinancialYear().prefetch_related(
