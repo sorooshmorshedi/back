@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.aggregates import Max
+from django.db.models.expressions import F
 from django.db.models.functions.comparison import Coalesce
 
 from accounts.accounts.models import Account, FloatAccount
@@ -94,6 +95,13 @@ class Sanad(BaseModel, ConfirmationMixin):
                 local_id=Coalesce(Max('local_id'), 0)
             )['local_id'] + 1
 
+        if self.is_auto_created:
+            i = 1
+            for item in self.items.all().order_by(F('bes') - F('bed')):
+                item.order = i
+                item.save()
+                i += 1
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -129,7 +137,7 @@ class SanadItem(BaseModel):
         return "{0} - {1}".format(self.sanad.code, self.explanation[0:30])
 
     class Meta(BaseModel.Meta):
-        ordering = ('-order', 'pk')
+        ordering = ('order', 'pk')
 
     def save(self, *args, **kwargs) -> None:
         self.financial_year = self.sanad.financial_year
