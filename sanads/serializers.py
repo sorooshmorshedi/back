@@ -5,10 +5,11 @@ from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccoun
 from accounts.accounts.validators import AccountValidator
 from cheques.models.StatusChangeModel import StatusChange
 from factors.models import Factor, Adjustment
+from imprests.models import ImprestSettlement
 
 from sanads.models import *
 from transactions.models import Transaction
-from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserSimpleSerializer
+from users.serializers import UserSimpleSerializer
 
 
 class SanadItemSerializer(serializers.ModelSerializer):
@@ -88,6 +89,14 @@ class StatusChangeSanadSerializer(serializers.ModelSerializer):
         fields = ('id', 'type')
 
 
+class ImprestSettlementSanadSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='transaction.id')
+
+    class Meta:
+        model = ImprestSettlement
+        fields = ('id',)
+
+
 class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
     created_by = UserSimpleSerializer()
@@ -99,6 +108,7 @@ class SanadListRetrieveSerializer(SanadSerializer):
     oilCompanyLading = OilCompanyLadingSanadSerializer(read_only=True, many=False)
     statusChange = StatusChangeSanadSerializer(read_only=True, many=False)
     transaction = TransactionSanadSerializer(read_only=True, many=False)
+    imprestSettlement = ImprestSettlementSanadSerializer(read_only=True, many=False)
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'
