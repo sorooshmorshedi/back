@@ -33,6 +33,7 @@ class ExportVerifier(BaseModel):
     FACTOR_BACK_FROM_BUY = 'fbfb'
     FACTOR_BACK_FROM_SALE = 'fbfs'
     CONSUMPTION_WARE_REMITTANCE = 'cwr'
+    FIRST_PERIOD_INVENTORY = 'fpi'
     TRANSACTION_RECEIVE = 'tr'
     TRANSACTION_PAYMENT = 'tp'
     TRANSFER = 't'
@@ -49,6 +50,7 @@ class ExportVerifier(BaseModel):
         (TRANSACTION_PAYMENT, 'پرداخت'),
         (TRANSFER, 'انتقال'),
         (CONSUMPTION_WARE_REMITTANCE, 'حواله کالای مصرفی'),
+        (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
         (INPUT_ADJUSTMENT, 'رسید تعدیل انبار'),
         (OUTPUT_ADJUSTMENT, 'حواله تعدیل انبار'),
     )

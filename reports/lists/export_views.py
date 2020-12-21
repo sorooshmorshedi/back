@@ -303,9 +303,13 @@ class FactorExportView(FactorListView, BaseExportView):
                 'title': 'حواله کالای مصرفی',
                 'verifier_form_name': ExportVerifier.CONSUMPTION_WARE_REMITTANCE
             },
+            'fpi': {
+                'title': 'موجودی اول دوره',
+                'verifier_form_name': ExportVerifier.FIRST_PERIOD_INVENTORY
+            },
         }
 
-        factorType = request.GET.get('type', None)
+        factorType = self.type
         summarized = request.GET.get('summarized', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
