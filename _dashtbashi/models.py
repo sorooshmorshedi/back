@@ -540,7 +540,7 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
 
     lading_bill_total_value = DECIMAL()
 
-    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='ladings', blank=True, null=True)
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='lading', blank=True, null=True)
 
     @property
     def commission_price(self):
@@ -584,7 +584,7 @@ class OilCompanyLading(BaseModel, ConfirmationMixin, LocalIdMixin):
 
     driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='oilCompanyLadings')
 
-    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='oilCompanyLadings', blank=True,
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='oilCompanyLading', blank=True,
                                  null=True)
 
     created_at = jmodels.jDateTimeField(auto_now=True)

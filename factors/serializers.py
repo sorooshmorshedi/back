@@ -6,7 +6,7 @@ from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
 from helpers.functions import get_current_user
 from sanads.models import newSanadCode, clearSanad
-from sanads.serializers import SanadSerializer, SanadListRetrieveSerializer
+from sanads.serializers import SanadSerializer
 from transactions.serializers import TransactionSerializerForPayment
 from users.serializers import UserSimpleSerializer
 from wares.models import WareInventory
@@ -340,7 +340,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 
 class AdjustmentListRetrieveSerializer(serializers.ModelSerializer):
     items = serializers.SerializerMethodField()
-    sanad = SanadListRetrieveSerializer()
+    sanad = SanadSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
 
     def get_items(self, obj):

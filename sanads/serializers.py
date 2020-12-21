@@ -1,7 +1,10 @@
 from rest_framework import serializers
+
+from _dashtbashi.models import Lading
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
 from accounts.accounts.validators import AccountValidator
-from factors.models import Factor
+from cheques.models.StatusChangeModel import StatusChange
+from factors.models import Factor, Adjustment
 
 from sanads.models import *
 from transactions.models import Transaction
@@ -46,23 +49,56 @@ class SanadSerializer(serializers.ModelSerializer):
         return super(SanadSerializer, self).update(instance, validated_data)
 
 
-class FactorWithTypeSerializer(serializers.ModelSerializer):
+class FactorSanadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
         fields = ('id', 'type')
 
 
-class TransactionWithTypeSerializer(serializers.ModelSerializer):
+class TransactionSanadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'type')
 
 
+class AdjustmentSanadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Adjustment
+        fields = ('id', 'type')
+
+
+class LadingSanadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lading
+        fields = ('id',)
+
+
+class OilCompanyLadingSanadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lading
+        fields = ('id',)
+
+
+class StatusChangeSanadSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='cheque.id')
+    type = serializers.CharField(source='cheque.type')
+
+    class Meta:
+        model = StatusChange
+        fields = ('id', 'type')
+
+
 class SanadListRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
-    factor = FactorWithTypeSerializer(read_only=True, many=False)
-    transaction = TransactionWithTypeSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer()
+
+    # this might be a performance problem
+    factor = FactorSanadSerializer(read_only=True, many=False)
+    adjustment = AdjustmentSanadSerializer(read_only=True, many=False)
+    lading = LadingSanadSerializer(read_only=True, many=False)
+    oilCompanyLading = OilCompanyLadingSanadSerializer(read_only=True, many=False)
+    statusChange = StatusChangeSanadSerializer(read_only=True, many=False)
+    transaction = TransactionSanadSerializer(read_only=True, many=False)
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'

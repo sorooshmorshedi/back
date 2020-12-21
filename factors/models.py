@@ -584,7 +584,7 @@ class Adjustment(BaseModel):
 
     type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
     factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
-    sanad = models.ForeignKey(Sanad, on_delete=models.PROTECT, related_name='adjustment', null=True)
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='adjustment', null=True)
     explanation = EXPLANATION()
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
