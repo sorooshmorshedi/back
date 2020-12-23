@@ -14,6 +14,7 @@ class LadingFilter(filters.FilterSet):
             'driving': ['exact'],
             'driving__driver__name': BASE_FIELD_FILTERS,
             'driving__car__owner': BASE_FIELD_FILTERS,
+            'driving__car': ['exact'],
 
             'remittance': ['exact'],
             'is_paid': ['exact'],
