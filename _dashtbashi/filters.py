@@ -142,6 +142,8 @@ class OilCompanyLadingItemFilter(filters.FilterSet):
         fields = {
             'id': BASE_FIELD_FILTERS,
 
+            'bill_number': BASE_FIELD_FILTERS,
+
             'gross_price': BASE_FIELD_FILTERS,
             'insurance_price': BASE_FIELD_FILTERS,
 

@@ -633,6 +633,8 @@ class OilCompanyLadingItem(BaseModel):
 
     oilCompanyLading = models.ForeignKey(OilCompanyLading, on_delete=models.CASCADE, related_name='items')
 
+    bill_number = models.IntegerField(blank=True, null=True)
+
     gross_price = DECIMAL()
     insurance_price = DECIMAL()
     tax_value = DECIMAL(null=True, blank=True)
