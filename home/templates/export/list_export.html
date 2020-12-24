@@ -12,7 +12,7 @@
 {% block body %}
     <body
             {% if print_document %}
-                onload="setTimeout(print, 500);"
+{#                onload="setTimeout(print, 500);"#}
             {% endif %}
     >
     <div class="container-fluid rtl">
@@ -29,6 +29,15 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+        <div class="row mb-3">
+            {% for filter in filters %}
+                <div class="col-xs-3">
+                    <span>{{ filter.text }}:</span>
+                    <span>{{ filter.value }}</span>
+                </div>
+            {% endfor %}
+        </div>
 
         <table class="table table-bordered table-striped">
             <thead>

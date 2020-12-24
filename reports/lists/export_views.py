@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from wkhtmltopdf.views import PDFTemplateView
 
+from accounts.accounts.models import Account
 from factors.models import Factor
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
 from helpers.exports import get_xlsx_response
@@ -42,6 +43,7 @@ class BaseExportView(APIView, PDFTemplateView):
 
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.get_queryset()
+        print(qs)
 
         context = {
             'forms': qs,
@@ -127,6 +129,7 @@ class BaseListExportView(PDFTemplateView):
     filename = None
     title = None
     context = {}
+    filters = []
 
     template_name = 'export/list_export.html'
     pagination_class = None
@@ -163,24 +166,34 @@ class BaseListExportView(PDFTemplateView):
         keys = list(data.keys())
         keys.sort()
         for key in keys:
-            break
-            text = [header['text'] for header in headers if header['value'].replace('.', '__') in key][0]
+
+            text = [header['text'] for header in headers if header['value'].replace('.', '__') in key]
+            if len(text):
+                text = text[0]
+            else:
+                continue
 
             value = data[key]
             if key.endswith('gt') or key.endswith('gte'):
                 text = "از {}".format(text)
-            if key.endswith('lt') or key.endswith('lte'):
+            elif key.endswith('lt') or key.endswith('lte'):
                 text = "تا {}".format(text)
+            elif key.endswith('startswith'):
+                text = "{} شروع شود با".format(text)
+            elif key.endswith('icontains'):
+                text = "{} دارا باشد".format(text)
 
             filters.append({
                 'text': text,
                 'value': value
             })
 
+        filters = self.filters + filters
+
         return filters
 
     def get_context_data(self, user, print_document=False, **kwargs):
-        context = ({
+        context = {
             'company': user.active_company,
             'user': user,
             'title': self.title,
@@ -191,7 +204,7 @@ class BaseListExportView(PDFTemplateView):
             'filters': self.get_filters(),
             'print_document': print_document,
             'additional_data': self.get_additional_data()
-        })
+        }
 
         context.update(self.context)
 
