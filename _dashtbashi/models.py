@@ -575,12 +575,26 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
 
 
 class OilCompanyLading(BaseModel, ConfirmationMixin, LocalIdMixin):
+    MONTHS = (
+        ('1', 'فروردین'),
+        ('2', 'اردیبهشت'),
+        ('3', 'خرداد'),
+        ('4', 'تیر'),
+        ('5', 'مرداد'),
+        ('6', 'شهریور'),
+        ('7', 'مهر'),
+        ('8', 'آبان'),
+        ('9', 'آذر'),
+        ('10', 'دی'),
+        ('11', 'بهمن'),
+        ('12', 'اسفند'),
+    )
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='oilCompanyLadings')
     explanation = EXPLANATION()
     date = jmodels.jDateField()
     list_date = jmodels.jDateField()
     export_date = jmodels.jDateField()
-    month = models.IntegerField()
+    month = models.CharField(choices=MONTHS, max_length=1)
 
     driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='oilCompanyLadings')
 
@@ -653,6 +667,7 @@ class OilCompanyLadingItem(BaseModel):
 
     company_commission = DECIMAL()
     car_income = DECIMAL()
+    net_price = DECIMAL()
 
     @property
     def month(self):

@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from _dashtbashi.filters import OtherDriverPaymentFilter
-from _dashtbashi.models import OtherDriverPayment, Car
+from _dashtbashi.models import OtherDriverPayment, Car, OilCompanyLading
 from _dashtbashi.report_views import LadingListView, LadingBillSeriesListView, RemittanceListView, \
     OilCompanyLadingListView, OilCompanyLadingItemListView
 from _dashtbashi.serializers import OtherDriverPaymentListRetrieveSerializer
@@ -87,6 +87,21 @@ class RemittanceListExportView(RemittanceListView, BaseListExportView):
 
     def get(self, request, *args, **kwargs):
         return self.get_response(request, *args, **kwargs)
+
+
+class OilCompanyLadingFormExportView(OilCompanyLadingListView, BaseExportView):
+    filename = 'other-driver-payment'
+
+    context = {
+        'title': 'بارگیری شرکت نفت',
+        'verifier_form_name': None
+    }
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
 
 
 class OilCompanyLadingListExportView(OilCompanyLadingListView, BaseListExportView):

@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 
 from _dashtbashi.export_views import LadingListExportView, OtherDriverPaymentListExportView, \
     OtherDriverPaymentFormExportView, LadingBillSeriesListExportView, LadingBillNumberListExportView, \
-    RemittanceListExportView, OilCompanyLadingListExportView, OilCompanyLadingItemListExportView
+    RemittanceListExportView, OilCompanyLadingListExportView, OilCompanyLadingItemListExportView, \
+    OilCompanyLadingFormExportView
 from _dashtbashi.report_views import RemittanceListView, OtherDriverPaymentReport, LadingBillSeriesListView, \
     LadingListView, OilCompanyLadingListView, OilCompanyLadingItemListView
 from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, AssociationModelView, \
@@ -46,6 +47,7 @@ urlpatterns += [
     url(r'^otherDriverPayments/(?P<pk>[0-9]+)/confirm/$', ConfirmOtherDriverPayment.as_view(), name=''),
 
     url(r'^export/otherDriverPayments/(?P<export_type>\S+)$', OtherDriverPaymentFormExportView.as_view(), name=''),
+    url(r'^export/oilCompanyLadings/(?P<export_type>\S+)$', OilCompanyLadingFormExportView.as_view(), name=''),
 
     url(r'^report/otherDriverPayments$', OtherDriverPaymentReport.as_view(), name=''),
     url(r'^report/remittances/$', RemittanceListView.as_view()),

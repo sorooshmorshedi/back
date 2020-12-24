@@ -1,0 +1,60 @@
+{% load report_filters %}
+
+<div class="row">
+    <div class="col-sm-6 mb-3">
+        <span>حمل کننده: </span>
+        <span> {{ form.driving.title }} </span>
+    </div>
+    <div class="col-sm-6 mb-3">
+        <span>توضیحات: </span>
+        <span> {{ form.explanation | default:'-' }} </span>
+    </div>
+
+    <div class="col-sm-12">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>تاریخ بارگیری</th>
+                <th>شماره بارنامه</th>
+                <th>مبدا</th>
+                <th>مقصد</th>
+                <th>وزن</th>
+                <th>مبلغ ناخالص</th>
+                <th>حق بیمه تامین اجتماعی</th>
+                <th>درصد مالیات بر ارزش افزوده</th>
+                <th>مبلغ مالیات بر ارزش افزوده</th>
+                <th>درصد عوارض بر ارزش افزوده</th>
+                <th>مبلغ عوارض بر ارزش افزوده</th>
+                <th>مبلغ کل با ارزش افزوده</th>
+                <th>مبلغ خالص</th>
+                <th>کمیسیون شرکت</th>
+                <th>درآمد ماشین</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in form.items.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.bill_number }}</td>
+                    <td>{{ row.origin.name }}</td>
+                    <td>{{ row.destination.name }}</td>
+                    <td>{{ row.weight | money }}</td>
+                    <td>{{ row.gross_price | money }}</td>
+                    <td>{{ row.insurance_price | money }}</td>
+                    <td>{{ row.tax_percent }}</td>
+                    <td>{{ row.tax_value | money }}</td>
+                    <td>{{ row.complication_percent }}</td>
+                    <td>{{ row.complication_price | money }}</td>
+                    <td>{{ row.total_value | money }}</td>
+                    <td>{{ row.net_price | money }}</td>
+                    <td>{{ row.company_commission | money }}</td>
+                    <td>{{ row.car_income | money }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
