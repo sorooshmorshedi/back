@@ -14,7 +14,7 @@ from reports.sanadItems.serializers import SanadItemLedgerSerializer
 from sanads.models import SanadItem
 
 """
-Used for sanadItems, journal & bill reports
+Used for sanadItems (ledger), journal & bill reports
 """
 
 
@@ -118,43 +118,11 @@ class SanadItemListExportView(SanadItemListView, BaseListExportView):
     def title(self):
         return self.request.GET.get('title')
 
-    def get_rows(self, *args, **kwargs):
-        data = self.serializer_class(self.get_queryset(), many=True).data
-        return data
-        row = None
-        rows = []
-        for row in data:
-            sanad = row['sanad']
-            rows.append([
-                data.index(row) + 1,
-                sanad['date'],
-                sanad['code'],
-                row['explanation'],
-                row['account']['code'] + " " + row['account']['name'],
-                row['bed'],
-                row['bes'],
-                row['remain'],
-                row['remain_type'],
-            ])
-
-        return rows
-
-        if row:
-            rows.append([
-                '',
-                '',
-                '',
-                '',
-                'مجموع',
-                row['comulative_bed'],
-                row['comulative_bes'],
-                row['remain'],
-                row['remain_type'],
-            ])
-
-        print(rows)
-
-        return rows
+    def get_additional_data(self):
+        return [{
+            'text': 'حساب',
+            'value': self.request.GET.get('account_title', '-')
+        }]
 
     def get(self, request, *args, **kwargs):
         return self.get_response(request, *args, **kwargs)
