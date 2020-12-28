@@ -16,5 +16,6 @@ backups/
 *.njsproj
 *.sln
 db.sqlite3
+**/__pycache__
 
 tmp_test.py
