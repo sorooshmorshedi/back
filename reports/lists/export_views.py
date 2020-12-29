@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from wkhtmltopdf.views import PDFTemplateView
 
-from accounts.accounts.models import Account
 from factors.models import Factor
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer
 from helpers.exports import get_xlsx_response
@@ -236,7 +235,7 @@ class BaseListExportView(PDFTemplateView):
             self.get_header_texts()
         ]
         i = 0
-        for item in items + self.get_appended_rows():
+        for item in list(items) + self.get_appended_rows():
             i += 1
             row = [i]
             for header in self.get_headers():
