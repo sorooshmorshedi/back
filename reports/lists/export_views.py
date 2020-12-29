@@ -157,6 +157,9 @@ class BaseListExportView(PDFTemplateView):
     def get_rows(self):
         return self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs.all()
 
+    def get_appended_rows(self):
+        return []
+
     def get_filters(self):
         filters = []
         data = self.request.GET.copy()
@@ -201,6 +204,7 @@ class BaseListExportView(PDFTemplateView):
             'values': self.get_header_values(),
             'raw_headers': self.get_headers(),
             'rows': self.get_rows(),
+            'appended_rows': self.get_appended_rows(),
             'filters': self.get_filters(),
             'print_document': print_document,
             'additional_data': self.get_additional_data()
@@ -232,7 +236,7 @@ class BaseListExportView(PDFTemplateView):
             self.get_header_texts()
         ]
         i = 0
-        for item in items:
+        for item in items + self.get_appended_rows():
             i += 1
             row = [i]
             for header in self.get_headers():

@@ -53,11 +53,23 @@
                     <td>{{ forloop.counter }}</td>
                     {% for value in values %}
                         {% autoescape off %}
-                            <td>{% get_item row value raw_headers %}</td>
+                            <td>{% get_value row value raw_headers %}</td>
                         {% endautoescape %}
                     {% endfor %}
                 </tr>
             {% endfor %}
+
+            {% for row in appended_rows %}
+                <tr>
+                    <td></td>
+                    {% for value in values %}
+                        {% autoescape off %}
+                            <td>{% get_value row value raw_headers %}</td>
+                        {% endautoescape %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+
             </tbody>
         </table>
 
