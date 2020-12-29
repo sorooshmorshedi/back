@@ -322,7 +322,10 @@ class FinancialYearModelView(viewsets.ModelViewSet):
         self.move_data(serializer.instance)
 
     def move_data(self, new_financial_year):
-        base_financial_year = FinancialYear.objects.get(pk=21)
+        try:
+            base_financial_year = FinancialYear.objects.get(pk=21)
+        except FinancialYear.DoesNotExist as e:
+            base_financial_year = FinancialYear.objects.get(pk=1)
 
         """
             Be careful about models with relationships

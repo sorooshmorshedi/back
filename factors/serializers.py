@@ -202,9 +202,22 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         fields = ('id', 'explanation', 'date', 'items')
 
     def sync(self, instance: Transfer, validated_data):
-        explanation = validated_data.get('explanation', '')
+
         output_factor = instance.output_factor
         input_factor = instance.input_factor
+
+        explanation = validated_data.get('explanation', '')
+
+        is_advari = True
+        if is_advari:
+            input_factor.definition_date = instance.date
+            output_factor.definition_date = instance.date
+        input_factor.date = instance.date
+        input_factor.explanation = instance.explanation
+        output_factor.date = instance.date
+        output_factor.explanation = instance.explanation
+        input_factor.save()
+        output_factor.save()
 
         input_items_data = []
         output_items_data = []
@@ -274,12 +287,19 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         financial_year = self.context['financial_year']
         date = validated_data['date']
         explanation = validated_data.get('explanation', '')
+
+        is_advari = True
+        if is_advari:
+            definition_date = date
+        else:
+            definition_date = now()
+
         factor_data = {
             'financial_year': financial_year,
             'date': date,
             'explanation': explanation,
             'is_definite': True,
-            'definition_date': now(),
+            'definition_date': definition_date,
             'time': now(),
             'is_auto_created': True
         }
@@ -399,6 +419,13 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         }, factor_items_data)))
         factor.items.all().delete()
 
+        is_advari = True
+        if is_advari:
+            factor.definition_date = instance.date.togregorian()
+        factor.date = instance.date
+        factor.explanation = instance.explanation
+        factor.save()
+
         for item_data in factor_items_data:
             factor.items.create(**item_data)
 
@@ -435,6 +462,12 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         date = validated_data['date']
         explanation = validated_data.get('explanation', '')
 
+        is_advari = True
+        if is_advari:
+            definition_date = date.togregorian()
+        else:
+            definition_date = now()
+
         factor_data = {
             'financial_year': financial_year,
             'temporary_code': Factor.get_new_temporary_code(adjustment_type),
@@ -442,7 +475,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'date': date,
             'explanation': explanation,
             'is_definite': True,
-            'definition_date': now(),
+            'definition_date': definition_date,
             'time': now(),
             'is_auto_created': True,
             'type': adjustment_type

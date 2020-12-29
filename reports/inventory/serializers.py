@@ -27,7 +27,7 @@ class WareInventorySerializer(serializers.ModelSerializer):
     output = serializers.SerializerMethodField()
     remain = serializers.SerializerMethodField()
 
-    def get_input(self, obj:FactorItem):
+    def get_input(self, obj: FactorItem):
         if obj.factor.type in Factor.INPUT_GROUP:
             if obj.factor.type in (Factor.BACK_FROM_SALE, Factor.INPUT_ADJUSTMENT):
                 value = obj.calculated_value

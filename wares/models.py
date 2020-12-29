@@ -206,7 +206,7 @@ class WareInventory(BaseModel):
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='inventory')
     count = models.DecimalField(max_digits=24, decimal_places=6, default=0)
-    fee = models.DecimalField(max_digits=24, decimal_places=6)
+    fee = models.DecimalField(max_digits=24, decimal_places=6, default=0)
 
     order = models.IntegerField(default=0)
 
@@ -246,14 +246,26 @@ class WareInventory(BaseModel):
         print(log)
         WareInventory.logger.info(log)
 
-        WareInventory.objects.create(
+        negative_inventory = WareInventory.objects.filter(
+            financial_year=financial_year,
             ware=ware,
             warehouse=warehouse,
-            count=count,
-            fee=fee,
-            financial_year=financial_year,
-            order=WareInventory._get_order(ware, warehouse, revert=revert)
-        )
+            count__lt=0,
+        ).first()
+
+        if negative_inventory:
+            negative_inventory.count += count
+            negative_inventory.fee = fee
+            negative_inventory.save()
+        else:
+            WareInventory.objects.create(
+                ware=ware,
+                warehouse=warehouse,
+                count=count,
+                fee=fee,
+                financial_year=financial_year,
+                order=WareInventory._get_order(ware, warehouse, revert=revert)
+            )
 
     @staticmethod
     def decrease_inventory(ware: Ware, warehouse: Warehouse, count, financial_year=None, revert=False):
@@ -278,15 +290,29 @@ class WareInventory(BaseModel):
         else:
             ware_balances = ware_balances.order_by('order')
 
+        check_inventory = False
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
-        if not revert and current_inventory_count < count:
-            raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
-                ware,
-                "{0:g}".format(float(current_inventory_count)),
-                ware.unit
-            ))
+        if check_inventory:
+            if not revert and current_inventory_count < count:
+                raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
+                    ware,
+                    "{0:g}".format(float(current_inventory_count)),
+                    ware.unit
+                ))
+        elif ware_balances.count() == 0:
+            raise ValidationError("ابتدا حداقل یک فاکتور ورود برای {} ثبت کنید".format(ware))
+        elif ware_balances.count() == 1:
+            ware_balance = ware_balances.first()
+            fees = [{
+                'fee': float(ware_balance.fee),
+                'count': float(count)
+            }]
+            ware_balance.count -= count
+            ware_balance.save()
+            return fees
 
         fees = []
+
         for ware_balance in ware_balances:
 
             fee = {
@@ -311,6 +337,11 @@ class WareInventory(BaseModel):
                 fees.append(fee)
                 ware_balance.save()
                 break
+
+        negative_inventory = current_inventory_count - count
+        if not check_inventory and negative_inventory <= 0:
+            WareInventory.increase_inventory(ware, warehouse, negative_inventory, fees[0]['fee'])
+            fees[0]['count'] += -float(negative_inventory)
 
         return fees
 

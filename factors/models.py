@@ -304,7 +304,9 @@ class Factor(BaseModel, ConfirmationMixin):
         :return: None
         """
 
-        if self.is_definite:
+        is_advari = True
+
+        if not is_advari and self.is_definite:
 
             # Verify item deletions
             for item in FactorItem.objects.filter(id__in=ids_to_delete):
@@ -339,15 +341,12 @@ class Factor(BaseModel, ConfirmationMixin):
                     factor__is_definite=True,
                     factor__definition_date__gt=self.definition_date,
                 )
-                print(self, count)
                 count = count.count()
 
                 if count == 0:
                     continue
 
                 raise ValidationError("ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1))
-
-        pass
 
     def sync(self, user, data):
         from factors.serializers import FactorItemSerializer
