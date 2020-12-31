@@ -456,6 +456,8 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     COMPANY = 'cmp'
     CONTRACTOR = 'cnt'
 
+    DRIVER = 'drvr'
+
     CREDIT = 'cr'
     CASH = 'cs'
     POS = 'p'
@@ -466,6 +468,11 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     TIP_PAYERS = (
         (COMPANY, 'شرکت'),
         (CONTRACTOR, 'پیمانکار')
+    )
+
+    LADING_BILL_DIFFERENCE_RECEIVERS = (
+        (COMPANY, 'شرکت'),
+        (DRIVER, 'راننده'),
     )
 
     RECEIVE_TYPES = (
@@ -541,6 +548,12 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     lading_bill_total_value = DECIMAL()
 
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='lading', blank=True, null=True)
+
+    lading_bill_difference_receiver = models.CharField(
+        max_length=4,
+        choices=LADING_BILL_DIFFERENCE_RECEIVERS,
+        default=DRIVER
+    )
 
     @property
     def commission_price(self):

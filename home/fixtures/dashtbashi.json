@@ -242,13 +242,13 @@
     "pk": 1018,
     "fields": {
       "financial_year": 1,
-      "name": "درآمد اختلاف بارنامه",
+      "name": "درآمد اختلاف بارنامه راننده",
       "account_level": 3,
       "account": 233,
       "floatAccount": null,
       "costCenter": null,
       "usage": "dashtbashi",
-      "codename": "ladingBillDifferenceIncome"
+      "codename": "DriverLadingBillDifferenceIncome"
     }
   },
   {
@@ -739,6 +739,20 @@
       "costCenter": null,
       "usage": "dashtbashi",
       "codename": "imprestAccountForOtherOilCompanyDrivers"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 1056,
+    "fields": {
+      "financial_year": 1,
+      "name": "درآمد اختلاف بارنامه شرکت",
+      "account_level": 3,
+      "account": 233,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "dashtbashi",
+      "codename": "CompanyLadingBillDifferenceIncome"
     }
   },
   {

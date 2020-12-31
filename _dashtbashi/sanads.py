@@ -286,17 +286,24 @@ class LadingSanad:
                 'explanation': lading_difference_bed_explanation
             })
 
-            if car.owner in (Car.RAHMAN, Car.PARTNERSHIP):
-                sanad_items.append({
-                    'bes': lading.lading_bill_difference,
-                    'account': DefaultAccount.get('ladingBillDifferenceIncome').account,
-                    'explanation': lading_difference_bes_explanation
-                })
+            if lading.lading_bill_difference_receiver == Lading.DRIVER:
+                if car.owner in (Car.RAHMAN, Car.PARTNERSHIP):
+                    sanad_items.append({
+                        'bes': lading.lading_bill_difference,
+                        'account': DefaultAccount.get('CompanyLadingBillDifferenceIncome').account,
+                        'explanation': lading_difference_bes_explanation
+                    })
+                else:
+                    sanad_items.append({
+                        'bes': lading.lading_bill_difference,
+                        'account': car.payableAccount,
+                        'floatAccount': driver.floatAccount,
+                        'explanation': lading_difference_bes_explanation
+                    })
             else:
                 sanad_items.append({
                     'bes': lading.lading_bill_difference,
-                    'account': car.payableAccount,
-                    'floatAccount': driver.floatAccount,
+                    'account': DefaultAccount.get('CompanyLadingBillDifferenceIncome').account,
                     'explanation': lading_difference_bes_explanation
                 })
 
