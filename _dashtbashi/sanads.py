@@ -93,11 +93,24 @@ class LadingSanad:
                         })
 
                     elif car.owner == Car.EBRAHIM:
+                        # sanad_items.append({
+                        #     'bes': lading.lading_total_value,
+                        #     'account': car.payableAccount,
+                        #     'floatAccount': driver.floatAccount,
+                        #     'explanation': bed_explanation
+                        # })
+
                         sanad_items.append({
-                            'bes': lading.lading_total_value,
+                            'bes': lading.company_commission_income,
+                            'account': DefaultAccount.get(
+                                'companyCommissionIncomeInEbrahim{}Cars'.format(contract_type)).account,
+                            'explanation': commission_bes_explanation
+                        })
+                        sanad_items.append({
+                            'bes': lading.car_income,
                             'account': car.payableAccount,
                             'floatAccount': driver.floatAccount,
-                            'explanation': bed_explanation
+                            'explanation': fare_bes_explanation
                         })
 
                     elif car.owner == Car.RAHIM:
