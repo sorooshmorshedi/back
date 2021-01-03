@@ -20,14 +20,13 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
         serializer.save(
             financial_year=self.financial_year
         )
-        for item in serializer.instance:
-            DefiniteFactor.updateInventory(item)
+        DefiniteFactor.updateFactorInventory(serializer.instance)
 
     def perform_update(self, serializer):
         serializer.save(
             financial_year=self.financial_year
         )
-        DefiniteFactor.updateInventory(serializer.instance)
+        DefiniteFactor.updateFactorInventory(serializer.instance)
 
 
 class FirstPeriodInventoryView(APIView):

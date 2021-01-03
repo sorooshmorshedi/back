@@ -305,7 +305,12 @@ class WareInventory(BaseModel):
                     ware.unit
                 ))
         elif ware_balances.count() == 0:
-            raise ValidationError("ابتدا حداقل یک فاکتور ورود برای {} ثبت کنید".format(ware))
+            fee = 0
+            WareInventory.increase_inventory(ware, warehouse, -count, fee)
+            return [{
+                'fee': fee,
+                'count': float(count)
+            }]
         elif ware_balances.count() == 1:
             ware_balance = ware_balances.first()
             fees = [{
