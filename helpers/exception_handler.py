@@ -20,6 +20,9 @@ labels = {
     'date': 'تاریخ',
     'type': 'نوع',
 
+    # Company & Financial Year
+    'warehouse_system': 'سیستم انبار',
+
     # Cheque
     'serial_from': 'از شماره سریال',
     'serial_to': 'تا شماره سریال',

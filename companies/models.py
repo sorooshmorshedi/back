@@ -66,7 +66,7 @@ class FinancialYear(BaseModel):
     name = models.CharField(max_length=150)
     start = jmodels.jDateField()
     end = jmodels.jDateField()
-    warehouse_system = models.CharField(max_length=2, choices=WAREHOUSE_SYSTEMS, default=DAEMI)
+    warehouse_system = models.CharField(max_length=2, choices=WAREHOUSE_SYSTEMS)
 
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
 
