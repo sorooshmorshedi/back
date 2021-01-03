@@ -64,16 +64,23 @@ class WareInventorySerializer(serializers.ModelSerializer):
             'value': '-'
         }
 
-    def get_remain(self, obj):
+    def get_remain(self, obj: FactorItem):
         from wares.models import Ware
-        if obj.ware.pricingType == Ware.WEIGHTED_MEAN and obj.remain_count:
+        are_factors_sorted = obj.financial_year.are_factors_sorted
+        if obj.ware.pricingType == Ware.WEIGHTED_MEAN and obj.remain_count and are_factors_sorted:
             fee = round(obj.remain_value / obj.remain_count, 2)
         else:
             fee = '-'
+
+        if are_factors_sorted:
+            value = obj.remain_value
+        else:
+            value = '-'
+
         return {
             'count': obj.remain_count,
             'fee': fee,
-            'value': obj.remain_value
+            'value': value
         }
 
     class Meta:

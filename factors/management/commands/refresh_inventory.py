@@ -50,6 +50,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         user = User.objects.get(pk=options['user_id'])
+        financial_year = user.active_financial_year
 
         self.backup_inventory()
 
@@ -62,7 +63,7 @@ class Command(BaseCommand):
 
         print("Undo + Redo definition")
         qs = Factor.objects.filter(
-            financial_year=user.active_financial_year,
+            financial_year=financial_year,
             is_definite=True
         ).all()
         for factor in queryset_iterator(qs, key=('definition_date',)):
@@ -76,5 +77,8 @@ class Command(BaseCommand):
                             factor.get_type_display(),
                             factor.code
                         ))
+
+        financial_year.are_factors_sorted = True
+        financial_year.save()
 
         print("Done!")

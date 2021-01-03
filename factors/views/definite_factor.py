@@ -170,12 +170,12 @@ class DefiniteFactor(APIView):
         return sanad
 
     @staticmethod
-    def updateFactorInventory(factor: Factor, revert=False, set_output_fees=True):
+    def updateFactorInventory(factor: Factor, revert=False):
         for item in factor.items.order_by('id').all():
-            DefiniteFactor._updateInventory(item, revert, set_output_fees)
+            DefiniteFactor._updateInventory(item, revert)
 
     @staticmethod
-    def _updateInventory(item: FactorItem, revert, set_output_fees):
+    def _updateInventory(item: FactorItem, revert):
 
         factor = item.factor
         ware = item.ware
@@ -197,13 +197,7 @@ class DefiniteFactor(APIView):
         if not revert:
             if factor.type in Factor.OUTPUT_GROUP:
                 fees = WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year)
-                if set_output_fees:
-                    item.fees = fees
-                else:
-                    item.fees = [{
-                        'fee': 0,
-                        'count': fee['count']
-                    } for fee in fees]
+                item.fees = fees
                 item.save()
 
             elif factor.type in Factor.INPUT_GROUP:

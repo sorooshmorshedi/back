@@ -546,6 +546,9 @@ class FactorItem(BaseModel):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.discountValue = self.discount
         self.calculated_value = 0
+        if self.financial_year.are_factors_sorted:
+            self.financial_year.are_factors_sorted = False
+            self.financial_year.save()
         for fee in self.fees:
             self.calculated_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
