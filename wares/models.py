@@ -81,6 +81,9 @@ class Ware(BaseModel):
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='wares')
 
+    # if True allows ware inventory become negative
+    check_inventory = models.BooleanField(default=True)
+
     level = models.IntegerField(choices=WARE_LEVELS)
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=50)
@@ -122,6 +125,8 @@ class Ware(BaseModel):
             ('getOwn.ware', 'مشاهده کالا های خود'),
             ('updateOwn.ware', 'ویرایش کالا های خود'),
             ('deleteOwn.ware', 'حذف کالا های خود'),
+
+            ('sort.inventory', 'مرتب سازی کاردکس کالا'),
         )
 
     def get_new_child_code(self):
@@ -290,7 +295,7 @@ class WareInventory(BaseModel):
         else:
             ware_balances = ware_balances.order_by('order')
 
-        check_inventory = False
+        check_inventory = ware.check_inventory
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
         if check_inventory:
             if not revert and current_inventory_count < count:

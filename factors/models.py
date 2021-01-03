@@ -304,9 +304,7 @@ class Factor(BaseModel, ConfirmationMixin):
         :return: None
         """
 
-        is_advari = True
-
-        if not is_advari and self.is_definite:
+        if not self.financial_year.is_advari and self.is_definite:
 
             # Verify item deletions
             for item in FactorItem.objects.filter(id__in=ids_to_delete):

@@ -55,9 +55,19 @@ class Company(BaseModel):
 
 
 class FinancialYear(BaseModel):
+    ADVARI = 'a'
+    DAEMI = 'd'
+
+    WAREHOUSE_SYSTEMS = (
+        (ADVARI, 'ادواری'),
+        (DAEMI, 'دائمی')
+    )
+
     name = models.CharField(max_length=150)
     start = jmodels.jDateField()
     end = jmodels.jDateField()
+    warehouse_system = models.CharField(max_length=2, choices=WAREHOUSE_SYSTEMS, default=DAEMI)
+
     explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
 
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='financial_years')
@@ -108,6 +118,10 @@ class FinancialYear(BaseModel):
     @property
     def is_closed(self):
         return self.temporaryClosingSanad is not None
+
+    @property
+    def is_advari(self):
+        return self.warehouse_system == self.ADVARI
 
     def get_opening_sanad(self):
         from sanads.models import Sanad

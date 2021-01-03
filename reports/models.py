@@ -11,10 +11,13 @@ class ReportPermissions(models.Model):
             ('get.accountBalanceReport', 'مشاهده تراز'),
             ('get.floatAccountBalanceByGroupReport', 'مشاهده تراز شناور بر اساس گروه'),
             ('get.floatAccountBalanceReport', 'مشاهده تراز شناور'),
+
             ('get.balanceSheetReport', 'مشاهده ترازنامه'),
+            ('get.incomeStatementReport', 'مشاهده گزارش سود و زیان تفصیلی'),
+
             ('get.buyReport', 'مشاهده گزارش خرید'),
             ('get.saleReport', 'مشاهده گزارش فروش'),
-            ('get.incomeStatementReport', 'مشاهده گزارش سود و زیان تفصیلی'),
+
             ('get.wareInventoryReport', 'مشاهده کاردکس کالا'),
             ('get.allWaresInventoryReport', 'مشاهده کاردکس همه کالا ها'),
             ('get.warehouseInventoryReport', 'مشاهده کاردکس انبار'),

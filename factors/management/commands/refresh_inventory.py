@@ -1,5 +1,6 @@
 import datetime
 from django.core.management.base import BaseCommand, CommandParser
+from rest_framework.exceptions import ValidationError
 
 from factors.models import Factor
 from factors.views.definite_factor import DefiniteFactor
@@ -66,5 +67,14 @@ class Command(BaseCommand):
         ).all()
         for factor in queryset_iterator(qs, key=('definition_date',)):
             DefiniteFactor.updateFactorInventory(factor)
+
+            for item in factor.items.all():
+                for fee in item.remain_fees:
+                    if fee['count'] < 0:
+                        raise ValidationError("موجودی کالای {} برای فاکتور {} شماره {} منفی است".format(
+                            item.ware.name,
+                            factor.get_type_display(),
+                            factor.code
+                        ))
 
         print("Done!")

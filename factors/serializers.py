@@ -208,8 +208,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 
         explanation = validated_data.get('explanation', '')
 
-        is_advari = True
-        if is_advari:
+        if instance.financial_year.is_advari:
             input_factor.definition_date = instance.date
             output_factor.definition_date = instance.date
         input_factor.date = instance.date
@@ -288,8 +287,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         date = validated_data['date']
         explanation = validated_data.get('explanation', '')
 
-        is_advari = True
-        if is_advari:
+        if financial_year.is_advari:
             definition_date = date
         else:
             definition_date = now()
@@ -419,8 +417,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         }, factor_items_data)))
         factor.items.all().delete()
 
-        is_advari = True
-        if is_advari:
+        if financial_year.is_advari:
             factor.definition_date = instance.date.togregorian()
         factor.date = instance.date
         factor.explanation = instance.explanation
@@ -462,8 +459,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         date = validated_data['date']
         explanation = validated_data.get('explanation', '')
 
-        is_advari = True
-        if is_advari:
+        if financial_year.is_advari:
             definition_date = date.togregorian()
         else:
             definition_date = now()

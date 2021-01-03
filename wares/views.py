@@ -1,11 +1,15 @@
 from typing import Any
 
+from django.core.management import call_command
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from werkzeug.routing import ValidationError
+
 from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
@@ -93,3 +97,18 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
 
         return Response(['کالا های دارای گردش در سال مالی جاری غیر قابل حذف می باشند'],
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+class SortInventoryView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'sort.inventory'
+
+    def post(self, request):
+        user = request.user
+        financial_year = user.active_financial_year
+        if not financial_year.is_advari:
+            raise ValidationError("فقط سیستم های ادواری امکان مرتب سازی کاردکس را دارند")
+
+        call_command('refresh_inventory', user.id)
+
+        return Response([])
