@@ -441,8 +441,11 @@ class OilCompanyLadingSanad:
 
         sanad = self.oilCompanyLading.sanad
         if not sanad:
-            sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.oilCompanyLading.financial_year,
-                                         date=self.oilCompanyLading.date)
+            sanad = Sanad.objects.create(
+                code=newSanadCode(),
+                financial_year=self.oilCompanyLading.financial_year,
+                date=self.oilCompanyLading.date
+            )
             oil_company_lading.sanad = sanad
             oil_company_lading.save()
             return
@@ -460,6 +463,7 @@ class OilCompanyLadingSanad:
             oil_company_lading.explanation,
         )
         sanad.explanation = explanation
+        sanad.date = self.oilCompanyLading.date
         sanad.save()
 
         sanad_items = []
