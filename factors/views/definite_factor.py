@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
@@ -68,7 +70,10 @@ class DefiniteFactor(APIView):
             factor.code = Factor.get_new_code(factor_type=factor.type)
 
         factor.is_definite = True
-        if not factor.definition_date:
+
+        if factor.financial_year.is_advari:
+            factor.definition_date = datetime.datetime.combine(factor.date.togregorian(), factor.time)
+        elif not factor.definition_date:
             factor.definition_date = now()
 
         factor.save()
