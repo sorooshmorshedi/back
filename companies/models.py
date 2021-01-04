@@ -85,7 +85,7 @@ class FinancialYear(BaseModel):
                                                blank=True)
 
     # Advari Fields
-    are_factors_sorted = models.BooleanField(default=False)
+    are_factors_sorted = models.BooleanField(default=True)
 
     def __str__(self):
         return "{} {} ({})".format(self.company, self.name, self.id)
