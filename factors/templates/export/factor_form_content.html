@@ -18,15 +18,15 @@
                     <span> شماره ملی: </span>
                     <span> {{ company.shenase | default:'-' }} </span>
                 </div>
+                <div class="col-xs-3">
+                    <span>آدرس: </span>
+                    <span> {{ company.address1 | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span>تلفن: </span>
+                    <span> {{ company.phone1 | default:'-' }} </span>
+                </div>
             {% endif %}
-            <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ company.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>تلفن: </span>
-                <span> {{ company.phone1 | default:'-' }} </span>
-            </div>
         </div>
         <hr>
         <div class="row buyer part">
@@ -48,15 +48,15 @@
                     <span> شماره ملی: </span>
                     <span> {{ form.account.person.meli_code | default:'-' }} </span>
                 </div>
+                <div class="col-xs-3">
+                    <span>آدرس: </span>
+                    <span> {{ form.account.person.address1 | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span>تلفن: </span>
+                    <span> {{ form.account.person.phone1 | default:'-' }} </span>
+                </div>
             {% endif %}
-            <div class="col-xs-3">
-                <span>آدرس: </span>
-                <span> {{ form.account.person.address1 | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span>تلفن: </span>
-                <span> {{ form.account.person.phone1 | default:'-' }} </span>
-            </div>
         </div>
     {% endif %}
 
@@ -73,14 +73,16 @@
                     <span> {{ form.account }} </span>
                 </div>
             {% endif %}
-            <div class="col-xs-3">
-                <span> کد اقتصادی: </span>
-                <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
-            </div>
-            <div class="col-xs-3">
-                <span> شماره ملی: </span>
-                <span> {{ form.account.person.meli_code | default:'-' }} </span>
-            </div>
+            {% if not summarized %}
+                <div class="col-xs-3">
+                    <span> کد اقتصادی: </span>
+                    <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
+                </div>
+                <div class="col-xs-3">
+                    <span> شماره ملی: </span>
+                    <span> {{ form.account.person.meli_code | default:'-' }} </span>
+                </div>
+            {% endif %}
         </div>
     {% endif %}
 
