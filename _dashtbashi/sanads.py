@@ -93,11 +93,24 @@ class LadingSanad:
                         })
 
                     elif car.owner == Car.EBRAHIM:
+                        # sanad_items.append({
+                        #     'bes': lading.lading_total_value,
+                        #     'account': car.payableAccount,
+                        #     'floatAccount': driver.floatAccount,
+                        #     'explanation': bed_explanation
+                        # })
+
                         sanad_items.append({
-                            'bes': lading.lading_total_value,
+                            'bes': lading.company_commission_income,
+                            'account': DefaultAccount.get(
+                                'companyCommissionIncomeInEbrahim{}Cars'.format(contract_type)).account,
+                            'explanation': commission_bes_explanation
+                        })
+                        sanad_items.append({
+                            'bes': lading.car_income,
                             'account': car.payableAccount,
                             'floatAccount': driver.floatAccount,
-                            'explanation': bed_explanation
+                            'explanation': fare_bes_explanation
                         })
 
                     elif car.owner == Car.RAHIM:
@@ -273,17 +286,24 @@ class LadingSanad:
                 'explanation': lading_difference_bed_explanation
             })
 
-            if car.owner in (Car.RAHMAN, Car.PARTNERSHIP):
-                sanad_items.append({
-                    'bes': lading.lading_bill_difference,
-                    'account': DefaultAccount.get('ladingBillDifferenceIncome').account,
-                    'explanation': lading_difference_bes_explanation
-                })
+            if lading.lading_bill_difference_receiver == Lading.DRIVER:
+                if car.owner in (Car.RAHMAN, Car.PARTNERSHIP):
+                    sanad_items.append({
+                        'bes': lading.lading_bill_difference,
+                        'account': DefaultAccount.get('CompanyLadingBillDifferenceIncome').account,
+                        'explanation': lading_difference_bes_explanation
+                    })
+                else:
+                    sanad_items.append({
+                        'bes': lading.lading_bill_difference,
+                        'account': car.payableAccount,
+                        'floatAccount': driver.floatAccount,
+                        'explanation': lading_difference_bes_explanation
+                    })
             else:
                 sanad_items.append({
                     'bes': lading.lading_bill_difference,
-                    'account': car.payableAccount,
-                    'floatAccount': driver.floatAccount,
+                    'account': DefaultAccount.get('CompanyLadingBillDifferenceIncome').account,
                     'explanation': lading_difference_bes_explanation
                 })
 
@@ -421,8 +441,11 @@ class OilCompanyLadingSanad:
 
         sanad = self.oilCompanyLading.sanad
         if not sanad:
-            sanad = Sanad.objects.create(code=newSanadCode(), financial_year=self.oilCompanyLading.financial_year,
-                                         date=self.oilCompanyLading.date)
+            sanad = Sanad.objects.create(
+                code=newSanadCode(),
+                financial_year=self.oilCompanyLading.financial_year,
+                date=self.oilCompanyLading.date
+            )
             oil_company_lading.sanad = sanad
             oil_company_lading.save()
             return
@@ -440,6 +463,7 @@ class OilCompanyLadingSanad:
             oil_company_lading.explanation,
         )
         sanad.explanation = explanation
+        sanad.date = self.oilCompanyLading.date
         sanad.save()
 
         sanad_items = []

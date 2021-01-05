@@ -31,14 +31,18 @@ def account_name(obj):
 
 
 @register.simple_tag
-def get_item(obj, key, headers):
-    value = rgetattr(obj, key)
+def get_value(obj, key, headers):
+    if isinstance(obj, list):
+        value = obj[key]
+    else:
+        value = rgetattr(obj, key)
 
     if value is None:
         return '-'
 
     header = [header for header in headers if header['value'] == key][0]
     value_type = header.get('type', None)
+
     if value_type == 'numeric':
         return add_separator(value)
     elif value_type == 'select':
