@@ -340,9 +340,9 @@ class FactorExportView(FactorListView, BaseExportView):
 
         if receipt:
             if factorType == Factor.BUY:
-                title = "رسید"
+                title = "رسید انبار"
             else:
-                title = "حواله"
+                title = "حواله انبار"
         else:
             title = names[factorType]['title']
 
