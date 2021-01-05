@@ -27,6 +27,9 @@ class WareInventorySerializer(serializers.ModelSerializer):
     output = serializers.SerializerMethodField()
     remain = serializers.SerializerMethodField()
 
+    comulative_input_count = serializers.DecimalField(max_digits=24, decimal_places=6)
+    comulative_output_count = serializers.DecimalField(max_digits=24, decimal_places=6)
+
     def get_input(self, obj: FactorItem):
         if obj.factor.type in Factor.INPUT_GROUP:
             if obj.factor.type in (Factor.BACK_FROM_SALE, Factor.INPUT_ADJUSTMENT):
@@ -78,7 +81,7 @@ class WareInventorySerializer(serializers.ModelSerializer):
             value = '-'
 
         return {
-            'count': obj.remain_count,
+            'count': (obj.comulative_input_count or 0) - (obj.comulative_output_count or 0),
             'fee': fee,
             'value': value
         }

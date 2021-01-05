@@ -114,6 +114,22 @@ class WareInventoryListView(generics.ListAPIView):
             'factor__sanad'
         ).order_by('factor__definition_date', 'id')
 
+        queryset = queryset.annotate(
+            definition_date=F('factor__definition_date'),
+            type=F('factor__type')
+        )
+
+        queryset = queryset.annotate(
+            comulative_input_count=Window(
+                expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
+                order_by=(F('definition_date'), F('id'))
+            ),
+            comulative_output_count=Window(
+                expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
+                order_by=(F('definition_date'), F('id'))
+            ),
+        )
+
         queryset = self.filter_queryset(queryset)
 
         return queryset
