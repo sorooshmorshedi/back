@@ -189,15 +189,16 @@ class DefiniteFactor(APIView):
         if item.ware.is_service:
             return
 
-        usage_in_next_years = FactorItem.objects.filter(
-            factor__financial_year__start__gt=factor.financial_year.end,
-            factor__financial_year__company=factor.financial_year.company,
-            factor__type__in=Factor.OUTPUT_GROUP,
-            ware=ware
-        )
+        if not item.financial_year.is_advari:
+            usage_in_next_years = FactorItem.objects.filter(
+                factor__financial_year__start__gt=factor.financial_year.end,
+                factor__financial_year__company=factor.financial_year.company,
+                factor__type__in=Factor.OUTPUT_GROUP,
+                ware=ware
+            )
 
-        if usage_in_next_years.exists():
-            raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
+            if usage_in_next_years.exists():
+                raise ValidationError("ابتدا فاکتور های سال مالی بعدی را پاک نمایید")
 
         if not revert:
             if factor.type in Factor.OUTPUT_GROUP:
