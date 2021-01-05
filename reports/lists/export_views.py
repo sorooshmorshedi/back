@@ -331,13 +331,20 @@ class FactorExportView(FactorListView, BaseExportView):
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
         hide_remain = request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
+        receipt = request.GET.get('receipt', 'false') == 'true'
 
         if factorType == Factor.CONSUMPTION_WARE:
             hide_expenses = True
             hide_remain = True
             hide_prices = True
 
-        title = names[factorType]['title']
+        if receipt:
+            if factorType == Factor.BUY:
+                title = "رسید انبار"
+            else:
+                title = "حواله انبار"
+        else:
+            title = names[factorType]['title']
 
         if not factorType:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)

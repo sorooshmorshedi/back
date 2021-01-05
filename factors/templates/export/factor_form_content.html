@@ -5,11 +5,11 @@
     <!-- seller in sale form -->
     {% if form.type == 'sale' or form.type == 'backFromBuy' %}
         <div class="row company part">
-            <div class="col-xs-12">
-                <span>فروشنده: </span>
-                <span> {{ company.name }} </span>
-            </div>
             {% if not summarized %}
+                <div class="col-xs-12">
+                    <span>فروشنده: </span>
+                    <span> {{ company.name }} </span>
+                </div>
                 <div class="col-xs-3">
                     <span> کد اقتصادی: </span>
                     <span> {{ company.eghtesadi_code | default:'-' }} </span>
