@@ -17256,5 +17256,20 @@
       "usage": "other",
       "codename": "otherBuyerParent"
     }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 32,
+    "fields": {
+      "financial_year": 1,
+      "name": "کسر و اضافه انبار",
+      "account_level": 3,
+      "explanation": "",
+      "account": 669,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "factor",
+      "codename": "warehouseDeductionAndAddition"
+    }
   }
 ]

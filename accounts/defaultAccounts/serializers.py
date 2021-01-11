@@ -16,7 +16,7 @@ class DefaultAccountSerializer(serializers.ModelSerializer):
         defaultAccount = self.instance
         account = data.get('account')
         if defaultAccount:
-            if account.level != defaultAccount.account_level:
+            if int(account.level) != int(defaultAccount.account_level):
                 raise serializers.ValidationError("سطح حساب اشتباه می باشد")
 
         if account.level == Account.TAFSILI:
