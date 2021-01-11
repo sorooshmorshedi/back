@@ -31,12 +31,7 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
 
 class FirstPeriodInventoryView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-
-    @property
-    def permission_codename(self):
-        if self.request.method.lower() == 'get':
-            return 'get.firstPeriodInventory'
-        return 'update.firstPeriodInventory'
+    permission_codename = 'get.firstPeriodInventory'
 
     def get(self, request):
         factor = Factor.get_first_period_inventory()
@@ -45,17 +40,6 @@ class FirstPeriodInventoryView(APIView):
         serialized = FactorListRetrieveSerializer(factor)
         return Response(serialized.data)
 
-    def post(self, request):
-        return self.update_first_period_inventory(request)
-
-    def put(self, request):
-        return self.update_first_period_inventory(request)
-
-    def update_first_period_inventory(self, request):
-        first_period_inventory = self.set_first_period_inventory(request.data)
-        return Response(FactorListRetrieveSerializer(
-            instance=Factor.objects.get(pk=first_period_inventory.id)
-        ).data, status=status.HTTP_200_OK)
 
     @staticmethod
     def set_first_period_inventory(data, financial_year=None):
@@ -80,7 +64,7 @@ class FirstPeriodInventoryView(APIView):
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
-            DefiniteFactor.undoDefinition(first_period_inventory)
+            DefiniteFactor.updateFactorInventory(first_period_inventory, True)
             first_period_inventory.is_definite = True
             first_period_inventory.code = 0
             first_period_inventory.save()

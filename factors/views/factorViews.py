@@ -85,6 +85,10 @@ class FactorModelView(viewsets.ModelViewSet):
 
         self.check_confirmations(request, factor)
 
+        if factor.type == Factor.FIRST_PERIOD_INVENTORY:
+            DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))
+            factor.refresh_from_db()
+
         res = Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
         return res
 
@@ -98,7 +102,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         is_definite = factor.is_definite
         if is_definite:
-            DefiniteFactor.undoDefinition( factor)
+            DefiniteFactor.updateFactorInventory(factor, True)
 
         serialized = FactorCreateUpdateSerializer(instance=factor, data=data['item'])
         serialized.is_valid(raise_exception=True)
@@ -170,7 +174,8 @@ class FactorModelView(viewsets.ModelViewSet):
         self.check_confirmations(request, factor, for_delete=True)
 
         if factor.is_definite:
-            DefiniteFactor.undoDefinition( factor)
+            DefiniteFactor.updateFactorInventory(factor, True)
+            clearSanad(factor.sanad)
 
         res = super().destroy(request, *args, **kwargs)
         return res

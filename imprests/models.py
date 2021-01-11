@@ -63,8 +63,7 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
         self.save()
 
         from imprests.sanads import ImprestSettlementSanad
-        sanad = ImprestSettlementSanad(self)
-        sanad.update()
+        ImprestSettlementSanad(self).update()
 
 
 class ImprestSettlementItem(BaseModel):

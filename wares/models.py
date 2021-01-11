@@ -1,3 +1,4 @@
+import decimal
 import logging
 
 from django.db import models
@@ -259,7 +260,7 @@ class WareInventory(BaseModel):
         ).first()
 
         if negative_inventory:
-            negative_inventory.count += count
+            negative_inventory.count += decimal.Decimal(count)
             negative_inventory.fee = fee
             negative_inventory.save()
         else:

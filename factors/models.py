@@ -220,6 +220,13 @@ class Factor(BaseModel, ConfirmationMixin):
         return Decimal(sum)
 
     @property
+    def calculated_sum(self):
+        sum = 0
+        for item in self.items.all():
+            sum += item.calculated_value
+        return Decimal(sum)
+
+    @property
     def discountSum(self):
         if self.discountPercent:
             discountSum = self.discountPercent * self.sum / 100
@@ -615,6 +622,8 @@ def get_factor_permission_basename(factor_type):
         base_codename = 'backFromSale'
     elif factor_type == Factor.CONSUMPTION_WARE:
         base_codename = 'consumptionWare'
+    elif factor_type == Factor.FIRST_PERIOD_INVENTORY:
+        return 'update.firstPeriodInventory'
     return "{}Factor".format(base_codename)
 
 

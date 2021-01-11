@@ -58,7 +58,7 @@ class AdjustmentModelView(viewsets.ModelViewSet):
         sanad = instance.sanad
         if not factor.is_deletable:
             raise ValidationError('تعدیل غیر قابل حذف می باشد')
-        DefiniteFactor.undoDefinition(factor)
+        DefiniteFactor.updateFactorInventory(factor, True)
         instance.delete()
         factor.delete()
         clearSanad(sanad)

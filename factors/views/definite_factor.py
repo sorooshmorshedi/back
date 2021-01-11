@@ -7,11 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.accounts.models import Account
-from accounts.defaultAccounts.models import DefaultAccount
+from factors.factor_sanad import FactorSanad
 from factors.models import Factor, FactorItem, get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
-from sanads.models import clearSanad, Sanad, newSanadCode
 from wares.models import WareInventory
 
 
@@ -35,36 +33,11 @@ class DefiniteFactor(APIView):
         return Response(FactorListRetrieveSerializer(factor).data)
 
     @staticmethod
-    def undoDefinition(factor: Factor):
-        sanad = DefiniteFactor.getFactorSanad(factor)
-        clearSanad(sanad)
-
-        sanad.is_auto_created = True
-        factor.code = None
-        factor.is_definite = False
-        factor.save()
-
-        for factor_item in factor.items.all():
-
-            ware = factor_item.ware
-
-            if ware.is_service:
-                continue
-
-            DefiniteFactor._updateInventory(factor_item, True)
-
-            factor_item.fees = []
-            factor_item.remain_fees = []
-            factor_item.save()
-
-    @staticmethod
     def definiteFactor(user, pk, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
 
-        sanad = DefiniteFactor.getFactorSanad(factor)
-        factor.sanad = sanad
-
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
+            factor.temporary_code = 0
             factor.code = 0
         else:
             factor.code = Factor.get_new_code(factor_type=factor.type)
@@ -80,99 +53,9 @@ class DefiniteFactor(APIView):
 
         DefiniteFactor.updateFactorInventory(factor)
 
-        first_row_bed = 0
-        first_row_bes = 0
+        FactorSanad(factor).update(is_confirmed)
 
-        second_row_bed = 0
-        second_row_bes = 0
-
-        if factor.type in Factor.SALE_GROUP:
-            first_row_bed = factor.sum
-            second_row_bes = factor.sum
-            if factor.type == Factor.SALE:
-                account = 'sale'
-            else:
-                account = 'backFromBuy'
-        else:
-            first_row_bes = factor.sum
-            second_row_bed = factor.sum
-            if factor.type == Factor.BUY:
-                account = 'buy'
-            else:
-                account = 'backFromSale'
-
-        explanation = "فاکتور {} شماره {} به تاریخ {} {} مشتری".format(
-            factor.type_label,
-            factor.code,
-            str(factor.date),
-            "از" if factor.type in Factor.BUY_GROUP else "به"
-        )
-
-        if factor.type not in (Factor.BACK_FROM_BUY, Factor.CONSUMPTION_WARE):
-            DefiniteFactor.submitSumSanadItems(
-                user,
-                factor,
-                first_row_bed,
-                first_row_bes,
-                second_row_bed,
-                second_row_bes,
-                account,
-                explanation
-            )
-
-        if factor.type in (Factor.SALE, Factor.CONSUMPTION_WARE):
-            DefiniteFactor.submitSaleSanadItems(user, factor, explanation)
-        elif factor.type == Factor.BACK_FROM_SALE:
-            DefiniteFactor.submitBackFromSaleSanadItems(user, factor, explanation)
-        elif factor.type == Factor.BACK_FROM_BUY:
-            DefiniteFactor.submitBackFromBuySanadItems(user, factor, explanation)
-
-        DefiniteFactor.submitDiscountSanadItems(
-            user,
-            factor,
-            factor.discountSum if first_row_bed != 0 else 0,
-            factor.discountSum if first_row_bes != 0 else 0,
-            factor.discountSum if second_row_bed != 0 else 0,
-            factor.discountSum if second_row_bes != 0 else 0,
-            account,
-            explanation
-        )
-        DefiniteFactor.submitTaxSanadItems(
-            user,
-            factor,
-            factor.taxSum if first_row_bed != 0 else 0,
-            factor.taxSum if first_row_bes != 0 else 0,
-            factor.taxSum if second_row_bed != 0 else 0,
-            factor.taxSum if second_row_bes != 0 else 0,
-            account,
-            explanation
-        )
-        DefiniteFactor.submitExpenseSanadItems(factor, explanation)
-
-        if not is_confirmed:
-            sanad.check_account_balance_confirmations()
-
-        sanad.update_values()
         return factor
-
-    @staticmethod
-    def getFactorSanad(factor: Factor):
-        if not factor.sanad:
-            sanad = Sanad(
-                code=newSanadCode(),
-                date=factor.date,
-                explanation=factor.explanation,
-                financial_year=factor.financial_year
-            )
-        else:
-            sanad = factor.sanad
-            clearSanad(sanad)
-            sanad.date = factor.date
-            sanad.is_auto_created = True
-            sanad.explanation = factor.explanation
-        sanad.save()
-
-        return sanad
 
     @staticmethod
     def updateFactorInventory(factor: Factor, revert=False):
@@ -217,6 +100,8 @@ class DefiniteFactor(APIView):
                 item.save()
                 WareInventory.increase_inventory(ware, warehouse, item.count, fee, factor.financial_year)
 
+            item.remain_fees = WareInventory.get_remain_fees(item.ware, item.warehouse)
+
         else:
             if item.factor.type in Factor.INPUT_GROUP:
                 WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year, revert=True)
@@ -224,198 +109,16 @@ class DefiniteFactor(APIView):
                 fees = item.fees.copy()
                 fees.reverse()
                 for fee in fees:
-                    WareInventory.increase_inventory(ware, warehouse, fee['count'], fee['fee'], factor.financial_year,
-                                                     revert=True)
+                    WareInventory.increase_inventory(
+                        ware,
+                        warehouse,
+                        fee['count'],
+                        fee['fee'],
+                        factor.financial_year,
+                        revert=True
+                    )
 
-        item.remain_fees = WareInventory.get_remain_fees(item.ware, item.warehouse)
+            item.fees = []
+            item.remain_fees = []
+
         item.save()
-
-    @staticmethod
-    def submitSumSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
-                            explanation):
-        sanad = factor.sanad
-        if factor.sum:
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                costCenter=factor.costCenter,
-                bed=first_row_bed,
-                bes=first_row_bes,
-                explanation=explanation,
-            )
-
-            sanad.items.create(
-                account=DefaultAccount.get(account).account,
-                floatAccount=DefaultAccount.get(account).floatAccount,
-                costCenter=DefaultAccount.get(account).costCenter,
-                bed=second_row_bed,
-                bes=second_row_bes,
-                explanation=explanation,
-            )
-
-    @staticmethod
-    def submitDiscountSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
-                                 explanation):
-        sanad = factor.sanad
-        if factor.discountSum:
-            sanad.items.create(
-                account=DefaultAccount.get(account).account,
-                floatAccount=DefaultAccount.get(account).floatAccount,
-                costCenter=DefaultAccount.get(account).costCenter,
-                bed=first_row_bed,
-                bes=first_row_bes,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                costCenter=factor.costCenter,
-                bed=second_row_bed,
-                bes=second_row_bes,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-
-    @staticmethod
-    def submitTaxSanadItems(user, factor, first_row_bed, first_row_bes, second_row_bed, second_row_bes, account,
-                            explanation):
-        sanad = factor.sanad
-        # Factor Tax Sum
-        if factor.taxSum:
-            sanad.items.create(
-                account=factor.account,
-                floatAccount=factor.floatAccount,
-                costCenter=factor.costCenter,
-                bed=first_row_bed,
-                bes=first_row_bes,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-            sanad.items.create(
-                account=DefaultAccount.get('tax').account,
-                floatAccount=DefaultAccount.get('tax').floatAccount,
-                costCenter=DefaultAccount.get('tax').costCenter,
-                bed=second_row_bed,
-                bes=second_row_bes,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )
-
-    @staticmethod
-    def submitExpenseSanadItems(factor, explanation):
-        sanad = factor.sanad
-        for e in factor.expenses.all():
-            if e.value:
-                sanad.items.create(
-                    account=e.expense.account,
-                    floatAccount=e.expense.floatAccount,
-                    costCenter=e.expense.costCenter,
-                    bed=e.value,
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-                sanad.items.create(
-                    account=e.account,
-                    floatAccount=e.floatAccount,
-                    costCenter=e.costCenter,
-                    bes=e.value,
-                    explanation=explanation,
-                    financial_year=sanad.financial_year
-                )
-
-    @staticmethod
-    def submitSaleSanadItems(user, factor, explanation):
-        sanad = factor.sanad
-        value = 0
-        for item in factor.items.all():
-            value += item.calculated_value
-            if not item.fee:
-                item.fee = item.calculated_value / item.count
-                item.save()
-
-        bed_account = Account.get_cost_of_sold_wares_account(user)
-        bed_float_account = None
-        bed_cost_center = None
-        if factor.type == Factor.CONSUMPTION_WARE:
-            bed_account = factor.account
-            bed_float_account = factor.floatAccount
-            bed_cost_center = factor.costCenter
-
-        sanad.items.create(
-            account=bed_account,
-            floatAccount=bed_float_account,
-            costCenter=bed_cost_center,
-            bed=value,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-        sanad.items.create(
-            account=Account.get_inventory_account(user),
-            bes=value,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-
-    @staticmethod
-    def submitBackFromSaleSanadItems(user, factor, explanation):
-        sanad = factor.sanad
-        value = 0
-
-        for item in factor.items.all():
-            value += item.calculated_value
-
-        sanad.items.create(
-            account=Account.get_inventory_account(user),
-            bed=value,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-        sanad.items.create(
-            account=Account.get_cost_of_sold_wares_account(user),
-            bes=value,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-
-    @staticmethod
-    def submitBackFromBuySanadItems(user, factor, explanation):
-        sanad = factor.sanad
-        value = 0
-        for item in factor.items.all():
-            value += item.calculated_value
-
-        sanad.items.create(
-            account=factor.account,
-            floatAccount=factor.floatAccount,
-            costCenter=factor.costCenter,
-            bed=factor.sum,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-        sanad.items.create(
-            account=Account.get_inventory_account(user),
-            bes=value,
-            explanation=explanation,
-            financial_year=sanad.financial_year
-        )
-
-        profit_and_loss_value = value - factor.sum
-        if profit_and_loss_value:
-            bed = 0
-            bes = 0
-            if profit_and_loss_value > 0:
-                bed = profit_and_loss_value
-            else:
-                profit_and_loss_value = abs(profit_and_loss_value)
-                bes = profit_and_loss_value
-
-            sanad.items.create(
-                account=DefaultAccount.get('profitAndLossFromBuying').account,
-                floatAccount=DefaultAccount.get('profitAndLossFromBuying').floatAccount,
-                costCenter=DefaultAccount.get('profitAndLossFromBuying').costCenter,
-                bed=bed,
-                bes=bes,
-                explanation=explanation,
-                financial_year=sanad.financial_year
-            )

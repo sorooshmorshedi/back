@@ -4,17 +4,17 @@ from imprests.models import ImprestSettlement
 
 
 class ImprestSettlementSanad(AutoSanad):
-    def perform_update(self, instance: ImprestSettlement, sanad):
-        sanad.explanation = sanad_exp(
+    def get_sanad_explanation(self):
+        return sanad_exp(
             'بابت تسویه',
-            instance.explanation,
+            self.instance.explanation,
             'از محل تنخواه شماره',
-            instance.transaction.code,
+            self.transaction.code,
             'مورخ',
-            instance.transaction.date
+            self.transaction.date
         )
-        sanad.date = instance.date
 
+    def get_sanad_rows(self, instance: ImprestSettlement):
         sanad_items = []
         for item in instance.items.all():
             sanad_items.append({
@@ -41,4 +41,4 @@ class ImprestSettlementSanad(AutoSanad):
             )
         })
 
-        self.create_sanad_items(sanad, sanad_items)
+        return sanad_items
