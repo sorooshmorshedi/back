@@ -2,10 +2,10 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
 from accounts.accounts.validators import AccountValidator
+from factors.adjustment_sanad import AdjustmentSanad
 from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
 from helpers.functions import get_current_user
-from sanads.models import newSanadCode, clearSanad
 from sanads.serializers import SanadSerializer
 from transactions.serializers import TransactionSerializerForPayment
 from users.serializers import UserSimpleSerializer
@@ -109,7 +109,8 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FactorItem
-        fields = ('id', 'order', 'ware', 'warehouse', 'count', 'fee', 'discountValue', 'discountPercent', 'explanation',)
+        fields = (
+            'id', 'order', 'ware', 'warehouse', 'count', 'fee', 'discountValue', 'discountPercent', 'explanation',)
 
 
 class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
@@ -429,29 +430,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         DefiniteFactor.updateFactorInventory(factor)
 
         # Sync sanad
-        sanad = instance.sanad
-        clearSanad(sanad)
-
-        bed_account = bes_account = None
-        if adjustment_type == Factor.INPUT_ADJUSTMENT:
-            bed_account = Account.get_inventory_account(user)
-            bes_account = Account.get_cost_of_sold_wares_account(user)
-        elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
-            bes_account = Account.get_inventory_account(user)
-            bed_account = Account.get_cost_of_sold_wares_account(user)
-
-        for item in factor.items.all():
-            sanad.items.create(
-                account=bed_account,
-                bed=item.calculated_value
-            )
-            sanad.items.create(
-                account=bes_account,
-                bes=item.calculated_value
-            )
-
-        sanad.is_auto_created = True
-        sanad.update_values()
+        AdjustmentSanad(instance).update()
 
     def create(self, validated_data, **kwargs):
         financial_year = self.context['financial_year']
@@ -479,15 +458,6 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         factor = Factor.objects.create(**factor_data)
         factor.save()
 
-        sanad_data = {
-            'financial_year': financial_year,
-            'date': date,
-            'explanation': explanation,
-            'is_auto_created': True,
-            'code': newSanadCode()
-        }
-        sanad = Sanad.objects.create(**sanad_data)
-
         code = Adjustment.objects.filter(type=adjustment_type).aggregate(Max('code'))['code__max']
         if code:
             code += 1
@@ -500,7 +470,6 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'date': date,
             'financial_year': financial_year,
             'factor': factor,
-            'sanad': sanad,
             'explanation': explanation
         }
         adjustment = Adjustment.objects.create(**adjustment_data)
@@ -519,12 +488,6 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'time': now(),
         }
         instance.factor.update(**factor_data)
-
-        sanad_data = {
-            'date': date,
-            'explanation': explanation,
-        }
-        instance.sanad.update(**sanad_data)
 
         adjustment_data = {
             'date': date,
