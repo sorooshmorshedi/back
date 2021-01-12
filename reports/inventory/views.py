@@ -188,6 +188,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
+        financial_year = self.request.user.active_financial_year
         last_factor_item = Subquery(
             FactorItem.objects.inFinancialYear().filter(
                 ware_id=OuterRef('ware_id')
@@ -205,12 +206,14 @@ class AllWaresInventoryListView(generics.ListAPIView):
 
         input_filter = {
             'factorItems__factor__is_definite': True,
-            'factorItems__factor__type__in': Factor.BUY_GROUP
+            'factorItems__factor__type__in': Factor.BUY_GROUP,
+            'factorItems__financial_year': financial_year,
         }
 
         output_filter = {
             'factorItems__factor__is_definite': True,
-            'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE)
+            'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE),
+            'factorItems__financial_year': financial_year,
         }
 
         queryset = Ware.objects.inFinancialYear().prefetch_related(
