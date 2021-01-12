@@ -51,14 +51,12 @@ class SanadItemListView(generics.ListAPIView):
         )
 
         if kwargs.get('getting_previous_sum', False):
-            previous_sum = self.get_previous_sum()
-        else:
             previous_sum = {
                 'bed': 0,
                 'bes': 0,
             }
-
-        qs = self.filter_queryset(qs)
+        else:
+            previous_sum = self.get_previous_sum()
 
         qs = qs.annotate(
             previous_bed=Value(previous_sum['bed'], IntegerField()),
@@ -88,7 +86,9 @@ class SanadItemListView(generics.ListAPIView):
             del filters['sanad__code__gte']
 
         if has_range_filter:
-            result = self.get_queryset(getting_previous_sum=True).filter(**filters).aggregate(
+            qs = self.get_queryset(getting_previous_sum=True)
+            qs = self.filterset_class(filters, qs).qs
+            result = qs.aggregate(
                 bed=Coalesce(Sum('bed'), 0),
                 bes=Coalesce(Sum('bes'), 0)
             )
@@ -102,6 +102,7 @@ class SanadItemListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
