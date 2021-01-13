@@ -22,6 +22,7 @@ class SanadItemLedgerFilter(filters.FilterSet):
             'sanad__code': BASE_FIELD_FILTERS,
 
             'financial_year': ['exact'],
+            'financial_year__name': BASE_FIELD_FILTERS,
 
             'bed': BASE_FIELD_FILTERS,
             'bes': BASE_FIELD_FILTERS,
