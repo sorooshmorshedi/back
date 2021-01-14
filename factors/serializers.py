@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
@@ -436,10 +438,11 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         financial_year = self.context['financial_year']
         adjustment_type = validated_data.get('type')
         date = validated_data['date']
+        time = validated_data['time']
         explanation = validated_data.get('explanation', '')
 
         if financial_year.is_advari:
-            definition_date = date.togregorian()
+            definition_date = datetime.datetime.combine(date, time)
         else:
             definition_date = now()
 
@@ -448,10 +451,10 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'temporary_code': Factor.get_new_temporary_code(adjustment_type),
             'code': Factor.get_new_code(adjustment_type),
             'date': date,
+            'time': time,
             'explanation': explanation,
             'is_definite': True,
             'definition_date': definition_date,
-            'time': now(),
             'is_auto_created': True,
             'type': adjustment_type
         }
@@ -468,6 +471,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'type': adjustment_type,
             'code': code,
             'date': date,
+            'time': time,
             'financial_year': financial_year,
             'factor': factor,
             'explanation': explanation
@@ -480,17 +484,19 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Adjustment, validated_data):
         date = validated_data['date']
+        time = validated_data['time']
         explanation = validated_data.get('explanation', '')
 
         factor_data = {
             'date': date,
+            'time': time,
             'explanation': explanation,
-            'time': now(),
         }
         instance.factor.update(**factor_data)
 
         adjustment_data = {
             'date': date,
+            'time': time,
             'explanation': explanation
         }
         instance.update(**adjustment_data)

@@ -7,9 +7,25 @@ from cheques.serializers import ChequebookListRetrieveSerializer
 from factors.models import Factor, FactorItem
 from factors.serializers import FactorCreateUpdateSerializer
 from imprests.serializers import ImprestSettlementSimpleSerializer
+from sanads.models import Sanad
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
+from users.serializers import UserSimpleSerializer
 from wares.models import Ware, Warehouse
+
+
+class SanadListSerializer(serializers.ModelSerializer):
+    created_by = UserSimpleSerializer(many=False)
+
+    class Meta:
+        model = Sanad
+        fields = '__all__'
+        read_only_fields = ('financial_year', 'code', 'local_id')
+
+    def update(self, instance, validated_data):
+        if instance.is_auto_created:
+            raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
+        return super(SanadSerializer, self).update(instance, validated_data)
 
 
 class AccountSimpleSerializer(serializers.ModelSerializer):

@@ -588,6 +588,7 @@ class Transfer(BaseModel):
 class Adjustment(BaseModel):
     code = models.IntegerField()
     date = jmodels.jDateField()
+    time = models.TimeField()
 
     type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
     factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
@@ -634,6 +635,7 @@ class WarehouseHandling(BaseModel, ConfirmationMixin):
     start_date = jmodels.jDateField()
     counting_date = jmodels.jDateField()
     submit_date = jmodels.jDateField()
+    submit_time = models.TimeField()
     handler = models.CharField(max_length=200)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='warehouseHandlings')
     ware_status = models.CharField(max_length=20)
