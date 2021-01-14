@@ -9,7 +9,7 @@ from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.functions import sanad_exp
-from helpers.models import BaseModel, ConfirmationMixin
+from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
@@ -328,7 +328,7 @@ class TransactionItem(BaseModel):
                                   null=True)
 
     type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT)
-    value = models.DecimalField(max_digits=24, decimal_places=0)
+    value = DECIMAL()
     date = jmodels.jDateField()
     due = jmodels.jDateField(null=True, blank=True)
     documentNumber = models.CharField(max_length=50, null=True, blank=True)
