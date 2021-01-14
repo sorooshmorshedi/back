@@ -97,7 +97,7 @@ class ImprestSettlementSanadSerializer(serializers.ModelSerializer):
         fields = ('id',)
 
 
-class SanadListRetrieveSerializer(SanadSerializer):
+class SanadRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
     created_by = UserSimpleSerializer()
 

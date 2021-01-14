@@ -1,12 +1,12 @@
 import django_filters
 from django.db.models import F
-from django_filters import rest_framework as filters
+from django_filters import rest_framework as filters, CharFilter
 from django_jalali.db import models as jmodels
 
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, FactorItem, Transfer, Adjustment, WarehouseHandling
-from helpers.filters import BASE_FIELD_FILTERS
+from helpers.filters import BASE_FIELD_FILTERS, filter_created_by_name
 from sanads.models import Sanad
 from transactions.models import Transaction
 
@@ -74,6 +74,10 @@ class ChequebookFilter(filters.FilterSet):
 
 
 class SanadFilter(filters.FilterSet):
+
+    created_by__name = CharFilter(method=filter_created_by_name)
+    created_by__name__icontains = CharFilter(method=filter_created_by_name)
+
     class Meta:
         model = Sanad
         fields = {
@@ -85,6 +89,7 @@ class SanadFilter(filters.FilterSet):
             'explanation': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'is_auto_created': ['exact'],
+            'created_by__name': ['icontains']
         }
         filter_overrides = {
             jmodels.jDateField: {

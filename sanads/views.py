@@ -21,18 +21,13 @@ from sanads.serializers import *
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class SanadListCreate(generics.ListCreateAPIView):
+class SanadCreateView(generics.CreateAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_basename = 'sanad'
     serializer_class = SanadSerializer
 
     def get_queryset(self):
         return Sanad.objects.hasAccess(self.request.method)
-
-    def list(self, request, *ergs, **kwargs):
-        queryset = self.get_queryset()
-        serializer = SanadListRetrieveSerializer(queryset, many=True)
-        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         user = request.user
@@ -64,7 +59,7 @@ class SanadListCreate(generics.ListCreateAPIView):
         if not is_confirmed:
             serializer.instance.check_account_balance_confirmations()
 
-        return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
+        return Response(SanadRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
 
 class SanadDetailView(generics.RetrieveUpdateAPIView):
@@ -88,7 +83,7 @@ class SanadDetailView(generics.RetrieveUpdateAPIView):
             'items__costCenter__floatAccountGroups',
         )
         sanad = get_object_or_404(queryset, pk=pk)
-        serializer = SanadListRetrieveSerializer(sanad)
+        serializer = SanadRetrieveSerializer(sanad)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
@@ -117,7 +112,7 @@ class SanadDetailView(generics.RetrieveUpdateAPIView):
         if not is_confirmed:
             serializer.instance.check_account_balance_confirmations()
 
-        return Response(SanadListRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
+        return Response(SanadRetrieveSerializer(instance=serializer.instance).data, status=status.HTTP_200_OK)
 
 
 class ReorderSanadsApiView(APIView):
@@ -164,7 +159,7 @@ class SanadByPositionView(APIView):
             request.GET.get('id')
         )
         if item:
-            return Response(SanadListRetrieveSerializer(instance=item).data)
+            return Response(SanadRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 

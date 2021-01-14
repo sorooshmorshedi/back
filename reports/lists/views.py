@@ -64,7 +64,7 @@ class SanadListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = "get.sanad"
 
-    serializer_class = SanadSerializer
+    serializer_class = SanadListSerializer
 
     pagination_class = LimitOffsetPagination
 

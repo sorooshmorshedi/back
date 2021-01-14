@@ -5,7 +5,7 @@ from accounts.accounts.validators import AccountValidator
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.models.StatusChangeModel import StatusChange
-from sanads.serializers import SanadListRetrieveSerializer
+from sanads.serializers import SanadRetrieveSerializer
 
 
 class StatusChangeSerializer(serializers.ModelSerializer):
@@ -52,9 +52,9 @@ class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
 
     def get_sanad(self, obj: StatusChange):
         if obj.sanad:
-            return SanadListRetrieveSerializer(obj.sanad).data
+            return SanadRetrieveSerializer(obj.sanad).data
         if obj.cheque.transactionItem:
-            return SanadListRetrieveSerializer(obj.cheque.transactionItem.transaction.sanad).data
+            return SanadRetrieveSerializer(obj.cheque.transactionItem.transaction.sanad).data
 
     class Meta:
         model = StatusChange
