@@ -125,6 +125,7 @@ class WarehouseHandlingDefiniteView(APIView):
         adjustment_data = {
             'explanation': instance.explanation,
             'date': str(instance.submit_date),
+            'time': str(instance.submit_time),
             'is_auto_created': True,
             'items': []
         }
@@ -159,7 +160,6 @@ class WarehouseHandlingDefiniteView(APIView):
         instance.inputAdjustment = input_serializer.instance
         instance.outputAdjustment = output_serializer.instance
         instance.is_definite = True
-        print(instance.code)
         if instance.code is None:
             instance.code = get_new_code(WarehouseHandling)
         instance.save()

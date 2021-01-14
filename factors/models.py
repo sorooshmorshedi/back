@@ -626,6 +626,7 @@ class WarehouseHandling(BaseModel, ConfirmationMixin):
     start_date = jmodels.jDateField()
     counting_date = jmodels.jDateField()
     submit_date = jmodels.jDateField()
+    submit_time = models.TimeField()
     handler = models.CharField(max_length=200)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='warehouseHandlings')
     ware_status = models.CharField(max_length=20)
