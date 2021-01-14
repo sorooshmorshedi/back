@@ -97,7 +97,7 @@ class Factor(BaseModel, ConfirmationMixin):
                                    blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
-    paidValue = models.DecimalField(default=0, max_digits=24, decimal_places=0)
+    paidValue = DECIMAL()
     bijak = models.IntegerField(null=True, blank=True)
 
     date = jmodels.jDateField()
@@ -423,7 +423,7 @@ class FactorExpense(BaseModel):
                                      null=True)
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpensesAsCostCenter',
                                    blank=True, null=True)
-    value = models.DecimalField(max_digits=24, decimal_places=0)
+    value = DECIMAL()
     explanation = models.CharField(max_length=255, blank=True)
 
     class Meta(BaseModel.Meta):
@@ -444,7 +444,7 @@ class FactorPayment(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_payments')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='payments')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='payments')
-    value = models.DecimalField(max_digits=24, decimal_places=0)
+    value = DECIMAL()
 
     class Meta(BaseModel.Meta):
         unique_together = ('factor', 'transaction')

@@ -1,16 +1,23 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
+from companies.models import FinancialYear
 from sanads.models import SanadItem, Sanad
 
 
-class SanadLedgerSerializer(serializers.ModelSerializer):
+class FinancialYearSanadItemReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FinancialYear
+        fields = ('id', 'name')
+
+
+class SanadSanadItemReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
         fields = ('id', 'code', 'date',)
 
 
-class AccountLedgerSerializer(serializers.ModelSerializer):
+class AccountSanadItemReportSerializer(serializers.ModelSerializer):
     level0_name = serializers.CharField(source="parent.parent.parent.name")
     level0_code = serializers.CharField(source="parent.parent.parent.code")
 
@@ -34,9 +41,10 @@ class AccountLedgerSerializer(serializers.ModelSerializer):
         )
 
 
-class SanadItemLedgerSerializer(serializers.ModelSerializer):
-    sanad = SanadLedgerSerializer(many=False, read_only=True)
-    account = AccountLedgerSerializer(many=False, read_only=True)
+class SanadItemReportSerializer(serializers.ModelSerializer):
+    financial_year = FinancialYearSanadItemReportSerializer()
+    sanad = SanadSanadItemReportSerializer(many=False, read_only=True)
+    account = AccountSanadItemReportSerializer(many=False, read_only=True)
 
     previous_bed = serializers.IntegerField()
     previous_bes = serializers.IntegerField()
@@ -73,5 +81,5 @@ class SanadItemLedgerSerializer(serializers.ModelSerializer):
         model = SanadItem
         fields = (
             'id', 'account', 'sanad', 'explanation', 'bed', 'bes', 'comulative_bed', 'comulative_bes', 'remain',
-            'remain_type', 'previous_bed', 'previous_bes', 'previous_remain', 'previous_remain_type'
+            'remain_type', 'previous_bed', 'previous_bes', 'previous_remain', 'previous_remain_type', 'financial_year',
         )
