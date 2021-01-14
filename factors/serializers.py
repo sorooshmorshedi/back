@@ -433,6 +433,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         financial_year = self.context['financial_year']
         adjustment_type = validated_data.get('type')
         date = validated_data['date']
+        time = validated_data['time']
         explanation = validated_data.get('explanation', '')
 
         factor_data = {
@@ -440,10 +441,10 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'temporary_code': Factor.get_new_temporary_code(adjustment_type),
             'code': Factor.get_new_code(adjustment_type),
             'date': date,
+            'time': time,
             'explanation': explanation,
             'is_definite': True,
             'definition_date': now(),
-            'time': now(),
             'is_auto_created': True,
             'type': adjustment_type
         }
@@ -469,6 +470,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'type': adjustment_type,
             'code': code,
             'date': date,
+            'time': time,
             'financial_year': financial_year,
             'factor': factor,
             'sanad': sanad,
@@ -482,12 +484,13 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Adjustment, validated_data):
         date = validated_data['date']
+        time = validated_data['time']
         explanation = validated_data.get('explanation', '')
 
         factor_data = {
             'date': date,
+            'time': time,
             'explanation': explanation,
-            'time': now(),
         }
         instance.factor.update(**factor_data)
 
@@ -499,6 +502,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
         adjustment_data = {
             'date': date,
+            'time': time,
             'explanation': explanation
         }
         instance.update(**adjustment_data)

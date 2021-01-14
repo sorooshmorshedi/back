@@ -581,6 +581,7 @@ class Transfer(BaseModel):
 class Adjustment(BaseModel):
     code = models.IntegerField()
     date = jmodels.jDateField()
+    time = models.TimeField()
 
     type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
     factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
