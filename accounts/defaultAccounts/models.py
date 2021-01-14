@@ -62,8 +62,12 @@ class DefaultAccount(BaseModel):
 
     @staticmethod
     def get(codename, financial_year=None):
+        qs = DefaultAccount.objects.inFinancialYear(financial_year)
         try:
-            return DefaultAccount.objects.inFinancialYear(financial_year).get(codename=codename)
+            return qs.get(codename=codename)
+        except DefaultAccount.MultipleObjectsReturned as e:
+            print(qs.filter(codename=codename))
+            raise e
         except DefaultAccount.DoesNotExist as e:
             print(codename)
             raise e
