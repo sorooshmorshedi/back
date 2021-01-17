@@ -39,7 +39,12 @@ class Command(BaseCommand):
 
             for financial_year in FinancialYear.objects.all():
                 try:
-                    item = DefaultAccount.objects.get(financial_year=financial_year, codename=codename)
+                    item = DefaultAccount.objects.inFinancialYear(financial_year).get(codename=codename)
                     item.update(**fields)
+                except DefaultAccount.MultipleObjectsReturned:
+                    qs = DefaultAccount.objects.inFinancialYear(financial_year).filter(codename=codename).order_by('pk')
+                    item = qs.first()
+                    item.update(**fields)
+                    qs.filter(pk__gt=item.id).delete()
                 except DefaultAccount.DoesNotExist:
                     DefaultAccount.objects.create(financial_year=financial_year, codename=codename, **fields)
