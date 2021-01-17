@@ -27,7 +27,9 @@ class SanadItemListView(generics.ListAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self, *args, **kwargs):
-        qs = SanadItem.objects.hasAccess(self.request.method, 'sanadItemsReport', use_financial_year=False)
+        qs = SanadItem.objects.hasAccess(self.request.method, 'sanadItemsReport', use_financial_year=False).filter(
+            financial_year__company=self.request.user.active_company
+        )
 
         order_sanads_by = self.request.GET.copy().get('order_sanads_by', None)
 
@@ -133,6 +135,7 @@ class SanadItemListExportView(SanadItemListView, BaseListExportView):
 
     def get_appended_rows(self):
         last_item = self.get_rows()[-1]
+        print(last_item['sanad']['code'])
         return [{
             'explanation': 'جمع',
             'bed': last_item['comulative_bed'],
