@@ -169,9 +169,9 @@ class WarehouseInventorySerializer(serializers.ModelSerializer):
 
 
 class AllWarehousesInventorySerializer(serializers.ModelSerializer):
-    input = serializers.IntegerField()
-    output = serializers.IntegerField()
-    remain = serializers.IntegerField()
+    input = serializers.DecimalField(max_digits=24, decimal_places=6)
+    output = serializers.DecimalField(max_digits=24, decimal_places=6)
+    remain = serializers.DecimalField(max_digits=24, decimal_places=6)
 
     class Meta:
         model = Ware
