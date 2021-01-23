@@ -105,12 +105,17 @@ class SanadItemListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
+
+        context = {
+            'consider_previous_remain': request.GET.get('consider_previous_remain', False) == 'true'
+        }
+
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.serializer_class(page, context=context, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.serializer_class(queryset, context=context, many=True)
         return Response(serializer.data)
 
 
@@ -130,12 +135,14 @@ class SanadItemListExportView(SanadItemListView, BaseListExportView):
     def get_rows(self):
         return self.serializer_class(
             self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs.all(),
-            many=True
+            many=True,
+            context={
+                'consider_previous_remain': self.request.GET.get('consider_previous_remain', False) == 'true'
+            }
         ).data
 
     def get_appended_rows(self):
         last_item = self.get_rows()[-1]
-        print(last_item['sanad']['code'])
         return [{
             'explanation': 'جمع',
             'bed': last_item['comulative_bed'],

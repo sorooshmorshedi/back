@@ -64,7 +64,11 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
         return self.calc_remain_type(obj.previous_bed, obj.previous_bes)
 
     def get_remain(self, obj):
-        return abs(obj.comulative_bed + obj.previous_bed - obj.comulative_bes - obj.previous_bes)
+        consider_previous_remain = self.context.get('consider_previous_remain', True)
+        remain = abs(obj.comulative_bed - obj.comulative_bes)
+        if consider_previous_remain:
+            remain = abs(remain + obj.previous_bed - obj.previous_bes)
+        return remain
 
     def get_remain_type(self, obj):
         return self.calc_remain_type(obj.comulative_bed + obj.previous_bed, obj.comulative_bes + obj.previous_bes)
