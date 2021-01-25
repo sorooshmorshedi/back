@@ -12,6 +12,7 @@ from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from factors.serializers import *
+from sanads.models import clearSanad
 from server.settings import TESTING
 
 
@@ -147,7 +148,7 @@ class FactorModelView(viewsets.ModelViewSet):
                         confirmations.append("حداقل موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
                             ware.name,
                             ware.minInventory,
-                            ware.unit.name,
+                            ware.main_unit.name,
                             balance
                         ))
                 else:
@@ -155,7 +156,7 @@ class FactorModelView(viewsets.ModelViewSet):
                         confirmations.append("حداکثر موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
                             ware.name,
                             ware.minInventory,
-                            ware.unit.name,
+                            ware.main_unit.name,
                             balance
                         ))
 

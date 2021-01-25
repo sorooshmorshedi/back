@@ -15,7 +15,7 @@ from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
-from wares.models import Ware, Warehouse
+from wares.models import Ware, Warehouse, Unit
 
 EXPENSE_TYPES = (
     ('buy', 'خرید'),
@@ -405,6 +405,9 @@ class Factor(BaseModel, ConfirmationMixin):
     @property
     def is_deletable(self):
 
+        if self.financial_year.is_advari:
+            return True
+
         if self.is_definite:
             for item in self.items.all():
                 if not item.is_editable:
@@ -466,9 +469,11 @@ class FactorItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_items')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='factorItems', null=True)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='factorItems', null=True,
                                   blank=True)
 
+    unit_count = models.DecimalField(max_digits=24, decimal_places=6)
     count = models.DecimalField(max_digits=24, decimal_places=6)
     fee = models.DecimalField(max_digits=24, decimal_places=6)
 

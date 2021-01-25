@@ -12,7 +12,8 @@ from sanads.serializers import SanadSerializer
 from transactions.serializers import TransactionSerializerForPayment
 from users.serializers import UserSimpleSerializer
 from wares.models import WareInventory
-from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, WarehouseSimpleSerializer
+from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, \
+    WarehouseSimpleSerializer, UnitSerializer
 from django.utils.timezone import now
 
 
@@ -72,8 +73,6 @@ class FactorCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class FactorItemSerializer(serializers.ModelSerializer):
-    sale_price = serializers.DecimalField(max_digits=24, decimal_places=0, allow_null=True, default=None)
-
     class Meta:
         model = FactorItem
         fields = '__all__'
@@ -89,30 +88,23 @@ class FactorItemSerializer(serializers.ModelSerializer):
         return super(FactorItemSerializer, self).validate(attrs)
 
     def update(self, instance, validated_data):
-        self.updateWarePrice(validated_data)
         return super(FactorItemSerializer, self).update(instance, validated_data)
 
     def create(self, validated_data):
-        self.updateWarePrice(validated_data)
         return super(FactorItemSerializer, self).create(validated_data)
-
-    @staticmethod
-    def updateWarePrice(validated_data):
-        ware = validated_data.get('ware')
-        sale_price = validated_data.pop('sale_price')
-        if sale_price:
-            ware.price = sale_price
-            ware.save()
 
 
 class FactorItemRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListSerializer(read_only=True, many=False)
+    unit = UnitSerializer(read_only=True, many=False)
     warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
 
     class Meta:
         model = FactorItem
         fields = (
-            'id', 'order', 'ware', 'warehouse', 'count', 'fee', 'discountValue', 'discountPercent', 'explanation',)
+            'id', 'order', 'ware', 'unit', 'warehouse', 'unit_count', 'count', 'fee', 'discountValue',
+            'discountPercent',
+            'explanation',)
 
 
 class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):

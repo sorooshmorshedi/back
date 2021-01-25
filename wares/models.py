@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
 from helpers.functions import get_current_user, get_new_child_code
-from helpers.models import BaseModel
+from helpers.models import BaseModel, DECIMAL
 
 
 class Unit(BaseModel):
@@ -20,6 +20,7 @@ class Unit(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
+        ordering = ('pk', )
         permission_basename = 'unit'
         permissions = (
             ('get.unit', 'مشاهده واحد'),
@@ -92,7 +93,6 @@ class Ware(BaseModel):
     barcode = models.CharField(max_length=50, blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True, null=True)
     isDisabled = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=24, decimal_places=0, null=True)
     pricingType = models.CharField(max_length=2, choices=PRICING_TYPES, null=True, blank=True)
     minSale = models.IntegerField(blank=True, null=True)
     maxSale = models.IntegerField(blank=True, null=True)
@@ -103,12 +103,15 @@ class Ware(BaseModel):
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
-    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
     supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     is_service = models.BooleanField(default=False)
 
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
+
+    @property
+    def main_unit(self) -> Unit:
+        return self.salePrices.first().unit
 
     def __str__(self):
         return self.name
@@ -207,6 +210,54 @@ class Ware(BaseModel):
         return res
 
 
+class SalePriceType(BaseModel):
+    name = models.CharField(max_length=100)
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    class Meta(BaseModel.Meta):
+        permission_basename = 'salePriceType'
+        ordering = ('id', )
+        permissions = (
+            ('get.salePriceType', 'مشاهده نوع های نرخ فروش '),
+            ('create.salePriceType', 'تعریف نوع های نرخ فروش '),
+            ('update.salePriceType', 'ویرایش نوع های نرخ فروش '),
+            ('delete.salePriceType', 'حذف نوع های نرخ فروش '),
+
+            ('getOwn.salePriceType', 'مشاهده نوع های نرخ فروش خود'),
+            ('updateOwn.salePriceType', 'ویرایش نوع های نرخ فروش خود'),
+            ('deleteOwn.salePriceType', 'حذف نوع های نرخ فروش خود'),
+        )
+        backward_financial_year = True
+
+
+class SalePrice(BaseModel):
+    type = models.ForeignKey(SalePriceType, on_delete=models.PROTECT)
+
+    ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='salePrices')
+
+    mainUnit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='salePricesAsMainUnit', null=True)
+    conversion_factor = DECIMAL(default=1)
+
+    unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='salePrices')
+    price = DECIMAL()
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        unique_together = ('ware', 'unit', 'type')
+        ordering = ('pk',)
+        permission_basename = 'salePrice'
+        permissions = (
+            ('get.salePrice', 'مشاهده قیمت فروش'),
+            ('create.salePrice', 'تعریف قیمت فروش'),
+            ('update.salePrice', 'ویرایش قیمت فروش'),
+            ('delete.salePrice', 'حذف قیمت فروش'),
+
+            ('getOwn.salePrice', 'مشاهده قیمت های خود'),
+            ('updateOwn.salePrice', 'ویرایش قیمت های خود'),
+            ('deleteOwn.salePrice', 'حذف قیمت های خود'),
+        )
+
+
 class WareInventory(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='waresInventories')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='inventory')
@@ -303,7 +354,7 @@ class WareInventory(BaseModel):
                 raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
                     ware,
                     "{0:g}".format(float(current_inventory_count)),
-                    ware.unit
+                    ware.main_unit.name
                 ))
         elif ware_balances.count() == 0:
             fee = 0

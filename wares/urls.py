@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from wares.views import WareListCreate, WareDetail, WarehouseListCreate, UnitListCreate, UnitDetail, WarehouseDetail, \
-    SortInventoryView
+    SortInventoryView, SalePriceTypeListCreate, SalePriceTypeDetail
 
 urlpatterns = [
     url(r'^wares$', WareListCreate.as_view(), name='Wares'),
@@ -9,6 +9,9 @@ urlpatterns = [
 
     url(r'^units$', UnitListCreate.as_view(), name='units'),
     url(r'^units/(?P<pk>[0-9]+)$', UnitDetail.as_view(), name='unitDetail'),
+
+    url(r'^salePriceTypes$', SalePriceTypeListCreate.as_view(), name='salePriceTypes'),
+    url(r'^salePriceTypes/(?P<pk>[0-9]+)$', SalePriceTypeDetail.as_view(), name='salePriceTypesDetail'),
 
     url(r'^warehouses$', WarehouseListCreate.as_view(), name='warehouse'),
     url(r'^warehouses/(?P<pk>[0-9]+)$', WarehouseDetail.as_view(), name='floatWareDetail'),

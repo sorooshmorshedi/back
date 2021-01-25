@@ -48,6 +48,21 @@ class UnitListCreate(ListCreateAPIViewWithAutoFinancialYear):
         serializer.save(financial_year=self.request.user.active_financial_year)
 
 
+class SalePriceTypeDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'salePriceType'
+    serializer_class = SalePriceTypeSerializer
+
+
+class SalePriceTypeListCreate(ListCreateAPIViewWithAutoFinancialYear):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'salePriceType'
+    serializer_class = SalePriceTypeSerializer
+
+    def perform_create(self, serializer: SalePriceTypeSerializer) -> None:
+        serializer.save(financial_year=self.request.user.active_financial_year)
+
+
 class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'ware'
@@ -73,6 +88,26 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
         )
 
 
+def update_sale_prices(ware: Ware, data: list):
+    data = list(filter(lambda o: o['unit'], data))
+    if len(data) == 0:
+        raise ValidationError("واحد اصلی کالا اجباری می باشد")
+
+    ware.salePrices.all().delete()
+    for row in data:
+        unit = Unit.objects.get(pk=row['unit'])
+        prices = row['prices']
+        for price_type_id in prices.keys():
+            price_type = SalePriceType.objects.get(pk=price_type_id)
+            price = prices[price_type_id]
+            ware.salePrices.create(
+                unit=unit,
+                type=price_type,
+                price=price,
+                conversion_factor=row['conversion_factor'],
+            )
+
+
 class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'ware'
@@ -88,6 +123,7 @@ class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         if ware.pricingType != request.data.get('pricingType') and ware.has_factorItem():
             return Response(['نحوه قیمت گذاری کالا های دارای گردش غیر قابل تغییر می باشد'],
                             status=status.HTTP_400_BAD_REQUEST)
+        update_sale_prices(ware, request.data.get('salePrices', []))
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
