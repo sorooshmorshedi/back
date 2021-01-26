@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.accounts.models import FloatAccountGroup, FloatAccount, AccountType, Account
 from sanads.models import SanadItem
+from wares.serializers import SalePriceTypeSerializer
 
 
 class FloatAccountGroupSimpleSerializer(serializers.ModelSerializer):
@@ -96,6 +97,7 @@ class AccountRetrieveSerializer(serializers.ModelSerializer):
     type = AccountTypeSerializer(read_only=True)
 
     balance = serializers.SerializerMethodField()
+    defaultSalePriceType = SalePriceTypeSerializer()
 
     def get_balance(self, obj: Account):
         return obj.get_balance()
@@ -122,6 +124,7 @@ class AccountListSerializer(serializers.ModelSerializer):
     floatAccountGroup = FloatAccountGroupSerializer(read_only=True)
     costCenterGroup = FloatAccountGroupSerializer(read_only=True)
     type = AccountTypeSerializer(read_only=True)
+    defaultSalePriceType = SalePriceTypeSerializer()
 
     def get_title(self, obj):
         return obj.title
@@ -131,7 +134,8 @@ class AccountListSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year', 'code', 'level')
         fields = (
             'id', 'title', 'floatAccountGroup', 'costCenterGroup', 'type',
-            'name', 'code', 'level', 'person_type', 'buyer_or_seller', 'parent', 'account_type'
+            'name', 'code', 'level', 'person_type', 'buyer_or_seller', 'parent', 'account_type',
+            'defaultSalePriceType'
         )
 
     @staticmethod

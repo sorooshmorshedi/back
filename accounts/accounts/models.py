@@ -8,6 +8,7 @@ from django.db.models.functions.comparison import Coalesce
 from companies.models import FinancialYear
 from helpers.functions import get_current_user, get_new_child_code
 from helpers.models import BaseModel, PHONE, MELLI_CODE, POSTAL_CODE
+from wares.models import SalePriceType
 
 
 class FloatAccountGroup(BaseModel):
@@ -167,6 +168,7 @@ class Account(BaseModel):
     # Person fields
     person_type = models.CharField(choices=PERSON_TYPES, max_length=10, default="", blank=True)
     buyer_or_seller = models.CharField(choices=BUYER_OR_SELLER_CHOICES, max_length=10, default="", blank=True)
+    defaultSalePriceType = models.ForeignKey(SalePriceType, on_delete=models.PROTECT, null=True)
 
     phone_1 = models.CharField(max_length=20, default="", blank=True)
     phone_2 = models.CharField(max_length=20, default="", blank=True)

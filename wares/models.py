@@ -7,7 +7,6 @@ from django.db.models.functions.comparison import Coalesce
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
-from accounts.accounts.models import Account
 from companies.models import FinancialYear
 from helpers.functions import get_current_user, get_new_child_code
 from helpers.models import BaseModel, DECIMAL
@@ -103,7 +102,6 @@ class Ware(BaseModel):
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
 
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='wares', null=True, blank=True)
-    supplier = models.ForeignKey(Account, on_delete=models.PROTECT, null=True, blank=True)
 
     is_service = models.BooleanField(default=False)
 
