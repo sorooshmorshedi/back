@@ -53,7 +53,7 @@ class SanadSerializer(serializers.ModelSerializer):
 class FactorSanadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Factor
-        fields = ('id', 'type')
+        fields = ('id', 'type', 'code')
 
 
 class TransactionSanadSerializer(serializers.ModelSerializer):

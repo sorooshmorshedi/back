@@ -6,6 +6,7 @@ from factors.models import Factor
 from factors.views.definite_factor import DefiniteFactor
 from helpers.db import queryset_iterator
 from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
+from sanads.serializers import FactorSanadSerializer
 from server.settings import BASE_DIR
 from users.models import User
 from wares.models import WareInventory
@@ -66,17 +67,23 @@ class Command(BaseCommand):
             financial_year=financial_year,
             is_definite=True
         ).all()
+
+        errors = []
         for factor in queryset_iterator(qs, key=('definition_date',)):
             DefiniteFactor.updateFactorInventory(factor)
 
             for item in factor.items.all():
                 for fee in item.remain_fees:
                     if fee['count'] < 0:
-                        raise ValidationError("موجودی کالای {} برای فاکتور {} شماره {} منفی است".format(
-                            item.ware.name,
-                            factor.get_type_display(),
-                            factor.code
-                        ))
+                        errors.append({
+                            'ware_name': item.ware.name,
+                            'count': abs(fee['count']),
+                            'factor_item_order': item.order,
+                            'factor': FactorSanadSerializer(factor).data
+                        })
+
+        if len(errors):
+            raise ValidationError(errors)
 
         financial_year.are_factors_sorted = True
         financial_year.save()
