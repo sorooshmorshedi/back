@@ -47,7 +47,7 @@ def get_salePrices(obj: Ware):
         'unit': sale_price.unit.id,
         'conversion_factor': sale_price.conversion_factor,
         'prices': {}
-    } for sale_price in obj.salePrices.all()]
+    } for sale_price in SalePrice.objects.filter(ware=obj).order_by('unit_id').distinct('unit_id')]
 
     for sale_price in obj.salePrices.all():
         sale_price_dict = [d for d in sale_prices if d['unit'] == sale_price.unit.id][0]
