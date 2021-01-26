@@ -2,6 +2,8 @@ from factors.models import FactorItem, Factor
 from reports.lists.serializers import FactorListCreateUpdateSerializer, WareSimpleSerializer, WarehouseSimpleSerializer
 from rest_framework import serializers
 
+from wares.serializers import UnitSerializer
+
 
 class BuySaleSerializer(serializers.ModelSerializer):
     factor = FactorListCreateUpdateSerializer(read_only=True, many=False)
@@ -13,6 +15,7 @@ class BuySaleSerializer(serializers.ModelSerializer):
     total_value = serializers.SerializerMethodField()
 
     count = serializers.SerializerMethodField()
+    unit = UnitSerializer()
 
     def get_value(self, obj):
         return self.format_value(obj, obj.value)
