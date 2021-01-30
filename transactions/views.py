@@ -8,14 +8,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.defaultAccounts.models import DefaultAccount
 from factors.models import Factor
+from factors.serializers import FactorListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_object_by_code
+from helpers.functions import get_object_by_code, get_object_accounts
 from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction, TransactionItem
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer, \
-    TransactionFactorListSerializer
+    TransactionFactorListSerializer, Sum
 
 
 def get_transaction_permission_basename(transaction_type):
@@ -183,3 +185,46 @@ class TransactionFactorsListView(APIView):
                 context={'transaction_id': transaction_id}
             ).data
         )
+
+
+class QuickFactorTransaction(APIView):
+    def post(self, request):
+        user = request.user
+        data = request.data
+        factor = get_object_or_404(Factor, pk=data.get('factor_id'))
+        value = factor.total_sum - factor.paidValue
+
+        if factor.type in Factor.BUY_GROUP:
+            transaction_type = Transaction.PAYMENT
+        else:
+            transaction_type = Transaction.RECEIVE
+
+        codename = data.get('default_account_codename')
+
+        default_account = DefaultAccount.get(codename)
+
+        transaction = Transaction.objects.create(
+            financial_year=user.active_financial_year,
+            type=transaction_type,
+            code=Transaction.newCodes(transaction_type),
+            date=factor.date,
+            **get_object_accounts(factor)
+        )
+        transaction.items.create(
+            financial_year=transaction.financial_year,
+            type=default_account,
+            **get_object_accounts(default_account),
+            date=factor.date,
+            value=value
+        )
+        transaction.factorPayments.create(
+            financial_year=transaction.financial_year,
+            factor=factor,
+            value=value
+        )
+        transaction.updateSanad(user)
+
+        factor.paidValue += value
+        factor.save()
+
+        return Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)

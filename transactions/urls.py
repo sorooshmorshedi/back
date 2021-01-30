@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from transactions.views import TransactionCreateView, TransactionDetailView, TransactionByPositionView, \
-    ConfirmTransaction, TransactionFactorsListView
+    ConfirmTransaction, TransactionFactorsListView, QuickFactorTransaction
 
 urlpatterns = [
     url(r'^$', TransactionCreateView.as_view(), name=''),
@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/confirm/$', ConfirmTransaction.as_view(), name=''),
     url(r'^byPosition$', TransactionByPositionView.as_view(), name=''),
     url(r'^factors$', TransactionFactorsListView.as_view(), name=''),
+    url(r'^quickFactorTransaction$', QuickFactorTransaction.as_view(), name=''),
 ]
