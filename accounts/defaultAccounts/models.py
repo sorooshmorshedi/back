@@ -1,4 +1,5 @@
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
@@ -65,7 +66,11 @@ class DefaultAccount(BaseModel):
     def get(codename, financial_year=None):
         qs = DefaultAccount.objects.inFinancialYear(financial_year)
         try:
-            return qs.get(codename=codename)
+            default_account = qs.get(codename=codename)
+            if not default_account.account:
+                raise ValidationError("حساب پیشفرض {} را مشخص نشده است".format(default_account.name))
+
+            return default_account
         except DefaultAccount.MultipleObjectsReturned as e:
             print(qs.filter(codename=codename))
             raise e
