@@ -9,7 +9,6 @@ from factors.models import *
 from factors.views.definite_factor import DefiniteFactor
 from helpers.functions import get_current_user
 from sanads.serializers import SanadSerializer
-from transactions.serializers import TransactionSerializerForPayment
 from users.serializers import UserSimpleSerializer
 from wares.models import WareInventory
 from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, \
@@ -107,6 +106,12 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
             'explanation',)
 
 
+class TransactionSerializerForPayment(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+
+
 class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
     transaction = TransactionSerializerForPayment(read_only=True, many=False)
 
@@ -135,21 +140,6 @@ class FactorPaymentSerializer(serializers.ModelSerializer):
         model = FactorPayment
         fields = '__all__'
         read_only_fields = ('financial_year',)
-
-
-class NotPaidFactorsCreateUpdateSerializer(FactorCreateUpdateSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
-    floatAccount = FloatAccountSerializer(read_only=True, many=False)
-    costCenter = FloatAccountSerializer(read_only=True, many=False)
-    payments = FactorPaymentSerializer(read_only=True, many=True)
-    sum = serializers.SerializerMethodField()
-
-    def get_sum(self, obj):
-        return obj.totalSum
-
-    class Meta:
-        model = Factor
-        fields = '__all__'
 
 
 class TransferListRetrieveSerializer(serializers.ModelSerializer):

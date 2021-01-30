@@ -182,55 +182,6 @@ class FactorModelView(viewsets.ModelViewSet):
         return res
 
 
-class NotPaidFactorsView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-
-    @property
-    def permission_basename(self):
-
-        transaction_type = self.request.GET.get('transactionType')
-        if transaction_type == Transaction.RECEIVE:
-            return 'notReceivedFactor'
-        else:
-            return 'notPaidFactor'
-
-    def get(self, request):
-
-        filters = Q()
-
-        if 'transactionType' not in request.GET:
-            return Response([], status=status.HTTP_400_BAD_REQUEST)
-
-        tType = request.GET['transactionType']
-
-        if 'transactionId' in request.GET:
-            tId = request.GET['transactionId']
-            filters &= (~Q(sanad__bed=F('paidValue')) | Q(payments__transaction_id=tId))
-        else:
-            filters &= ~Q(sanad__bed=F('paidValue'))
-
-        if tType == 'receive':
-            filters &= Q(type__in=("sale", "backFromBuy"))
-        else:
-            filters &= Q(type__in=("buy", "backFromSale"))
-
-        if 'accountId' in request.GET:
-            account_id = request.GET['accountId']
-            filters &= Q(account=account_id)
-
-        qs = Factor.objects.hasAccess('get', self.permission_basename) \
-            .exclude(sanad__bed=0) \
-            .filter(filters) \
-            .distinct() \
-            .prefetch_related('items') \
-            .prefetch_related('payments') \
-            .prefetch_related('account') \
-            .prefetch_related('floatAccount') \
-            .prefetch_related('costCenter')
-        res = Response(NotPaidFactorsCreateUpdateSerializer(qs, many=True).data)
-        return res
-
-
 class GetFactorByPositionView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 

@@ -84,6 +84,7 @@ class Transaction(BaseModel, ConfirmationMixin):
         from transactions.serializers import TransactionItemCreateUpdateSerializer
         from factors.serializers import FactorPaymentSerializer
         from cheques.views import SubmitChequeApiView
+        from factors.models import FactorPayment, Factor
 
         items_data = data.get('items')
         payments_data = data.get('payments')
@@ -109,6 +110,10 @@ class Transaction(BaseModel, ConfirmationMixin):
             TransactionItemCreateUpdateSerializer,
         ).sync()
 
+        factor_ids_to_update = [o['factor'] for o in payments_data.get('items')]
+        factor_ids_to_update += [o.factor_id for o in
+                                 FactorPayment.objects.filter(id__in=payments_data.get('ids_to_delete'))]
+
         MassRelatedCUD(
             user,
             payments_data.get('items'),
@@ -119,9 +124,8 @@ class Transaction(BaseModel, ConfirmationMixin):
             FactorPaymentSerializer
         ).sync()
 
-        for payment in self.payments.all():
-            factor = payment.factor
-            factor.paidValue = factor.payments.aggregate(Sum('value'))['value__sum']
+        for factor in Factor.objects.filter(id__in=factor_ids_to_update).all():
+            factor.paidValue = factor.payments.aggregate(Sum('value'))['value__sum'] or 0
             factor.save()
 
     @property

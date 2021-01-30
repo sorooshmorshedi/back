@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.models.query import Prefetch
+from django.db.models import Q, F
 
 from rest_framework import generics, serializers
 from rest_framework import status
@@ -8,12 +8,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from factors.models import Factor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction, TransactionItem
-from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer
+from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer, \
+    TransactionFactorListSerializer
 
 
 def get_transaction_permission_basename(transaction_type):
@@ -131,3 +133,53 @@ class ConfirmTransaction(ConfirmView):
     def permission_codename(self):
         instance = self.get_object()
         return get_transaction_permission_basename(instance.type)
+
+
+class TransactionFactorsListView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_basename(self):
+
+        transaction_type = self.request.GET.get('transaction_type')
+        if transaction_type == Transaction.RECEIVE:
+            return 'notReceivedFactor'
+        else:
+            return 'notPaidFactor'
+
+    def get(self, request):
+        data = request.GET
+
+        account_id = data.get('account_id')
+        floatAccount_id = data.get('floatAccount_id')
+        costCenter_id = data.get('costCenter_id')
+        transaction_type = data.get('transaction_type')
+        transaction_id = data.get('transaction_id')  # optional, others are required
+
+        qs = Factor.objects.filter(
+            account_id=account_id,
+            floatAccount_id=floatAccount_id,
+            costCenter_id=costCenter_id
+        )
+
+        if transaction_type == Transaction.PAYMENT:
+            qs = qs.filter(type__in=Factor.BUY_GROUP)
+        else:
+            qs = qs.filter(type__in=Factor.SALE_GROUP)
+
+        if transaction_id:
+            qs = qs.filter(
+                Q(
+                    Q(payments=None) | Q(payments__transaction_id=transaction_id)
+                )
+            )
+        else:
+            qs = qs.filter(~Q(paidValue=F('total_sum')))
+
+        return Response(
+            TransactionFactorListSerializer(
+                qs,
+                many=True,
+                context={'transaction_id': transaction_id}
+            ).data
+        )

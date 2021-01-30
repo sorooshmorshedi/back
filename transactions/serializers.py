@@ -4,6 +4,7 @@ from accounts.accounts.serializers import FloatAccountSerializer, AccountListSer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from cheques.serializers import ChequeListRetrieveSerializer
+from factors.models import FactorPayment, Factor
 from imprests.serializers import ImprestSettlementListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import *
@@ -44,6 +45,57 @@ class TransactionCreateUpdateSerializer(serializers.ModelSerializer):
         return super(TransactionCreateUpdateSerializer, self).validate(data)
 
 
+class TransactionFactorPaymentFactorRetrieveSerializer(serializers.ModelSerializer):
+    totalSum = serializers.CharField()
+
+    class Meta:
+        model = Factor
+        fields = ('id', 'type', 'code', 'temporary_code', 'explanation', 'date', 'totalSum', 'paidValue')
+
+
+class TransactionFactorPaymentRetrieveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FactorPayment
+        fields = '__all__'
+
+
+class TransactionFactorListSerializer(serializers.ModelSerializer):
+    remain = serializers.SerializerMethodField()
+    previous_paid_value = serializers.SerializerMethodField()
+    payment = serializers.SerializerMethodField()
+
+    def get_remain(self, obj: Factor):
+        return obj.total_sum - obj.paidValue
+
+    def get_previous_paid_value(self, obj: Factor):
+        payment = obj.payments.filter(transaction_id=self.transaction_id).first()
+        if payment:
+            return obj.paidValue - payment.value
+        else:
+            return obj.paidValue
+
+    def get_payment(self, obj: Factor):
+        payment = obj.payments.filter(transaction_id=self.transaction_id).first()
+        if payment:
+            return TransactionFactorPaymentRetrieveSerializer(payment).data
+        else:
+            return {
+                'factor': obj.id,
+                'value': 0
+            }
+
+    @property
+    def transaction_id(self):
+        return self.context.get('transaction_id')
+
+    class Meta:
+        model = Factor
+        fields = (
+            'id', 'type', 'code', 'temporary_code', 'explanation', 'date', 'total_sum', 'remain', 'previous_paid_value',
+            'payment'
+        )
+
+
 class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
@@ -52,13 +104,8 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     sanad = SanadSerializer(read_only=True, many=False)
     imprestSettlement = ImprestSettlementListRetrieveSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(many=False, read_only=True)
+    factorPayments = TransactionFactorPaymentRetrieveSerializer(many=True)
 
-    class Meta:
-        model = Transaction
-        fields = '__all__'
-
-
-class TransactionSerializerForPayment(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = '__all__'

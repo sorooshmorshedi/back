@@ -116,6 +116,8 @@ class Factor(BaseModel, ConfirmationMixin):
     is_definite = models.BooleanField(default=0)
     definition_date = models.DateTimeField(blank=True, null=True)
 
+    total_sum = DECIMAL()
+
     class Meta(BaseModel.Meta):
         permissions = (
             ('get.buyFactor', 'مشاهده فاکتور خرید'),
@@ -249,10 +251,6 @@ class Factor(BaseModel, ConfirmationMixin):
         return Decimal(self.sum - self.discountSum)
 
     @property
-    def totalSum(self):
-        return Decimal(self.sum - self.discountSum + self.taxSum)
-
-    @property
     def expensesSum(self):
         return Decimal(FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum'])
 
@@ -276,21 +274,21 @@ class Factor(BaseModel, ConfirmationMixin):
         if self.type in ('buy', 'backFromSale'):
             after_factor_title = 'مبلغ قابل پرداخت'
             if remain_type == 'bes':
-                before_factor = self.totalSum + remain_value
+                before_factor = self.total_sum + remain_value
                 sign = '+'
                 before_factor_title = 'مانده بستانکار'
             else:
-                before_factor = self.totalSum - remain_value
+                before_factor = self.total_sum - remain_value
                 sign = '-'
                 before_factor_title = 'مانده بدهکار'
         else:
             after_factor_title = 'مبلغ قابل دریافت'
             if remain_type == 'bes':
-                before_factor = self.totalSum - remain_value
+                before_factor = self.total_sum - remain_value
                 sign = '-'
                 before_factor_title = 'مانده بستانکار'
             else:
-                before_factor = self.totalSum + remain_value
+                before_factor = self.total_sum + remain_value
                 sign = '+'
                 before_factor_title = 'مانده بدهکار'
 
@@ -416,6 +414,10 @@ class Factor(BaseModel, ConfirmationMixin):
         else:
             return True
 
+    def save(self, *args, **kwargs) -> None:
+        self.total_sum = self.sum - self.discountSum + self.taxSum
+        super(Factor, self).save(*args, **kwargs)
+
 
 class FactorExpense(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_expenses')
@@ -446,7 +448,7 @@ class FactorExpense(BaseModel):
 class FactorPayment(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_payments')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='payments')
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='payments')
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='factorPayments')
     value = DECIMAL()
 
     class Meta(BaseModel.Meta):
