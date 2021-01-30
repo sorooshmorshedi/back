@@ -17271,5 +17271,65 @@
       "usage": "factor",
       "codename": "warehouseDeductionAndAddition"
     }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 33,
+    "fields": {
+      "financial_year": 1,
+      "name": "وجه نقد سریع",
+      "account_level": 3,
+      "explanation": "",
+      "account": null,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "receive",
+      "codename": "quickCacheReceive"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 34,
+    "fields": {
+      "financial_year": 1,
+      "name": "کارت خوان سریع",
+      "account_level": 3,
+      "explanation": "",
+      "account": null,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "receive",
+      "codename": "quickPosReceive"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 35,
+    "fields": {
+      "financial_year": 1,
+      "name": "وجه نقد سریع",
+      "account_level": 3,
+      "explanation": "",
+      "account": null,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "payment",
+      "codename": "quickCachePayment"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 36,
+    "fields": {
+      "financial_year": 1,
+      "name": "بانکی سریع",
+      "account_level": 3,
+      "explanation": "",
+      "account": null,
+      "floatAccount": null,
+      "costCenter": null,
+      "usage": "payment",
+      "codename": "quickBankPayment"
+    }
   }
 ]

@@ -131,7 +131,6 @@
       "level": 3,
       "barcode": "12",
       "isDisabled": false,
-      "price": "2100000",
       "pricingType": "f",
       "minSale": 3,
       "maxSale": 12,
@@ -141,8 +140,6 @@
       "updated_at": "1397-12-28",
       "parent": 3,
       "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
       "is_service": false
     }
   },
@@ -152,23 +149,19 @@
     "fields": {
       "financial_year": 1,
       "name": "کالای دو",
-      "code": "100101002",
+      "code": "100101001",
       "level": 3,
-      "barcode": null,
-      "explanation": null,
+      "barcode": "12",
       "isDisabled": false,
-      "price": "1600000",
       "pricingType": "f",
-      "minSale": null,
-      "maxSale": null,
-      "minInventory": null,
-      "maxInventory": null,
-      "created_at": "1398-12-03",
+      "minSale": 3,
+      "maxSale": 12,
+      "minInventory": 5,
+      "maxInventory": 15,
+      "created_at": "1398-12-21",
       "updated_at": "1397-12-28",
       "parent": 3,
       "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
       "is_service": false
     }
   },
@@ -183,7 +176,6 @@
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
-      "price": "3000000",
       "pricingType": "f",
       "minSale": null,
       "maxSale": null,
@@ -193,8 +185,6 @@
       "updated_at": "1397-12-28",
       "parent": 4,
       "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
       "is_service": false
     }
   },
@@ -209,7 +199,6 @@
       "barcode": null,
       "explanation": null,
       "isDisabled": false,
-      "price": "2400000",
       "pricingType": "f",
       "minSale": null,
       "maxSale": null,
@@ -219,9 +208,55 @@
       "updated_at": "1397-12-28",
       "parent": 4,
       "warehouse": 1,
-      "unit": 1,
-      "supplier": null,
       "is_service": false
+    }
+  },
+  {
+    "model": "wares.salePriceType",
+    "pk": 1,
+    "fields": {
+      "financial_year": 1,
+      "name": "فروش عادی"
+    }
+  },
+  {
+    "model": "wares.salePrice",
+    "pk": 1,
+    "fields": {
+      "type": 1,
+      "ware": 5,
+      "unit": 1,
+      "price": 1000
+    }
+  },
+  {
+    "model": "wares.salePrice",
+    "pk": 2,
+    "fields": {
+      "type": 1,
+      "ware": 6,
+      "unit": 1,
+      "price": 2000
+    }
+  },
+  {
+    "model": "wares.salePrice",
+    "pk": 3,
+    "fields": {
+      "type": 1,
+      "ware": 7,
+      "unit": 1,
+      "price": 3000
+    }
+  },
+  {
+    "model": "wares.salePrice",
+    "pk": 4,
+    "fields": {
+      "type": 1,
+      "ware": 8,
+      "unit": 1,
+      "price": 4000
     }
   }
 ]
