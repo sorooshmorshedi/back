@@ -29,13 +29,10 @@ class Command(BaseCommand):
             if not codename:
                 continue
 
-            del fields['financial_year']
-            del fields['codename']
-            del fields['account']
-            if 'floatAccount' in fields:
-                del fields['floatAccount']
-            if 'costCenter' in fields:
-                del fields['costCenter']
+            excluded_fields = ('financial_year', 'codename', 'account', 'floatAccount', 'costCenter')
+            for field in excluded_fields:
+                if field in fields:
+                    del fields[field]
 
             for financial_year in FinancialYear.objects.all():
                 try:
