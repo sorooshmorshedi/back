@@ -9,6 +9,7 @@ from factors.models import Factor, FactorItem, Transfer, Adjustment, WarehouseHa
 from helpers.filters import BASE_FIELD_FILTERS, filter_created_by_name
 from sanads.models import Sanad
 from transactions.models import Transaction
+from wares.models import SalePrice, SalePriceChange, WareSalePriceChange
 
 
 class TransactionFilter(filters.FilterSet):
@@ -74,7 +75,6 @@ class ChequebookFilter(filters.FilterSet):
 
 
 class SanadFilter(filters.FilterSet):
-
     created_by__name = CharFilter(method=filter_created_by_name)
     created_by__name__icontains = CharFilter(method=filter_created_by_name)
 
@@ -209,3 +209,63 @@ class WarehouseHandlingFilter(filters.FilterSet):
             },
         }
 
+
+class SalePriceFilter(filters.FilterSet):
+    class Meta:
+        model = SalePrice
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'type': ('exact',),
+            'type__name': BASE_FIELD_FILTERS,
+            'ware': ('exact',),
+            'ware__name': BASE_FIELD_FILTERS,
+            'ware__code': BASE_FIELD_FILTERS,
+            'mainUnit': ('exact',),
+            'mainUnit__name': BASE_FIELD_FILTERS,
+            'unit': ('exact',),
+            'unit__name': BASE_FIELD_FILTERS,
+            'conversion_factor': BASE_FIELD_FILTERS,
+            'price': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class SalePriceChangeFilter(filters.FilterSet):
+    class Meta:
+        model = SalePriceChange
+        fields = {
+            'is_increase': ('exact', ),
+            'is_percent': ('exact', ),
+            'rate': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class WareSalePriceChangeFilter(filters.FilterSet):
+    class Meta:
+        model = WareSalePriceChange
+        fields = {
+            'salePriceChange': ('exact', ),
+            'salePrice__ware__name': BASE_FIELD_FILTERS,
+            'salePrice__ware__code': BASE_FIELD_FILTERS,
+            'salePrice__type__name': BASE_FIELD_FILTERS,
+            'salePrice__mainUnit__name': BASE_FIELD_FILTERS,
+            'salePrice__unit__name': BASE_FIELD_FILTERS,
+            'salePrice__conversion_factor': BASE_FIELD_FILTERS,
+            'salePrice__price': BASE_FIELD_FILTERS,
+            'previous_price': BASE_FIELD_FILTERS,
+            'new_price': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }

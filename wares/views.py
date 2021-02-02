@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any
 
 from django.core.management import call_command
@@ -14,6 +15,8 @@ from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
     RetrieveUpdateDestroyAPIViewWithAutoFinancialYear
 from helpers.views.ListCreateAPIViewWithAutoFinancialYear import ListCreateAPIViewWithAutoFinancialYear
+from reports.lists.filters import SalePriceFilter
+from wares.models import SalePriceChange, WareSalePriceChange
 from wares.serializers import *
 
 
@@ -147,5 +150,53 @@ class SortInventoryView(APIView):
             raise ValidationError("فقط سیستم های ادواری امکان مرتب سازی کاردکس را دارند")
 
         call_command('refresh_inventory', user.id)
+
+        return Response([])
+
+
+class ChangeSalePricesView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = "salePrice"
+
+    def put(self, request):
+        qs = SalePrice.objects.hasAccess('get').all()
+        qs = SalePriceFilter(request.data['filters'], qs).qs
+
+        try:
+            is_percent = request.data['operation']['is_percent']
+            is_increase = request.data['operation']['is_increase']
+            rate = Decimal(request.data['operation']['rate'])
+        except IndexError:
+            raise ValidationError("لطفا همه فیلد ها را وارد کنید")
+
+        sale_price_change = SalePriceChange.objects.create(
+            is_percent=is_percent,
+            is_increase=is_increase,
+            rate=rate
+        )
+
+        for sale_price in qs.all():
+            price = sale_price.price
+            previous_price = price
+
+            if is_percent:
+                diff = price * rate / 100
+            else:
+                diff = rate
+
+            if is_increase:
+                new_price = price + diff
+            else:
+                new_price = price - diff
+
+            sale_price.price = new_price
+            sale_price.save()
+
+            WareSalePriceChange.objects.create(
+                salePriceChange=sale_price_change,
+                salePrice=sale_price,
+                previous_price=previous_price,
+                new_price=new_price
+            )
 
         return Response([])

@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from wares.views import WareListCreate, WareDetail, WarehouseListCreate, UnitListCreate, UnitDetail, WarehouseDetail, \
-    SortInventoryView, SalePriceTypeListCreate, SalePriceTypeDetail
+    SortInventoryView, SalePriceTypeListCreate, SalePriceTypeDetail, ChangeSalePricesView
 
 urlpatterns = [
     url(r'^wares$', WareListCreate.as_view(), name='Wares'),
@@ -18,4 +18,5 @@ urlpatterns = [
 
     url(r'^sortInventory$', SortInventoryView.as_view(), name='sortInventory'),
 
+    url(r'^changeSalePrices$', ChangeSalePricesView.as_view(), name='changeSalePrice'),
 ]

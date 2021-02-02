@@ -28,6 +28,9 @@ urlpatterns = [
     url(r'^lists/factorItems$', FactorItemListView.as_view(), name=''),
     url(r'^lists/adjustments$', AdjustmentListView.as_view(), name=''),
     url(r'^lists/warehouseHandlings$', WarehouseHandlingListView.as_view(), name=''),
+    url(r'^lists/salePrices$', SalePriceListView.as_view(), name=''),
+    url(r'^lists/salePriceChanges$', SalePriceChangeListView.as_view(), name=''),
+    url(r'^lists/wareSalePriceChanges$', WareSalePriceChangeListView.as_view(), name=''),
 ]
 
 # Lists Export

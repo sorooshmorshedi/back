@@ -13,6 +13,7 @@ from reports.lists.filters import *
 from reports.lists.serializers import *
 from transactions.models import Transaction
 from transactions.views import get_transaction_permission_basename
+from wares.models import WareSalePriceChange
 
 
 class TransactionListView(generics.ListAPIView):
@@ -172,3 +173,42 @@ class WarehouseHandlingListView(generics.ListAPIView):
         return WarehouseHandling.objects.hasAccess('get').prefetch_related(
             Prefetch('items', WarehouseHandlingItem.objects.order_by('order'))
         ).all()
+
+
+class SalePriceListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.salePrice"
+    serializer_class = SalePriceListSerializer
+    filterset_class = SalePriceFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return SalePrice.objects.hasAccess('get').all()
+
+
+class SalePriceChangeListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.salePriceChange"
+    serializer_class = SalePriceChangeListSerializer
+    filterset_class = SalePriceChangeFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return SalePriceChange.objects.hasAccess('get').all()
+
+
+class WareSalePriceChangeListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.salePriceChange"
+    serializer_class = WareSalePriceChangeListSerializer
+    filterset_class = WareSalePriceChangeFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return WareSalePriceChange.objects.hasAccess('get', self.permission_codename).all()

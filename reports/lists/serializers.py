@@ -11,7 +11,8 @@ from sanads.models import Sanad
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from users.serializers import UserSimpleSerializer
-from wares.models import Ware, Warehouse
+from wares.models import Ware, Warehouse, SalePrice, SalePriceChange, WareSalePriceChange
+from wares.serializers import SalePriceTypeSerializer, WareListSerializer, UnitSerializer
 
 
 class SanadListSerializer(serializers.ModelSerializer):
@@ -107,4 +108,31 @@ class FactorItemListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FactorItem
+        fields = '__all__'
+
+
+class SalePriceListSerializer(serializers.ModelSerializer):
+    ware = WareListSerializer()
+    type = SalePriceTypeSerializer()
+    mainUnit = UnitSerializer()
+    unit = UnitSerializer()
+
+    class Meta:
+        model = SalePrice
+        fields = '__all__'
+
+
+class SalePriceChangeListSerializer(serializers.ModelSerializer):
+    created_by = UserSimpleSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = SalePriceChange
+        fields = '__all__'
+
+
+class WareSalePriceChangeListSerializer(serializers.ModelSerializer):
+    salePrice = SalePriceListSerializer()
+
+    class Meta:
+        model = WareSalePriceChange
         fields = '__all__'

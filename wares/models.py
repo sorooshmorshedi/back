@@ -19,7 +19,7 @@ class Unit(BaseModel):
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
-        ordering = ('pk', )
+        ordering = ('pk',)
         permission_basename = 'unit'
         permissions = (
             ('get.unit', 'مشاهده واحد'),
@@ -214,7 +214,7 @@ class SalePriceType(BaseModel):
 
     class Meta(BaseModel.Meta):
         permission_basename = 'salePriceType'
-        ordering = ('id', )
+        ordering = ('id',)
         permissions = (
             ('get.salePriceType', 'مشاهده نوع های نرخ فروش '),
             ('create.salePriceType', 'تعریف نوع های نرخ فروش '),
@@ -250,10 +250,39 @@ class SalePrice(BaseModel):
             ('update.salePrice', 'ویرایش قیمت فروش'),
             ('delete.salePrice', 'حذف قیمت فروش'),
 
-            ('getOwn.salePrice', 'مشاهده قیمت های خود'),
-            ('updateOwn.salePrice', 'ویرایش قیمت های خود'),
-            ('deleteOwn.salePrice', 'حذف قیمت های خود'),
+            ('getOwn.salePrice', 'مشاهده قیمت های فروش خود'),
+            ('updateOwn.salePrice', 'ویرایش قیمت های فروش خود'),
+            ('deleteOwn.salePrice', 'حذف قیمت های فروش خود'),
         )
+
+
+class SalePriceChange(BaseModel):
+    is_increase = models.BooleanField()
+    is_percent = models.BooleanField()
+    rate = DECIMAL()
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        ordering = ('-pk',)
+        permission_basename = 'salePriceChange'
+        permissions = (
+            ('get.salePriceChange', 'مشاهده تغییرات قیمت فروش'),
+            ('getOwn.salePriceChange', 'مشاهده تغییرات قیمت های فروش خود'),
+        )
+
+
+class WareSalePriceChange(BaseModel):
+    salePriceChange = models.ForeignKey(SalePriceChange, on_delete=models.CASCADE)
+    salePrice = models.ForeignKey(SalePrice, on_delete=models.CASCADE)
+
+    previous_price = DECIMAL()
+    new_price = DECIMAL()
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        ordering = ('pk',)
+        permission_basename = ''
+        permissions = ()
 
 
 class WareInventory(BaseModel):
