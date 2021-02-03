@@ -21,7 +21,9 @@ class TransactionFilter(filters.FilterSet):
             'date': BASE_FIELD_FILTERS,
             'explanation': ['icontains'],
             'type': ['exact'],
-            'sanad__bed': BASE_FIELD_FILTERS
+            'sanad__bed': BASE_FIELD_FILTERS,
+            'imprestSettlement': ['isnull'],
+            'imprestSettlement__is_settled': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
