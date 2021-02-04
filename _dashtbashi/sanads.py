@@ -27,6 +27,7 @@ class LadingSanad:
         else:
             clearSanad(sanad)
             sanad.is_auto_created = True
+            sanad.date = self.lading.sanad_date
             sanad.save()
 
         sanad_items = []
