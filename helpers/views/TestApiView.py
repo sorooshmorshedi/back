@@ -10,6 +10,7 @@ from accounts.accounts.models import Account, FloatAccountRelation, FloatAccount
 from accounts.accounts.views import AccountListCreate, SanadItem
 from companies.models import FinancialYear
 # from helpers.db import select_raw_sql
+from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
 from sanads.models import Sanad, newSanadCode
 from users.models import User
 
@@ -17,6 +18,7 @@ from users.models import User
 class TestApiView(APIView):
 
     def get(self, request):
+        ModifyRequestMiddleware.thread_local = type('thread_local', (object,), {'user': User.objects.get(pk=3)})
 
         for lading in Lading.objects.all():
             LadingSanad(lading).update()
