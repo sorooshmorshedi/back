@@ -66,6 +66,7 @@ class Command(BaseCommand):
         ).all()
         for item in queryset_iterator(qs):
             AccountBalance.update_balance(
+                financial_year=item.financial_year,
                 **get_object_accounts(item),
                 bed_change=item.bed,
                 bes_change=item.bes
