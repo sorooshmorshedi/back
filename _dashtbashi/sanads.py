@@ -8,6 +8,7 @@ from sanads.models import clearSanad, Sanad, newSanadCode
 
 class LadingSanad:
     def __init__(self, lading: Lading):
+        lading.refresh_from_db()
         self.lading = lading
 
     def update(self):
