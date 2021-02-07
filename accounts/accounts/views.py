@@ -71,19 +71,6 @@ class FloatAccountGroupListCreate(ListCreateAPIViewWithAutoFinancialYear):
     serializer_class = FloatAccountGroupSerializer
     permission_basename = 'floatAccountGroup'
 
-    def get_queryset(self):
-        user = self.request.user
-        financial_year = user.active_financial_year
-        queryset = super().get_queryset()
-        queryset = queryset.prefetch_related(
-            Prefetch('floatAccounts',
-                     queryset=FloatAccount.objects.inFinancialYear()
-                     .filter(relation__financial_year=financial_year)
-                     .distinct()
-                     )
-        )
-        return queryset
-
 
 class FloatAccountGroupDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
