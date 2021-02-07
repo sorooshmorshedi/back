@@ -20,6 +20,9 @@ class Command(BaseCommand):
         with open(BASE_DIR + '/home/fixtures/3-accounts.json', 'rb') as fixture_file:
             fixture_data = json.load(fixture_file)
 
+        with open(BASE_DIR + '/home/fixtures/dashtbashi.json', 'rb') as fixture_file:
+            fixture_data += json.load(fixture_file)
+
         items = list(filter(lambda x: x['model'] == 'accounts.defaultaccount', fixture_data))
 
         for item in items:
