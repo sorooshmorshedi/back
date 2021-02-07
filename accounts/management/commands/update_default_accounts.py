@@ -1,5 +1,6 @@
 import json
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
@@ -37,14 +38,18 @@ class Command(BaseCommand):
                 if field in fields:
                     del fields[field]
 
-            for financial_year in FinancialYear.objects.all():
+            print("Codename: {}".format(codename))
+            for financial_year in FinancialYear.objects.filter(pk=21).all():
+                print(" - Financial Year #{}".format(financial_year.id))
                 try:
                     item = DefaultAccount.objects.inFinancialYear(financial_year).get(codename=codename)
                     item.update(**fields)
                 except DefaultAccount.MultipleObjectsReturned:
+                    print(" - - Duplicate {}!".format(codename))
                     qs = DefaultAccount.objects.inFinancialYear(financial_year).filter(codename=codename).order_by('pk')
                     item = qs.first()
                     item.update(**fields)
-                    qs.filter(pk__gt=item.id).delete()
+                    print(" - - ", qs.filter(~Q(pk=item.id)).delete())
                 except DefaultAccount.DoesNotExist:
+                    print(" - - Creating Default Account")
                     DefaultAccount.objects.create(financial_year=financial_year, codename=codename, **fields)
