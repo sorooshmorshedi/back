@@ -1,19 +1,16 @@
+from typing import List
 from django.db.models import Q
 from django.db.models import Sum
-from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
-from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from wkhtmltopdf.views import PDFTemplateView
 
 from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
-from accounts.accounts.serializers import AccountTypeSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.exports import get_xlsx_response, MPDFTemplateView
-from reports.balance.serializers import BalanceAccountSerializer, BalanceFloatAccountSerializer, \
-    BalanceFloatAccountGroupSerializer
+from helpers.db import select_raw_sql
+from helpers.exports import get_xlsx_response
+from reports.balance.serializers import BalanceAccountSerializer
 from reports.filters import get_account_sanad_items_filter
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
@@ -67,38 +64,113 @@ class AccountBalanceView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.accountBalanceReport'
 
+    _rows = None
+
+    def get_rows(self):
+
+        if self._rows:
+            return self._rows
+
+        request = self.request
+        data = request.GET
+        balance_status = request.GET.get('balance_status')
+
+        where_filters = "true and "
+        if 'from_date' in data:
+            where_filters += "sanad.date >= '{}' and ".format(data['from_date'])
+        if 'to_date' in data:
+            where_filters += "sanad.date <= '{}' and ".format(data['to_date'])
+        if 'from_code' in data:
+            where_filters += "sanad.code >= {} and ".format(data['from_code'])
+        if 'to_code' in data:
+            where_filters += "sanad.code <= {} and ".format(data['to_code'])
+        if data.get('skip_closing_sanad', False) == 'true':
+            financial_year = request.user.active_financial_year
+            closing_sanad_names = [
+                'temporaryClosingSanad',
+                'currentEarningsClosingSanad',
+                'permanentsClosingSanad',
+            ]
+            for closing_sanad_name in closing_sanad_names:
+                closing_sanad = getattr(financial_year, closing_sanad_name)
+                if closing_sanad:
+                    where_filters += "sanad.id != {} and ".format(closing_sanad.id)
+
+        where_filters += "true"
+
+        having_filters = "true and "
+        if balance_status == 'with_remain':
+            having_filters += "bed_sum != bes_sum and "
+        elif balance_status == 'without_remain':
+            having_filters += "bed_sum = bes_sum and "
+        elif balance_status == 'bed_remain':
+            having_filters += "bed_sum > bes_sum and "
+        elif balance_status == 'bes_remain':
+            having_filters += "bed_sum < bes_sum and "
+        elif balance_status == 'with_transaction':
+            having_filters += "(bed_sum != 0 or bes_sum != 0) and "
+        elif balance_status == 'without_transaction':
+            having_filters += "bed_sum = 0 and bes_sum = 0 and "
+
+        having_filters += " true"
+
+        sql = """
+            select 
+                account_id, 
+                \"floatAccount_id\",
+                \"costCenter_id\", 
+                sum(sanadItem.bed) as bed_sum, sum(sanadItem.bes) as bes_sum
+            from sanads_sanaditem as sanadItem join sanads_sanad as sanad on sanadItem.sanad_id = sanad.id
+            where {}
+            group by account_id, \"floatAccount_id\", \"costCenter_id\"
+            order by account_id
+        """.format(where_filters)
+
+        self._rows = select_raw_sql(sql)
+        return self._rows
+
+    def set_remain(self, account: Account, accounts: List[Account]):
+
+        if hasattr(account, 'bed_sum'):
+            return
+
+        account.bed_sum = 0
+        account.bes_sum = 0
+        account.bed_remain = 0
+        account.bes_remain = 0
+
+        if account.level == Account.TAFSILI:
+            rows = self.get_rows()
+            for row in rows:
+                if row['account_id'] == account.id:
+                    account.bed_sum += row['bed_sum']
+                    account.bes_sum += row['bes_sum']
+
+            remain = account.bed_sum - account.bes_sum
+            if remain > 0:
+                account.bed_remain = remain
+            else:
+                account.bes_remain = -remain
+        else:
+            for sub_account in accounts:
+                if sub_account.parent_id == account.id:
+                    self.set_remain(sub_account, accounts)
+                    account.bed_sum += sub_account.bed_sum
+                    account.bes_sum += sub_account.bes_sum
+                    account.bed_remain += sub_account.bed_remain
+                    account.bes_remain += sub_account.bes_remain
+
     def get_accounts(self, request):
-        filters = get_account_sanad_items_filter(request)
+
+
         account_code_starts_with = request.GET.get('account_code_starts_with', '')
         level = request.GET.get('level', None)
         account_type = request.GET.get('account_type')
-        balance_status = request.GET.get('balance_status')
-
         show_differences = request.GET.get('show_differences')
 
-        qs = Account.objects.inFinancialYear().annotate(
-            bed_sum=Coalesce(Sum('sanadItems__bed', filter=filters), 0),
-            bes_sum=Coalesce(Sum('sanadItems__bes', filter=filters), 0)
-        )
+        qs = Account.objects.inFinancialYear()
 
         qs = qs.filter(code__startswith=account_code_starts_with, )
-
-        if level:
-            qs = qs.filter(level=level)
-
-        if balance_status == 'with_remain':
-            qs = qs.filter(~Q(bed_sum=F('bes_sum')))
-        elif balance_status == 'without_remain':
-            qs = qs.filter(bed_sum=F('bes_sum'))
-        elif balance_status == 'bed_remain':
-            qs = qs.filter(bed_sum__gt=F('bes_sum'))
-        elif balance_status == 'bes_remain':
-            qs = qs.filter(bes_sum__gt=F('bed_sum'))
-        elif balance_status == 'with_transaction':
-            qs = qs.filter(~Q(bes_sum=0, bed_sum=0))
-        elif balance_status == 'without_transaction':
-            qs = qs.filter(bes_sum=0, bed_sum=0)
-
         if account_type == Account.BUYER:
             qs = qs.filter(account_type=Account.PERSON, buyer_or_seller=Account.BUYER)
         elif account_type == Account.SELLER:
@@ -106,46 +178,40 @@ class AccountBalanceView(APIView):
         elif account_type == Account.BANK:
             qs = qs.filter(account_type=Account.BANK)
 
+        if level:
+            qs = qs.filter(level=level)
+
         accounts = qs.prefetch_related(
-            'floatAccountGroup', 'costCenterGroup', 'type'
-        ).order_by('code')
+            'type',
+            'floatAccountGroup',
+            'costCenterGroup',
+            'floatAccountGroup__floatAccounts',
+            'costCenterGroup__floatAccounts',
+        ).order_by('code').all()
 
         for account in accounts:
-            if account.level != 3:
-                for acc in accounts:
-                    if acc == account or acc.level != 3:
-                        continue
-                    if acc.code.find(account.code) == 0:
-                        account.bed_sum += acc.bed_sum
-                        account.bes_sum += acc.bes_sum
 
-            remain = account.bed_sum - account.bes_sum
-            if remain > 0:
-                account.bed_remain = remain
-                account.bes_remain = 0
-            else:
-                account.bed_remain = 0
-                account.bes_remain = -remain
+            self.set_remain(account, accounts)
 
             if account.type:
-                account.type_data = AccountTypeSerializer(account.type).data
-            if account.floatAccountGroup:
-                account.floatAccountGroup_data = BalanceFloatAccountGroupSerializer(account.floatAccountGroup).data
-            if account.costCenterGroup:
-                account.costCenterGroup_data = BalanceFloatAccountGroupSerializer(account.costCenterGroup).data
+                account.type_data = {
+                    'nature': account.type.nature
+                }
 
             account.floatAccounts_data = []
             account.costCenters_data = []
-            if account.floatAccountGroup:
-                floatAccounts = FloatAccount.objects.inFinancialYear() \
-                    .filter(floatAccountGroups__in=[account.floatAccountGroup]) \
-                    .annotate(bed_sum=Coalesce(Sum('sanadItems__bed',
-                                                   filter=Q(sanadItems__account=account) & filters), 0)) \
-                    .annotate(bes_sum=Coalesce(Sum('sanadItems__bes',
-                                                   filter=Q(sanadItems__account=account) & filters), 0)) \
-                    .prefetch_related('floatAccountGroups')
 
-                for floatAccount in floatAccounts:
+            rows = self.get_rows()
+
+            if account.floatAccountGroup:
+                for floatAccount in account.floatAccountGroup.floatAccounts.all():
+                    floatAccount.bed_sum = 0
+                    floatAccount.bes_sum = 0
+                    for row in rows:
+                        if row['account_id'] == account.id and row['floatAccount_id'] == floatAccount.id:
+                            floatAccount.bed_sum += row['bed_sum']
+                            floatAccount.bes_sum += row['bes_sum']
+
                     remain = floatAccount.bed_sum - floatAccount.bes_sum
                     if remain > 0:
                         floatAccount.bed_remain = remain
@@ -153,18 +219,23 @@ class AccountBalanceView(APIView):
                     else:
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
-                    account.floatAccounts_data.append(BalanceFloatAccountSerializer(floatAccount).data)
+                    account.floatAccounts_data.append({
+                        'name': floatAccount.name,
+                        'bed_sum': floatAccount.bed_sum,
+                        'bes_sum': floatAccount.bes_sum,
+                        'bed_remain': floatAccount.bed_remain,
+                        'bes_remain': floatAccount.bes_remain,
+                    })
 
             if account.costCenterGroup:
-                floatAccounts = FloatAccount.objects.inFinancialYear() \
-                    .filter(floatAccountGroups__in=[account.costCenterGroup]) \
-                    .annotate(bed_sum=Coalesce(Sum('sanadItemsAsCostCenter__bed',
-                                                   filter=Q(sanadItemsAsCostCenter__account=account) & filters), 0)) \
-                    .annotate(bes_sum=Coalesce(Sum('sanadItemsAsCostCenter__bes',
-                                                   filter=Q(sanadItemsAsCostCenter__account=account) & filters), 0)) \
-                    .prefetch_related('floatAccountGroups')
+                for floatAccount in account.costCenterGroup.floatAccounts.all():
+                    floatAccount.bed_sum = 0
+                    floatAccount.bes_sum = 0
+                    for row in rows:
+                        if row['account_id'] == account.id and row['costCenter_id'] == floatAccount.id:
+                            floatAccount.bed_sum += row['bed_sum']
+                            floatAccount.bes_sum += row['bes_sum']
 
-                for floatAccount in floatAccounts:
                     remain = floatAccount.bed_sum - floatAccount.bes_sum
                     if remain > 0:
                         floatAccount.bed_remain = remain
@@ -172,7 +243,14 @@ class AccountBalanceView(APIView):
                     else:
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
-                    account.costCenters_data.append(BalanceFloatAccountSerializer(floatAccount).data)
+                    account.costCenters_data.append({
+                        'name': floatAccount.name,
+                        'bed_sum': floatAccount.bed_sum,
+                        'bes_sum': floatAccount.bes_sum,
+                        'bed_remain': floatAccount.bed_remain,
+                        'bes_remain': floatAccount.bes_remain,
+                    })
+
 
         accounts = list(accounts)
         for account in accounts:
