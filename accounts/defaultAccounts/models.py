@@ -33,7 +33,7 @@ class DefaultAccount(BaseModel):
     explanation = models.TextField(null=True, blank=True)
 
     account_level = models.IntegerField(choices=Account.ACCOUNT_LEVELS, default=Account.TAFSILI)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts', null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
                                      blank=True)
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccountsAsCostCenter',
