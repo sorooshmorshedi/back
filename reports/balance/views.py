@@ -10,6 +10,7 @@ from accounts.accounts.models import Account, FloatAccount, FloatAccountGroup
 from helpers.auth import BasicCRUDPermission
 from helpers.db import select_raw_sql
 from helpers.exports import get_xlsx_response
+from helpers.functions import to_gregorian
 from reports.balance.serializers import BalanceAccountSerializer
 from reports.filters import get_account_sanad_items_filter
 from reports.lists.export_views import BaseExportView, BaseListExportView
@@ -73,16 +74,15 @@ class AccountBalanceView(APIView):
 
         request = self.request
         data = request.GET
-        balance_status = request.GET.get('balance_status')
 
         where_filters = "true and "
-        if 'from_date' in data:
-            where_filters += "sanad.date >= '{}' and ".format(data['from_date'])
-        if 'to_date' in data:
-            where_filters += "sanad.date <= '{}' and ".format(data['to_date'])
-        if 'from_code' in data:
+        if data.get('from_date'):
+            where_filters += "sanad.date >= '{}' and ".format(to_gregorian(data['from_date']))
+        if data.get('to_date'):
+            where_filters += "sanad.date <= '{}' and ".format(to_gregorian(data['to_date']))
+        if data.get('from_code'):
             where_filters += "sanad.code >= {} and ".format(data['from_code'])
-        if 'to_code' in data:
+        if data.get('to_code'):
             where_filters += "sanad.code <= {} and ".format(data['to_code'])
         if data.get('skip_closing_sanad', False) == 'true':
             financial_year = request.user.active_financial_year
@@ -97,22 +97,6 @@ class AccountBalanceView(APIView):
                     where_filters += "sanad.id != {} and ".format(closing_sanad.id)
 
         where_filters += "true"
-
-        having_filters = "true and "
-        if balance_status == 'with_remain':
-            having_filters += "bed_sum != bes_sum and "
-        elif balance_status == 'without_remain':
-            having_filters += "bed_sum = bes_sum and "
-        elif balance_status == 'bed_remain':
-            having_filters += "bed_sum > bes_sum and "
-        elif balance_status == 'bes_remain':
-            having_filters += "bed_sum < bes_sum and "
-        elif balance_status == 'with_transaction':
-            having_filters += "(bed_sum != 0 or bes_sum != 0) and "
-        elif balance_status == 'without_transaction':
-            having_filters += "bed_sum = 0 and bes_sum = 0 and "
-
-        having_filters += " true"
 
         sql = """
             select 
@@ -145,41 +129,33 @@ class AccountBalanceView(APIView):
                 if row['account_id'] == account.id:
                     account.bed_sum += row['bed_sum']
                     account.bes_sum += row['bes_sum']
-
-            remain = account.bed_sum - account.bes_sum
-            if remain > 0:
-                account.bed_remain = remain
-            else:
-                account.bes_remain = -remain
         else:
             for sub_account in accounts:
                 if sub_account.parent_id == account.id:
                     self.set_remain(sub_account, accounts)
                     account.bed_sum += sub_account.bed_sum
                     account.bes_sum += sub_account.bes_sum
-                    account.bed_remain += sub_account.bed_remain
-                    account.bes_remain += sub_account.bes_remain
+
+        remain = account.bed_sum - account.bes_sum
+        if remain > 0:
+            account.bed_remain = remain
+        else:
+            account.bes_remain = -remain
 
     def get_accounts(self, request):
 
-
-        account_code_starts_with = request.GET.get('account_code_starts_with', '')
-        level = request.GET.get('level', None)
+        account_code_starts_with = request.GET.get('account_code_starts_with')
+        level = request.GET.get('level')
         account_type = request.GET.get('account_type')
+        account_code_gte = request.GET.get('account__code__gte')
+        account_code_lte = request.GET.get('account__code__lte')
+        balance_status = request.GET.get('balance_status')
+        show_float_accounts = request.GET.get('show_float_accounts')
+        show_cost_centers = request.GET.get('show_cost_centers')
         show_differences = request.GET.get('show_differences')
+        show_differences = False
 
         qs = Account.objects.inFinancialYear()
-
-        qs = qs.filter(code__startswith=account_code_starts_with, )
-        if account_type == Account.BUYER:
-            qs = qs.filter(account_type=Account.PERSON, buyer_or_seller=Account.BUYER)
-        elif account_type == Account.SELLER:
-            qs = qs.filter(account_type=Account.PERSON, buyer_or_seller=Account.SELLER)
-        elif account_type == Account.BANK:
-            qs = qs.filter(account_type=Account.BANK)
-
-        if level:
-            qs = qs.filter(level=level)
 
         accounts = qs.prefetch_related(
             'type',
@@ -203,7 +179,7 @@ class AccountBalanceView(APIView):
 
             rows = self.get_rows()
 
-            if account.floatAccountGroup:
+            if show_float_accounts == 'true' and account.floatAccountGroup:
                 for floatAccount in account.floatAccountGroup.floatAccounts.all():
                     floatAccount.bed_sum = 0
                     floatAccount.bes_sum = 0
@@ -227,7 +203,7 @@ class AccountBalanceView(APIView):
                         'bes_remain': floatAccount.bes_remain,
                     })
 
-            if account.costCenterGroup:
+            if show_cost_centers == 'true' and account.costCenterGroup:
                 for floatAccount in account.costCenterGroup.floatAccounts.all():
                     floatAccount.bed_sum = 0
                     floatAccount.bes_sum = 0
@@ -251,10 +227,9 @@ class AccountBalanceView(APIView):
                         'bes_remain': floatAccount.bes_remain,
                     })
 
-
         accounts = list(accounts)
         for account in accounts:
-            if show_differences:
+            if show_differences == 'true':
                 nature = account.type.nature
                 if (
                         account.bed_remain == account.bes_remain == 0
@@ -264,6 +239,44 @@ class AccountBalanceView(APIView):
                         nature == 'bes' and account.bed_remain != 0
                 ):
                     accounts.remove(account)
+
+        def filter_account(acc: Account):
+            result = True
+
+            if account_code_starts_with:
+                result = result and acc.code.startswith(account_code_starts_with)
+
+            if account_type == 'buyer':
+                result = result and acc.account_type == Account.PERSON and acc.buyer_or_seller == Account.BUYER
+            elif account_type == 'seller':
+                result = result and acc.account_type == Account.PERSON and acc.buyer_or_seller == Account.SELLER
+            elif account_type == 'bank':
+                result = result and acc.account_type == Account.BANK
+
+            if level is not None:
+                result = result and acc.level == int(level)
+
+            if balance_status == 'with_remain':
+                result = result and acc.bed_sum != acc.bes_sum
+            elif balance_status == 'without_remain':
+                result = result and acc.bed_sum == acc.bes_sum
+            elif balance_status == 'bed_remain':
+                result = result and acc.bed_sum > acc.bes_sum
+            elif balance_status == 'bes_remain':
+                result = result and acc.bed_sum < acc.bes_sum
+            elif balance_status == 'with_transaction':
+                result = result and (acc.bed_sum != 0 or acc.bes_sum != 0)
+            elif balance_status == 'without_transaction':
+                result = result and acc.bed_sum == 0 and acc.bes_sum == 0
+
+            if account_code_gte:
+                result = result and acc.code >= account_code_gte
+            if account_code_lte:
+                result = result and acc.code < account_code_lte
+
+            return result
+
+        accounts = list(filter(filter_account, accounts))
 
         return accounts
 
