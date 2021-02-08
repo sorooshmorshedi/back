@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +6,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import FloatAccount, FloatAccountGroup
 from helpers.auth import BasicCRUDPermission
-from reports.balance.account_balance import get_common_columns_sum
+from reports.balance.account_balance import get_common_columns_sum, AccountBalanceView
 from reports.filters import get_account_sanad_items_filter
 from reports.lists.export_views import BaseListExportView
 
@@ -21,78 +20,47 @@ class FloatAccountBalanceByGroupView(APIView):
         return self.request.GET.get('is_cost_center') == 'true'
 
     def get_accounts_data(self, request):
+        rows = AccountBalanceView.get_rows(request.GET, request.user.active_financial_year)
 
-        filters = get_account_sanad_items_filter(request)
+        qs = FloatAccountGroup.objects.inFinancialYear().prefetch_related(
+            'floatAccounts'
+        ).filter(is_cost_center=self.is_cost_center)
 
-        floatAccounts = FloatAccount.objects.inFinancialYear().filter(is_cost_center=self.is_cost_center)
-        floatAccountGroups = FloatAccountGroup.objects.inFinancialYear().prefetch_related(
-            'floatAccounts').filter(is_cost_center=self.is_cost_center)
-
-        if self.is_cost_center:
-            sanad_item_key = "sanadItemsAsCostCenter"
-            float_account_group_key = "costCenterGroup"
-        else:
-            sanad_item_key = "sanadItems"
-            float_account_group_key = "floatAccountGroup"
-
-        for floatAccountGroup in floatAccountGroups.all():
-            annotates = {
-                "bed_sum_{}".format(floatAccountGroup.id): Coalesce(
-                    Sum(
-                        '{}__bed'.format(sanad_item_key),
-                        filter=(filters & Q(**{
-                            '{}__account__{}'.format(sanad_item_key, float_account_group_key): floatAccountGroup
-                        }))
-                    ),
-                    0
-                ),
-                "bes_sum_{}".format(floatAccountGroup.id): Coalesce(
-                    Sum(
-                        '{}__bes'.format(sanad_item_key),
-                        filter=(filters & Q(**{
-                            '{}__account__{}'.format(sanad_item_key, float_account_group_key): floatAccountGroup
-                        }))
-                    ),
-                    0
-                ),
-            }
-
-            floatAccounts = floatAccounts.annotate(**annotates)
-
-        res = []
-
-        for floatAccountGroup in floatAccountGroups:
-
-            bed_sum = bes_sum = 0
-            for floatAccount in floatAccounts:
-                if floatAccountGroup.id in [o.id for o in floatAccount.floatAccountGroups.all()]:
-                    bed_sum += getattr(floatAccount, "bed_sum_{}".format(floatAccountGroup.id))
-                    bes_sum += getattr(floatAccount, "bes_sum_{}".format(floatAccountGroup.id))
-
-            res.append({
-                'bed_sum': bed_sum,
-                'bes_sum': bes_sum,
+        result = []
+        for group in qs:
+            group_data = {
+                'group_id': group.id,
+                'group_name': group.name,
+                'float_account_name': '',
+                'bed_sum': 0,
+                'bes_sum': 0,
                 'bed_remain': 0,
                 'bes_remain': 0,
-                'group_name': floatAccountGroup.name,
-                'float_account_name': '',
-            })
+            }
+            float_accounts_data = []
+            for float_account in group.floatAccounts.all():
+                bed_sum = bes_sum = 0
+                for row in rows:
+                    if row['floatAccount_id'] == float_account.id:
+                        bed_sum += row['bed_sum']
+                        bes_sum += row['bes_sum']
 
-            for floatAccount in floatAccounts:
-                if floatAccountGroup in floatAccount.floatAccountGroups.all():
-                    bed_sum = getattr(floatAccount, "bed_sum_{}".format(floatAccountGroup.id))
-                    bes_sum = getattr(floatAccount, "bes_sum_{}".format(floatAccountGroup.id))
+                float_accounts_data.append({
+                    'float_account_id': float_account.id,
+                    'group_name': '',
+                    'float_account_name': float_account.name,
+                    'bed_sum': bed_sum,
+                    'bes_sum': bes_sum,
+                    'bed_remain': 0,
+                    'bes_remain': 0,
+                })
+                group_data['bed_sum'] += bed_sum
+                group_data['bes_sum'] += bes_sum
 
-                    res.append({
-                        'bed_sum': bed_sum,
-                        'bes_sum': bes_sum,
-                        'bed_remain': 0,
-                        'bes_remain': 0,
-                        'group_name': '',
-                        'float_account_name': floatAccount.name,
-                    })
+            result.append(group_data)
+            result = result + float_accounts_data
 
-        for account in res:
+        for account in result:
             remain = account['bed_sum'] - account['bes_sum']
             if remain > 0:
                 account['bed_remain'] = remain
@@ -101,7 +69,7 @@ class FloatAccountBalanceByGroupView(APIView):
                 account['bes_remain'] = -remain
                 account['bed_remain'] = 0
 
-        return res
+        return result
 
     def get(self, request):
         data = self.get_accounts_data(request)

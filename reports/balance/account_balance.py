@@ -64,25 +64,22 @@ class AccountBalanceView(APIView):
 
     _rows = None
 
-    def get_rows(self):
+    @staticmethod
+    def get_rows(filters, financial_year):
 
-        if self._rows:
-            return self._rows
-
-        request = self.request
-        data = request.GET
+        if AccountBalanceView._rows:
+            return AccountBalanceView._rows
 
         where_filters = "true and "
-        if data.get('from_date'):
-            where_filters += "sanad.date >= '{}' and ".format(to_gregorian(data['from_date']))
-        if data.get('to_date'):
-            where_filters += "sanad.date <= '{}' and ".format(to_gregorian(data['to_date']))
-        if data.get('from_code'):
-            where_filters += "sanad.code >= {} and ".format(data['from_code'])
-        if data.get('to_code'):
-            where_filters += "sanad.code <= {} and ".format(data['to_code'])
-        if data.get('skip_closing_sanad', False) == 'true':
-            financial_year = request.user.active_financial_year
+        if filters.get('from_date'):
+            where_filters += "sanad.date >= '{}' and ".format(to_gregorian(filters['from_date']))
+        if filters.get('to_date'):
+            where_filters += "sanad.date <= '{}' and ".format(to_gregorian(filters['to_date']))
+        if filters.get('from_code'):
+            where_filters += "sanad.code >= {} and ".format(filters['from_code'])
+        if filters.get('to_code'):
+            where_filters += "sanad.code <= {} and ".format(filters['to_code'])
+        if filters.get('skip_closing_sanad', False) == 'true':
             closing_sanad_names = [
                 'temporaryClosingSanad',
                 'currentEarningsClosingSanad',
@@ -107,8 +104,8 @@ class AccountBalanceView(APIView):
             order by account_id
         """.format(where_filters)
 
-        self._rows = select_raw_sql(sql)
-        return self._rows
+        AccountBalanceView._rows = select_raw_sql(sql)
+        return AccountBalanceView._rows
 
     def set_remain(self, account: Account, accounts: List[Account]):
 
@@ -121,7 +118,7 @@ class AccountBalanceView(APIView):
         account.bes_remain = 0
 
         if account.level == Account.TAFSILI:
-            rows = self.get_rows()
+            rows = self.get_rows(self.request.GET, self.request.user.active_financial_year)
             for row in rows:
                 if row['account_id'] == account.id:
                     account.bed_sum += row['bed_sum']
@@ -150,7 +147,6 @@ class AccountBalanceView(APIView):
         show_float_accounts = request.GET.get('show_float_accounts')
         show_cost_centers = request.GET.get('show_cost_centers')
         show_differences = request.GET.get('show_differences')
-        show_differences = False
 
         qs = Account.objects.inFinancialYear()
 
@@ -174,7 +170,7 @@ class AccountBalanceView(APIView):
             account.floatAccounts_data = []
             account.costCenters_data = []
 
-            rows = self.get_rows()
+            rows = self.get_rows(self.request.GET, self.request.user.active_financial_year)
 
             if show_float_accounts == 'true' and account.floatAccountGroup:
                 for floatAccount in account.floatAccountGroup.floatAccounts.all():
