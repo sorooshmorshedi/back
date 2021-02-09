@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
-from accounts.accounts.models import Account
+from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from sanads.models import SanadItem, Sanad
+from users.serializers import UserSimpleSerializer
 
 
 class FinancialYearSanadItemReportSerializer(serializers.ModelSerializer):
@@ -14,7 +15,7 @@ class FinancialYearSanadItemReportSerializer(serializers.ModelSerializer):
 class SanadSanadItemReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
-        fields = ('id', 'code', 'date',)
+        fields = ('id', 'local_id', 'code', 'date', 'explanation')
 
 
 class AccountSanadItemReportSerializer(serializers.ModelSerializer):
@@ -41,10 +42,18 @@ class AccountSanadItemReportSerializer(serializers.ModelSerializer):
         )
 
 
+class FloatAccountSanadItemReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FloatAccount
+        fields = ('id', 'name')
+
+
 class SanadItemReportSerializer(serializers.ModelSerializer):
     financial_year = FinancialYearSanadItemReportSerializer()
     sanad = SanadSanadItemReportSerializer(many=False, read_only=True)
     account = AccountSanadItemReportSerializer(many=False, read_only=True)
+    floatAccount = FloatAccountSanadItemReportSerializer(many=False, read_only=True)
+    costCenter = FloatAccountSanadItemReportSerializer(many=False, read_only=True)
 
     previous_bed = serializers.IntegerField()
     previous_bes = serializers.IntegerField()
@@ -56,6 +65,8 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
 
     remain = serializers.SerializerMethodField()
     remain_type = serializers.SerializerMethodField()
+
+    created_by = UserSimpleSerializer(many=False, read_only=True)
 
     def get_previous_remain(self, obj):
         return abs(obj.previous_bed - obj.previous_bes)
@@ -86,4 +97,5 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'account', 'sanad', 'explanation', 'bed', 'bes', 'comulative_bed', 'comulative_bes', 'remain',
             'remain_type', 'previous_bed', 'previous_bes', 'previous_remain', 'previous_remain_type', 'financial_year',
+            'created_by', 'floatAccount', 'costCenter'
         )
