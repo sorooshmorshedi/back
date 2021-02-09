@@ -1,6 +1,7 @@
 import gc
 from abc import ABC
 
+from django.db import connection
 from django.db.models import Func
 from django_jalali.db import models as jmodels
 
@@ -11,7 +12,6 @@ def bulk_create(model_class, model_array, chunk=50):
 
 
 def queryset_iterator(queryset, chunk_size=100, key=None):
-
     if isinstance(queryset, list):
         return queryset
 
@@ -36,3 +36,14 @@ class DateAdd(Func, ABC):
     arg_joiner = " + CAST("
     template = "%(expressions)s || ' days' as INTERVAL)"
     output_field = jmodels.jDateField()
+
+
+def select_raw_sql(sql):
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+
+        columns = [col[0] for col in cursor.description]
+        return [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]

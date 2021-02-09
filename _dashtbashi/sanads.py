@@ -8,6 +8,7 @@ from sanads.models import clearSanad, Sanad, newSanadCode
 
 class LadingSanad:
     def __init__(self, lading: Lading):
+        lading.refresh_from_db()
         self.lading = lading
 
     def update(self):
@@ -27,6 +28,7 @@ class LadingSanad:
         else:
             clearSanad(sanad)
             sanad.is_auto_created = True
+            sanad.date = self.lading.sanad_date
             sanad.save()
 
         sanad_items = []

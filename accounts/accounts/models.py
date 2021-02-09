@@ -6,7 +6,7 @@ from django.db.models.aggregates import Max
 from django.db.models.functions.comparison import Coalesce
 
 from companies.models import FinancialYear
-from helpers.functions import get_current_user, get_new_child_code
+from helpers.functions import get_new_child_code
 from helpers.models import BaseModel, PHONE, MELLI_CODE, POSTAL_CODE
 from wares.models import SalePriceType
 
@@ -317,13 +317,12 @@ class AccountBalance(BaseModel):
         return "{}, Bed: {}, Bes: {}".format(self.account, self.bed, self.bes)
 
     @staticmethod
-    def update_balance(account, bed_change=0, bes_change=0, floatAccount=None, costCenter=None):
-        user = get_current_user()
+    def update_balance(financial_year, account, bed_change=0, bes_change=0, floatAccount=None, costCenter=None):
         account_balance, created = AccountBalance.objects.get_or_create(
+            financial_year=financial_year,
             account=account,
             floatAccount=floatAccount,
             costCenter=costCenter,
-            financial_year=user.active_financial_year
         )
         account_balance.bed += bed_change
         account_balance.bes += bes_change

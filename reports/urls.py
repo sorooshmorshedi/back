@@ -1,8 +1,9 @@
 from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
-from reports.balance.views import AccountBalanceView, FloatAccountBalanceByGroupView, FloatAccountBalanceView, \
-    AccountBalanceExportView, FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
+from reports.balance.views import FloatAccountBalanceByGroupView, FloatAccountBalanceView, \
+    FloatAccountBalanceByGroupExportView, FloatAccountBalanceExportView
+from reports.balance.account_balance import AccountBalanceView, AccountBalanceExportView
 from reports.balanceSheet.views import BalanceSheetView, BalanceSheetExportView
 from reports.buySale.views import BuySaleReportView, BuySaleReportExportView
 from reports.incomeStatement.views import IncomeStatementView, IncomeStatementExportView

@@ -135,3 +135,8 @@ def rgetattr(obj, attr, *args):
                 return None
 
     return functools.reduce(_getattr, [obj] + attr.split('.'))
+
+
+def to_gregorian(date):
+    date = jdatetime.date(*list(map(int, date.split('-'))))
+    return date.togregorian().isoformat()
