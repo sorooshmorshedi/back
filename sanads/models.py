@@ -141,6 +141,7 @@ class SanadItem(BaseModel):
 
     def save(self, *args, **kwargs) -> None:
         self.financial_year = self.sanad.financial_year
+        self.is_auto_created = self.sanad.is_auto_created
         super(SanadItem, self).save(*args, **kwargs)
 
 
