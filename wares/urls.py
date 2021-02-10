@@ -1,11 +1,11 @@
 from django.conf.urls import url
 
-from wares.views import WareListCreate, WareDetail, WarehouseListCreate, UnitListCreate, UnitDetail, WarehouseDetail, \
+from wares.views import WareListCreateView, WareDetailView, WarehouseListCreate, UnitListCreate, UnitDetail, WarehouseDetail, \
     SortInventoryView, SalePriceTypeListCreate, SalePriceTypeDetail, ChangeSalePricesView
 
 urlpatterns = [
-    url(r'^wares$', WareListCreate.as_view(), name='Wares'),
-    url(r'^wares/(?P<pk>[0-9]+)$', WareDetail.as_view(), name='WareDetail'),
+    url(r'^wares$', WareListCreateView.as_view(), name='Wares'),
+    url(r'^wares/(?P<pk>[0-9]+)$', WareDetailView.as_view(), name='WareDetail'),
 
     url(r'^units$', UnitListCreate.as_view(), name='units'),
     url(r'^units/(?P<pk>[0-9]+)$', UnitDetail.as_view(), name='unitDetail'),

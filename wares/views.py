@@ -5,11 +5,11 @@ from django.core.management import call_command
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from werkzeug.routing import ValidationError
 
 from helpers.auth import BasicCRUDPermission
 from helpers.views.RetrieveUpdateDestroyAPIViewWithAutoFinancialYear import \
@@ -66,7 +66,29 @@ class SalePriceTypeListCreate(ListCreateAPIViewWithAutoFinancialYear):
         serializer.save(financial_year=self.request.user.active_financial_year)
 
 
-class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
+def update_sale_prices(ware: Ware, data: list):
+    data = list(filter(lambda o: o['unit'], data))
+    if len(data) == 0:
+        raise ValidationError("واحد اصلی کالا اجباری می باشد")
+
+    ware.salePrices.all().delete()
+    data[0]['conversion_factor'] = 1
+    for row in data:
+        unit = Unit.objects.get(pk=row['unit'])
+        prices = row['prices']
+        for price_type_id in prices.keys():
+            price_type = SalePriceType.objects.get(pk=price_type_id)
+            price = prices[price_type_id]
+            if price:
+                ware.salePrices.create(
+                    unit=unit,
+                    type=price_type,
+                    price=price,
+                    conversion_factor=row['conversion_factor'],
+                )
+
+
+class WareListCreateView(ListCreateAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'ware'
     serializer_class = WareSerializer
@@ -90,29 +112,11 @@ class WareListCreate(ListCreateAPIViewWithAutoFinancialYear):
             financial_year=self.request.user.active_financial_year
         )
 
-
-def update_sale_prices(ware: Ware, data: list):
-    data = list(filter(lambda o: o['unit'], data))
-    if len(data) == 0:
-        raise ValidationError("واحد اصلی کالا اجباری می باشد")
-
-    ware.salePrices.all().delete()
-    for row in data:
-        unit = Unit.objects.get(pk=row['unit'])
-        prices = row['prices']
-        for price_type_id in prices.keys():
-            price_type = SalePriceType.objects.get(pk=price_type_id)
-            price = prices[price_type_id]
-            if price:
-                ware.salePrices.create(
-                    unit=unit,
-                    type=price_type,
-                    price=price,
-                    conversion_factor=row['conversion_factor'],
-                )
+        ware = serializer.instance
+        update_sale_prices(ware, self.request.data.get('salePrices', []))
 
 
-class WareDetail(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
+class WareDetailView(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'ware'
     serializer_class = WareSerializer
