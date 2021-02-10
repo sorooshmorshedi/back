@@ -73,9 +73,11 @@ class Command(BaseCommand):
             DefiniteFactor.updateFactorInventory(factor)
 
             for item in factor.items.all():
+                print(item.remain_fees)
                 for fee in item.remain_fees:
                     if fee['count'] < 0:
                         errors.append({
+                            'ware_id': item.ware.id,
                             'ware_name': item.ware.name,
                             'count': abs(fee['count']),
                             'factor_item_order': item.order,
@@ -83,7 +85,7 @@ class Command(BaseCommand):
                         })
 
         if len(errors):
-            raise ValidationError(errors)
+            raise ValidationError({'items': errors})
 
         financial_year.are_factors_sorted = True
         financial_year.save()
