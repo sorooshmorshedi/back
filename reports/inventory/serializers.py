@@ -104,7 +104,7 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
         }
 
     def get_output(self, obj):
-        factorItem = obj.factorItems.first
+        factorItem = obj.factorItems.first()
         if factorItem and obj.pricingType == Ware.WEIGHTED_MEAN and factorItem.remain_count:
             fee = factorItem.remain_value / factorItem.remain_count
         else:
