@@ -76,13 +76,14 @@ def float_to_str(f):
 def add_separator(value):
     if value is None:
         return ''
+    elif value == 0:
+        return 0
     try:
         str_value = '{:,}'.format(float(value))
     except ValueError:
         return value
-    if '.' in str_value:
-        str_value = str_value.strip('0')
-    str_value = str_value.strip('.')
+
+    # str_value = str_value.replace(',', '/')
 
     if not str_value:
         str_value = '0'
