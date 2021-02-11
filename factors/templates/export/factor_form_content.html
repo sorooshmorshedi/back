@@ -118,6 +118,7 @@
                             <th>مالیات</th>
                         {% endif %}
                         <th>جمع فاکتور</th>
+                        <th>توضیحات</th>
                     {% endif %}
                 </tr>
                 </thead>
@@ -144,6 +145,7 @@
                             <td>{{ item.totalValue | money }}</td>
 
                         {% endif %}
+                        <td>{{ item.explanation }}</td>
                     </tr>
                 {% endfor %}
                 {% if not hide_prices %}
@@ -159,17 +161,20 @@
                         {% endif %}
 
                         <td>{{ form.totalSum | money }}</td>
+                        <td></td>
                     </tr>
                     {% if not hide_remain %}
                         <tr>
                             <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
                             <th>{{ form.remain.before_factor_title }}</th>
                             <td>{{ form.remain.before_factor | money }}</td>
+                            <td></td>
                         </tr>
                         <tr>
                             <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
                             <th>{{ form.remain.after_factor_title }}</th>
                             <td>{{ form.remain.after_factor | money }}</td>
+                            <td></td>
                         </tr>
                     {% endif %}
                 {% endif %}

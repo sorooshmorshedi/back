@@ -172,7 +172,11 @@ class AllWarehousesInventorySerializer(serializers.ModelSerializer):
     input = serializers.DecimalField(max_digits=24, decimal_places=6)
     output = serializers.DecimalField(max_digits=24, decimal_places=6)
     remain = serializers.DecimalField(max_digits=24, decimal_places=6)
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj: Ware):
+        return obj.main_unit.name
 
     class Meta:
         model = Ware
-        fields = ('id', 'code', 'name', 'input', 'output', 'remain')
+        fields = ('id', 'code', 'name', 'input', 'output', 'remain', 'unit')

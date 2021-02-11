@@ -25,11 +25,13 @@
                 <th>#</th>
                 <th>کد کالا</th>
                 <th>نام کالا</th>
+                <th>واحد</th>
                 <th>موجودی شمارش شده</th>
                 {% if not hide_remains %}
                     <th>مانده سیستم</th>
                     <th>مغایرت</th>
                 {% endif %}
+                <th>توضیحات</th>
             </tr>
             </thead>
             <tbody>
@@ -38,6 +40,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.ware.code }}</td>
                     <td>{{ item.ware.name }}</td>
+                    <td>{{ item.ware.main_unit.name }}</td>
                     {% if item.warehouse_remain is not None and not hide_remains%}
                         <td>{{ item.warehouse_remain | money }}</td>
                     {% else %}
@@ -47,6 +50,7 @@
                         <td>{{ item.system_remain | money }}</td>
                         <td class="ltr text-right">{{ item.contradiction | money }}</td>
                     {% endif %}
+                    <td>{{ item.explanation }}</td>
                 </tr>
             {% endfor %}
             </tbody>

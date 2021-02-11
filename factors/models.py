@@ -673,6 +673,8 @@ class WarehouseHandlingItem(BaseModel):
 
     order = models.IntegerField(default=0)
 
+    explanation = EXPLANATION()
+
     @property
     def contradiction(self):
         if self.warehouse_remain is not None:

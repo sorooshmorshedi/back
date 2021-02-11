@@ -497,6 +497,10 @@ class WarehouseHandlingItemCreateUpdateSerializer(serializers.ModelSerializer):
 
 class WarehouseHandlingItemListRetrieveSerializer(serializers.ModelSerializer):
     ware = WareListSerializer(many=False, read_only=True)
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj: WarehouseHandlingItem):
+        return obj.ware.main_unit.name
 
     class Meta:
         model = WarehouseHandlingItem
