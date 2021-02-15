@@ -95,6 +95,13 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
     input = serializers.SerializerMethodField()
     output = serializers.SerializerMethodField()
     remain = serializers.SerializerMethodField()
+    unit = serializers.SerializerMethodField()
+
+    def get_unit(self, obj: Ware):
+        main_unit = obj.main_unit
+        if main_unit:
+            return main_unit.name
+        return None
 
     def get_input(self, obj):
         return {
@@ -130,7 +137,7 @@ class AllWaresInventorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ware
-        fields = ('id', 'code', 'name', 'input', 'output', 'remain')
+        fields = ('id', 'code', 'name', 'unit', 'input', 'output', 'remain')
 
 
 class WarehouseInventorySerializer(serializers.ModelSerializer):
@@ -175,7 +182,10 @@ class AllWarehousesInventorySerializer(serializers.ModelSerializer):
     unit = serializers.SerializerMethodField()
 
     def get_unit(self, obj: Ware):
-        return obj.main_unit.name
+        main_unit = obj.main_unit
+        if main_unit:
+            return main_unit.name
+        return None
 
     class Meta:
         model = Ware

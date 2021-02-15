@@ -107,10 +107,16 @@ class WareRetrieveSerializer(WareSerializer):
 class WareListSerializer(WareSerializer):
     warehouse = WarehouseSimpleSerializer(read_only=True)
     salePrices = serializers.SerializerMethodField()
+    main_unit_name = serializers.SerializerMethodField()
 
-    def get_salePrices(self, obj):
+    def get_salePrices(self, obj: Ware):
         return get_salePrices(obj)
+
+    def get_main_unit_name(self, obj: Ware):
+        if obj.main_unit:
+            return obj.main_unit.name
+        return None
 
     class Meta:
         model = Ware
-        fields = ('id', 'code', 'name', 'level', 'warehouse', 'parent', 'salePrices')
+        fields = ('id', 'code', 'name', 'level', 'warehouse', 'parent', 'salePrices', 'main_unit_name')

@@ -109,7 +109,9 @@ class Ware(BaseModel):
 
     @property
     def main_unit(self) -> Unit:
-        return self.salePrices.first().unit
+        if self.level == 3:
+            return self.salePrices.first().unit
+        return None
 
     def __str__(self):
         return self.name
