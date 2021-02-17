@@ -79,6 +79,7 @@ class Command(BaseCommand):
                         errors.append({
                             'ware_id': item.ware.id,
                             'ware_name': item.ware.name,
+                            'warehouse_name': item.warehouse.name,
                             'count': abs(fee['count']),
                             'factor_item_order': item.order,
                             'factor': FactorSanadSerializer(factor).data
