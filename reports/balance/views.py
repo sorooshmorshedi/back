@@ -46,6 +46,7 @@ class FloatAccountBalanceByGroupView(APIView):
                         bes_sum += row['bes_sum']
 
                 float_accounts_data.append({
+                    'group_id': group.id,
                     'float_account_id': float_account.id,
                     'group_name': '',
                     'float_account_name': float_account.name,

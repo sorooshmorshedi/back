@@ -189,6 +189,7 @@ class AccountBalanceView(APIView):
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
                     account.floatAccounts_data.append({
+                        'id': floatAccount.id,
                         'name': floatAccount.name,
                         'bed_sum': floatAccount.bed_sum,
                         'bes_sum': floatAccount.bes_sum,
@@ -213,6 +214,7 @@ class AccountBalanceView(APIView):
                         floatAccount.bes_remain = -remain
                         floatAccount.bed_remain = 0
                     account.costCenters_data.append({
+                        'id': floatAccount.id,
                         'name': floatAccount.name,
                         'bed_sum': floatAccount.bed_sum,
                         'bes_sum': floatAccount.bes_sum,
