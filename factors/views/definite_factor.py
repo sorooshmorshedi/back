@@ -40,7 +40,7 @@ class DefiniteFactor(APIView):
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
             factor.temporary_code = 0
             factor.code = 0
-        else:
+        elif factor.code is None:
             factor.code = Factor.get_new_code(factor_type=factor.type)
 
         factor.is_definite = True

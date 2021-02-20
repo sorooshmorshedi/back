@@ -189,7 +189,7 @@ class Factor(BaseModel, ConfirmationMixin):
         sum = 0
         for i in self.items.all():
             sum += i.fee * i.count
-        return Decimal(sum)
+        return sum
 
     @property
     def calculated_sum(self):
@@ -206,7 +206,7 @@ class Factor(BaseModel, ConfirmationMixin):
             discountSum = self.discountValue
         for i in self.items.all():
             discountSum += i.discount
-        return Decimal(discountSum)
+        return discountSum
 
     @property
     def taxSum(self):
@@ -214,7 +214,7 @@ class Factor(BaseModel, ConfirmationMixin):
             taxSum = self.taxPercent * (self.sum - self.discountSum) / 100
         else:
             taxSum = self.taxValue
-        return Decimal(taxSum)
+        return taxSum
 
     @property
     def sumAfterDiscount(self):
