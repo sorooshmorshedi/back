@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='warehousehandlingitem',
             name='warehouseHandling',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='factors.models.warehouse_handling.WarehouseHandling'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='factors.WarehouseHandling'),
         ),
     ]

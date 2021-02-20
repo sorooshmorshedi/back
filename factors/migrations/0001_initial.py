@@ -4,7 +4,7 @@ import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django_jalali.db.models
 import factors.models
-import helpers.db
+from helpers.db import get_empty_array
 
 
 class Migration(migrations.Migration):
@@ -83,8 +83,8 @@ class Migration(migrations.Migration):
                 ('updated_at', django_jalali.db.models.jDateTimeField(blank=True, editable=False)),
                 ('count', models.DecimalField(decimal_places=6, max_digits=24)),
                 ('fee', models.DecimalField(decimal_places=0, max_digits=24)),
-                ('fees', django.contrib.postgres.fields.jsonb.JSONField(default=helpers.db.get_empty_array)),
-                ('remain_fees', django.contrib.postgres.fields.jsonb.JSONField(default=helpers.db.get_empty_array)),
+                ('fees', django.contrib.postgres.fields.jsonb.JSONField(default=get_empty_array)),
+                ('remain_fees', django.contrib.postgres.fields.jsonb.JSONField(default=get_empty_array)),
                 ('discountValue', models.DecimalField(blank=True, decimal_places=0, default=0, max_digits=24, null=True)),
                 ('discountPercent', models.IntegerField(blank=True, default=0, null=True)),
                 ('explanation', models.CharField(blank=True, max_length=255)),

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='warehousehandling',
             name='inputAdjustment',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='warehouseHandlingAsInput', to='factors.models.adjustment.Adjustment'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='warehouseHandlingAsInput', to='factors.Adjustment'),
         ),
         migrations.AddField(
             model_name='warehousehandling',
@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='warehousehandling',
             name='outputAdjustment',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='warehouseHandlingAsOutput', to='factors.models.adjustment.Adjustment'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='warehouseHandlingAsOutput', to='factors.Adjustment'),
         ),
     ]
