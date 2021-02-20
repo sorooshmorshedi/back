@@ -109,8 +109,9 @@ class Ware(BaseModel):
 
     @property
     def main_unit(self) -> Unit:
-        if self.level == 3:
-            return self.salePrices.first().unit
+        salePrice = self.salePrices.filter(conversion_factor=1).first()
+        if salePrice:
+            return salePrice.unit
         return None
 
     def __str__(self):
