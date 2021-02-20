@@ -4,7 +4,8 @@ from accounts.accounts.models import Account
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import ChequebookListRetrieveSerializer
-from factors.models import Factor, FactorItem
+from factors.models import Factor
+from factors.models.factor import FactorItem
 from factors.serializers import FactorCreateUpdateSerializer
 from imprests.serializers import ImprestSettlementSimpleSerializer
 from sanads.models import Sanad

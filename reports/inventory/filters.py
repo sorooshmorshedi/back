@@ -1,6 +1,6 @@
 import django_filters
 from django_filters import rest_framework as filters
-from factors.models import FactorItem
+from factors.models.factor import FactorItem
 from django_jalali.db import models as jmodels
 
 from helpers.filters import BASE_FIELD_FILTERS

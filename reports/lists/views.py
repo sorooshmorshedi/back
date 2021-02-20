@@ -5,9 +5,10 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from cheques.views import get_cheque_permission_basename
+from factors.models.warehouse_handling import WarehouseHandlingItem
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
     WarehouseHandlingListRetrieveSerializer
-from factors.models import get_factor_permission_basename, WarehouseHandlingItem
+from factors.models.factor import get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *

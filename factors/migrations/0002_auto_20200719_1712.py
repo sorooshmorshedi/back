@@ -33,12 +33,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='transfer',
             name='input_factor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='input_transfer', to='factors.Factor'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='input_transfer', to='factors.models.factor.Factor'),
         ),
         migrations.AddField(
             model_name='transfer',
             name='output_factor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='output_transfer', to='factors.Factor'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='output_transfer', to='factors.models.factor.Factor'),
         ),
         migrations.AddField(
             model_name='factorpayment',
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='factorpayment',
             name='factor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='factors.Factor'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='factors.models.factor.Factor'),
         ),
         migrations.AddField(
             model_name='factorpayment',
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='factoritem',
             name='factor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='factors.Factor'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='factors.models.factor.Factor'),
         ),
         migrations.AddField(
             model_name='factoritem',
@@ -103,12 +103,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='factorexpense',
             name='expense',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorExpenses', to='factors.Expense'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='factorExpenses', to='factors.models.expense.Expense'),
         ),
         migrations.AddField(
             model_name='factorexpense',
             name='factor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='expenses', to='factors.Factor'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='expenses', to='factors.models.factor.Factor'),
         ),
         migrations.AddField(
             model_name='factorexpense',

@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factors.factor_sanad import FactorSanad
-from factors.models import Factor, FactorItem, get_factor_permission_basename
+from factors.models import Factor
+from factors.models.factor import FactorItem, get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from wares.models import WareInventory
 

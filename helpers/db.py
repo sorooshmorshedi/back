@@ -47,3 +47,7 @@ def select_raw_sql(sql):
             dict(zip(columns, row))
             for row in cursor.fetchall()
         ]
+
+
+def get_empty_array():
+    return []

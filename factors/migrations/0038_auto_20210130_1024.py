@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from factors.models import Factor
+from factors.models.factor import Factor
 
 
 def save_all_factors(apps, schema_editor):

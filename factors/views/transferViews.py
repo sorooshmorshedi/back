@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from factors.models import Transfer
+from factors.models.transfer_model import Transfer
 from factors.serializers import TransferListRetrieveSerializer, TransferCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission

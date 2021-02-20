@@ -5,7 +5,10 @@ from django_jalali.db import models as jmodels
 
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
-from factors.models import Factor, FactorItem, Transfer, Adjustment, WarehouseHandling
+from factors.models import Factor, Adjustment
+from factors.models.transfer_model import Transfer
+from factors.models.warehouse_handling import WarehouseHandling
+from factors.models.factor import FactorItem
 from helpers.filters import BASE_FIELD_FILTERS, filter_created_by_name
 from sanads.models import Sanad
 from transactions.models import Transaction

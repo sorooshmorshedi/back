@@ -1,7 +1,9 @@
 from django.contrib import admin
 
-from factors.models import Factor, FactorPayment, FactorItem, Transfer, Expense, Adjustment, WarehouseHandling, \
-    WarehouseHandlingItem
+from factors.models import Factor, Expense, Adjustment
+from factors.models.transfer_model import Transfer
+from factors.models.warehouse_handling import WarehouseHandling, WarehouseHandlingItem
+from factors.models.factor import FactorPayment, FactorItem
 
 admin.site.register(Factor)
 admin.site.register(FactorItem)

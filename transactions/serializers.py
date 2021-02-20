@@ -4,7 +4,8 @@ from accounts.accounts.serializers import FloatAccountSerializer, AccountListSer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
 from cheques.serializers import ChequeListRetrieveSerializer
-from factors.models import FactorPayment, Factor
+from factors.models import Factor
+from factors.models.factor import FactorPayment
 from imprests.serializers import ImprestSettlementListRetrieveSerializer
 from sanads.serializers import SanadSerializer
 from transactions.models import *

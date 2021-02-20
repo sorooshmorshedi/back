@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('first_confirmed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='first_warehousehandlingitemConfirmer', to=settings.AUTH_USER_MODEL)),
                 ('second_confirmed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='second_warehousehandlingitemConfirmer', to=settings.AUTH_USER_MODEL)),
                 ('ware', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='warehouseHandlingItems', to='wares.Ware')),
-                ('warehouseHandling', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='items', to='factors.WarehouseHandling')),
+                ('warehouseHandling', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='items', to='factors.models.warehouse_handling.WarehouseHandling')),
             ],
             options={
                 'ordering': ['-pk'],

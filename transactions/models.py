@@ -84,7 +84,8 @@ class Transaction(BaseModel, ConfirmationMixin):
         from transactions.serializers import TransactionItemCreateUpdateSerializer
         from factors.serializers import FactorPaymentSerializer
         from cheques.views import SubmitChequeApiView
-        from factors.models import FactorPayment, Factor
+        from factors.models.factor import FactorPayment
+        from factors.models import Factor
 
         items_data = data.get('items')
         payments_data = data.get('payments')

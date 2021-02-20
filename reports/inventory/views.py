@@ -4,7 +4,8 @@ from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
-from factors.models import FactorItem, Factor
+from factors.models import Factor
+from factors.models.factor import FactorItem
 from helpers.auth import BasicCRUDPermission
 from helpers.querysets import get_deep_sum
 from reports.inventory.filters import InventoryFilter, AllWaresInventoryFilter

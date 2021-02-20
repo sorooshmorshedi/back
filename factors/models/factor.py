@@ -1,9 +1,8 @@
-from decimal import Decimal
+from _pydecimal import Decimal
 
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
-from django.db.models import Sum
-from django.db.models.aggregates import Max
+from django.db.models.aggregates import Sum, Max
 from django.db.models.functions.comparison import Coalesce
 from django.db.models.query_utils import Q
 from django_jalali.db import models as jmodels
@@ -11,42 +10,13 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
-from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION, DECIMAL
+from factors.models.expense import Expense
+from helpers.db import get_empty_array
+from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
-from wares.models import Ware, Warehouse, Unit
-
-EXPENSE_TYPES = (
-    ('buy', 'خرید'),
-    ('sale', 'فروش')
-)
-
-
-class Expense(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='expenses')
-    name = models.CharField(max_length=100)
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factorExpense')
-    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpense', null=True,
-                                     blank=True)
-    costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorExpenseAsCostCenter',
-                                   blank=True, null=True)
-    type = models.CharField(max_length=10, choices=EXPENSE_TYPES)
-    explanation = models.CharField(max_length=255, blank=True)
-
-    class Meta(BaseModel.Meta):
-        backward_financial_year = True
-        permission_basename = 'expense'
-        permissions = (
-            ('get.expense', 'مشاهده هزینه فاکتور'),
-            ('create.expense', 'تعریف هزینه  فاکتور'),
-            ('update.expense', 'ویرایش هزینه فاکتور'),
-            ('delete.expense', 'حذف هزینه فاکتور'),
-
-            ('getOwn.expense', 'مشاهده هزینه های فاکتور خود'),
-            ('updateOwn.expense', 'ویرایش هزینه های فاکتور خود'),
-            ('deleteOwn.expense', 'حذف هزینه های فاکتور خود'),
-        )
+from wares.models import Ware, Unit, Warehouse
 
 
 class Factor(BaseModel, ConfirmationMixin):
@@ -455,10 +425,6 @@ class FactorPayment(BaseModel):
         unique_together = ('factor', 'transaction')
 
 
-def get_empty_array():
-    return []
-
-
 class FactorItem(BaseModel):
 
     def __init__(self, *args, **kwargs):
@@ -568,56 +534,6 @@ class FactorItem(BaseModel):
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
 
 
-class Transfer(BaseModel):
-    code = models.IntegerField()
-    date = jmodels.jDateField()
-
-    input_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='input_transfer')
-    output_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='output_transfer')
-    explanation = models.CharField(max_length=255, blank=True)
-
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transfers')
-
-    class Meta(BaseModel.Meta):
-        permission_basename = 'transfer'
-        permissions = (
-            ('get.transfer', 'مشاهده انتقال'),
-            ('create.transfer', 'تعریف انتقال'),
-            ('update.transfer', 'ویرایش انتقال'),
-            ('delete.transfer', 'حذف انتقال'),
-
-            ('getOwn.transfer', 'مشاهده انتقال های خود'),
-            ('updateOwn.transfer', 'ویرایش انتقال های خود'),
-            ('deleteOwn.transfer', 'حذف انتقال های خود'),
-        )
-
-
-class Adjustment(BaseModel):
-    code = models.IntegerField()
-    date = jmodels.jDateField()
-    time = models.TimeField()
-
-    type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
-    factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
-    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='adjustment', null=True)
-    explanation = EXPLANATION()
-
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
-
-    class Meta(BaseModel.Meta):
-        permission_basename = 'adjustment'
-        permissions = (
-            ('get.adjustment', 'مشاهده تعدیل '),
-            ('create.adjustment', 'تعریف تعدیل '),
-            ('update.adjustment', 'ویرایش تعدیل '),
-            ('delete.adjustment', 'حذف تعدیل '),
-
-            ('getOwn.adjustment', 'مشاهده تعدیل های خود'),
-            ('updateOwn.adjustment', 'ویرایش تعدیل های خود'),
-            ('deleteOwn.adjustment', 'حذف تعدیل های خود'),
-        )
-
-
 def get_factor_permission_basename(factor_type):
     base_codename = ''
     if factor_type == Factor.BUY:
@@ -633,50 +549,3 @@ def get_factor_permission_basename(factor_type):
     elif factor_type == Factor.FIRST_PERIOD_INVENTORY:
         return 'update.firstPeriodInventory'
     return "{}Factor".format(base_codename)
-
-
-class WarehouseHandling(BaseModel, ConfirmationMixin):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlings')
-    code = models.IntegerField(blank=True, null=True)
-
-    start_date = jmodels.jDateField()
-    counting_date = jmodels.jDateField()
-    submit_date = jmodels.jDateField()
-    submit_time = models.TimeField()
-    handler = models.CharField(max_length=200)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='warehouseHandlings')
-    ware_status = models.CharField(max_length=20)
-    explanation = EXPLANATION()
-
-    is_definite = models.BooleanField(default=False)
-    inputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsInput',
-                                        blank=True, null=True)
-    outputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsOutput',
-                                         blank=True, null=True)
-
-    class Meta(BaseModel.Meta):
-        permission_basename = 'warehouseHandling'
-        permissions = (
-            ('get.warehouseHandling', 'مشاهده انبار گردانی'),
-            ('create.warehouseHandling', 'تعریف انبار گردانی'),
-            ('update.warehouseHandling', 'ویرایش انبار گردانی'),
-            ('delete.warehouseHandling', 'حذف انبار گردانی'),
-        )
-
-
-class WarehouseHandlingItem(BaseModel):
-    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlingItems')
-    warehouseHandling = models.ForeignKey(WarehouseHandling, on_delete=models.CASCADE, related_name='items')
-    ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='warehouseHandlingItems')
-    warehouse_remain = DECIMAL(null=True, default=None)
-    system_remain = DECIMAL(null=True, default=None)
-
-    order = models.IntegerField(default=0)
-
-    explanation = EXPLANATION()
-
-    @property
-    def contradiction(self):
-        if self.warehouse_remain is not None:
-            return self.warehouse_remain - self.system_remain
-        return None

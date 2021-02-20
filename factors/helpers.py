@@ -1,6 +1,7 @@
 from django.db.models import Sum
 
-from factors.models import FactorItem, Factor
+from factors.models import Factor
+from factors.models.factor import FactorItem
 
 
 # remain by considering definition

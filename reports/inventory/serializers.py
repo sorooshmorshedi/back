@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from accounts.accounts.models import Account
-from factors.models import FactorItem, Factor
+from factors.models import Factor
+from factors.models.factor import FactorItem
 from factors.serializers import FactorCreateUpdateSerializer, FactorItemSerializer
 from reports.lists.serializers import WarehouseSimpleSerializer
 from wares.models import Ware

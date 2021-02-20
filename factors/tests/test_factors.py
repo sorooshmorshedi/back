@@ -3,7 +3,8 @@ from random import randint
 import jdatetime
 
 from accounts.tests.test_accounts import AccountTest
-from factors.models import Factor, FactorItem
+from factors.models import Factor
+from factors.models.factor import FactorItem
 from users.models import User
 
 from django.urls.base import reverse

@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from factors.models import WarehouseHandling, Factor
+from factors.models import Factor
+from factors.models.warehouse_handling import WarehouseHandling
 from factors.serializers import WarehouseHandlingCreateUpdateSerializer, WarehouseHandlingItemCreateUpdateSerializer, \
     WarehouseHandlingListRetrieveSerializer, AdjustmentCreateUpdateSerializer
 from factors.views.adjustment_views import AdjustmentModelView

@@ -1,4 +1,5 @@
-from factors.models import Factor, FactorItem
+from factors.models import Factor
+from factors.models.factor import FactorItem
 from factors.tests.test_factors import FactorTest
 from factors.views.definite_factor import DefiniteFactor
 from users.models import User

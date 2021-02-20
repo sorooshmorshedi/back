@@ -174,7 +174,7 @@ class Ware(BaseModel):
 
     def last_factor_item(self, user, exclude_factors=None, other_filters=None):
         try:
-            from factors.models import FactorItem
+            from factors.models.factor import FactorItem
             from factors.models import Factor
             from django.db.models import Q
             last_factor_item = FactorItem.objects.inFinancialYear().filter(ware=self) \

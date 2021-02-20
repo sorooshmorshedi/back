@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(choices=[('ia', 'رسید تعدیل انبار'), ('oa', 'حواله تعدیل انبار')], max_length=2)),
                 ('explanation', models.CharField(blank=True, default='', max_length=255, null=True)),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
-                ('factor', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='adjustment', to='factors.Factor')),
+                ('factor', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='adjustment', to='factors.models.factor.Factor')),
                 ('financial_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.FinancialYear')),
                 ('sanad', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='adjustment', to='sanads.Sanad')),
             ],

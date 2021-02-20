@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from factors.models import Adjustment, FactorItem
+from factors.models import Adjustment
+from factors.models.factor import FactorItem
 from factors.serializers import AdjustmentListRetrieveSerializer, AdjustmentCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
