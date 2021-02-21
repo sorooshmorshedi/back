@@ -113,7 +113,8 @@ class WareListCreateView(ListCreateAPIViewWithAutoFinancialYear):
         )
 
         ware = serializer.instance
-        update_sale_prices(ware, self.request.data.get('salePrices', []))
+        if ware.level == 3:
+            update_sale_prices(ware, self.request.data.get('salePrices', []))
 
 
 class WareDetailView(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
@@ -131,7 +132,9 @@ class WareDetailView(RetrieveUpdateDestroyAPIViewWithAutoFinancialYear):
         if ware.pricingType != request.data.get('pricingType') and ware.has_factorItem():
             return Response(['نحوه قیمت گذاری کالا های دارای گردش غیر قابل تغییر می باشد'],
                             status=status.HTTP_400_BAD_REQUEST)
-        update_sale_prices(ware, request.data.get('salePrices', []))
+
+        if ware.level == 3:
+            update_sale_prices(ware, request.data.get('salePrices', []))
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
