@@ -55,6 +55,8 @@ urlpatterns = [
 
     url(r'^dashtbashi/', include('_dashtbashi.urls')),
 
+    url(r'^distributions/', include('distributions.urls')),
+
     path('__debug__/', include(debug_toolbar.urls)),
 
 ]

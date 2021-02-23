@@ -1,5 +1,6 @@
 import datetime
 
+from django.db.models import Max
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
@@ -14,7 +15,7 @@ from helpers.functions import get_current_user
 from sanads.serializers import SanadSerializer
 from transactions.models import Transaction
 from users.serializers import UserSimpleSerializer
-from wares.models import WareInventory
+from wares.models import WareInventory, Ware, Warehouse
 from wares.serializers import WareRetrieveSerializer, WarehouseSerializer, WareListSerializer, \
     WarehouseSimpleSerializer, UnitSerializer
 from django.utils.timezone import now

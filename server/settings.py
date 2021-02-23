@@ -66,6 +66,8 @@ INSTALLED_APPS = [
 
     '_dashtbashi',
 
+    'distributions',
+
 ]
 
 ALLOWED_HOSTS = ['*']

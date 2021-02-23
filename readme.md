@@ -7,6 +7,20 @@
 * fields: postal_code
 * methods: get_new_code
 
+### Serializers
+Serializer of a model should be in one of the following formats:
+* One serializer:
+    * ModelSerializer
+* Two Serializers:
+    * ModelCreateUpdateSerializer
+    * ModelListRetrieveSerializer
+* Three or more:
+    * ModelCreateSerializer
+    * ModelUpdateSerializer
+    * ModelListSerializer
+    * ModelRetrieveSerializer
+* There can be more serializers, like `ModelSimpleSerializer`
+
 ### Apps
 * _* apps are add-on apps
 

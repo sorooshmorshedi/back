@@ -107,6 +107,8 @@ class Ware(BaseModel):
 
     parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
 
+    commission_percent = models.IntegerField(blank=True, default=0)
+
     @property
     def main_unit(self) -> Unit:
         salePrice = self.salePrices.filter(conversion_factor=1).first()

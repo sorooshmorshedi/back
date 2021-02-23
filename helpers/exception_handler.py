@@ -42,6 +42,8 @@ labels = {
     'code': 'شماره',
     'form': 'فرم',
     'post': 'سمت',
+    'percent': 'درصد',
+    'user': 'کاربر',
 
     # Dashtbashi
     'destination': 'مقصد',

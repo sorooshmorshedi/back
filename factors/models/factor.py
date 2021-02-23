@@ -10,6 +10,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
+from distributions.models import Visitor
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
 from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
@@ -87,6 +88,8 @@ class Factor(BaseModel, ConfirmationMixin):
     definition_date = models.DateTimeField(blank=True, null=True)
 
     total_sum = DECIMAL()
+
+    visitor = models.ForeignKey(Visitor, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         permissions = (
