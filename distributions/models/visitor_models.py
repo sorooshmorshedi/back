@@ -35,7 +35,7 @@ class Visitor(BaseModel):
         null=True
     )
 
-    commission_percent = models.IntegerField(default=0)
+    commission_percent = models.FloatField(default=0)
     fixed_commission = DECIMAL(default=0)
     commissionRange = models.ForeignKey(
         CommissionRange,
