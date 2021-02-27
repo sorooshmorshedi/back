@@ -356,5 +356,6 @@ class FinancialYearModelView(viewsets.ModelViewSet):
             for default_account in DefaultAccount.objects.inFinancialYear(base_financial_year).all():
                 default_account.pk = None
                 default_account.financial_year = new_financial_year
-                default_account.account_id = accounts_map[default_account.account_id]
+                if default_account.account_id in accounts_map:
+                    default_account.account_id = accounts_map[default_account.account_id]
                 default_account.save()
