@@ -1,6 +1,7 @@
 import logging
 import re
 from datetime import datetime
+from functools import reduce
 
 import jdatetime
 from django.db.models.aggregates import Max
@@ -12,7 +13,7 @@ from django.db import models
 import django.db.models.options as options
 from rest_framework.exceptions import ValidationError
 
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_new_child_code
 
 options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('backward_financial_year', 'permission_basename')
 
@@ -195,6 +196,55 @@ class LocalIdMixin(models.Model):
                 local_id=Coalesce(Max('local_id'), 0)
             )['local_id'] + 1
         super().save(*args, **kwargs)
+
+
+class TreeMixin(models.Model):
+
+    @property
+    def CODE_LENGTHS(self):
+        raise NotImplementedError()
+
+    explanation = models.CharField(max_length=255, blank=True, null=True)
+
+    level = models.IntegerField()
+    code = models.CharField(max_length=100)
+    parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def get_new_child_code(self):
+        last_child_code = None
+
+        last_child = self.children.order_by('-code').first()
+        if last_child:
+            last_child_code = last_child.code
+
+        return get_new_child_code(
+            self.code,
+            self.CODE_LENGTHS[self.level + 1],
+            last_child_code
+        )
+
+    @classmethod
+    def get_new_code(cls):
+        code = cls.objects.inFinancialYear().filter(level=0).aggregate(
+            last_code=Max('code')
+        )['last_code']
+
+        if code:
+            code = int(code) + 1
+        else:
+            code = 0
+
+        if code < 9:
+            code += 10
+
+        if code >= 99:
+            from rest_framework import serializers
+            raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
+
+        return str(code)
 
 
 def DATE(**kwargs):

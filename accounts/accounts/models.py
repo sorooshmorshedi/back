@@ -170,6 +170,8 @@ class Account(BaseModel):
     buyer_or_seller = models.CharField(choices=BUYER_OR_SELLER_CHOICES, max_length=10, default="", blank=True)
     defaultSalePriceType = models.ForeignKey(SalePriceType, on_delete=models.PROTECT, null=True)
 
+    path = models.ForeignKey('distributions.Path', on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
+
     phone_1 = models.CharField(max_length=20, default="", blank=True)
     phone_2 = models.CharField(max_length=20, default="", blank=True)
     mobile = PHONE(null=True, blank=True)

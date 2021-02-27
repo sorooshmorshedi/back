@@ -135,7 +135,7 @@ class AccountListSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'title', 'floatAccountGroup', 'costCenterGroup', 'type',
             'name', 'code', 'level', 'person_type', 'buyer_or_seller', 'parent', 'account_type',
-            'defaultSalePriceType'
+            'defaultSalePriceType', 'path'
         )
 
     @staticmethod
