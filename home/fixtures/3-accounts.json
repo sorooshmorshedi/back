@@ -17331,5 +17331,16 @@
       "usage": "payment",
       "codename": "quickBankPayment"
     }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 37,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب تفصیلی ویزیتور ها",
+      "account_level": 3,
+      "usage": "factor",
+      "codename": "visitorsAccount"
+    }
   }
 ]

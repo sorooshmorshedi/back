@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from accounts.defaultAccounts.models import DefaultAccount
-from companies.models import FinancialYear
+from companies.models import FinancialYear, Company
 from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
 from server.settings import BASE_DIR
 from users.models import User
@@ -39,14 +39,15 @@ class Command(BaseCommand):
                     del fields[field]
 
             print("Codename: {}".format(codename))
-            for financial_year in FinancialYear.objects.filter(pk=21).all():
-                print(" - Financial Year #{}".format(financial_year.id))
+            for company in Company.objects.all():
+                financial_year = company.financial_years.latest()
+                print(" - Company #{}".format(company.id))
                 try:
-                    item = DefaultAccount.objects.inFinancialYear(financial_year).get(codename=codename)
+                    item = DefaultAccount.objects.filter(financial_year__company=company).get(codename=codename)
                     item.update(**fields)
                 except DefaultAccount.MultipleObjectsReturned:
                     print(" - - Duplicate {}!".format(codename))
-                    qs = DefaultAccount.objects.inFinancialYear(financial_year).filter(codename=codename).order_by('pk')
+                    qs = DefaultAccount.objects.filter(financial_year__company=company, codename=codename).order_by('pk')
                     item = qs.first()
                     item.update(**fields)
                     print(" - - ", qs.filter(~Q(pk=item.id)).delete())

@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.accounts.models import Account
+from accounts.accounts.models import FloatAccount
 from companies.models import FinancialYear
 from distributions.models.commission_range_models import CommissionRange
 from helpers.models import BaseModel, DECIMAL, EXPLANATION, TreeMixin
@@ -14,12 +14,7 @@ class Visitor(BaseModel, TreeMixin):
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='visitors')
     explanation = EXPLANATION()
 
-    account = models.ForeignKey(
-        Account,
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True
-    )
+    floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT)
     parent = models.ForeignKey(
         'self',
         on_delete=models.PROTECT,

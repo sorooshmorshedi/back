@@ -27,6 +27,7 @@ class BaseManager(models.Manager):
             return super().get_queryset()
 
         if hasattr(self.model, 'financial_year') and use_financial_year:
+            print(self.model, 'ha', financial_year)
             queryset = self.inFinancialYear(financial_year)
         else:
             queryset = super().get_queryset()
@@ -90,6 +91,7 @@ class BaseModel(models.Model):
         ordering = ['-pk']
         backward_financial_year = False
         permission_basename = None
+        get_latest_by = 'pk'
 
     objects = BaseManager()
 
