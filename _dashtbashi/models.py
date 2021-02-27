@@ -607,7 +607,7 @@ class OilCompanyLading(BaseModel, ConfirmationMixin, LocalIdMixin):
     date = jmodels.jDateField()
     list_date = jmodels.jDateField()
     export_date = jmodels.jDateField()
-    month = models.CharField(choices=MONTHS, max_length=1)
+    month = models.CharField(choices=MONTHS, max_length=2)
 
     driving = models.ForeignKey(Driving, on_delete=models.PROTECT, related_name='oilCompanyLadings')
 
