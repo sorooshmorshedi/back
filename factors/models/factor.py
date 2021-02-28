@@ -69,7 +69,6 @@ class Factor(BaseModel, ConfirmationMixin):
                                    blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
-    paidValue = DECIMAL()
     bijak = models.IntegerField(null=True, blank=True)
 
     date = jmodels.jDateField()
@@ -85,9 +84,18 @@ class Factor(BaseModel, ConfirmationMixin):
     taxValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
 
-    is_definite = models.BooleanField(default=0)
+    is_definite = models.BooleanField(default=False)
     definition_date = models.DateTimeField(blank=True, null=True)
 
+    is_loaded = models.BooleanField(default=False)
+    loading_date = models.DateTimeField(blank=True, null=True)
+
+    is_delivered = models.BooleanField(default=False)
+    delivery_date = models.DateTimeField(blank=True, null=True)
+
+    is_settled = models.BooleanField(default=False)
+
+    paidValue = DECIMAL()
     total_sum = DECIMAL()
 
     visitor = models.ForeignKey(Visitor, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
@@ -392,6 +400,7 @@ class Factor(BaseModel, ConfirmationMixin):
 
     def save(self, *args, **kwargs) -> None:
         self.total_sum = self.sum - self.discountSum + self.taxSum
+        self.is_settled = self.total_sum == self.paidValue
         super(Factor, self).save(*args, **kwargs)
 
 
