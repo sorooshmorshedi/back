@@ -1,6 +1,10 @@
 from rest_framework import status
 from rest_framework.views import exception_handler
 
+import logging
+
+from helpers.bale import Bale
+
 labels = {
     # Admin
     'company_name': 'نام شرکت',
@@ -87,3 +91,11 @@ def custom_exception_handler(exc, context):
         response.data = errors
 
     return response
+
+
+class BaleLogHandler(logging.Handler):
+
+    def emit(self, record):
+        text = self.format(record)
+        print(text)
+        Bale.to_me(text)
