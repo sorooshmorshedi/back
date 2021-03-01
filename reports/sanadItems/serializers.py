@@ -60,13 +60,19 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
     previous_remain = serializers.SerializerMethodField()
     previous_remain_type = serializers.SerializerMethodField()
 
-    comulative_bed = serializers.IntegerField()
+    comulative_bed = serializers.SerializerMethodField()
     comulative_bes = serializers.IntegerField()
 
     remain = serializers.SerializerMethodField()
     remain_type = serializers.SerializerMethodField()
 
     created_by = UserSimpleSerializer(many=False, read_only=True)
+
+    def get_comulative_bed(self, obj):
+        bed = obj.comulative_bed
+        if self.consider_previous_remain:
+            bed += obj.previous_bed
+        return bed
 
     def get_previous_remain(self, obj):
         return abs(obj.previous_bed - obj.previous_bes)
@@ -75,14 +81,19 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
         return self.calc_remain_type(obj.previous_bed, obj.previous_bes)
 
     def get_remain(self, obj):
-        consider_previous_remain = self.context.get('consider_previous_remain', True)
         remain = abs(obj.comulative_bed - obj.comulative_bes)
-        if consider_previous_remain:
+        if self.consider_previous_remain:
             remain = abs(remain + obj.previous_bed - obj.previous_bes)
         return remain
 
     def get_remain_type(self, obj):
-        return self.calc_remain_type(obj.comulative_bed + obj.previous_bed, obj.comulative_bes + obj.previous_bes)
+        bed = obj.comulative_bed
+        bes = obj.comulative_bes
+        if self.consider_previous_remain:
+            bed += obj.previous_bed
+            bes += obj.previous_bes
+
+        return self.calc_remain_type(bed, bes)
 
     def calc_remain_type(self, bed, bes):
         if bed > bes:
@@ -91,6 +102,10 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
             return 'بس'
         else:
             return ' - '
+
+    @property
+    def consider_previous_remain(self):
+        return self.context.get('consider_previous_remain', True)
 
     class Meta:
         model = SanadItem
