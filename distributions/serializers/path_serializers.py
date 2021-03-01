@@ -1,9 +1,6 @@
-from typing import Any
-
-from django.db import connection
 from rest_framework import serializers
 
-from distributions.models.path import Path
+from distributions.models.path_model import Path
 
 
 class PathListRetrieveSerializer(serializers.ModelSerializer):

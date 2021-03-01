@@ -27,7 +27,6 @@ class BaseManager(models.Manager):
             return super().get_queryset()
 
         if hasattr(self.model, 'financial_year') and use_financial_year:
-            print(self.model, 'ha', financial_year)
             queryset = self.inFinancialYear(financial_year)
         else:
             queryset = super().get_queryset()
@@ -79,7 +78,7 @@ class BaseManager(models.Manager):
 
 
 class BaseModel(models.Model):
-    created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='own_%(class)s')
+    created_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
     created_at = jmodels.jDateTimeField(auto_now=True, null=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True, null=True)
     is_auto_created = models.BooleanField(default=False)

@@ -146,7 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'helpers.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'helpers.exception_handlers.custom_exception_handler',
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),

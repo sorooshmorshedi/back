@@ -11,7 +11,9 @@ from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
 from distributions.models import Visitor
-from distributions.models.path import Path
+from distributions.models.car_model import Car
+from distributions.models.distribution_model import Distribution
+from distributions.models.path_model import Path
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
 from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
@@ -74,9 +76,6 @@ class Factor(BaseModel, ConfirmationMixin):
     date = jmodels.jDateField()
     time = models.TimeField()
 
-    created_at = jmodels.jDateTimeField(auto_now=True)
-    updated_at = jmodels.jDateTimeField(auto_now_add=True)
-
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
 
@@ -85,12 +84,16 @@ class Factor(BaseModel, ConfirmationMixin):
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
 
     is_definite = models.BooleanField(default=False)
+    defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='definedFactors')
     definition_date = models.DateTimeField(blank=True, null=True)
 
     is_loaded = models.BooleanField(default=False)
+    loaded_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='loadedFactors')
+    distribution = models.ForeignKey(Distribution, on_delete=models.PROTECT, null=True, related_name='factors')
     loading_date = models.DateTimeField(blank=True, null=True)
 
     is_delivered = models.BooleanField(default=False)
+    delivered_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='deliveredFactors')
     delivery_date = models.DateTimeField(blank=True, null=True)
 
     is_settled = models.BooleanField(default=False)
