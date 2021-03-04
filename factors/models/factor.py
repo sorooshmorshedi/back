@@ -213,7 +213,7 @@ class Factor(BaseModel, ConfirmationMixin):
         sum = 0
         for item in self.items.all():
             sum += item.calculated_value
-        return Decimal(sum)
+        return sum
 
     @property
     def discountSum(self):
