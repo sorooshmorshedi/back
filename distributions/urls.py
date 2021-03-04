@@ -1,7 +1,8 @@
+from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from distributions.views import CommissionRangeModelView, VisitorModelView, PathModelView, DriverModelView, \
-    DistributorModelView, CarModelView, DistributionModelView
+    DistributorModelView, CarModelView, DistributionModelView, GetDistributionByPositionView
 
 router = DefaultRouter()
 router.register('commissionRanges', CommissionRangeModelView, base_name='commission-range')
@@ -14,4 +15,6 @@ router.register('distributions', DistributionModelView, base_name='distribution'
 
 urlpatterns = router.urls
 
-urlpatterns += []
+urlpatterns += [
+    url(r'^distributions/byPosition$', GetDistributionByPositionView.as_view(), name=''),
+]

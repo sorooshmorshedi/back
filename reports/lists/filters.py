@@ -119,7 +119,10 @@ class FactorFilter(filters.FilterSet):
             'explanation': ['icontains'],
             'sanad__bed': ['icontains'],
             'type': ['exact', 'in'],
-            'is_definite': ['exact']
+            'is_definite': ['exact'],
+            'is_loaded': ['exact'],
+            'path': ['in'],
+            'visitor': ['in', 'exact']
         }
         filter_overrides = {
             jmodels.jDateField: {
