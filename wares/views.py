@@ -68,11 +68,12 @@ class SalePriceTypeListCreate(ListCreateAPIViewWithAutoFinancialYear):
 
 def update_sale_prices(ware: Ware, data: list):
     data = list(filter(lambda o: o['unit'], data))
-    if len(data) == 0:
-        raise ValidationError("واحد اصلی کالا اجباری می باشد")
 
     ware.salePrices.all().delete()
     data[0]['conversion_factor'] = 1
+
+    created_rows = 0
+
     for row in data:
         unit = Unit.objects.get(pk=row['unit'])
         prices = row['prices']
@@ -86,6 +87,10 @@ def update_sale_prices(ware: Ware, data: list):
                     price=price,
                     conversion_factor=row['conversion_factor'],
                 )
+                created_rows += 1
+
+    if created_rows == 0:
+        raise ValidationError("واحد و قیمت اصلی کالا اجباری می باشد")
 
 
 class WareListCreateView(ListCreateAPIViewWithAutoFinancialYear):
