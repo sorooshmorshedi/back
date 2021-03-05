@@ -9,7 +9,7 @@ def move_units_and_prices(apps, schema_editor):
     Ware = apps.get_model('wares', 'Ware')
     SalePrice = apps.get_model('wares', 'SalePrice')
 
-    for ware in Ware.objects.filter(~Q(price=None)):
+    for ware in Ware.objects.filter(level=3):
         financial_year = ware.financial_year
 
         salePriceType = SalePriceType.objects.filter(financial_year=financial_year).first()

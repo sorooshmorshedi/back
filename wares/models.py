@@ -242,7 +242,7 @@ class SalePrice(BaseModel):
     conversion_factor = DECIMAL(default=1)
 
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='salePrices')
-    price = DECIMAL()
+    price = DECIMAL(null=True)
 
     class Meta(BaseModel.Meta):
         backward_financial_year = True
