@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from distributions.models import CommissionRange, Visitor
 from distributions.models.car_model import Car
@@ -20,7 +21,7 @@ from distributions.serializers.driver_serializers import DriverListRetrieveSeria
 from distributions.serializers.path_serializers import PathListRetrieveSerializer, PathCreateUpdateSerializer
 from distributions.serializers.visitor_serializers import VisitorCreateUpdateSerializer, VisitorListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_new_code
+from helpers.functions import get_new_code, get_object_by_code
 
 
 class CommissionRangeModelView(viewsets.ModelViewSet):
@@ -267,9 +268,13 @@ class DistributionModelView(viewsets.ModelViewSet):
             instance=self.get_object(),
             data=data,
         )
+        instance = self.get_object()
+        factors = instance.factors.all()
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        instance = serializer.instance
+
+        instance.sync(factors)
 
         return Response(DistributionListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 
@@ -285,8 +290,26 @@ class DistributionModelView(viewsets.ModelViewSet):
         )
 
         instance = serializer.instance
+        instance.sync()
 
         return Response(
             DistributionListRetrieveSerializer(instance=instance).data,
             status=status.HTTP_200_OK
         )
+
+
+class GetDistributionByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'distribution'
+
+    def get(self, request):
+        data = request.GET
+
+        item = get_object_by_code(
+            Distribution.objects.hasAccess(request.method, self.permission_basename),
+            data.get('position'),
+            data.get('id')
+        )
+        if item:
+            return Response(DistributionListRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
