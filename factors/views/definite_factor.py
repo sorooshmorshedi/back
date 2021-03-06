@@ -92,8 +92,6 @@ class DefiniteFactor(APIView):
 
             elif factor.type in Factor.INPUT_GROUP:
                 fee = item.fee
-                if factor.type == Factor.BACK_FROM_SALE:
-                    fee = float(WareInventory.get_remain_fees(ware, warehouse)[-1]['fee'])
                 item.fees = [{
                     'fee': float(fee),
                     'count': float(item.count)
