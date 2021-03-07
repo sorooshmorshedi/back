@@ -9,9 +9,9 @@ class ImprestSettlementSanad(AutoSanad):
             'بابت تسویه',
             self.instance.explanation,
             'از محل تنخواه شماره',
-            self.transaction.code,
+            self.instance.transaction.code,
             'مورخ',
-            self.transaction.date
+            self.instance.transaction.date
         )
 
     def get_sanad_rows(self, instance: ImprestSettlement):

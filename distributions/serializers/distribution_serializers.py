@@ -6,11 +6,17 @@ from factors.serializers import FactorListRetrieveSerializer
 from users.serializers import UserSimpleSerializer
 
 
-class DistributionListRetrieveSerializer(serializers.ModelSerializer):
+class DistributionRetrieveSerializer(serializers.ModelSerializer):
     created_by = UserSimpleSerializer()
     factors = FactorListRetrieveSerializer(many=True)
     car = CarListRetrieveSerializer()
 
+    class Meta:
+        model = Distribution
+        fields = '__all__'
+
+
+class DistributionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Distribution
         fields = '__all__'

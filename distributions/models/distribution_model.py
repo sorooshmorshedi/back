@@ -33,24 +33,20 @@ class Distribution(BaseModel, LocalIdMixin):
             ('delete.distribution', 'حذف توزیع '),
         )
 
-    def sync(self, previous_factors=()):
-        new_factors = self.factors.all()
+    def sync(self):
+        from factors.models import Factor
 
-        for factor in new_factors:
-            if factor not in previous_factors:
-                print('n', factor.id)
-                factor.is_loaded = True
-                factor.loaded_by = get_current_user()
-                factor.loading_date = datetime.datetime.combine(self.date.togregorian(), self.time)
-                factor.save()
+        Factor.objects.filter(distribution=None).update(
+            is_loaded=False,
+            loaded_by=None,
+            loading_date=None
+        )
 
-        for factor in previous_factors:
-            if factor not in new_factors:
-                print('p', factor.id)
-                factor.is_loaded = False
-                factor.loaded_by = None
-                factor.loading_date = None
-                factor.save()
+        for factor in self.factors.all():
+            factor.is_loaded = True
+            factor.loaded_by = get_current_user()
+            factor.loading_date = datetime.datetime.combine(self.date.togregorian(), self.time)
+            factor.save()
 
     def save(self, *args, **kwargs) -> None:
         if not self.pk:

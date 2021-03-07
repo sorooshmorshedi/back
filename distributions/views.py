@@ -1,6 +1,9 @@
+from typing import Any
+
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,8 +16,8 @@ from distributions.models.path_model import Path
 from distributions.serializers.car_serializers import CarListRetrieveSerializer, CarCreateUpdateSerializer
 from distributions.serializers.commission_range_serializers import CommissionRangeCreateUpdateSerializer, \
     CommissionRangeListRetrieveSerializer
-from distributions.serializers.distribution_serializers import DistributionListRetrieveSerializer, \
-    DistributionCreateUpdateSerializer
+from distributions.serializers.distribution_serializers import DistributionRetrieveSerializer, \
+    DistributionCreateUpdateSerializer, DistributionListSerializer
 from distributions.serializers.distributor_serializers import DistributorListRetrieveSerializer, \
     DistributorCreateUpdateSerializer
 from distributions.serializers.driver_serializers import DriverListRetrieveSerializer, DriverCreateUpdateSerializer
@@ -256,7 +259,7 @@ class CarModelView(viewsets.ModelViewSet):
 class DistributionModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'distribution'
-    serializer_class = DistributionListRetrieveSerializer
+    serializer_class = DistributionListSerializer
 
     def get_queryset(self):
         return Distribution.objects.hasAccess(self.request.method, self.permission_basename)
@@ -269,14 +272,13 @@ class DistributionModelView(viewsets.ModelViewSet):
             data=data,
         )
         instance = self.get_object()
-        factors = instance.factors.all()
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        instance.sync(factors)
+        instance.sync()
 
-        return Response(DistributionListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+        return Response(DistributionRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -293,9 +295,12 @@ class DistributionModelView(viewsets.ModelViewSet):
         instance.sync()
 
         return Response(
-            DistributionListRetrieveSerializer(instance=instance).data,
+            DistributionRetrieveSerializer(instance=instance).data,
             status=status.HTTP_200_OK
         )
+
+    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(DistributionRetrieveSerializer(self.get_object()).data)
 
 
 class GetDistributionByPositionView(APIView):
@@ -311,5 +316,5 @@ class GetDistributionByPositionView(APIView):
             data.get('id')
         )
         if item:
-            return Response(DistributionListRetrieveSerializer(instance=item).data)
+            return Response(DistributionRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
