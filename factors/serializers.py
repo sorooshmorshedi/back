@@ -213,6 +213,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         if instance.financial_year.is_advari:
             input_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
             output_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
+
         input_factor.date = instance.date
         input_factor.explanation = instance.explanation
         output_factor.date = instance.date
@@ -236,13 +237,12 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         output_factor.items.all().delete()
 
         for item in validated_data['items']:
-            ware = Ware.objects.get(pk=item['ware'])
             input_warehouse = Warehouse.objects.get(pk=item['input_warehouse'])
             output_warehouse = Warehouse.objects.get(pk=item['output_warehouse'])
 
             item_data = {
                 'financial_year': instance.financial_year,
-                'explanation': explanation,
+                'explanation': item['explanation'],
                 'count': item['count'],
                 'unit_count': item['unit_count'],
                 'unit_id': item['unit'],
@@ -296,14 +296,13 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         else:
             definition_date = now()
 
-        print(date, definition_date)
         factor_data = {
             'financial_year': financial_year,
-            'date': '1399-03-26',
+            'date': date,
             'explanation': explanation,
             'is_definite': True,
-            'definition_date': now(),
-            'time': '19:21',
+            'definition_date': definition_date,
+            'time': now(),
             'is_auto_created': True
         }
         input_factor = Factor.objects.create(
