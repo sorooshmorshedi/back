@@ -1,5 +1,6 @@
 import datetime
 
+import jdatetime
 from django.db.models import Max
 from rest_framework import serializers
 
@@ -164,14 +165,16 @@ class TransferListRetrieveSerializer(serializers.ModelSerializer):
             output_item = output_items[i]
 
             ware = WareRetrieveSerializer(input_item.ware).data
-            count = input_item.count
+            unit = UnitSerializer(input_item.unit).data
             explanation = input_item.explanation
             output_warehouse = WarehouseSerializer(output_item.warehouse).data
             input_warehouse = WarehouseSerializer(input_item.warehouse).data
 
             items.append({
                 'ware': ware,
-                'count': count,
+                'unit': unit,
+                'unit_count': input_item.unit_count,
+                'count': input_item.count,
                 'explanation': explanation,
                 'output_warehouse': output_warehouse,
                 'input_warehouse': input_warehouse,
@@ -199,8 +202,8 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         explanation = validated_data.get('explanation', '')
 
         if instance.financial_year.is_advari:
-            input_factor.definition_date = instance.date
-            output_factor.definition_date = instance.date
+            input_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
+            output_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
         input_factor.date = instance.date
         input_factor.explanation = instance.explanation
         output_factor.date = instance.date
@@ -232,7 +235,9 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
                 'financial_year': instance.financial_year,
                 'explanation': explanation,
                 'count': item['count'],
-                'ware': ware,
+                'unit_count': item['unit_count'],
+                'unit_id': item['unit'],
+                'ware_id': item['ware'],
             }
 
             # move ware out
@@ -282,13 +287,14 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         else:
             definition_date = now()
 
+        print(date, definition_date)
         factor_data = {
             'financial_year': financial_year,
-            'date': date,
+            'date': '1399-03-26',
             'explanation': explanation,
             'is_definite': True,
-            'definition_date': definition_date,
-            'time': now(),
+            'definition_date': now(),
+            'time': '19:21',
             'is_auto_created': True
         }
         input_factor = Factor.objects.create(
