@@ -105,6 +105,8 @@ class Factor(BaseModel, ConfirmationMixin):
 
     path = models.ForeignKey(Path, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
 
+    backFrom = models.OneToOneField('self', on_delete=models.PROTECT, related_name='backFactor', blank=True, null=True)
+
     class Meta(BaseModel.Meta):
         permissions = (
             ('get.buyFactor', 'مشاهده فاکتور خرید'),

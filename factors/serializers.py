@@ -126,6 +126,14 @@ class FactorPaymentWithTransactionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class BackFactorSerializer(serializers.ModelSerializer):
+    items = FactorItemRetrieveSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Factor
+        fields = '__all__'
+
+
 class FactorListRetrieveSerializer(serializers.ModelSerializer):
     account = AccountListSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
@@ -135,6 +143,7 @@ class FactorListRetrieveSerializer(serializers.ModelSerializer):
     payments = FactorPaymentWithTransactionSerializer(read_only=True, many=True)
     sanad = SanadSerializer(read_only=True, many=False)
     created_by = UserSimpleSerializer(read_only=True)
+    backFactor = BackFactorSerializer(read_only=True)
 
     class Meta:
         model = Factor
