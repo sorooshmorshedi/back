@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandParser
 from accounts.accounts.models import AccountBalance
 from helpers.db import queryset_iterator
 from helpers.functions import get_object_accounts
-from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
+from helpers.middlewares.modify_request_middleware import ModifyRequestMiddleware
 from sanads.models import SanadItem
 from server.settings import BASE_DIR
 from users.models import User

@@ -85,6 +85,11 @@ class UserChangePasswordView(APIView):
         request.user.has_object_perm(user, 'changePassword', raise_exception=True)
         user.set_password(request.data.get('password'))
         user.save()
+
+        token = user.auth_token
+        if token:
+            token.delete()
+
         return Response([])
 
 

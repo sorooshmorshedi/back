@@ -8,7 +8,7 @@ from django.db.models.query_utils import Q
 
 
 def get_current_user():
-    from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
+    from helpers.middlewares.modify_request_middleware import ModifyRequestMiddleware
     return ModifyRequestMiddleware.thread_local.user
 
 

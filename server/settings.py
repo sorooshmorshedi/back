@@ -84,7 +84,9 @@ MIDDLEWARE = [
 
     'corsheaders.middleware.CorsMiddleware',
 
-    'helpers.middlewares.ModifyRequestMiddleware.ModifyRequestMiddleware',
+    'helpers.middlewares.modify_request_middleware.ModifyRequestMiddleware',
+
+    'helpers.middlewares.check_token_expiration.CheckTokenExpiration',
 
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 

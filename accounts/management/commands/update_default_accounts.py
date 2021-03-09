@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear, Company
-from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
+from helpers.middlewares.modify_request_middleware import ModifyRequestMiddleware
 from server.settings import BASE_DIR
 from users.models import User
 

@@ -8,7 +8,7 @@ from django.db.models.base import Model
 from faker import Faker
 from rest_framework.test import APIClient, APITestCase
 
-from helpers.middlewares.ModifyRequestMiddleware import ModifyRequestMiddleware
+from helpers.middlewares.modify_request_middleware import ModifyRequestMiddleware
 from helpers.validators import ModelValidator
 
 

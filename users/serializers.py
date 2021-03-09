@@ -84,7 +84,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'roles', 'is_active')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'roles', 'is_active')
 
 
 class UserDeleteSerializer(serializers.ModelSerializer):

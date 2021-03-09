@@ -209,3 +209,63 @@ class ConfirmFactor(ConfirmView):
     @property
     def permission_codename(self):
         return get_factor_permission_basename(self.get_object().type)
+
+
+class CreateBackFactor(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+
+    @property
+    def permission_codename(self):
+        factor_type = self.get_object().type
+        if factor_type == Factor.SALE:
+            return 'create.backFromSaleFactor'
+        else:
+            return 'create.backFromBuyFactor'
+
+    def get_object(self):
+        factor_id = self.request.data.get('id')
+        factor = get_object_or_404(Factor, pk=factor_id)
+        return factor
+
+    def post(self, request):
+        factor = self.get_object()
+
+        if factor.type not in [Factor.BUY, Factor.SALE]:
+            raise ValidationError("امکان ثبت فاکتور برگشتی برای این نوع فاکتور وجود ندارد")
+
+        if factor.type == Factor.SALE:
+            back_factor_type = Factor.BACK_FROM_SALE
+        else:
+            back_factor_type = Factor.BACK_FROM_BUY
+
+        back_factor = Factor.objects.create(
+            financial_year=factor.financial_year,
+            temporary_code=Factor.get_new_temporary_code(factor_type=factor.type),
+            account=factor.account,
+            floatAccount=factor.floatAccount,
+            costCenter=factor.costCenter,
+            type=back_factor_type,
+            date=jdatetime.date.today(),
+            time=now(),
+            discountValue=factor.discountValue,
+            discountPercent=factor.discountPercent,
+            has_tax=factor.has_tax,
+            taxValue=factor.taxValue,
+            taxPercent=factor.taxPercent,
+            visitor=factor.visitor,
+            path=factor.path,
+            backFrom=factor.id
+        )
+
+        for item in factor.items.all():
+            item.pk = None
+            item.factor = back_factor
+            item.save()
+
+        DefiniteFactor.definiteFactor(
+            request.user,
+            back_factor.pk,
+            is_confirmed=request.data.get('_confirmed')
+        )
+
+        return Response(FactorListRetrieveSerializer(instance=back_factor).data)
