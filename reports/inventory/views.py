@@ -22,26 +22,16 @@ def addSum(queryset, data):
         },
         'remain': data[-1]['remain'],
         'input': {
-            'count': queryset.filter(factor__type__in=(
-                *Factor.BUY_GROUP,
-                Factor.INPUT_ADJUSTMENT
-            )).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=Factor.INPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=(
-                *Factor.BUY_GROUP,
-                Factor.INPUT_ADJUSTMENT
-            )).aggregate(value=Sum('calculated_value'))[
+            'value': queryset.filter(factor__type__in=Factor.INPUT_GROUP).aggregate(value=Sum('calculated_value'))[
                 'value'
             ]
         },
         'output': {
             'count': queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=(
-                *Factor.SALE_GROUP,
-                Factor.OUTPUT_ADJUSTMENT,
-                Factor.CONSUMPTION_WARE
-            )).aggregate(
+            'value': queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(
                 value=Sum('calculated_value')
             )['value'],
         }
