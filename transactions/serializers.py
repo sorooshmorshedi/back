@@ -64,9 +64,16 @@ class TransactionFactorListSerializer(serializers.ModelSerializer):
     remain = serializers.SerializerMethodField()
     previous_paid_value = serializers.SerializerMethodField()
     payment = serializers.SerializerMethodField()
+    back_total_sum = serializers.SerializerMethodField()
+
+    def get_back_total_sum(self, obj: Factor):
+        if obj.backFactor:
+            return obj.backFactor.total_sum
+        else:
+            return 0
 
     def get_remain(self, obj: Factor):
-        return obj.total_sum - obj.paidValue
+        return obj.total_sum - self.get_back_total_sum(obj) - obj.paidValue
 
     def get_previous_paid_value(self, obj: Factor):
         payment = obj.payments.filter(transaction_id=self.transaction_id).first()
@@ -93,7 +100,8 @@ class TransactionFactorListSerializer(serializers.ModelSerializer):
         model = Factor
         fields = (
             'id', 'type', 'code', 'temporary_code', 'explanation', 'date', 'total_sum', 'remain', 'previous_paid_value',
-            'payment'
+            'payment',
+            'back_total_sum'
         )
 
 
