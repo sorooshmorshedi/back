@@ -17,8 +17,13 @@ class Car(BaseModel):
         backward_financial_year = True
         permission_basename = 'car'
         permissions = (
-            ('get.car', 'مشاهده ماشین ها'),
             ('create.car', 'تعریف ماشین '),
+
+            ('get.car', 'مشاهده ماشین ها'),
             ('update.car', 'ویرایش ماشین '),
             ('delete.car', 'حذف ماشین '),
+
+            ('getOwn.car', 'مشاهده ماشین های خود'),
+            ('updateOwn.car', 'ویرایش ماشین های خود'),
+            ('deleteOwn.car', 'حذف ماشین های خود'),
         )
