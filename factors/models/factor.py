@@ -340,6 +340,22 @@ class Factor(BaseModel, ConfirmationMixin):
 
                 raise ValidationError("ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1))
 
+        # Check items for back factors
+        if self.backFrom:
+            for item_data in items_data:
+                item_exists = False
+                for item in self.items.all():
+                    if item_data['ware'] == item.ware_id:
+                        item_exists = True
+                        if item_data['count'] > item.count:
+                            raise ValidationError("تعداد ردیف {} بیشتر از تعداد فاکتور اصلی می باشد.".format(
+                                items_data.index(item_data) + 1
+                            ))
+                        break
+                if not item_exists:
+                    ware = Ware.objects.get(pk=item_data['ware'])
+                    raise ValidationError("کالای {} در فاکتور اصلی وجود ندارد".format(ware.name))
+
     def sync(self, user, data):
         from factors.serializers import FactorItemSerializer
         from factors.serializers import FactorExpenseSerializer

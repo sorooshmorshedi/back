@@ -211,7 +211,7 @@ class ConfirmFactor(ConfirmView):
         return get_factor_permission_basename(self.get_object().type)
 
 
-class CreateBackFactor(APIView):
+class CreateBackFactorView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
 
     @property
