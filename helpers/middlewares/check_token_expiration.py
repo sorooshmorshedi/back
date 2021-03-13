@@ -1,6 +1,8 @@
 import datetime
 import pytz
+from django.core.handlers.wsgi import WSGIRequest
 from rest_framework.authtoken.models import Token
+from rest_framework.request import Request
 
 
 class CheckTokenExpiration:
@@ -8,10 +10,10 @@ class CheckTokenExpiration:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def __call__(self, request):
+    def __call__(self, request: Request):
         user = request.user
 
-        if user and user.pk:
+        if request.path != '/login' and user and user.pk:
             utc_now = datetime.datetime.utcnow()
             utc_now = utc_now.replace(tzinfo=pytz.utc)
 

@@ -17,5 +17,7 @@ backups/
 *.sln
 db.sqlite3
 **/__pycache__
+.git.bfg-report
+bfg.jar
 
 tmp_test.py
