@@ -61,7 +61,7 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
     previous_remain_type = serializers.SerializerMethodField()
 
     comulative_bed = serializers.SerializerMethodField()
-    comulative_bes = serializers.IntegerField()
+    comulative_bes = serializers.SerializerMethodField()
 
     remain = serializers.SerializerMethodField()
     remain_type = serializers.SerializerMethodField()
@@ -74,6 +74,12 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
             bed += obj.previous_bed
         return bed
 
+    def get_comulative_bes(self, obj):
+        bes = obj.comulative_bes
+        if self.consider_previous_remain:
+            bes += obj.previous_bes
+        return bes
+
     def get_previous_remain(self, obj):
         return abs(obj.previous_bed - obj.previous_bes)
 
@@ -81,10 +87,10 @@ class SanadItemReportSerializer(serializers.ModelSerializer):
         return self.calc_remain_type(obj.previous_bed, obj.previous_bes)
 
     def get_remain(self, obj):
-        remain = abs(obj.comulative_bed - obj.comulative_bes)
+        remain = obj.comulative_bed - obj.comulative_bes
         if self.consider_previous_remain:
-            remain = abs(remain + obj.previous_bed - obj.previous_bes)
-        return remain
+            remain = remain + obj.previous_bed - obj.previous_bes
+        return abs(remain)
 
     def get_remain_type(self, obj):
         bed = obj.comulative_bed
