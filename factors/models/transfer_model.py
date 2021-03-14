@@ -9,6 +9,7 @@ from helpers.models import BaseModel
 class Transfer(BaseModel):
     code = models.IntegerField()
     date = jmodels.jDateField()
+    time = models.TimeField()
 
     input_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='input_transfer')
     output_factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='output_transfer')

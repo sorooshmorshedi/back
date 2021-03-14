@@ -201,7 +201,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transfer
-        fields = ('id', 'explanation', 'date', 'items')
+        fields = ('id', 'explanation', 'date', 'time', 'items')
 
     def sync(self, instance: Transfer, validated_data):
 
@@ -211,8 +211,8 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         explanation = validated_data.get('explanation', '')
 
         if instance.financial_year.is_advari:
-            input_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
-            output_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), now().time())
+            input_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), instance.time)
+            output_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), instance.time)
 
         input_factor.date = instance.date
         input_factor.explanation = instance.explanation
@@ -242,7 +242,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 
             item_data = {
                 'financial_year': instance.financial_year,
-                'explanation': item['explanation'],
+                'explanation': item.get('explanation', ''),
                 'count': item['count'],
                 'unit_count': item['unit_count'],
                 'unit_id': item['unit'],
@@ -277,6 +277,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             'input_factor': input_factor,
             'output_factor': output_factor,
             'date': validated_data['date'],
+            'time': validated_data['time'],
             'explanation': explanation,
         }
 
@@ -289,20 +290,21 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         financial_year = self.context['financial_year']
         date = validated_data['date']
+        time = validated_data['time']
         explanation = validated_data.get('explanation', '')
 
         if financial_year.is_advari:
-            definition_date = date
+            definition_date = datetime.datetime.combine(date.togregorian(), time)
         else:
             definition_date = now()
 
         factor_data = {
             'financial_year': financial_year,
             'date': date,
+            'time': time,
             'explanation': explanation,
             'is_definite': True,
             'definition_date': definition_date,
-            'time': now(),
             'is_auto_created': True
         }
         input_factor = Factor.objects.create(
@@ -331,6 +333,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             'input_factor': input_factor,
             'output_factor': output_factor,
             'date': date,
+            'time': time,
             'explanation': explanation,
             'code': code
         }
@@ -398,7 +401,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
                 try:
-                    fee = float(WareInventory.get_remain_fees(item['ware'], item['warehouse'])[0]['fee'])
+                    fee = float(WareInventory.get_remain_fees(item['ware'])[0]['fee'])
                 except IndexError:
                     raise serializers.ValidationError("هیچ فاکتوری برای {} ثبت نشده است".format(ware.name))
             elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
@@ -407,6 +410,8 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             factor_items_data.append({
                 'financial_year': financial_year,
                 'count': item['count'],
+                'unit_count': item['unit_count'],
+                'unit_id': item['unit'],
                 'fee': fee,
                 'ware': ware,
                 'warehouse': Warehouse.objects.get(pk=item['warehouse'])
@@ -443,7 +448,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         explanation = validated_data.get('explanation', '')
 
         if financial_year.is_advari:
-            definition_date = datetime.datetime.combine(date, time)
+            definition_date = datetime.datetime.combine(date.togregorian(), time)
         else:
             definition_date = now()
 
