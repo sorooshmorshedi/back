@@ -14,6 +14,7 @@ from distributions.models import Visitor
 from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
+from helpers.bale import Bale
 from helpers.db import get_empty_array
 from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -314,8 +315,8 @@ class Factor(BaseModel, ConfirmationMixin):
                     if (
                             row['ware'] == item.ware_id
                             and row['warehouse'] == item.warehouse_id
-                            and Decimal(row['count']) == item.count
-                            and Decimal(row.get('fee', 0)) == item.fee
+                            and float(row['count']) == float(item.count)
+                            and float(row.get('fee', 0)) == float(item.fee)
                     ):
                         is_not_changed = True
                         break
@@ -324,7 +325,7 @@ class Factor(BaseModel, ConfirmationMixin):
                     continue
 
                 # Verify new or changed items
-                count = FactorItem.objects.filter(
+                qs = FactorItem.objects.filter(
                     ~Q(factor=self),
                     ware_id=row['ware'],
                     warehouse_id=row['warehouse'],
@@ -332,12 +333,24 @@ class Factor(BaseModel, ConfirmationMixin):
                     factor__is_definite=True,
                     factor__definition_date__gt=self.definition_date,
                 )
-                count = count.count()
+                count = qs.count()
 
                 if count == 0:
                     continue
 
-                raise ValidationError("ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1))
+                raise ValidationError({
+                    "non_field_errors": ["ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1)],
+                    "why": {
+                        'is_not_changed': is_not_changed,
+                        'compared_values': [
+                            row['ware'],
+                            row['warehouse'],
+                            Decimal(row['count']),
+                            Decimal(row.get('fee', 0)),
+                        ],
+                        'newer_factors': qs.values_list('factor_id', flat=True)
+                    },
+                })
 
         # Check items for back factors
         if self.backFrom:
@@ -543,14 +556,18 @@ class FactorItem(BaseModel):
 
     @property
     def is_ware_last_definite_factor_item(self):
-        count = FactorItem.objects.filter(
+        qs = FactorItem.objects.filter(
             ware=self.ware,
             warehouse=self.warehouse,
             financial_year=self.financial_year,
             factor__is_definite=True,
             factor__definition_date__gt=self.factor.definition_date
-        ).count()
-        return count == 0
+        )
+        is_last = qs.count() == 0
+        if not is_last:
+            Bale.to_me(self.id)
+            Bale.to_me(*qs.values_list('id', flat=True))
+        return is_last
 
     @property
     def is_editable(self):
