@@ -342,12 +342,6 @@ class Factor(BaseModel, ConfirmationMixin):
                     "non_field_errors": ["ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1)],
                     "why": {
                         'is_not_changed': is_not_changed,
-                        'compared_values': [
-                            row['ware'],
-                            row['warehouse'],
-                            Decimal(row['count']),
-                            Decimal(row.get('fee', 0)),
-                        ],
                         'newer_factors': qs.values_list('factor_id', flat=True)
                     },
                 })
