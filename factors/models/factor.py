@@ -11,11 +11,9 @@ from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from companies.models import FinancialYear
 from distributions.models import Visitor
-from distributions.models.car_model import Car
 from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
-from helpers.bale import Bale
 from helpers.db import get_empty_array
 from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD

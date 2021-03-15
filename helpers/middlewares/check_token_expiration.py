@@ -13,7 +13,7 @@ class CheckTokenExpiration:
     def __call__(self, request: Request):
         user = request.user
 
-        if request.path != '/login' and user and user.pk:
+        if request.path != '/login' and user and user.pk and hasattr(user, 'auth_token'):
             utc_now = datetime.datetime.utcnow()
             utc_now = utc_now.replace(tzinfo=pytz.utc)
 
