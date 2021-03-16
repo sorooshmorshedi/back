@@ -65,10 +65,15 @@ class ExportVerifier(BaseModel):
 
     class Meta(BaseModel.Meta):
         permissions = (
-            ('get.exportVerifier', 'مشاهده تایید کنندگان خروجی'),
             ('create.exportVerifier', 'تعریف تایید کنندگان خروجی'),
+
+            ('get.exportVerifier', 'مشاهده تایید کنندگان خروجی'),
             ('update.exportVerifier', 'ویرایش تایید کنندگان خروجی'),
             ('delete.exportVerifier', 'حذف تایید کنندگان خروجی'),
+
+            ('getOwn.exportVerifier', 'مشاهده تایید کنندگان خروجی خود'),
+            ('updateOwn.exportVerifier', 'ویرایش تایید کنندگان خروجی خود'),
+            ('deleteOwn.exportVerifier', 'حذف تایید کنندگان خروجی خود'),
         )
 
     def __str__(self):
