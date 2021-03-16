@@ -86,9 +86,10 @@ class UserChangePasswordView(APIView):
         user.set_password(request.data.get('password'))
         user.save()
 
-        token = user.auth_token
-        if token:
-            token.delete()
+        if hasattr(user, 'auth_token'):
+            token = user.auth_token
+            if token:
+                token.delete()
 
         return Response([])
 
