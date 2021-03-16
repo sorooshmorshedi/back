@@ -104,14 +104,14 @@
                 <tr>
                     <th>#</th>
                     <th>نام کالا</th>
+                    <th>واحد</th>
                     {% if show_warehouse %}
                         <th>انبار</th>
                     {% endif %}
                     <th>تعداد</th>
-                    <th>واحد</th>
                     {% if not hide_prices %}
                         <th>قیمت واحد</th>
-                        <th>جمع</th>
+                        <th>مبلغ کل</th>
                         <th>تخفیف (مبلغ)</th>
                         <th>تخفیف درصد</th>
                         {% if form.has_tax %}
@@ -127,11 +127,11 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ item.ware }}</td>
+                        <td>{{ item.unit.name }}</td>
                         {% if show_warehouse %}
                             <td>{{ item.warehouse.name | default:'-' }}</td>
                         {% endif %}
-                        <td>{{ item.count | money }}</td>
-                        <td>{{ item.ware.unit.name }}</td>
+                        <td>{{ item.unit_count | money }}</td>
                         {% if not hide_prices %}
                             <td>{{ item.fee | money }}</td>
                             <td>{{ item.value | money }}</td>
@@ -160,7 +160,7 @@
                             <td>{{ form.taxSum | money }}</td>
                         {% endif %}
 
-                        <td>{{ form.totalSum | money }}</td>
+                        <td>{{ form.total_sum | money }}</td>
                         <td></td>
                     </tr>
                     {% if not hide_remain %}
