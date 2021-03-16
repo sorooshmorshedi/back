@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.accounts.models import FloatAccount
+from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from distributions.models.commission_range_models import CommissionRange
 from helpers.models import BaseModel, DECIMAL, EXPLANATION, TreeMixin
@@ -32,6 +33,8 @@ class Visitor(BaseModel, TreeMixin):
         blank=True,
         null=True
     )
+
+    defaultAccounts = models.ManyToManyField(DefaultAccount, related_name='visitors')
 
     class Meta(BaseModel.Meta):
         ordering = ['code']
