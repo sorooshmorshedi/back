@@ -14,7 +14,6 @@ from distributions.models import Visitor
 from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
-from helpers.bale import Bale
 from helpers.db import get_empty_array
 from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -558,9 +557,6 @@ class FactorItem(BaseModel):
             factor__definition_date__gt=self.factor.definition_date
         )
         is_last = qs.count() == 0
-        if not is_last:
-            Bale.to_me(self.id)
-            Bale.to_me(*qs.values_list('id', flat=True))
         return is_last
 
     @property
