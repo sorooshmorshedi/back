@@ -163,17 +163,46 @@
                         <td>{{ form.total_sum | money }}</td>
                         <td></td>
                     </tr>
+                    <tr>
+                        <td colspan="{% colspan 10 show_warehouse form.has_tax %}"></td>
+                    </tr>
                     {% if not hide_remain %}
                         <tr>
                             <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <th>تخفیف</th>
+                            <td class="text-left">{{ form.discountSum | money }}</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <th>مبلغ فاکتور پس از تخفیف</th>
+                            <td class="text-left">{{ form.sumAfterDiscount | money }}</td>
+                            <td></td>
+                        </tr>
+                        {% if has_tax %}
+                            <tr>
+                                <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                                <th>مالیات</th>
+                                <td class="text-left">{{ form.taxSum | money }}</td>
+                                <td></td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <th>مبلغ کل فاکتور</th>
+                            <td class="text-left">{{ form.total_sum | money }}</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
                             <th>{{ form.remain.before_factor_title }}</th>
-                            <td>{{ form.remain.before_factor | money }}</td>
+                            <td class="text-left">{{ form.remain.before_factor | money }}</td>
                             <td></td>
                         </tr>
                         <tr>
                             <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
                             <th>{{ form.remain.after_factor_title }}</th>
-                            <td>{{ form.remain.after_factor | money }}</td>
+                            <td class="text-left">{{ form.remain.after_factor | money }}</td>
                             <td></td>
                         </tr>
                     {% endif %}

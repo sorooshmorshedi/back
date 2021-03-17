@@ -236,7 +236,7 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @property
     def sumAfterDiscount(self):
-        return Decimal(self.sum - self.discountSum)
+        return self.sum - self.discountSum
 
     @property
     def expensesSum(self):
@@ -268,7 +268,7 @@ class Factor(BaseModel, ConfirmationMixin):
             else:
                 before_factor = self.total_sum - remain_value
                 sign = '-'
-                before_factor_title = 'مانده بدهکار'
+                before_factor_title = 'مانده حساب'
         else:
             after_factor_title = 'مبلغ قابل دریافت'
             if remain_type == 'bes':
@@ -278,7 +278,7 @@ class Factor(BaseModel, ConfirmationMixin):
             else:
                 before_factor = self.total_sum + remain_value
                 sign = '+'
-                before_factor_title = 'مانده بدهکار'
+                before_factor_title = 'مانده حساب'
 
         res = {
             'before_factor_title': before_factor_title,

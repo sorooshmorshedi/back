@@ -88,6 +88,9 @@ def add_separator(value):
     if not str_value:
         str_value = '0'
 
+    if str_value.endswith('.0'):
+        str_value = str_value[:-2]
+
     return str_value
 
 
