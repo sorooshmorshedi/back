@@ -23,7 +23,7 @@ def move_units_and_prices(apps, schema_editor):
             type=salePriceType,
             ware=ware,
             unit=ware.unit,
-            price=ware.price
+            price=ware.price or 0
         )
 
 

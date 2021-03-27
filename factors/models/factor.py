@@ -467,14 +467,6 @@ class FactorPayment(BaseModel):
 
 
 class FactorItem(BaseModel):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.initial_ware = self.ware
-        self.initial_warehouse = self.warehouse
-        self.initial_count = self.count
-        self.initial_fee = self.fee
-
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factor_items')
     factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='items')
     ware = models.ForeignKey(Ware, on_delete=models.PROTECT, related_name='factorItems')
