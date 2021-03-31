@@ -81,13 +81,12 @@ def update_sale_prices(ware: Ware, data: list):
         for price_type_id in prices.keys():
             price_type = SalePriceType.objects.get(pk=price_type_id)
             price = prices[price_type_id]
-            if price:
-                ware.salePrices.create(
-                    unit=unit,
-                    type=price_type,
-                    price=price,
-                    conversion_factor=row['conversion_factor'],
-                )
+            ware.salePrices.create(
+                unit=unit,
+                type=price_type,
+                price=price,
+                conversion_factor=row['conversion_factor'],
+            )
 
 
 class WareListCreateView(ListCreateAPIViewWithAutoFinancialYear):
