@@ -51,7 +51,8 @@ def get_salePrices(obj: Ware):
 
     for sale_price in obj.salePrices.all():
         sale_price_dict = [d for d in sale_prices if d['unit'] == sale_price.unit.id][0]
-        sale_price_dict['prices'][sale_price.type.id] = sale_price.price
+        if sale_price.type:
+            sale_price_dict['prices'][sale_price.type.id] = sale_price.price
 
     return sale_prices
 

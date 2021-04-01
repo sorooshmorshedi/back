@@ -234,7 +234,7 @@ class SalePriceType(BaseModel):
 
 
 class SalePrice(BaseModel):
-    type = models.ForeignKey(SalePriceType, on_delete=models.PROTECT)
+    type = models.ForeignKey(SalePriceType, on_delete=models.PROTECT, null=True)
 
     ware = models.ForeignKey(Ware, on_delete=models.CASCADE, related_name='salePrices')
 
