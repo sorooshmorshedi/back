@@ -292,7 +292,7 @@ class MoveFinancialYearView(APIView):
     def post(self, request):
         target_financial_year = get_object_or_404(FinancialYear, pk=request.data.get('target_financial_year'))
 
-        request.user.has_object_perm(request.useractive_financial_year, self.permission_codename, raise_exception=True)
+        request.user.has_object_perm(request.user.active_financial_year, self.permission_codename, raise_exception=True)
 
         self.sanad = target_financial_year.get_opening_sanad()
 
