@@ -20,13 +20,11 @@ class FirstPeriodInventoryItemMassRelatedCUD(MassRelatedCUD):
         serializer.save(
             financial_year=self.financial_year
         )
-        DefiniteFactor.updateFactorInventory(serializer.instance)
 
     def perform_update(self, serializer):
         serializer.save(
             financial_year=self.financial_year
         )
-        DefiniteFactor.updateFactorInventory(serializer.instance)
 
 
 class FirstPeriodInventoryView(APIView):
@@ -39,7 +37,6 @@ class FirstPeriodInventoryView(APIView):
             return Response({'message': 'no first period inventory'}, status=status.HTTP_200_OK)
         serialized = FactorListRetrieveSerializer(factor)
         return Response(serialized.data)
-
 
     @staticmethod
     def set_first_period_inventory(data, financial_year=None):
@@ -121,6 +118,8 @@ class FirstPeriodInventoryView(APIView):
 
         for item in first_period_inventory.items.all():
             item.save()
+
+        DefiniteFactor.updateFactorInventory(first_period_inventory)
 
         return first_period_inventory
 

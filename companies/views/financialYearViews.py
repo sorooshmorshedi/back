@@ -14,6 +14,7 @@ from companies.serializers import FinancialYearSerializer
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from helpers.auth import BasicCRUDPermission
+from helpers.functions import get_object_accounts
 from sanads.models import SanadItem, clearSanad
 from users.models import User
 from users.serializers import UserListRetrieveSerializer
@@ -93,8 +94,23 @@ class ClosingHelpers:
         if first_period_inventory:
             first_period_inventory.delete()
 
+        opening_default_account = DefaultAccount.get('opening')
+        account = opening_default_account.account.id
+        if opening_default_account.floatAccount:
+            float_account = opening_default_account.floatAccount.id
+        else:
+            float_account = None
+        if opening_default_account.costCenter:
+            cost_center = opening_default_account.costCenter.id
+        else:
+            cost_center = None
+
         data = {
             'item': {
+                'type': Factor.FIRST_PERIOD_INVENTORY,
+                'account': account,
+                'floatAccount': float_account,
+                'costCenter': cost_center,
                 'date': jdatetime.date.today(),
                 'time': jdatetime.datetime.now().strftime('%H:%m'),
             },
@@ -111,8 +127,10 @@ class ClosingHelpers:
             items.append({
                 'fee': inventory.fee,
                 'ware': inventory.ware.id,
+                'unit': inventory.ware.main_unit.id,
                 'warehouse': inventory.warehouse.id,
                 'count': inventory.count,
+                'unit_count': inventory.count,
             })
 
         data['items']['items'] = items
@@ -296,7 +314,7 @@ class MoveFinancialYearView(APIView):
 
         self.sanad = target_financial_year.get_opening_sanad()
 
-        self.move_accounts()
+        # self.move_accounts()
 
         ClosingHelpers.create_first_period_inventory(target_financial_year)
 
