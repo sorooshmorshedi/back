@@ -1,10 +1,11 @@
 from django.db import models
+from django.db.models import Q
 from django_jalali.db import models as jmodels
 from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequebookModel import Chequebook
 from companies.models import FinancialYear
-from helpers.models import BaseModel, ConfirmationMixin
+from helpers.models import BaseModel, ConfirmationMixin, BaseManager
 
 CHEQUE_STATUSES = (
     ('blank', 'blank'),
@@ -17,6 +18,31 @@ CHEQUE_STATUSES = (
     ('transferred', 'transferred'),
     ('', 'any'),
 )
+
+
+class ChequeManager(BaseManager):
+
+    def inFinancialYear(self, financial_year=None):
+        from helpers.functions import get_current_user
+        qs = super().get_queryset()
+
+        if not financial_year:
+            user = get_current_user()
+
+            if not user:
+                return super().get_queryset()
+
+            financial_year = user.active_financial_year
+
+        qs = qs.filter(financial_year__company=financial_year.company)
+
+        return qs.filter(
+            Q(
+                Q(financial_year__id__lt=financial_year.id) & Q(status__in=('blank', 'notPassed', 'bounced'))
+            ) | Q(
+                financial_year__id=financial_year.id
+            )
+        )
 
 
 class Cheque(BaseModel, ConfirmationMixin):
@@ -69,6 +95,8 @@ class Cheque(BaseModel, ConfirmationMixin):
     accountNumber = models.CharField(max_length=50, null=True, blank=True)
 
     has_transaction = models.BooleanField(default=False)
+
+    objects = ChequeManager()
 
     def __str__(self):
         if self.chequebook:
@@ -138,8 +166,8 @@ class Cheque(BaseModel, ConfirmationMixin):
 
         return res
 
-    def changeStatus(self, user, date, to_status, account: Account = None, floatAccount: floatAccount = None,
-                     costCenter: floatAccount = None, explanation='', sanad=None):
+    def changeStatus(self, user, date, to_status, account: Account = None, floatAccount: FloatAccount = None,
+                     costCenter: FloatAccount = None, explanation='', sanad=None):
         data = {
             'cheque': self.id,
             'fromStatus': self.status,
@@ -223,7 +251,12 @@ class Cheque(BaseModel, ConfirmationMixin):
                 lastAccount = defaultAccount.account
                 lastFloatAccount = defaultAccount.floatAccount
                 lastCostCenter = defaultAccount.costCenter
+
                 data['besAccount'] = lastAccount.id
+                if lastFloatAccount:
+                    data['besFloatAccount'] = lastFloatAccount.id
+                if lastCostCenter:
+                    data['besCostCenter'] = lastCostCenter.id
 
             else:
                 lastAccount = account

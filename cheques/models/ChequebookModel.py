@@ -1,9 +1,39 @@
 from django.db import models
+from django.db.models import Q
 from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
-from helpers.models import BaseModel
+from helpers.models import BaseModel, BaseManager
+
+
+class ChequebookManager(BaseManager):
+
+    def inFinancialYear(self, financial_year=None):
+        from helpers.functions import get_current_user
+        qs = super().get_queryset()
+
+        if not financial_year:
+            user = get_current_user()
+
+            if not user:
+                return super().get_queryset()
+
+            financial_year = user.active_financial_year
+
+        qs = qs.filter(financial_year__company=financial_year.company)
+
+        items = Chequebook.objects.filter(
+            Q(
+                Q(financial_year__id__lt=financial_year.id) & Q(cheques__status='blank')
+            ) | Q(
+                financial_year__id=financial_year.id
+            )
+        ).distinct('id').values_list('id', flat=True)
+
+        qs = qs.filter(id__in=items)
+
+        return qs
 
 
 class Chequebook(BaseModel):
@@ -19,6 +49,8 @@ class Chequebook(BaseModel):
     explanation = models.CharField(max_length=255, blank=True)
     serial_from = models.IntegerField()
     serial_to = models.IntegerField()
+
+    objects = ChequebookManager()
 
     def __str__(self):
         return "{0} - {1}".format(self.account.title, self.serial, )
