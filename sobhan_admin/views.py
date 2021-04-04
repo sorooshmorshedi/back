@@ -66,4 +66,8 @@ class AdminUsersView(ModelViewSet):
             user=user
         )
 
+        user.users.update(
+            modules=user.modules
+        )
+
         return Response(AdminUserListRetrieveSerializer(serializer.instance).data)
