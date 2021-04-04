@@ -234,10 +234,6 @@ class Factor(BaseModel, ConfirmationMixin):
         return tax_sum
 
     @property
-    def sumAfterDiscount(self):
-        return self.sum - self.discountSum
-
-    @property
     def expensesSum(self):
         return Decimal(FactorExpense.objects.filter(factor=self).aggregate(Sum('value'))['value__sum'])
 
@@ -252,41 +248,6 @@ class Factor(BaseModel, ConfirmationMixin):
     @property
     def type_label(self):
         return self.get_type_label(self.type)
-
-    @property
-    def remain(self):
-        bed, bes = AccountBalance.get_bed_bes(self.account, self.floatAccount, self.costCenter)
-        remain_value = abs(bed - bes)
-        remain_type = "bed" if bed > bes else "bes"
-        if self.type in ('buy', 'backFromSale'):
-            after_factor_title = 'مبلغ قابل پرداخت'
-            if remain_type == 'bes':
-                before_factor = self.total_sum + remain_value
-                sign = '+'
-                before_factor_title = 'مانده بستانکار'
-            else:
-                before_factor = self.total_sum - remain_value
-                sign = '-'
-                before_factor_title = 'مانده حساب'
-        else:
-            after_factor_title = 'مبلغ قابل دریافت'
-            if remain_type == 'bes':
-                before_factor = self.total_sum - remain_value
-                sign = '-'
-                before_factor_title = 'مانده بستانکار'
-            else:
-                before_factor = self.total_sum + remain_value
-                sign = '+'
-                before_factor_title = 'مانده حساب'
-
-        res = {
-            'before_factor_title': before_factor_title,
-            'before_factor': abs(before_factor),
-            'after_factor_title': after_factor_title,
-            'after_factor': remain_value,
-            'sign': sign
-        }
-        return res
 
     def verify_items(self, items_data, ids_to_delete=()):
         """
@@ -423,6 +384,60 @@ class Factor(BaseModel, ConfirmationMixin):
         else:
             return True
 
+    @property
+    def export_data(self):
+        sums = {
+            'unit_count': 0,
+            'sum': 0,
+            'discount': 0,
+            'tax': 0,
+            'sum_after_tax': 0
+        }
+        for item in self.items.all():
+            sums['unit_count'] += item.unit_count
+            sums['sum'] += item.value
+            sums['discount'] += item.discount
+            sums['tax'] += item.tax
+            sums['sum_after_tax'] += item.totalValue
+
+        totals = {
+            'sum_after_discount': sums['sum_after_tax'] - self.discountSum
+        }
+
+        bed, bes = AccountBalance.get_bed_bes(self.account, self.floatAccount, self.costCenter)
+        print(bed, bes)
+        remain_value = abs(bed - bes)
+        remain_type = "bed" if bed > bes else "bes"
+        if self.type in ('buy', 'backFromSale'):
+            after_factor_title = 'مبلغ قابل پرداخت'
+            if remain_type == 'bes':
+                before_factor = self.total_sum + remain_value
+                is_negative = False
+            else:
+                before_factor = self.total_sum - remain_value
+                is_negative = True
+        else:
+            after_factor_title = 'مبلغ قابل دریافت'
+            if remain_type == 'bes':
+                before_factor = self.total_sum - remain_value
+                is_negative = True
+            else:
+                before_factor = self.total_sum + remain_value
+                is_negative = False
+
+        remains = {
+            'before_factor': abs(before_factor),
+            'after_factor_title': after_factor_title,
+            'after_factor': remain_value,
+            'is_negative': is_negative
+        }
+
+        return {
+            'sums': sums,
+            'totals': totals,
+            'remains': remains
+        }
+
     def save(self, *args, **kwargs) -> None:
         self.total_sum = self.sum - self.discountSum + self.taxSum
         self.is_settled = self.total_sum == self.paidValue
@@ -537,7 +552,7 @@ class FactorItem(BaseModel):
         if self.tax_percent:
             return (self.value - self.discount) * self.tax_percent / 100
         else:
-            return self.tax_percent
+            return self.tax_value
 
     @property
     def totalValue(self):
@@ -563,6 +578,7 @@ class FactorItem(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.discountValue = self.discount
+        self.tax_value = self.tax
         self.calculated_value = 0
         if self.financial_year.is_advari and self.financial_year.are_factors_sorted:
             self.financial_year.are_factors_sorted = False

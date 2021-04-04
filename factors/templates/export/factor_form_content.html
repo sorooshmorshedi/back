@@ -113,9 +113,10 @@
                         <th>قیمت واحد</th>
                         <th>مبلغ کل</th>
                         <th>تخفیف (مبلغ)</th>
-                        <th>تخفیف درصد</th>
+                        <th>تخفیف (درصد)</th>
                         {% if form.has_tax %}
-                            <th>مالیات</th>
+                            <th>مالیات (مبلغ)</th>
+                            <th>مالیات (درصد)</th>
                         {% endif %}
                         <th>جمع فاکتور</th>
                         <th>توضیحات</th>
@@ -139,7 +140,8 @@
                             <td>{{ item.discountPercent }}</td>
 
                             {% if form.has_tax %}
-                                <td>{{ item.tax | money }}</td>
+                                <td>{{ item.tax_value | money }}</td>
+                                <td>{{ item.tax_percent | money }}</td>
                             {% endif %}
 
                             <td>{{ item.totalValue | money }}</td>
@@ -150,59 +152,69 @@
                 {% endfor %}
                 {% if not hide_prices %}
                     <tr>
-                        <th colspan="{% colspan 5 show_warehouse %}">
+                        <th colspan="{% colspan 2 show_warehouse %}">
                             جمع
                         </th>
-                        <td>{{ form.sum | money }}</td>
-                        <td colspan="2">{{ form.discountSum | money }}</td>
+                        <td>-</td>
+                        <td>{{ form.export_data.sums.unit_count | money }}</td>
+                        <td>-</td>
+                        <td>{{ form.export_data.sums.sum | money }}</td>
+                        <td colspan="2">{{ form.export_data.sums.discount | money }}</td>
 
                         {% if form.has_tax %}
-                            <td>{{ form.taxSum | money }}</td>
+                            <td colspan="2">{{ form.export_data.sums.tax | money }}</td>
                         {% endif %}
 
-                        <td>{{ form.total_sum | money }}</td>
+                        <td>{{ form.export_data.sums.sum_after_tax | money }}</td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td colspan="{% colspan 10 show_warehouse form.has_tax %}"></td>
+                        <td colspan="{% colspan 10 show_warehouse form.has_tax form.has_tax %}"></td>
                     </tr>
                     {% if not hide_remain %}
                         <tr>
-                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
                             <th>تخفیف</th>
-                            <td class="text-left">{{ form.discountSum | money }}</td>
+                            <td class="text-left">{{ form.discountValue | money }}</td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
                             <th>مبلغ فاکتور پس از تخفیف</th>
-                            <td class="text-left">{{ form.sumAfterDiscount | money }}</td>
+                            <td class="text-left">{{ form.export_data.totals.sum_after_discount | money }}</td>
                             <td></td>
                         </tr>
-                        {% if has_tax %}
+                        {% if form.has_tax %}
                             <tr>
-                                <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                                <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
                                 <th>مالیات</th>
-                                <td class="text-left">{{ form.taxSum | money }}</td>
+                                <td class="text-left">{{ form.taxValue | money }}</td>
                                 <td></td>
                             </tr>
                         {% endif %}
                         <tr>
-                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
                             <th>مبلغ کل فاکتور</th>
                             <td class="text-left">{{ form.total_sum | money }}</td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
-                            <th>{{ form.remain.before_factor_title }}</th>
-                            <td class="text-left">{{ form.remain.before_factor | money }}</td>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
+                            <th>مانده حساب</th>
+                            <td class="text-left" dir="ltr">
+                                {% if form.export_data.remains.is_negative %}
+                                    <span style="color: red"> - </span>
+                                {% endif %}
+                                {{ form.export_data.remains.before_factor | money }}
+                            </td>
                             <td></td>
                         </tr>
                         <tr>
-                            <td colspan="{% colspan 7 show_warehouse form.has_tax %}"></td>
-                            <th>{{ form.remain.after_factor_title }}</th>
-                            <td class="text-left">{{ form.remain.after_factor | money }}</td>
+                            <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
+                            <th>{{ form.export_data.remains.after_factor_title }}</th>
+                            <td class="text-left" dir="ltr">
+                                {{ form.export_data.remains.after_factor | money }}
+                            </td>
                             <td></td>
                         </tr>
                     {% endif %}
