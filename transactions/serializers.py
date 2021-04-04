@@ -67,7 +67,7 @@ class TransactionFactorListSerializer(serializers.ModelSerializer):
     back_total_sum = serializers.SerializerMethodField()
 
     def get_back_total_sum(self, obj: Factor):
-        if obj.backFactor:
+        if hasattr(obj, 'backFactor'):
             return obj.backFactor.total_sum
         else:
             return 0
