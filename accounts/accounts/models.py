@@ -7,7 +7,7 @@ from django.db.models.functions.comparison import Coalesce
 
 from companies.models import FinancialYear
 from helpers.functions import get_new_child_code
-from helpers.models import BaseModel, PHONE, MELLI_CODE, POSTAL_CODE
+from helpers.models import BaseModel, PHONE, MELLI_CODE, POSTAL_CODE, DECIMAL
 from wares.models import SalePriceType
 
 
@@ -41,10 +41,10 @@ class FloatAccount(BaseModel):
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_cost_center = models.BooleanField(default=False)
 
-    max_bed = models.CharField(max_length=20, blank=True, null=True)
-    max_bes = models.CharField(max_length=20, blank=True, null=True)
-    max_bed_with_sanad = models.CharField(max_length=20, blank=True, null=True)
-    max_bes_with_sanad = models.CharField(max_length=20, blank=True, null=True)
+    max_bed = DECIMAL(blank=True, null=True)
+    max_bes = DECIMAL(blank=True, null=True)
+    max_bed_with_sanad = DECIMAL(blank=True, null=True)
+    max_bes_with_sanad = DECIMAL(blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
     floatAccountGroups = models.ManyToManyField(FloatAccountGroup, through='FloatAccountRelation',
@@ -148,8 +148,8 @@ class Account(BaseModel):
     explanation = models.CharField(max_length=255, blank=True, null=True)
     is_disabled = models.BooleanField(default=False)
 
-    max_bed = models.IntegerField(blank=True, null=True)
-    max_bes = models.IntegerField(blank=True, null=True)
+    max_bed = DECIMAL(blank=True, null=True)
+    max_bes = DECIMAL(blank=True, null=True)
     max_bed_with_sanad = models.IntegerField(blank=True, null=True)
     max_bes_with_sanad = models.IntegerField(blank=True, null=True)
 
@@ -170,7 +170,8 @@ class Account(BaseModel):
     buyer_or_seller = models.CharField(choices=BUYER_OR_SELLER_CHOICES, max_length=10, default="", blank=True)
     defaultSalePriceType = models.ForeignKey(SalePriceType, on_delete=models.PROTECT, null=True)
 
-    path = models.ForeignKey('distributions.Path', on_delete=models.PROTECT, related_name='accounts', blank=True, null=True)
+    path = models.ForeignKey('distributions.Path', on_delete=models.PROTECT, related_name='accounts', blank=True,
+                             null=True)
 
     phone_1 = models.CharField(max_length=20, default="", blank=True)
     phone_2 = models.CharField(max_length=20, default="", blank=True)
