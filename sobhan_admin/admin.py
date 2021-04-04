@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from sobhan_admin.models import Profile
+
+admin.site.register(Profile)
