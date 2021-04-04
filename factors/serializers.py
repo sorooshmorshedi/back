@@ -108,8 +108,7 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
         model = FactorItem
         fields = (
             'id', 'order', 'ware', 'unit', 'warehouse', 'unit_count', 'count', 'fee', 'discountValue',
-            'discountPercent',
-            'explanation',)
+            'discountPercent', 'explanation', 'tax_value', 'tax_percent')
 
 
 class TransactionSerializerForPayment(serializers.ModelSerializer):

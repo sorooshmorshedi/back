@@ -228,11 +228,10 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @property
     def taxSum(self):
-        if self.taxPercent:
-            taxSum = self.taxPercent * (self.sum - self.discountSum) / 100
-        else:
-            taxSum = self.taxValue
-        return taxSum
+        tax_sum = self.taxValue
+        for item in self.items.all():
+            tax_sum += item.tax
+        return tax_sum
 
     @property
     def sumAfterDiscount(self):
@@ -482,8 +481,13 @@ class FactorItem(BaseModel):
     fees = JSONField(default=get_empty_array)
 
     remain_fees = JSONField(default=get_empty_array)
+
     discountValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     discountPercent = models.IntegerField(default=0, null=True, blank=True)
+
+    tax_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
+    tax_percent = models.IntegerField(default=0, null=True, blank=True)
+
     explanation = models.CharField(max_length=255, blank=True)
 
     # this is used for inventory reports and sanads.
@@ -530,10 +534,10 @@ class FactorItem(BaseModel):
 
     @property
     def tax(self):
-        if self.factor.taxPercent:
-            return self.value * self.factor.taxPercent / 100
+        if self.tax_percent:
+            return (self.value - self.discount) * self.tax_percent / 100
         else:
-            return 0
+            return self.tax_percent
 
     @property
     def totalValue(self):
