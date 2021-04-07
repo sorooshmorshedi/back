@@ -124,7 +124,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for item in form.items.all %}
+                {% get_ordered_items form as items %}
+                {% for item in items %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ item.ware }}</td>
@@ -175,7 +176,7 @@
                         <tr>
                             <td colspan="{% colspan 7 show_warehouse form.has_tax form.has_tax %}"></td>
                             <th>تخفیف</th>
-                            <td class="text-left">{{ form.discountValue | money }}</td>
+                            <td class="text-left">{{ form.factor_discount | money }}</td>
                             <td></td>
                         </tr>
                         <tr>

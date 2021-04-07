@@ -51,3 +51,8 @@ def get_value(obj, key, headers):
         return '&#10004;' if value else '&#10006;'
 
     return value
+
+
+@register.simple_tag
+def get_ordered_items(obj):
+    return obj.items.order_by('order')

@@ -210,6 +210,13 @@ class Factor(BaseModel, ConfirmationMixin):
         return sum
 
     @property
+    def rows_sum_after_tax(self):
+        sum = 0
+        for item in self.items.all():
+            sum += item.totalValue
+        return sum
+
+    @property
     def calculated_sum(self):
         sum = 0
         for item in self.items.all():
@@ -217,11 +224,16 @@ class Factor(BaseModel, ConfirmationMixin):
         return sum
 
     @property
-    def discountSum(self):
+    def factor_discount(self):
         if self.discountPercent:
-            discountSum = self.discountPercent * self.sum / 100
+            discount = self.discountPercent * self.rows_sum_after_tax / 100
         else:
-            discountSum = self.discountValue
+            discount = self.discountValue
+        return discount
+
+    @property
+    def discountSum(self):
+        discountSum = self.factor_discount
         for i in self.items.all():
             discountSum += i.discount
         return discountSum
@@ -438,7 +450,7 @@ class Factor(BaseModel, ConfirmationMixin):
         }
 
     def save(self, *args, **kwargs) -> None:
-        self.total_sum = self.sum - self.discountSum + self.taxSum
+        self.total_sum = self.rows_sum_after_tax - self.factor_discount + self.taxValue
         self.is_settled = self.total_sum == self.paidValue
         super(Factor, self).save(*args, **kwargs)
 
