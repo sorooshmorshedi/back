@@ -420,28 +420,34 @@ class Factor(BaseModel, ConfirmationMixin):
         remain_value = abs(bed - bes)
         remain_type = "bed" if bed > bes else "bes"
 
-        if self.is_definite:
-            if self.type in ('buy', 'backFromSale'):
-                after_factor_title = 'مبلغ قابل پرداخت'
-                if remain_type == 'bes':
-                    before_factor = remain_value - self.total_sum
-                    is_negative = False
-                else:
-                    before_factor = remain_value + self.total_sum
-                    is_negative = True
+        if self.type in ('buy', 'backFromSale'):
+            after_factor_title = 'مبلغ قابل پرداخت'
+            if remain_type == 'bes':
+                remain_with_factor = remain_value - self.total_sum
+                is_negative = False
             else:
-                after_factor_title = 'مبلغ قابل دریافت'
-                if remain_type == 'bes':
-                    before_factor = remain_value + self.total_sum
-                    is_negative = True
-                else:
-                    before_factor = remain_value - self.total_sum
-                    is_negative = False
+                remain_with_factor = remain_value + self.total_sum
+                is_negative = True
+        else:
+            after_factor_title = 'مبلغ قابل دریافت'
+            if remain_type == 'bes':
+                remain_with_factor = remain_value + self.total_sum
+                is_negative = True
+            else:
+                remain_with_factor = remain_value - self.total_sum
+                is_negative = False
+
+        if self.is_definite:
+            before_factor = remain_with_factor
+            after_factor = remain_value
+        else:
+            before_factor = remain_value
+            after_factor = -remain_with_factor
 
         remains = {
             'before_factor': abs(before_factor),
             'after_factor_title': after_factor_title,
-            'after_factor': remain_value,
+            'after_factor': after_factor,
             'is_negative': is_negative
         }
 
