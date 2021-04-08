@@ -218,6 +218,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': '{}/debug-tmp.log'.format(BASE_DIR),
         },
+        'bale': {
+            'class': 'bale_handler.TelegramHandler',
+            'token': '6585755eb40e4ab91d3545b2e05dd742a197d34f',
+            'chat_id': '1213037233'
+        },
     },
     'loggers': {
         'django': {
@@ -235,5 +240,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'django.request': {
+            'handlers': ['bale'],
+            'level': 'ERROR',
+            'propagate': True,
+        }
     },
 }
+
