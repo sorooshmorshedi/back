@@ -155,7 +155,7 @@ class FactorModelView(viewsets.ModelViewSet):
                     if ware.maxInventory and balance + count > ware.maxInventory:
                         confirmations.append("حداکثر موجودی {} برابر {} {} می باشد. موجودی فعلی {}".format(
                             ware.name,
-                            ware.minInventory,
+                            ware.maxInventory,
                             ware.main_unit.name,
                             balance
                         ))
