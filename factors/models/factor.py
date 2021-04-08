@@ -419,22 +419,24 @@ class Factor(BaseModel, ConfirmationMixin):
         bed, bes = AccountBalance.get_bed_bes(self.account, self.floatAccount, self.costCenter)
         remain_value = abs(bed - bes)
         remain_type = "bed" if bed > bes else "bes"
-        if self.type in ('buy', 'backFromSale'):
-            after_factor_title = 'مبلغ قابل پرداخت'
-            if remain_type == 'bes':
-                before_factor = remain_value - self.total_sum
-                is_negative = False
+
+        if self.is_definite:
+            if self.type in ('buy', 'backFromSale'):
+                after_factor_title = 'مبلغ قابل پرداخت'
+                if remain_type == 'bes':
+                    before_factor = remain_value - self.total_sum
+                    is_negative = False
+                else:
+                    before_factor = remain_value + self.total_sum
+                    is_negative = True
             else:
-                before_factor = remain_value + self.total_sum
-                is_negative = True
-        else:
-            after_factor_title = 'مبلغ قابل دریافت'
-            if remain_type == 'bes':
-                before_factor = remain_value + self.total_sum
-                is_negative = True
-            else:
-                before_factor = remain_value - self.total_sum
-                is_negative = False
+                after_factor_title = 'مبلغ قابل دریافت'
+                if remain_type == 'bes':
+                    before_factor = remain_value + self.total_sum
+                    is_negative = True
+                else:
+                    before_factor = remain_value - self.total_sum
+                    is_negative = False
 
         remains = {
             'before_factor': abs(before_factor),
