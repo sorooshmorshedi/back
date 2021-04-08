@@ -413,7 +413,7 @@ class Factor(BaseModel, ConfirmationMixin):
             sums['sum_after_tax'] += item.totalValue
 
         totals = {
-            'sum_after_discount': sums['sum_after_tax'] - self.discountSum
+            'sum_after_discount': sums['sum_after_tax'] - self.factor_discount
         }
 
         bed, bes = AccountBalance.get_bed_bes(self.account, self.floatAccount, self.costCenter)
