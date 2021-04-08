@@ -391,6 +391,7 @@ class Remittance(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
     destination = models.ForeignKey(City, on_delete=models.PROTECT, related_name='remittanceDestinations')
 
     class Meta(BaseModel.Meta):
+        backward_financial_year = True
         ordering = ['-code', ]
         permission_basename = 'remittance'
         permissions = (
