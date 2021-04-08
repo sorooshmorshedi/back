@@ -1,4 +1,4 @@
-from _pydecimal import Decimal
+from decimal import Decimal
 
 from django.contrib.postgres.fields.jsonb import JSONField
 from django.db import models
@@ -450,7 +450,7 @@ class Factor(BaseModel, ConfirmationMixin):
         }
 
     def save(self, *args, **kwargs) -> None:
-        self.total_sum = self.rows_sum_after_tax - self.factor_discount + self.taxValue
+        self.total_sum = Decimal(self.rows_sum_after_tax) - Decimal(self.factor_discount) + self.taxValue
         self.is_settled = self.total_sum == self.paidValue
         super(Factor, self).save(*args, **kwargs)
 
