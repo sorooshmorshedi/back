@@ -116,6 +116,8 @@ class WarehouseHandlingDefiniteView(APIView):
                     'ware': item.ware.id,
                     'warehouse': instance.warehouse.id,
                     'count': abs(contradiction),
+                    'unit': item.ware.main_unit.id,
+                    'unit_count': abs(contradiction),
                     'is_auto_created': True
                 }
                 if contradiction > 0:
