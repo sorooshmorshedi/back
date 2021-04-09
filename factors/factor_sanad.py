@@ -12,21 +12,23 @@ class FactorSanad(AutoSanad):
     def get_sanad_rows(self, instance: BaseModel) -> list:
         if instance.type == Factor.SALE:
             items = [
-                {**get_object_accounts(instance), 'bed': instance.sum, },
-                {'account': 'sale', 'bes': instance.sum, },
+                {**get_object_accounts(instance), 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'sale', 'bes': instance.sum, 'explanation': self.get_sanad_explanation()},
             ]
             if instance.financial_year.warehouse_system == FinancialYear.DAEMI:
                 items += [
                     {'account': Account.get_cost_of_sold_wares_account(instance.created_by),
-                     'bed': instance.calculated_sum, },
-                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum, },
+                     'bed': instance.calculated_sum, 'explanation': self.get_sanad_explanation()},
+                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum,
+                     'explanation': self.get_sanad_explanation()},
                 ]
             items += [
-                {'account': 'sale', 'bed': instance.discountSum},
-                {**get_object_accounts(instance), 'bes': instance.discountSum},
+                {'account': 'sale', 'bed': instance.discountSum, 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bes': instance.discountSum,
+                 'explanation': self.get_sanad_explanation()},
 
-                {**get_object_accounts(instance), 'bed': instance.taxSum},
-                {'account': 'tax', 'bes': instance.taxSum}
+                {**get_object_accounts(instance), 'bed': instance.taxSum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'tax', 'bes': instance.taxSum, 'explanation': self.get_sanad_explanation()}
             ]
         elif instance.type == Factor.BACK_FROM_BUY:
             if instance.financial_year.warehouse_system == FinancialYear.DAEMI:
@@ -37,68 +39,80 @@ class FactorSanad(AutoSanad):
                 else:
                     bes = -profit_and_loss_value
                 items = [
-                    {**get_object_accounts(instance), 'bed': instance.sum, },
-                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum, },
-                    {'account': 'profitAndLossFromBuying', 'bed': bed, 'bes': bes},
+                    {**get_object_accounts(instance), 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},
+                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum,
+                     'explanation': self.get_sanad_explanation()},
+                    {'account': 'profitAndLossFromBuying', 'bed': bed, 'bes': bes,
+                     'explanation': self.get_sanad_explanation()},
                 ]
             else:
                 items = [
-                    {**get_object_accounts(instance), 'bed': instance.sum},
-                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.sum},
+                    {**get_object_accounts(instance), 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},
+                    {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.sum,
+                     'explanation': self.get_sanad_explanation()},
                 ]
             items += [
 
-                {'account': 'backFromBuy', 'bed': instance.discountSum},
-                {**get_object_accounts(instance), 'bes': instance.discountSum},
+                {'account': 'backFromBuy', 'bed': instance.discountSum, 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bes': instance.discountSum,
+                 'explanation': self.get_sanad_explanation()},
 
-                {**get_object_accounts(instance), 'bed': instance.taxSum},
-                {'account': 'tax', 'bes': instance.taxSum}
+                {**get_object_accounts(instance), 'bed': instance.taxSum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'tax', 'bes': instance.taxSum, 'explanation': self.get_sanad_explanation()}
             ]
         elif instance.type == Factor.BUY:
             items = [
-                {**get_object_accounts(instance), 'bes': instance.sum},
-                {'account': 'buy', 'bed': instance.sum},
-                {'account': 'buy', 'bes': instance.discountSum},
-                {**get_object_accounts(instance), 'bed': instance.discountSum},
-                {**get_object_accounts(instance), 'bes': instance.taxSum},
-                {'account': 'tax', 'bed': instance.taxSum}
+                {**get_object_accounts(instance), 'bes': instance.sum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'buy', 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'buy', 'bes': instance.discountSum, 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bed': instance.discountSum,
+                 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bes': instance.taxSum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'tax', 'bed': instance.taxSum, 'explanation': self.get_sanad_explanation()}
             ]
         elif instance.type == Factor.BACK_FROM_SALE:
             items = [
-                {**get_object_accounts(instance), 'bes': instance.sum},
-                {'account': 'backFromSale', 'bed': instance.sum},
+                {**get_object_accounts(instance), 'bes': instance.sum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'backFromSale', 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},
             ]
 
             if instance.financial_year.warehouse_system == FinancialYear.DAEMI:
                 items += [
-                    {'account': Account.get_inventory_account(instance.created_by), 'bed': instance.calculated_sum, },
+                    {'account': Account.get_inventory_account(instance.created_by), 'bed': instance.calculated_sum,
+                     'explanation': self.get_sanad_explanation()},
                     {'account': Account.get_cost_of_sold_wares_account(instance.created_by),
-                     'bes': instance.calculated_sum, },
+                     'bes': instance.calculated_sum, 'explanation': self.get_sanad_explanation()},
                 ]
 
             items += [
-                {'account': 'backFromSale', 'bes': instance.discountSum},
-                {**get_object_accounts(instance), 'bed': instance.discountSum},
-                {**get_object_accounts(instance), 'bes': instance.taxSum},
-                {'account': 'tax', 'bed': instance.taxSum}
+                {'account': 'backFromSale', 'bes': instance.discountSum, 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bed': instance.discountSum,
+                 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bes': instance.taxSum, 'explanation': self.get_sanad_explanation()},
+                {'account': 'tax', 'bed': instance.taxSum, 'explanation': self.get_sanad_explanation()}
             ]
         elif instance.type == Factor.CONSUMPTION_WARE:
             items = [
-                {**get_object_accounts(instance), 'bed': instance.calculated_sum, },
-                {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum, },
+                {**get_object_accounts(instance), 'bed': instance.calculated_sum,
+                 'explanation': self.get_sanad_explanation()},
+                {'account': Account.get_inventory_account(instance.created_by), 'bes': instance.calculated_sum,
+                 'explanation': self.get_sanad_explanation()},
             ]
         elif instance.type == Factor.FIRST_PERIOD_INVENTORY:
             items = [
-                {'account': Account.get_inventory_account(instance.created_by), 'bed': instance.sum, },
-                {**get_object_accounts(instance), 'bes': instance.sum, },
+                {'account': Account.get_inventory_account(instance.created_by), 'bed': instance.sum,
+                 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(instance), 'bes': instance.sum, 'explanation': self.get_sanad_explanation()},
             ]
         else:
             raise ValidationError("نوع فاکتور صحیح نمی باشد")
 
         for factor_expense in instance.expenses.all():
             items += [
-                {**get_object_accounts(factor_expense.expense), 'bed': factor_expense.value},
-                {**get_object_accounts(factor_expense), 'bes': factor_expense.value}
+                {**get_object_accounts(factor_expense.expense), 'bed': factor_expense.value,
+                 'explanation': self.get_sanad_explanation()},
+                {**get_object_accounts(factor_expense), 'bes': factor_expense.value,
+                 'explanation': self.get_sanad_explanation()}
             ]
 
         return items
