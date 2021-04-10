@@ -1,7 +1,7 @@
 import datetime
 
 import jdatetime
-from django.db.models import Max
+from django.db.models import Max, Q
 from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountListSerializer
@@ -399,9 +399,14 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             ware = Ware.objects.get(pk=item['ware'])
             fee = None
             if adjustment_type == Factor.INPUT_ADJUSTMENT:
-                try:
-                    fee = float(WareInventory.get_remain_fees(item['ware'])[0]['fee'])
-                except IndexError:
+                ware_last_factor_item = FactorItem.objects.inFinancialYear().filter(
+                    ~Q(fee=0),
+                    ware=ware,
+                    factor__type__in=Factor.INPUT_GROUP,
+                ).first()
+                if ware_last_factor_item:
+                    fee = ware_last_factor_item.fee
+                else:
                     raise serializers.ValidationError("هیچ فاکتوری برای {} ثبت نشده است".format(ware.name))
             elif adjustment_type == Factor.OUTPUT_ADJUSTMENT:
                 fee = 0
