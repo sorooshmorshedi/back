@@ -35,17 +35,20 @@ class SanadItemListView(generics.ListAPIView):
 
         if order_sanads_by:
             qs = qs.order_by('sanad__{}'.format(order_sanads_by))
+            order_by = [F('sanad_{}'.format(order_sanads_by)).asc(), F('id').asc()]
         else:
             ordering = self.request.GET.copy().get('ordering', None)
             if ordering:
                 qs = qs.order_by(ordering)
+                order_by = [F(ordering), F('id').asc()]
+            else:
+                qs = qs.order_by('sanad_date')
+                order_by = [F('sanad_date').asc(), F('id').asc()]
 
         qs = qs.annotate(
             sanad_date=F('sanad__date'),
             sanad_code=F('sanad__code')
         )
-
-        order_by = [F('sanad_{}'.format(order_sanads_by or 'code')).asc(), F('id').asc()]
 
         qs = qs.annotate(
             comulative_bed=Window(expression=Sum('bed'), order_by=order_by),
