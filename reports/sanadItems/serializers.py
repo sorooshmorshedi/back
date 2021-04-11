@@ -3,6 +3,9 @@ from rest_framework import serializers
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from sanads.models import SanadItem, Sanad
+from sanads.serializers import FactorSanadSerializer, AdjustmentSanadSerializer, LadingSanadSerializer, \
+    OilCompanyLadingSanadSerializer, StatusChangeSanadSerializer, TransactionSanadSerializer, \
+    ImprestSettlementSanadSerializer
 from users.serializers import UserSimpleSerializer
 
 
@@ -15,7 +18,23 @@ class FinancialYearSanadItemReportSerializer(serializers.ModelSerializer):
 class SanadSanadItemReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
-        fields = ('id', 'local_id', 'code', 'date', 'explanation', 'is_auto_created')
+        fields = ('id', 'local_id', 'code', 'date', 'explanation', 'is_auto_created',
+                  'factor',
+                  'adjustment',
+                  'lading',
+                  'oilCompanyLading',
+                  'statusChange',
+                  'transaction',
+                  'imprestSettlement',
+                  )
+
+    factor = FactorSanadSerializer(read_only=True, many=False)
+    adjustment = AdjustmentSanadSerializer(read_only=True, many=False)
+    lading = LadingSanadSerializer(read_only=True, many=False)
+    oilCompanyLading = OilCompanyLadingSanadSerializer(read_only=True, many=False)
+    statusChange = StatusChangeSanadSerializer(read_only=True, many=False)
+    transaction = TransactionSanadSerializer(read_only=True, many=False)
+    imprestSettlement = ImprestSettlementSanadSerializer(read_only=True, many=False)
 
 
 class AccountSanadItemReportSerializer(serializers.ModelSerializer):
