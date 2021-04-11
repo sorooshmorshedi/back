@@ -49,7 +49,8 @@
             </tr>
             </thead>
             <tbody>
-            {% for item in form.items.all %}
+            {% get_ordered_items form as items %}
+            {% for item in items %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ item.type }}</td>
