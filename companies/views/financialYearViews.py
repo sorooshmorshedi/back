@@ -14,7 +14,7 @@ from companies.serializers import FinancialYearSerializer
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_object_accounts
+from home.models import DefaultText
 from sanads.models import SanadItem, clearSanad
 from users.models import User
 from users.serializers import UserListRetrieveSerializer
@@ -349,9 +349,9 @@ class FinancialYearModelView(viewsets.ModelViewSet):
         serializer.save(
             company=self.request.user.active_company
         )
-        self.move_data(serializer.instance)
+        self.copy_data(serializer.instance)
 
-    def move_data(self, new_financial_year):
+    def copy_data(self, new_financial_year):
         try:
             base_financial_year = FinancialYear.objects.get(pk=21)
         except FinancialYear.DoesNotExist as e:
@@ -362,7 +362,7 @@ class FinancialYearModelView(viewsets.ModelViewSet):
         """
 
         """
-            Moving accounts
+            Copying accounts
         """
         accounts_map = {}
         if Account.objects.inFinancialYear(new_financial_year).count() == 0:
@@ -380,12 +380,22 @@ class FinancialYearModelView(viewsets.ModelViewSet):
                 accounts_map[key] = account.pk
 
         """
-            Moving default accounts
+            Copying default accounts
         """
         if DefaultAccount.objects.inFinancialYear(new_financial_year).count() == 0:
-            for default_account in DefaultAccount.objects.inFinancialYear(base_financial_year).all():
-                default_account.pk = None
-                default_account.financial_year = new_financial_year
-                if default_account.account_id in accounts_map:
-                    default_account.account_id = accounts_map[default_account.account_id]
-                default_account.save()
+            for item in DefaultAccount.objects.inFinancialYear(base_financial_year).all():
+                item.pk = None
+                item.financial_year = new_financial_year
+                if item.account_id in accounts_map:
+                    item.account_id = accounts_map[item.account_id]
+                item.save()
+
+        """
+            Copying default texts
+        """
+
+        if DefaultText.objects.inFinancialYear(new_financial_year).count() == 0:
+            for item in DefaultText.objects.inFinancialYear(base_financial_year).all():
+                item.pk = None
+                item.financial_year = new_financial_year
+                item.save()

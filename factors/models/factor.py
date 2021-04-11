@@ -106,6 +106,9 @@ class Factor(BaseModel, ConfirmationMixin):
 
     backFrom = models.OneToOneField('self', on_delete=models.PROTECT, related_name='backFactor', blank=True, null=True)
 
+    after_rows_explanation = models.TextField(blank=True, null=True)
+    bottom_explanation = models.TextField(blank=True, null=True)
+
     class Meta(BaseModel.Meta):
         permissions = (
             ('get.buyFactor', 'مشاهده فاکتور خرید'),

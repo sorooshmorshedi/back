@@ -42,7 +42,6 @@ class BaseExportView(APIView, PDFTemplateView):
 
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.get_queryset()
-        print(qs)
 
         context = {
             'forms': qs,
@@ -329,13 +328,13 @@ class FactorExportView(FactorListView, BaseExportView):
         summarized = request.GET.get('summarized', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
-        hide_remain = request.GET.get('hide_remain', 'false') == 'true'
+        show_remain = not request.GET.get('hide_remain', 'false') == 'true'
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
         receipt = request.GET.get('receipt', 'false') == 'true'
 
         if factorType == Factor.CONSUMPTION_WARE:
             hide_expenses = True
-            hide_remain = True
+            show_remain = False
             hide_prices = True
 
         if receipt:
@@ -356,7 +355,7 @@ class FactorExportView(FactorListView, BaseExportView):
             'hide_factor': hide_factor,
             'hide_expenses': hide_expenses,
             'summarized': summarized,
-            'hide_remain': hide_remain,
+            'show_remain': show_remain,
             'hide_prices': hide_prices,
         }
         return self.export(request, export_type, *args, **kwargs)

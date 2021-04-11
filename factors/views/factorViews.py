@@ -12,6 +12,7 @@ from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from factors.serializers import *
+from home.models import DefaultText
 from sanads.models import clearSanad
 from server.settings import TESTING
 
@@ -85,6 +86,15 @@ class FactorModelView(viewsets.ModelViewSet):
         factor.sync(user, data)
 
         self.check_confirmations(request, factor)
+
+        if factor.type == Factor.SALE:
+            factor.after_rows_explanation = DefaultText.get('under_sale_factor_rows')
+            factor.bottom_explanation = DefaultText.get('under_sale_factor')
+            factor.save()
+        elif factor.type == Factor.BACK_FROM_BUY:
+            factor.after_rows_explanation = DefaultText.get('under_back_from_buy_factor_rows')
+            factor.bottom_explanation = DefaultText.get('under_back_from_buy_factor')
+            factor.save()
 
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
             DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))

@@ -1,5 +1,6 @@
 from django.db import models
 
+from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
@@ -43,3 +44,26 @@ class Option(BaseModel):
         last_order_id += 1
         Option.set_value('order_id', last_order_id)
         return last_order_id
+
+
+class DefaultText(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    usage = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    key = models.CharField(max_length=255)
+    value = models.TextField(blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        permission_basename = 'defaultText'
+        permissions = (
+            ('get.defaultText', 'مشاهده متن های پیشفرض'),
+            ('update.defaultText', 'ویرایش متن های پیشفرض'),
+        )
+
+    @staticmethod
+    def get(key, financial_year=None):
+        qs = DefaultText.objects.inFinancialYear(financial_year)
+        text = qs.filter(key=key).first()
+        return text.value
