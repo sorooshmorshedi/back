@@ -15,7 +15,7 @@ class FinancialYearSanadItemReportSerializer(serializers.ModelSerializer):
 class SanadSanadItemReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sanad
-        fields = ('id', 'local_id', 'code', 'date', 'explanation')
+        fields = ('id', 'local_id', 'code', 'date', 'explanation', 'is_auto_created')
 
 
 class AccountSanadItemReportSerializer(serializers.ModelSerializer):
