@@ -1,21 +1,21 @@
 from django.core.management.base import BaseCommand
-
-from companies.models import FinancialYear
-from home.models import DefaultText
+from factors.factor_sanad import FactorSanad
+from factors.models import Factor
+from helpers.test import set_user
 
 
 class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        try:
-            base_financial_year = FinancialYear.objects.get(pk=21)
-        except FinancialYear.DoesNotExist as e:
-            base_financial_year = FinancialYear.objects.get(pk=1)
-
-        for financial_year in FinancialYear.objects.all():
-            if DefaultText.objects.inFinancialYear(financial_year).count() == 0:
-                for item in DefaultText.objects.inFinancialYear(base_financial_year).all():
-                    item.pk = None
-                    item.financial_year = financial_year
-                    item.save()
+        i = 0
+        qs = Factor.objects.filter(is_definite=True)
+        count = qs.count()
+        for factor in qs:
+            print("{}/{} : {}".format(count, i + 1, factor.id))
+            set_user(factor.created_by)
+            try:
+                FactorSanad(factor).update(True)
+            except Exception as e:
+                print(e)
+            i += 1
