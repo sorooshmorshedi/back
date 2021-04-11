@@ -124,14 +124,26 @@ class ClosingHelpers:
 
         WareInventory.objects.inFinancialYear(target_financial_year).delete()
         for inventory in WareInventory.objects.inFinancialYear().all():
-            items.append({
-                'fee': inventory.fee,
-                'ware': inventory.ware.id,
-                'unit': inventory.ware.main_unit.id,
-                'warehouse': inventory.warehouse.id,
-                'count': inventory.count,
-                'unit_count': inventory.count,
-            })
+            has_similar = False
+            for item in items:
+                if (
+                        item['fee'] == inventory.fee
+                        and item['ware'] == inventory.ware.id
+                        and item['warehouse'] == inventory.warehouse.id
+                ):
+                    item['count'] += inventory.count
+                    item['unit_count'] += inventory.count
+                    has_similar = True
+
+            if not has_similar:
+                items.append({
+                    'fee': inventory.fee,
+                    'ware': inventory.ware.id,
+                    'unit': inventory.ware.main_unit.id,
+                    'warehouse': inventory.warehouse.id,
+                    'count': inventory.count,
+                    'unit_count': inventory.count,
+                })
 
         data['items']['items'] = items
 
@@ -314,7 +326,7 @@ class MoveFinancialYearView(APIView):
 
         self.sanad = target_financial_year.get_opening_sanad()
 
-        # self.move_accounts()
+        self.move_accounts()
 
         ClosingHelpers.create_first_period_inventory(target_financial_year)
 

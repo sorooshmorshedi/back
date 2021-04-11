@@ -138,7 +138,8 @@ class FinancialYear(BaseModel):
             sanad = Sanad.objects.create(
                 financial_year=self,
                 code=code,
-                date=jdatetime.date.today()
+                date=jdatetime.date.today(),
+                is_auto_created=True
             )
             self.openingSanad = sanad
             self.save()
@@ -161,7 +162,8 @@ class FinancialYear(BaseModel):
                 sanad = Sanad.objects.create(
                     financial_year=self,
                     code=newSanadCode(self),
-                    date=jdatetime.date.today()
+                    date=jdatetime.date.today(),
+                    is_auto_created=True
                 )
                 setattr(self, sanad_name, sanad)
                 need_save = True
