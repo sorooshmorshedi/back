@@ -14,6 +14,9 @@ from reports.inventory.serializers import WareInventorySerializer, AllWaresInven
 from reports.lists.export_views import BaseListExportView
 from wares.models import Ware, Warehouse
 
+INVENTORY_INPUT_GROUP = Factor.INPUT_GROUP
+INVENTORY_OUTPUT_GROUP = Factor.OUTPUT_GROUP
+
 
 def addSum(queryset, data):
     data.append({
@@ -22,16 +25,16 @@ def addSum(queryset, data):
         },
         'remain': data[-1]['remain'],
         'input': {
-            'count': queryset.filter(factor__type__in=Factor.INPUT_GROUP).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=INVENTORY_INPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=Factor.INPUT_GROUP).aggregate(value=Sum('calculated_value'))[
+            'value': queryset.filter(factor__type__in=INVENTORY_INPUT_GROUP).aggregate(value=Sum('calculated_value'))[
                 'value'
             ]
         },
         'output': {
-            'count': queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(Sum('count'))['count__sum'],
+            'count': queryset.filter(factor__type__in=INVENTORY_OUTPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',
-            'value': queryset.filter(factor__type__in=Factor.OUTPUT_GROUP).aggregate(
+            'value': queryset.filter(factor__type__in=INVENTORY_OUTPUT_GROUP).aggregate(
                 value=Sum('calculated_value')
             )['value'],
         }
@@ -91,15 +94,15 @@ class WareInventoryListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = FactorItem.objects.inFinancialYear().filter(
             factor__is_definite=True,
-            factor__type__in=(
-                *Factor.SALE_GROUP,
-                *Factor.BUY_GROUP,
-                Factor.INPUT_ADJUSTMENT,
-                Factor.OUTPUT_ADJUSTMENT,
-                Factor.INPUT_TRANSFER,
-                Factor.OUTPUT_TRANSFER,
-                Factor.CONSUMPTION_WARE
-            )
+            # factor__type__in=(
+            #     *Factor.SALE_GROUP,
+            #     *Factor.BUY_GROUP,
+            #     Factor.INPUT_ADJUSTMENT,
+            #     Factor.OUTPUT_ADJUSTMENT,
+            #     Factor.INPUT_TRANSFER,
+            #     Factor.OUTPUT_TRANSFER,
+            #     Factor.CONSUMPTION_WARE
+            # )
         ).prefetch_related(
             'factor__account',
             'factor__sanad'
@@ -112,11 +115,11 @@ class WareInventoryListView(generics.ListAPIView):
 
         queryset = queryset.annotate(
             comulative_input_count=Window(
-                expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
+                expression=Sum('count', filter=Q(type__in=INVENTORY_INPUT_GROUP)),
                 order_by=(F('definition_date'), F('id'))
             ),
             comulative_output_count=Window(
-                expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
+                expression=Sum('count', filter=Q(type__in=INVENTORY_OUTPUT_GROUP)),
                 order_by=(F('definition_date'), F('id'))
             ),
         )
@@ -185,25 +188,27 @@ class AllWaresInventoryListView(generics.ListAPIView):
                 ware_id=OuterRef('ware_id')
             ).filter(
                 factor__is_definite=True,
-                factor__type__in=(
-                    *Factor.SALE_GROUP,
-                    *Factor.BUY_GROUP,
-                    Factor.INPUT_ADJUSTMENT,
-                    Factor.OUTPUT_ADJUSTMENT,
-                    Factor.CONSUMPTION_WARE
-                )
+                # factor__type__in=(
+                #     *Factor.SALE_GROUP,
+                #     *Factor.BUY_GROUP,
+                #     Factor.INPUT_ADJUSTMENT,
+                #     Factor.OUTPUT_ADJUSTMENT,
+                #     Factor.CONSUMPTION_WARE
+                # )
             ).order_by('factor__definition_date').values_list('id', flat=True)[:1]
         )
 
         input_filter = {
             'factorItems__factor__is_definite': True,
-            'factorItems__factor__type__in': Factor.BUY_GROUP,
+            # 'factorItems__factor__type__in': Factor.BUY_GROUP,
+            'factorItems__factor__type__in': INVENTORY_INPUT_GROUP,
             'factorItems__financial_year': financial_year,
         }
 
         output_filter = {
             'factorItems__factor__is_definite': True,
-            'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE),
+            # 'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE),
+            'factorItems__factor__type__in': INVENTORY_OUTPUT_GROUP,
             'factorItems__financial_year': financial_year,
         }
 
@@ -314,11 +319,11 @@ class WarehouseInventoryListView(generics.ListAPIView):
             type=F('factor__type')
         ).annotate(
             cumulative_input_count=Window(
-                expression=Sum('count', filter=Q(type__in=Factor.INPUT_GROUP)),
+                expression=Sum('count', filter=Q(type__in=INVENTORY_INPUT_GROUP)),
                 order_by=[F('definition_date').asc(), F('id').asc()]
             ),
             cumulative_output_count=Window(
-                expression=Sum('count', filter=Q(type__in=Factor.OUTPUT_GROUP)),
+                expression=Sum('count', filter=Q(type__in=INVENTORY_OUTPUT_GROUP)),
                 order_by=[F('definition_date').asc(), F('id').asc()]
             )
         )
@@ -401,13 +406,13 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         input_filter = {
             'factorItems__factor__is_definite': True,
             'factorItems__factor__financial_year': financial_year,
-            'factorItems__factor__type__in': Factor.INPUT_GROUP
+            'factorItems__factor__type__in': INVENTORY_INPUT_GROUP
         }
 
         output_filter = {
             'factorItems__factor__is_definite': True,
             'factorItems__factor__financial_year': financial_year,
-            'factorItems__factor__type__in': Factor.OUTPUT_GROUP
+            'factorItems__factor__type__in': INVENTORY_OUTPUT_GROUP
         }
 
         queryset = Ware.objects.inFinancialYear()
