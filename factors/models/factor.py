@@ -560,7 +560,7 @@ class FactorItem(BaseModel):
 
     @property
     def value(self):
-        return self.fee * self.count
+        return self.fee * self.unit_count
 
     @property
     def discount(self):
