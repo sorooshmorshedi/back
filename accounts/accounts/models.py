@@ -335,8 +335,8 @@ class AccountBalance(BaseModel):
             account_balance.save()
 
     @staticmethod
-    def get_bed_bes(account=None, floatAccount=None, costCenter=None) -> tuple:
-        qs = AccountBalance.objects
+    def get_bed_bes(account=None, floatAccount=None, costCenter=None, financial_year=None) -> tuple:
+        qs = AccountBalance.objects.inFinancialYear(financial_year)
 
         if account:
             qs = qs.filter(account=account)
