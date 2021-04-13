@@ -90,11 +90,11 @@ class FactorModelView(viewsets.ModelViewSet):
         if factor.type == Factor.SALE:
             factor.after_rows_explanation = DefaultText.get('under_sale_factor_rows')
             factor.bottom_explanation = DefaultText.get('under_sale_factor')
-            factor.save()
         elif factor.type == Factor.BACK_FROM_BUY:
             factor.after_rows_explanation = DefaultText.get('under_back_from_buy_factor_rows')
             factor.bottom_explanation = DefaultText.get('under_back_from_buy_factor')
-            factor.save()
+
+        factor.save()
 
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
             DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))
@@ -123,6 +123,8 @@ class FactorModelView(viewsets.ModelViewSet):
 
         if is_definite:
             DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))
+
+        factor.save()
 
         self.check_confirmations(request, factor)
 
