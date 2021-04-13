@@ -114,8 +114,6 @@ class FinancialYear(BaseModel):
         )
 
     def delete(self, *args, **kwargs):
-        if self.users.all().count() != 0:
-            raise ValidationError("این سال مالی برای بعضی از کاربران فعال است")
         return super().delete(*args, **kwargs)
 
     @property

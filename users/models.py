@@ -54,9 +54,9 @@ class User(AbstractUser, BaseModel):
         },
     )
 
-    active_company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='usersActiveCompany', null=True,
+    active_company = models.ForeignKey(Company, on_delete=models.SET_NULL, related_name='usersActiveCompany', null=True,
                                        blank=True)
-    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.PROTECT, related_name='users', null=True,
+    active_financial_year = models.ForeignKey(FinancialYear, on_delete=models.SET_NULL, related_name='users', null=True,
                                               blank=True)
 
     first_name = models.CharField(max_length=30)
