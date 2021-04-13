@@ -209,7 +209,7 @@ class Factor(BaseModel, ConfirmationMixin):
     def sum(self):
         sum = 0
         for i in self.items.all():
-            sum += i.fee * i.count
+            sum += i.fee * i.unit_count
         return sum
 
     @property
