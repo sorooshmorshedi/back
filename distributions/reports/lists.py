@@ -4,7 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from distributions.models.distribution_model import Distribution
 from distributions.reports.filters import DistributionFilter
-from distributions.serializers.distribution_serializers import DistributionListSerializer
+from distributions.serializers.distribution_serializers import DistributionListSerializer, \
+    DistributionRemittanceSerializer
 from helpers.auth import BasicCRUDPermission
 from reports.lists.export_views import BaseListExportView
 
@@ -29,3 +30,14 @@ class DistributionListExportView(DistributionListView, BaseListExportView):
 
     def get(self, request, *args, **kwargs):
         return self.get_response(request, *args, **kwargs)
+
+
+class DistributionRemittanceView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_basename = 'distribution'
+
+    serializer_class = DistributionRemittanceSerializer
+
+    def get_queryset(self):
+        return Distribution.objects.hasAccess('get', self.permission_basename).all()
