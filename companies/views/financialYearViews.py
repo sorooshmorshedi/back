@@ -324,16 +324,16 @@ class MoveFinancialYearView(APIView):
 
         request.user.has_object_perm(request.user.active_financial_year, self.permission_codename, raise_exception=True)
 
-        self.sanad = target_financial_year.get_opening_sanad()
-
-        self.move_accounts()
+        self.move_accounts(target_financial_year)
 
         ClosingHelpers.create_first_period_inventory(target_financial_year)
 
         return Response(UserListRetrieveSerializer(request.user).data)
 
-    def move_accounts(self):
-        sanad_items = ClosingHelpers.create_sanad_items_with_balance(self.sanad)
+    def move_accounts(self, target_financial_year):
+        sanad = target_financial_year.get_opening_sanad()
+        clearSanad(sanad)
+        sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad)
         return sanad_items
 
 

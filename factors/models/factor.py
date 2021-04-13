@@ -312,8 +312,12 @@ class Factor(BaseModel, ConfirmationMixin):
                 if count == 0:
                     continue
 
+                ware = Ware.objects.get(pk=row['ware'])
+
                 raise ValidationError({
-                    "non_field_errors": ["ردیف {} غیر قابل ثبت می باشد".format(items_data.index(row) + 1)],
+                    "non_field_errors": [
+                        "ردیف {} ({}) غیر قابل ثبت می باشد".format(items_data.index(row) + 1, ware.name),
+                    ],
                     "why": {
                         'is_not_changed': is_not_changed,
                         'newer_factors': qs.values_list('factor_id', flat=True)
