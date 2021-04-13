@@ -209,7 +209,7 @@ class TreeMixin(models.Model):
 
     level = models.IntegerField()
     code = models.CharField(max_length=100)
-    parent = models.ForeignKey('self', on_delete=models.PROTECT, related_name='children', blank=True, null=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='children', blank=True, null=True)
 
     class Meta:
         abstract = True

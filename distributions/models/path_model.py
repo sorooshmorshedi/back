@@ -17,6 +17,7 @@ class Path(BaseModel, TreeMixin):
         ordering = ['code', ]
         backward_financial_year = True
         permission_basename = 'path'
+        unique_together = (('financial_year', 'code'),)
         permissions = (
             ('get.path', 'مشاهده مسیر ها'),
 
