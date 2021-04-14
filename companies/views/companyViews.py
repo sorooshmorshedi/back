@@ -6,6 +6,7 @@ from companies.models import Company
 from companies.permissions import CompanyLimit
 from companies.serializers import CompanySerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.models import manage_files
 
 
 class CompanyModelView(viewsets.ModelViewSet):
@@ -23,3 +24,7 @@ class CompanyModelView(viewsets.ModelViewSet):
         serializer.save(
             superuser=user.get_superuser()
         )
+
+    def perform_update(self, serializer: CompanySerializer) -> None:
+        manage_files(serializer.instance, self.request.data, ['logo'])
+        serializer.save()

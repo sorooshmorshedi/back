@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager
+from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager, upload_to
 
 
 class Company(BaseModel):
@@ -22,6 +22,8 @@ class Company(BaseModel):
     eghtesadi_code = models.CharField(max_length=20, blank=True, null=True)
     shenase = models.CharField(max_length=20, blank=True, null=True)
     explanation = EXPLANATION()
+
+    logo = models.FileField(upload_to=upload_to, null=True, blank=True, default=None)
 
     superuser = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='companies')
 
