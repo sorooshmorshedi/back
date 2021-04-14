@@ -64,6 +64,7 @@ class ExportVerifier(BaseModel):
     form = models.CharField(choices=FORMS, max_length=4)
 
     class Meta(BaseModel.Meta):
+        backward_financial_year = True
         permissions = (
             ('create.exportVerifier', 'تعریف تایید کنندگان خروجی'),
 
