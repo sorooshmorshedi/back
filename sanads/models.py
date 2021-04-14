@@ -150,10 +150,9 @@ def clearSanad(sanad: Sanad):
         return
     sanad.explanation = ''
     sanad.is_auto_created = False
-    sanad.save()
     for item in sanad.items.all():
         item.delete()
-
+    sanad.save()
     sanad.update_values()
 
 

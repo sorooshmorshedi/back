@@ -39,7 +39,7 @@ class FirstPeriodInventoryView(APIView):
         return Response(serialized.data)
 
     @staticmethod
-    def set_first_period_inventory(data, financial_year=None):
+    def set_first_period_inventory(data, financial_year=None, engage_inventory=True):
         """
         :param data: {
             item: {...},
@@ -66,8 +66,13 @@ class FirstPeriodInventoryView(APIView):
             first_period_inventory.code = 0
             first_period_inventory.save()
 
-        first_period_inventory = FirstPeriodInventoryView._create_or_update_factor(factor_data, factor_items_data,
-                                                                                   financial_year, user)
+        first_period_inventory = FirstPeriodInventoryView._create_or_update_factor(
+            factor_data,
+            factor_items_data,
+            financial_year,
+            user,
+            engage_inventory
+        )
 
         sanad = FirstPeriodInventoryView._create_or_update_sanad(first_period_inventory, financial_year, user)
 
@@ -78,14 +83,15 @@ class FirstPeriodInventoryView(APIView):
         return first_period_inventory
 
     @staticmethod
-    def _create_or_update_factor(factor_data, factor_items_data, financial_year, user):
+    def _create_or_update_factor(factor_data, factor_items_data, financial_year, user, engage_inventory=True):
         factor_data.pop('sanad', None)
         factor_data['type'] = Factor.FIRST_PERIOD_INVENTORY
         factor_data['is_definite'] = 1
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
-            first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
+            if engage_inventory:
+                first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
             serializer = FactorCreateUpdateSerializer(instance=first_period_inventory, data=factor_data)
         else:
             serializer = FactorCreateUpdateSerializer(data=factor_data)
@@ -101,7 +107,8 @@ class FirstPeriodInventoryView(APIView):
             first_period_inventory = serializer.instance
             first_period_inventory.definition_date = str(jdatetime.date.today())
             first_period_inventory.save()
-            first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
+            if engage_inventory:
+                first_period_inventory.verify_items(factor_items_data['items'], factor_items_data['ids_to_delete'])
 
         FirstPeriodInventoryItemMassRelatedCUD(
             user,
@@ -119,7 +126,8 @@ class FirstPeriodInventoryView(APIView):
         for item in first_period_inventory.items.all():
             item.save()
 
-        DefiniteFactor.updateFactorInventory(first_period_inventory)
+        if engage_inventory:
+            DefiniteFactor.updateFactorInventory(first_period_inventory)
 
         return first_period_inventory
 

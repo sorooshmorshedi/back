@@ -16,24 +16,23 @@ import os
 class Command(BaseCommand):
     help = 'refresh inventory'
 
+    backups_directory = "{}/backups/refresh_inventory".format(BASE_DIR)
+
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('user_id', type=int)
 
     def __init__(self):
         super().__init__()
 
-        self.backups_directory = "{}/backups/refresh_inventory".format(
-            BASE_DIR,
-        )
-
-    def backup_inventory(self):
+    @staticmethod
+    def backup_inventory():
         print("Backup inventory")
 
         from django.core import serializers
 
         data = serializers.serialize('json', WareInventory.objects.all())
 
-        backup_directory = "{}/{}".format(self.backups_directory, datetime.date.today())
+        backup_directory = "{}/{}".format(Command.backups_directory, datetime.date.today())
         if not os.path.exists(backup_directory):
             os.makedirs(backup_directory)
 
@@ -45,22 +44,22 @@ class Command(BaseCommand):
         with open(path, "w") as backup_file:
             backup_file.write(data)
 
-    def delete_inventories(self, user):
-        print("Deleting all inventory records in financial year #{}".format(user.active_financial_year.id))
-        WareInventory.objects.filter(financial_year=user.active_financial_year).delete()
+    @staticmethod
+    def delete_inventories(financial_year):
+        print("Deleting all inventory records in financial year #{}".format(financial_year.id))
+        WareInventory.objects.filter(financial_year=financial_year).delete()
 
-    def handle(self, *args, **options):
-        user = User.objects.get(pk=options['user_id'])
-        financial_year = user.active_financial_year
+    @staticmethod
+    def refresh_inventory(user, financial_year):
 
-        self.backup_inventory()
+        Command.backup_inventory()
 
         print("Set {} as performer user".format(user.username))
         ModifyRequestMiddleware.thread_local = type('thread_local', (object,), {
             'user': user
         })
 
-        self.delete_inventories(user)
+        Command.delete_inventories(financial_year)
 
         print("Undo + Redo definition")
         qs = Factor.objects.filter(
@@ -92,3 +91,8 @@ class Command(BaseCommand):
         financial_year.save()
 
         print("Done!")
+
+    def handle(self, *args, **options):
+        user = User.objects.get(pk=options['user_id'])
+        financial_year = user.active_financial_year
+        self.refresh_inventory(user, financial_year)

@@ -11,6 +11,7 @@ from accounts.accounts.models import Account, AccountType, AccountBalance
 from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear
 from companies.serializers import FinancialYearSerializer
+from factors.management.commands.refresh_inventory import Command
 from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from helpers.auth import BasicCRUDPermission
@@ -88,7 +89,7 @@ class ClosingHelpers:
         return item
 
     @staticmethod
-    def create_first_period_inventory(target_financial_year):
+    def create_first_period_inventory(user, target_financial_year):
 
         first_period_inventory = Factor.get_first_period_inventory(target_financial_year)
         if first_period_inventory:
@@ -147,7 +148,8 @@ class ClosingHelpers:
 
         data['items']['items'] = items
 
-        FirstPeriodInventoryView.set_first_period_inventory(data, target_financial_year)
+        FirstPeriodInventoryView.set_first_period_inventory(data, target_financial_year, engage_inventory=False)
+        Command.refresh_inventory(user, target_financial_year)
 
 
 class CloseFinancialYearView(APIView):
@@ -199,7 +201,7 @@ class CloseFinancialYearView(APIView):
 
         CloseFinancialYearView.create_opening_sanad(current_financial_year, target_financial_year)
 
-        ClosingHelpers.create_first_period_inventory(target_financial_year)
+        ClosingHelpers.create_first_period_inventory(user, target_financial_year)
 
     @staticmethod
     def add_temporaries_sanad_items(sanad):
@@ -326,7 +328,7 @@ class MoveFinancialYearView(APIView):
 
         self.move_accounts(target_financial_year)
 
-        ClosingHelpers.create_first_period_inventory(target_financial_year)
+        ClosingHelpers.create_first_period_inventory(request.user, target_financial_year)
 
         return Response(UserListRetrieveSerializer(request.user).data)
 
