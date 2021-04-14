@@ -31,5 +31,7 @@ class OptionUpdateView(generics.UpdateAPIView):
 class DefaultTextView(generics.ListAPIView, generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     permission_basename = 'defaultText'
-    queryset = DefaultText.objects.all()
     serializer_class = DefaultTextSerializer
+
+    def get_queryset(self):
+        return DefaultText.objects.inFinancialYear()
