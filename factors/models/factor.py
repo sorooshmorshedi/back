@@ -467,6 +467,7 @@ class Factor(BaseModel, ConfirmationMixin):
     def save(self, *args, **kwargs) -> None:
         self.total_sum = Decimal(self.rows_sum_after_tax) - Decimal(self.factor_discount) + self.taxValue
         self.is_settled = self.total_sum == self.paidValue
+        self.discountValue = self.factor_discount
         super(Factor, self).save(*args, **kwargs)
 
 
