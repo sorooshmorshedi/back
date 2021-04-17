@@ -122,7 +122,8 @@ class FactorFilter(filters.FilterSet):
             'is_definite': ['exact'],
             'is_loaded': ['exact'],
             'path': ['in'],
-            'visitor': ['in', 'exact']
+            'visitor': ['in', 'exact'],
+            'is_pre_factor': ['exact']
         }
         filter_overrides = {
             jmodels.jDateField: {

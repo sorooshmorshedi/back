@@ -106,6 +106,10 @@ class FactorListView(generics.ListAPIView):
     def type(self):
         return self.request.GET.get('type')
 
+    @property
+    def is_pre_factor(self):
+        return self.request.GET.get('is_pre_factor') == 'true'
+
     serializer_class = FactorListCreateUpdateSerializer
     filterset_class = FactorFilter
     ordering_fields = '__all__'

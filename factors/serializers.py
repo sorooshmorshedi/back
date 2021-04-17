@@ -104,11 +104,40 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
     unit = UnitSerializer(read_only=True, many=False)
     warehouse = WarehouseSimpleSerializer(read_only=True, many=False)
 
+    factorItem = serializers.SerializerMethodField()
+    preFactorItem = serializers.SerializerMethodField()
+
+    def get_factorItem(self, obj: FactorItem):
+        factor_item = getattr(obj, 'factorItem', None)
+        if factor_item:
+            return {
+                'id': factor_item.id,
+                'order': factor_item.order,
+                'factor_id': factor_item.factor_id,
+                'factor_type': factor_item.factor.type,
+                'factor_temporary_code': factor_item.factor.temporary_code,
+            }
+        else:
+            return None
+
+    def get_preFactorItem(self, obj: FactorItem):
+        pre_factor_item = getattr(obj, 'preFactorItem', None)
+        if pre_factor_item:
+            return {
+                'id': pre_factor_item.id,
+                'order': pre_factor_item.order,
+                'factor_id': pre_factor_item.factor_id,
+                'factor_type': pre_factor_item.factor.type,
+                'factor_temporary_code': pre_factor_item.factor.temporary_code,
+            }
+        else:
+            return None
+
     class Meta:
         model = FactorItem
         fields = (
             'id', 'order', 'ware', 'unit', 'warehouse', 'unit_count', 'count', 'fee', 'discountValue',
-            'discountPercent', 'explanation', 'tax_value', 'tax_percent', 'fees')
+            'discountPercent', 'explanation', 'tax_value', 'tax_percent', 'fees', 'factorItem', 'preFactorItem')
 
 
 class TransactionSerializerForPayment(serializers.ModelSerializer):

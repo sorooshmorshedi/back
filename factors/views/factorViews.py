@@ -79,7 +79,10 @@ class FactorModelView(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(
             financial_year=user.active_financial_year,
-            temporary_code=Factor.get_new_temporary_code(factor_type=factor_data.get('type'))
+            temporary_code=Factor.get_new_temporary_code(
+                factor_type=factor_data.get('type'),
+                is_pre_factor=factor_data.get('is_pre_factor')
+            )
         )
 
         factor = serializer.instance
@@ -204,7 +207,8 @@ class GetFactorByPositionView(APIView):
     def get(self, request):
         item = get_object_by_code(
             Factor.objects.hasAccess(request.method, self.permission_basename).filter(
-                type=request.GET['type']
+                type=request.GET['type'],
+                is_pre_factor=request.GET['is_pre_factor'] == 'true'
             ),
             request.GET.get('position'),
             request.GET.get('id')

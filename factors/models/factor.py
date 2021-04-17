@@ -41,6 +41,9 @@ class Factor(BaseModel, ConfirmationMixin):
         (OUTPUT_ADJUSTMENT, 'حواله تعدیل انبار'),
     )
 
+    RECEIPT = 'rc'
+    REMITTANCE = 'rm'
+
     FACTOR_TYPES = (
         (BUY, 'خرید'),
         (SALE, 'فروش'),
@@ -50,7 +53,9 @@ class Factor(BaseModel, ConfirmationMixin):
         (INPUT_TRANSFER, 'وارده از انتقال'),
         (OUTPUT_TRANSFER, 'صادره با انتقال'),
         (CONSUMPTION_WARE, 'حواله کالای مصرفی'),
-        *ADJUSTMENT_TYPES
+        *ADJUSTMENT_TYPES,
+        (RECEIPT, 'رسید'),
+        (REMITTANCE, 'حواله'),
     )
 
     BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
@@ -108,6 +113,8 @@ class Factor(BaseModel, ConfirmationMixin):
 
     after_rows_explanation = models.TextField(blank=True, null=True)
     bottom_explanation = models.TextField(blank=True, null=True)
+
+    is_pre_factor = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         permissions = (
@@ -377,14 +384,19 @@ class Factor(BaseModel, ConfirmationMixin):
 
     @staticmethod
     def get_new_code(factor_type):
-        data = Factor.objects.inFinancialYear().filter(type=factor_type).aggregate(
+        data = Factor.objects.inFinancialYear().filter(
+            type=factor_type,
+        ).aggregate(
             code=Coalesce(Max('code'), 0),
         )
         return data['code'] + 1
 
     @staticmethod
-    def get_new_temporary_code(factor_type):
-        data = Factor.objects.inFinancialYear().filter(type=factor_type).aggregate(
+    def get_new_temporary_code(factor_type, is_pre_factor=False):
+        data = Factor.objects.inFinancialYear().filter(
+            type=factor_type,
+            is_pre_factor=is_pre_factor
+        ).aggregate(
             temporary_code=Coalesce(Max('temporary_code'), 0),
         )
         return data['temporary_code'] + 1
@@ -537,6 +549,9 @@ class FactorItem(BaseModel):
     calculated_value = models.DecimalField(default=0, max_digits=24, decimal_places=0, blank=True)
 
     order = models.IntegerField(default=0)
+
+    preFactorItem = models.OneToOneField('self', on_delete=models.PROTECT, related_name='factorItem', blank=True,
+                                         null=True)
 
     def __str__(self):
         return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(

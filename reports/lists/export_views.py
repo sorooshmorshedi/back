@@ -324,7 +324,7 @@ class FactorExportView(FactorListView, BaseExportView):
             },
         }
 
-        factorType = self.type
+        factor_type = self.type
         summarized = request.GET.get('summarized', 'false') == 'true'
         hide_factor = request.GET.get('hide_factor', 'false') == 'true'
         hide_expenses = request.GET.get('hide_expenses', 'false') == 'true'
@@ -332,26 +332,28 @@ class FactorExportView(FactorListView, BaseExportView):
         hide_prices = request.GET.get('hide_prices', 'false') == 'true'
         receipt = request.GET.get('receipt', 'false') == 'true'
 
-        if factorType == Factor.CONSUMPTION_WARE:
+        if factor_type == Factor.CONSUMPTION_WARE:
             hide_expenses = True
             show_remain = False
             hide_prices = True
 
         if receipt:
-            if factorType == Factor.BUY:
+            if factor_type == Factor.BUY:
                 title = "رسید انبار"
             else:
                 title = "حواله انبار"
         else:
-            title = names[factorType]['title']
+            title = names[factor_type]['title']
+            if self.is_pre_factor:
+                title = "پیش {}".format(title)
 
-        if not factorType:
+        if not factor_type:
             return Response(["No factor type specified"], status=status.HTTP_400_BAD_REQUEST)
 
         self.context = {
             'title': title,
-            'verifier_form_name': names[factorType]['verifier_form_name'],
-            'show_warehouse': factorType != 'sale',
+            'verifier_form_name': names[factor_type]['verifier_form_name'],
+            'show_warehouse': factor_type != 'sale',
             'hide_factor': hide_factor,
             'hide_expenses': hide_expenses,
             'summarized': summarized,
