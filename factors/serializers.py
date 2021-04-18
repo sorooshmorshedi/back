@@ -126,9 +126,10 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
             return {
                 'id': pre_factor_item.id,
                 'order': pre_factor_item.order,
-                'factor_id': pre_factor_item.factor_id,
-                'factor_type': pre_factor_item.factor.type,
-                'factor_temporary_code': pre_factor_item.factor.temporary_code,
+                'factor__id': pre_factor_item.factor_id,
+                'factor__is_pre_factor': pre_factor_item.factor.is_pre_factor,
+                'factor__type': pre_factor_item.factor.type,
+                'factor__temporary_code': pre_factor_item.factor.temporary_code,
             }
         else:
             return None
