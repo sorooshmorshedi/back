@@ -21,7 +21,9 @@ class TransactionFilter(filters.FilterSet):
         fields = {
             'id': ['exact'],
             'code': BASE_FIELD_FILTERS,
+            'account': ['exact'],
             'account__name': ['exact', 'icontains'],
+            'floatAccount': ['exact'],
             'date': BASE_FIELD_FILTERS,
             'explanation': ['icontains'],
             'type': ['exact'],
