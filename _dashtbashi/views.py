@@ -24,9 +24,9 @@ from _dashtbashi.serializers import DriverSerializer, CarSerializer, DrivingCrea
     OtherDriverPaymentCreateUpdateSerializer, LadingBillNumberListSerializer, LadingRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
-from helpers.models import manage_files
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
+from imprests.models import ImprestSettlement, ImprestSettlementItem
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer
 
@@ -215,26 +215,13 @@ class LadingModelView(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
         headers = self.get_success_headers(serializer.data)
-        return Response(LadingListSerializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED,
-                        headers=headers)
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        manage_files(instance, request.data, ['lading_attachment', 'bill_attachment'])
-
-        instance = self.get_object()
-        serializer = LadingCreateUpdateSerializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(LadingRetrieveSerializer(instance=instance).data)
+        return Response(
+            LadingListSerializer(instance=serializer.instance).data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         serializer.save(
@@ -399,6 +386,7 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
         serializer.save(
             financial_year=user.active_financial_year,
             code=Transaction.newCodes(Transaction.PAYMENT),
+            is_auto_created=True,
         )
         payment = serializer.instance
         payment.sync(user, payment_data)
@@ -410,31 +398,67 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
             payment=payment,
             code=get_new_code(OtherDriverPayment)
         )
+        instance: OtherDriverPayment = serializer.instance
+        car = instance.driving.car
+        driver = instance.driving.driver
 
-        instance = serializer.instance
+        for lading in instance.ladings.all():
+            lading.is_paid = True
+            lading.save()
+
+        for imprest in instance.imprests.all():
+            imprest_settlement = getattr(imprest, 'imprestSettlement', None)
+            explanation = "تسویه شده توسط پرداخت رانندگان متفرقه"
+            if not imprest_settlement:
+                imprest_settlement = ImprestSettlement.objects.create(
+                    financial_year=user.active_financial_year,
+                    code=get_new_code(ImprestSettlement),
+                    transaction=imprest,
+                    date=instance.date,
+                    is_auto_created=True,
+                )
+
+            ImprestSettlementItem.objects.create(
+                financial_year=user.active_financial_year,
+                imprestSettlement=imprest_settlement,
+                date=instance.date,
+                account=car.payableAccount,
+                floatAccount=driver.floatAccount,
+                value=imprest_settlement.remain_value,
+                explanation=explanation,
+                is_auto_created=True,
+            )
+
+            imprest_settlement.sync()
+
+        payment.updateSanad(request.user)
 
         return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def destroy(self, request, *args, **kwargs):
+        instance: OtherDriverPayment = self.get_object()
 
-        user = request.user
-        form_data = request.data['form']
-        items_data = request.data['items']
+        for lading in instance.ladings.all():
+            lading.is_paid = False
+            lading.save()
 
-        serialized = self.serializer_class(instance=instance, data=form_data)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
+        for imprest in instance.imprests.all():
+            imprest_settlement = getattr(imprest, 'imprestSettlement', None)
+            if imprest_settlement and imprest_settlement.is_auto_created:
+                imprest_settlement.delete()
+            else:
+                ImprestSettlementItem.objects.filter(
+                    imprestSettlement=imprest_settlement,
+                    is_auto_created=True,
+                ).delete()
 
-        MassRelatedCUD(
-            user,
-            items_data.get('items'),
-            items_data.get('ids_to_delete'),
-            'otherDriverPayment',
-            instance.id,
-        ).sync()
+        payment = instance.payment
 
-        return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
+        instance.delete()
+
+        payment.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OtherDriverPaymentByPositionView(APIView):
