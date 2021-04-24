@@ -207,6 +207,50 @@ class Factor(BaseModel, ConfirmationMixin):
             ('firstConfirmOwn.consumptionWareFactor', 'تایید اول حواله کالای مصرفی خود'),
             ('secondConfirmOwn.consumptionWareFactor', 'تایید دوم حواله کالای مصرفی خود'),
 
+            ('create.buyPreFactor', 'تعریف پیش فاکتور خرید'),
+
+            ('get.buyPreFactor', 'مشاهده پیش فاکتور خرید'),
+            ('update.buyPreFactor', 'ویرایش پیش فاکتور خرید'),
+            ('delete.buyPreFactor', 'حذف پیش فاکتور خرید'),
+            ('convert.buyPreFactor', 'تبدیل پیش فاکتور خرید به فاکتور'),
+
+            ('getOwn.buyPreFactor', 'مشاهده پیش فاکتور خرید خود'),
+            ('updateOwn.buyPreFactor', 'ویرایش پیش فاکتور خرید خود'),
+            ('deleteOwn.buyPreFactor', 'حذف پیش فاکتور خرید خود'),
+            ('convertOwn.buyPreFactor', 'تبدیل پیش فاکتور خرید خود به فاکتور'),
+
+            ('create.salePreFactor', 'تعریف پیش فاکتور فروش'),
+
+            ('get.salePreFactor', 'مشاهده پیش فاکتور فروش'),
+            ('update.salePreFactor', 'ویرایش پیش فاکتور فروش'),
+            ('delete.salePreFactor', 'حذف پیش فاکتور فروش'),
+            ('convert.salePreFactor', 'تبدیل پیش فاکتور فروش به فاکتور'),
+
+            ('getOwn.salePreFactor', 'مشاهده پیش فاکتور فروش خود'),
+            ('updateOwn.salePreFactor', 'ویرایش پیش فاکتور فروش خود'),
+            ('deleteOwn.salePreFactor', 'حذف پیش فاکتور فروش خود'),
+            ('convertOwn.salePreFactor', 'تبدیل پیش فاکتور فروش خود به فاکتور'),
+
+            ('create.receipt', 'تعریف رسید'),
+
+            ('get.receipt', 'مشاهده رسید'),
+            ('update.receipt', 'ویرایش رسید'),
+            ('delete.receipt', 'حذف رسید'),
+
+            ('getOwn.receipt', 'مشاهده رسید های خود'),
+            ('updateOwn.receipt', 'ویرایش رسید های خود'),
+            ('deleteOwn.receipt', 'حذف رسید های خود'),
+
+            ('create.remittance', 'تعریف حواله'),
+
+            ('get.remittance', 'مشاهده حواله'),
+            ('update.remittance', 'ویرایش حواله'),
+            ('delete.remittance', 'حذف حواله'),
+
+            ('getOwn.remittance', 'مشاهده حواله های خود'),
+            ('updateOwn.remittance', 'ویرایش حواله های خود'),
+            ('deleteOwn.remittance', 'حذف حواله های خود'),
+
         )
 
     def __str__(self):
