@@ -407,29 +407,14 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
             lading.save()
 
         for imprest in instance.imprests.all():
-            imprest_settlement = getattr(imprest, 'imprestSettlement', None)
             explanation = "تسویه شده توسط پرداخت رانندگان متفرقه"
-            if not imprest_settlement:
-                imprest_settlement = ImprestSettlement.objects.create(
-                    financial_year=user.active_financial_year,
-                    code=get_new_code(ImprestSettlement),
-                    transaction=imprest,
-                    date=instance.date,
-                    is_auto_created=True,
-                )
-
-            ImprestSettlementItem.objects.create(
-                financial_year=user.active_financial_year,
-                imprestSettlement=imprest_settlement,
-                date=instance.date,
+            ImprestSettlement.settle_imprest(
+                imprest,
+                instance.date,
                 account=car.payableAccount,
                 floatAccount=driver.floatAccount,
-                value=imprest_settlement.remain_value,
                 explanation=explanation,
-                is_auto_created=True,
             )
-
-            imprest_settlement.sync()
 
         payment.updateSanad(request.user)
 
@@ -474,6 +459,30 @@ class OtherDriverPaymentByPositionView(APIView):
         if item:
             return Response(OtherDriverPaymentListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class SettleDriverImprests(APIView):
+    permission_basename = 'otherDriverPayment'
+
+    def post(self, request):
+        data = request.data
+        car = Car.objects.get(pk=data['car'])
+        driver = Driver.objects.get(pk=data['driver'])
+        imprests = Transaction.objects.filter(type=Transaction.IMPREST, pk__in=data['imprests'])
+
+        settlements = []
+        for imprest in imprests:
+            explanation = "تسویه شده توسط پرداخت رانندگان متفرقه"
+            settlement = ImprestSettlement.settle_imprest(
+                imprest,
+                data['date'],
+                account=car.payableAccount,
+                floatAccount=driver.floatAccount,
+                explanation=explanation,
+            )
+            settlements.append(settlement.id)
+
+        return Response(settlements)
 
 
 class ConfirmRemittance(ConfirmView):

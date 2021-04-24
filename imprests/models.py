@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
+from helpers.functions import get_new_code
 from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin, upload_to
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -64,6 +65,35 @@ class ImprestSettlement(BaseModel, ConfirmationMixin):
 
         from imprests.sanads import ImprestSettlementSanad
         ImprestSettlementSanad(self).update()
+
+    @staticmethod
+    def settle_imprest(imprest: Transaction, date, account, floatAccount=None, costCenter=None, explanation=""):
+
+        imprest_settlement = getattr(imprest, 'imprestSettlement', None)
+        if not imprest_settlement:
+            imprest_settlement = ImprestSettlement.objects.create(
+                financial_year=imprest.financial_year,
+                code=get_new_code(ImprestSettlement),
+                transaction=imprest,
+                date=date,
+                is_auto_created=True,
+            )
+
+        ImprestSettlementItem.objects.create(
+            financial_year=imprest.financial_year,
+            imprestSettlement=imprest_settlement,
+            date=date,
+            account=account,
+            floatAccount=floatAccount,
+            costCenter=costCenter,
+            value=imprest_settlement.remain_value,
+            explanation=explanation,
+            is_auto_created=True,
+        )
+
+        imprest_settlement.sync()
+
+        return imprest_settlement
 
 
 class ImprestSettlementItem(BaseModel):
