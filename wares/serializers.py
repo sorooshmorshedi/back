@@ -72,7 +72,7 @@ class WareSerializer(serializers.ModelSerializer):
         level = attrs.get('level')
         if level != Ware.NATURE:
             validate_required_fields(attrs, ('parent',))
-        if not attrs.get('is_service'):
+        if not attrs.get('is_service') and level == Ware.WARE:
             validate_required_fields(attrs, ('warehouse', 'pricingType'))
         return attrs
 
