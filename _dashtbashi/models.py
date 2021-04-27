@@ -562,6 +562,7 @@ class Lading(RemittanceMixin, ConfirmationMixin, LocalIdMixin):
 
     class Meta(BaseModel.Meta):
         permission_basename = 'lading'
+        unique_together = (('financial_year', 'lading_number'), )
         permissions = (
             ('get.lading', 'مشاهده بارگیری'),
             ('create.lading', 'تعریف بارگیری'),
