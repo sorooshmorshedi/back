@@ -139,6 +139,11 @@ class BaseListExportView(PDFTemplateView):
         """
         return []
 
+    def get_applied_filters(self):
+        applied_filters = self.request.GET.get('applied_filters', "[]")
+        applied_filters = json.loads(applied_filters)
+        return applied_filters
+
     def get_headers(self):
         headers = self.request.GET.get('headers', "[]")
         headers = json.loads(headers)
@@ -162,6 +167,7 @@ class BaseListExportView(PDFTemplateView):
         filters = []
         data = self.request.GET.copy()
         data.pop('headers', None)
+        data.pop('applied_filters', None)
         data.pop('token', None)
         headers = self.get_headers()
         keys = list(data.keys())
@@ -203,9 +209,10 @@ class BaseListExportView(PDFTemplateView):
             'raw_headers': self.get_headers(),
             'rows': self.get_rows(),
             'appended_rows': self.get_appended_rows(),
-            'filters': self.get_filters(),
+            'applied_filters': self.get_applied_filters(),
             'print_document': print_document,
-            'additional_data': self.get_additional_data()
+            'additional_data': self.get_additional_data(),
+            'filters': []
         }
 
         context.update(self.context)
@@ -228,8 +235,18 @@ class BaseListExportView(PDFTemplateView):
             )
 
     def get_xlsx_data(self, items):
+        applied_filters = self.get_applied_filters()
+        filters_text = ""
+        for applied_filter in applied_filters:
+            filters_text += applied_filter['text']
+            type_text = applied_filter.get('typeText')
+            if type_text:
+                filters_text += " ({})".format(type_text)
+            filters_text += ": {}  -  ".format(applied_filter['value'])
+
         data = [
             [self.title],
+            ["فیلتر های اعمال شده:", filters_text],
             *[[data['text'], data['value']] for data in self.get_additional_data()],
             self.get_header_texts()
         ]

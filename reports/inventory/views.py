@@ -19,11 +19,15 @@ INVENTORY_OUTPUT_GROUP = Factor.OUTPUT_GROUP
 
 
 def addSum(queryset, data):
+    if len(data) > 0:
+        remain = data[-1]['remain']
+    else:
+        remain = 0
     data.append({
         'factor': {
             'explanation': 'مجموع',
         },
-        'remain': data[-1]['remain'],
+        'remain': remain,
         'input': {
             'count': queryset.filter(factor__type__in=INVENTORY_INPUT_GROUP).aggregate(Sum('count'))['count__sum'],
             'fee': '-',

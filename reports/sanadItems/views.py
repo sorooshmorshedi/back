@@ -145,14 +145,17 @@ class SanadItemListExportView(SanadItemListView, BaseListExportView):
         ).data
 
     def get_appended_rows(self):
-        last_item = self.get_rows()[-1]
-        return [{
-            'explanation': 'جمع',
-            'bed': last_item['comulative_bed'],
-            'bes': last_item['comulative_bes'],
-            'remain': last_item['remain'],
-            'remain_type': last_item['remain_type'],
-        }]
+        rows = self.get_rows()
+        if len(rows):
+            last_item = self.get_rows()[-1]
+            return [{
+                'explanation': 'جمع',
+                'bed': last_item['comulative_bed'],
+                'bes': last_item['comulative_bes'],
+                'remain': last_item['remain'],
+                'remain_type': last_item['remain_type'],
+            }]
+        return [{}]
 
     def get(self, request, *args, **kwargs):
         return self.get_response(request, *args, **kwargs)
