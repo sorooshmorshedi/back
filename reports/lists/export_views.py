@@ -339,6 +339,14 @@ class FactorExportView(FactorListView, BaseExportView):
                 'title': 'موجودی اول دوره',
                 'verifier_form_name': ExportVerifier.FIRST_PERIOD_INVENTORY
             },
+            'rc': {
+                'title': 'رسید',
+                'verifier_form_name': ExportVerifier.FACTOR_RECEIPT
+            },
+            'rm': {
+                'title': 'حواله',
+                'verifier_form_name': ExportVerifier.FACTOR_REMITTANCE
+            },
         }
 
         factor_type = self.type

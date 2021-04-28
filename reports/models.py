@@ -31,15 +31,24 @@ class ReportPermissions(models.Model):
 
 class ExportVerifier(BaseModel):
     SANAD = 's'
+
     FACTOR_BUY = 'fb'
     FACTOR_SALE = 'fs'
     FACTOR_BACK_FROM_BUY = 'fbfb'
     FACTOR_BACK_FROM_SALE = 'fbfs'
+    FACTOR_RECEIPT = 'frc'
+    FACTOR_REMITTANCE = 'frm'
     CONSUMPTION_WARE_REMITTANCE = 'cwr'
     FIRST_PERIOD_INVENTORY = 'fpi'
+
+    PRE_FACTOR_BUY = 'pfb'
+    PRE_FACTOR_SALE = 'pfs'
+
     TRANSACTION_RECEIVE = 'tr'
     TRANSACTION_PAYMENT = 'tp'
+
     TRANSFER = 't'
+
     INPUT_ADJUSTMENT = 'ia'
     OUTPUT_ADJUSTMENT = 'oa'
 
@@ -56,6 +65,10 @@ class ExportVerifier(BaseModel):
         (FIRST_PERIOD_INVENTORY, 'موجودی اول دوره'),
         (INPUT_ADJUSTMENT, 'رسید تعدیل انبار'),
         (OUTPUT_ADJUSTMENT, 'حواله تعدیل انبار'),
+        (PRE_FACTOR_BUY, 'پیش فاکتور خرید'),
+        (PRE_FACTOR_SALE, 'پیش فاکتور فروش'),
+        (FACTOR_RECEIPT, 'رسید'),
+        (FACTOR_REMITTANCE, 'حواله')
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='export_verifiers')
