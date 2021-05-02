@@ -40,6 +40,10 @@ class Command(BaseCommand):
 
             print("Codename: {}".format(codename))
             for company in Company.objects.all():
+
+                if company.financial_years.count() == 0:
+                    continue
+
                 financial_year = company.financial_years.latest()
                 print(" - Company #{}".format(company.id))
                 try:

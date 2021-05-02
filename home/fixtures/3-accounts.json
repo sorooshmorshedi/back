@@ -17342,5 +17342,18 @@
       "usage": "factor",
       "codename": "visitorsAccount"
     }
+  },
+
+
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 38,
+    "fields": {
+      "financial_year": 1,
+      "name": "حساب پیشفرض کالای ساخته شده",
+      "account_level": 3,
+      "usage": "costAccounting",
+      "codename": "producedWareAccount"
+    }
   }
 ]

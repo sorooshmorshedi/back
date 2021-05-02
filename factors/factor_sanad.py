@@ -60,7 +60,7 @@ class FactorSanad(AutoSanad):
                 {**get_object_accounts(instance), 'bed': instance.taxSum, 'explanation': self.get_sanad_explanation()},
                 {'account': 'tax', 'bes': instance.taxSum, 'explanation': self.get_sanad_explanation()}
             ]
-        elif instance.type == Factor.BUY:
+        elif instance.type in (Factor.BUY, Factor.PRODUCTION):
             items = [
                 {**get_object_accounts(instance), 'bes': instance.sum, 'explanation': self.get_sanad_explanation()},
                 {'account': 'buy', 'bed': instance.sum, 'explanation': self.get_sanad_explanation()},

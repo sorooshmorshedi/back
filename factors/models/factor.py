@@ -44,6 +44,8 @@ class Factor(BaseModel, ConfirmationMixin):
     RECEIPT = 'rc'
     REMITTANCE = 'rm'
 
+    PRODUCTION = 'p'
+
     FACTOR_TYPES = (
         (BUY, 'خرید'),
         (SALE, 'فروش'),
@@ -56,9 +58,10 @@ class Factor(BaseModel, ConfirmationMixin):
         *ADJUSTMENT_TYPES,
         (RECEIPT, 'رسید'),
         (REMITTANCE, 'حواله'),
+        (PRODUCTION, 'تولید'),
     )
 
-    BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY)
+    BUY_GROUP = (BUY, BACK_FROM_SALE, FIRST_PERIOD_INVENTORY, PRODUCTION)
     SALE_GROUP = (SALE, BACK_FROM_BUY)
 
     INPUT_GROUP = (*BUY_GROUP, INPUT_TRANSFER, INPUT_ADJUSTMENT)
@@ -250,6 +253,16 @@ class Factor(BaseModel, ConfirmationMixin):
             ('getOwn.remittance', 'مشاهده حواله های خود'),
             ('updateOwn.remittance', 'ویرایش حواله های خود'),
             ('deleteOwn.remittance', 'حذف حواله های خود'),
+
+            ('create.production', 'تعریف تولید'),
+
+            ('get.production', 'مشاهده تولید'),
+            ('update.production', 'ویرایش تولید'),
+            ('delete.production', 'حذف تولید'),
+
+            ('getOwn.production', 'مشاهده تولید های خود'),
+            ('updateOwn.production', 'ویرایش تولید های خود'),
+            ('deleteOwn.production', 'حذف تولید های خود'),
 
         )
 
