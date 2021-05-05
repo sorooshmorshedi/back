@@ -6,13 +6,13 @@ from distributions.views import CommissionRangeModelView, VisitorModelView, Path
     DistributorModelView, CarModelView, DistributionModelView, GetDistributionByPositionView
 
 router = DefaultRouter()
-router.register('commissionRanges', CommissionRangeModelView, base_name='commission-range')
-router.register('visitors', VisitorModelView, base_name='visitor')
-router.register('paths', PathModelView, base_name='path')
-router.register('drivers', DriverModelView, base_name='driver')
-router.register('distributors', DistributorModelView, base_name='distributor')
-router.register('cars', CarModelView, base_name='car')
-router.register('distributions', DistributionModelView, base_name='distribution')
+router.register('commissionRanges', CommissionRangeModelView, basename='commission-range')
+router.register('visitors', VisitorModelView, basename='visitor')
+router.register('paths', PathModelView, basename='path')
+router.register('drivers', DriverModelView, basename='driver')
+router.register('distributors', DistributorModelView, basename='distributor')
+router.register('cars', CarModelView, basename='car')
+router.register('distributions', DistributionModelView, basename='distribution')
 
 urlpatterns = router.urls
 

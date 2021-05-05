@@ -11,11 +11,11 @@ from factors.views.warehouse_handling_view import WarehouseHandlingModelView, Ge
     WarehouseHandlingDefiniteView
 
 router = DefaultRouter()
-router.register(r'expenses', ExpenseModelView, base_name='expense')
-router.register(r'factors', FactorModelView, base_name='factor')
-router.register(r'transfers', TransferModelView, base_name='transfer')
-router.register(r'adjustments', AdjustmentModelView, base_name='adjustment')
-router.register(r'warehouseHandlings', WarehouseHandlingModelView, base_name='warehouseHandling')
+router.register(r'expenses', ExpenseModelView, basename='expense')
+router.register(r'factors', FactorModelView, basename='factor')
+router.register(r'transfers', TransferModelView, basename='transfer')
+router.register(r'adjustments', AdjustmentModelView, basename='adjustment')
+router.register(r'warehouseHandlings', WarehouseHandlingModelView, basename='warehouseHandling')
 
 urlpatterns = router.urls + [
     url(r'^factors/byPosition$', GetFactorByPositionView.as_view(), name=''),

@@ -83,5 +83,5 @@ urlpatterns += [
 
 # Other
 router = DefaultRouter()
-router.register('exportVerifiers', ExportVerifiersModelView, base_name='export-verifiers')
+router.register('exportVerifiers', ExportVerifiersModelView, basename='export-verifiers')
 urlpatterns += router.urls

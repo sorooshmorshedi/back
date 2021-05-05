@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from imprests.views import ImprestSettlementModelView, ImprestSettlementByPositionView, ConfirmImprest
 
 router = DefaultRouter()
-router.register('imprestSettlement', ImprestSettlementModelView, base_name='imprestSettlement')
+router.register('imprestSettlement', ImprestSettlementModelView, basename='imprestSettlement')
 
 urlpatterns = router.urls
 

@@ -6,8 +6,8 @@ from companies.views.financialYearViews import CloseFinancialYearView, MoveFinan
 from companies.views.companyViews import CompanyModelView
 
 router = DefaultRouter()
-router.register('financialYears', FinancialYearModelView, base_name='financial-year')
-router.register('', CompanyModelView, base_name='company')
+router.register('financialYears', FinancialYearModelView, basename='financial-year')
+router.register('', CompanyModelView, basename='company')
 
 urlpatterns = router.urls
 

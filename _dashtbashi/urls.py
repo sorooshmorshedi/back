@@ -15,16 +15,16 @@ from _dashtbashi.views import DriverModelView, CarModelView, DrivingModelView, A
     SettleDriverImprests
 
 router = DefaultRouter()
-router.register('drivers', DriverModelView, base_name='drivers')
-router.register('cars', CarModelView, base_name='cars')
-router.register('drivings', DrivingModelView, base_name='drivings')
-router.register('associations', AssociationModelView, base_name='associations')
-router.register('ladingBillSeries', LadingBillSeriesModelView, base_name='ladingBillSeries')
+router.register('drivers', DriverModelView, basename='drivers')
+router.register('cars', CarModelView, basename='cars')
+router.register('drivings', DrivingModelView, basename='drivings')
+router.register('associations', AssociationModelView, basename='associations')
+router.register('ladingBillSeries', LadingBillSeriesModelView, basename='ladingBillSeries')
 
-router.register('remittances', RemittanceModelView, base_name='remittances')
-router.register('ladings', LadingModelView, base_name='ladings')
-router.register('oilCompanyLadings', OilCompanyLadingModelView, base_name='oilCompanyLadings')
-router.register('otherDriverPayments', OtherDriverPaymentModelView, base_name='otherDriverPayments')
+router.register('remittances', RemittanceModelView, basename='remittances')
+router.register('ladings', LadingModelView, basename='ladings')
+router.register('oilCompanyLadings', OilCompanyLadingModelView, basename='oilCompanyLadings')
+router.register('otherDriverPayments', OtherDriverPaymentModelView, basename='otherDriverPayments')
 
 urlpatterns = router.urls
 

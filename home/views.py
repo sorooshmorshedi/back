@@ -1,6 +1,12 @@
 import datetime
+import json
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,6 +14,7 @@ from rest_framework.views import APIView
 from helpers.auth import BasicCRUDPermission
 from home.models import Option, DefaultText
 from home.serializers import OptionSerializer, DefaultTextSerializer
+from server.settings import RECAPTCHA_PRIVATE_KEY
 
 
 class TimeView(APIView):
@@ -35,3 +42,24 @@ class DefaultTextView(generics.ListAPIView, generics.UpdateAPIView):
 
     def get_queryset(self):
         return DefaultText.objects.inFinancialYear()
+
+
+class ObtainAuthTokenView(ObtainAuthToken):
+
+    def post(self, request, *args, **kwargs):
+        URIReCaptcha = 'https://www.google.com/recaptcha/api/siteverify'
+        recaptcha_response = request.data.get('recaptchaResponse', None)
+        params = urlencode({
+            'secret': RECAPTCHA_PRIVATE_KEY,
+            'response': recaptcha_response,
+            'remote_ip': request.META.get('REMOTE_ADDR')
+        })
+
+        data = urlopen(URIReCaptcha, params.encode('utf-8')).read()
+        result = json.loads(data)
+        success = result.get('success', None)
+
+        if success:
+            return super(ObtainAuthTokenView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError({'non_field_errors': ['ریکپچا غیر قابل قبول می باشد']})
