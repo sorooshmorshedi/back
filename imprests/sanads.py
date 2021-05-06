@@ -27,6 +27,8 @@ class ImprestSettlementSanad(AutoSanad):
                     instance.transaction.date,
                     'از محل تنخواه شماره',
                     instance.transaction.code,
+                    ' - ',
+                    item.explanation
                 )
             })
 
