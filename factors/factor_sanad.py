@@ -122,5 +122,7 @@ class FactorSanad(AutoSanad):
             self.instance.type_label,
             self.instance.code,
             str(self.instance.date),
-            "از" if self.instance.type in Factor.BUY_GROUP else "به"
+            "از" if self.instance.type in Factor.BUY_GROUP else "به",
+            " - ",
+            self.instance.explanation
         )
