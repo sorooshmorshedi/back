@@ -1,4 +1,5 @@
 import jdatetime
+from django.contrib.postgres.fields import ArrayField
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -25,7 +26,16 @@ class Company(BaseModel):
 
     logo = models.FileField(upload_to=upload_to, null=True, blank=True, default=None)
 
-    superuser = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='companies')
+    superuser = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='companies_as_superuser')
+
+    users = models.ManyToManyField(
+        'users.User',
+        through='companies.CompanyUser',
+        through_fields=('company', 'user'),
+        related_name='companies'
+    )
+
+    modules = ArrayField(models.CharField(max_length=30), default=list, blank=True)
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)
@@ -175,3 +185,36 @@ class FinancialYear(BaseModel):
         self.temporaryClosingSanad.delete()
         self.currentEarningsClosingSanad.delete()
         self.permanentsClosingSanad.delete()
+
+
+class CompanyUser(BaseModel):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='companyUsers')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='companyUsers')
+
+    financialYears = models.ManyToManyField(FinancialYear, related_name='companyUsers')
+
+    roles = models.ManyToManyField('users.Role', related_name='companyUsers', blank=True)
+
+    class Meta(BaseModel.Meta):
+        unique_together = (('company', 'user'),)
+
+    def __str__(self):
+        return "{} {} ({})".format(self.company.name, self.user.username, self.id)
+
+
+class CompanyUserInvitation(BaseModel):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='companyUserInvitations')
+
+    username = models.CharField(max_length=150)
+
+    financialYears = models.ManyToManyField(FinancialYear, related_name='companyUserInvitations')
+
+    roles = models.ManyToManyField('users.Role', related_name='companyUserInvitations', blank=True)
+
+    confirmation_code = models.CharField(max_length=20)
+
+    class Meta(BaseModel.Meta):
+        unique_together = (('company', 'username'),)
+
+    def __str__(self):
+        return "{} {} ({})".format(self.company.name, self.username, self.id)

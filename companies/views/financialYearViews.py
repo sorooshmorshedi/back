@@ -1,5 +1,5 @@
 import jdatetime
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, AccountType, AccountBalance
 from accounts.defaultAccounts.models import DefaultAccount
-from companies.models import FinancialYear
+from companies.models import FinancialYear, CompanyUser
 from companies.serializers import FinancialYearSerializer
 from factors.management.commands.refresh_inventory import Command
 from factors.models import Factor
@@ -308,7 +308,7 @@ class CancelFinancialYearClosingView(APIView):
     def post(self, request):
         financial_year = request.user.active_financial_year
 
-        request.user.has_object_perm(active_financial_year, self.permission_codename, raise_exception=True)
+        request.user.has_object_perm(financial_year, self.permission_codename, raise_exception=True)
 
         if financial_year.is_closed:
             financial_year.delete_closing_sanads()
@@ -345,7 +345,11 @@ class FinancialYearModelView(viewsets.ModelViewSet):
     serializer_class = FinancialYearSerializer
 
     def get_queryset(self) -> QuerySet:
-        return FinancialYear.objects.hasAccess(self.request.method, self.permission_basename)
+        user = self.request.user
+        company = user.active_company
+        company_user = CompanyUser.objects.get(company=company, user=user)
+        qs = company_user.financialYears.all()
+        return qs
 
     def perform_create(self, serializer: FinancialYearSerializer) -> None:
         serializer.save(
