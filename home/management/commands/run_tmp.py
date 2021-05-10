@@ -21,7 +21,9 @@ class Command(BaseCommand):
             company.save()
 
             financial_years = company.financial_years.all()
-            for user in list(superuser.users.all()) + [superuser]:
+            users = list(superuser.users.all())
+            users.append(superuser)
+            for user in users:
                 print(" - User #{}".format(user.id))
                 obj, created = CompanyUser.objects.get_or_create(
                     company=company,
