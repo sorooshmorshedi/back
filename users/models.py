@@ -159,7 +159,8 @@ class PhoneVerification(BaseModel):
             code=code
         )
 
-        Sms.send(phone, "کد تایید شما در سامانه سبحان: {}".format(code))
+        res = Sms.send(phone, "کد تایید شما در سامانه سبحان: {}".format(code))
+        print(res)
 
     @staticmethod
     def check_verification(phone, code, raise_exception=False):
