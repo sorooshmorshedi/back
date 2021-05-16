@@ -2,6 +2,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
+from companies.models import CompanyUserInvitation
 from companies.serializers import FinancialYearSerializer, CompanySerializer
 from users.models import Role, User, City
 
@@ -65,11 +68,15 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(default=None, allow_null=True, write_only=True)
-    roles = serializers.PrimaryKeyRelatedField(many=True, queryset=Role.objects.all())
+    token = serializers.SerializerMethodField()
+
+    def get_token(self, obj: User):
+        token, created = Token.objects.get_or_create(user=obj)
+        return token.key
 
     class Meta:
         model = get_user_model()
-        fields = ('username', 'first_name', 'last_name', 'email', 'phone', 'password', 'roles', 'is_active')
+        fields = ('username', 'first_name', 'last_name', 'phone', 'password', 'token')
 
     def create(self, validated_data):
         user = super().create(validated_data)
@@ -80,20 +87,20 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    roles = serializers.PrimaryKeyRelatedField(many=True, queryset=Role.objects.all())
-
     class Meta:
         model = get_user_model()
-        fields = ('first_name', 'last_name', 'email', 'phone', 'roles', 'is_active')
-
-
-class UserDeleteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = get_user_model()
-        fields = '__all__'
+        fields = ('first_name', 'last_name')
 
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
         fields = '__all__'
+
+
+class UserInvitationsListSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source='company.name')
+
+    class Meta:
+        model = CompanyUserInvitation
+        fields = ('id', 'company_name', 'status')

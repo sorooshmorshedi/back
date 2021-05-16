@@ -610,6 +610,8 @@ class FactorItem(BaseModel):
     preFactorItem = models.OneToOneField('self', on_delete=models.PROTECT, related_name='factorItem', blank=True,
                                          null=True)
 
+    meta = JSONField(default=dict)
+
     def __str__(self):
         return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(
             self.factor.id,

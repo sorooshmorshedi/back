@@ -1,6 +1,8 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from companies.models import Company
 from companies.permissions import CompanyLimit
@@ -28,3 +30,16 @@ class CompanyModelView(viewsets.ModelViewSet):
     def perform_update(self, serializer: CompanySerializer) -> None:
         manage_files(serializer.instance, self.request.data, ['logo'])
         serializer.save()
+
+    def list(self, request, *args, **kwargs):
+        return Response([])
+
+
+class CompanyListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = CompanySerializer
+
+    def get_queryset(self) -> QuerySet:
+        user = self.request.user
+        qs = Company.objects.filter(Q(companyUsers__user=user) | Q(superuser=user))
+        return qs.prefetch_related('financial_years')

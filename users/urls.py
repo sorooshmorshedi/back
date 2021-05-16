@@ -3,17 +3,19 @@ from django.conf.urls import url
 from users.views.citiesView import CityListCreateView, CityDetailView
 from users.views.rolesView import RoleCreateView, RoleUpdateView, RoleDestroyView, RoleListView, PermissionListView
 from users.views.usersView import SetActiveCompany, SetActiveFinancialYear, CurrentUserApiView, UserCreateView, \
-    UserUpdateView, UserDestroyView, UserListView, UserChangePasswordView, SendVerificationCodeForForgetPasswordView, \
-    ChangePasswordByVerificationCodeView
+    UserUpdateView, UserListView, UserChangePasswordView, SendVerificationCodeView, \
+    ChangePasswordByVerificationCodeView, UserInvitationsListView, ChangeUserInvitationStatusView
 
 urlpatterns = [
     url(r'^create$', UserCreateView.as_view(), name='create-user'),
     url(r'^update/(?P<pk>[0-9]+)$', UserUpdateView.as_view(), name='update-user'),
-    url(r'^delete/(?P<pk>[0-9]+)$', UserDestroyView.as_view(), name='destroy-user'),
     url(r'^changePassword$', UserChangePasswordView.as_view(), name='change-user-password'),
+    url(r'^invitations$', UserInvitationsListView.as_view(), name='user-invitations'),
+    url(r'^invitations/changeStatus$', ChangeUserInvitationStatusView.as_view(), name='change-user-invitation-status'),
+
     url(r'^list$', UserListView.as_view(), name='list-users'),
 
-    url(r'^sendVerificationCodeForForgetPassword$', SendVerificationCodeForForgetPasswordView.as_view()),
+    url(r'^sendVerificationCode$', SendVerificationCodeView.as_view()),
     url(r'^changePasswordByVerificationCode$', ChangePasswordByVerificationCodeView.as_view()),
 
     url(r'^roles/create$', RoleCreateView.as_view(), name='create-role'),

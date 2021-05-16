@@ -60,6 +60,11 @@ class ObtainAuthTokenView(ObtainAuthToken):
         success = result.get('success', None)
 
         if success:
-            return super(ObtainAuthTokenView, self).post(request, *args, **kwargs)
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data['user']
+            Token.objects.filter(user=user).delete()
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
         else:
             raise ValidationError({'non_field_errors': ['ریکپچا غیر قابل قبول می باشد']})

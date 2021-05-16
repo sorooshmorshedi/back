@@ -9,7 +9,7 @@ from django.db.models.query_utils import Q
 
 def get_current_user():
     from helpers.middlewares.modify_request_middleware import ModifyRequestMiddleware
-    return ModifyRequestMiddleware.thread_local.user
+    return getattr(ModifyRequestMiddleware.thread_local, 'user', None)
 
 
 def get_new_child_code(parent_code, child_code_length, last_child_code=None):

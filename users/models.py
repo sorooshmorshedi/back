@@ -101,11 +101,12 @@ class User(AbstractUser, BaseModel):
     def has_perm(self, permission_codename, company=None):
         if not self.is_active:
             return False
-        if self.is_superuser:
-            return True
 
         if not company:
             company = self.active_company
+
+        if self == company.superuser:
+            return True
 
         queryset = self.roles.filter(permissions__codename=permission_codename)
 
@@ -148,11 +149,9 @@ class PhoneVerification(BaseModel):
         get_latest_by = 'id'
 
     @staticmethod
-    def send_verification_code(phone, has_user):
+    def send_verification_code(phone):
         code = random.randint(1000, 9999)
-        user = None
-        if has_user:
-            user = get_object_or_404(User, phone=phone)
+        user = User.objects.filter(phone=phone).first()
 
         PhoneVerification.objects.create(
             user=user,

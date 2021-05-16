@@ -38,10 +38,7 @@ class AdminUsersView(ModelViewSet):
 
         serializer = AdminUserCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(
-            superuser=None,
-            is_superuser=True
-        )
+        serializer.save()
 
         profile_serializer = AdminProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)

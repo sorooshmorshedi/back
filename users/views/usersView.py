@@ -5,11 +5,13 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from companies.models import CompanyUserInvitation, CompanyUser
 from helpers.auth import BasicCRUDPermission
 from users.models import User, PhoneVerification
-from users.permissions import DeleteUserPermission, ChangePasswordPermission, UserLimit
+from users.permissions import ChangePasswordPermission
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer, \
-    UserDeleteSerializer
+    UserInvitationsListSerializer
 
 
 class CurrentUserApiView(APIView):
@@ -26,24 +28,15 @@ class UserListView(generics.ListAPIView):
 
     def get_queryset(self) -> QuerySet:
         return User.objects.hasAccess('get').filter(
-            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
+            companyUsers__company=self.request.user.active_company
         )
 
 
 class UserCreateView(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission, UserLimit)
-    permission_basename = 'user'
     serializer_class = UserCreateSerializer
 
     def get_queryset(self) -> QuerySet:
-        return User.objects.hasAccess('post')
-
-    def perform_create(self, serializer: UserCreateSerializer) -> None:
-        user = self.request.user
-        serializer.save(
-            superuser=user.get_superuser(),
-            modules=user.modules
-        )
+        return User.objects.all()
 
 
 class UserUpdateView(generics.UpdateAPIView):
@@ -52,21 +45,7 @@ class UserUpdateView(generics.UpdateAPIView):
     serializer_class = UserUpdateSerializer
 
     def get_queryset(self) -> QuerySet:
-        return User.objects.hasAccess('put').filter(
-            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
-        )
-
-
-class UserDestroyView(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission, DeleteUserPermission)
-    permission_basename = 'user'
-    serializer_class = UserDeleteSerializer
-
-    def get_queryset(self) -> QuerySet:
         return User.objects.all()
-        return User.objects.hasAccess('delete').filter(
-            Q(superuser=self.request.user.get_superuser()) | Q(id=self.request.user.id)
-        )
 
 
 class UserChangePasswordView(APIView):
@@ -122,11 +101,11 @@ class SetActiveFinancialYear(APIView):
         return Response(UserListRetrieveSerializer(user).data, status=status.HTTP_200_OK)
 
 
-class SendVerificationCodeForForgetPasswordView(APIView):
+class SendVerificationCodeView(APIView):
     throttle_scope = 'verification_code'
 
     def post(self, request):
-        PhoneVerification.send_verification_code(request.data.get('phone'), has_user=True)
+        PhoneVerification.send_verification_code(request.data.get('phone'))
         return Response({})
 
 
@@ -144,3 +123,43 @@ class ChangePasswordByVerificationCodeView(APIView):
         user.set_password(new_password)
         user.save()
         return Response({})
+
+
+class UserInvitationsListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserInvitationsListSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return CompanyUserInvitation.objects.filter(username=self.request.user.username)
+
+
+class ChangeUserInvitationStatusView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        data = request.data
+        invitation = get_object_or_404(CompanyUserInvitation, pk=data.get('id'))
+        new_status = data.get('status')
+
+        if invitation.status == invitation.PENDING:
+            if new_status == invitation.ACCEPTED:
+                confirmation_code = data.get('confirmation_code')
+                if confirmation_code != invitation.confirmation_code:
+                    return Response(
+                        ['کد تایید اشتباه می باشد.'],
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                company_user, created = CompanyUser.objects.get_or_create(
+                    user=request.user,
+                    company=invitation.company,
+                )
+                company_user.financialYears.set(invitation.financialYears.all())
+                company_user.roles.set(invitation.roles.all())
+
+            invitation.status = new_status
+            invitation.save()
+
+            return Response([], status.HTTP_200_OK)
+        else:
+            return Response(['دعوت غیر قابل ویرایش می باشد.'], status=status.HTTP_400_BAD_REQUEST)

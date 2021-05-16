@@ -203,6 +203,16 @@ class CompanyUser(BaseModel):
 
 
 class CompanyUserInvitation(BaseModel):
+    PENDING = 'p'
+    ACCEPTED = 'a'
+    REJECTED = 'r'
+
+    STATUSES = (
+        (PENDING, 'در انتظار بررسی'),
+        (ACCEPTED, 'تایید شده'),
+        (REJECTED, 'رد شده')
+    )
+
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='companyUserInvitations')
 
     username = models.CharField(max_length=150)
@@ -213,8 +223,10 @@ class CompanyUserInvitation(BaseModel):
 
     confirmation_code = models.CharField(max_length=20)
 
+    status = models.CharField(max_length=1, choices=STATUSES, default=PENDING)
+
     class Meta(BaseModel.Meta):
-        unique_together = (('company', 'username'),)
+        permission_basename = 'user'
 
     def __str__(self):
         return "{} {} ({})".format(self.company.name, self.username, self.id)
