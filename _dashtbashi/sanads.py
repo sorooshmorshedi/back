@@ -2,6 +2,7 @@ from rest_framework.exceptions import ValidationError
 
 from _dashtbashi.models import Lading, Car, OilCompanyLading
 from accounts.defaultAccounts.models import DefaultAccount
+from helpers.bale import Bale
 from helpers.functions import sanad_exp
 from sanads.models import clearSanad, Sanad, newSanadCode
 
@@ -58,7 +59,10 @@ class LadingSanad:
             fare_bes_explanation = sanad_exp(explanation, "با نرخ", lading.fare_price)
 
             if lading.remittance_payment_method == Lading.TO_COMPANY:
+                Bale.to_me(1)
                 if lading.contractor_type == Lading.OTHER:
+                    Bale.to_me(2)
+                    Bale.to_me(car.owner, Car.RAHIM)
                     # 1 & 2 & 3 & 4 & 5 & 6
                     sanad_items.append({
                         'bed': lading.lading_total_value,
@@ -116,6 +120,7 @@ class LadingSanad:
                         })
 
                     elif car.owner == Car.RAHIM:
+                        Bale.to_me(car.owner, lading.company_commission_income, lading.car_income)
                         sanad_items.append({
                             'bes': lading.company_commission_income,
                             'account': DefaultAccount.get(
