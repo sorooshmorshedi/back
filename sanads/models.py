@@ -8,11 +8,11 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from helpers.models import BaseModel, ConfirmationMixin
+from helpers.models import BaseModel
 from server.settings import TESTING
 
 
-class Sanad(BaseModel, ConfirmationMixin):
+class Sanad(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(verbose_name="شماره سند")
     local_id = models.BigIntegerField()

@@ -5,12 +5,12 @@ from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account, FloatAccount
 from companies.models import FinancialYear
 from helpers.functions import get_new_code
-from helpers.models import BaseModel, DECIMAL, EXPLANATION, ConfirmationMixin, upload_to
+from helpers.models import BaseModel, DECIMAL, EXPLANATION, upload_to
 from sanads.models import Sanad
 from transactions.models import Transaction
 
 
-class ImprestSettlement(BaseModel, ConfirmationMixin):
+class ImprestSettlement(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
     code = models.IntegerField()
     transaction = models.OneToOneField(Transaction, on_delete=models.PROTECT, related_name='imprestSettlement')

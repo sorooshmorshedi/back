@@ -9,13 +9,13 @@ from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.functions import sanad_exp
-from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
+from helpers.models import BaseModel, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
 
 
-class Transaction(BaseModel, ConfirmationMixin):
+class Transaction(BaseModel):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     IMPREST = 'imprest'

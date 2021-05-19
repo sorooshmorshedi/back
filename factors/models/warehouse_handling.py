@@ -3,11 +3,11 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from factors.models.adjustment import Adjustment
-from helpers.models import BaseModel, ConfirmationMixin, EXPLANATION, DECIMAL
+from helpers.models import BaseModel, EXPLANATION, DECIMAL
 from wares.models import Warehouse, Ware
 
 
-class WarehouseHandling(BaseModel, ConfirmationMixin):
+class WarehouseHandling(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlings')
     code = models.IntegerField(blank=True, null=True)
 

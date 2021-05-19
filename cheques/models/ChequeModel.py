@@ -5,7 +5,7 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequebookModel import Chequebook
 from companies.models import FinancialYear
-from helpers.models import BaseModel, ConfirmationMixin, BaseManager
+from helpers.models import BaseModel, BaseManager
 
 CHEQUE_STATUSES = (
     ('blank', 'blank'),
@@ -45,7 +45,7 @@ class ChequeManager(BaseManager):
         )
 
 
-class Cheque(BaseModel, ConfirmationMixin):
+class Cheque(BaseModel):
     RECEIVED = 'r'
     PAID = 'p'
 

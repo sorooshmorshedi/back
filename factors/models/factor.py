@@ -15,14 +15,14 @@ from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
-from helpers.models import BaseModel, ConfirmationMixin, DECIMAL
+from helpers.models import BaseModel, DECIMAL
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
 from wares.models import Ware, Unit, Warehouse
 
 
-class Factor(BaseModel, ConfirmationMixin):
+class Factor(BaseModel):
     BUY = 'buy'
     SALE = 'sale'
     BACK_FROM_BUY = 'backFromBuy'
