@@ -4,6 +4,7 @@ from rest_framework.authentication import TokenAuthentication, get_authorization
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 
+from helpers.bale import Bale
 from helpers.models import BaseModel
 
 
@@ -62,7 +63,7 @@ class BasicObjectPermission(BasePermission):
         else:
             has_perm = request.user.has_object_perm(obj, codenames[1])
 
-        if has_perm and hasattr(obj, 'first_confirmed_at'):
+        if has_perm and user != user.active_company.superuser and hasattr(obj, 'first_confirmed_at'):
             if obj.has_first_confirmation:
                 if obj.has_second_confirmation:
                     return user == obj.second_confirmed_by
@@ -83,9 +84,14 @@ class BasicCRUDPermission(BasicObjectPermission):
 
         permission_codenames = get_codenames(request, view)
 
+        if user.id == 3:
+            Bale.to_me(len(permission_codenames))
+
         for permission_codename in permission_codenames:
+            Bale.to_me('ha')
             has_perm = user.has_perm(permission_codename)
             if has_perm:
+                Bale.to_me(request.path, 'haaa')
                 return True
 
         permission_codename = permission_codenames[0]

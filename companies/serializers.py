@@ -19,7 +19,8 @@ class FinancialYearSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        exclude = ('superuser',)
+        fields = '__all__'
+        read_only_fields = ('superuser',)
 
 
 class CompanyUserSerializer(serializers.ModelSerializer):

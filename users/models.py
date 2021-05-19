@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from companies.models import Company, FinancialYear, CompanyUser
+from helpers.bale import Bale
 from helpers.models import BaseModel, BaseManager
 from helpers.sms import Sms
 
