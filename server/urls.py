@@ -23,7 +23,7 @@ from rest_framework.schemas import get_schema_view
 from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
 
 from helpers.views.TestApiView import TestApiView
-from home.views import ObtainAuthTokenView
+from users.views.auth_views import ObtainAuthTokenView
 from server import settings
 import debug_toolbar
 

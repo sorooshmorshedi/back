@@ -1,5 +1,6 @@
 from django.conf.urls import url
 
+from users.views.auth_views import SecretKeyView
 from users.views.citiesView import CityListCreateView, CityDetailView
 from users.views.rolesView import RoleCreateView, RoleUpdateView, RoleDestroyView, RoleListView, PermissionListView
 from users.views.usersView import SetActiveCompany, SetActiveFinancialYear, CurrentUserApiView, UserCreateView, \
@@ -31,4 +32,6 @@ urlpatterns = [
 
     url(r'^cities$', CityListCreateView.as_view(), name='list-create-city'),
     url(r'^cities/(?P<pk>[0-9]+)$', CityDetailView.as_view(), name='detail-city'),
+
+    url('secretKey', SecretKeyView.as_view(), name='update-secret-key'),
 ]

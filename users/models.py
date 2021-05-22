@@ -69,6 +69,8 @@ class User(AbstractUser, BaseModel):
     max_companies = models.IntegerField(default=0)
     max_users = models.IntegerField(default=0)
 
+    secret_key = models.CharField(max_length=32, null=True, blank=True, default=None)
+
     @property
     def name(self):
         return "{} {}".format(self.first_name, self.last_name)

@@ -57,13 +57,17 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_financial_year = FinancialYearSerializer()
     roles = RoleWithPermissionListSerializer(many=True)
     name = serializers.SerializerMethodField()
+    has_two_factor_authentication = serializers.SerializerMethodField()
 
     def get_name(self, obj: User):
         return obj.first_name + ' ' + obj.last_name
 
+    def get_has_two_factor_authentication(self, obj: User):
+        return obj.secret_key is not None
+
     class Meta:
         model = get_user_model()
-        exclude = ('password',)
+        exclude = ('password', 'secret_key')
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
