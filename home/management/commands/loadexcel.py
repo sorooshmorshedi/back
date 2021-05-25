@@ -18,7 +18,7 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = 'Tmp command, for testing, correcting, bug fixing and etc'
+    help = 'Load data from excel'
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('file_path', type=str)
