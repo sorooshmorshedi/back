@@ -64,7 +64,8 @@ labels = {
     'owner': 'مالک',
     'bill_price': 'مبلغ بارنامه',
     'driving': 'حمل کننده',
-    'month': 'ماه'
+    'month': 'ماه',
+    'lading_bill_difference_receiver': 'دریافت کننده اختلاف بارنامه'
 
 }
 
