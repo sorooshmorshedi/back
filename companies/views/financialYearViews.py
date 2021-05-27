@@ -279,6 +279,8 @@ class CloseFinancialYearView(APIView):
         sanad = target_financial_year.get_opening_sanad()
         clearSanad(sanad)
         sanad.is_auto_created = True
+        sanad.date = target_financial_year.start
+        sanad.save()
 
         opening_default_account = DefaultAccount.get('opening')
         closing_default_account = DefaultAccount.get('closing')
