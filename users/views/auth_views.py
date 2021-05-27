@@ -76,7 +76,7 @@ class ObtainAuthTokenView(ObtainAuthToken):
         success = result.get('success', None)
 
         if not success:
-            raise ValidationError({'non_field_errors': ['ریکپچا غیر قابل قبول می باشد']})
+            raise ValidationError({'non_field_errors': ['من ربات نیستم را تایید نمایید']})
         return True
 
     def post(self, request, *args, **kwargs):
