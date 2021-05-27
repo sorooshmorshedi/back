@@ -75,6 +75,8 @@ class SanadDetailView(generics.RetrieveUpdateAPIView):
             'created_by',
             'items',
             'items__account',
+            'items__account__type',
+            'items__account__defaultSalePriceType',
             'items__account__floatAccountGroup',
             'items__account__costCenterGroup',
             'items__floatAccount',
