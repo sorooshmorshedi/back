@@ -26,7 +26,7 @@ class Command(BaseCommand):
         sheet_names = ['ادواری', 'دائمی']
         for sheet_name in sheet_names:
             print("Working on:")
-            print("\t-\t", sheet_name)
+            print(sheet_name)
             company_name = 'کدینگ پیشفرض {}'.format(sheet_name)
 
             data: DataFrame = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=0)
@@ -42,6 +42,7 @@ class Command(BaseCommand):
                 start='1399-01-01',
                 end='1400-01-01'
             )
+            print("Company: {}, Financial Year: {}".format(company.id, financial_year.id))
 
             objects_data = []
             for i in range(len(data['code'])):
