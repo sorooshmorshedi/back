@@ -41,5 +41,5 @@ class CompanyListView(ListAPIView):
 
     def get_queryset(self) -> QuerySet:
         user = self.request.user
-        qs = Company.objects.filter(Q(companyUsers__user=user) | Q(superuser=user))
+        qs = Company.objects.filter(Q(companyUsers__user=user) | Q(superuser=user)).distinct('pk')
         return qs.prefetch_related('financial_years')
