@@ -23,7 +23,7 @@ class CompanySerializer(serializers.ModelSerializer):
         read_only_fields = ('superuser',)
 
 
-class CompanyUserSerializer(serializers.ModelSerializer):
+class CompanyUserListRetrieveSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 
     def get_user(self, obj: CompanyUser):
@@ -33,6 +33,12 @@ class CompanyUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyUser
         fields = '__all__'
+
+
+class CompanyUserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyUser
+        fields = ('financialYears', 'roles')
 
 
 class CompanyUserInvitationSerializer(serializers.ModelSerializer):

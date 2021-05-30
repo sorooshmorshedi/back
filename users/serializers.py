@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from companies.models import CompanyUserInvitation
+from companies.models import CompanyUserInvitation, CompanyUser
 from companies.serializers import FinancialYearSerializer, CompanySerializer
 from users.models import Role, User, City
 
@@ -55,9 +55,22 @@ class UserSimpleSerializer(serializers.ModelSerializer):
 class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_company = CompanySerializer()
     active_financial_year = FinancialYearSerializer()
-    roles = RoleWithPermissionListSerializer(many=True)
+    roles = serializers.SerializerMethodField()
+    financialYears = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     has_two_factor_authentication = serializers.SerializerMethodField()
+
+    def get_roles(self, obj: User):
+        return RoleWithPermissionListSerializer(
+            CompanyUser.objects.filter(user=obj, company=obj.active_company).first().roles.all(),
+            many=True
+        ).data
+
+    def get_financialYears(self, obj: User):
+        return FinancialYearSerializer(
+            CompanyUser.objects.filter(user=obj, company=obj.active_company).first().financialYears.all(),
+            many=True
+        ).data
 
     def get_name(self, obj: User):
         return obj.first_name + ' ' + obj.last_name

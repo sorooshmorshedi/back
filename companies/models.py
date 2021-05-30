@@ -197,6 +197,7 @@ class CompanyUser(BaseModel):
 
     class Meta(BaseModel.Meta):
         unique_together = (('company', 'user'),)
+        permission_basename = 'user'
 
     def __str__(self):
         return "{} {} ({})".format(self.company.name, self.user.username, self.id)
