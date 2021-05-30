@@ -349,9 +349,13 @@ class FinancialYearModelView(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         user = self.request.user
         company = user.active_company
-        company_user = CompanyUser.objects.get(company=company, user=user)
-        qs = company_user.financialYears.all()
-        return qs
+
+        if user == company.superuser:
+            return company.financial_years.all()
+        else:
+            company_user = CompanyUser.objects.get(company=company, user=user)
+            qs = company_user.financialYears.all()
+            return qs
 
     def perform_create(self, serializer: FinancialYearSerializer) -> None:
         serializer.save(
