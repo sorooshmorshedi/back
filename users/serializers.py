@@ -59,6 +59,10 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     financialYears = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     has_two_factor_authentication = serializers.SerializerMethodField()
+    modules = serializers.SerializerMethodField()
+
+    def get_modules(self, obj: User):
+        return obj.active_company.modules
 
     def get_roles(self, obj: User):
         return RoleWithPermissionListSerializer(
