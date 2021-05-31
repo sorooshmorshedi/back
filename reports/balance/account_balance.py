@@ -70,7 +70,7 @@ class AccountBalanceView(APIView):
         if AccountBalanceView._rows:
             return AccountBalanceView._rows
 
-        where_filters = "true and "
+        where_filters = "sanad.financial_year_id = {} and ".format(financial_year.id)
         if filters.get('from_date'):
             where_filters += "sanad.date >= '{}' and ".format(to_gregorian(filters['from_date']))
         if filters.get('to_date'):
