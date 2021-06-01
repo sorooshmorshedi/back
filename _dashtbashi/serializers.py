@@ -1,6 +1,7 @@
 from typing import Any
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from _dashtbashi.models import Driver, Car, Driving, Association, Remittance, Lading, LadingBillSeries, \
     LadingBillNumber, OilCompanyLading, OilCompanyLadingItem, OtherDriverPayment
@@ -151,6 +152,13 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         model = Lading
         fields = '__all__'
         read_only_fields = ('financial_year',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Lading.objects.inFinancialYear(),
+                fields=["lading_number", "financial_year"],
+                message="شماره بارگیری تکراری است"
+            )
+        ]
 
     def validate(self, attrs):
         remittance = attrs.get('remittance')
