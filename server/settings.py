@@ -248,5 +248,6 @@ LOGGING = {
     },
 }
 
-
 RECAPTCHA_PRIVATE_KEY = '6Lda3sYaAAAAANqk8giZj98V7vKmB-FRGWp0PNE7'
+
+APP_SHORT_LINK = "yun.ir/x6bfw"

@@ -1,6 +1,7 @@
 import requests
 
 from server import settings
+from server.settings import APP_SHORT_LINK
 
 
 class Sms:
@@ -53,3 +54,10 @@ class Sms:
         )
 
         return response.json()
+
+
+if __name__ == '__main__':
+    text = ""
+    print(
+        Sms.send('09307468674', text)
+    )

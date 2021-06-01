@@ -4,6 +4,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.viewsets import ModelViewSet
+
+from helpers.sms import Sms
+from server.settings import APP_SHORT_LINK
 from sobhan_admin.permissions import IsStaff
 from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer, AdminUserCreateSerializer, \
     AdminUserUpdateSerializer
@@ -40,11 +43,19 @@ class AdminUsersView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        user: User = serializer.instance
+
         profile_serializer = AdminProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
         profile_serializer.save(
-            user=serializer.instance
+            user=user
         )
+
+        text = "{} عزیز\nنرم افزار حسابداری شما آماده استفاده می باشد.\nامور مشتریان حسابداری آنلاین سبحان {}".format(
+            user.name,
+            APP_SHORT_LINK
+        )
+        Sms.send(user.phone, text)
 
         return Response(AdminUserListRetrieveSerializer(serializer.instance).data)
 

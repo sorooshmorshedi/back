@@ -10,6 +10,9 @@ from companies.models import CompanyUserInvitation, CompanyUser
 from companies.serializers import CompanyUserInvitationSerializer, CompanyUserUpdateSerializer, \
     CompanyUserListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission
+from helpers.sms import Sms
+from server.settings import APP_SHORT_LINK
+from users.models import User
 
 
 class CompanyUserInvitationModelView(ModelViewSet):
@@ -28,6 +31,14 @@ class CompanyUserInvitationModelView(ModelViewSet):
         serializer.save(
             company=self.company
         )
+        instance: CompanyUserInvitation = serializer.instance
+        user = User.objects.filter(username=instance.username).first()
+        if user:
+            text = "شرکت {} شما را به نرم افزار حسابداری آنلاین سبحان دعوت نموده است.\nبرای تایید دعوت خود وارد پروفایل کاربری شوید\nآدرس: {}".format(
+                self.company.name,
+                APP_SHORT_LINK
+            )
+            Sms.send(user.phone, text)
 
     def perform_destroy(self, instance: CompanyUserInvitation) -> None:
         if instance.status != CompanyUserInvitation.PENDING:
