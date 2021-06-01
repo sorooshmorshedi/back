@@ -23,10 +23,12 @@ class Command(BaseCommand):
 
         base_financial_year = FinancialYear.objects.get(pk=1)
 
-        sheet_names = ['ادواری', 'دائمی']
+        sheet_names = [
+            'ادواری',
+            'دائمی'
+        ]
         for sheet_name in sheet_names:
-            print("Working on:")
-            print(sheet_name)
+            print("Working on: {}".format('Advari' if sheet_name == sheet_names[0] else 'Daemi'))
             company_name = 'کدینگ پیشفرض {}'.format(sheet_name)
 
             data: DataFrame = pd.read_excel(file_path, sheet_name=sheet_name, skiprows=0)

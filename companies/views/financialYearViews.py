@@ -366,9 +366,9 @@ class FinancialYearModelView(viewsets.ModelViewSet):
     def copy_data(self, new_financial_year: FinancialYear):
 
         if new_financial_year.is_advari:
-            base_financial_year = FinancialYear.objects.get(pk=21)
+            base_financial_year = FinancialYear.objects.get(pk=116)
         else:
-            base_financial_year = FinancialYear.objects.get(pk=21)
+            base_financial_year = FinancialYear.objects.get(pk=117)
 
         """
             Be careful about models with relationships
