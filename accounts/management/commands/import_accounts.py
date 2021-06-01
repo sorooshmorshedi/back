@@ -1,15 +1,13 @@
-import json
-from pprint import pprint
 
 import pandas as pd
-from django.apps import apps
-from django.core.management import CommandParser
 from django.core.management.base import BaseCommand
 from pandas import DataFrame
 
 from accounts.accounts.models import AccountType, Account
+from accounts.defaultAccounts.models import DefaultAccount
 from companies.models import FinancialYear, Company
 from helpers.test import set_user
+from home.models import DefaultText
 from server.settings import BASE_DIR
 from users.models import User
 
@@ -22,6 +20,8 @@ class Command(BaseCommand):
         set_user(user)
 
         file_path = BASE_DIR + '/new-coding.xlsx'
+
+        base_financial_year = FinancialYear.objects.get(pk=1)
 
         sheet_names = ['ادواری', 'دائمی']
         for sheet_name in sheet_names:
@@ -83,3 +83,30 @@ class Command(BaseCommand):
                         print(parent_code, "Does not exists")
                         continue
                 account, created = Account.objects.get_or_create(**data, parent=parent)
+
+            """
+                Copying default accounts
+            """
+            if DefaultAccount.objects.inFinancialYear(financial_year).count() == 0:
+                for item in DefaultAccount.objects.inFinancialYear(base_financial_year).all():
+                    DefaultAccount.objects.get_or_create(
+                        financial_year=financial_year,
+                        name=item.name,
+                        account_level=item.account_level,
+                        usage=item.usage,
+                        codename=item.codename
+                    )
+
+            """
+                Copying default texts
+            """
+
+            if DefaultText.objects.inFinancialYear(financial_year).count() == 0:
+                for item in DefaultText.objects.inFinancialYear(base_financial_year).all():
+                    DefaultText.objects.get_or_create(
+                        financial_year=financial_year,
+                        usage=item.usage,
+                        name=item.name,
+                        key=item.key,
+                        value=item.value
+                    )

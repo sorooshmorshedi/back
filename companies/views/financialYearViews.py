@@ -363,11 +363,12 @@ class FinancialYearModelView(viewsets.ModelViewSet):
         )
         self.copy_data(serializer.instance)
 
-    def copy_data(self, new_financial_year):
-        try:
+    def copy_data(self, new_financial_year: FinancialYear):
+
+        if new_financial_year.is_advari:
             base_financial_year = FinancialYear.objects.get(pk=21)
-        except FinancialYear.DoesNotExist as e:
-            base_financial_year = FinancialYear.objects.get(pk=1)
+        else:
+            base_financial_year = FinancialYear.objects.get(pk=21)
 
         """
             Be careful about models with relationships

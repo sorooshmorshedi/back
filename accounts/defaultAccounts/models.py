@@ -37,7 +37,7 @@ class DefaultAccount(BaseModel):
     name = models.CharField(max_length=150)
     explanation = models.TextField(null=True, blank=True)
 
-    account_level = models.IntegerField(choices=Account.ACCOUNT_LEVELS, default=Account.TAFSILI)
+    account_level = models.CharField(max_length=1, choices=Account.ACCOUNT_LEVELS, default=Account.TAFSILI)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='defaultAccounts', blank=True,
                                 null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='defaultAccounts', null=True,
