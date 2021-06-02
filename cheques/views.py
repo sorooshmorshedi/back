@@ -411,6 +411,30 @@ class RevertChequeInFlowStatusView(APIView):
         return Response(serialized.data, status=status.HTTP_200_OK)
 
 
+class RevokeBlankPaidChequeView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "changeStatus.paidCheque"
+
+    def post(self, request):
+        data = request.data
+        queryset = Cheque.objects.inFinancialYear()
+        cheque = get_object_or_404(queryset, pk=data.get('cheque'))
+
+        date = data.get('date')
+        to_status = 'revoked'
+        explanation = data.get('explanation')
+
+        status_change = cheque.changeStatus(
+            user=request.user,
+            date=date,
+            to_status=to_status,
+            explanation=explanation,
+        )
+
+        return Response(StatusChangeListRetrieveSerializer(instance=status_change).data, status=status.HTTP_200_OK)
+
+
 class ConfirmCheque(ConfirmView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     model = Cheque

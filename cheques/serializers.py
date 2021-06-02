@@ -5,6 +5,7 @@ from accounts.accounts.validators import AccountValidator
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.models.StatusChangeModel import StatusChange
+from helpers.serializers import validate_required_fields
 from sanads.serializers import SanadRetrieveSerializer
 
 
@@ -19,27 +20,30 @@ class StatusChangeSerializer(serializers.ModelSerializer):
         # if cheque.statusChanges.count() > 1:
         #     raise serializers.ValidationError("ابتدا تغییر وضعیت های چک را پاک کنید")
 
-        if 'bedAccount' not in data or 'besAccount' not in data:
-            raise serializers.ValidationError("حساب بدهکار و یا بستانکار انتخاب نشده است")
+        if cheque.status == 'blank' and data['toStatus'] == 'revoked':
+            validate_required_fields(data, ['explanation'])
+        else:
+            if 'bedAccount' not in data or 'besAccount' not in data:
+                raise serializers.ValidationError("حساب بدهکار و یا بستانکار انتخاب نشده است")
 
-        AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount',
-                                 cost_center_key='besCostCenter')
-        AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount',
-                                 cost_center_key='bedCostCenter')
+            if data['bedAccount'] == data['besAccount']:
+                raise serializers.ValidationError("حساب بدهکار و بستانکار نمی تواند یکی باشد")
 
-        if data['bedAccount'] == data['besAccount']:
-            raise serializers.ValidationError("حساب بدهکار و بستانکار نمی تواند یکی باشد")
+            AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount',
+                                     cost_center_key='besCostCenter')
+            AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount',
+                                     cost_center_key='bedCostCenter')
 
-        if data['fromStatus'] == 'blank':
-            if data['toStatus'] != 'notPassed':
-                raise serializers.ValidationError("ابتدا چک را ثبت کنید")
-            else:
-                if not cheque.value:
-                    raise serializers.ValidationError("لطفا مبلغ چک را وارد کنید")
-                if not cheque.due:
-                    raise serializers.ValidationError("لطفا تاریخ سر رسید چک را وارد کنید")
-                if not cheque.date:
-                    raise serializers.ValidationError("لطفا تاریخ دریافت/پرداخت چک را وارد کنید")
+            if data['fromStatus'] == 'blank':
+                if data['toStatus'] != 'notPassed':
+                    raise serializers.ValidationError("ابتدا چک را ثبت کنید")
+                else:
+                    if not cheque.value:
+                        raise serializers.ValidationError("لطفا مبلغ چک را وارد کنید")
+                    if not cheque.due:
+                        raise serializers.ValidationError("لطفا تاریخ سر رسید چک را وارد کنید")
+                    if not cheque.date:
+                        raise serializers.ValidationError("لطفا تاریخ دریافت/پرداخت چک را وارد کنید")
 
         if data['fromStatus'] == data['toStatus']:
             raise serializers.ValidationError("لطفا وضعیت جدیدی برای تغییر انتخاب کنید")
@@ -53,7 +57,7 @@ class StatusChangeListRetrieveSerializer(serializers.ModelSerializer):
     def get_sanad(self, obj: StatusChange):
         if obj.sanad:
             return SanadRetrieveSerializer(obj.sanad).data
-        if obj.cheque.transactionItem:
+        if hasattr(obj.cheque, 'transactionItem'):
             return SanadRetrieveSerializer(obj.cheque.transactionItem.transaction.sanad).data
 
     class Meta:

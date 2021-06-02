@@ -48,6 +48,7 @@ labels = {
     'post': 'سمت',
     'percent': 'درصد',
     'user': 'کاربر',
+    'explanation': 'توضیحات',
 
     # Dashtbashi
     'destination': 'مقصد',
