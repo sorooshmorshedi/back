@@ -61,6 +61,7 @@ class BaseManager(models.Manager):
         from helpers.functions import get_current_user
         qs = super().get_queryset()
 
+        company = None
         if not financial_year:
             user = get_current_user()
 
@@ -68,8 +69,10 @@ class BaseManager(models.Manager):
                 return super().get_queryset()
 
             financial_year = user.active_financial_year
+            if financial_year:
+                company = financial_year.company
 
-        qs = qs.filter(financial_year__company=financial_year.company)
+        qs = qs.filter(financial_year__company=company)
 
         if self.model._meta.backward_financial_year:
             return qs.filter(financial_year__id__lte=financial_year.id)
