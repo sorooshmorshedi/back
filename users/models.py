@@ -62,8 +62,10 @@ class User(AbstractUser, BaseModel):
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=11)
 
+    # this field is not required, because it moved to CompanyUser
     roles = models.ManyToManyField(Role, related_name='users', blank=True)
 
+    # this field is required for cave users
     modules = ArrayField(models.CharField(max_length=30), default=list, blank=True)
 
     max_companies = models.IntegerField(default=0)

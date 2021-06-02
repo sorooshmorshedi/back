@@ -61,20 +61,32 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     has_two_factor_authentication = serializers.SerializerMethodField()
     modules = serializers.SerializerMethodField()
 
-    def get_modules(self, obj: User):
-        return obj.active_company.modules
+    def get_company_user(self, obj: User):
+        return CompanyUser.objects.filter(user=obj, company=obj.active_company).first()
 
     def get_roles(self, obj: User):
-        return RoleWithPermissionListSerializer(
-            CompanyUser.objects.filter(user=obj, company=obj.active_company).first().roles.all(),
-            many=True
-        ).data
+        company_user = self.get_company_user(obj)
+        if company_user:
+            return RoleWithPermissionListSerializer(
+                company_user.roles.all(),
+                many=True
+            ).data
+        return []
 
     def get_financialYears(self, obj: User):
-        return FinancialYearSerializer(
-            CompanyUser.objects.filter(user=obj, company=obj.active_company).first().financialYears.all(),
-            many=True
-        ).data
+        company_user = self.get_company_user(obj)
+        if company_user:
+            return FinancialYearSerializer(
+                CompanyUser.objects.filter(user=obj, company=obj.active_company).first().financialYears.all(),
+                many=True
+            ).data
+        return []
+
+    def get_modules(self, obj: User):
+        active_company = obj.active_company
+        if active_company:
+            return obj.active_company.modules
+        return obj.modules
 
     def get_name(self, obj: User):
         return obj.first_name + ' ' + obj.last_name
