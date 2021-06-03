@@ -151,7 +151,6 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lading
         fields = '__all__'
-        read_only_fields = ('financial_year',)
         validators = [
             UniqueTogetherValidator(
                 queryset=Lading.objects.inFinancialYear(),

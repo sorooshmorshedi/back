@@ -212,7 +212,9 @@ class LadingModelView(viewsets.ModelViewSet):
         return LadingCreateUpdateSerializer
 
     def create(self, request, *args, **kwargs) -> Response:
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        data['financial_year'] = self.request.user.active_financial_year.id
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
@@ -221,11 +223,6 @@ class LadingModelView(viewsets.ModelViewSet):
             LadingListSerializer(instance=serializer.instance).data,
             status=status.HTTP_201_CREATED,
             headers=headers
-        )
-
-    def perform_create(self, serializer: BaseSerializer) -> None:
-        serializer.save(
-            financial_year=self.request.user.active_financial_year,
         )
 
 
