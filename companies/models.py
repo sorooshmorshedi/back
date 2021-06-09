@@ -138,20 +138,21 @@ class FinancialYear(BaseModel):
 
     def get_opening_sanad(self):
         from sanads.models import Sanad
-        from sanads.models import newSanadCode
 
         if not self.openingSanad:
-            code = newSanadCode(self)
-            if code != 1:
-                raise ValidationError('ابتدا سند های سال مالی جدید را پاک کنید')
-
-            sanad = Sanad.objects.create(
+            sanad, created = Sanad.objects.get_or_create(
                 financial_year=self,
-                code=code,
-                date=self.start,
-                is_auto_created=True,
-                type=Sanad.OPENING,
+                code=1,
+                defaults={
+                    'date': self.start,
+                    'is_auto_created': True,
+                    'type': Sanad.OPENING,
+                }
             )
+
+            if not sanad.is_auto_created and sanad.type != Sanad.OPENING:
+                raise ValidationError('سند شماره یک سال مالی جدید را خالی کنید')
+
             self.openingSanad = sanad
             self.save()
 

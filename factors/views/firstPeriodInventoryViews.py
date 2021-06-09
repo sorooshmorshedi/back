@@ -81,16 +81,15 @@ class FirstPeriodInventoryView(APIView):
 
         if submit_sanad:
             sanad = FirstPeriodInventoryView._create_or_update_sanad(first_period_inventory, financial_year, user)
+            is_confirmed = data.get('_confirmed')
+            if not is_confirmed:
+                sanad.check_account_balance_confirmations()
         else:
             sanad = first_period_inventory.sanad
             if sanad:
                 clearSanad(sanad)
                 first_period_inventory.sanad = None
                 first_period_inventory.save()
-
-        is_confirmed = data.get('_confirmed')
-        if not is_confirmed:
-            sanad.check_account_balance_confirmations()
 
         return first_period_inventory
 
