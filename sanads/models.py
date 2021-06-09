@@ -8,11 +8,22 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
+from helpers.functions import get_current_user
 from helpers.models import BaseModel
 from server.settings import TESTING
 
 
 class Sanad(BaseModel):
+    OPENING = 'o'
+    CLOSING = 'c'
+    NORMAL = 'n'
+
+    TYPES = (
+        (OPENING, 'افتتاحیه'),
+        (CLOSING, 'اختتامیه'),
+        (NORMAL, 'عادی'),
+    )
+
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(verbose_name="شماره سند")
     local_id = models.BigIntegerField()
@@ -25,6 +36,8 @@ class Sanad(BaseModel):
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0, verbose_name="بستانکار")
 
     is_auto_created = models.BooleanField(default=True)
+
+    type = models.CharField(choices=TYPES, default=NORMAL, max_length=3)
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
@@ -160,4 +173,9 @@ def newSanadCode(financial_year=None):
     try:
         return Sanad.objects.inFinancialYear(financial_year).latest('code').code + 1
     except:
-        return 1
+        financial_year = financial_year or get_current_user().active_financial_year
+        company = financial_year.company
+        if company.financial_years.count() == 1:
+            return 1
+        else:
+            return 2

@@ -149,7 +149,8 @@ class FinancialYear(BaseModel):
                 financial_year=self,
                 code=code,
                 date=self.start,
-                is_auto_created=True
+                is_auto_created=True,
+                type=Sanad.OPENING,
             )
             self.openingSanad = sanad
             self.save()
