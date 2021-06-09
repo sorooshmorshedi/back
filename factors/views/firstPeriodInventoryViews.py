@@ -39,8 +39,12 @@ class FirstPeriodInventoryView(APIView):
         return Response(serialized.data)
 
     @staticmethod
-    def set_first_period_inventory(data, financial_year=None, engage_inventory=True):
+    def set_first_period_inventory(data, financial_year=None, engage_inventory=True, submit_sanad=True,
+                                   is_auto_created=False):
         """
+        :param submit_sanad:
+        :param engage_inventory:
+        :param is_auto_created:
         :param data: {
             item: {...},
             items: {
@@ -63,6 +67,7 @@ class FirstPeriodInventoryView(APIView):
         if first_period_inventory:
             DefiniteFactor.updateFactorInventory(first_period_inventory, True)
             first_period_inventory.is_definite = True
+            first_period_inventory.is_auto_created = is_auto_created
             first_period_inventory.code = 0
             first_period_inventory.save()
 
@@ -74,7 +79,14 @@ class FirstPeriodInventoryView(APIView):
             engage_inventory
         )
 
-        sanad = FirstPeriodInventoryView._create_or_update_sanad(first_period_inventory, financial_year, user)
+        if submit_sanad:
+            sanad = FirstPeriodInventoryView._create_or_update_sanad(first_period_inventory, financial_year, user)
+        else:
+            sanad = first_period_inventory.sanad
+            if sanad:
+                clearSanad(sanad)
+                first_period_inventory.sanad = None
+                first_period_inventory.save()
 
         is_confirmed = data.get('_confirmed')
         if not is_confirmed:

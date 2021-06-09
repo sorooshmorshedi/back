@@ -148,7 +148,13 @@ class ClosingHelpers:
 
         data['items']['items'] = items
 
-        FirstPeriodInventoryView.set_first_period_inventory(data, target_financial_year, engage_inventory=False)
+        FirstPeriodInventoryView.set_first_period_inventory(
+            data,
+            target_financial_year,
+            engage_inventory=False,
+            submit_sanad=False,
+            is_auto_created=True
+        )
         Command.refresh_inventory(user, target_financial_year)
 
 
