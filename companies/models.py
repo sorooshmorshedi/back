@@ -175,7 +175,8 @@ class FinancialYear(BaseModel):
                     financial_year=self,
                     code=newSanadCode(self),
                     date=jdatetime.date.today(),
-                    is_auto_created=True
+                    is_auto_created=True,
+                    type=Sanad.CLOSING
                 )
                 setattr(self, sanad_name, sanad)
                 need_save = True

@@ -62,7 +62,9 @@ class BaseManager(models.Manager):
         qs = super().get_queryset()
 
         company = None
-        if not financial_year:
+        if financial_year:
+            company = financial_year.company
+        else:
             user = get_current_user()
 
             if not user:
