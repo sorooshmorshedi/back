@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from accounts.accounts.models import Account, AccountType, AccountBalance
 from accounts.defaultAccounts.models import DefaultAccount
-from companies.models import FinancialYear, CompanyUser
+from companies.models import FinancialYear, CompanyUser, FinancialYearOperation
 from companies.serializers import FinancialYearSerializer
 from factors.management.commands.refresh_inventory import Command
 from factors.models import Factor
@@ -157,6 +157,12 @@ class ClosingHelpers:
         )
         Command.refresh_inventory(user, target_financial_year)
 
+    @staticmethod
+    def verify_password(user: User, password):
+        is_valid = user.check_password(password)
+        if not is_valid:
+            raise ValidationError(["کلمه عبور غیر قابل قبول می باشد"])
+
 
 class CloseFinancialYearView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -167,6 +173,8 @@ class CloseFinancialYearView(APIView):
     def post(self, request):
         data = request.data
         user = request.user
+
+        ClosingHelpers.verify_password(user, data.get('password'))
 
         target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
 
@@ -208,6 +216,12 @@ class CloseFinancialYearView(APIView):
         CloseFinancialYearView.create_opening_sanad(current_financial_year, target_financial_year)
 
         ClosingHelpers.create_first_period_inventory(user, target_financial_year)
+
+        FinancialYearOperation.objects.create(
+            fromFinancialYear=current_financial_year,
+            toFinancialYear=target_financial_year,
+            operation=FinancialYearOperation.CLOSE_AND_MOVE
+        )
 
     @staticmethod
     def add_temporaries_sanad_items(sanad):
@@ -316,12 +330,24 @@ class CancelFinancialYearClosingView(APIView):
     def post(self, request):
         financial_year = request.user.active_financial_year
 
-        request.user.has_object_perm(financial_year, self.permission_codename, raise_exception=True)
+        user = request.user
+        data = request.data
 
-        if financial_year.is_closed:
+        ClosingHelpers.verify_password(user, data.get('password'))
+
+        user.has_object_perm(financial_year, self.permission_codename, raise_exception=True)
+
+        if financial_year.is_closed():
             financial_year.delete_closing_sanads()
+            financial_year.refresh_from_db()
 
-        return Response(UserListRetrieveSerializer(request.user).data)
+        FinancialYearOperation.objects.create(
+            fromFinancialYear=financial_year,
+            toFinancialYear=None,
+            operation=FinancialYearOperation.CANCEL_CLOSE
+        )
+
+        return Response(UserListRetrieveSerializer(user).data)
 
 
 class MoveFinancialYearView(APIView):
@@ -330,13 +356,25 @@ class MoveFinancialYearView(APIView):
     sanad = None
 
     def post(self, request):
-        target_financial_year = get_object_or_404(FinancialYear, pk=request.data.get('target_financial_year'))
+        user = request.user
+        data = request.data
 
-        request.user.has_object_perm(request.user.active_financial_year, self.permission_codename, raise_exception=True)
+        ClosingHelpers.verify_password(user, data.get('password'))
+
+        current_financial_year = user.active_financial_year
+        target_financial_year = get_object_or_404(FinancialYear, pk=data.get('target_financial_year'))
+
+        request.user.has_object_perm(current_financial_year, self.permission_codename, raise_exception=True)
 
         self.move_accounts(target_financial_year)
 
-        ClosingHelpers.create_first_period_inventory(request.user, target_financial_year)
+        ClosingHelpers.create_first_period_inventory(user, target_financial_year)
+
+        FinancialYearOperation.objects.create(
+            fromFinancialYear=current_financial_year,
+            toFinancialYear=target_financial_year,
+            operation=FinancialYearOperation.MOVE
+        )
 
         return Response(UserListRetrieveSerializer(request.user).data)
 

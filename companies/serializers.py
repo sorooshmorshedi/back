@@ -1,14 +1,23 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from companies.models import Company, FinancialYear, CompanyUser, CompanyUserInvitation
+from companies.models import Company, FinancialYear, CompanyUser, CompanyUserInvitation, FinancialYearOperation
+
+
+class FinancialYearOperationSerializer(serializers.ModelSerializer):
+    from_financial_year_name = serializers.CharField(source='fromFinancialYear.name')
+    to_financial_year_name = serializers.CharField(source='toFinancialYear.name', allow_null=True)
+    operation = serializers.CharField(source='get_operation_display')
+    operator_name = serializers.CharField(source='created_by.name')
+
+    class Meta:
+        model = FinancialYearOperation
+        fields = '__all__'
 
 
 class FinancialYearSerializer(serializers.ModelSerializer):
-    is_closed = serializers.SerializerMethodField()
-
-    def get_is_closed(self, obj: FinancialYear):
-        return obj.is_closed
+    is_closed = serializers.BooleanField()
+    operations = FinancialYearOperationSerializer(many=True)
 
     class Meta:
         model = FinancialYear

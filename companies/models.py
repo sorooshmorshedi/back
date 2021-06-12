@@ -128,7 +128,6 @@ class FinancialYear(BaseModel):
     def delete(self, *args, **kwargs):
         return super().delete(*args, **kwargs)
 
-    @property
     def is_closed(self):
         return self.temporaryClosingSanad is not None
 
@@ -234,3 +233,22 @@ class CompanyUserInvitation(BaseModel):
 
     def __str__(self):
         return "{} {} ({})".format(self.company.name, self.username, self.id)
+
+
+class FinancialYearOperation(BaseModel):
+    MOVE = 'm'
+    CLOSE = 'c'
+    CLOSE_AND_MOVE = 'cm'
+    CANCEL_CLOSE = 'cc'
+
+    OPERATIONS = (
+        (MOVE, 'انتقال'),
+        (CLOSE, 'بستن'),
+        (CLOSE_AND_MOVE, 'بستن و انتقال'),
+        (CANCEL_CLOSE, 'لغو بستن')
+    )
+
+    fromFinancialYear = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='operations')
+    toFinancialYear = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, blank=True, null=True)
+
+    operation = models.CharField(max_length=2, choices=OPERATIONS)

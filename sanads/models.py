@@ -163,6 +163,7 @@ def clearSanad(sanad: Sanad):
         return
     sanad.explanation = ''
     sanad.is_auto_created = False
+    sanad.type = Sanad.NORMAL
     for item in sanad.items.all():
         item.delete()
     sanad.save()
