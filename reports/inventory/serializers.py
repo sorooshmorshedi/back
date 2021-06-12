@@ -19,7 +19,10 @@ class FactorWithAccountCreateUpdateSerializer(FactorCreateUpdateSerializer):
 
     class Meta:
         model = Factor
-        fields = ('id', 'code', 'date', 'type', 'account', 'explanation', 'is_definite', 'definition_date')
+        fields = (
+            'id', 'code', 'date', 'type', 'is_pre_factor', 'account', 'explanation', 'is_definite', 'definition_date',
+            'input_transfer', 'output_transfer', 'adjustment'
+        )
 
 
 class WareInventorySerializer(serializers.ModelSerializer):
