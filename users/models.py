@@ -111,7 +111,11 @@ class User(AbstractUser, BaseModel):
         if self == company.superuser:
             return True
 
-        queryset = self.roles.filter(permissions__codename=permission_codename)
+        company_user = self.companyUsers.all().filter(company=company).first()
+        if not company_user:
+            return False
+
+        queryset = company_user.roles.filter(permissions__codename=permission_codename)
 
         # Allow all users to get list of companies
         permission_parts = permission_codename.split('.')
