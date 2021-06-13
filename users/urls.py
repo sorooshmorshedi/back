@@ -2,6 +2,7 @@ from django.conf.urls import url
 
 from users.views.auth_views import SecretKeyView
 from users.views.citiesView import CityListCreateView, CityDetailView
+from users.views.notification_views import UserNotificationListView, ChangeUserNotificationStatusView
 from users.views.rolesView import RoleCreateView, RoleUpdateView, RoleDestroyView, RoleListView, PermissionListView
 from users.views.usersView import SetActiveCompany, SetActiveFinancialYear, CurrentUserApiView, UserCreateView, \
     UserUpdateView, UserListView, UserChangePasswordView, SendVerificationCodeView, \
@@ -34,4 +35,9 @@ urlpatterns = [
     url(r'^cities/(?P<pk>[0-9]+)$', CityDetailView.as_view(), name='detail-city'),
 
     url('secretKey', SecretKeyView.as_view(), name='update-secret-key'),
+
+    url('notifications/changeStatus', ChangeUserNotificationStatusView.as_view(),
+        name='change-user-notification-status'),
+    url('notifications', UserNotificationListView.as_view(), name='user-notifications-list'),
+
 ]

@@ -6,7 +6,8 @@ from rest_framework.authtoken.models import Token
 
 from companies.models import CompanyUserInvitation, CompanyUser
 from companies.serializers import FinancialYearSerializer, CompanySerializer
-from users.models import Role, User, City
+from server.settings import DATETIME_FORMAT
+from users.models import Role, User, City, UserNotification
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -60,6 +61,10 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     has_two_factor_authentication = serializers.SerializerMethodField()
     modules = serializers.SerializerMethodField()
+    unread_notifications_count = serializers.SerializerMethodField()
+
+    def get_unread_notifications_count(self, obj: User):
+        return obj.notifications.exclude(status=UserNotification.READ).count()
 
     def get_company_user(self, obj: User):
         return CompanyUser.objects.filter(user=obj, company=obj.active_company).first()
@@ -137,3 +142,18 @@ class UserInvitationsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyUserInvitation
         fields = ('id', 'company_name', 'status')
+
+
+class UserNotificationSerializer(serializers.ModelSerializer):
+    status = serializers.CharField(source='get_status_display')
+    title = serializers.CharField(source='notification.title')
+    explanation = serializers.CharField(source='notification.explanation')
+    created_at = serializers.SerializerMethodField()
+    status_codename = serializers.CharField(source='status')
+
+    def get_created_at(self, obj: UserNotification):
+        return obj.created_at.strftime(DATETIME_FORMAT)
+
+    class Meta:
+        model = UserNotification
+        fields = ('id', 'title', 'explanation', 'status', 'created_at', 'status_codename')

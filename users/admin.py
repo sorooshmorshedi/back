@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 
-from users.models import User, Role, PhoneVerification
+from users.models import User, Role, PhoneVerification, Notification, UserNotification
 
 UserAdmin.fieldsets += (('ماژول ها', {'fields': ('modules',)}),)
 UserAdmin.fieldsets += (('active financial company', {'fields': ('active_company',)}),)
@@ -18,3 +18,5 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Role)
 admin.site.register(Permission, PermissionAdmin)
 admin.site.register(PhoneVerification)
+admin.site.register(Notification)
+admin.site.register(UserNotification)
