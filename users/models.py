@@ -105,8 +105,10 @@ class User(AbstractUser, BaseModel):
         if not self.is_active:
             return False
 
+        company = company or self.active_company
+
         if not company:
-            company = self.active_company
+            return True
 
         if self == company.superuser:
             return True

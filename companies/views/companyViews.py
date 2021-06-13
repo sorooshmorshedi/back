@@ -4,7 +4,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from companies.models import Company
+from companies.models import Company, CompanyUser
 from companies.permissions import CompanyLimit
 from companies.serializers import CompanySerializer
 from helpers.auth import BasicCRUDPermission
@@ -23,8 +23,16 @@ class CompanyModelView(viewsets.ModelViewSet):
 
     def perform_create(self, serializer: CompanySerializer) -> None:
         user = self.request.user
+        superuser = user.get_superuser()
         serializer.save(
-            superuser=user.get_superuser()
+            superuser=superuser,
+            modules=superuser.modules
+        )
+
+        company = serializer.instance
+        CompanyUser.objects.get_or_create(
+            company=company,
+            user=user,
         )
 
     def perform_update(self, serializer: CompanySerializer) -> None:

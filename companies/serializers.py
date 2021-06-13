@@ -16,8 +16,8 @@ class FinancialYearOperationSerializer(serializers.ModelSerializer):
 
 
 class FinancialYearSerializer(serializers.ModelSerializer):
-    is_closed = serializers.BooleanField()
-    operations = FinancialYearOperationSerializer(many=True)
+    is_closed = serializers.BooleanField(read_only=True)
+    operations = FinancialYearOperationSerializer(read_only=True, many=True)
 
     class Meta:
         model = FinancialYear

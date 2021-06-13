@@ -8,8 +8,7 @@ from rest_framework.viewsets import ModelViewSet
 from helpers.sms import Sms
 from server.settings import APP_SHORT_LINK
 from sobhan_admin.permissions import IsStaff
-from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer, AdminUserCreateSerializer, \
-    AdminUserUpdateSerializer
+from sobhan_admin.serializers import AdminUserListRetrieveSerializer, AdminProfileSerializer, AdminUserUpdateSerializer
 from users.models import User
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -39,11 +38,14 @@ class AdminUsersView(ModelViewSet):
         data = request.data
         profile_data = data.pop('profile')
 
-        serializer = AdminUserCreateSerializer(data=data)
+        username = data.get('username')
+        user = User.objects.filter(username=username).first()
+        if not user:
+            raise ValidationError("کاربری با کد ملی {} وجود ندارد".format(username))
+
+        serializer = AdminUserUpdateSerializer(instance=user, data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        user: User = serializer.instance
 
         profile_serializer = AdminProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)

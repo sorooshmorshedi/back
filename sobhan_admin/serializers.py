@@ -20,15 +20,7 @@ class AdminUserListRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AdminUserCreateSerializer(UserCreateSerializer):
-    password = serializers.CharField(default=None, allow_null=True, write_only=True)
-
-    class Meta:
-        model = get_user_model()
-        fields = '__all__'
-
-
 class AdminUserUpdateSerializer(UserCreateSerializer):
     class Meta:
         model = get_user_model()
-        fields = '__all__'
+        fields = ('max_users', 'max_companies', 'modules')
