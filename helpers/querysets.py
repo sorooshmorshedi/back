@@ -1,6 +1,13 @@
+from django.db import models
 from django.db.models.aggregates import Sum
 from django.db.models.functions.comparison import Coalesce
 from django.db.models.query_utils import Q
+from typing import List
+from django.db.models import Model
+from django.db.models.fields.reverse_related import (
+    ManyToOneRel,
+    ForeignObjectRel,
+)
 
 
 def add_sum(response, sum_fields, qs, page=None):
@@ -44,3 +51,31 @@ def get_deep_sum(field, filters, related_name='children', depth=4):
     )
 
 
+def get_all_relations(model: Model) -> List[ForeignObjectRel]:
+    """
+    Return all Many to One Relation to point to the given model
+    """
+    result: List[ForeignObjectRel] = []
+    for field in model._meta.get_fields(include_hidden=True):
+        if isinstance(field, ManyToOneRel):
+            result.append(field)
+    return result
+
+
+def delete_object_recursively(obj: Model, d=0):
+    for field in get_all_relations(obj):
+        field: ManyToOneRel
+
+        if field.on_delete == models.CASCADE or field.on_delete == models.PROTECT:
+            target_model: Model = field.related_model
+            target_field: str = field.remote_field.name
+
+            print('- ' * d, target_field, ':')
+
+            related_objs = target_model.objects.filter(
+                **{target_field: obj}
+            )
+            for related_obj in related_objs:
+                delete_object_recursively(related_obj, d=d + 1)
+
+    obj.delete()
