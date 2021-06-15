@@ -276,6 +276,7 @@ class AccountBalanceView(APIView):
         return accounts
 
     def get(self, request):
+        AccountBalanceView._rows = None
         accounts = self.get_accounts(request)
         res = Response(BalanceAccountSerializer(accounts, many=True).data)
         return res
