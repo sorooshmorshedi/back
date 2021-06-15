@@ -534,6 +534,8 @@ class Factor(BaseModel):
         }
 
     def save(self, *args, **kwargs) -> None:
+        self.financial_year.check_date(self.date)
+
         self.total_sum = Decimal(self.rows_sum_after_tax) - Decimal(self.factor_discount) + self.taxValue
         self.is_settled = self.total_sum == self.paidValue
         self.discountValue = self.factor_discount

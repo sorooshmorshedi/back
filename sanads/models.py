@@ -103,6 +103,9 @@ class Sanad(BaseModel):
                         ))
 
     def save(self, *args, **kwargs) -> None:
+
+        self.financial_year.check_date(self.date)
+
         if not self.local_id:
             self.local_id = Sanad.objects.inFinancialYear(self.financial_year).aggregate(
                 local_id=Coalesce(Max('local_id'), 0)

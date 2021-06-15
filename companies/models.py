@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
+from helpers.functions import date_to_str
 from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager, upload_to
 
 
@@ -187,6 +188,14 @@ class FinancialYear(BaseModel):
         self.temporaryClosingSanad.delete()
         self.currentEarningsClosingSanad.delete()
         self.permanentsClosingSanad.delete()
+
+    def check_date(self, date):
+        is_valid = self.start <= date <= self.end
+        if not is_valid:
+            raise ValidationError("تاریخ باید در بازه سال مالی باشد. ( از {} تا {})".format(
+                date_to_str(self.start),
+                date_to_str(self.end),
+            ))
 
 
 class CompanyUser(BaseModel):
