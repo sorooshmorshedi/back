@@ -11,6 +11,7 @@ from helpers.exports import get_xlsx_response
 from helpers.functions import to_gregorian
 from reports.balance.serializers import BalanceAccountSerializer
 from reports.lists.export_views import BaseExportView
+from sanads.models import Sanad
 
 common_headers = [
     'گردش بدهکار',
@@ -92,20 +93,50 @@ class AccountBalanceView(APIView):
 
         where_filters += "true"
 
-        sql = """
+        base_query = """
             select 
                 account_id, 
                 \"floatAccount_id\",
                 \"costCenter_id\", 
-                sum(sanadItem.bed) as bed_sum, sum(sanadItem.bes) as bes_sum
+                sum(sanadItem.bed) as bed_sum,
+                sum(sanadItem.bes) as bes_sum
             from sanads_sanaditem as sanadItem join sanads_sanad as sanad on sanadItem.sanad_id = sanad.id
             where {}
             group by account_id, \"floatAccount_id\", \"costCenter_id\"
             order by account_id
-        """.format(where_filters)
+        """
 
-        AccountBalanceView._rows = select_raw_sql(sql)
-        return AccountBalanceView._rows
+        sql = base_query.format(where_filters)
+        rows = select_raw_sql(sql)
+
+        opening_sql = base_query.format(where_filters + " and sanad.type = '{}'".format(Sanad.OPENING))
+        opening_rows = select_raw_sql(opening_sql)
+
+        previous_rows = []
+
+        def are_equal(r1, r2):
+            return r1['account_id'] == r2['account_id'] and \
+                   r1['floatAccount_id'] == r2['floatAccount_id'] and \
+                   r1['costCenter_id'] == r2['costCenter_id']
+
+        for row in rows:
+            row['opening_bed_sum'] = row['opening_bes_sum'] = row['previous_bed_sum'] = row['previous_bes_sum'] = 0
+
+        for row in rows:
+            for opening_row in opening_rows:
+                if are_equal(row, opening_row):
+                    row['opening_bed_sum'] = opening_row['bed_sum']
+                    row['opening_bes_sum'] = opening_row['bes_sum']
+                    continue
+
+        # for previous_row in previous_rows:
+        #     if are_equal(row, previous_row):
+        #         row['previous_bed_sum'] = previous_row['bed_sum']
+        #         row['previous_bes_sum'] = previous_row['bes_sum']
+
+        AccountBalanceView._rows = rows
+
+        return rows
 
     def set_remain(self, account: Account, accounts: List[Account]):
 
@@ -117,18 +148,32 @@ class AccountBalanceView(APIView):
         account.bed_remain = 0
         account.bes_remain = 0
 
+        account.opening_bed_sum = 0
+        account.opening_bes_sum = 0
+
+        account.previous_bed_sum = 0
+        account.previous_bes_sum = 0
+
         if account.level == Account.TAFSILI:
             rows = self.get_rows(self.request.GET, self.request.user.active_financial_year)
             for row in rows:
                 if row['account_id'] == account.id:
                     account.bed_sum += row['bed_sum']
                     account.bes_sum += row['bes_sum']
+                    account.opening_bed_sum += row['opening_bed_sum']
+                    account.opening_bes_sum += row['opening_bes_sum']
+                    account.previous_bed_sum += row['previous_bed_sum']
+                    account.previous_bes_sum += row['previous_bes_sum']
         else:
             for sub_account in accounts:
                 if sub_account.parent_id == account.id:
                     self.set_remain(sub_account, accounts)
                     account.bed_sum += sub_account.bed_sum
                     account.bes_sum += sub_account.bes_sum
+                    account.opening_bed_sum += sub_account.opening_bed_sum
+                    account.opening_bes_sum += sub_account.opening_bes_sum
+                    account.previous_bed_sum += sub_account.previous_bed_sum
+                    account.previous_bes_sum += sub_account.previous_bes_sum
 
         remain = account.bed_sum - account.bes_sum
         if remain > 0:
@@ -176,10 +221,18 @@ class AccountBalanceView(APIView):
                 for floatAccount in account.floatAccountGroup.floatAccounts.all():
                     floatAccount.bed_sum = 0
                     floatAccount.bes_sum = 0
+                    floatAccount.opening_bed_sum = 0
+                    floatAccount.opening_bes_sum = 0
+                    floatAccount.previous_bed_sum = 0
+                    floatAccount.previous_bes_sum = 0
                     for row in rows:
                         if row['account_id'] == account.id and row['floatAccount_id'] == floatAccount.id:
                             floatAccount.bed_sum += row['bed_sum']
                             floatAccount.bes_sum += row['bes_sum']
+                            floatAccount.opening_bed_sum += row['opening_bed_sum']
+                            floatAccount.opening_bes_sum += row['opening_bes_sum']
+                            floatAccount.previous_bed_sum += row['previous_bed_sum']
+                            floatAccount.previous_bes_sum += row['previous_bes_sum']
 
                     remain = floatAccount.bed_sum - floatAccount.bes_sum
                     if remain > 0:
@@ -195,16 +248,28 @@ class AccountBalanceView(APIView):
                         'bes_sum': floatAccount.bes_sum,
                         'bed_remain': floatAccount.bed_remain,
                         'bes_remain': floatAccount.bes_remain,
+                        'opening_bed_sum': floatAccount.opening_bed_sum,
+                        'opening_bes_sum': floatAccount.opening_bes_sum,
+                        'previous_bed_sum': floatAccount.previous_bed_sum,
+                        'previous_bes_sum': floatAccount.previous_bes_sum,
                     })
 
             if show_cost_centers == 'true' and account.costCenterGroup:
                 for floatAccount in account.costCenterGroup.floatAccounts.all():
                     floatAccount.bed_sum = 0
                     floatAccount.bes_sum = 0
+                    floatAccount.opening_bed_sum = 0
+                    floatAccount.opening_bes_sum = 0
+                    floatAccount.previous_bed_sum = 0
+                    floatAccount.previous_bes_sum = 0
                     for row in rows:
                         if row['account_id'] == account.id and row['costCenter_id'] == floatAccount.id:
                             floatAccount.bed_sum += row['bed_sum']
                             floatAccount.bes_sum += row['bes_sum']
+                            floatAccount.opening_bed_sum = +row['opening_bed_sum']
+                            floatAccount.opening_bes_sum = +row['opening_bes_sum']
+                            floatAccount.previous_bed_sum = +row['previous_bed_sum']
+                            floatAccount.previous_bes_sum = +row['previous_bes_sum']
 
                     remain = floatAccount.bed_sum - floatAccount.bes_sum
                     if remain > 0:
@@ -220,6 +285,10 @@ class AccountBalanceView(APIView):
                         'bes_sum': floatAccount.bes_sum,
                         'bed_remain': floatAccount.bed_remain,
                         'bes_remain': floatAccount.bes_remain,
+                        'opening_bed_sum': floatAccount.opening_bed_sum,
+                        'opening_bes_sum': floatAccount.opening_bes_sum,
+                        'previous_bed_sum': floatAccount.previous_bed_sum,
+                        'previous_bes_sum': floatAccount.previous_bes_sum,
                     })
 
         accounts = list(accounts)
@@ -248,7 +317,7 @@ class AccountBalanceView(APIView):
             elif account_type == 'bank':
                 result = result and acc.account_type == Account.BANK
 
-            if level is not None:
+            if level:
                 result = result and acc.level == int(level)
 
             if balance_status == 'with_remain':
