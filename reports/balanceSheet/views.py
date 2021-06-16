@@ -10,6 +10,7 @@ from helpers.auth import BasicCRUDPermission
 from helpers.exports import get_xlsx_response
 
 from reports.filters import get_account_sanad_items_filter
+from reports.incomeStatement.views import IncomeStatementView
 
 
 def getAccounts(accountType, allAccounts):
@@ -45,6 +46,10 @@ class BalanceSheetView(APIView):
 
         for at in accountTypes:
             remain = getRemain(at, allAccounts)
+
+            if at.codename == 'accumulatedProfit':
+                remain += IncomeStatementView.generate_report(request)[-1]['remain']
+
             res[at.codename] = {
                 'name': at.name,
                 'remain': remain,

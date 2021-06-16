@@ -77,7 +77,8 @@ class IncomeStatementView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.incomeStatementReport'
 
-    def generate_report(self, request):
+    @staticmethod
+    def generate_report(request):
         getType.accountTypes = AccountType.objects.all()
 
         rows = []
