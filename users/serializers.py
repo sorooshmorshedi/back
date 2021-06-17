@@ -62,6 +62,11 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     has_two_factor_authentication = serializers.SerializerMethodField()
     modules = serializers.SerializerMethodField()
     unread_notifications_count = serializers.SerializerMethodField()
+    pop_up_notifications = serializers.SerializerMethodField()
+
+    def get_pop_up_notifications(self, obj: User):
+        qs = obj.notifications.exclude(status=UserNotification.READ).filter(notification__show_pop_up=True)
+        return UserNotificationSerializer(qs, many=True).data
 
     def get_unread_notifications_count(self, obj: User):
         return obj.notifications.exclude(status=UserNotification.READ).count()

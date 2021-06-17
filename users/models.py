@@ -201,6 +201,7 @@ class Notification(BaseModel):
     title = models.CharField(max_length=255, blank=True, null=True)
     # explanation is html, so should showed in <pre> tag (so we can use js editor in admin to create explanation)
     explanation = models.TextField(blank=True, null=True)
+    show_pop_up = models.BooleanField(default=False)
 
     send_notification = models.BooleanField(default=False)
     notification_title = models.CharField(max_length=255, blank=True, null=True)
