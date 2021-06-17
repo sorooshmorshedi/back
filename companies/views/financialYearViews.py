@@ -16,7 +16,7 @@ from factors.models import Factor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from helpers.auth import BasicCRUDPermission
 from home.models import DefaultText
-from sanads.models import SanadItem, clearSanad
+from sanads.models import SanadItem, clearSanad, Sanad
 from users.models import User
 from users.serializers import UserListRetrieveSerializer
 from wares.models import WareInventory
@@ -72,14 +72,14 @@ class ClosingHelpers:
         elif sanad_remain > 0:
             bes = sanad_remain
 
-        current_earnings_default_account = DefaultAccount.get(defaultAccount)
+        account = DefaultAccount.get(defaultAccount)
 
         item = SanadItem(
             financial_year=sanad.financial_year,
             sanad=sanad,
-            account=current_earnings_default_account.account,
-            floatAccount=current_earnings_default_account.floatAccount,
-            costCenter=current_earnings_default_account.costCenter,
+            account=account.account,
+            floatAccount=account.floatAccount,
+            costCenter=account.costCenter,
             bed=bed,
             bes=bes
         )
@@ -112,8 +112,8 @@ class ClosingHelpers:
                 'account': account,
                 'floatAccount': float_account,
                 'costCenter': cost_center,
-                'date': jdatetime.date.today(),
-                'time': jdatetime.datetime.now().strftime('%H:%m'),
+                'date': target_financial_year.start,
+                'time': '00:00',
             },
             'items': {
                 'items': [],
@@ -196,22 +196,33 @@ class CloseFinancialYearView(APIView):
         sanad = current_financial_year.temporaryClosingSanad
         clearSanad(sanad)
         sanad.is_auto_created = True
+        sanad.type = Sanad.CLOSING
+        sanad.explanation = "سند اختتامیه"
         CloseFinancialYearView.add_temporaries_sanad_items(sanad)
+        sanad.update_values()
         CloseFinancialYearView.add_current_earnings_sanad_item(sanad)
         sanad.save()
+        sanad.update_values()
 
         sanad = current_financial_year.currentEarningsClosingSanad
         clearSanad(sanad)
         sanad.is_auto_created = True
+        sanad.type = Sanad.CLOSING
+        sanad.explanation = "سند اختتامیه"
         CloseFinancialYearView.add_retained_earnings_sanad_item(sanad)
         sanad.save()
+        sanad.update_values()
 
         sanad = current_financial_year.permanentsClosingSanad
         clearSanad(sanad)
         sanad.is_auto_created = True
+        sanad.type = Sanad.CLOSING
+        sanad.explanation = "سند اختتامیه"
         CloseFinancialYearView.add_permanents_sanad_items(sanad)
+        sanad.update_values()
         CloseFinancialYearView.add_closing_sanad_item(sanad)
         sanad.save()
+        sanad.update_values()
 
         CloseFinancialYearView.create_opening_sanad(current_financial_year, target_financial_year)
 
@@ -246,6 +257,7 @@ class CloseFinancialYearView(APIView):
             [current_earnings_default_account],
             reverse=True
         )
+        sanad.update_values()
         sanad_items.append(ClosingHelpers.balance_sanad(sanad, 'retainedEarnings'))
         return sanad_items
 
@@ -299,6 +311,8 @@ class CloseFinancialYearView(APIView):
         sanad = target_financial_year.get_opening_sanad()
         clearSanad(sanad)
         sanad.is_auto_created = True
+        sanad.type = Sanad.OPENING
+        sanad.explanation = "سند افتتاحیه"
         sanad.date = target_financial_year.start
         sanad.save()
 
@@ -310,6 +324,7 @@ class CloseFinancialYearView(APIView):
             sanad_item.id = None
             sanad_item.sanad = sanad
             sanad_item.bed, sanad_item.bes = sanad_item.bes, sanad_item.bed
+            sanad.explanation = "سند افتتاحیه"
 
             if sanad_item.account == closing_default_account.account:
                 sanad_item.account = opening_default_account.account
@@ -319,6 +334,8 @@ class CloseFinancialYearView(APIView):
             sanad_item.save()
 
             sanad_items.append(sanad_item)
+
+        sanad.update_values()
 
         return sanad_items
 
