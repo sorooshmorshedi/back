@@ -66,27 +66,30 @@ class AccountBalanceView(APIView):
         if AccountBalanceView._rows:
             return AccountBalanceView._rows
 
+        cols_count = int(filters.get('cols_count', 2))
+
         where_filters = "sanad.financial_year_id = {} and ".format(financial_year.id)
+
+        if cols_count == 8:
+            where_filters += "sanad.type != '{}' and ".format(Sanad.OPENING)
+
+        previous_values_where_filters = "{} (false or ".format(where_filters)
+
         if filters.get('from_date'):
             where_filters += "sanad.date >= '{}' and ".format(to_gregorian(filters['from_date']))
+            previous_values_where_filters += "sanad.date < '{}' or ".format(to_gregorian(filters['from_date']))
         if filters.get('to_date'):
             where_filters += "sanad.date <= '{}' and ".format(to_gregorian(filters['to_date']))
         if filters.get('from_code'):
             where_filters += "sanad.code >= {} and ".format(filters['from_code'])
+            previous_values_where_filters += "sanad.code < {} or ".format(filters['from_code'])
         if filters.get('to_code'):
             where_filters += "sanad.code <= {} and ".format(filters['to_code'])
         if filters.get('skip_closing_sanad', False) == 'true':
-            closing_sanad_names = [
-                'temporaryClosingSanad',
-                'currentEarningsClosingSanad',
-                'permanentsClosingSanad',
-            ]
-            for closing_sanad_name in closing_sanad_names:
-                closing_sanad = getattr(financial_year, closing_sanad_name)
-                if closing_sanad:
-                    where_filters += "sanad.id != {} and ".format(closing_sanad.id)
+            where_filters += "sanad.type != '{}' and ".format(Sanad.CLOSING)
 
         where_filters += "true"
+        previous_values_where_filters += "false)"
 
         base_query = """
             select 
@@ -104,10 +107,20 @@ class AccountBalanceView(APIView):
         sql = base_query.format(where_filters)
         rows = select_raw_sql(sql)
 
-        opening_sql = base_query.format(where_filters + " and sanad.type = '{}'".format(Sanad.OPENING))
-        opening_rows = select_raw_sql(opening_sql)
+        opening_sql = base_query.format("sanad.financial_year_id = {} and sanad.type = '{}'".format(
+            financial_year.id,
+            Sanad.OPENING
+        ))
+        if cols_count >= 8:
+            opening_rows = select_raw_sql(opening_sql)
+        else:
+            opening_rows = []
 
-        previous_rows = []
+        previous_sql = base_query.format(previous_values_where_filters)
+        if cols_count >= 6:
+            previous_rows = select_raw_sql(previous_sql)
+        else:
+            previous_rows = []
 
         def are_equal(r1, r2):
             return r1['account_id'] == r2['account_id'] and \
@@ -124,10 +137,10 @@ class AccountBalanceView(APIView):
                     row['opening_bes_sum'] = opening_row['bes_sum']
                     continue
 
-        # for previous_row in previous_rows:
-        #     if are_equal(row, previous_row):
-        #         row['previous_bed_sum'] = previous_row['bed_sum']
-        #         row['previous_bes_sum'] = previous_row['bes_sum']
+            for previous_row in previous_rows:
+                if are_equal(row, previous_row):
+                    row['previous_bed_sum'] = previous_row['bed_sum']
+                    row['previous_bes_sum'] = previous_row['bes_sum']
 
         AccountBalanceView._rows = rows
 
