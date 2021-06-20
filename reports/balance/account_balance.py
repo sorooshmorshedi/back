@@ -7,10 +7,9 @@ from rest_framework.views import APIView
 from accounts.accounts.models import Account
 from helpers.auth import BasicCRUDPermission
 from helpers.db import select_raw_sql
-from helpers.exports import get_xlsx_response
 from helpers.functions import to_gregorian
 from reports.balance.serializers import BalanceAccountSerializer
-from reports.lists.export_views import BaseExportView
+from reports.lists.export_views import BaseListExportView
 from sanads.models import Sanad
 
 common_headers = [
@@ -21,42 +20,38 @@ common_headers = [
 ]
 
 
-def get_common_columns(obj, is_dict=False):
+def get_common_columns(obj, is_dict=False) -> dict:
     if is_dict:
-        return [
-            obj['bed_sum'],
-            obj['bes_sum'],
-            obj['bed_remain'],
-            obj['bes_remain'],
-        ]
-    return [
-        obj.bed_sum,
-        obj.bes_sum,
-        obj.bed_remain,
-        obj.bes_remain,
-    ]
+        return {
+            'opening_bed_sum': obj['bed_sum'],
+            'opening_bes_sum': obj['bes_sum'],
+            'previous_bed_sum': obj['bed_sum'],
+            'previous_bes_sum': obj['bes_sum'],
+            'bed_sum': obj['bed_sum'],
+            'bes_sum': obj['bes_sum'],
+            'bed_remain': obj['bed_remain'],
+            'bes_remain': obj['bes_remain'],
+        }
+    return {
+        'opening_bed_sum': obj.bed_sum,
+        'opening_bes_sum': obj.bes_sum,
+        'previous_bed_sum': obj.bed_sum,
+        'previous_bes_sum': obj.bes_sum,
+        'bed_sum': obj.bed_sum,
+        'bes_sum': obj.bes_sum,
+        'bed_remain': obj.bed_remain,
+        'bes_remain': obj.bes_remain,
+    }
 
 
-def get_common_columns_sum(objs, is_dict=False):
-    bed_sum = bes_sum = bed_remain = bes_remain = 0
+def get_common_columns_sum(objs, is_dict=False) -> dict:
+    sums = {}
     for obj in objs:
+        obj = get_common_columns(obj, is_dict)
+        for key in obj.keys():
+            sums[key] = sums.get(key, 0) + obj[key]
 
-        if is_dict:
-            bed_sum += obj['bed_sum']
-            bes_sum += obj['bes_sum']
-            bed_remain += obj['bed_remain']
-            bes_remain += obj['bes_remain']
-        else:
-            bed_sum += obj.bed_sum
-            bes_sum += obj.bes_sum
-            bed_remain += obj.bed_remain
-            bes_remain += obj.bes_remain
-    return [
-        bed_sum,
-        bes_sum,
-        bed_remain,
-        bes_remain,
-    ]
+    return sums
 
 
 class AccountBalanceView(APIView):
@@ -66,7 +61,7 @@ class AccountBalanceView(APIView):
     _rows = None
 
     @staticmethod
-    def get_rows(filters, financial_year):
+    def get_db_rows(filters, financial_year):
 
         if AccountBalanceView._rows:
             return AccountBalanceView._rows
@@ -155,7 +150,7 @@ class AccountBalanceView(APIView):
         account.previous_bes_sum = 0
 
         if account.level == Account.TAFSILI:
-            rows = self.get_rows(self.request.GET, self.request.user.active_financial_year)
+            rows = self.get_db_rows(self.request.GET, self.request.user.active_financial_year)
             for row in rows:
                 if row['account_id'] == account.id:
                     account.bed_sum += row['bed_sum']
@@ -215,7 +210,7 @@ class AccountBalanceView(APIView):
             account.floatAccounts_data = []
             account.costCenters_data = []
 
-            rows = self.get_rows(self.request.GET, self.request.user.active_financial_year)
+            rows = self.get_db_rows(self.request.GET, self.request.user.active_financial_year)
 
             if show_float_accounts == 'true' and account.floatAccountGroup:
                 for floatAccount in account.floatAccountGroup.floatAccounts.all():
@@ -351,48 +346,30 @@ class AccountBalanceView(APIView):
         return res
 
 
-class AccountBalanceExportView(AccountBalanceView, BaseExportView):
+class AccountBalanceExportView(AccountBalanceView, BaseListExportView):
     filename = 'account-balance.pdf'
     template_name = 'export/simple_export.html'
+    right_header_template = 'reports/balance_report_right_header.html'
 
-    def get_context_data(self, user, **kwargs):
-        data = self.request.GET.copy()
+    @property
+    def title(self):
+        cols_count = self.request.GET.get('cols_count')
+        return "تراز {} ستونی حساب ها".format(cols_count)
+
+    def get_rows(self):
         accounts = self.get_accounts(self.request)
 
-        context = {
-            'title': "تراز حساب ها",
-            'content_template': 'reports/balance_report.html',
-            'company': self.request.user.active_company,
-            'user': self.request.user,
-            'items': BalanceAccountSerializer(accounts, many=True).data,
-            'show_float_accounts': data.get('show_float_accounts') == 'true',
-            'show_cost_centers': data.get('show_cost_centers') == 'true',
-            'four_cols': data.get('cols_count') == '4',
-            'sum': get_common_columns_sum(accounts)
-        }
+        data = self.request.data
+        show_float_accounts = data.get('show_float_accounts') == 'true',
+        show_cost_centers = data.get('show_cost_centers') == 'true',
 
-        return context
-
-    def xlsx_response(self, request, *args, **kwargs):
-        accounts = self.get_accounts(request)
-
-        context = self.get_context_data(request.user, **kwargs)
-        show_float_accounts = context['show_float_accounts']
-        show_cost_centers = context['show_cost_centers']
-
-        data = [[
-            '#',
-            'کد حساب',
-            'نام حساب',
-            *common_headers
-        ]]
+        rows = []
         for account in accounts:
-            data.append([
-                accounts.index(account),
-                account.code,
-                account.name,
-                *get_common_columns(account)
-            ])
+            rows.append({
+                'code': account.code,
+                'name': account.name,
+                **get_common_columns(account)
+            })
 
             sub_items = []
             if show_float_accounts:
@@ -401,19 +378,19 @@ class AccountBalanceExportView(AccountBalanceView, BaseExportView):
                 sub_items += account.costCenters_data
 
             for item in sub_items:
-                data.append([
-                    '', '',
-                    item['name'],
-                    *get_common_columns(item, True)
-                ])
+                rows.append({
+                    'code': '',
+                    'name': item['name'],
+                    **get_common_columns(item, True)
+                })
 
-        data.append([
-            '', '',
-            'جمع',
-            *get_common_columns_sum(accounts)
-        ])
+        rows.append({
+            'code': '',
+            'name': 'جمع',
+            **get_common_columns_sum(accounts)
+        })
 
-        return get_xlsx_response('account-balance', data)
+        return rows
 
-    def get(self, *args, **kwargs):
-        return self.export(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.get_response(request, *args, **kwargs)

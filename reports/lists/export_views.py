@@ -128,6 +128,7 @@ class BaseListExportView(PDFTemplateView):
     title = None
     context = {}
     filters = []
+    right_header_template = None
 
     template_name = 'export/list_export.html'
     pagination_class = None
@@ -162,6 +163,9 @@ class BaseListExportView(PDFTemplateView):
 
     def get_appended_rows(self):
         return []
+
+    def get_right_header_template(self):
+        return self.right_header_template
 
     def get_filters(self):
         filters = []
@@ -212,6 +216,7 @@ class BaseListExportView(PDFTemplateView):
             'applied_filters': self.get_applied_filters(),
             'print_document': print_document,
             'additional_data': self.get_additional_data(),
+            'right_header_template': self.get_right_header_template(),
             'filters': []
         }
 

@@ -1,7 +1,9 @@
+import jdatetime
 from django import template
 
 from factors.models import Factor
 from helpers.functions import add_separator, get_object_account_names, rgetattr
+from server.settings import DATE_FORMAT
 
 register = template.Library()
 
@@ -56,3 +58,8 @@ def get_value(obj, key, headers):
 @register.simple_tag
 def get_ordered_items(obj):
     return obj.items.order_by('order')
+
+
+@register.simple_tag
+def today():
+    return jdatetime.date.today().strftime(DATE_FORMAT.replace('-', '/'))

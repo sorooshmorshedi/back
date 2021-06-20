@@ -20,7 +20,7 @@ class FloatAccountBalanceByGroupView(APIView):
         return self.request.GET.get('is_cost_center') == 'true'
 
     def get_accounts_data(self, request):
-        rows = AccountBalanceView.get_rows(request.GET, request.user.active_financial_year)
+        rows = AccountBalanceView.get_db_rows(request.GET, request.user.active_financial_year)
 
         qs = FloatAccountGroup.objects.inFinancialYear().prefetch_related(
             'floatAccounts'
