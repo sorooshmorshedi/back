@@ -21,27 +21,25 @@ common_headers = [
 
 
 def get_common_columns(obj, is_dict=False) -> dict:
-    if is_dict:
-        return {
-            'opening_bed_sum': obj['bed_sum'],
-            'opening_bes_sum': obj['bes_sum'],
-            'previous_bed_sum': obj['bed_sum'],
-            'previous_bes_sum': obj['bes_sum'],
-            'bed_sum': obj['bed_sum'],
-            'bes_sum': obj['bes_sum'],
-            'bed_remain': obj['bed_remain'],
-            'bes_remain': obj['bes_remain'],
-        }
-    return {
-        'opening_bed_sum': obj.bed_sum,
-        'opening_bes_sum': obj.bes_sum,
-        'previous_bed_sum': obj.bed_sum,
-        'previous_bes_sum': obj.bes_sum,
-        'bed_sum': obj.bed_sum,
-        'bes_sum': obj.bes_sum,
-        'bed_remain': obj.bed_remain,
-        'bes_remain': obj.bes_remain,
-    }
+    keys = [
+        'opening_bed_sum',
+        'opening_bes_sum',
+        'previous_bed_sum',
+        'previous_bes_sum',
+        'bed_sum',
+        'bes_sum',
+        'bed_remain',
+        'bes_remain',
+    ]
+
+    data = {}
+    for key in keys:
+        if is_dict:
+            data[key] = obj[key]
+        else:
+            data[key] = getattr(obj, key)
+
+    return data
 
 
 def get_common_columns_sum(objs, is_dict=False) -> dict:
@@ -337,9 +335,13 @@ class AccountBalanceView(APIView):
             elif balance_status == 'bes_remain':
                 result = result and acc.bed_sum < acc.bes_sum
             elif balance_status == 'with_transaction':
-                result = result and (acc.bed_sum != 0 or acc.bes_sum != 0)
+                result = result and (
+                        acc.bed_sum + acc.bes_sum + acc.previous_bed_sum + acc.previous_bes_sum + acc.opening_bed_sum + acc.opening_bes_sum != 0
+                )
             elif balance_status == 'without_transaction':
-                result = result and acc.bed_sum == 0 and acc.bes_sum == 0
+                result = result and (
+                        acc.bed_sum + acc.bes_sum + acc.previous_bed_sum + acc.previous_bes_sum + acc.opening_bed_sum + acc.opening_bes_sum == 0
+                )
 
             if account_code_gte:
                 result = result and acc.code >= account_code_gte
@@ -350,6 +352,7 @@ class AccountBalanceView(APIView):
 
         accounts = list(filter(filter_account, accounts))
 
+        print(accounts[0].opening_bed_sum, accounts[0].opening_bes_sum)
         return accounts
 
     def get(self, request):
@@ -406,4 +409,5 @@ class AccountBalanceExportView(AccountBalanceView, BaseListExportView):
         return rows
 
     def get(self, request, *args, **kwargs):
+        AccountBalanceView._rows = None
         return self.get_response(request, *args, **kwargs)
