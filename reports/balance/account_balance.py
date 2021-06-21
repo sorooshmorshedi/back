@@ -181,7 +181,11 @@ class AccountBalanceView(APIView):
                     account.previous_bed_sum += sub_account.previous_bed_sum
                     account.previous_bes_sum += sub_account.previous_bes_sum
 
-        remain = account.bed_sum - account.bes_sum
+        remain = (
+                         account.bed_sum + account.opening_bed_sum + account.previous_bed_sum
+                 ) - (
+                         account.bes_sum + account.opening_bes_sum + account.previous_bes_sum
+                 )
         if remain > 0:
             account.bed_remain = remain
         else:
