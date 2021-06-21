@@ -128,17 +128,47 @@ class AccountBalanceView(APIView):
         for row in rows:
             row['opening_bed_sum'] = row['opening_bes_sum'] = row['previous_bed_sum'] = row['previous_bes_sum'] = 0
 
-        for row in rows:
-            for opening_row in opening_rows:
+        for opening_row in opening_rows:
+            is_added = False
+            for row in rows:
                 if are_equal(row, opening_row):
                     row['opening_bed_sum'] = opening_row['bed_sum']
                     row['opening_bes_sum'] = opening_row['bes_sum']
-                    continue
+                    is_added = True
+                    break
+            if not is_added:
+                rows.append({
+                    'account_id': opening_row['account_id'],
+                    'floatAccount_id': opening_row['floatAccount_id'],
+                    'costCenter_id': opening_row['costCenter_id'],
+                    'bed_sum': 0,
+                    'bes_sum': 0,
+                    'previous_bed_sum': 0,
+                    'previous_bes_sum': 0,
+                    'opening_bed_sum': opening_row['bed_sum'],
+                    'opening_bes_sum': opening_row['bes_sum']
+                })
 
-            for previous_row in previous_rows:
+        for previous_row in previous_rows:
+            is_added = False
+            for row in rows:
                 if are_equal(row, previous_row):
                     row['previous_bed_sum'] = previous_row['bed_sum']
                     row['previous_bes_sum'] = previous_row['bes_sum']
+                    is_added = True
+                    break
+            if not is_added:
+                rows.append({
+                    'account_id': previous_row['account_id'],
+                    'floatAccount_id': previous_row['floatAccount_id'],
+                    'costCenter_id': previous_row['costCenter_id'],
+                    'bed_sum': 0,
+                    'bes_sum': 0,
+                    'previous_bed_sum': previous_row['bed_sum'],
+                    'previous_bes_sum': previous_row['bes_sum'],
+                    'opening_bed_sum': 0,
+                    'opening_bes_sum': 0
+                })
 
         AccountBalanceView._rows = rows
 
@@ -340,19 +370,11 @@ class AccountBalanceView(APIView):
                 result = result and acc.bed_sum < acc.bes_sum
             elif balance_status == 'with_transaction':
                 result = result and (
-                        (
-                                acc.bed_sum + acc.previous_bed_sum + acc.opening_bed_sum != 0
-                        ) or (
-                                acc.bes_sum + acc.previous_bes_sum + acc.opening_bes_sum != 0
-                        )
+                        acc.bed_sum != 0 or acc.previous_bed_sum != 0 or acc.opening_bed_sum != 0 or acc.bes_sum != 0 or acc.previous_bes_sum != 0 or acc.opening_bes_sum != 0
                 )
             elif balance_status == 'without_transaction':
                 result = result and (
-                        (
-                                acc.bed_sum + acc.previous_bed_sum + acc.opening_bed_sum == 0
-                        ) or (
-                                acc.bes_sum + acc.previous_bes_sum + acc.opening_bes_sum == 0
-                        )
+                        acc.bed_sum == 0 and acc.previous_bed_sum == 0 and acc.opening_bed_sum == 0 and acc.bes_sum == 0 and acc.previous_bes_sum == 0 and acc.opening_bes_sum == 0
                 )
 
             if account_code_gte:
