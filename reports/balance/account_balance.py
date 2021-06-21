@@ -68,7 +68,7 @@ class AccountBalanceView(APIView):
 
         where_filters = "sanad.financial_year_id = {} and ".format(financial_year.id)
 
-        if cols_count == 8:
+        if cols_count >= 8:
             where_filters += "sanad.type != '{}' and ".format(Sanad.OPENING)
 
         previous_values_where_filters = "{} (false or ".format(where_filters)
@@ -340,11 +340,19 @@ class AccountBalanceView(APIView):
                 result = result and acc.bed_sum < acc.bes_sum
             elif balance_status == 'with_transaction':
                 result = result and (
-                        acc.bed_sum + acc.bes_sum + acc.previous_bed_sum + acc.previous_bes_sum + acc.opening_bed_sum + acc.opening_bes_sum != 0
+                        (
+                                acc.bed_sum + acc.previous_bed_sum + acc.opening_bed_sum != 0
+                        ) or (
+                                acc.bes_sum + acc.previous_bes_sum + acc.opening_bes_sum != 0
+                        )
                 )
             elif balance_status == 'without_transaction':
                 result = result and (
-                        acc.bed_sum + acc.bes_sum + acc.previous_bed_sum + acc.previous_bes_sum + acc.opening_bed_sum + acc.opening_bes_sum == 0
+                        (
+                                acc.bed_sum + acc.previous_bed_sum + acc.opening_bed_sum == 0
+                        ) or (
+                                acc.bes_sum + acc.previous_bes_sum + acc.opening_bes_sum == 0
+                        )
                 )
 
             if account_code_gte:
