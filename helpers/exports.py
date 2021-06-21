@@ -26,6 +26,13 @@ class MPDFTemplateView(PDFTemplateView):
 
 
 def get_xlsx_response(file_name, data):
+    for row in data:
+        for i in range(len(row)):
+            try:
+                row[i] = float(row[i])
+            except:
+                pass
+
     with BytesIO() as b:
         writer = pandas.ExcelWriter(b, engine='xlsxwriter')
 
@@ -44,6 +51,9 @@ def get_xlsx_response(file_name, data):
         workbook = writer.book
         worksheet = writer.sheets[sheet_name]
         worksheet.right_to_left()
+
+        number_format = workbook.add_format({'num_format': '#,##0.00'})
+        worksheet.set_column('B:Z', None, number_format)
 
         border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
         worksheet.conditional_format(xlsxwriter.utility.xl_range(
