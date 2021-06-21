@@ -18,7 +18,7 @@ def get_account_sanad_items_filter(request) -> Q:
         filters &= Q(sanadItems__sanad__code__lte=data['to_code'])
     if 'codes' in data:
         filters &= Q(sanadItems__sanad__code__in=data['codes'])
-    if data.get('skip_closing_sanad', False) == 'true':
+    if data.get('skip_closing_sanads', False) == 'true':
         closing_sanad = financial_year.closing_sanad
         if closing_sanad:
             filters &= ~Q(sanadItems__sanad=closing_sanad)

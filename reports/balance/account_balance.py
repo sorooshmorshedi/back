@@ -85,7 +85,7 @@ class AccountBalanceView(APIView):
             previous_values_where_filters += "sanad.code < {} or ".format(filters['from_code'])
         if filters.get('to_code'):
             where_filters += "sanad.code <= {} and ".format(filters['to_code'])
-        if filters.get('skip_closing_sanad', False) == 'true':
+        if filters.get('skip_closing_sanads', False) == 'true':
             where_filters += "sanad.type != '{}' and ".format(Sanad.CLOSING)
 
         where_filters += "true"
