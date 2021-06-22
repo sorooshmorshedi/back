@@ -324,7 +324,7 @@ class CloseFinancialYearView(APIView):
             sanad_item.id = None
             sanad_item.sanad = sanad
             sanad_item.bed, sanad_item.bes = sanad_item.bes, sanad_item.bed
-            sanad.explanation = "سند افتتاحیه"
+            sanad_item.explanation = "سند افتتاحیه"
 
             if sanad_item.account == closing_default_account.account:
                 sanad_item.account = opening_default_account.account
