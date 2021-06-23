@@ -1,3 +1,5 @@
+import traceback
+
 import requests
 
 
@@ -18,6 +20,13 @@ class Bale:
 
         response = requests.post(url, body)
         return response
+
+    @staticmethod
+    def send_stack():
+        stack = traceback.extract_stack()
+        stack = list(map(lambda s: "{} : {}".format(s.filename, s.lineno), stack))
+        stack = "\n".join(stack)
+        Bale.to_me(stack)
 
 
 if __name__ == '__main__':

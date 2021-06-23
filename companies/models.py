@@ -1,4 +1,3 @@
-import jdatetime
 from django.contrib.postgres.fields import ArrayField
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ObjectDoesNotExist

@@ -1,3 +1,4 @@
+import jdatetime
 from django.db import models
 from django.db.models.aggregates import Max
 from django.db.models.expressions import F
@@ -167,6 +168,8 @@ def clearSanad(sanad: Sanad):
     sanad.explanation = ''
     sanad.is_auto_created = False
     sanad.type = Sanad.NORMAL
+    sanad.date = jdatetime.date.today()
+
     for item in sanad.items.all():
         item.delete()
     sanad.save()
