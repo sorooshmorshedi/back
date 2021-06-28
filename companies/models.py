@@ -198,10 +198,13 @@ class FinancialYear(BaseModel):
     def check_date(self, date):
         is_valid = self.start <= date <= self.end
         if not is_valid:
-            raise ValidationError("تاریخ باید در بازه سال مالی باشد. ( از {} تا {})".format(
-                date_to_str(self.start),
-                date_to_str(self.end),
-            ))
+            raise ValidationError({
+                "non_field_errors": ["تاریخ باید در بازه سال مالی باشد. ( از {} تا {})".format(
+                    date_to_str(self.start),
+                    date_to_str(self.end),
+                )],
+                "date": date_to_str(date)
+            })
 
 
 class CompanyUser(BaseModel):

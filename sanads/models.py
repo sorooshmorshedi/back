@@ -168,7 +168,7 @@ def clearSanad(sanad: Sanad):
     sanad.explanation = ''
     sanad.is_auto_created = False
     sanad.type = Sanad.NORMAL
-    sanad.date = jdatetime.date.today()
+    sanad.date = sanad.financial_year.start
 
     for item in sanad.items.all():
         item.delete()
