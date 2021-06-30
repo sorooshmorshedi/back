@@ -5,10 +5,12 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
-from users.filters import UserNotificationFilter
-from users.models import UserNotification
-from users.serializers import UserNotificationSerializer
+from helpers.auth import BasicCRUDPermission
+from users.filters import UserNotificationFilter, NotificationFilter
+from users.models import UserNotification, Notification
+from users.serializers import UserNotificationSerializer, SendNotificationSerializer, ReminderNotificationSerializer
 
 
 class UserNotificationListView(generics.ListAPIView):
@@ -34,3 +36,38 @@ class ChangeUserNotificationStatusView(APIView):
         user_notification.save()
 
         return Response([])
+
+
+class SendNotificationModelView(ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_codename = 'send.notification'
+    serializer_class = SendNotificationSerializer
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+    filterset_class = NotificationFilter
+
+    def get_queryset(self) -> QuerySet:
+        return Notification.objects.filter(created_by=self.request.user, type=Notification.SEND_BY_USER)
+
+    def perform_create(self, serializer: SendNotificationSerializer) -> None:
+        serializer.save(
+            type=Notification.SEND_BY_USER
+        )
+
+
+class ReminderNotificationModelView(ModelViewSet):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ReminderNotificationSerializer
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+    filterset_class = NotificationFilter
+
+    def get_queryset(self) -> QuerySet:
+        return Notification.objects.filter(created_by=self.request.user, type=Notification.REMINDER)
+
+    def perform_create(self, serializer: ReminderNotificationSerializer) -> None:
+        serializer.save(
+            receivers=[self.request.user],
+            type=Notification.REMINDER,
+            has_schedule=True
+        )

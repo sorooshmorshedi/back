@@ -1,14 +1,20 @@
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
 
 from users.views.auth_views import SecretKeyView
 from users.views.citiesView import CityListCreateView, CityDetailView
-from users.views.notification_views import UserNotificationListView, ChangeUserNotificationStatusView
+from users.views.notification_views import UserNotificationListView, ChangeUserNotificationStatusView, \
+    SendNotificationModelView, ReminderNotificationModelView
 from users.views.rolesView import RoleCreateView, RoleUpdateView, RoleDestroyView, RoleListView, PermissionListView
 from users.views.usersView import SetActiveCompany, SetActiveFinancialYear, CurrentUserApiView, UserCreateView, \
     UserUpdateView, UserListView, UserChangePasswordView, SendVerificationCodeView, \
     ChangePasswordByVerificationCodeView, UserInvitationsListView, ChangeUserInvitationStatusView
 
-urlpatterns = [
+router = DefaultRouter()
+router.register('sendNotification', SendNotificationModelView, basename='send-notification')
+router.register('reminderNotification', ReminderNotificationModelView, basename='reminder-notification')
+
+urlpatterns = router.urls +[
     url(r'^create$', UserCreateView.as_view(), name='create-user'),
     url(r'^update/(?P<pk>[0-9]+)$', UserUpdateView.as_view(), name='update-user'),
     url(r'^changePassword$', UserChangePasswordView.as_view(), name='change-user-password'),

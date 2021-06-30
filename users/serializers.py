@@ -6,8 +6,9 @@ from rest_framework.authtoken.models import Token
 
 from companies.models import CompanyUserInvitation, CompanyUser
 from companies.serializers import FinancialYearSerializer, CompanySerializer
+from helpers.functions import get_current_user
 from server.settings import DATETIME_FORMAT
-from users.models import Role, User, City, UserNotification
+from users.models import Role, User, City, UserNotification, Notification
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -162,3 +163,41 @@ class UserNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserNotification
         fields = ('id', 'title', 'explanation', 'status', 'created_at', 'status_codename')
+
+
+class SendNotificationSerializer(serializers.ModelSerializer):
+    userNotifications = UserNotificationSerializer(many=True, read_only=True)
+
+    created_at = serializers.SerializerMethodField()
+
+    def get_created_at(self, obj: Notification):
+        return obj.created_at.strftime(DATETIME_FORMAT)
+
+    class Meta:
+        model = Notification
+        fields = (
+            'id', 'title', 'explanation', 'show_pop_up', 'has_schedule', 'send_date', 'send_time', 'receivers',
+            'userNotifications', 'created_at',
+        )
+
+    def validate_receivers(self, value):
+        if value:
+            user = get_current_user()
+            is_valid = CompanyUser.objects.filter(company=user.active_company, user__in=value).count() == len(value)
+            if not is_valid:
+                raise serializers.ValidationError("کاربران انتخاب شده معتبر نمی باشند")
+        return value
+
+
+class ReminderNotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ('id', 'title', 'explanation', 'send_date', 'send_time')
+
+    def validate_receivers(self, value):
+        if value:
+            user = get_current_user()
+            is_valid = user.active_company.filter(users__in=value).count() == len(value)
+            if not is_valid:
+                raise serializers.ValidationError("کاربران انتخاب شده معتبر نمی باشند")
+        return value

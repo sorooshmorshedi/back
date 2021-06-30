@@ -198,10 +198,30 @@ class City(BaseModel):
 
 
 class Notification(BaseModel):
+    SEND_BY_USER = 'su'
+    REMINDER = 'sr'
+    SEND_BY_SYSTEM = 'ss'
+    SEND_BY_ADMIN = 'sa'
+
+    TYPES = (
+        (SEND_BY_USER, 'ارسال شده توسط کاربر'),
+        (REMINDER, 'یاداور'),
+        (SEND_BY_SYSTEM, 'ارسال شده توسط سامانه'),
+        (SEND_BY_ADMIN, 'ارسال شده توسط ادمین')
+    )
+
+    type = models.CharField(max_length=2, choices=TYPES)
+
     title = models.CharField(max_length=255, blank=True, null=True)
     # explanation is html, so should showed in <pre> tag (so we can use js editor in admin to create explanation)
     explanation = models.TextField(blank=True, null=True)
     show_pop_up = models.BooleanField(default=False)
+
+    is_sent = models.BooleanField(default=False)
+
+    has_schedule = models.BooleanField(default=False)
+    send_date = jmodels.jDateField(blank=True, null=True)
+    send_time = models.TimeField(blank=True, null=True)
 
     send_notification = models.BooleanField(default=False)
     notification_title = models.CharField(max_length=255, blank=True, null=True)
@@ -211,19 +231,33 @@ class Notification(BaseModel):
     send_sms = models.BooleanField(default=False)
     sms_text = models.CharField(max_length=500, blank=True, null=True)
 
+    receivers = models.ManyToManyField(User)
+
     def __str__(self):
         return "{} ({})".format(self.title, self.id)
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('send.notification', 'ارسال اعلان به سایر کاربران شرکت'),
+        )
+
+    def create_user_notifications(self):
+        for receiver in self.receivers.all():
+            self.userNotifications.create(
+                user=receiver,
+                status=UserNotification.NOT_READ,
+            )
+        self.is_sent = True
+        self.save()
 
 
 class UserNotification(BaseModel):
     PENDING = 'p'
-    SENT = 's'
     READ = 'r'
     NOT_READ = 'ur'
 
     STATUSES = (
         (PENDING, 'در انتظار ارسال'),
-        (SENT, 'ارسال شده'),
         (READ, 'خوانده شده'),
         (NOT_READ, 'خوانده نشده')
     )

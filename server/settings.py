@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'wkhtmltopdf',
     'rest_framework_swagger',
     'rest_framework.authtoken',
+    'django_extensions',
 
     'users',
     'companies',

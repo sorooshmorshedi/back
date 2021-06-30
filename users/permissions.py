@@ -23,3 +23,15 @@ class UserLimit(BasePermission):
 
             return users_count + 1 < user.max_users
         return True
+
+
+class NotificationPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            company = request.user.active_company
+            user = company.created_by
+
+            users_count = CompanyUser.objects.filter(company__created_by=user).count()
+
+            return users_count + 1 < user.max_users
+        return True
