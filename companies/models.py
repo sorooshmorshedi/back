@@ -161,6 +161,9 @@ class FinancialYear(BaseModel):
 
             self.openingSanad = sanad
             self.save()
+        else:
+            self.openingSanad.date = self.start
+            self.openingSanad.save()
 
         return self.openingSanad
 
