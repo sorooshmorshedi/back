@@ -432,7 +432,10 @@ class FinancialYearModelView(viewsets.ModelViewSet):
             else:
                 base_financial_year = FinancialYear.objects.get(pk=117)
         except FinancialYear.DoesNotExist:
-            base_financial_year = FinancialYear.objects.get(pk=1)
+            if new_financial_year.is_advari:
+                base_financial_year = FinancialYear.objects.get(pk=2)
+            else:
+                base_financial_year = FinancialYear.objects.get(pk=3)
 
         """
             Be careful about models with relationships

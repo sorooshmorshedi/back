@@ -36,14 +36,13 @@ class DefiniteFactor(APIView):
     @staticmethod
     def definiteFactor(user, pk, is_confirmed=False):
         factor = get_object_or_404(Factor.objects.inFinancialYear(), pk=pk)
+        factor.define()
 
         if factor.type == Factor.FIRST_PERIOD_INVENTORY:
             factor.temporary_code = 0
             factor.code = 0
         elif factor.code is None:
             factor.code = Factor.get_new_code(factor_type=factor.type)
-
-        factor.is_definite = True
 
         if factor.financial_year.is_advari:
             factor.definition_date = datetime.datetime.combine(factor.date.togregorian(), factor.time)

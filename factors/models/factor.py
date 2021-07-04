@@ -15,14 +15,14 @@ from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
-from helpers.models import BaseModel, DECIMAL
+from helpers.models import BaseModel, DECIMAL, DefinableMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
 from wares.models import Ware, Unit, Warehouse
 
 
-class Factor(BaseModel):
+class Factor(BaseModel, DefinableMixin):
     BUY = 'buy'
     SALE = 'sale'
     BACK_FROM_BUY = 'backFromBuy'
@@ -89,10 +89,6 @@ class Factor(BaseModel):
     has_tax = models.BooleanField(default=False)
     taxValue = models.DecimalField(default=0, max_digits=24, decimal_places=0, null=True, blank=True)
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
-
-    is_definite = models.BooleanField(default=False)
-    defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='definedFactors')
-    definition_date = models.DateTimeField(blank=True, null=True)
 
     is_loaded = models.BooleanField(default=False)
     loaded_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='loadedFactors')

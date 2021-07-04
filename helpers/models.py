@@ -1,9 +1,6 @@
-import logging
 import re
 from datetime import datetime
-from functools import reduce
-
-import jdatetime
+from django.utils.timezone import now
 from django.db.models.aggregates import Max
 from django.db.models.deletion import ProtectedError
 from django.db.models.functions.comparison import Coalesce
@@ -188,6 +185,39 @@ class TreeMixin(models.Model):
             raise serializers.ValidationError("تعداد عضو های این سطح پر شده است")
 
         return str(code)
+
+
+class DefinableManager(BaseManager):
+
+    def definites(self, financial_year=None):
+        return self.inFinancialYear(financial_year).filter(is_definite=True)
+
+    def indefinites(self, financial_year=None):
+        return self.inFinancialYear(financial_year).filter(is_definite=False)
+
+
+class DefinableMixin(models.Model):
+    is_definite = models.BooleanField(default=False)
+    defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
+    definition_date = models.DateTimeField(blank=True, null=True)
+
+    objects = DefinableManager()
+
+    class Meta:
+        abstract = True
+
+    def define(self, date=None):
+        if not self.is_definite:
+            self.is_definite = True
+            self.defined_by = get_current_user()
+            self.definition_date = date or now()
+            self.save()
+
+    def indefine(self):
+        self.is_definite = False
+        self.defined_by = None
+        self.definition_date = None
+        self.save()
 
 
 def DATE(**kwargs):
