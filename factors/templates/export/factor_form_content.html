@@ -42,19 +42,19 @@
             {% if not summarized %}
                 <div class="col-xs-3">
                     <span> کد اقتصادی: </span>
-                    <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
+                    <span> {{ form.account.eghtesadi_code | default:'-' }} </span>
                 </div>
                 <div class="col-xs-3">
                     <span> شماره ملی: </span>
-                    <span> {{ form.account.person.meli_code | default:'-' }} </span>
+                    <span> {{ form.account.meli_code | default:'-' }} </span>
                 </div>
                 <div class="col-xs-3">
                     <span>آدرس: </span>
-                    <span> {{ form.account.person.address1 | default:'-' }} </span>
+                    <span> {{ form.account.address_1 | default:'-' }} </span>
                 </div>
                 <div class="col-xs-3">
                     <span>تلفن: </span>
-                    <span> {{ form.account.person.phone1 | default:'-' }} </span>
+                    <span> {{ form.account.phone_1 | default:'-' }} </span>
                 </div>
             {% endif %}
         </div>
@@ -76,11 +76,11 @@
             {% if not summarized %}
                 <div class="col-xs-3">
                     <span> کد اقتصادی: </span>
-                    <span> {{ form.account.person.eghtesadiCode | default:'-' }} </span>
+                    <span> {{ form.account.eghtesadi_code | default:'-' }} </span>
                 </div>
                 <div class="col-xs-3">
                     <span> شماره ملی: </span>
-                    <span> {{ form.account.person.meli_code | default:'-' }} </span>
+                    <span> {{ form.account.meli_code | default:'-' }} </span>
                 </div>
             {% endif %}
         </div>
