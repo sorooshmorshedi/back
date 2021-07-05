@@ -3,10 +3,10 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from factors.models.factor import Factor
-from helpers.models import BaseModel
+from helpers.models import BaseModel, DefinableMixin
 
 
-class Transfer(BaseModel):
+class Transfer(BaseModel, DefinableMixin):
     code = models.IntegerField()
     date = jmodels.jDateField()
     time = models.TimeField()
@@ -24,8 +24,10 @@ class Transfer(BaseModel):
             ('create.transfer', 'تعریف انتقال'),
             ('update.transfer', 'ویرایش انتقال'),
             ('delete.transfer', 'حذف انتقال'),
+            ('define.transfer', 'قطعی کردن انتقال'),
 
             ('getOwn.transfer', 'مشاهده انتقال های خود'),
             ('updateOwn.transfer', 'ویرایش انتقال های خود'),
             ('deleteOwn.transfer', 'حذف انتقال های خود'),
+            ('defineOwn.transfer', 'قطعی کردن انتقال های خود'),
         )

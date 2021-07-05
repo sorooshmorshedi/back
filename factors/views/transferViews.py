@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -78,3 +79,22 @@ class GetTransferByPositionView(APIView):
         if item:
             return Response(TransferListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class DefineTransferView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_codename = 'define.transfer'
+    serializer_class = TransferListRetrieveSerializer
+
+    def post(self, request):
+        data = request.data
+        item = get_object_or_404(
+            self.serializer_class.Meta.model,
+            pk=data.get('item')
+        )
+
+        DefiniteFactor.updateFactorInventory(item.output_factor)
+        DefiniteFactor.updateFactorInventory(item.input_factor)
+        item.define()
+
+        return Response(self.serializer_class(instance=item).data)
