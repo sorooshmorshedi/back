@@ -9,13 +9,13 @@ from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.functions import sanad_exp
-from helpers.models import BaseModel, DECIMAL
+from helpers.models import BaseModel, DECIMAL, DefinableMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
 
 
-class Transaction(BaseModel):
+class Transaction(BaseModel, DefinableMixin):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     IMPREST = 'imprest'
@@ -52,31 +52,34 @@ class Transaction(BaseModel):
             ('create.receiveTransaction', 'تعریف دریافت'),
             ('update.receiveTransaction', 'ویرایش دریافت'),
             ('delete.receiveTransaction', 'حذف دریافت'),
+            ('define.receiveTransaction', 'قطعی کردن دریافت'),
 
             ('get.paymentTransaction', 'مشاهده پرداخت'),
             ('create.paymentTransaction', 'تعریف پرداخت'),
             ('update.paymentTransaction', 'ویرایش پرداخت'),
             ('delete.paymentTransaction', 'حذف پرداخت'),
+            ('define.paymentTransaction', 'قطعی کردن پرداخت'),
 
             ('get.imprestTransaction', 'مشاهده پرداخت تنخواه'),
             ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
             ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
             ('delete.imprestTransaction', 'حذف پرداخت تنخواه'),
+            ('define.imprestTransaction', 'قعطی کردن پرداخت تنخواه'),
 
-            ('firstConfirm.receiveTransaction', 'تایید اول دریافت '),
-            ('secondConfirm.receiveTransaction', 'تایید دوم دریافت '),
-            ('firstConfirmOwn.receiveTransaction', 'تایید اول دریافت های خود'),
-            ('secondConfirmOwn.receiveTransaction', 'تایید دوم دریافت های خود'),
+            ('getOwn.receiveTransaction', 'مشاهده دریافت های خود'),
+            ('updateOwn.receiveTransaction', 'ویرایش دریافت های خود'),
+            ('deleteOwn.receiveTransaction', 'حذف دریافت های خود'),
+            ('defineOwn.receiveTransaction', 'قطعی کردن دریافت های خود'),
 
-            ('firstConfirm.paymentTransaction', 'تایید اول پرداخت '),
-            ('secondConfirm.paymentTransaction', 'تایید دوم پرداخت '),
-            ('firstConfirmOwn.paymentTransaction', 'تایید اول پرداخت های خود'),
-            ('secondConfirmOwn.paymentTransaction', 'تایید دوم پرداخت های خود'),
+            ('getOwn.paymentTransaction', 'مشاهده پرداخت های خود'),
+            ('updateOwn.paymentTransaction', 'ویرایش پرداخت های خود'),
+            ('deleteOwn.paymentTransaction', 'حذف پرداخت های خود'),
+            ('defineOwn.paymentTransaction', 'قطعی کردن پرداخت های خود'),
 
-            ('firstConfirm.imprestTransaction', 'تایید اول تنخواه '),
-            ('secondConfirm.imprestTransaction', 'تایید دوم تنخواه '),
-            ('firstConfirmOwn.imprestTransaction', 'تایید اول تنخواه های خود'),
-            ('secondConfirmOwn.imprestTransaction', 'تایید دوم تنخواه های خود'),
+            ('getOwn.imprestTransaction', 'مشاهده پرداخت تنخواه های خود'),
+            ('updateOwn.imprestTransaction', 'ویرایش پرداخت تنخواه های خود'),
+            ('deleteOwn.imprestTransaction', 'حذف پرداخت تنخواه های خود'),
+            ('defineOwn.imprestTransaction', 'قعطی کردن پرداخت تنخواه های خود'),
 
         )
 
@@ -125,9 +128,10 @@ class Transaction(BaseModel):
             FactorPaymentSerializer
         ).sync()
 
-        for factor in Factor.objects.filter(id__in=factor_ids_to_update).all():
-            factor.paidValue = factor.payments.aggregate(Sum('value'))['value__sum'] or 0
-            factor.save()
+        if self.is_defined:
+            for factor in Factor.objects.filter(id__in=factor_ids_to_update).all():
+                factor.paidValue = factor.payments.filter(is_defined=True).aggregate(Sum('value'))['value__sum'] or 0
+                factor.save()
 
     @property
     def sum(self):
@@ -283,6 +287,7 @@ class Transaction(BaseModel):
             )
 
         sanad.update_values()
+        sanad.define()
 
     def delete(self, *args, **kwargs):
         clearSanad(self.sanad)
@@ -307,9 +312,12 @@ class Transaction(BaseModel):
 
     @staticmethod
     def get_not_settled_imprests_queryset(account_id=None, floatAccount_id=None, costCenter_id=None):
-        queryset = Transaction.objects.hasAccess('get', 'imprestTransaction') \
-            .filter(type=Transaction.IMPREST) \
-            .filter(Q(imprestSettlement=None) | Q(imprestSettlement__is_settled=False))
+        queryset = Transaction.objects.hasAccess('get', 'imprestTransaction').filter(
+            is_defined=True,
+            type=Transaction.IMPREST
+        ).filter(
+            Q(imprestSettlement=None) | Q(imprestSettlement__is_settled=False)
+        )
 
         if account_id:
             queryset = queryset.filter(account__id=account_id)

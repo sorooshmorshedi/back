@@ -465,7 +465,11 @@ class SettleDriverImprests(APIView):
         data = request.data
         car = Car.objects.get(pk=data['car'])
         driver = Driver.objects.get(pk=data['driver'])
-        imprests = Transaction.objects.filter(type=Transaction.IMPREST, pk__in=data['imprests'])
+        imprests = Transaction.objects.filter(
+            is_defined=True,
+            type=Transaction.IMPREST,
+            pk__in=data['imprests']
+        )
 
         settlements = []
         for imprest in imprests:

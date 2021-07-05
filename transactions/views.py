@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from accounts.defaultAccounts.models import DefaultAccount
 from factors.models import Factor
 from factors.serializers import FactorListRetrieveSerializer
-from helpers.auth import BasicCRUDPermission
+from helpers.auth import BasicCRUDPermission, DefinedItemUDPermission
 from helpers.functions import get_object_by_code, get_object_accounts
 from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
@@ -56,15 +56,17 @@ class TransactionCreateView(generics.CreateAPIView):
             code=Transaction.newCodes(transaction_data.get('type')),
             sanad=sanad
         )
-        transaction = serializer.instance
-        transaction.sync(user, data)
-        transaction.updateSanad(user)
 
-        return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_201_CREATED)
+        serializer.instance.sync(user, data)
+
+        return Response(
+            TransactionListRetrieveSerializer(instance=serializer.instance).data,
+            status=status.HTTP_201_CREATED
+        )
 
 
 class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission, DefinedItemUDPermission)
     serializer_class = TransactionCreateUpdateSerializer
 
     @property
@@ -86,8 +88,11 @@ class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        transaction.sync(user, data)
-        transaction.updateSanad(user)
+        instance = serializer.instance
+        instance.sync(user, data)
+
+        if instance.is_defined:
+            instance.updateSanad(user)
 
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_200_OK)
 
@@ -228,3 +233,28 @@ class QuickFactorTransaction(APIView):
         factor.save()
 
         return Response(FactorListRetrieveSerializer(instance=factor).data, status=status.HTTP_200_OK)
+
+
+class DefineTransactionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    serializer_class = TransactionListRetrieveSerializer
+
+    @property
+    def permission_codename(self):
+        return 'define.{}'.format(get_transaction_permission_basename(self.item.type))
+
+    @property
+    def item(self):
+        data = self.request.data
+        return get_object_or_404(
+            self.serializer_class.Meta.model,
+            pk=data.get('item')
+        )
+
+    def post(self, request):
+        user = request.user
+
+        self.item.updateSanad(user)
+        self.item.define()
+
+        return Response(self.serializer_class(instance=self.item).data)

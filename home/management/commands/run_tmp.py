@@ -7,6 +7,7 @@ from factors.factor_sanad import FactorSanad
 from factors.models import Factor
 from helpers.test import set_user
 from sanads.models import Sanad
+from transactions.models import Transaction
 
 
 class Command(BaseCommand):
@@ -17,6 +18,9 @@ class Command(BaseCommand):
             set_user(company.created_by)
 
             print("#{}".format(company.id))
-            for sanad in Sanad.objects.filter(financial_year__company=company):
-                if sanad.financial_year.check_date(sanad.date, raise_exception=False):
-                    sanad.define()
+
+            models = [Sanad, Transaction]
+            for model in models:
+                for item in model.objects.filter(financial_year__company=company):
+                    if item.financial_year.check_date(item.date, raise_exception=False):
+                        item.define()
