@@ -6,21 +6,22 @@ from sanads.models import SanadItem
 
 
 def updateAccountBalanceOnSave(sender, instance: SanadItem, **kwargs):
-    if instance.id:
-        sanadItem = SanadItem.objects.get(pk=instance.id)
+    if instance.sanad.is_defined:
+        if instance.id:
+            sanadItem = SanadItem.objects.get(pk=instance.id)
+            AccountBalance.update_balance(
+                financial_year=instance.financial_year,
+                **get_object_accounts(sanadItem),
+                bed_change=-sanadItem.bed,
+                bes_change=-sanadItem.bes,
+            )
+
         AccountBalance.update_balance(
             financial_year=instance.financial_year,
-            **get_object_accounts(sanadItem),
-            bed_change=-sanadItem.bed,
-            bes_change=-sanadItem.bes,
+            **get_object_accounts(instance),
+            bed_change=instance.bed,
+            bes_change=instance.bes
         )
-
-    AccountBalance.update_balance(
-        financial_year=instance.financial_year,
-        **get_object_accounts(instance),
-        bed_change=instance.bed,
-        bes_change=instance.bes
-    )
 
 
 def updateAccountBalanceOnDelete(sender, instance: SanadItem, **kwargs):

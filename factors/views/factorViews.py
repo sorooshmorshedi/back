@@ -114,8 +114,8 @@ class FactorModelView(viewsets.ModelViewSet):
 
         factor.verify_items(data['items']['items'], data['items']['ids_to_delete'])
 
-        is_definite = factor.is_definite
-        if is_definite:
+        is_defined = factor.is_defined
+        if is_defined:
             DefiniteFactor.updateFactorInventory(factor, True)
 
         serialized = FactorCreateUpdateSerializer(instance=factor, data=data['item'])
@@ -124,7 +124,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         factor.sync(user, data)
 
-        if is_definite:
+        if is_defined:
             DefiniteFactor.definiteFactor(user, factor.pk, is_confirmed=request.data.get('_confirmed'))
 
         factor.save()
@@ -189,7 +189,7 @@ class FactorModelView(viewsets.ModelViewSet):
 
         self.check_confirmations(request, factor, for_delete=True)
 
-        if factor.is_definite:
+        if factor.is_defined:
             DefiniteFactor.updateFactorInventory(factor, True)
             clearSanad(factor.sanad)
 

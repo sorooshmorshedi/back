@@ -80,7 +80,7 @@ class BuySaleReportView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = FactorItem.objects.inFinancialYear() \
-            .filter(factor__is_definite=True) \
+            .filter(factor__is_defined=True) \
             .prefetch_related('factor__account') \
             .prefetch_related('ware') \
             .prefetch_related('warehouse') \

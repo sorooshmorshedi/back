@@ -121,31 +121,31 @@ class Factor(BaseModel, DefinableMixin):
             ('create.buyFactor', 'تعریف فاکتور خرید'),
             ('update.buyFactor', 'ویرایش فاکتور خرید'),
             ('delete.buyFactor', 'حذف فاکتور خرید'),
-            ('definite.buyFactor', 'قطعی کردن خرید'),
+            ('define.buyFactor', 'قطعی کردن خرید'),
 
             ('get.saleFactor', 'مشاهده فاکتور فروش'),
             ('create.saleFactor', 'تعریف فاکتور فروش'),
             ('update.saleFactor', 'ویرایش فاکتور فروش'),
             ('delete.saleFactor', 'حذف فاکتور فروش'),
-            ('definite.saleFactor', 'قطعی کردن فروش'),
+            ('define.saleFactor', 'قطعی کردن فروش'),
 
             ('get.backFromSaleFactor', 'مشاهده فاکتور برگشت از فروش'),
             ('create.backFromSaleFactor', 'تعریف فاکتور برگشت از فروش'),
             ('update.backFromSaleFactor', 'ویرایش فاکتور برگشت از فروش'),
             ('delete.backFromSaleFactor', 'حذف فاکتور برگشت از فروش'),
-            ('definite.backFromSaleFactor', 'قطعی کردن برگشت از فروش'),
+            ('define.backFromSaleFactor', 'قطعی کردن برگشت از فروش'),
 
             ('get.backFromBuyFactor', 'مشاهده فاکتور برگشت از خرید'),
             ('create.backFromBuyFactor', 'تعریف فاکتور برگشت از خرید'),
             ('update.backFromBuyFactor', 'ویرایش فاکتور برگشت از خرید'),
             ('delete.backFromBuyFactor', 'حذف فاکتور برگشت از خرید'),
-            ('definite.backFromBuyFactor', 'قطعی کردن برگشت از خرید'),
+            ('define.backFromBuyFactor', 'قطعی کردن برگشت از خرید'),
 
             ('get.consumptionWareFactor', 'مشاهده حواله کالای مصرفی'),
             ('create.consumptionWareFactor', 'تعریف حواله کالای مصرفی'),
             ('update.consumptionWareFactor', 'ویرایش حواله کالای مصرفی'),
             ('delete.consumptionWareFactor', 'حذف حواله کالای مصرفی'),
-            ('definite.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی'),
+            ('define.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی'),
 
             ('get.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده'),
             ('get.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده'),
@@ -153,27 +153,27 @@ class Factor(BaseModel, DefinableMixin):
             ('getOwn.buyFactor', 'مشاهده فاکتور خرید خود'),
             ('updateOwn.buyFactor', 'ویرایش فاکتور های خرید خود'),
             ('deleteOwn.buyFactor', 'حذف فاکتور های خرید خود'),
-            ('definiteOwn.buyFactor', 'قطعی کردن فاکتور های خرید خود'),
+            ('defineOwn.buyFactor', 'قطعی کردن فاکتور های خرید خود'),
 
             ('getOwn.saleFactor', 'مشاهده فاکتور های فروش خود'),
             ('updateOwn.saleFactor', 'ویرایش فاکتور های فروش خود'),
             ('deleteOwn.saleFactor', 'حذف فاکتور های فروش خود'),
-            ('definiteOwn.saleFactor', 'قطعی کردن فاکتور های فروش خود'),
+            ('defineOwn.saleFactor', 'قطعی کردن فاکتور های فروش خود'),
 
             ('getOwn.backFromSaleFactor', 'مشاهده فاکتور های برگشت از فروش خود'),
             ('updateOwn.backFromSaleFactor', 'ویرایش فاکتور های برگشت از فروش خود'),
             ('deleteOwn.backFromSaleFactor', 'حذف فاکتور های برگشت از فروش خود'),
-            ('definiteOwn.backFromSaleFactor', 'قطعی کردن فاکتور های برگشت از فروش خود'),
+            ('defineOwn.backFromSaleFactor', 'قطعی کردن فاکتور های برگشت از فروش خود'),
 
             ('getOwn.backFromBuyFactor', 'مشاهده فاکتور های برگشت از خرید خود'),
             ('updateOwn.backFromBuyFactor', 'ویرایش فاکتور های برگشت از خرید خود'),
             ('deleteOwn.backFromBuyFactor', 'حذف فاکتور های برگشت از خرید خود'),
-            ('definiteOwn.backFromBuyFactor', 'قطعی کردن فاکتور های برگشت از خرید خود'),
+            ('defineOwn.backFromBuyFactor', 'قطعی کردن فاکتور های برگشت از خرید خود'),
 
             ('getOwn.consumptionWareFactor', 'مشاهده حواله کالای مصرفی خود'),
             ('updateOwn.consumptionWareFactor', 'ویرایش حواله کالای مصرفی خود'),
             ('deleteOwn.consumptionWareFactor', 'حذف حواله کالای مصرفی خود'),
-            ('definiteOwn.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی خود'),
+            ('defineOwn.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی خود'),
 
             ('getOwn.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده خود'),
             ('getOwn.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده خود'),
@@ -263,7 +263,7 @@ class Factor(BaseModel, DefinableMixin):
         )
 
     def __str__(self):
-        return "ID: {}, code: {}, type: {}, is_definite: {}".format(self.pk, self.code, self.type, self.is_definite)
+        return "ID: {}, code: {}, type: {}, is_defined: {}".format(self.pk, self.code, self.type, self.is_defined)
 
     @property
     def sum(self):
@@ -332,7 +332,7 @@ class Factor(BaseModel, DefinableMixin):
         :return: None
         """
 
-        if not self.financial_year.is_advari and self.is_definite:
+        if not self.financial_year.is_advari and self.is_defined:
 
             # Verify item deletions
             for item in FactorItem.objects.filter(id__in=ids_to_delete):
@@ -364,7 +364,7 @@ class Factor(BaseModel, DefinableMixin):
                     ware_id=row['ware'],
                     warehouse_id=row['warehouse'],
                     financial_year=self.financial_year,
-                    factor__is_definite=True,
+                    factor__is_defined=True,
                     factor__definition_date__gt=self.definition_date,
                 )
                 count = qs.count()
@@ -460,7 +460,7 @@ class Factor(BaseModel, DefinableMixin):
         if self.financial_year.is_advari:
             return True
 
-        if self.is_definite:
+        if self.is_defined:
             for item in self.items.all():
                 if not item.is_editable:
                     return False
@@ -509,7 +509,7 @@ class Factor(BaseModel, DefinableMixin):
                 value = +self.total_sum
                 is_negative = False
 
-        if self.is_definite:
+        if self.is_defined:
             before_factor = remain_value - value
             after_factor = remain_value
         else:
@@ -611,10 +611,10 @@ class FactorItem(BaseModel):
     meta = JSONField(default=dict)
 
     def __str__(self):
-        return "factor id: {}, factor type: {}, is_definite: {}, ware: {}, count: {}".format(
+        return "factor id: {}, factor type: {}, is_defined: {}, ware: {}, count: {}".format(
             self.factor.id,
             self.factor.type,
-            self.factor.is_definite,
+            self.factor.is_defined,
             self.ware, self.count
         )
 
@@ -663,7 +663,7 @@ class FactorItem(BaseModel):
             ware=self.ware,
             warehouse=self.warehouse,
             financial_year=self.financial_year,
-            factor__is_definite=True,
+            factor__is_defined=True,
             factor__definition_date__gt=self.factor.definition_date
         )
         is_last = qs.count() == 0
@@ -671,7 +671,7 @@ class FactorItem(BaseModel):
 
     @property
     def is_editable(self):
-        if self.factor.is_definite:
+        if self.factor.is_defined:
             return self.is_ware_last_definite_factor_item
         return True
 

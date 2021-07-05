@@ -20,7 +20,7 @@ class FactorWithAccountCreateUpdateSerializer(FactorCreateUpdateSerializer):
     class Meta:
         model = Factor
         fields = (
-            'id', 'code', 'date', 'type', 'is_pre_factor', 'account', 'explanation', 'is_definite', 'definition_date',
+            'id', 'code', 'date', 'type', 'is_pre_factor', 'account', 'explanation', 'is_defined', 'definition_date',
             'input_transfer', 'output_transfer', 'adjustment'
         )
 

@@ -180,7 +180,7 @@ class CloseFinancialYearView(APIView):
 
         user.has_object_perm(user.active_financial_year, self.permission_codename, raise_exception=True)
 
-        if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_definite=True).exists():
+        if Factor.objects.inFinancialYear(target_financial_year).filter(code__gte=1, is_defined=True).exists():
             raise ValidationError("ابتدا فاکتور های قطعی سال مالی جدید را پاک نمایید")
 
         CloseFinancialYearView.close_financial_year(user, target_financial_year)

@@ -63,6 +63,7 @@ class Command(BaseCommand):
         print("Update balances")
         qs = SanadItem.objects.filter(
             financial_year=user.active_financial_year,
+            sanad__is_defined=True
         ).all()
         for item in queryset_iterator(qs):
             AccountBalance.update_balance(

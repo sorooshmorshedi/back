@@ -28,7 +28,8 @@ class SanadItemListView(generics.ListAPIView):
 
     def get_queryset(self, *args, **kwargs):
         qs = SanadItem.objects.hasAccess(self.request.method, 'sanadItemsReport', use_financial_year=False).filter(
-            financial_year__company=self.request.user.active_company
+            financial_year__company=self.request.user.active_company,
+            sanad__is_defined=True,
         )
 
         order_sanads_by = self.request.GET.copy().get('order_sanads_by', None)

@@ -101,3 +101,18 @@ class TokenAuthSupportQueryString(TokenAuthentication):
             result = super(TokenAuthSupportQueryString, self).authenticate(request)
 
         return result
+
+
+class DefinedItemUDPermission(BasePermission):
+
+    def has_object_permission(self, request: Request, view: View, obj: BaseModel) -> bool:
+        if request.method.lower() in ('put', 'delete'):
+            user = request.user
+
+            has_define_perm = user.has_object_perm(obj, f'define.{obj._meta.permission_basename}')
+            if has_define_perm:
+                return True
+            else:
+                return False
+
+        return True

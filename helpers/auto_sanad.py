@@ -55,6 +55,7 @@ class AutoSanad:
             sanad.date = self.get_sanad_date()
             sanad.explanation = self.get_sanad_explanation()
             sanad.save()
+        sanad.define()
         return sanad
 
     def _create_sanad_items(self, sanad: Sanad, sanad_items: list):

@@ -10,11 +10,11 @@ from django_jalali.db import models as jmodels
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user
-from helpers.models import BaseModel
+from helpers.models import BaseModel, DefinableMixin
 from server.settings import TESTING
 
 
-class Sanad(BaseModel):
+class Sanad(BaseModel, DefinableMixin):
     OPENING = 'o'
     CLOSING = 'c'
     NORMAL = 'n'
@@ -61,6 +61,8 @@ class Sanad(BaseModel):
             ('secondConfirmOwn.sanad', 'تایید دوم سند های خود'),
 
             ('reorder.sanad', 'مرتب کردن کد اسناد بر اساس تاریخ'),
+
+            ('define.sanad', 'قطعی کردن سند'),
         )
 
     @property

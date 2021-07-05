@@ -66,7 +66,7 @@ class FirstPeriodInventoryView(APIView):
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:
             DefiniteFactor.updateFactorInventory(first_period_inventory, True)
-            first_period_inventory.is_definite = True
+            first_period_inventory.is_defined = True
             first_period_inventory.is_auto_created = is_auto_created
             first_period_inventory.code = 0
             first_period_inventory.save()
@@ -97,7 +97,7 @@ class FirstPeriodInventoryView(APIView):
     def _create_or_update_factor(factor_data, factor_items_data, financial_year, user, engage_inventory=True):
         factor_data.pop('sanad', None)
         factor_data['type'] = Factor.FIRST_PERIOD_INVENTORY
-        factor_data['is_definite'] = 1
+        factor_data['is_defined'] = 1
 
         first_period_inventory = Factor.get_first_period_inventory(financial_year)
         if first_period_inventory:

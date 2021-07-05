@@ -190,14 +190,14 @@ class TreeMixin(models.Model):
 class DefinableManager(BaseManager):
 
     def definites(self, financial_year=None):
-        return self.inFinancialYear(financial_year).filter(is_definite=True)
+        return self.inFinancialYear(financial_year).filter(is_defined=True)
 
     def indefinites(self, financial_year=None):
-        return self.inFinancialYear(financial_year).filter(is_definite=False)
+        return self.inFinancialYear(financial_year).filter(is_defined=False)
 
 
 class DefinableMixin(models.Model):
-    is_definite = models.BooleanField(default=False)
+    is_defined = models.BooleanField(default=False)
     defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
     definition_date = models.DateTimeField(blank=True, null=True)
 
@@ -207,14 +207,14 @@ class DefinableMixin(models.Model):
         abstract = True
 
     def define(self, date=None):
-        if not self.is_definite:
-            self.is_definite = True
+        if not self.is_defined:
+            self.is_defined = True
             self.defined_by = get_current_user()
             self.definition_date = date or now()
             self.save()
 
     def indefine(self):
-        self.is_definite = False
+        self.is_defined = False
         self.defined_by = None
         self.definition_date = None
         self.save()

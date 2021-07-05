@@ -181,7 +181,7 @@ class Ware(BaseModel):
             from factors.models import Factor
             from django.db.models import Q
             last_factor_item = FactorItem.objects.inFinancialYear().filter(ware=self) \
-                .filter(factor__is_definite=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
+                .filter(factor__is_defined=True, factor__type__in=(*Factor.SALE_GROUP, *Factor.BUY_GROUP)) \
                 .order_by('-factor__definition_date', '-id')
 
             if exclude_factors:

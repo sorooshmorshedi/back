@@ -159,6 +159,7 @@ class FinancialYear(BaseModel):
             if not is_sanad_ok:
                 raise ValidationError('سند شماره یک سال مالی جدید را خالی کنید')
 
+            sanad.define()
             self.openingSanad = sanad
             self.save()
         else:
@@ -198,16 +199,18 @@ class FinancialYear(BaseModel):
         self.currentEarningsClosingSanad.delete()
         self.permanentsClosingSanad.delete()
 
-    def check_date(self, date):
+    def check_date(self, date, raise_exception=True):
         is_valid = self.start <= date <= self.end
-        if not is_valid:
-            raise ValidationError({
-                "non_field_errors": ["تاریخ باید در بازه سال مالی باشد. ( از {} تا {})".format(
-                    date_to_str(self.start),
-                    date_to_str(self.end),
-                )],
-                "date": date_to_str(date)
-            })
+        if raise_exception:
+            if not is_valid:
+                raise ValidationError({
+                    "non_field_errors": ["تاریخ باید در بازه سال مالی باشد. ( از {} تا {})".format(
+                        date_to_str(self.start),
+                        date_to_str(self.end),
+                    )],
+                    "date": date_to_str(date)
+                })
+        return is_valid
 
 
 class CompanyUser(BaseModel):

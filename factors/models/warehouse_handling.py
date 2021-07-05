@@ -20,7 +20,7 @@ class WarehouseHandling(BaseModel):
     ware_status = models.CharField(max_length=20)
     explanation = EXPLANATION()
 
-    is_definite = models.BooleanField(default=False)
+    is_defined = models.BooleanField(default=False)
     inputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsInput',
                                         blank=True, null=True)
     outputAdjustment = models.ForeignKey(Adjustment, on_delete=models.PROTECT, related_name='warehouseHandlingAsOutput',

@@ -332,7 +332,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             'date': date,
             'time': time,
             'explanation': explanation,
-            'is_definite': True,
+            'is_defined': True,
             'definition_date': definition_date,
             'is_auto_created': True
         }
@@ -493,7 +493,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
             'date': date,
             'time': time,
             'explanation': explanation,
-            'is_definite': True,
+            'is_defined': True,
             'definition_date': definition_date,
             'is_auto_created': True,
             'type': adjustment_type

@@ -24,7 +24,7 @@ def colspan(initial_count, *args):
 
 @register.simple_tag
 def factor_title(factor: Factor):
-    return "{}فاکتور {}".format("پیش " if not factor.is_definite else "", Factor.get_type_label(factor.type))
+    return "{}فاکتور {}".format("پیش " if not factor.is_defined else "", Factor.get_type_label(factor.type))
 
 
 @register.simple_tag

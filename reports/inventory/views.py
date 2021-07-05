@@ -97,7 +97,7 @@ class WareInventoryListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = FactorItem.objects.inFinancialYear().filter(
-            factor__is_definite=True,
+            factor__is_defined=True,
             # factor__type__in=(
             #     *Factor.SALE_GROUP,
             #     *Factor.BUY_GROUP,
@@ -191,7 +191,7 @@ class AllWaresInventoryListView(generics.ListAPIView):
             FactorItem.objects.inFinancialYear().filter(
                 ware_id=OuterRef('ware_id')
             ).filter(
-                factor__is_definite=True,
+                factor__is_defined=True,
                 # factor__type__in=(
                 #     *Factor.SALE_GROUP,
                 #     *Factor.BUY_GROUP,
@@ -203,14 +203,14 @@ class AllWaresInventoryListView(generics.ListAPIView):
         )
 
         input_filter = {
-            'factorItems__factor__is_definite': True,
+            'factorItems__factor__is_defined': True,
             # 'factorItems__factor__type__in': Factor.BUY_GROUP,
             'factorItems__factor__type__in': INVENTORY_INPUT_GROUP,
             'factorItems__financial_year': financial_year,
         }
 
         output_filter = {
-            'factorItems__factor__is_definite': True,
+            'factorItems__factor__is_defined': True,
             # 'factorItems__factor__type__in': (*Factor.SALE_GROUP, Factor.CONSUMPTION_WARE),
             'factorItems__factor__type__in': INVENTORY_OUTPUT_GROUP,
             'factorItems__financial_year': financial_year,
@@ -311,7 +311,7 @@ class WarehouseInventoryListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = FactorItem.objects.inFinancialYear().filter(
-            factor__is_definite=True
+            factor__is_defined=True
         ).prefetch_related(
             'factor__account',
             'factor__sanad',
@@ -408,13 +408,13 @@ class AllWarehousesInventoryListView(generics.ListAPIView):
         financial_year = self.request.user.active_financial_year
 
         input_filter = {
-            'factorItems__factor__is_definite': True,
+            'factorItems__factor__is_defined': True,
             'factorItems__factor__financial_year': financial_year,
             'factorItems__factor__type__in': INVENTORY_INPUT_GROUP
         }
 
         output_filter = {
-            'factorItems__factor__is_definite': True,
+            'factorItems__factor__is_defined': True,
             'factorItems__factor__financial_year': financial_year,
             'factorItems__factor__type__in': INVENTORY_OUTPUT_GROUP
         }

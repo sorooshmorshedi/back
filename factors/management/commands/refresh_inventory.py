@@ -64,7 +64,7 @@ class Command(BaseCommand):
         print("Undo + Redo definition")
         qs = Factor.objects.filter(
             financial_year=financial_year,
-            is_definite=True
+            is_defined=True
         ).all()
 
         errors = []

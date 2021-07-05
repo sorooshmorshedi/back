@@ -1,6 +1,4 @@
 from django.db.models.aggregates import Count
-from django.db.models.expressions import F
-from django.db.models.query import Prefetch
 from django.db.models.query_utils import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -12,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from helpers.auth import BasicCRUDPermission
+from helpers.auth import BasicCRUDPermission, DefinedItemUDPermission
 from helpers.db import queryset_iterator
 from helpers.functions import get_object_by_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
@@ -63,7 +61,7 @@ class SanadCreateView(generics.CreateAPIView):
 
 
 class SanadDetailView(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_classes = (IsAuthenticated, BasicCRUDPermission, DefinedItemUDPermission)
     permission_basename = 'sanad'
     serializer_class = SanadSerializer
 
@@ -169,3 +167,24 @@ class ConfirmSanad(ConfirmView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission,)
     permission_basename = 'sanad'
     model = Sanad
+
+
+class DefineSanadView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_codename = 'define.sanad'
+    serializer_class = SanadRetrieveSerializer
+
+    def post(self, request):
+        data = request.data
+        item = get_object_or_404(
+            self.serializer_class.Meta.model,
+            pk=data.get('item')
+        )
+
+        indefine = data.get('indefine') == 'true'
+        if indefine:
+            item.indefine()
+        else:
+            item.define()
+
+        return Response(self.serializer_class(instance=item).data)

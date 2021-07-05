@@ -70,7 +70,7 @@ class WarehouseHandlingModelView(viewsets.ModelViewSet):
             WarehouseHandlingItemCreateUpdateSerializer
         ).sync()
 
-        if instance.is_definite:
+        if instance.is_defined:
             WarehouseHandlingDefiniteView.definite(instance)
 
         return Response(
@@ -162,7 +162,7 @@ class WarehouseHandlingDefiniteView(APIView):
 
         instance.inputAdjustment = input_serializer.instance
         instance.outputAdjustment = output_serializer.instance
-        instance.is_definite = True
+        instance.is_defined = True
         if instance.code is None:
             instance.code = get_new_code(WarehouseHandling)
         instance.save()
