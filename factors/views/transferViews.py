@@ -93,8 +93,9 @@ class DefineTransferView(APIView):
             pk=data.get('item')
         )
 
-        DefiniteFactor.updateFactorInventory(item.output_factor)
-        DefiniteFactor.updateFactorInventory(item.input_factor)
-        item.define()
+        if not item.is_defined:
+            DefiniteFactor.updateFactorInventory(item.output_factor)
+            DefiniteFactor.updateFactorInventory(item.input_factor)
+            item.define()
 
         return Response(self.serializer_class(instance=item).data)

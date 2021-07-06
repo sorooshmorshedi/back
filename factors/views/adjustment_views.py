@@ -1,12 +1,12 @@
-from django.db.models.query import Prefetch
+from rest_framework.generics import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from factors.adjustment_sanad import AdjustmentSanad
 from factors.models import Adjustment
-from factors.models.factor import FactorItem
 from factors.serializers import AdjustmentListRetrieveSerializer, AdjustmentCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
@@ -82,3 +82,23 @@ class GetAdjustmentByPositionView(APIView):
         if item:
             return Response(AdjustmentListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class DefineAdjustmentView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_codename = 'define.adjustment'
+    serializer_class = AdjustmentListRetrieveSerializer
+
+    def post(self, request):
+        data = request.data
+        item = get_object_or_404(
+            self.serializer_class.Meta.model,
+            pk=data.get('item')
+        )
+
+        if not item.is_defined:
+            DefiniteFactor.updateFactorInventory(item.factor)
+            AdjustmentSanad(item).update()
+            item.define()
+
+        return Response(self.serializer_class(instance=item).data)

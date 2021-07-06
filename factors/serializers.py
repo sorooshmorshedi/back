@@ -427,7 +427,9 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
 
         # Sync factor
         factor = instance.factor
-        DefiniteFactor.updateFactorInventory(factor, revert=True)
+
+        if instance.is_defined:
+            DefiniteFactor.updateFactorInventory(factor, revert=True)
 
         factor_items_data = []
         for item in validated_data.get('items'):
@@ -474,10 +476,11 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         for item_data in factor_items_data:
             factor.items.create(**item_data)
 
-        DefiniteFactor.updateFactorInventory(factor)
+        if instance.is_defined:
+            DefiniteFactor.updateFactorInventory(factor)
 
-        # Sync sanad
-        AdjustmentSanad(instance).update()
+            # Sync sanad
+            AdjustmentSanad(instance).update()
 
     def create(self, validated_data, **kwargs):
         financial_year = self.context['financial_year']

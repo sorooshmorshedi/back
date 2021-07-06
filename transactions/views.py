@@ -254,7 +254,8 @@ class DefineTransactionView(APIView):
     def post(self, request):
         user = request.user
 
-        self.item.updateSanad(user)
-        self.item.define()
+        if not self.item.is_defined:
+            self.item.updateSanad(user)
+            self.item.define()
 
         return Response(self.serializer_class(instance=self.item).data)

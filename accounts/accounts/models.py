@@ -277,6 +277,7 @@ class Account(BaseModel):
 
     @staticmethod
     def get_inventory_account(user):
+        return Account.objects.inFinancialYear().get(code='601010001')
         return Account.objects.inFinancialYear().get(code='106040001')
 
     @staticmethod
