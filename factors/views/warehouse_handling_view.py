@@ -13,6 +13,7 @@ from factors.views.adjustment_views import AdjustmentModelView
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
+from helpers.views.lock_view import ToggleItemLockView
 
 
 class WarehouseHandlingModelView(viewsets.ModelViewSet):
@@ -183,3 +184,8 @@ class GetWarehouseHandlingByPositionView(APIView):
         if item:
             return Response(WarehouseHandlingListRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
+
+
+class ToggleWarehouseHandlingLockView(ToggleItemLockView):
+    serializer_class = WarehouseHandlingListRetrieveSerializer
+    permission_codename = 'lock.warehouseHandling'

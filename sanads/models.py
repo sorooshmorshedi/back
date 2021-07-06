@@ -10,11 +10,11 @@ from django_jalali.db import models as jmodels
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user
-from helpers.models import BaseModel, DefinableMixin
+from helpers.models import BaseModel, DefinableMixin, LockableMixin
 from server.settings import TESTING
 
 
-class Sanad(BaseModel, DefinableMixin):
+class Sanad(BaseModel, DefinableMixin, LockableMixin):
     OPENING = 'o'
     CLOSING = 'c'
     NORMAL = 'n'
@@ -48,21 +48,19 @@ class Sanad(BaseModel, DefinableMixin):
         unique_together = ('code', 'financial_year')
         permission_basename = 'sanad'
         permissions = (
-            ('get.sanad', 'مشاهده سند'),
             ('create.sanad', 'تعریف سند'),
+
+            ('get.sanad', 'مشاهده سند'),
             ('update.sanad', 'ویرایش سند'),
+            ('define.sanad', 'قطعی کردن سند'),
+            ('lock.sanad', 'قفل کردن سند'),
 
             ('getOwn.sanad', 'مشاهده سند های خود'),
             ('updateOwn.sanad', 'ویرایش سند های خود'),
-
-            ('firstConfirm.sanad', 'تایید اول سند'),
-            ('secondConfirm.sanad', 'تایید دوم سند'),
-            ('firstConfirmOwn.sanad', 'تایید اول سند های خود'),
-            ('secondConfirmOwn.sanad', 'تایید دوم سند های خود'),
+            ('defineOwn.sanad', 'قطعی کردن سند های خود'),
+            ('lockOwn.sanad', 'قفل کردن سند های خود'),
 
             ('reorder.sanad', 'مرتب کردن کد اسناد بر اساس تاریخ'),
-
-            ('define.sanad', 'قطعی کردن سند'),
         )
 
     @property

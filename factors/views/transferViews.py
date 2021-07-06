@@ -10,6 +10,7 @@ from factors.serializers import TransferListRetrieveSerializer, TransferCreateUp
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code, get_new_code
+from helpers.views.lock_view import ToggleItemLockView
 
 
 class TransferModelView(viewsets.ModelViewSet):
@@ -99,3 +100,8 @@ class DefineTransferView(APIView):
             item.define()
 
         return Response(self.serializer_class(instance=item).data)
+
+
+class ToggleTransferLockView(ToggleItemLockView):
+    serializer_class = TransferListRetrieveSerializer
+    permission_codename = 'lock.transfer'

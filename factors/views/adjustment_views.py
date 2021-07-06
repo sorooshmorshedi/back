@@ -11,6 +11,7 @@ from factors.serializers import AdjustmentListRetrieveSerializer, AdjustmentCrea
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
+from helpers.views.lock_view import ToggleItemLockView
 from sanads.models import clearSanad
 
 
@@ -102,3 +103,8 @@ class DefineAdjustmentView(APIView):
             item.define()
 
         return Response(self.serializer_class(instance=item).data)
+
+
+class ToggleAdjustmentLockView(ToggleItemLockView):
+    permission_codename = 'lock.adjustment'
+    serializer_class = AdjustmentListRetrieveSerializer

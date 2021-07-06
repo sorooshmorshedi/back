@@ -3,11 +3,11 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from factors.models.factor import Factor
-from helpers.models import BaseModel, EXPLANATION, DefinableMixin
+from helpers.models import BaseModel, EXPLANATION, DefinableMixin, LockableMixin
 from sanads.models import Sanad
 
 
-class Adjustment(BaseModel, DefinableMixin):
+class Adjustment(BaseModel, DefinableMixin, LockableMixin):
     code = models.IntegerField()
     date = jmodels.jDateField()
     time = models.TimeField()
@@ -27,9 +27,11 @@ class Adjustment(BaseModel, DefinableMixin):
             ('update.adjustment', 'ویرایش تعدیل '),
             ('delete.adjustment', 'حذف تعدیل '),
             ('define.adjustment', 'قطعی کردن تعدیل '),
+            ('lock.adjustment', 'قفل کردن تعدیل '),
 
             ('getOwn.adjustment', 'مشاهده تعدیل های خود'),
             ('updateOwn.adjustment', 'ویرایش تعدیل های خود'),
             ('deleteOwn.adjustment', 'حذف تعدیل های خود'),
-            ('defineOwn.adjustment', 'قطعی کردن تعدیل های خود')
+            ('defineOwn.adjustment', 'قطعی کردن تعدیل های خود'),
+            ('lockOwn.adjustment', 'قفل کردن تعدیل های خود')
         )

@@ -9,13 +9,13 @@ from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.functions import sanad_exp
-from helpers.models import BaseModel, DECIMAL, DefinableMixin
+from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
 
 
-class Transaction(BaseModel, DefinableMixin):
+class Transaction(BaseModel, DefinableMixin, LockableMixin):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     IMPREST = 'imprest'
@@ -53,33 +53,39 @@ class Transaction(BaseModel, DefinableMixin):
             ('update.receiveTransaction', 'ویرایش دریافت'),
             ('delete.receiveTransaction', 'حذف دریافت'),
             ('define.receiveTransaction', 'قطعی کردن دریافت'),
+            ('lock.receiveTransaction', 'قفل کردن دریافت'),
 
             ('get.paymentTransaction', 'مشاهده پرداخت'),
             ('create.paymentTransaction', 'تعریف پرداخت'),
             ('update.paymentTransaction', 'ویرایش پرداخت'),
             ('delete.paymentTransaction', 'حذف پرداخت'),
             ('define.paymentTransaction', 'قطعی کردن پرداخت'),
+            ('lock.paymentTransaction', 'قفل کردن پرداخت'),
 
             ('get.imprestTransaction', 'مشاهده پرداخت تنخواه'),
             ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
             ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
             ('delete.imprestTransaction', 'حذف پرداخت تنخواه'),
             ('define.imprestTransaction', 'قعطی کردن پرداخت تنخواه'),
+            ('lock.imprestTransaction', 'قفل کردن پرداخت تنخواه'),
 
             ('getOwn.receiveTransaction', 'مشاهده دریافت های خود'),
             ('updateOwn.receiveTransaction', 'ویرایش دریافت های خود'),
             ('deleteOwn.receiveTransaction', 'حذف دریافت های خود'),
             ('defineOwn.receiveTransaction', 'قطعی کردن دریافت های خود'),
+            ('lockOwn.receiveTransaction', 'قفل کردن دریافت های خود'),
 
             ('getOwn.paymentTransaction', 'مشاهده پرداخت های خود'),
             ('updateOwn.paymentTransaction', 'ویرایش پرداخت های خود'),
             ('deleteOwn.paymentTransaction', 'حذف پرداخت های خود'),
             ('defineOwn.paymentTransaction', 'قطعی کردن پرداخت های خود'),
+            ('lockOwn.paymentTransaction', 'قفل کردن پرداخت های خود'),
 
             ('getOwn.imprestTransaction', 'مشاهده پرداخت تنخواه های خود'),
             ('updateOwn.imprestTransaction', 'ویرایش پرداخت تنخواه های خود'),
             ('deleteOwn.imprestTransaction', 'حذف پرداخت تنخواه های خود'),
             ('defineOwn.imprestTransaction', 'قعطی کردن پرداخت تنخواه های خود'),
+            ('lockOwn.imprestTransaction', 'قفل کردن پرداخت تنخواه های خود'),
 
         )
 

@@ -3,11 +3,11 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from factors.models.adjustment import Adjustment
-from helpers.models import BaseModel, EXPLANATION, DECIMAL
+from helpers.models import BaseModel, EXPLANATION, DECIMAL, LockableMixin
 from wares.models import Warehouse, Ware
 
 
-class WarehouseHandling(BaseModel):
+class WarehouseHandling(BaseModel, LockableMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='warehouseHandlings')
     code = models.IntegerField(blank=True, null=True)
 
@@ -29,10 +29,17 @@ class WarehouseHandling(BaseModel):
     class Meta(BaseModel.Meta):
         permission_basename = 'warehouseHandling'
         permissions = (
-            ('get.warehouseHandling', 'مشاهده انبار گردانی'),
             ('create.warehouseHandling', 'تعریف انبار گردانی'),
+
+            ('get.warehouseHandling', 'مشاهده انبار گردانی'),
             ('update.warehouseHandling', 'ویرایش انبار گردانی'),
             ('delete.warehouseHandling', 'حذف انبار گردانی'),
+            ('lock.warehouseHandling', 'قفل کردن انبار گردانی'),
+
+            ('getOwn.warehouseHandling', 'مشاهده انبار گردانی های خود'),
+            ('updateOwn.warehouseHandling', 'ویرایش انبار گردانی های خود'),
+            ('deleteOwn.warehouseHandling', 'حذف انبار گردانی های خود'),
+            ('lockOwn.warehouseHandling', 'قفل کردن انبار گردانی های خود'),
         )
 
 

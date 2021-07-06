@@ -15,6 +15,7 @@ from helpers.db import queryset_iterator
 from helpers.functions import get_object_by_code
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
+from helpers.views.lock_view import ToggleItemLockView
 from sanads.serializers import *
 
 
@@ -188,3 +189,8 @@ class DefineSanadView(APIView):
             item.define()
 
         return Response(self.serializer_class(instance=item).data)
+
+
+class ToggleSanadLockView(ToggleItemLockView):
+    permission_codename = 'lock.sanad'
+    serializer_class = SanadRetrieveSerializer

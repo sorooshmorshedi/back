@@ -99,6 +99,10 @@ class BaseModel(models.Model):
     def save(self, *args, **kwargs) -> None:
         if not self.pk:
             self.created_by = get_current_user()
+        else:
+            if isinstance(self, LockableMixin) and not kwargs.pop('toggling_lock', False) and self.is_locked:
+                raise ValidationError("ابتدا قفل را باز کنید")
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -218,6 +222,31 @@ class DefinableMixin(models.Model):
         self.defined_by = None
         self.definition_date = None
         self.save()
+
+
+class LockableMixin(models.Model):
+    """
+    Lock will be checked in BaseModel save method
+    """
+    is_locked = models.BooleanField(default=False)
+    locked_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
+    lock_date = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def lock(self, date=None):
+        if not self.is_locked:
+            self.is_locked = True
+            self.locked_by = get_current_user()
+            self.lock_date = date or now()
+            self.save(toggling_lock=True)
+
+    def unlock(self):
+        self.is_locked = False
+        self.locked_by = None
+        self.lock_date = None
+        self.save(toggling_lock=True)
 
 
 def DATE(**kwargs):

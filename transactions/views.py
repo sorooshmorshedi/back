@@ -14,6 +14,7 @@ from factors.serializers import FactorListRetrieveSerializer
 from helpers.auth import BasicCRUDPermission, DefinedItemUDPermission
 from helpers.functions import get_object_by_code, get_object_accounts
 from helpers.views.confirm_view import ConfirmView
+from helpers.views.lock_view import ToggleItemLockView
 from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction, TransactionItem
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer, \
@@ -259,3 +260,11 @@ class DefineTransactionView(APIView):
             self.item.define()
 
         return Response(self.serializer_class(instance=self.item).data)
+
+
+class ToggleTransactionLockView(ToggleItemLockView):
+    serializer_class = TransactionListRetrieveSerializer
+
+    @property
+    def permission_codename(self):
+        return 'lock.{}'.format(get_transaction_permission_basename(self.request.data.get('type')))

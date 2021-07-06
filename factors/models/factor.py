@@ -15,14 +15,14 @@ from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
-from helpers.models import BaseModel, DECIMAL, DefinableMixin
+from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
 from wares.models import Ware, Unit, Warehouse
 
 
-class Factor(BaseModel, DefinableMixin):
+class Factor(BaseModel, DefinableMixin, LockableMixin):
     BUY = 'buy'
     SALE = 'sale'
     BACK_FROM_BUY = 'backFromBuy'
@@ -121,31 +121,36 @@ class Factor(BaseModel, DefinableMixin):
             ('create.buyFactor', 'تعریف فاکتور خرید'),
             ('update.buyFactor', 'ویرایش فاکتور خرید'),
             ('delete.buyFactor', 'حذف فاکتور خرید'),
-            ('define.buyFactor', 'قطعی کردن خرید'),
+            ('define.buyFactor', 'قطعی کردن فاکتور خرید'),
+            ('lock.buyFactor', 'قفل کردن فاکتور خرید'),
 
             ('get.saleFactor', 'مشاهده فاکتور فروش'),
             ('create.saleFactor', 'تعریف فاکتور فروش'),
             ('update.saleFactor', 'ویرایش فاکتور فروش'),
             ('delete.saleFactor', 'حذف فاکتور فروش'),
-            ('define.saleFactor', 'قطعی کردن فروش'),
+            ('define.saleFactor', 'قطعی کردن فاکتور فروش'),
+            ('lock.saleFactor', 'قفل کردن فاکتور فروش'),
 
             ('get.backFromSaleFactor', 'مشاهده فاکتور برگشت از فروش'),
             ('create.backFromSaleFactor', 'تعریف فاکتور برگشت از فروش'),
             ('update.backFromSaleFactor', 'ویرایش فاکتور برگشت از فروش'),
             ('delete.backFromSaleFactor', 'حذف فاکتور برگشت از فروش'),
-            ('define.backFromSaleFactor', 'قطعی کردن برگشت از فروش'),
+            ('define.backFromSaleFactor', 'قطعی کردن فاکتور برگشت از فروش'),
+            ('lock.backFromSaleFactor', 'قفل کردن فاکتور برگشت از فروش'),
 
             ('get.backFromBuyFactor', 'مشاهده فاکتور برگشت از خرید'),
             ('create.backFromBuyFactor', 'تعریف فاکتور برگشت از خرید'),
             ('update.backFromBuyFactor', 'ویرایش فاکتور برگشت از خرید'),
             ('delete.backFromBuyFactor', 'حذف فاکتور برگشت از خرید'),
-            ('define.backFromBuyFactor', 'قطعی کردن برگشت از خرید'),
+            ('define.backFromBuyFactor', 'قطعی کردن فاکتور برگشت از خرید'),
+            ('lock.backFromBuyFactor', 'قفل کردن فاکتور برگشت از خرید'),
 
             ('get.consumptionWareFactor', 'مشاهده حواله کالای مصرفی'),
             ('create.consumptionWareFactor', 'تعریف حواله کالای مصرفی'),
             ('update.consumptionWareFactor', 'ویرایش حواله کالای مصرفی'),
             ('delete.consumptionWareFactor', 'حذف حواله کالای مصرفی'),
             ('define.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی'),
+            ('lock.consumptionWareFactor', 'قفل کردن حواله کالای مصرفی'),
 
             ('get.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده'),
             ('get.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده'),
@@ -154,57 +159,37 @@ class Factor(BaseModel, DefinableMixin):
             ('updateOwn.buyFactor', 'ویرایش فاکتور های خرید خود'),
             ('deleteOwn.buyFactor', 'حذف فاکتور های خرید خود'),
             ('defineOwn.buyFactor', 'قطعی کردن فاکتور های خرید خود'),
+            ('lockOwn.buyFactor', 'قفل کردن فاکتور های خرید خود'),
 
             ('getOwn.saleFactor', 'مشاهده فاکتور های فروش خود'),
             ('updateOwn.saleFactor', 'ویرایش فاکتور های فروش خود'),
             ('deleteOwn.saleFactor', 'حذف فاکتور های فروش خود'),
             ('defineOwn.saleFactor', 'قطعی کردن فاکتور های فروش خود'),
+            ('lockOwn.saleFactor', 'قفل کردن فاکتور های فروش خود'),
 
             ('getOwn.backFromSaleFactor', 'مشاهده فاکتور های برگشت از فروش خود'),
             ('updateOwn.backFromSaleFactor', 'ویرایش فاکتور های برگشت از فروش خود'),
             ('deleteOwn.backFromSaleFactor', 'حذف فاکتور های برگشت از فروش خود'),
             ('defineOwn.backFromSaleFactor', 'قطعی کردن فاکتور های برگشت از فروش خود'),
+            ('lockOwn.backFromSaleFactor', 'قفل کردن فاکتور های برگشت از فروش خود'),
 
             ('getOwn.backFromBuyFactor', 'مشاهده فاکتور های برگشت از خرید خود'),
             ('updateOwn.backFromBuyFactor', 'ویرایش فاکتور های برگشت از خرید خود'),
             ('deleteOwn.backFromBuyFactor', 'حذف فاکتور های برگشت از خرید خود'),
             ('defineOwn.backFromBuyFactor', 'قطعی کردن فاکتور های برگشت از خرید خود'),
+            ('lockOwn.backFromBuyFactor', 'قفل کردن فاکتور های برگشت از خرید خود'),
 
             ('getOwn.consumptionWareFactor', 'مشاهده حواله کالای مصرفی خود'),
             ('updateOwn.consumptionWareFactor', 'ویرایش حواله کالای مصرفی خود'),
             ('deleteOwn.consumptionWareFactor', 'حذف حواله کالای مصرفی خود'),
             ('defineOwn.consumptionWareFactor', 'قطعی کردن حواله کالای مصرفی خود'),
+            ('lockOwn.consumptionWareFactor', 'قفل کردن حواله کالای مصرفی خود'),
 
             ('getOwn.notPaidFactor', 'مشاهده فاکتور های پرداخت نشده خود'),
             ('getOwn.notReceivedFactor', 'مشاهده فاکتور های دریافت نشده خود'),
 
             ('get.firstPeriodInventory', 'مشاهده موجودی اول دوره'),
             ('update.firstPeriodInventory', 'ثبت موجودی اول دوره'),
-
-            ('firstConfirm.buyFactor', 'تایید اول فاکتور خرید '),
-            ('secondConfirm.buyFactor', 'تایید دوم فاکتور خرید '),
-            ('firstConfirmOwn.buyFactor', 'تایید اول فاکتور های خرید خود'),
-            ('secondConfirmOwn.buyFactor', 'تایید دوم فاکتور های خرید خود'),
-
-            ('firstConfirm.saleFactor', 'تایید اول فاکتور فروش '),
-            ('secondConfirm.saleFactor', 'تایید دوم فاکتور فروش '),
-            ('firstConfirmOwn.saleFactor', 'تایید اول فاکتور های فروش خود'),
-            ('secondConfirmOwn.saleFactor', 'تایید دوم فاکتور های فروش خود'),
-
-            ('firstConfirm.backFromBuyFactor', 'تایید اول فاکتور برگشت از خرید'),
-            ('secondConfirm.backFromBuyFactor', 'تایید دوم فاکتور برگشت از خرید'),
-            ('firstConfirmOwn.backFromBuyFactor', 'تایید اول فاکتور های برگشت از خرید خود'),
-            ('secondConfirmOwn.backFromBuyFactor', 'تایید دوم فاکتور های برگشت از خرید خود'),
-
-            ('firstConfirm.backFromSaleFromSaleFactor', 'تایید اول فاکتور برگشت از فروش '),
-            ('secondConfirm.backFromSaleFromSaleFactor', 'تایید دوم فاکتور برگشت از فروش '),
-            ('firstConfirmOwn.backFromSaleFromSaleFactor', 'تایید اول فاکتور های برگشت از فروش خود'),
-            ('secondConfirmOwn.backFromSaleFromSaleFactor', 'تایید دوم فاکتور های برگشت از فروش خود'),
-
-            ('firstConfirm.consumptionWareFactor', 'تایید اولحواله کالای مصرفی'),
-            ('secondConfirm.consumptionWareFactor', 'تایید دومحواله کالای مصرفی'),
-            ('firstConfirmOwn.consumptionWareFactor', 'تایید اول حواله کالای مصرفی خود'),
-            ('secondConfirmOwn.consumptionWareFactor', 'تایید دوم حواله کالای مصرفی خود'),
 
             ('create.buyPreFactor', 'تعریف پیش فاکتور خرید'),
 

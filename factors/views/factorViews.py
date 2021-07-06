@@ -12,6 +12,7 @@ from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from factors.serializers import *
+from helpers.views.lock_view import ToggleItemLockView
 from home.models import DefaultText
 from sanads.models import clearSanad
 from server.settings import TESTING
@@ -285,3 +286,11 @@ class CreateBackFactorView(APIView):
         )
 
         return Response(FactorListRetrieveSerializer(instance=back_factor).data)
+
+
+class ToggleFactorLockView(ToggleItemLockView):
+    serializer_class = FactorListRetrieveSerializer
+
+    @property
+    def permission_codename(self):
+        return f'lock.{get_factor_permission_basename(self.request.data.get("type"))}'
