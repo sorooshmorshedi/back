@@ -25,9 +25,11 @@ class Command(BaseCommand):
             models = [Factor, Transaction, Adjustment, Lading, OilCompanyLading, StatusChange, ImprestSettlement]
             for model in models:
                 for item in model.objects.filter(financial_year__company=company):
-                    if item.financial_year.check_date(
-                            item.date, raise_exception=False
-                    ) and getattr(item, 'sanad', None):
+                    if model == Lading:
+                        date = item.sanad_date
+                    else:
+                        date = item.date
+                    if item.financial_year.check_date(date, raise_exception=False) and getattr(item, 'sanad', None):
                         sanad = item.sanad
                         content_type = get_content_type_for_model(model)
 
