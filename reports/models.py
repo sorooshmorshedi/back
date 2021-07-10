@@ -4,9 +4,14 @@ from companies.models import FinancialYear
 from helpers.models import BaseModel
 
 
-class ReportPermissions(models.Model):
+class ReportsPermissions(models.Model):
     class Meta:
         default_permissions = ()
+
+        """
+            Reports permissions codenames should end with `Report` 
+        """
+
         permissions = (
             ('get.accountBalanceReport', 'مشاهده تراز'),
             ('get.floatAccountBalanceByGroupReport', 'مشاهده تراز شناور بر اساس گروه'),

@@ -1,4 +1,6 @@
 from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from _dashtbashi.models import Lading, OilCompanyLading
 from cheques.models.StatusChangeModel import StatusChange
@@ -14,7 +16,8 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        self.update_sanads_origin()
+        content_type = ContentType.objects.get(app_label='reports', model='report')
+        Permission.objects.filter(content_type=content_type).delete()
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
