@@ -4,6 +4,7 @@ from rest_framework.authentication import TokenAuthentication, get_authorization
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 
+from helpers.bale import Bale
 from helpers.models import BaseModel
 
 
@@ -86,6 +87,8 @@ class BasicCRUDPermission(BasicObjectPermission):
             self.message = "شما اجازه این عملیات را ندارید: {}".format(permission.name)
         else:
             self.message = "not found permission: {}".format(permission_codename)
+
+        Bale.to_me(user.username, permission_codename)
 
         return False
 
