@@ -83,6 +83,7 @@ def custom_exception_handler(exc, context):
             message = data[0]
         else:
             message = data.get('detail')
+
         if not message:
             for field, value in response.data.items():
                 errors.append({
@@ -90,10 +91,16 @@ def custom_exception_handler(exc, context):
                     'messages': value
                 })
         else:
-            errors.append({
-                'field': '',
-                'messages': [message]
-            })
+            if isinstance(message, dict) and 'non_field_errors' in message:
+                errors.append({
+                    'field': 'non_field_errors',
+                    'messages': message['non_field_errors']
+                })
+            else:
+                errors.append({
+                    'field': '',
+                    'messages': [message]
+                })
 
         response.data = errors
 
