@@ -1,3 +1,5 @@
+from django.contrib.admin.options import get_content_type_for_model
+
 from accounts.defaultAccounts.models import DefaultAccount
 from helpers.functions import get_object_accounts
 from helpers.models import BaseModel
@@ -28,7 +30,7 @@ class AutoSanad:
     def update(self, is_confirmed=True):
         sanad = self._get_sanad()
         rows = self.get_sanad_rows(self.instance)
-        self._create_sanad_items(sanad, rows)
+        self.create_sanad_items(sanad, rows)
         sanad.update_values()
 
         if not is_confirmed:
@@ -43,22 +45,27 @@ class AutoSanad:
             sanad = Sanad.objects.create(
                 code=newSanadCode(),
                 financial_year=self.instance.financial_year,
+                is_auto_created=True,
+                origin_content_type=get_content_type_for_model(type(self.instance)),
+                origin_id=self.instance.id,
+
                 date=self.get_sanad_date(),
                 explanation=self.get_sanad_explanation(),
-                is_auto_created=True,
             )
             self.instance.sanad = sanad
             self.instance.save()
         else:
-            clearSanad(sanad)
-            sanad.is_auto_created = True
+            sanad.delete_items(self.instance)
             sanad.date = self.get_sanad_date()
             sanad.explanation = self.get_sanad_explanation()
             sanad.save()
+
         sanad.define()
+
         return sanad
 
-    def _create_sanad_items(self, sanad: Sanad, sanad_items: list):
+    @staticmethod
+    def create_sanad_items(sanad: Sanad, sanad_items: list):
         """
         :param sanad: Sanad
         :param sanad_items: array[{any field of SanadItem}, ...]
@@ -69,8 +76,12 @@ class AutoSanad:
         for sanad_item in sanad_items:
             if isinstance(sanad_item['account'], str):
                 sanad_item.update(get_object_accounts(DefaultAccount.get(sanad_item['account'])))
+
             sanad_item['bed'] = sanad_item.get('bed', 0)
             sanad_item['bes'] = sanad_item.get('bes', 0)
+
+            sanad_item['origin_content_type'] = sanad_item.get('origin_content_type', sanad.origin_content_type)
+            sanad_item['origin_id'] = sanad_item.get('origin_id', sanad.origin_id)
 
         for sanad_item in sanad_items:
             if sanad_item['bed'] == sanad_item['bes'] == 0:

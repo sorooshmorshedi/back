@@ -14,9 +14,7 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        self.define_all_definable_models()
-
-    """
+        self.update_sanads_origin()
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
@@ -37,7 +35,6 @@ class Command(BaseCommand):
                         sanad.origin_id = item.id
                         sanad.items.update(origin_content_type=content_type, origin_id=item.id)
                         sanad.save()
-"""
 
     def define_all_definable_models(self):
         for company in Company.objects.all():

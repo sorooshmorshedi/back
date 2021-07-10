@@ -101,14 +101,19 @@ class SanadRetrieveSerializer(SanadSerializer):
     items = SanadItemListRetrieveSerializer(read_only=True, many=True)
     created_by = UserSimpleSerializer()
 
-    # this might be a performance problem
-    factor = FactorSanadSerializer(read_only=True, many=False)
-    adjustment = AdjustmentSanadSerializer(read_only=True, many=False)
-    lading = LadingSanadSerializer(read_only=True, many=False)
-    oilCompanyLading = OilCompanyLadingSanadSerializer(read_only=True, many=False)
-    statusChange = StatusChangeSanadSerializer(read_only=True, many=False)
-    transaction = TransactionSanadSerializer(read_only=True, many=False)
-    imprestSettlement = ImprestSettlementSanadSerializer(read_only=True, many=False)
+    origin = serializers.SerializerMethodField()
+
+    def get_origin(self, obj: Sanad):
+        origin = obj.get_origin()
+        if origin:
+            return {
+                'name': f'{obj.origin_content_type.app_label}.{obj.origin_content_type.model}',
+                'id': origin.id,
+                'type': getattr(origin, 'type'),
+                'code': getattr(origin, 'code')
+            }
+        else:
+            return None
 
     class Meta(SanadSerializer.Meta):
         fields = '__all__'

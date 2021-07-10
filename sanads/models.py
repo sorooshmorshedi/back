@@ -1,4 +1,5 @@
-import jdatetime
+from django.contrib.admin.options import get_content_type_for_model
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.aggregates import Max
 from django.db.models.expressions import F
@@ -39,6 +40,16 @@ class Sanad(BaseModel, DefinableMixin, LockableMixin):
     is_auto_created = models.BooleanField(default=True)
 
     type = models.CharField(choices=TYPES, default=NORMAL, max_length=3)
+
+    origin_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT, null=True, blank=True)
+    origin_id = models.BigIntegerField(null=True, blank=True)
+
+    def get_origin(self):
+        if self.origin_id:
+            origin = self.origin_content_type.get_object_for_this_type(pk=self.origin_id)
+            return origin
+        else:
+            return None
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.explanation[0:30])
@@ -103,6 +114,20 @@ class Sanad(BaseModel, DefinableMixin, LockableMixin):
                             account.max_bes
                         ))
 
+    def delete_items(self, origin: BaseModel = None):
+        qs = self.items.all()
+        if origin:
+            qs.filter(
+                origin_content_type=get_content_type_for_model(type(origin)),
+                origin_id=origin.id
+            )
+
+        for item in qs:
+            item.delete()
+
+        self.save()
+        self.update_values()
+
     def save(self, *args, **kwargs) -> None:
 
         self.financial_year.check_date(self.date)
@@ -150,6 +175,16 @@ class SanadItem(BaseModel):
 
     order = models.IntegerField(default=0)
 
+    origin_content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT, null=True, blank=True)
+    origin_id = models.BigIntegerField(null=True, blank=True)
+
+    def get_origin(self):
+        if self.origin_id:
+            origin = self.origin_content_type.get_object_for_this_type(pk=self.origin_id)
+            return origin
+        else:
+            return None
+
     def __str__(self):
         return "{0} - {1}".format(self.sanad.code, self.explanation[0:30])
 
@@ -169,9 +204,12 @@ def clearSanad(sanad: Sanad):
     sanad.is_auto_created = False
     sanad.type = Sanad.NORMAL
     sanad.date = sanad.financial_year.start
+    sanad.origin_content_type = None
+    sanad.origin_id = None
 
     for item in sanad.items.all():
         item.delete()
+
     sanad.save()
     sanad.update_values()
 
