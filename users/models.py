@@ -190,10 +190,15 @@ class City(BaseModel):
     class Meta(BaseModel.Meta):
         default_permissions = ()
         permissions = (
-            ('get.city', 'مشاهده شهر'),
             ('create.city', 'تعریف شهر'),
+
+            ('get.city', 'مشاهده شهر'),
             ('update.city', 'ویرایش شهر'),
             ('delete.city', 'حذف شهر'),
+
+            ('getOwn.city', 'مشاهده شهر های خود'),
+            ('updateOwn.city', 'ویرایش شهر های خود'),
+            ('deleteOwn.city', 'حذف شهر های خود'),
         )
 
 
