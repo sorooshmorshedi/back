@@ -1,3 +1,4 @@
+from django.contrib.admin.options import get_content_type_for_model
 from rest_framework.exceptions import ValidationError
 
 from _dashtbashi.models import Lading, Car, OilCompanyLading
@@ -436,6 +437,9 @@ class LadingSanad:
             )
 
         sanad.explanation = explanation
+        sanad.origin_content_type = get_content_type_for_model(Lading)
+        sanad.origin_id = lading.id
+
         sanad.save()
         sanad.update_values()
         sanad.define()
@@ -476,6 +480,8 @@ class OilCompanyLadingSanad:
         )
         sanad.explanation = explanation
         sanad.date = self.oilCompanyLading.date
+        sanad.origin_content_type = get_content_type_for_model(OilCompanyLading)
+        sanad.origin_id = oil_company_lading.id
         sanad.save()
 
         sanad_items = []

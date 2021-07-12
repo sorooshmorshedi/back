@@ -1,3 +1,4 @@
+from django.contrib.admin.options import get_content_type_for_model
 from django.db import models
 from django.db.models import Sum
 from django.db.models.functions.comparison import Coalesce
@@ -192,6 +193,8 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
 
         sanad.explanation = explanation
         sanad.date = self.date
+        sanad.origin_content_type = get_content_type_for_model(Transaction)
+        sanad.origin_id = self.id
         sanad.save()
 
         typeNames = []
