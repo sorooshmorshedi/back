@@ -88,7 +88,7 @@ class BasicCRUDPermission(BasicObjectPermission):
         else:
             self.message = "not found permission: {}".format(permission_codename)
 
-        Bale.to_me(user.username, permission_codename)
+        # Bale.to_me(user.username, permission_codename)
 
         return False
 
@@ -107,12 +107,15 @@ class TokenAuthSupportQueryString(TokenAuthentication):
 
 
 class DefinedItemUDPermission(BasePermission):
+    """
+    Should set permission_basename in view
+    """
 
     def has_object_permission(self, request: Request, view: View, obj: BaseModel) -> bool:
         if request.method.lower() in ('put', 'delete'):
             user = request.user
 
-            has_define_perm = user.has_object_perm(obj, f'define.{obj._meta.permission_basename}')
+            has_define_perm = user.has_object_perm(obj, f'define.{view.permission_basename}')
             if has_define_perm:
                 return True
             else:

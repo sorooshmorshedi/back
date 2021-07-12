@@ -67,7 +67,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
             ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
             ('delete.imprestTransaction', 'حذف پرداخت تنخواه'),
-            ('define.imprestTransaction', 'قعطی کردن پرداخت تنخواه'),
+            ('define.imprestTransaction', 'قطعی کردن پرداخت تنخواه'),
             ('lock.imprestTransaction', 'قفل کردن پرداخت تنخواه'),
 
             ('getOwn.receiveTransaction', 'مشاهده دریافت های خود'),
@@ -77,7 +77,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('lockOwn.receiveTransaction', 'قفل کردن دریافت های خود'),
 
             ('getOwn.paymentTransaction', 'مشاهده پرداخت های خود'),
-            ('updateOwn.paymentTransaction', 'ویرایش پرداخت های خود'),
+            ('updateOwn:.paymentTransaction', 'ویرایش پرداخت های خود'),
             ('deleteOwn.paymentTransaction', 'حذف پرداخت های خود'),
             ('defineOwn.paymentTransaction', 'قطعی کردن پرداخت های خود'),
             ('lockOwn.paymentTransaction', 'قفل کردن پرداخت های خود'),
@@ -85,7 +85,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('getOwn.imprestTransaction', 'مشاهده پرداخت تنخواه های خود'),
             ('updateOwn.imprestTransaction', 'ویرایش پرداخت تنخواه های خود'),
             ('deleteOwn.imprestTransaction', 'حذف پرداخت تنخواه های خود'),
-            ('defineOwn.imprestTransaction', 'قعطی کردن پرداخت تنخواه های خود'),
+            ('defineOwn.imprestTransaction', 'قطعی کردن پرداخت تنخواه های خود'),
             ('lockOwn.imprestTransaction', 'قفل کردن پرداخت تنخواه های خود'),
 
         )
