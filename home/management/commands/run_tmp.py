@@ -16,8 +16,7 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        content_type = ContentType.objects.get(app_label='reports', model='report')
-        Permission.objects.filter(content_type=content_type).delete()
+        self.update_sanads_origin()
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
@@ -27,7 +26,7 @@ class Command(BaseCommand):
 
             models = [Factor, Transaction, Adjustment, Lading, OilCompanyLading, StatusChange, ImprestSettlement]
             for model in models:
-                for item in model.objects.filter(financial_year__company=company):
+                for item in model.objects.filter(financial_year__company=company, sanad__origin_id=None):
                     if model == Lading:
                         date = item.sanad_date
                     else:

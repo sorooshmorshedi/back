@@ -438,6 +438,7 @@ class LadingSanad:
         sanad.explanation = explanation
         sanad.save()
         sanad.update_values()
+        sanad.define()
 
 
 class OilCompanyLadingSanad:
@@ -556,3 +557,4 @@ class OilCompanyLadingSanad:
             )
 
         sanad.update_values()
+        sanad.define()
