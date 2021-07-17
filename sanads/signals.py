@@ -25,19 +25,20 @@ def updateAccountBalanceOnSave(sender, instance: SanadItem, **kwargs):
 
 
 def updateAccountBalanceOnDelete(sender, instance: SanadItem, **kwargs):
-    account = instance.account
-    bed = instance.bed
-    bes = instance.bes
+    if instance.sanad.is_defined:
+        account = instance.account
+        bed = instance.bed
+        bes = instance.bes
 
-    AccountBalance.update_balance(
-        financial_year=instance.financial_year,
-        account=account,
-        bed_change=-bed,
-        bes_change=-bes,
-        floatAccount=instance.floatAccount,
-        costCenter=instance.costCenter
-    )
-    account.save()
+        AccountBalance.update_balance(
+            financial_year=instance.financial_year,
+            account=account,
+            bed_change=-bed,
+            bes_change=-bes,
+            floatAccount=instance.floatAccount,
+            costCenter=instance.costCenter
+        )
+        account.save()
 
 
 signals.pre_save.connect(receiver=updateAccountBalanceOnSave, sender=SanadItem)

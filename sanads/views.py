@@ -10,9 +10,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.accounts.models import AccountBalance
 from helpers.auth import BasicCRUDPermission, DefinedItemUDPermission
 from helpers.db import queryset_iterator
-from helpers.functions import get_object_by_code
+from helpers.functions import get_object_by_code, get_object_accounts
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from helpers.views.confirm_view import ConfirmView
 from helpers.views.lock_view import ToggleItemLockView
@@ -182,11 +183,15 @@ class DefineSanadView(APIView):
             pk=data.get('item')
         )
 
-        indefine = data.get('indefine') == 'true'
-        if indefine:
-            item.indefine()
-        else:
-            item.define()
+        item.define()
+
+        for sanad_item in item.items.all():
+            AccountBalance.update_balance(
+                financial_year=sanad_item.financial_year,
+                **get_object_accounts(sanad_item),
+                bed_change=sanad_item.bed,
+                bes_change=sanad_item.bes
+            )
 
         return Response(self.serializer_class(instance=item).data)
 
