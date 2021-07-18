@@ -270,7 +270,7 @@ def PHONE(**kwargs):
 
 
 def EXPLANATION():
-    return models.CharField(max_length=255, blank=True, null=True, default="")
+    return models.CharField(max_length=1000, blank=True, null=True, default="")
 
 
 def is_valid_melli_code(value):

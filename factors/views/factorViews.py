@@ -294,3 +294,9 @@ class ToggleFactorLockView(ToggleItemLockView):
     @property
     def permission_codename(self):
         return f'lock.{get_factor_permission_basename(self.request.data.get("type"))}'
+
+
+class FactorsAggregatedSanadModelView(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    serializer_class = ExpenseSerializer
+    permission_basename = 'factorsAggregatedSanad'

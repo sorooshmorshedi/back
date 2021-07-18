@@ -22,6 +22,13 @@ from transactions.models import Transaction
 from wares.models import Ware, Unit, Warehouse
 
 
+class FactorsAggregatedSanad(BaseModel):
+    code = models.IntegerField(blank=True, null=True)
+    date = jmodels.jDateField()
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factorsAggregatedSanad', blank=True,
+                                 null=True)
+
+
 class Factor(BaseModel, DefinableMixin, LockableMixin):
     BUY = 'buy'
     SALE = 'sale'
@@ -70,7 +77,6 @@ class Factor(BaseModel, DefinableMixin, LockableMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='factors')
     temporary_code = models.IntegerField()
     code = models.IntegerField(blank=True, null=True)
-    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='factors', blank=True, null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factors', blank=True,
                                      null=True)
@@ -114,6 +120,12 @@ class Factor(BaseModel, DefinableMixin, LockableMixin):
     bottom_explanation = models.TextField(blank=True, null=True)
 
     is_pre_factor = models.BooleanField(default=False)
+
+    has_auto_sanad = models.BooleanField(default=True)
+    has_aggregated_sanad = models.BooleanField(default=False)
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
+    aggregatedSanad = models.ForeignKey(FactorsAggregatedSanad, on_delete=models.SET_NULL, blank=True, null=True,
+                                        related_name='factors')
 
     class Meta(BaseModel.Meta):
         permissions = (

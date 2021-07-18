@@ -10,7 +10,7 @@ from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
 from helpers.functions import sanad_exp
-from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin
+from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin, EXPLANATION
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
 from sanads.models import Sanad, newSanadCode, clearSanad
@@ -355,7 +355,7 @@ class TransactionItem(BaseModel):
     due = jmodels.jDateField(null=True, blank=True)
     documentNumber = models.CharField(max_length=50, null=True, blank=True)
     bankName = models.CharField(max_length=255, null=True, blank=True)
-    explanation = models.CharField(max_length=255, default="", blank=True)
+    explanation = EXPLANATION()
 
     file = models.FileField(blank=True, null=True)
 
