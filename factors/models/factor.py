@@ -28,6 +28,45 @@ class FactorsAggregatedSanad(BaseModel):
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factorsAggregatedSanad', blank=True,
                                  null=True)
 
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.buyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید'),
+            ('create.buyFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور خرید'),
+            ('update.buyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور خرید'),
+            ('delete.buyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور خرید'),
+
+            ('get.saleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور فروش'),
+            ('create.saleFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور فروش'),
+            ('update.saleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور فروش'),
+            ('delete.saleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور فروش'),
+
+            ('get.backFromSaleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از فروش'),
+            ('create.backFromSaleFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از فروش'),
+            ('update.backFromSaleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از فروش'),
+            ('delete.backFromSaleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از فروش'),
+
+            ('get.backFromBuyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از خرید'),
+            ('create.backFromBuyFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از خرید'),
+            ('update.backFromBuyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از خرید'),
+            ('delete.backFromBuyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از خرید'),
+
+            ('getOwn.buyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید خود'),
+            ('updateOwn.buyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های خرید خود'),
+            ('deleteOwn.buyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های خرید خود'),
+
+            ('getOwn.saleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های فروش خود'),
+            ('updateOwn.saleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های فروش خود'),
+            ('deleteOwn.saleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های فروش خود'),
+
+            ('getOwn.backFromSaleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از فروش خود'),
+            ('updateOwn.backFromSaleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از فروش خود'),
+            ('deleteOwn.backFromSaleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از فروش خود'),
+
+            ('getOwn.backFromBuyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از خرید خود'),
+            ('updateOwn.backFromBuyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از خرید خود'),
+            ('deleteOwn.backFromBuyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از خرید خود'),
+        )
+
 
 class Factor(BaseModel, DefinableMixin, LockableMixin):
     BUY = 'buy'
@@ -625,8 +664,7 @@ class FactorItem(BaseModel):
             count += fee['count']
         return round(count, 2)
 
-    @property
-    def remain_value(self):
+    def get_remain_value(self):
         value = 0
         for fee in self.remain_fees:
             value += fee['count'] * fee['fee']

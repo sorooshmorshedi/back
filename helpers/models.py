@@ -202,7 +202,7 @@ class DefinableManager(BaseManager):
 
 class DefinableMixin(models.Model):
     is_defined = models.BooleanField(default=False)
-    defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
+    defined_by = models.ForeignKey('users.User', on_delete=models.PROTECT, blank=True, null=True, related_name='+')
     definition_date = models.DateTimeField(blank=True, null=True)
 
     objects = DefinableManager()
@@ -229,7 +229,7 @@ class LockableMixin(models.Model):
     Lock will be checked in BaseModel save method
     """
     is_locked = models.BooleanField(default=False)
-    locked_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='+')
+    locked_by = models.ForeignKey('users.User', on_delete=models.PROTECT, blank=True, null=True, related_name='+')
     lock_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
