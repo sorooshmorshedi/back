@@ -69,13 +69,15 @@ class DefiniteFactor(APIView):
         ware = item.ware
         warehouse = item.warehouse
 
+        financial_year = factor.financial_year
+
         if item.ware.is_service:
             return
 
         if not item.financial_year.is_advari:
             usage_in_next_years = FactorItem.objects.filter(
-                factor__financial_year__start__gt=factor.financial_year.end,
-                factor__financial_year__company=factor.financial_year.company,
+                factor__financial_year__start__gt=financial_year.end,
+                factor__financial_year__company=financial_year.company,
                 factor__type__in=Factor.OUTPUT_GROUP,
                 ware=ware
             )
@@ -85,7 +87,7 @@ class DefiniteFactor(APIView):
 
         if not revert:
             if factor.type in Factor.OUTPUT_GROUP:
-                fees = WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year)
+                fees = WareInventory.decrease_inventory(ware, warehouse, item.count, financial_year)
                 item.fees = fees
                 item.save()
 
@@ -96,13 +98,13 @@ class DefiniteFactor(APIView):
                     'count': float(item.count)
                 }]
                 item.save()
-                WareInventory.increase_inventory(ware, warehouse, item.count, fee, factor.financial_year)
+                WareInventory.increase_inventory(ware, warehouse, item.count, fee, financial_year)
 
-            item.remain_fees = WareInventory.get_remain_fees(item.ware, item.warehouse)
+            item.remain_fees = WareInventory.get_remain_fees(item.ware, item.warehouse, financial_year)
 
         else:
             if item.factor.type in Factor.INPUT_GROUP:
-                WareInventory.decrease_inventory(ware, warehouse, item.count, factor.financial_year, revert=True)
+                WareInventory.decrease_inventory(ware, warehouse, item.count, financial_year, revert=True)
             else:
                 fees = item.fees.copy()
                 fees.reverse()
@@ -112,7 +114,7 @@ class DefiniteFactor(APIView):
                         warehouse,
                         fee['count'],
                         fee['fee'],
-                        factor.financial_year,
+                        financial_year,
                         revert=True
                     )
 

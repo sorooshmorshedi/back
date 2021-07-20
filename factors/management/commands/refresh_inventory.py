@@ -72,7 +72,6 @@ class Command(BaseCommand):
             DefiniteFactor.updateFactorInventory(factor)
 
             for item in factor.items.all():
-                print(item.remain_fees)
                 for fee in item.remain_fees:
                     if fee['count'] < 0:
                         errors.append({

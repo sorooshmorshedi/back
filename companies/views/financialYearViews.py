@@ -123,7 +123,7 @@ class ClosingHelpers:
 
         items = []
 
-        WareInventory.objects.inFinancialYear(target_financial_year).delete()
+        # WareInventory.objects.inFinancialYear(target_financial_year).delete()
         for inventory in WareInventory.objects.inFinancialYear().all():
             has_similar = False
             for item in items:
