@@ -115,7 +115,7 @@ class SanadRetrieveSerializer(SanadSerializer):
 
             return {
                 'name': f'{obj.origin_content_type.app_label}.{obj.origin_content_type.model}',
-                'id': origin.id,
+                'id': origin_id,
                 'type': getattr(origin, 'type', None),
                 'code': getattr(origin, 'code', None)
             }
