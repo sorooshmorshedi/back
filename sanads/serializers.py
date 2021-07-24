@@ -105,7 +105,14 @@ class SanadRetrieveSerializer(SanadSerializer):
 
     def get_origin(self, obj: Sanad):
         origin = obj.get_origin()
+
         if origin:
+
+            if isinstance(origin, ImprestSettlement):
+                origin_id = origin.transaction.id
+            else:
+                origin_id = origin.id
+
             return {
                 'name': f'{obj.origin_content_type.app_label}.{obj.origin_content_type.model}',
                 'id': origin.id,

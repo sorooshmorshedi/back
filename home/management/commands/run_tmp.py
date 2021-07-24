@@ -25,8 +25,9 @@ class Command(BaseCommand):
             print("#{}".format(company.id))
 
             models = [Factor, Transaction, Adjustment, Lading, OilCompanyLading, StatusChange, ImprestSettlement]
+            models = [ImprestSettlement]
             for model in models:
-                for item in model.objects.filter(financial_year__company=company, sanad__origin_id=None):
+                for item in model.objects.filter(financial_year__company=company):
                     if model == Lading:
                         date = item.sanad_date
                     else:
