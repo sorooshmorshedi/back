@@ -232,7 +232,8 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
         model = Transfer
         fields = ('id', 'explanation', 'date', 'time', 'items')
 
-    def sync(self, instance: Transfer, validated_data):
+    @staticmethod
+    def sync(instance: Transfer, validated_data):
 
         output_factor = instance.output_factor
         input_factor = instance.input_factor
@@ -298,6 +299,7 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
                 total_count += output_fee['count']
             if total_count != 0:
                 fee /= total_count
+
             input_factor.items.create(
                 **item_data,
                 fee=fee,

@@ -89,15 +89,17 @@ class DefineTransferView(APIView):
 
     def post(self, request):
         data = request.data
+        item_data = data.pop('item')
         item = get_object_or_404(
             self.serializer_class.Meta.model,
-            pk=data.get('item')
+            pk=item_data['id']
         )
 
         if not item.is_defined:
             DefiniteFactor.updateFactorInventory(item.output_factor)
             DefiniteFactor.updateFactorInventory(item.input_factor)
             item.define()
+            TransferCreateUpdateSerializer.sync(item, item_data)
 
         return Response(self.serializer_class(instance=item).data)
 
