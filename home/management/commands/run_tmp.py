@@ -1,10 +1,8 @@
 from django.contrib.admin.options import get_content_type_for_model
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from _dashtbashi.models import Lading, OilCompanyLading
 from cheques.models.StatusChangeModel import StatusChange
-from companies.models import Company
+from companies.models import Company, FinancialYear
 from factors.models import Factor, Transfer, Adjustment
 from helpers.test import set_user
 from imprests.models import ImprestSettlement
@@ -16,7 +14,10 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        self.update_sanads_origin()
+        for financial_year in FinancialYear.objects.all():
+            if financial_year.openingSanad:
+                financial_year.openingSanad.type = Sanad.OPENING
+                financial_year.openingSanad.save()
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
