@@ -174,7 +174,11 @@
                             rowspan="{% colspan 3 form.has_tax show_remain show_remain %}"
                             style="vertical-align: baseline !important;"
                         >
-                            <pre style="background: none;border:none">{{ form.after_rows_explanation | default:'' }}</pre>
+                            <p
+                                    style="background: none;border:none;white-space: pre-line; line-height: 24px;text-align: justify"
+                            >
+                                {{ form.after_rows_explanation | default:'' }}
+                            </p>
                         </td>
                         <th>تخفیف</th>
                         <td class="text-left">{{ form.factor_discount | money }}</td>
