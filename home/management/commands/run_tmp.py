@@ -15,10 +15,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for financial_year in FinancialYear.objects.all():
+            set_user(financial_year.company.created_by)
+
             try:
                 last_local_id = Lading.objects.inFinancialYear(financial_year).latest('local_id').local_id
             except:
                 last_local_id = 0
+
             for lading in Lading.objects.inFinancialYear(financial_year).filter(local_id=1)[1:]:
                 print(financial_year.id, lading.id)
                 lading.local_id = last_local_id + 1
