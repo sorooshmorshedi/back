@@ -17,6 +17,7 @@ class Command(BaseCommand):
         for financial_year in FinancialYear.objects.all():
             if financial_year.openingSanad:
                 financial_year.openingSanad.type = Sanad.OPENING
+                financial_year.openingSanad.is_auto_created = True
                 financial_year.openingSanad.save()
 
     def update_sanads_origin(self):
