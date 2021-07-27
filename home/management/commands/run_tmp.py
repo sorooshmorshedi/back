@@ -15,10 +15,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for financial_year in FinancialYear.objects.all():
-            if financial_year.openingSanad:
-                financial_year.openingSanad.type = Sanad.OPENING
-                financial_year.openingSanad.is_auto_created = True
-                financial_year.openingSanad.save()
+            try:
+                last_local_id = Lading.objects.inFinancialYear(financial_year).latest('local_id').local_id
+            except:
+                last_local_id = 0
+            for lading in Lading.objects.inFinancialYear(financial_year).filter(local_id=1)[1:]:
+                print(financial_year.id, lading.id)
+                lading.local_id = last_local_id + 1
+                lading.save()
+
+                last_local_id += 1
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
@@ -27,7 +33,6 @@ class Command(BaseCommand):
             print("#{}".format(company.id))
 
             models = [Factor, Transaction, Adjustment, Lading, OilCompanyLading, StatusChange, ImprestSettlement]
-            models = [ImprestSettlement]
             for model in models:
                 for item in model.objects.filter(financial_year__company=company):
                     if model == Lading:
