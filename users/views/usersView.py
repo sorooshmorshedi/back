@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
 from django.db.models.query_utils import Q
 from rest_framework import status, generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -110,16 +111,21 @@ class SendVerificationCodeView(APIView):
 
 
 class ChangePasswordByVerificationCodeView(APIView):
-    # throttle_scope = 'verification_code'
+    throttle_scope = 'verification_code'
 
     def post(self, request):
         data = request.data
         phone = data.get('phone')
+        username = data.get('username')
         code = data.get('code')
         new_password = data.get('new_password')
-        phone_verification = PhoneVerification.check_verification(phone, code, raise_exception=True)
+        PhoneVerification.check_verification(phone, code, raise_exception=True)
 
-        user = phone_verification.user
+        try:
+            user = get_object_or_404(User, username=username, phone=phone)
+        except User.DoesNotExist:
+            raise ValidationError('نام کاربری اشتباه می باشد')
+
         user.set_password(new_password)
         user.save()
         return Response({})
