@@ -14,20 +14,7 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        for financial_year in FinancialYear.objects.all():
-            set_user(financial_year.company.created_by)
-
-            try:
-                last_local_id = Lading.objects.inFinancialYear(financial_year).latest('local_id').local_id
-            except:
-                last_local_id = 0
-
-            for lading in Lading.objects.inFinancialYear(financial_year).filter(local_id=1)[1:]:
-                print(financial_year.id, lading.id)
-                lading.local_id = last_local_id + 1
-                lading.save()
-
-                last_local_id += 1
+        pass
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
@@ -55,10 +42,12 @@ class Command(BaseCommand):
         for company in Company.objects.all():
             set_user(company.created_by)
 
-            print("#{}".format(company.id))
+            print("#{} {}".format(company.id, company.name))
 
             models = [Sanad, Transaction, Transfer, Adjustment, ]
             for model in models:
                 for item in model.objects.filter(financial_year__company=company):
                     if item.financial_year.check_date(item.date, raise_exception=False):
                         item.define()
+                    else:
+                        print(' - ', item.financial_year.id, model.__name__, model.id)
