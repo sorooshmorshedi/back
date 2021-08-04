@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from factors.views.adjustment_views import AdjustmentModelView, GetAdjustmentByPositionView, DefineAdjustmentView, \
     ToggleAdjustmentLockView
 from factors.views.factorViews import ExpenseModelView, FactorModelView, GetFactorByPositionView, \
-    ConfirmFactor, ToggleFactorLockView
+    ConfirmFactor, FactorsAggregatedSanadModelView, GetFactorsAggregatedSanadsByPositionView
 from factors.views.definite_factor import DefiniteFactor
 from factors.views.firstPeriodInventoryViews import FirstPeriodInventoryView
 from factors.views.transferViews import TransferModelView, GetTransferByPositionView, DefineTransferView, \
@@ -18,12 +18,16 @@ router.register(r'factors', FactorModelView, basename='factor')
 router.register(r'transfers', TransferModelView, basename='transfer')
 router.register(r'adjustments', AdjustmentModelView, basename='adjustment')
 router.register(r'warehouseHandlings', WarehouseHandlingModelView, basename='warehouseHandling')
+router.register(r'factorsAggregatedSanads', FactorsAggregatedSanadModelView, basename='factorsAggregatedSanad')
 
 urlpatterns = [
     url(r'^factors/byPosition$', GetFactorByPositionView.as_view(), name=''),
     url(r'^factors/(?P<pk>[0-9]+)/confirm/$', ConfirmFactor.as_view(), name=''),
     url(r'^factors/definite/(?P<pk>[0-9]+)$', DefiniteFactor.as_view(), name=''),
-    url(r'^factors/toggleLock/$', ToggleFactorLockView.as_view(), name=''),
+
+    url(r'^factorsAggregatedSanads/byPosition$', GetFactorsAggregatedSanadsByPositionView.as_view(), name=''),
+
+    url(r'^factors/byPosition$', GetFactorByPositionView.as_view(), name=''),
 
     url(r'^transfers/byPosition$', GetTransferByPositionView.as_view(), name=''),
     url(r'^transfers/define/$', DefineTransferView.as_view(), name=''),

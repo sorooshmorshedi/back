@@ -53,7 +53,8 @@ class DefiniteFactor(APIView):
 
         DefiniteFactor.updateFactorInventory(factor)
 
-        FactorSanad(factor).update(is_confirmed)
+        if factor.has_auto_sanad:
+            FactorSanad(factor).update(is_confirmed)
 
         return factor
 

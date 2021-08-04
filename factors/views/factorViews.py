@@ -6,10 +6,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from factors.factor_sanad import FactorsAggregatedSanadSanad
 from factors.models.factor import get_factor_permission_basename
 from helpers.auth import BasicCRUDPermission
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from helpers.functions import get_object_by_code
+from helpers.functions import get_object_by_code, get_new_code
 from helpers.views.confirm_view import ConfirmView
 from factors.serializers import *
 from helpers.views.lock_view import ToggleItemLockView
@@ -298,5 +299,77 @@ class ToggleFactorLockView(ToggleItemLockView):
 
 class FactorsAggregatedSanadModelView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = ExpenseSerializer
-    permission_basename = 'factorsAggregatedSanad'
+    serializer_class = FactorsAggregatedSanadCreateUpdateSerializer
+
+    @property
+    def permission_basename(self):
+        if self.request.method.lower() == 'post':
+            factor_type = self.request.data.get('type')
+        else:
+            factor_type = FactorsAggregatedSanad.objects.get(pk=self.kwargs['pk']).type
+        return get_factor_permission_basename(factor_type) + 'sAggregatedSanad'
+
+    def get_queryset(self):
+        return FactorsAggregatedSanad.objects.hasAccess(self.request.method, self.permission_basename)
+
+    def perform_create(self, serializer: FactorsAggregatedSanadCreateUpdateSerializer) -> None:
+        serializer.save(
+        )
+
+    def create(self, request, *args, **kwargs):
+
+        data = request.data
+
+        serializer = FactorsAggregatedSanadCreateUpdateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            financial_year=self.request.user.active_financial_year,
+            code=get_new_code(FactorsAggregatedSanad)
+        )
+        FactorsAggregatedSanadSanad(serializer.instance).update()
+
+        return Response(
+            FactorsAggregatedSanadRetrieveSerializer(instance=serializer.instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        instance = self.get_object()
+
+        serialized = FactorsAggregatedSanadCreateUpdateSerializer(instance=instance, data=data)
+        serialized.is_valid(raise_exception=True)
+        serialized.save()
+
+        FactorsAggregatedSanadSanad(instance).update()
+
+        return Response(
+            FactorsAggregatedSanadRetrieveSerializer(instance=instance).data,
+            status=status.HTTP_200_OK
+        )
+
+    def retrieve(self, request, pk=None):
+        queryset = self.get_queryset()
+        instance = get_object_or_404(queryset, pk=pk)
+        serialized = FactorsAggregatedSanadRetrieveSerializer(instance)
+        return Response(serialized.data)
+
+
+class GetFactorsAggregatedSanadsByPositionView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_basename(self):
+        return get_factor_permission_basename(self.request.GET.get('type')) + 'AggregatedSanad'
+
+    def get(self, request):
+        item = get_object_by_code(
+            FactorsAggregatedSanad.objects.hasAccess(request.method, self.permission_basename).filter(
+                type=request.GET['type'],
+            ),
+            request.GET.get('position'),
+            request.GET.get('id')
+        )
+        if item:
+            return Response(FactorsAggregatedSanadRetrieveSerializer(instance=item).data)
+        return Response(['not found'], status=status.HTTP_404_NOT_FOUND)

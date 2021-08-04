@@ -8,7 +8,7 @@ from cheques.models.ChequebookModel import Chequebook
 from factors.models import Factor, Adjustment
 from factors.models.transfer_model import Transfer
 from factors.models.warehouse_handling import WarehouseHandling
-from factors.models.factor import FactorItem
+from factors.models.factor import FactorItem, FactorsAggregatedSanad
 from helpers.filters import BASE_FIELD_FILTERS, filter_created_by_name
 from sanads.models import Sanad
 from transactions.models import Transaction
@@ -120,12 +120,15 @@ class FactorFilter(filters.FilterSet):
             'account__name': ['icontains'],
             'explanation': ['icontains'],
             'sanad__bed': ['icontains'],
+            'sanad': ['exact'],
             'type': ['exact', 'in'],
             'is_defined': ['exact'],
             'is_loaded': ['exact'],
             'path': ['in'],
             'visitor': ['in', 'exact'],
-            'is_pre_factor': ['exact']
+            'is_pre_factor': ['exact'],
+            'has_auto_sanad': ['exact'],
+            'aggregatedSanad': ['exact', 'isnull'],
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -138,6 +141,24 @@ class FactorFilter(filters.FilterSet):
             return queryset.filter(sanad__bed=F('paidValue'))
         else:
             return queryset
+
+
+class FactorsAggregatedSanadFilter(filters.FilterSet):
+    class Meta:
+        model = FactorsAggregatedSanad
+        fields = {
+            'id': ['exact'],
+            'code': BASE_FIELD_FILTERS,
+            'date': ['gte', 'lte'],
+            'explanation': ['icontains'],
+            'sanad': ['exact'],
+            'type': ['exact', 'in'],
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
 
 
 class TransferFilter(filters.FilterSet):
@@ -249,8 +270,8 @@ class SalePriceChangeFilter(filters.FilterSet):
     class Meta:
         model = SalePriceChange
         fields = {
-            'is_increase': ('exact', ),
-            'is_percent': ('exact', ),
+            'is_increase': ('exact',),
+            'is_percent': ('exact',),
             'rate': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
@@ -264,7 +285,7 @@ class WareSalePriceChangeFilter(filters.FilterSet):
     class Meta:
         model = WareSalePriceChange
         fields = {
-            'salePriceChange': ('exact', ),
+            'salePriceChange': ('exact',),
             'salePrice__ware__name': BASE_FIELD_FILTERS,
             'salePrice__ware__code': BASE_FIELD_FILTERS,
             'salePrice__type__name': BASE_FIELD_FILTERS,

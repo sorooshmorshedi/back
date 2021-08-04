@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from cheques.views import get_cheque_permission_basename
 from factors.models.warehouse_handling import WarehouseHandlingItem
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
-    WarehouseHandlingListRetrieveSerializer
-from factors.models.factor import get_factor_permission_basename
+    WarehouseHandlingListRetrieveSerializer, FactorsAggregatedSanadListSerializer
+from factors.models.factor import get_factor_permission_basename, FactorsAggregatedSanad
 from helpers.auth import BasicCRUDPermission
 from reports.lists.filters import *
 from reports.lists.serializers import *
@@ -120,6 +120,29 @@ class FactorListView(generics.ListAPIView):
             'get',
             permission_basename=get_factor_permission_basename(self.type)
         ).prefetch_related('items').prefetch_related('account').all()
+
+
+class FactorsAggregatedSanadListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    @property
+    def permission_basename(self):
+        return "{}sAggregatedSanad".format(get_factor_permission_basename(self.type))
+
+    @property
+    def type(self):
+        return self.request.GET.get('type')
+
+    serializer_class = FactorsAggregatedSanadListSerializer
+    filterset_class = FactorsAggregatedSanadFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return FactorsAggregatedSanad.objects.hasAccess(
+            'get',
+            permission_basename=self.permission_basename
+        ).all()
 
 
 class TransferListView(generics.ListAPIView):

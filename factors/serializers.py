@@ -1,6 +1,5 @@
 import datetime
 
-import jdatetime
 from django.db.models import Max, Q
 from rest_framework import serializers
 
@@ -8,7 +7,7 @@ from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccoun
 from accounts.accounts.validators import AccountValidator
 from factors.adjustment_sanad import AdjustmentSanad
 from factors.models import Expense, Factor, Adjustment
-from factors.models.factor import FactorExpense, FactorPayment, FactorItem
+from factors.models.factor import FactorExpense, FactorPayment, FactorItem, FactorsAggregatedSanad
 from factors.models.transfer_model import Transfer
 from factors.models.warehouse_handling import WarehouseHandling, WarehouseHandlingItem
 from factors.views.definite_factor import DefiniteFactor
@@ -138,7 +137,8 @@ class FactorItemRetrieveSerializer(serializers.ModelSerializer):
         model = FactorItem
         fields = (
             'id', 'order', 'ware', 'unit', 'warehouse', 'unit_count', 'count', 'fee', 'discountValue',
-            'discountPercent', 'explanation', 'tax_value', 'tax_percent', 'fees', 'factorItem', 'preFactorItem', 'meta')
+            'discountPercent', 'explanation', 'tax_value', 'tax_percent', 'fees', 'factorItem', 'preFactorItem', 'meta',
+        )
 
 
 class TransactionSerializerForPayment(serializers.ModelSerializer):
@@ -592,3 +592,27 @@ class WarehouseHandlingListRetrieveSerializer(serializers.ModelSerializer):
         model = WarehouseHandling
         fields = '__all__'
         read_only_fields = ['id', 'financial_year']
+
+
+class FactorsAggregatedSanadCreateUpdateSerializer(serializers.ModelSerializer):
+    factors = serializers.PrimaryKeyRelatedField(many=True, queryset=Factor.objects.all())
+
+    class Meta:
+        model = FactorsAggregatedSanad
+        fields = '__all__'
+        read_only_fields = ['id', 'financial_year']
+
+
+class FactorsAggregatedSanadRetrieveSerializer(serializers.ModelSerializer):
+    factors = FactorListRetrieveSerializer(many=True)
+    sanad = SanadSerializer()
+
+    class Meta:
+        model = FactorsAggregatedSanad
+        fields = '__all__'
+
+
+class FactorsAggregatedSanadListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FactorsAggregatedSanad
+        fields = '__all__'

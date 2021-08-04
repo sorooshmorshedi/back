@@ -1,7 +1,7 @@
 from rest_framework.exceptions import ValidationError
 from accounts.accounts.models import Account
 from companies.models import FinancialYear
-from factors.models import Factor
+from factors.models.factor import Factor, FactorsAggregatedSanad
 from helpers.auto_sanad import AutoSanad
 from helpers.functions import get_object_accounts
 from helpers.models import BaseModel
@@ -126,3 +126,15 @@ class FactorSanad(AutoSanad):
             " - ",
             self.instance.explanation
         )
+
+
+class FactorsAggregatedSanadSanad(AutoSanad):
+
+    def get_sanad_rows(self, instance: FactorsAggregatedSanad) -> list:
+        factors = instance.factors.all()
+        rows = []
+        for factor in factors:
+            factor_sanad = FactorSanad(factor)
+            rows += factor_sanad.get_sanad_rows(factor)
+
+        return rows

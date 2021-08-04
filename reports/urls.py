@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^lists/sanads/unbalanced$', UnbalancedSanadListView.as_view(), name=''),
     url(r'^lists/sanads/empty$', EmptySanadListView.as_view(), name=''),
     url(r'^lists/factors$', FactorListView.as_view(), name=''),
+    url(r'^lists/factorsAggregatedSanads$', FactorsAggregatedSanadListView.as_view(), name=''),
     url(r'^lists/transfers$', TransferListView.as_view(), name=''),
     url(r'^lists/factorItems$', FactorItemListView.as_view(), name=''),
     url(r'^lists/adjustments$', AdjustmentListView.as_view(), name=''),

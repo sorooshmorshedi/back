@@ -28,10 +28,11 @@ def get_new_child_code(parent_code, child_code_length, last_child_code=None):
 
 
 def get_new_code(model: Type[Model], max_length=None):
-    try:
-        code = model.objects.inFinancialYear().filter(~Q(code=None)).latest('code').code + 1
-    except:
-        return 1
+    last_item = model.objects.inFinancialYear().filter(~Q(code=None)).order_by('-code').first()
+    if last_item:
+        code = last_item.code + 1
+    else:
+        code = 1
 
     if max_length and len(str(code)) > max_length:
         from rest_framework import serializers

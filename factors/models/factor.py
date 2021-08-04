@@ -15,57 +15,11 @@ from distributions.models.distribution_model import Distribution
 from distributions.models.path_model import Path
 from factors.models.expense import Expense
 from helpers.db import get_empty_array
-from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin
+from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin, EXPLANATION
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 from sanads.models import Sanad
 from transactions.models import Transaction
 from wares.models import Ware, Unit, Warehouse
-
-
-class FactorsAggregatedSanad(BaseModel):
-    code = models.IntegerField(blank=True, null=True)
-    date = jmodels.jDateField()
-    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factorsAggregatedSanad', blank=True,
-                                 null=True)
-
-    class Meta(BaseModel.Meta):
-        permissions = (
-            ('get.buyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید'),
-            ('create.buyFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور خرید'),
-            ('update.buyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور خرید'),
-            ('delete.buyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور خرید'),
-
-            ('get.saleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور فروش'),
-            ('create.saleFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور فروش'),
-            ('update.saleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور فروش'),
-            ('delete.saleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور فروش'),
-
-            ('get.backFromSaleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از فروش'),
-            ('create.backFromSaleFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از فروش'),
-            ('update.backFromSaleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از فروش'),
-            ('delete.backFromSaleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از فروش'),
-
-            ('get.backFromBuyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از خرید'),
-            ('create.backFromBuyFactorAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از خرید'),
-            ('update.backFromBuyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از خرید'),
-            ('delete.backFromBuyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از خرید'),
-
-            ('getOwn.buyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید خود'),
-            ('updateOwn.buyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های خرید خود'),
-            ('deleteOwn.buyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های خرید خود'),
-
-            ('getOwn.saleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های فروش خود'),
-            ('updateOwn.saleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های فروش خود'),
-            ('deleteOwn.saleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های فروش خود'),
-
-            ('getOwn.backFromSaleFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از فروش خود'),
-            ('updateOwn.backFromSaleFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از فروش خود'),
-            ('deleteOwn.backFromSaleFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از فروش خود'),
-
-            ('getOwn.backFromBuyFactorAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از خرید خود'),
-            ('updateOwn.backFromBuyFactorAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از خرید خود'),
-            ('deleteOwn.backFromBuyFactorAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از خرید خود'),
-        )
 
 
 class Factor(BaseModel, DefinableMixin, LockableMixin):
@@ -161,9 +115,9 @@ class Factor(BaseModel, DefinableMixin, LockableMixin):
     is_pre_factor = models.BooleanField(default=False)
 
     has_auto_sanad = models.BooleanField(default=True)
-    has_aggregated_sanad = models.BooleanField(default=False)
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factor', blank=True, null=True)
-    aggregatedSanad = models.ForeignKey(FactorsAggregatedSanad, on_delete=models.SET_NULL, blank=True, null=True,
+    aggregatedSanad = models.ForeignKey('factors.FactorsAggregatedSanad', on_delete=models.SET_NULL, blank=True,
+                                        null=True,
                                         related_name='factors')
 
     class Meta(BaseModel.Meta):
@@ -720,6 +674,58 @@ class FactorItem(BaseModel):
         for fee in self.fees:
             self.calculated_value += fee['count'] * fee['fee']
         return super(FactorItem, self).save(force_insert, force_update, using, update_fields)
+
+
+class FactorsAggregatedSanad(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+
+    type = models.CharField(max_length=15, choices=Factor.FACTOR_TYPES)
+
+    code = models.IntegerField(blank=True, null=True)
+    date = jmodels.jDateField()
+    sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='factorsAggregatedSanad', blank=True,
+                                 null=True)
+
+    explanation = EXPLANATION()
+
+    class Meta(BaseModel.Meta):
+        permissions = (
+            ('get.buyFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید'),
+            ('create.buyFactorsAggregatedSanad', 'تعریف سند تجمیعی فاکتور خرید'),
+            ('update.buyFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور خرید'),
+            ('delete.buyFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور خرید'),
+
+            ('get.saleFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور فروش'),
+            ('create.saleFactorsAggregatedSanad', 'تعریف سند تجمیعی فاکتور فروش'),
+            ('update.saleFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور فروش'),
+            ('delete.saleFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور فروش'),
+
+            ('get.backFromSaleFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از فروش'),
+            ('create.backFromSaleFactorsAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از فروش'),
+            ('update.backFromSaleFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از فروش'),
+            ('delete.backFromSaleFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از فروش'),
+
+            ('get.backFromBuyFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور برگشت از خرید'),
+            ('create.backFromBuyFactorsAggregatedSanad', 'تعریف سند تجمیعی فاکتور برگشت از خرید'),
+            ('update.backFromBuyFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور برگشت از خرید'),
+            ('delete.backFromBuyFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور برگشت از خرید'),
+
+            ('getOwn.buyFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور خرید خود'),
+            ('updateOwn.buyFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های خرید خود'),
+            ('deleteOwn.buyFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور های خرید خود'),
+
+            ('getOwn.saleFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های فروش خود'),
+            ('updateOwn.saleFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های فروش خود'),
+            ('deleteOwn.saleFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور های فروش خود'),
+
+            ('getOwn.backFromSaleFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از فروش خود'),
+            ('updateOwn.backFromSaleFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از فروش خود'),
+            ('deleteOwn.backFromSaleFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از فروش خود'),
+
+            ('getOwn.backFromBuyFactorsAggregatedSanad', 'مشاهده سند تجمیعی فاکتور های برگشت از خرید خود'),
+            ('updateOwn.backFromBuyFactorsAggregatedSanad', 'ویرایش سند تجمیعی فاکتور های برگشت از خرید خود'),
+            ('deleteOwn.backFromBuyFactorsAggregatedSanad', 'حذف سند تجمیعی فاکتور های برگشت از خرید خود'),
+        )
 
 
 def get_factor_permission_basename(factor_type):
