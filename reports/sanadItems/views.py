@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from helpers.auth import BasicCRUDPermission
 from reports.lists.export_views import BaseListExportView
-from reports.sanadItems.filters import SanadItemLedgerFilter
+from reports.sanadItems.filters import SanadItemReportFilter
 from reports.sanadItems.serializers import SanadItemReportSerializer
 from sanads.models import SanadItem
 
@@ -18,11 +18,11 @@ Used for sanadItems (ledger), journal & bill reports
 """
 
 
-class SanadItemListView(generics.ListAPIView):
+class SanadItemReportView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = 'get.sanad'
     serializer_class = SanadItemReportSerializer
-    filterset_class = SanadItemLedgerFilter
+    filterset_class = SanadItemReportFilter
     pagination_class = LimitOffsetPagination
     ordering_fields = '__all__'
 
@@ -123,7 +123,7 @@ class SanadItemListView(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class SanadItemListExportView(SanadItemListView, BaseListExportView):
+class SanadItemReportExportView(SanadItemReportView, BaseListExportView):
     filename = 'sanad-items'
 
     @property
