@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import Window, F, Value
 from django.db.models.fields import IntegerField
@@ -11,7 +12,7 @@ from helpers.auth import BasicCRUDPermission
 from reports.lists.export_views import BaseListExportView
 from reports.sanadItems.filters import SanadItemReportFilter
 from reports.sanadItems.serializers import SanadItemReportSerializer
-from sanads.models import SanadItem
+from sanads.models import SanadItem, Sanad
 
 """
 Used for sanadItems (ledger), journal & bill reports
@@ -45,6 +46,16 @@ class SanadItemReportView(generics.ListAPIView):
             else:
                 qs = qs.order_by('sanad_date')
                 order_by = [F('sanad_date').asc(), F('id').asc()]
+
+        report_type = self.request.GET.copy().get('report_type', None)
+        if report_type == 'bill':
+            qs.exclude(
+                Q(
+                    (Q(sanad__type=Sanad.OPENING) & Q(sanad__is_auto_created=True)) |
+                    (Q(sanad__type=Sanad.CLOSING) & Q(sanad__is_auto_created=True))
+                )
+                ,
+            )
 
         qs = qs.annotate(
             sanad_date=F('sanad__date'),
