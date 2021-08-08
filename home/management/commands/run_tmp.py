@@ -14,7 +14,31 @@ class Command(BaseCommand):
     help = 'Tmp command, for testing, correcting, bug fixing and etc'
 
     def handle(self, *args, **options):
-        pass
+
+        closing_sanads = [
+            'temporaryClosingSanad',
+            'currentEarningsClosingSanad',
+            'permanentsClosingSanad'
+        ]
+
+        for company in Company.objects.all():
+            set_user(company.superuser)
+
+            for financial_year in company.financial_years.all():
+                for sanad_field in closing_sanads:
+                    sanad = getattr(financial_year, sanad_field)
+                    if sanad:
+                        sanad.date = financial_year.end
+                        sanad.type = Sanad.CLOSING
+                        sanad.is_auto_created = True
+                        sanad.save()
+
+                sanad = financial_year.openingSanad
+                if sanad:
+                    sanad.date = financial_year.start
+                    sanad.type = sanad.OPENING
+                    sanad.is_auto_created = True
+                    sanad.save()
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
