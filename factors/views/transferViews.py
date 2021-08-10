@@ -99,7 +99,9 @@ class DefineTransferView(APIView):
             DefiniteFactor.updateFactorInventory(item.output_factor)
             DefiniteFactor.updateFactorInventory(item.input_factor)
             item.define()
-            TransferCreateUpdateSerializer.sync(item, item_data)
+            serializer = TransferCreateUpdateSerializer(instance=item, data=item_data)
+            serializer.is_valid()
+            serializer.save()
 
         return Response(self.serializer_class(instance=item).data)
 
