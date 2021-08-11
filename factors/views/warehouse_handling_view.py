@@ -137,6 +137,9 @@ class WarehouseHandlingDefiniteView(APIView):
         input_adjustment = instance.inputAdjustment
         output_adjustment = instance.outputAdjustment
 
+        input_adjustment.define()
+        output_adjustment.define()
+
         adjustment_data['items'] = input_items
         adjustment_data['type'] = Factor.INPUT_ADJUSTMENT
         input_serializer = AdjustmentCreateUpdateSerializer(
