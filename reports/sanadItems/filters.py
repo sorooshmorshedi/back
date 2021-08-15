@@ -15,6 +15,8 @@ class SanadItemReportFilter(filters.FilterSet):
             'account__name': BASE_FIELD_FILTERS,
             'account__floatAccountGroup': ['exact'],
             'account__costCenterGroup': ['exact'],
+            'floatAccount': ['exact'],
+            'costCenter': ['exact'],
 
             'floatAccount': ['exact', 'in'],
 
