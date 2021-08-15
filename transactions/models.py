@@ -20,10 +20,12 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
     IMPREST = 'imprest'
+    BANK_TRANSFER = 'bankTransfer'
     TYPES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
         (IMPREST, 'پرداخت تنخواه'),
+        (BANK_TRANSFER, 'انتقال بین بانکی'),
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactions')
@@ -63,6 +65,13 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('define.paymentTransaction', 'قطعی کردن پرداخت'),
             ('lock.paymentTransaction', 'قفل کردن پرداخت'),
 
+            ('get.bankTransferTransaction', 'مشاهده پرداخت بین بانک ها'),
+            ('create.bankTransferTransaction', 'تعریف پرداخت بین بانک ها'),
+            ('update.bankTransferTransaction', 'ویرایش پرداخت بین بانک ها'),
+            ('delete.bankTransferTransaction', 'حذف پرداخت بین بانک ها'),
+            ('define.bankTransferTransaction', 'قطعی کردن پرداخت بین بانک ها'),
+            ('lock.bankTransferTransaction', 'قفل کردن پرداخت بین بانک ها'),
+
             ('get.imprestTransaction', 'مشاهده پرداخت تنخواه'),
             ('create.imprestTransaction', 'تعریف پرداخت تنخواه'),
             ('update.imprestTransaction', 'ویرایش پرداخت تنخواه'),
@@ -81,6 +90,12 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('deleteOwn.paymentTransaction', 'حذف پرداخت های خود'),
             ('defineOwn.paymentTransaction', 'قطعی کردن پرداخت های خود'),
             ('lockOwn.paymentTransaction', 'قفل کردن پرداخت های خود'),
+
+            ('getOwn.bankTransferTransaction', 'مشاهده پرداخت های بین بانک های خود'),
+            ('updateOwn:.bankTransferTransaction', 'ویرایش پرداخت های بین بانک های خود'),
+            ('deleteOwn.bankTransferTransaction', 'حذف پرداخت های بین بانک های خود'),
+            ('defineOwn.bankTransferTransaction', 'قطعی کردن پرداخت های بین بانک های خود'),
+            ('lockOwn.bankTransferTransaction', 'قفل کردن پرداخت های بین بانک های خود'),
 
             ('getOwn.imprestTransaction', 'مشاهده پرداخت تنخواه های خود'),
             ('updateOwn.imprestTransaction', 'ویرایش پرداخت تنخواه های خود'),
@@ -172,7 +187,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
                 self.code,
                 self.explanation
             )
-        elif self.type == self.PAYMENT:
+        elif self.type in (self.PAYMENT, self.BANK_TRANSFER):
             explanation = sanad_exp(
                 'بابت پرداخت',
                 'شماره',
@@ -197,13 +212,10 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         sanad.origin_id = self.id
         sanad.save()
 
-        typeNames = []
         totalValue = 0
         for item in self.items.all():
 
             totalValue += item.value
-            if item.type.name not in typeNames:
-                typeNames.append(item.type.name)
 
             bed = 0
             bes = 0
@@ -222,7 +234,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
                 )
             else:
                 bes = item.value
-                if self.type == Transaction.PAYMENT:
+                if self.type in (Transaction.PAYMENT, Transaction.BANK_TRANSFER):
                     row_explanation = sanad_exp(
                         'بابت پرداخت شماره',
                         self.code,
@@ -267,7 +279,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             )
         else:
             last_bed = totalValue
-            if self.type == Transaction.PAYMENT:
+            if self.type in (Transaction.PAYMENT, Transaction.BANK_TRANSFER):
                 last_row_explanation = sanad_exp(
                     'بابت دریافت طی شماره پرداخت',
                     self.code,
@@ -349,7 +361,7 @@ class TransactionItem(BaseModel):
     cheque = models.OneToOneField(Cheque, on_delete=models.CASCADE, related_name='transactionItem', blank=True,
                                   null=True)
 
-    type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT)
+    type = models.ForeignKey(DefaultAccount, on_delete=models.PROTECT, blank=True, null=True)
     value = DECIMAL()
     date = jmodels.jDateField()
     due = jmodels.jDateField(null=True, blank=True)

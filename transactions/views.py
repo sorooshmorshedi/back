@@ -22,10 +22,14 @@ from transactions.serializers import TransactionCreateUpdateSerializer, Transact
 
 
 def get_transaction_permission_basename(transaction_type):
+    if transaction_type == Transaction.PAYMENT:
+        return "paymentTransaction"
     if transaction_type == Transaction.RECEIVE:
         return "receiveTransaction"
-    else:
-        return "paymentTransaction"
+    if transaction_type == Transaction.IMPREST:
+        return "imprestTransaction"
+    if transaction_type == Transaction.BANK_TRANSFER:
+        return "bankTransferTransaction"
 
 
 class TransactionCreateView(generics.CreateAPIView):
@@ -34,7 +38,7 @@ class TransactionCreateView(generics.CreateAPIView):
 
     @property
     def permission_basename(self):
-        return get_transaction_permission_basename(self.request.data.get('type'))
+        return get_transaction_permission_basename(self.request.data['item']['type'])
 
     def get_queryset(self):
         return Transaction.objects.hasAccess(self.request.method, self.permission_basename)
