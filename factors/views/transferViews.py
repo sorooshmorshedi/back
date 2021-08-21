@@ -60,6 +60,9 @@ class TransferModelView(viewsets.ModelViewSet):
             raise ValidationError('انتقال غیر قابل ویرایش می باشد')
         instance.delete()
 
+        if not input_factor.is_deletable or not output_factor.is_deletable:
+            raise ValidationError('انتقال غیر قابل حذف می باشد')
+
         DefiniteFactor.updateFactorInventory(input_factor, revert=True)
         DefiniteFactor.updateFactorInventory(output_factor, revert=True)
 
