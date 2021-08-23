@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.models import Account
+from accounts.accounts.serializers import AccountSimpleSerializer
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
 from cheques.serializers import ChequebookListRetrieveSerializer
@@ -28,12 +28,6 @@ class SanadListSerializer(serializers.ModelSerializer):
         if instance.is_auto_created:
             raise serializers.ValidationError("سند های خودکار غیر قابل ویرایش می باشند")
         return super(SanadSerializer, self).update(instance, validated_data)
-
-
-class AccountSimpleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Account
-        fields = '__all__'
 
 
 class WareSimpleSerializer(serializers.ModelSerializer):
@@ -70,7 +64,8 @@ class ChequeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cheque
-        fields = '__all__'
+        fields = ('id', 'title', 'serial', 'value', 'due', 'date', 'explanation', 'status', 'received_or_paid', 'type',
+                  'bankName', 'floatAccount', 'costCenter', 'account', 'chequebook')
 
 
 class ChequebookListSerializer(serializers.ModelSerializer):

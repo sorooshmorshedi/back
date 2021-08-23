@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer
+from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountSimpleSerializer
 from accounts.accounts.validators import AccountValidator
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
@@ -84,7 +84,7 @@ class ChequebookCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class ChequebookListRetrieveSerializer(serializers.ModelSerializer):
-    account = AccountRetrieveSerializer(read_only=True, many=False)
+    account = AccountSimpleSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
 

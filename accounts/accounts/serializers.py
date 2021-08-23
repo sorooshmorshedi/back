@@ -162,3 +162,9 @@ class TypeReportAccountSerializer(serializers.ModelSerializer):
         read_only_fields = ['financial_year']
 
     remain = serializers.IntegerField()
+
+
+class AccountSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ('id', 'code', 'account_type', 'name', 'level', 'costCenterGroup', 'floatAccountGroup', 'person_type',)
