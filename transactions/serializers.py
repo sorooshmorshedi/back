@@ -118,3 +118,10 @@ class TransactionListRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = '__all__'
+
+
+class BankingOperationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankingOperation
+        fields = '__all__'
+        read_only_fields = ('financial_year',)

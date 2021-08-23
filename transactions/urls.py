@@ -1,7 +1,10 @@
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
+
 from transactions.views import TransactionCreateView, TransactionDetailView, TransactionByPositionView, \
     ConfirmTransaction, TransactionFactorsListView, QuickFactorTransaction, DefineTransactionView, \
-    ToggleTransactionLockView
+    ToggleTransactionLockView, BankingOperationModelView
+
 
 urlpatterns = [
     url(r'^$', TransactionCreateView.as_view(), name=''),
@@ -13,3 +16,8 @@ urlpatterns = [
     url(r'^define/$', DefineTransactionView.as_view(), name=''),
     url(r'^toggleLock/$', ToggleTransactionLockView.as_view(), name=''),
 ]
+
+router = DefaultRouter()
+router.register('bankingOperations', BankingOperationModelView, basename='bankingOperations')
+
+urlpatterns += router.urls

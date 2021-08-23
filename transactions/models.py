@@ -9,7 +9,7 @@ from accounts.accounts.models import Account, FloatAccount
 from accounts.defaultAccounts.models import DefaultAccount
 from cheques.models.ChequeModel import Cheque
 from companies.models import FinancialYear
-from helpers.functions import sanad_exp
+from helpers.functions import sanad_exp, get_object_accounts
 from helpers.models import BaseModel, DECIMAL, DefinableMixin, LockableMixin, EXPLANATION
 from helpers.views.MassRelatedCUD import MassRelatedCUD
 
@@ -212,10 +212,11 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         sanad.origin_id = self.id
         sanad.save()
 
-        totalValue = 0
+        total_value = 0
+        total_banking_operation_value = 0
         for item in self.items.all():
 
-            totalValue += item.value
+            total_value += item.value
 
             bed = 0
             bes = 0
@@ -256,6 +257,19 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
                         item.explanation
                     )
 
+                if item.banking_operation_value != 0:
+                    print('ha')
+                    total_banking_operation_value += item.banking_operation_value
+                    sanad.items.create(
+                        bed=0,
+                        bes=item.banking_operation_value,
+                        explanation='',
+                        account=item.account,
+                        floatAccount=item.floatAccount,
+                        costCenter=item.costCenter,
+                        financial_year=sanad.financial_year
+                    )
+
             sanad.items.create(
                 bed=bed,
                 bes=bes,
@@ -271,14 +285,14 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         last_row_explanation = ''
 
         if self.type == Transaction.RECEIVE:
-            last_bes = totalValue
+            last_bes = total_value
             last_row_explanation = sanad_exp(
                 'بابت واریز طی دریافت شماره',
                 self.code,
                 self.explanation
             )
         else:
-            last_bed = totalValue
+            last_bed = total_value
             if self.type in (Transaction.PAYMENT, Transaction.BANK_TRANSFER):
                 last_row_explanation = sanad_exp(
                     'بابت دریافت طی شماره پرداخت',
@@ -294,6 +308,15 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
                     'مورخ',
                     self.date,
                     self.explanation
+                )
+
+            if total_banking_operation_value != 0:
+                sanad.items.create(
+                    bed=total_banking_operation_value,
+                    bes=0,
+                    explanation='',
+                    **get_object_accounts(DefaultAccount.get('paymentBankWage')),
+                    financial_year=sanad.financial_year
                 )
 
         if len(self.items.all()) != 0:
@@ -350,6 +373,30 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         return queryset
 
 
+class BankingOperation(BaseModel):
+    financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    explanation = EXPLANATION()
+
+    class Meta(BaseModel.Meta):
+        backward_financial_year = True
+        ordering = ('pk',)
+        permission_basename = 'bankingOperation'
+        permissions = (
+            ('get.bankingOperation', 'مشاهده عملیات های بانکی'),
+            ('create.bankingOperation', 'تعریف عملیات های بانکی'),
+            ('update.bankingOperation', 'ویرایش عملیات های بانکی'),
+            ('delete.bankingOperation', 'حذف عملیات های بانکی'),
+
+            ('getOwn.bankingOperation', 'مشاهده عملیات های بانکی خود'),
+            ('updateOwn.bankingOperation', 'ویرایش عملیات های بانکی خود'),
+            ('deleteOwn.bankingOperation', 'حذف عملیات های بانکی خود'),
+        )
+
+    def __str__(self):
+        return self.name
+
+
 class TransactionItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactionItems')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
@@ -372,6 +419,9 @@ class TransactionItem(BaseModel):
     file = models.FileField(blank=True, null=True)
 
     order = models.IntegerField(default=0)
+
+    bankingOperation = models.ForeignKey(BankingOperation, on_delete=models.PROTECT, null=True, blank=True)
+    banking_operation_value = DECIMAL(default=0)
 
     def __str__(self):
         return "{0} - {1}".format(self.transaction.code, self.explanation[0:30])

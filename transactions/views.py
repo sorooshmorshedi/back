@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Q, F
+from django.db.models import Q, F, QuerySet
 
 from rest_framework import generics, serializers
 from rest_framework import status
@@ -7,6 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 
 from accounts.defaultAccounts.models import DefaultAccount
 from factors.models import Factor
@@ -16,9 +17,9 @@ from helpers.functions import get_object_by_code, get_object_accounts
 from helpers.views.confirm_view import ConfirmView
 from helpers.views.lock_view import ToggleItemLockView
 from sanads.models import clearSanad, Sanad
-from transactions.models import Transaction, TransactionItem
+from transactions.models import Transaction, TransactionItem, BankingOperation
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer, \
-    TransactionFactorListSerializer, Sum
+    TransactionFactorListSerializer, Sum, BankingOperationSerializer
 
 
 def get_transaction_permission_basename(transaction_type):
@@ -272,3 +273,17 @@ class ToggleTransactionLockView(ToggleItemLockView):
     @property
     def permission_codename(self):
         return 'lock.{}'.format(get_transaction_permission_basename(self.request.data.get('type')))
+
+
+class BankingOperationModelView(ModelViewSet):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission,)
+    permission_basename = 'bankingOperation'
+    serializer_class = BankingOperationSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return BankingOperation.objects.hasAccess(self.request.method)
+
+    def perform_create(self, serializer: BankingOperationSerializer) -> None:
+        serializer.save(
+            financial_year=self.request.user.active_financial_year
+        )

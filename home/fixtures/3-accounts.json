@@ -17343,8 +17343,6 @@
       "codename": "visitorsAccount"
     }
   },
-
-
   {
     "model": "accounts.defaultaccount",
     "pk": 38,
@@ -17354,6 +17352,17 @@
       "account_level": 3,
       "usage": "costAccounting",
       "codename": "producedWareAccount"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 39,
+    "fields": {
+      "financial_year": 1,
+      "name": "هزینه های بانکی",
+      "account_level": 3,
+      "usage": "payment",
+      "codename": "paymentBankWage"
     }
   }
 ]
