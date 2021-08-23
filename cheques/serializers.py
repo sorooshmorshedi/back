@@ -122,7 +122,7 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
         return super(ChequeCreateUpdateSerializer, self).update(instance, validated_data)
 
 
-class ChequeListRetrieveSerializer(serializers.ModelSerializer):
+class ChequeRetrieveSerializer(serializers.ModelSerializer):
     account = AccountRetrieveSerializer(read_only=True, many=False)
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)

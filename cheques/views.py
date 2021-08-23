@@ -95,7 +95,7 @@ class SubmitChequeApiView(APIView):
 
         cheque = self.submitCheque(user, data)
 
-        return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
+        return Response(ChequeRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
 
     @staticmethod
     def submitCheque(user, data):
@@ -147,7 +147,7 @@ def get_cheque_permission_basename(received_or_paid):
 
 class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    serializer_class = ChequeListRetrieveSerializer
+    serializer_class = ChequeRetrieveSerializer
 
     @property
     def permission_basename(self):
@@ -187,11 +187,12 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
         )
         sanad = status_change.updateSanad(user)
 
-        is_confirmed = request.data.get('_confirmed')
-        if not is_confirmed:
-            sanad.check_account_balance_confirmations()
+        if sanad:
+            is_confirmed = request.data.get('_confirmed')
+            if not is_confirmed:
+                sanad.check_account_balance_confirmations()
 
-        return Response(ChequeListRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
+        return Response(ChequeRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         cheque = self.get_object()
@@ -240,7 +241,7 @@ class ChequeByPositionApiView(APIView):
             request.GET.get('id')
         )
         if item:
-            return Response(ChequeListRetrieveSerializer(instance=item).data)
+            return Response(ChequeRetrieveSerializer(instance=item).data)
         return Response(['not found'], status=status.HTTP_404_NOT_FOUND)
 
 

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from accounts.accounts.serializers import FloatAccountSerializer, AccountListSerializer
 from accounts.accounts.validators import AccountValidator
 from accounts.defaultAccounts.serializers import DefaultAccountListRetrieveSerializer
-from cheques.serializers import ChequeListRetrieveSerializer
+from cheques.serializers import ChequeRetrieveSerializer
 from factors.models import Factor
 from factors.models.factor import FactorPayment
 from imprests.serializers import ImprestSettlementListRetrieveSerializer
@@ -28,7 +28,7 @@ class TransactionItemListRetrieveSerializer(serializers.ModelSerializer):
     floatAccount = FloatAccountSerializer(read_only=True, many=False)
     costCenter = FloatAccountSerializer(read_only=True, many=False)
     type = DefaultAccountListRetrieveSerializer(read_only=True, many=False)
-    cheque = ChequeListRetrieveSerializer(read_only=True, many=False)
+    cheque = ChequeRetrieveSerializer(read_only=True, many=False)
 
     class Meta:
         model = TransactionItem
