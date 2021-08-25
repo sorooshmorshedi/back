@@ -201,6 +201,7 @@ class CloseFinancialYearView(APIView):
         CloseFinancialYearView.add_temporaries_sanad_items(sanad)
         sanad.update_values()
         CloseFinancialYearView.add_current_earnings_sanad_item(sanad)
+        sanad.define()
         sanad.save()
         sanad.update_values()
 
@@ -210,6 +211,7 @@ class CloseFinancialYearView(APIView):
         sanad.type = Sanad.CLOSING
         sanad.explanation = "سند اختتامیه"
         CloseFinancialYearView.add_retained_earnings_sanad_item(sanad)
+        sanad.define()
         sanad.save()
         sanad.update_values()
 
@@ -221,6 +223,7 @@ class CloseFinancialYearView(APIView):
         CloseFinancialYearView.add_permanents_sanad_items(sanad)
         sanad.update_values()
         CloseFinancialYearView.add_closing_sanad_item(sanad)
+        sanad.define()
         sanad.save()
         sanad.update_values()
 
@@ -335,6 +338,7 @@ class CloseFinancialYearView(APIView):
 
             sanad_items.append(sanad_item)
 
+        sanad.define()
         sanad.update_values()
 
         return sanad_items
