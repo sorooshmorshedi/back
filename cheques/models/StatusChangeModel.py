@@ -215,6 +215,7 @@ class StatusChange(BaseModel):
         sanad.explanation = explanation
         sanad.save()
 
+        sanad.define()
         sanad.update_values()
 
         return sanad

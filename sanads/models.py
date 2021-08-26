@@ -1,16 +1,17 @@
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.contenttypes.models import ContentType
+from django.utils.timezone import now
 from django.db import models
 from django.db.models.aggregates import Max
 from django.db.models.expressions import F
 from django.db.models.functions.comparison import Coalesce
 
-from accounts.accounts.models import Account, FloatAccount
+from accounts.accounts.models import Account, FloatAccount, AccountBalance
 from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
-from helpers.functions import get_current_user
+from helpers.functions import get_current_user, get_object_accounts
 from helpers.models import BaseModel, DefinableMixin, LockableMixin
 from server.settings import TESTING
 
@@ -150,6 +151,21 @@ class Sanad(BaseModel, DefinableMixin, LockableMixin):
         for item in self.items.all():
             item.delete()
         return super(Sanad, self).delete(*args, **kwargs)
+
+    def define(self, date=None):
+        if not self.is_defined:
+            self.is_defined = True
+            self.defined_by = get_current_user()
+            self.definition_date = date or now()
+            self.save()
+
+            for item in self.items.all():
+                AccountBalance.update_balance(
+                    financial_year=item.financial_year,
+                    **get_object_accounts(item),
+                    bed_change=item.bed,
+                    bes_change=item.bes
+                )
 
 
 class SanadItem(BaseModel):

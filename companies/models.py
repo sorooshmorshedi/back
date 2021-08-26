@@ -159,6 +159,7 @@ class FinancialYear(BaseModel):
             if not is_sanad_ok:
                 raise ValidationError('سند شماره یک سال مالی جدید را خالی کنید')
 
+            sanad.type = Sanad.OPENING
             sanad.define()
             self.openingSanad = sanad
             self.save()
