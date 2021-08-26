@@ -7,7 +7,10 @@ def get_account_sanad_items_filter(request) -> Q:
     data = request.GET
     financial_year = get_current_user().active_financial_year
 
-    filters = Q(sanadItems__sanad__financial_year=financial_year)
+    filters = Q(
+        sanadItems__sanad__financial_year=financial_year,
+        sanadItems__sanad__is_defined=True
+    )
     if 'from_date' in data:
         filters &= Q(sanadItems__sanad__date__gte=data['from_date'])
     if 'to_date' in data:

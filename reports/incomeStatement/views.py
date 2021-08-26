@@ -84,11 +84,13 @@ class IncomeStatementView(APIView):
         rows = []
         dateFilter = get_account_sanad_items_filter(request)
 
-        allAccounts = list(Account.objects.inFinancialYear() \
-                           .annotate(remain=
-                                     Coalesce(Sum('sanadItems__bed', filter=dateFilter), 0) -
-                                     Coalesce(Sum('sanadItems__bes', filter=dateFilter), 0)
-                                     ).filter(level=3).order_by('code'))
+        allAccounts = list(Account.objects.inFinancialYear().annotate(
+            remain=Coalesce(
+                Sum('sanadItems__bed', filter=dateFilter), 0
+            ) - Coalesce(
+                Sum('sanadItems__bes', filter=dateFilter), 0
+            )
+        ).filter(level=3).order_by('code'))
 
         t = getSerialized('sale', allAccounts)
         rows.append(t)
