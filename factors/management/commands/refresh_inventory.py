@@ -69,7 +69,11 @@ class Command(BaseCommand):
 
         errors = []
         for factor in queryset_iterator(qs, key=('definition_date',)):
-            DefiniteFactor.updateFactorInventory(factor)
+            try:
+                DefiniteFactor.updateFactorInventory(factor)
+            except ValidationError as e:
+                print("Error in Factor #{}".format(factor.id))
+                raise e
 
             for item in factor.items.all():
                 for fee in item.remain_fees:
