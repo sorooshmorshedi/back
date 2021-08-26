@@ -368,6 +368,15 @@ class CancelFinancialYearClosingView(APIView):
             operation=FinancialYearOperation.CANCEL_CLOSE
         )
 
+        target_financial_year = FinancialYearOperation.objects.filter(
+            fromFinancialYear=financial_year,
+            operation=FinancialYearOperation.CLOSE_AND_MOVE
+        ).latest().toFinancialYear
+        sanad = target_financial_year.get_opening_sanad()
+        clearSanad(sanad)
+        sanad.is_auto_created = True
+        sanad.save()
+
         return Response(UserListRetrieveSerializer(user).data)
 
 
