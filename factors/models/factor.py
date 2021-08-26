@@ -90,12 +90,12 @@ class Factor(BaseModel, DefinableMixin, LockableMixin):
     taxPercent = models.IntegerField(default=0, null=True, blank=True)
 
     is_loaded = models.BooleanField(default=False)
-    loaded_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='loadedFactors')
-    distribution = models.ForeignKey(Distribution, on_delete=models.PROTECT, null=True, related_name='factors')
+    loaded_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, blank=True, related_name='loadedFactors')
+    distribution = models.ForeignKey(Distribution, on_delete=models.PROTECT, null=True, blank=True, related_name='factors')
     loading_date = models.DateTimeField(blank=True, null=True)
 
     is_delivered = models.BooleanField(default=False)
-    delivered_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, related_name='deliveredFactors')
+    delivered_by = models.ForeignKey('users.User', on_delete=models.PROTECT, null=True, blank=True, related_name='deliveredFactors')
     delivery_date = models.DateTimeField(blank=True, null=True)
 
     is_settled = models.BooleanField(default=False)

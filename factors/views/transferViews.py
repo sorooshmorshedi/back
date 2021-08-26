@@ -1,15 +1,17 @@
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 from rest_framework import viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from factors.models import Factor
 from factors.models.transfer_model import Transfer
 from factors.serializers import TransferListRetrieveSerializer, TransferCreateUpdateSerializer
 from factors.views.definite_factor import DefiniteFactor
 from helpers.auth import BasicCRUDPermission
-from helpers.functions import get_object_by_code, get_new_code
+from helpers.functions import get_object_by_code, get_new_code, get_current_user
 from helpers.views.lock_view import ToggleItemLockView
 
 
@@ -99,9 +101,25 @@ class DefineTransferView(APIView):
         )
 
         if not item.is_defined:
-            DefiniteFactor.updateFactorInventory(item.output_factor)
-            DefiniteFactor.updateFactorInventory(item.input_factor)
+            input_factor = item.input_factor
+            output_factor = item.output_factor
+
             item.define()
+
+            input_factor.definition_date = now()
+            input_factor.code = Factor.get_new_code(Factor.INPUT_TRANSFER)
+            input_factor.is_defined = True
+            input_factor.defined_by = get_current_user()
+            input_factor.save()
+            DefiniteFactor.updateFactorInventory(input_factor)
+
+            output_factor.definition_date = now()
+            output_factor.code = Factor.get_new_code(Factor.OUTPUT_TRANSFER)
+            output_factor.is_defined = True
+            output_factor.defined_by = get_current_user()
+            output_factor.save()
+            DefiniteFactor.updateFactorInventory(output_factor)
+
             serializer = TransferCreateUpdateSerializer(instance=item, data=item_data)
             serializer.is_valid()
             serializer.save()
