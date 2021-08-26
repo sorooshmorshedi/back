@@ -240,15 +240,16 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
 
         explanation = validated_data.get('explanation', '')
 
-        if instance.financial_year.is_advari:
+        if instance.is_defined and instance.financial_year.is_advari:
             input_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), instance.time)
             output_factor.definition_date = datetime.datetime.combine(instance.date.togregorian(), instance.time)
 
         input_factor.date = instance.date
         input_factor.explanation = instance.explanation
+        input_factor.save()
+
         output_factor.date = instance.date
         output_factor.explanation = instance.explanation
-        input_factor.save()
         output_factor.save()
 
         input_items_data = []
@@ -309,6 +310,15 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             if instance.is_defined:
                 DefiniteFactor.updateFactorInventory(input_factor)
 
+        if instance.is_defined:
+            input_factor.is_defined = True
+            input_factor.defined_by = get_current_user()
+            input_factor.save()
+
+            output_factor.is_defined = True
+            output_factor.defined_by = get_current_user()
+            output_factor.save()
+
         transfer_data = {
             'input_factor': input_factor,
             'output_factor': output_factor,
@@ -339,22 +349,20 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             'date': date,
             'time': time,
             'explanation': explanation,
-            'is_defined': True,
-            'definition_date': definition_date,
             'is_auto_created': True
         }
         input_factor = Factor.objects.create(
             **factor_data,
             type=Factor.INPUT_TRANSFER,
             temporary_code=Factor.get_new_temporary_code(Factor.INPUT_TRANSFER),
-            code=Factor.get_new_code(Factor.INPUT_TRANSFER),
+            # code=Factor.get_new_code(Factor.INPUT_TRANSFER),
         )
         input_factor.save()
         output_factor = Factor.objects.create(
             **factor_data,
             type=Factor.OUTPUT_TRANSFER,
             temporary_code=Factor.get_new_code(Factor.OUTPUT_TRANSFER),
-            code=Factor.get_new_temporary_code(Factor.OUTPUT_TRANSFER)
+            # code=Factor.get_new_temporary_code(Factor.OUTPUT_TRANSFER)
         )
         output_factor.save()
 
