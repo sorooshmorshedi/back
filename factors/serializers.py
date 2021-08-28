@@ -288,6 +288,9 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
                 warehouse=output_warehouse
             )
 
+            if instance.is_defined:
+                DefiniteFactor._updateInventory(output_factor_item, revert=False)
+
             # move wares in
             output_factor_item.refresh_from_db()
             fee = 0
@@ -298,15 +301,14 @@ class TransferCreateUpdateSerializer(serializers.ModelSerializer):
             if total_count != 0:
                 fee /= total_count
 
-            input_factor.items.create(
+            input_factor_item = input_factor.items.create(
                 **item_data,
                 fee=fee,
                 warehouse=input_warehouse,
             )
 
-        if instance.is_defined:
-            DefiniteFactor.updateFactorInventory(input_factor)
-            DefiniteFactor.updateFactorInventory(output_factor)
+            if instance.is_defined:
+                DefiniteFactor._updateInventory(input_factor_item, revert=False)
 
         transfer_data = {
             'input_factor': input_factor,
