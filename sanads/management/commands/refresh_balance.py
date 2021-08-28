@@ -48,8 +48,7 @@ class Command(BaseCommand):
         print("Deleting all balances in financial year #{}".format(user.active_financial_year.id))
         AccountBalance.objects.filter(financial_year=user.active_financial_year).delete()
 
-    def handle(self, *args, **options):
-        user = User.objects.get(pk=options['user_id'])
+    def refresh_balance(self, user, financial_year):
 
         self.backup_balances()
 
@@ -62,7 +61,7 @@ class Command(BaseCommand):
 
         print("Update balances")
         qs = SanadItem.objects.filter(
-            financial_year=user.active_financial_year,
+            financial_year=financial_year,
             sanad__is_defined=True
         ).all()
         for item in queryset_iterator(qs):
@@ -74,3 +73,7 @@ class Command(BaseCommand):
             )
 
         print("Done!")
+
+    def handle(self, *args, **options):
+        user = User.objects.get(pk=options['user_id'])
+        self.refresh_balance(user, user.active_financial_year)

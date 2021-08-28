@@ -8,6 +8,7 @@ from helpers.test import set_user
 from imprests.models import ImprestSettlement
 from sanads.models import Sanad
 from transactions.models import Transaction
+from sanads.management.commands.refresh_balance import Command as RefreshBalanceCommand
 
 
 class Command(BaseCommand):
@@ -15,30 +16,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        closing_sanads = [
-            'temporaryClosingSanad',
-            'currentEarningsClosingSanad',
-            'permanentsClosingSanad'
-        ]
-
+        command = RefreshBalanceCommand()
         for company in Company.objects.all():
-            set_user(company.superuser)
-
+            user = company.created_by
+            set_user(user)
             for financial_year in company.financial_years.all():
-                for sanad_field in closing_sanads:
-                    sanad = getattr(financial_year, sanad_field)
-                    if sanad:
-                        sanad.date = financial_year.end
-                        sanad.type = Sanad.CLOSING
-                        sanad.is_auto_created = True
-                        sanad.save()
-
-                sanad = financial_year.openingSanad
-                if sanad:
-                    sanad.date = financial_year.start
-                    sanad.type = sanad.OPENING
-                    sanad.is_auto_created = True
-                    sanad.save()
+                command.refresh_balance(user, financial_year)
 
     def update_sanads_origin(self):
         for company in Company.objects.all():
