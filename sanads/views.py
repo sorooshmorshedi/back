@@ -185,14 +185,6 @@ class DefineSanadView(APIView):
 
         item.define()
 
-        for sanad_item in item.items.all():
-            AccountBalance.update_balance(
-                financial_year=sanad_item.financial_year,
-                **get_object_accounts(sanad_item),
-                bed_change=sanad_item.bed,
-                bes_change=sanad_item.bes
-            )
-
         return Response(self.serializer_class(instance=item).data)
 
 
