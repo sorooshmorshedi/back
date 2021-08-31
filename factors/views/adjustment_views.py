@@ -96,11 +96,7 @@ class DefineAdjustmentView(APIView):
             self.serializer_class.Meta.model,
             pk=data.get('item')
         )
-
-        if not item.is_defined:
-            DefiniteFactor.updateFactorInventory(item.factor)
-            AdjustmentSanad(item).update()
-            item.define()
+        item.define()
 
         return Response(self.serializer_class(instance=item).data)
 

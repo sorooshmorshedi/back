@@ -134,16 +134,10 @@ class WarehouseHandlingDefiniteView(APIView):
             'items': []
         }
 
-        input_adjustment = instance.inputAdjustment
-        output_adjustment = instance.outputAdjustment
-
-        input_adjustment.define()
-        output_adjustment.define()
-
         adjustment_data['items'] = input_items
         adjustment_data['type'] = Factor.INPUT_ADJUSTMENT
         input_serializer = AdjustmentCreateUpdateSerializer(
-            instance=input_adjustment,
+            instance=instance.inputAdjustment,
             data=adjustment_data,
             context={
                 'financial_year': instance.financial_year
@@ -151,11 +145,13 @@ class WarehouseHandlingDefiniteView(APIView):
         )
         input_serializer.is_valid(raise_exception=True)
         input_serializer.save()
+        input_adjustment = input_serializer.instance
+        input_adjustment.define()
 
         adjustment_data['items'] = output_items
         adjustment_data['type'] = Factor.OUTPUT_ADJUSTMENT
         output_serializer = AdjustmentCreateUpdateSerializer(
-            instance=output_adjustment,
+            instance=instance.outputAdjustment,
             data=adjustment_data,
             context={
                 'financial_year': instance.financial_year
@@ -163,9 +159,11 @@ class WarehouseHandlingDefiniteView(APIView):
         )
         output_serializer.is_valid(raise_exception=True)
         output_serializer.save()
+        output_adjustment = output_serializer.instance
+        output_adjustment.define()
 
-        instance.inputAdjustment = input_serializer.instance
-        instance.outputAdjustment = output_serializer.instance
+        instance.inputAdjustment = input_adjustment
+        instance.outputAdjustment = output_adjustment
         instance.is_defined = True
         if instance.code is None:
             instance.code = get_new_code(WarehouseHandling)

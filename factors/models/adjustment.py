@@ -3,6 +3,7 @@ from django_jalali.db import models as jmodels
 
 from companies.models import FinancialYear
 from factors.models.factor import Factor
+from helpers.functions import get_current_user
 from helpers.models import BaseModel, EXPLANATION, DefinableMixin, LockableMixin
 from sanads.models import Sanad
 
@@ -35,3 +36,16 @@ class Adjustment(BaseModel, DefinableMixin, LockableMixin):
             ('defineOwn.adjustment', 'قطعی کردن تعدیل های خود'),
             ('lockOwn.adjustment', 'قفل کردن تعدیل های خود')
         )
+
+    def define(self, date=None):
+        from factors.views.definite_factor import DefiniteFactor
+        from factors.adjustment_sanad import AdjustmentSanad
+        from django.utils.timezone import now
+
+        if not self.is_defined:
+            DefiniteFactor.updateFactorInventory(self.factor)
+            AdjustmentSanad(self).update()
+            self.is_defined = True
+            self.defined_by = get_current_user()
+            self.definition_date = date or now()
+            self.save()
