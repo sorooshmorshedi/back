@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from companies.models import CompanyUserInvitation, CompanyUser
 from helpers.auth import BasicCRUDPermission
+from helpers.views.recaptcha import RecaptchaView
 from users.models import User, PhoneVerification
 from users.permissions import ChangePasswordPermission
 from users.serializers import UserListRetrieveSerializer, UserCreateSerializer, UserUpdateSerializer, \
@@ -102,18 +103,25 @@ class SetActiveFinancialYear(APIView):
         return Response(UserListRetrieveSerializer(user).data, status=status.HTTP_200_OK)
 
 
-class SendVerificationCodeView(APIView):
+class SendVerificationCodeView(APIView, RecaptchaView):
     throttle_scope = 'verification_code'
 
     def post(self, request):
-        PhoneVerification.send_verification_code(request.data.get('phone'))
+        self.verify_recaptcha()
+
+        data = request.data
+        PhoneVerification.send_verification_code(
+            data.get('phone'),
+            data.get('username', None)
+        )
         return Response({})
 
 
-class ChangePasswordByVerificationCodeView(APIView):
-    throttle_scope = 'verification_code'
+class ChangePasswordByVerificationCodeView(APIView, RecaptchaView):
 
     def post(self, request):
+        self.verify_recaptcha()
+
         data = request.data
         phone = data.get('phone')
         username = data.get('username')

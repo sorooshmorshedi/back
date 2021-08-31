@@ -158,9 +158,17 @@ class PhoneVerification(BaseModel):
         get_latest_by = 'id'
 
     @staticmethod
-    def send_verification_code(phone):
+    def send_verification_code(phone, username=None):
         code = random.randint(1000, 9999)
-        user = User.objects.filter(phone=phone).first()
+
+        qs = User.objects.filter(phone=phone)
+        if username:
+            qs = qs.filter(username=username)
+            user = qs.first()
+            if not user:
+                raise ValidationError("کاربری با این شماره موبایل و نام کاربری وجود ندارد")
+        else:
+            user = qs.first()
 
         PhoneVerification.objects.create(
             user=user,

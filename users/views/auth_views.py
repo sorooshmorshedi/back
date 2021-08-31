@@ -1,7 +1,3 @@
-import json
-from urllib.parse import urlencode
-from urllib.request import urlopen
-
 import pyotp
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -11,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from server.settings import RECAPTCHA_PRIVATE_KEY
+from helpers.views.recaptcha import RecaptchaView
 
 
 class SecretKeyView(APIView):
@@ -60,24 +56,7 @@ class SecretKeyView(APIView):
         return Response([])
 
 
-class ObtainAuthTokenView(ObtainAuthToken):
-
-    def verify_recaptcha(self):
-        URIReCaptcha = 'https://www.google.com/recaptcha/api/siteverify'
-        recaptcha_response = self.request.data.get('recaptchaResponse', None)
-        params = urlencode({
-            'secret': RECAPTCHA_PRIVATE_KEY,
-            'response': recaptcha_response,
-            'remote_ip': self.request.META.get('REMOTE_ADDR')
-        })
-
-        recaptcha_data = urlopen(URIReCaptcha, params.encode('utf-8')).read()
-        result = json.loads(recaptcha_data)
-        success = result.get('success', None)
-
-        if not success:
-            raise ValidationError({'non_field_errors': ['من ربات نیستم را تایید نمایید']})
-        return True
+class ObtainAuthTokenView(ObtainAuthToken, RecaptchaView):
 
     def post(self, request, *args, **kwargs):
 
