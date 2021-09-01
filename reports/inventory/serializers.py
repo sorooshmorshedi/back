@@ -35,6 +35,8 @@ class WareInventorySerializer(serializers.ModelSerializer):
 
     origin = serializers.SerializerMethodField()
 
+    warehouse_name = serializers.CharField(source='warehouse.name')
+
     def get_origin(self, obj: FactorItem):
         factor = obj.factor
 
