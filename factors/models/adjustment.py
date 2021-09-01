@@ -14,7 +14,7 @@ class Adjustment(BaseModel, DefinableMixin, LockableMixin):
     time = models.TimeField()
 
     type = models.CharField(max_length=2, choices=Factor.ADJUSTMENT_TYPES)
-    factor = models.ForeignKey(Factor, on_delete=models.PROTECT, related_name='adjustment')
+    factor = models.OneToOneField(Factor, on_delete=models.PROTECT, related_name='adjustment')
     sanad = models.OneToOneField(Sanad, on_delete=models.PROTECT, related_name='adjustment', null=True)
     explanation = EXPLANATION()
 

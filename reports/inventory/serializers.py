@@ -20,8 +20,7 @@ class FactorWithAccountCreateUpdateSerializer(FactorCreateUpdateSerializer):
     class Meta:
         model = Factor
         fields = (
-            'id', 'code', 'date', 'type', 'is_pre_factor', 'account', 'explanation', 'is_defined', 'definition_date',
-            'input_transfer', 'output_transfer', 'adjustment'
+            'id', 'code', 'date', 'type', 'is_pre_factor', 'account', 'explanation', 'is_defined', 'definition_date'
         )
 
 
@@ -33,6 +32,31 @@ class WareInventorySerializer(serializers.ModelSerializer):
 
     comulative_input_count = serializers.DecimalField(max_digits=24, decimal_places=6)
     comulative_output_count = serializers.DecimalField(max_digits=24, decimal_places=6)
+
+    origin = serializers.SerializerMethodField()
+
+    def get_origin(self, obj: FactorItem):
+        factor = obj.factor
+
+        factor_type = factor.type
+        origin_id = factor.id
+        origin_code = factor.code
+
+        if factor_type == Factor.INPUT_TRANSFER:
+            origin_id = factor.input_transfer.id
+            origin_code = factor.input_transfer.code
+        elif factor_type == Factor.OUTPUT_TRANSFER:
+            origin_id = factor.output_transfer.id
+            origin_code = factor.output_transfer.code
+        elif factor_type in (Factor.INPUT_ADJUSTMENT, Factor.OUTPUT_ADJUSTMENT):
+            origin_id = factor.adjustment.id
+            origin_code = factor.adjustment.code
+
+        return {
+            'type': factor_type,
+            'id': origin_id,
+            'code': origin_code
+        }
 
     def get_input(self, obj: FactorItem):
         if obj.factor.type in Factor.INPUT_GROUP:
