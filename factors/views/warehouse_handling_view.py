@@ -140,7 +140,8 @@ class WarehouseHandlingDefiniteView(APIView):
             instance=instance.inputAdjustment,
             data=adjustment_data,
             context={
-                'financial_year': instance.financial_year
+                'financial_year': instance.financial_year,
+                'is_defining': True
             }
         )
         input_serializer.is_valid(raise_exception=True)
@@ -154,7 +155,8 @@ class WarehouseHandlingDefiniteView(APIView):
             instance=instance.outputAdjustment,
             data=adjustment_data,
             context={
-                'financial_year': instance.financial_year
+                'financial_year': instance.financial_year,
+                'is_defining': True
             }
         )
         output_serializer.is_valid(raise_exception=True)

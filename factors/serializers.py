@@ -419,10 +419,12 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         financial_year = user.active_financial_year
         adjustment_type = instance.type
 
+        is_defining = self.context.get('is_defining', False)
+
         # Sync factor
         factor = instance.factor
 
-        if instance.is_defined:
+        if instance.is_defined or is_defining:
             DefiniteFactor.updateFactorInventory(factor, revert=True)
 
         factor_items_data = []
@@ -470,7 +472,7 @@ class AdjustmentCreateUpdateSerializer(serializers.ModelSerializer):
         for item_data in factor_items_data:
             factor.items.create(**item_data)
 
-        if instance.is_defined:
+        if instance.is_defined or is_defining:
             DefiniteFactor.updateFactorInventory(factor)
 
             # Sync sanad
