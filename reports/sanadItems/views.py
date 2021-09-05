@@ -49,7 +49,7 @@ class SanadItemReportView(generics.ListAPIView):
 
         report_type = self.request.GET.copy().get('report_type', None)
         if report_type == 'bill':
-            qs.exclude(
+            qs = qs.exclude(
                 Q(
                     (Q(sanad__type=Sanad.OPENING) & Q(sanad__is_auto_created=True)) |
                     (Q(sanad__type=Sanad.CLOSING) & Q(sanad__is_auto_created=True))
