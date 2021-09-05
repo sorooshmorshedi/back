@@ -115,20 +115,20 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         items_data = data.get('items')
         payments_data = data.get('payments')
 
-        for i in range(len(items_data.get('items'))):
-            item = items_data['items'][i]
+        for i, item in enumerate(items_data.get('items')):
+
             cheque_data = item.get('cheque')
             if cheque_data:
-                if item.get('id'):
-                    items_data['items'].pop(i)
-                else:
+                if not item.get('id'):
                     cheque_data['has_transaction'] = True
                     cheque = SubmitChequeApiView.submitCheque(user, cheque_data)
                     item['cheque'] = cheque.id
 
+        items_data_items = list(filter(lambda o: not (o.get('id') and o.get('cheque')), items_data.get('items')))
+
         MassRelatedCUD(
             user,
-            items_data.get('items'),
+            items_data_items,
             items_data.get('ids_to_delete'),
             'transaction',
             self.id,
@@ -164,7 +164,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         return [t[1] for t in self.TYPES if t[0] == self.type][0]
 
     def _createSanad(self, user):
-        sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year, date=self.date)
+        sanad = Sanad(code=newSanadCode(), financial_year=self.financial_year, date=self.date, is_auto_created=True)
         sanad.save()
         self.sanad = sanad
         self.save()
