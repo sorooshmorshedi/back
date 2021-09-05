@@ -312,11 +312,7 @@ class CloseFinancialYearView(APIView):
     def create_opening_sanad(current_financial_year, target_financial_year):
 
         sanad = target_financial_year.get_opening_sanad()
-        clearSanad(sanad)
-        sanad.is_auto_created = True
-        sanad.type = Sanad.OPENING
-        sanad.explanation = "سند افتتاحیه"
-        sanad.date = target_financial_year.start
+        sanad.delete_items()
         sanad.save()
 
         opening_default_account = DefaultAccount.get('opening')
@@ -373,8 +369,7 @@ class CancelFinancialYearClosingView(APIView):
             operation=FinancialYearOperation.CLOSE_AND_MOVE
         ).latest().toFinancialYear
         sanad = target_financial_year.get_opening_sanad()
-        clearSanad(sanad)
-        sanad.is_auto_created = True
+        sanad.delete_items()
         sanad.save()
 
         return Response(UserListRetrieveSerializer(user).data)
@@ -410,7 +405,7 @@ class MoveFinancialYearView(APIView):
 
     def move_accounts(self, target_financial_year):
         sanad = target_financial_year.get_opening_sanad()
-        clearSanad(sanad)
+        sanad.delete_items()
         sanad_items = ClosingHelpers.create_sanad_items_with_balance(sanad)
         return sanad_items
 

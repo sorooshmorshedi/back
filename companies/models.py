@@ -144,8 +144,6 @@ class FinancialYear(BaseModel):
                 code=1,
                 defaults={
                     'date': self.start,
-                    'is_auto_created': True,
-                    'type': Sanad.OPENING,
                 }
             )
 
@@ -159,15 +157,19 @@ class FinancialYear(BaseModel):
             if not is_sanad_ok:
                 raise ValidationError('سند شماره یک سال مالی جدید را خالی کنید')
 
-            sanad.type = Sanad.OPENING
-            sanad.define()
             self.openingSanad = sanad
             self.save()
         else:
-            self.openingSanad.date = self.start
-            self.openingSanad.save()
+            sanad = self.openingSanad
 
-        return self.openingSanad
+        sanad.date = self.start
+        sanad.is_auto_created = True
+        sanad.type = Sanad.OPENING
+        sanad.explanation = "سند افتتاحیه"
+        sanad.define()
+        sanad.save()
+
+        return sanad
 
     def check_closing_sanads(self):
         from sanads.models import Sanad
