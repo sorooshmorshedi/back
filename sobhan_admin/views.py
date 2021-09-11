@@ -70,7 +70,8 @@ class AdminUsersView(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        profile_serializer = AdminProfileSerializer(user.profile, data=profile_data)
+        profile = getattr(user, 'profile', None)
+        profile_serializer = AdminProfileSerializer(profile, data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
         profile_serializer.save(
             user=user
