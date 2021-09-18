@@ -15,6 +15,7 @@ from helpers.auth import BasicCRUDPermission
 from helpers.functions import get_object_by_code
 from helpers.views.confirm_view import ConfirmView
 from sanads.models import clearSanad, Sanad
+from transactions.transaction_sanad import TransactionSanad
 
 
 class ChequebookModelView(viewsets.ModelViewSet):
@@ -98,15 +99,15 @@ class SubmitChequeApiView(APIView):
         return Response(ChequeRetrieveSerializer(instance=cheque).data, status=status.HTTP_200_OK)
 
     @staticmethod
-    def submitCheque(user, data):
+    def submitCheque(user, data, is_guarantee=False):
 
-        received_or_paid = data.get('received_or_paid')
+        is_paid = data.get('is_paid', False) == 'true'
 
-        if received_or_paid == Cheque.RECEIVED:
-            serializer = ChequeCreateUpdateSerializer(data=data)
-        else:
+        if is_paid:
             instance = get_object_or_404(Cheque, pk=data.get('id'))
             serializer = ChequeCreateUpdateSerializer(instance=instance, data=data)
+        else:
+            serializer = ChequeCreateUpdateSerializer(data=data)
 
         serializer.is_valid(raise_exception=True)
         serializer.save(
@@ -121,10 +122,15 @@ class SubmitChequeApiView(APIView):
         if sanad and not sanad.isEmpty:
             raise ValidationError("سند باید خالی باشد")
 
+        if is_guarantee:
+            to_status = 'guarantee'
+        else:
+            to_status = 'notPassed'
+
         status_change = cheque.changeStatus(
             user=user,
             date=cheque.date,
-            to_status='notPassed',
+            to_status=to_status,
             explanation=cheque.explanation,
             sanad=sanad
         )
@@ -138,11 +144,11 @@ class SubmitChequeApiView(APIView):
         return cheque
 
 
-def get_cheque_permission_basename(received_or_paid):
-    if received_or_paid == Cheque.RECEIVED:
-        return "receivedCheque"
-    else:
+def get_cheque_permission_basename(is_paid):
+    if is_paid:
         return "paidCheque"
+    else:
+        return "receivedCheque"
 
 
 class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
@@ -151,7 +157,7 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
 
     @property
     def permission_basename(self):
-        return get_cheque_permission_basename(get_object_or_404(Cheque, pk=self.kwargs.get('pk')).received_or_paid)
+        return get_cheque_permission_basename(get_object_or_404(Cheque, pk=self.kwargs.get('pk')).is_paid)
 
     def get_queryset(self) -> QuerySet:
         return Cheque.objects.hasAccess(self.request.method, self.permission_basename)
@@ -197,7 +203,7 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         cheque = self.get_object()
 
-        if cheque.received_or_paid == Cheque.PAID:
+        if cheque.is_paid:
             raise ValidationError("چک پرداختی غیر قابل حذف می باشد")
 
         if cheque.status != 'notPassed' or cheque.statusChanges.count() != 1:
@@ -208,13 +214,12 @@ class ChequeApiView(generics.RetrieveUpdateDestroyAPIView):
 
     def perform_destroy(self, instance: Cheque):
 
-        user = self.request.user
         if instance.has_transaction:
             transaction_item = instance.transactionItem
             transaction = transaction_item.transaction
 
             transaction_item.delete()
-            transaction.updateSanad(user)
+            TransactionSanad(transaction).update()
         else:
             status_change = instance.statusChanges.first()
             if status_change:
@@ -229,13 +234,13 @@ class ChequeByPositionApiView(APIView):
 
     @property
     def permission_basename(self):
-        received_or_paid = self.request.GET.get('received_or_paid')
-        return get_cheque_permission_basename(received_or_paid)
+        return get_cheque_permission_basename(self.request.GET.get('is_paid', False) == 'true')
 
     def get(self, request):
         item = get_object_by_code(
             Cheque.objects.hasAccess(request.method, self.permission_basename).filter(
-                received_or_paid=request.GET.get('received_or_paid')
+                is_paid=request.GET.get('is_paid', False) == 'true',
+                type=request.GET.get('type')
             ),
             request.GET.get('position'),
             request.GET.get('id')
@@ -294,10 +299,10 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
     def permission_basename(self):
         status_change = get_object_or_404(StatusChange, pk=self.kwargs.get('pk'))
         cheque = status_change.cheque
-        if cheque.received_or_paid == Cheque.RECEIVED:
-            return "receivedChequeStatusChange"
-        else:
+        if cheque.is_paid:
             return "paidChequeStatusChange"
+        else:
+            return "receivedChequeStatusChange"
 
     def get_queryset(self):
         return StatusChange.objects.hasAccess(self.request.method, self.permission_basename)
@@ -313,7 +318,7 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
             raise serializers.ValidationError("ابتدا تغییرات جلوتر را پاک کنید")
 
         if cheque.statusChanges.count() == 1:
-            if cheque.received_or_paid == Cheque.RECEIVED:
+            if not cheque.is_paid:
                 raise ValidationError("حذف اولین تغییر وضعیت چک دریافتی امکان پذیر نیست")
             else:
                 cheque.account = None
@@ -337,14 +342,14 @@ class DeleteStatusChangeView(generics.DestroyAPIView):
 
         cheque.status = instance.fromStatus
 
-        if cheque.received_or_paid == Cheque.RECEIVED:
-            lastAccount = instance.besAccount
-            lastFloatAccount = instance.besFloatAccount
-            lastCostCenter = instance.besCostCenter
-        else:
+        if cheque.is_paid:
             lastAccount = instance.bedAccount
             lastFloatAccount = instance.bedFloatAccount
             lastCostCenter = instance.bedCostCenter
+        else:
+            lastAccount = instance.besAccount
+            lastFloatAccount = instance.besFloatAccount
+            lastCostCenter = instance.besCostCenter
 
         cheque.lastAccount = lastAccount
         cheque.lastFloatAccount = lastFloatAccount
@@ -385,16 +390,7 @@ class RevertChequeInFlowStatusView(APIView):
 
         serialized = StatusChangeSerializer(data=data)
         if serialized.is_valid():
-            if cheque.received_or_paid == Cheque.RECEIVED:
-                cheque.lastAccount = Account.objects.inFinancialYear().get(pk=data['bedAccount'])
-                if 'bedFloatAccount' in data:
-                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear().get(
-                        pk=data['bedFloatAccount'])
-                if 'bedCostCenter' in data:
-                    cheque.lastCostCenter = FloatAccount.objects.inFinancialYear().get(
-                        pk=data['bedCostCenter'])
-
-            else:
+            if cheque.is_paid:
                 cheque.lastAccount = Account.objects.inFinancialYear().get(pk=data['besAccount'])
                 if 'besFloatAccount' in data:
                     cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear().get(
@@ -402,6 +398,15 @@ class RevertChequeInFlowStatusView(APIView):
                 if 'besCostCenter' in data:
                     cheque.lastCostCenter = FloatAccount.objects.inFinancialYear().get(
                         pk=data['besCostCenter'])
+
+            else:
+                cheque.lastAccount = Account.objects.inFinancialYear().get(pk=data['bedAccount'])
+                if 'bedFloatAccount' in data:
+                    cheque.lastFloatAccount = FloatAccount.objects.inFinancialYear().get(
+                        pk=data['bedFloatAccount'])
+                if 'bedCostCenter' in data:
+                    cheque.lastCostCenter = FloatAccount.objects.inFinancialYear().get(
+                        pk=data['bedCostCenter'])
 
             cheque.status = data['toStatus']
             cheque.save()
@@ -441,4 +446,4 @@ class ConfirmCheque(ConfirmView):
     model = Cheque
 
     def permission_codename(self):
-        return get_cheque_permission_basename(self.get_object().received_or_paid)
+        return get_cheque_permission_basename(self.get_object().is_paid)

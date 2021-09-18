@@ -19,7 +19,9 @@ class TransactionItemCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ('financial_year',)
 
     def validate(self, data):
-        AccountValidator.tafsili(data)
+        transaction_type = data['transaction'].type
+        if transaction_type not in (Transaction.PAYMENT_GUARANTEE, Transaction.RECEIVED_GUARANTEE):
+            AccountValidator.tafsili(data)
         return super(TransactionItemCreateUpdateSerializer, self).validate(data)
 
 

@@ -89,7 +89,7 @@ class Chequebook(BaseModel):
             self.cheques.create(
                 serial=i,
                 status='blank',
-                received_or_paid=Cheque.PAID,
+                is_paid=True,
                 account=self.account,
                 floatAccount=self.floatAccount,
                 costCenter=self.costCenter,

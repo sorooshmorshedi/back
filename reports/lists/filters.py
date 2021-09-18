@@ -51,7 +51,7 @@ class ChequeFilter(filters.FilterSet):
             'status': BASE_FIELD_FILTERS,
             'bankName': ['icontains'],
             'type': ['exact'],
-            'received_or_paid': ['exact'],
+            'is_paid': ['exact'],
             'chequebook__id': ['exact'],
             'chequebook__explanation': ['icontains'],
             'chequebook__account__name': ['icontains'],

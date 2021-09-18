@@ -20,6 +20,7 @@ from sanads.models import clearSanad, Sanad
 from transactions.models import Transaction, TransactionItem, BankingOperation
 from transactions.serializers import TransactionCreateUpdateSerializer, TransactionListRetrieveSerializer, \
     TransactionFactorListSerializer, Sum, BankingOperationSerializer
+from transactions.transaction_sanad import TransactionSanad
 
 
 def get_transaction_permission_basename(transaction_type):
@@ -31,6 +32,10 @@ def get_transaction_permission_basename(transaction_type):
         return "imprestTransaction"
     if transaction_type == Transaction.BANK_TRANSFER:
         return "bankTransferTransaction"
+    if transaction_type == Transaction.RECEIVED_GUARANTEE:
+        return "receivedGuaranteeTransaction"
+    if transaction_type == Transaction.PAYMENT_GUARANTEE:
+        return "paymentGuaranteeTransaction"
 
 
 class TransactionCreateView(generics.CreateAPIView):
@@ -98,7 +103,7 @@ class TransactionDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.sync(user, data)
 
         if instance.is_defined:
-            instance.updateSanad(user)
+            TransactionSanad(instance).update()
 
         return Response(TransactionListRetrieveSerializer(instance=transaction).data, status=status.HTTP_200_OK)
 
@@ -233,7 +238,7 @@ class QuickFactorTransaction(APIView):
             factor=factor,
             value=value
         )
-        transaction.updateSanad(user)
+        TransactionSanad(transaction).update()
 
         factor.paidValue += value
         factor.save()
@@ -261,7 +266,7 @@ class DefineTransactionView(APIView):
         user = request.user
 
         if not self.item.is_defined:
-            self.item.updateSanad(user)
+            TransactionSanad(self.item).update()
             self.item.define()
 
         return Response(self.serializer_class(instance=self.item).data)

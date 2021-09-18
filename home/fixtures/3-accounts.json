@@ -17364,5 +17364,49 @@
       "usage": "payment",
       "codename": "paymentBankWage"
     }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 40,
+    "fields": {
+      "financial_year": 1,
+      "name": "پیش فرض حساب های انتظامی - اسناد اخذ شده",
+      "account_level": 3,
+      "usage": "guarantee",
+      "codename": "receivedGuarantee"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 41,
+    "fields": {
+      "financial_year": 1,
+      "name": "پیش فرض طرف حساب های انتظامی - اسناد اخذ شده",
+      "account_level": 3,
+      "usage": "guarantee",
+      "codename": "receivedGuaranteeFrom"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 42,
+    "fields": {
+      "financial_year": 1,
+      "name": "پیش فرض حساب های انتظامی - اسناد واگذار شده",
+      "account_level": 3,
+      "usage": "guarantee",
+      "codename": "paidGuarantee"
+    }
+  },
+  {
+    "model": "accounts.defaultaccount",
+    "pk": 43,
+    "fields": {
+      "financial_year": 1,
+      "name": "پیش فرض طرف حساب های انتظامی - اسناد واگذار شده",
+      "account_level": 3,
+      "usage": "guarantee",
+      "codename": "paidGuaranteeTo"
+    }
   }
 ]

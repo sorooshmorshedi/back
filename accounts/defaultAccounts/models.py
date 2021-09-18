@@ -9,7 +9,7 @@ from helpers.models import BaseModel
 class DefaultAccount(BaseModel):
     RECEIVE = 'receive'
     PAYMENT = 'payment'
-    RECEIVE_AND_PAYMENT = 'receiveAndPayment'
+    GUARANTEE = 'guarantee'
     FACTOR = 'factor'
     CLOSE_ACCOUNTS = 'closeAccounts'
     IMPREST = 'imprest'
@@ -22,7 +22,7 @@ class DefaultAccount(BaseModel):
     USAGES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
-        (RECEIVE_AND_PAYMENT, 'دریافت و پرداخت'),
+        (GUARANTEE, 'اسناد ضمانتی'),
         (FACTOR, 'فاکتور'),
         (CLOSE_ACCOUNTS, 'بستن حساب ها'),
         (IMPREST, 'تنخواه'),

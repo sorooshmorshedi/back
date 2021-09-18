@@ -21,11 +21,16 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
     PAYMENT = 'payment'
     IMPREST = 'imprest'
     BANK_TRANSFER = 'bankTransfer'
+    PAYMENT_GUARANTEE = 'paymentGuarantee'
+    RECEIVED_GUARANTEE = 'receivedGuarantee'
+
     TYPES = (
         (RECEIVE, 'دریافت'),
         (PAYMENT, 'پرداخت'),
         (IMPREST, 'پرداخت تنخواه'),
         (BANK_TRANSFER, 'انتقال بین بانکی'),
+        (PAYMENT_GUARANTEE, 'اسناد ضمانتی پرداختی'),
+        (RECEIVED_GUARANTEE, 'اسناد ضمانتی دریافتی'),
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactions')
@@ -79,6 +84,20 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('define.imprestTransaction', 'قطعی کردن پرداخت تنخواه'),
             ('lock.imprestTransaction', 'قفل کردن پرداخت تنخواه'),
 
+            ('get.receivedGuaranteeTransaction', 'مشاهده اسناد ضمانتی دریافتی'),
+            ('create.receivedGuaranteeTransaction', 'تعریف اسناد ضمانتی دریافتی'),
+            ('update.receivedGuaranteeTransaction', 'ویرایش اسناد ضمانتی دریافتی'),
+            ('delete.receivedGuaranteeTransaction', 'حذف اسناد ضمانتی دریافتی'),
+            ('define.receivedGuaranteeTransaction', 'قطعی اسناد ضمانتی دریافتی'),
+            ('lock.receivedGuaranteeTransaction', 'قفل اسناد ضمانتی دریافتی'),
+
+            ('get.paymentGuaranteeTransaction', 'مشاهده اسناد ضمانتی پرداختی'),
+            ('create.paymentGuaranteeTransaction', 'تعریف اسناد ضمانتی پرداختی'),
+            ('update.paymentGuaranteeTransaction', 'ویرایش اسناد ضمانتی پرداختی'),
+            ('delete.paymentGuaranteeTransaction', 'حذف اسناد ضمانتی پرداختی'),
+            ('define.paymentGuaranteeTransaction', 'قطعی اسناد ضمانتی پرداختی'),
+            ('lock.paymentGuaranteeTransaction', 'قفل اسناد ضمانتی پرداختی'),
+
             ('getOwn.receiveTransaction', 'مشاهده دریافت های خود'),
             ('updateOwn.receiveTransaction', 'ویرایش دریافت های خود'),
             ('deleteOwn.receiveTransaction', 'حذف دریافت های خود'),
@@ -103,6 +122,18 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             ('defineOwn.imprestTransaction', 'قطعی کردن پرداخت تنخواه های خود'),
             ('lockOwn.imprestTransaction', 'قفل کردن پرداخت تنخواه های خود'),
 
+            ('getOwn.receivedGuaranteeTransaction', 'مشاهده اسناد ضمانتی دریافتی خود'),
+            ('updateOwn.receivedGuaranteeTransaction', 'ویرایش اسناد ضمانتی دریافتی خود'),
+            ('deleteOwn.receivedGuaranteeTransaction', 'حذف اسناد ضمانتی دریافتی خود'),
+            ('defineOwn.receivedGuaranteeTransaction', 'قطعی اسناد ضمانتی دریافتی خود'),
+            ('lockOwn.receivedGuaranteeTransaction', 'قفل اسناد ضمانتی دریافتی خود'),
+
+            ('getOwn.paymentGuaranteeTransaction', 'مشاهده اسناد ضمانتی پرداختی خود'),
+            ('updateOwn.paymentGuaranteeTransaction', 'ویرایش اسناد ضمانتی پرداختی خود'),
+            ('deleteOwn.paymentGuaranteeTransaction', 'حذف اسناد ضمانتی پرداختی خود'),
+            ('defineOwn.paymentGuaranteeTransaction', 'قطعی اسناد ضمانتی پرداختی خود'),
+            ('lockOwn.paymentGuaranteeTransaction', 'قفل اسناد ضمانتی پرداختی خود'),
+
         )
 
     def sync(self, user, data):
@@ -121,7 +152,11 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             if cheque_data:
                 if not item.get('id'):
                     cheque_data['has_transaction'] = True
-                    cheque = SubmitChequeApiView.submitCheque(user, cheque_data)
+                    cheque = SubmitChequeApiView.submitCheque(
+                        user,
+                        cheque_data,
+                        is_guarantee=self.type in (self.PAYMENT_GUARANTEE, self.RECEIVED_GUARANTEE)
+                    )
                     item['cheque'] = cheque.id
 
         items_data_items = list(filter(lambda o: not (o.get('id') and o.get('cheque')), items_data.get('items')))
@@ -169,169 +204,6 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
         self.sanad = sanad
         self.save()
         return sanad
-
-    def updateSanad(self, user):
-        sanad = self.sanad
-        if not sanad:
-            sanad = self._createSanad(user)
-
-        clearSanad(sanad)
-
-        sanad.is_auto_created = True
-
-        explanation = ''
-        if self.type == self.RECEIVE:
-            explanation = sanad_exp(
-                'بابت دریافت',
-                'شماره',
-                self.code,
-                self.explanation
-            )
-        elif self.type in (self.PAYMENT, self.BANK_TRANSFER):
-            explanation = sanad_exp(
-                'بابت پرداخت',
-                'شماره',
-                self.code,
-                'مورخ',
-                self.date,
-                self.explanation
-            )
-        elif self.type == self.IMPREST:
-            explanation = sanad_exp(
-                'بابت پرداخت تنخواه شماره',
-                self.code,
-                'مورخ',
-                self.date,
-                'جهت',
-                self.explanation
-            )
-
-        sanad.explanation = explanation
-        sanad.date = self.date
-        sanad.origin_content_type = get_content_type_for_model(Transaction)
-        sanad.origin_id = self.id
-        sanad.save()
-
-        total_value = 0
-        total_banking_operation_value = 0
-        for item in self.items.all():
-
-            total_value += item.value
-
-            bed = 0
-            bes = 0
-
-            row_explanation = ''
-            if self.type == Transaction.RECEIVE:
-                bed = item.value
-                row_explanation = sanad_exp(
-                    'بابت دریافت شماره',
-                    self.code,
-                    'به شماره پیگیری',
-                    item.documentNumber,
-                    'مورخ',
-                    item.date,
-                    item.explanation
-                )
-            else:
-                bes = item.value
-                if self.type in (Transaction.PAYMENT, Transaction.BANK_TRANSFER):
-                    row_explanation = sanad_exp(
-                        'بابت پرداخت شماره',
-                        self.code,
-                        'به شماره پیگیری',
-                        item.documentNumber,
-                        'مورخ',
-                        item.date,
-                        item.explanation
-                    )
-                elif self.type == Transaction.IMPREST:
-                    row_explanation = sanad_exp(
-                        'بابت پرداخت تنخواه شماره',
-                        self.code,
-                        'مورخ',
-                        item.date,
-                        'به شماره پیگیری',
-                        item.documentNumber,
-                        'جهت',
-                        item.explanation
-                    )
-
-                if item.banking_operation_value != 0:
-                    print('ha')
-                    total_banking_operation_value += item.banking_operation_value
-                    sanad.items.create(
-                        bed=0,
-                        bes=item.banking_operation_value,
-                        explanation='',
-                        account=item.account,
-                        floatAccount=item.floatAccount,
-                        costCenter=item.costCenter,
-                        financial_year=sanad.financial_year
-                    )
-
-            sanad.items.create(
-                bed=bed,
-                bes=bes,
-                explanation=row_explanation,
-                account=item.account,
-                floatAccount=item.floatAccount,
-                costCenter=item.costCenter,
-                financial_year=sanad.financial_year
-            )
-
-        last_bed = 0
-        last_bes = 0
-        last_row_explanation = ''
-
-        if self.type == Transaction.RECEIVE:
-            last_bes = total_value
-            last_row_explanation = sanad_exp(
-                'بابت واریز طی دریافت شماره',
-                self.code,
-                self.explanation
-            )
-        else:
-            last_bed = total_value
-            if self.type in (Transaction.PAYMENT, Transaction.BANK_TRANSFER):
-                last_row_explanation = sanad_exp(
-                    'بابت دریافت طی شماره پرداخت',
-                    self.code,
-                    'مورخ',
-                    self.date,
-                    self.explanation
-                )
-            elif self.type == Transaction.IMPREST:
-                last_row_explanation = sanad_exp(
-                    'بابت دریافت تنخواه شماره',
-                    self.code,
-                    'مورخ',
-                    self.date,
-                    self.explanation
-                )
-
-            if total_banking_operation_value != 0:
-                sanad.items.create(
-                    bed=total_banking_operation_value,
-                    bes=0,
-                    explanation='',
-                    **get_object_accounts(DefaultAccount.get('paymentBankWage')),
-                    financial_year=sanad.financial_year
-                )
-
-        if len(self.items.all()) != 0:
-            sanad.items.create(
-                bed=last_bed,
-                bes=last_bes,
-                explanation=last_row_explanation,
-                account=self.account,
-                floatAccount=self.floatAccount,
-                costCenter=self.costCenter,
-                financial_year=sanad.financial_year
-            )
-
-        sanad.update_values()
-        sanad.define()
 
     def delete(self, *args, **kwargs):
         clearSanad(self.sanad)
@@ -400,7 +272,8 @@ class BankingOperation(BaseModel):
 class TransactionItem(BaseModel):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='transactionItems')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='items')
-    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems')
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='transactionItems', blank=True,
+                                null=True)
     floatAccount = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItems',
                                      blank=True, null=True)
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='transactionItemsAsCostCenter',

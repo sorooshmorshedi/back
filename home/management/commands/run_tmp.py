@@ -1,6 +1,7 @@
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.management.base import BaseCommand
 from _dashtbashi.models import Lading, OilCompanyLading
+from cheques.models.ChequeModel import Cheque
 from cheques.models.StatusChangeModel import StatusChange
 from companies.models import Company, FinancialYear
 from factors.models import Factor, Transfer, Adjustment

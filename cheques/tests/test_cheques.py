@@ -17,7 +17,7 @@ class ChequeTest(MTestCase):
         account, float_account_id, cost_center_id = AccountTest.get_account()
 
         return {
-            "received_or_paid": "r",
+            "is_paid": False,
             "due": "1398-12-06",
             "date": "1398-12-06",
             "serial": "1522",

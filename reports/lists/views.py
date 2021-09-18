@@ -38,8 +38,7 @@ class ChequeListView(generics.ListAPIView):
 
     @property
     def permission_basename(self):
-        received_or_paid = self.request.GET.get('received_or_paid')
-        return get_cheque_permission_basename(received_or_paid)
+        return get_cheque_permission_basename(self.request.GET.get('is_paid', False) == 'true')
 
     serializer_class = ChequeListSerializer
     filterset_class = ChequeFilter

@@ -64,7 +64,7 @@ class ChequeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cheque
-        fields = ('id', 'title', 'serial', 'value', 'due', 'date', 'explanation', 'status', 'received_or_paid', 'type',
+        fields = ('id', 'title', 'serial', 'value', 'due', 'date', 'explanation', 'status', 'is_paid', 'type',
                   'bankName', 'floatAccount', 'costCenter', 'account', 'chequebook')
 
 

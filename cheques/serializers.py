@@ -103,21 +103,18 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
 
         AccountValidator.tafsili(data)
 
-        received_or_paid = data.get('received_or_paid')
-
-        if received_or_paid not in (Cheque.RECEIVED, Cheque.PAID):
-            raise serializers.ValidationError("لطفا نوع چک (پرداختی یا دریافتی) را مشخص کنید")
+        is_paid = data.get('is_paid', False) == 'true'
 
         if self.instance:
-            if self.instance.chequebook and received_or_paid != Cheque.PAID:
+            if self.instance.chequebook and not is_paid:
                 raise serializers.ValidationError("نوع چک غیر قابل قبول است")
 
         return data
 
     def update(self, instance: Cheque, validated_data):
-        if instance.received_or_paid == Cheque.PAID:
+        if instance.is_paid:
             validated_data.pop('serial')
-            validated_data.pop('received_or_paid')
+            validated_data.pop('is_paid')
 
         return super(ChequeCreateUpdateSerializer, self).update(instance, validated_data)
 

@@ -100,7 +100,7 @@ class StatusChange(BaseModel):
 
         if self.toStatus == 'notPassed' and self.fromStatus != 'inFlow':
 
-            if cheque.received_or_paid == Cheque.PAID:
+            if cheque.is_paid:
                 explanation = sanad_exp(
                     "بابت پرداخت",
                     base_explanation,
@@ -134,7 +134,7 @@ class StatusChange(BaseModel):
                 'transferred': 'انتقال چک',
             }
             if newStatus == 'passed':
-                if cheque.received_or_paid == Cheque.PAID:
+                if cheque.is_paid:
                     explanation = bed_explanation = bes_explanation = sanad_exp(
                         "بابت پاس شدن",
                         base_explanation,
@@ -166,7 +166,7 @@ class StatusChange(BaseModel):
                 bes_explanation = sanad_exp("بابت برگشت", base_explanation)
 
             elif newStatus == 'cashed':
-                if cheque.received_or_paid == Cheque.PAID:
+                if cheque.is_paid:
                     explanation = bed_explanation = bes_explanation = sanad_exp(
                         "بابت پرداخت نقدی",
                         base_explanation,

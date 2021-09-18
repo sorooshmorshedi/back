@@ -10,7 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.DeleteModel(
-            name='Report',
-        ),
+        # - Model Report Does not exists
+        #
+        # migrations.DeleteModel(
+        #     name='Report',
+        # ),
     ]

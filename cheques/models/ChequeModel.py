@@ -46,15 +46,20 @@ class ChequeManager(BaseManager):
 
 
 class Cheque(BaseModel):
-    RECEIVED = 'r'
-    PAID = 'p'
+    CHEQUE = 'c'
+    PROMISSORY_NOTE = 'pn'
+    BANK_GUARANTEE = 'bg'
+    TYPES = (
+        (CHEQUE, 'چک'),
+        (PROMISSORY_NOTE, 'سفته'),
+        (BANK_GUARANTEE, 'ضمانت نامه بانکی'),
+    )
 
     PERSONAL = 'p'
     COMPANY = 'c'
     OTHER_PERSON = 'op'
     OTHER_COMPANY = 'oc'
-
-    CHEQUE_TYPES = (
+    CHEQUE_OWNER_TYPES = (
         (PERSONAL, 'شخصی'),
         (OTHER_PERSON, 'شخصی سایرین'),
         (COMPANY, 'شرکت'),
@@ -62,6 +67,10 @@ class Cheque(BaseModel):
     )
 
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='cheques')
+
+    type = models.CharField(max_length=2, choices=TYPES, default=CHEQUE)
+    is_paid = models.BooleanField(default=False)
+
     serial = models.IntegerField()
     chequebook = models.ForeignKey(Chequebook, on_delete=models.CASCADE, related_name='cheques', blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='receivedCheques', blank=True,
@@ -76,8 +85,7 @@ class Cheque(BaseModel):
     date = jmodels.jDateField(blank=True, null=True)
     explanation = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=30, choices=CHEQUE_STATUSES)
-    received_or_paid = models.CharField(max_length=10, choices=((RECEIVED, 'دریافتنی'), (PAID, 'پرداختنی')))
-    type = models.CharField(max_length=2, choices=CHEQUE_TYPES, blank=True)
+    owner_type = models.CharField(max_length=2, choices=CHEQUE_OWNER_TYPES, blank=True, null=True)
 
     created_at = jmodels.jDateField(auto_now=True)
     updated_at = jmodels.jDateField(auto_now_add=True)
@@ -99,10 +107,11 @@ class Cheque(BaseModel):
     objects = ChequeManager()
 
     def __str__(self):
+        received_or_paid = 'p' if self.is_paid else 'r'
         if self.chequebook:
-            return "{} - {} - {}".format(self.received_or_paid, self.chequebook.explanation[0:50], self.serial)
+            return "{} - {} - {}".format(received_or_paid, self.chequebook.explanation[0:50], self.serial)
         else:
-            return "{} - {} - {}".format(self.received_or_paid, self.explanation[0:50], self.serial)
+            return "{} - {} - {}".format(received_or_paid, self.explanation[0:50], self.serial)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'چک'
@@ -133,16 +142,6 @@ class Cheque(BaseModel):
             ('deleteOwn.paidCheque', 'حذف چک های پرداختی خود'),
 
             ('changeStatusOwn.paidCheque', 'تغییر وضعیت های پرداختی خود'),
-
-            ('firstConfirm.receivedCheque', 'تایید اول چک دریافتی'),
-            ('secondConfirm.receivedCheque', 'تایید دوم چک دریافتی'),
-            ('firstConfirmOwn.receivedCheque', 'تایید اول چک های دریافتی خود'),
-            ('secondConfirmOwn.receivedCheque', 'تایید دوم چک های دریافتی خود'),
-
-            ('firstConfirm.paidCheque', 'تایید اول چک پرداختی '),
-            ('secondConfirm.paidCheque', 'تایید دوم چک پرداختی '),
-            ('firstConfirmOwn.paidCheque', 'تایید اول چک های پرداختی خود'),
-            ('secondConfirmOwn.paidCheque', 'تایید دوم چک های پرداختی خود'),
         )
 
     def save(self, *args, **kwargs):
@@ -162,9 +161,7 @@ class Cheque(BaseModel):
             self.lastAccount = self.account
             self.lastFloatAccount = self.floatAccount
             self.lastCostCenter = self.costCenter
-            res = self.save()
-
-        return res
+            self.save()
 
     def changeStatus(self, user, date, to_status, account: Account = None, floatAccount: FloatAccount = None,
                      costCenter: FloatAccount = None, explanation='', sanad=None):
@@ -183,7 +180,7 @@ class Cheque(BaseModel):
         lastFloatAccount = None
         lastCostCenter = None
 
-        if self.received_or_paid == Cheque.RECEIVED:
+        if not self.is_paid:
 
             data['besAccount'] = self.lastAccount.id
             if self.lastFloatAccount:
@@ -230,7 +227,7 @@ class Cheque(BaseModel):
                 if self.lastFloatAccount:
                     data['bedFloatAccount'] = self.lastFloatAccount.id
                 if self.lastCostCenter:
-                    data['bedCostCenter'] = self.costCenter.id
+                    data['bedCostCenter'] = self.lastCostCenter.id
 
                 if to_status == 'revoked' or to_status == 'bounced':
                     lastAccount = self.account
