@@ -103,10 +103,16 @@ class LadingListView(generics.ListAPIView):
     ordering_fields = '__all__'
 
     def get_queryset(self):
-        return Lading.objects.hasAccess('get').all()
+
+        ordering = self.request.GET.get('ordering')
+        qs = Lading.objects.hasAccess('get')
+        if ordering:
+            qs = qs.order_by(ordering)
+
+        return self.filter_queryset(qs)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
 
         if page:

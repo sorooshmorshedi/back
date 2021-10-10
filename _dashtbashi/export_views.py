@@ -16,10 +16,7 @@ class LadingListExportView(LadingListView, BaseListExportView):
     title = None
 
     def get_rows(self):
-        res = super(LadingListExportView, self).get_rows()
-        print(res)
-        print(self.get_queryset())
-        return res
+        return self.filterset_class(self.request.GET, queryset=self.get_queryset()).qs.all()
 
     def get(self, request, *args, **kwargs):
         self.title = request.GET.get('title', 'لیست بارگیری ها')
