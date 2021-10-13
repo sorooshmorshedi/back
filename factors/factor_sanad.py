@@ -118,12 +118,11 @@ class FactorSanad(AutoSanad):
         return items
 
     def get_sanad_explanation(self):
-        return "فاکتور {} شماره {} به تاریخ {} {} مشتری".format(
+        return "فاکتور {} شماره {} به تاریخ {} {} مشتری - {}".format(
             self.instance.type_label,
             self.instance.code,
             str(self.instance.date),
             "از" if self.instance.type in Factor.BUY_GROUP else "به",
-            " - ",
             self.instance.explanation
         )
 

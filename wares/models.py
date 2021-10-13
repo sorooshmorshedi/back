@@ -8,6 +8,7 @@ from django_jalali.db import models as jmodels
 from rest_framework.exceptions import ValidationError
 
 from companies.models import FinancialYear
+from helpers.bale import Bale
 from helpers.functions import get_current_user, get_new_child_code
 from helpers.models import BaseModel, DECIMAL
 
@@ -366,6 +367,7 @@ class WareInventory(BaseModel):
             financial_year.id, count, ware.id, warehouse.id, revert
         )
         print(log)
+        Bale.to_me(log)
         WareInventory.logger.info(log)
 
         ware_balances = WareInventory.objects.filter(
@@ -381,6 +383,7 @@ class WareInventory(BaseModel):
 
         check_inventory = ware.check_inventory
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
+        Bale.to_me(current_inventory_count, count)
         if check_inventory:
             if not revert and current_inventory_count < count:
                 raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
