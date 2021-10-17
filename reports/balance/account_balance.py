@@ -66,7 +66,7 @@ class AccountBalanceView(APIView):
 
         cols_count = int(filters.get('cols_count', 2))
 
-        where_filters = "sanad.financial_year_id = {} and ".format(financial_year.id)
+        where_filters = "sanad.financial_year_id = {} and sanad.is_defined = true and ".format(financial_year.id)
 
         if cols_count >= 8:
             where_filters += "sanad.type != '{}' and ".format(Sanad.OPENING)
