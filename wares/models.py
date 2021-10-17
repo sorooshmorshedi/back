@@ -366,8 +366,8 @@ class WareInventory(BaseModel):
         log = "Financial Year #{}: dec {} #{} from #{}, revert:{}".format(
             financial_year.id, count, ware.id, warehouse.id, revert
         )
-        print(log)
-        Bale.to_me(log)
+        # print(log)
+        # Bale.to_me(log)
         WareInventory.logger.info(log)
 
         ware_balances = WareInventory.objects.filter(
@@ -383,7 +383,7 @@ class WareInventory(BaseModel):
 
         check_inventory = ware.check_inventory
         current_inventory_count = ware_balances.aggregate(count=Coalesce(Sum('count'), 0))['count']
-        Bale.to_me(current_inventory_count, count)
+        # Bale.to_me(current_inventory_count, count)
         if check_inventory:
             if not revert and current_inventory_count < count:
                 raise ValidationError("موجودی {} کافی نیست، موجودی فعلی: {} {}".format(
