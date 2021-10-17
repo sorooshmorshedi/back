@@ -12,7 +12,7 @@ from django_jalali.db import models as jmodels
 from companies.models import FinancialYear
 from helpers.exceptions.ConfirmationError import ConfirmationError
 from helpers.functions import get_current_user, get_object_accounts
-from helpers.models import BaseModel, DefinableMixin, LockableMixin
+from helpers.models import BaseModel, DefinableMixin, LockableMixin, EXPLANATION
 from server.settings import TESTING
 
 
@@ -30,7 +30,7 @@ class Sanad(BaseModel, DefinableMixin, LockableMixin):
     financial_year = models.ForeignKey(FinancialYear, on_delete=models.CASCADE, related_name='sanads')
     code = models.IntegerField(verbose_name="شماره سند")
     local_id = models.BigIntegerField()
-    explanation = models.CharField(max_length=255, blank=True, verbose_name="توضیحات")
+    explanation = EXPLANATION()
     date = jmodels.jDateField(verbose_name="تاریخ")
     created_at = jmodels.jDateTimeField(auto_now=True)
     updated_at = jmodels.jDateTimeField(auto_now_add=True)
