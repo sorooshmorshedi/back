@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
+from helpers.bale import Bale
 from helpers.functions import date_to_str
 from helpers.models import BaseModel, POSTAL_CODE, EXPLANATION, BaseManager, upload_to
 
@@ -180,10 +181,10 @@ class FinancialYear(BaseModel):
             'currentEarningsClosingSanad',
             'permanentsClosingSanad'
         ]
-        need_save = False
 
         for sanad_name in closing_sanads:
-            if not getattr(self, sanad_name):
+            sanad = getattr(self, sanad_name)
+            if not sanad:
                 sanad = Sanad.objects.create(
                     financial_year=self,
                     code=newSanadCode(self),
@@ -192,10 +193,8 @@ class FinancialYear(BaseModel):
                     type=Sanad.CLOSING
                 )
                 setattr(self, sanad_name, sanad)
-                need_save = True
 
-        if need_save:
-            self.save()
+        self.save()
 
     def delete_closing_sanads(self):
         self.temporaryClosingSanad.delete()

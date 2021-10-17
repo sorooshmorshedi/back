@@ -198,6 +198,7 @@ class CloseFinancialYearView(APIView):
         sanad.is_auto_created = True
         sanad.type = Sanad.CLOSING
         sanad.explanation = "سند اختتامیه"
+        sanad.date = current_financial_year.end
         CloseFinancialYearView.add_temporaries_sanad_items(sanad)
         sanad.update_values()
         CloseFinancialYearView.add_current_earnings_sanad_item(sanad)
@@ -210,6 +211,7 @@ class CloseFinancialYearView(APIView):
         sanad.is_auto_created = True
         sanad.type = Sanad.CLOSING
         sanad.explanation = "سند اختتامیه"
+        sanad.date = current_financial_year.end
         CloseFinancialYearView.add_retained_earnings_sanad_item(sanad)
         sanad.define()
         sanad.save()
@@ -220,6 +222,7 @@ class CloseFinancialYearView(APIView):
         sanad.is_auto_created = True
         sanad.type = Sanad.CLOSING
         sanad.explanation = "سند اختتامیه"
+        sanad.date = current_financial_year.end
         CloseFinancialYearView.add_permanents_sanad_items(sanad)
         sanad.update_values()
         CloseFinancialYearView.add_closing_sanad_item(sanad)
