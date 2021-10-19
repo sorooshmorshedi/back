@@ -47,13 +47,17 @@ class ChequeManager(BaseManager):
 
 class Cheque(BaseModel):
     CHEQUE = 'c'
+    GUARANTEE_CHEQUE = 'gc'
     PROMISSORY_NOTE = 'pn'
     BANK_GUARANTEE = 'bg'
     TYPES = (
         (CHEQUE, 'چک'),
+        (GUARANTEE_CHEQUE, 'چک ضمانتی'),
         (PROMISSORY_NOTE, 'سفته'),
         (BANK_GUARANTEE, 'ضمانت نامه بانکی'),
     )
+
+    GUARANTEE_TYPES = (GUARANTEE_CHEQUE, PROMISSORY_NOTE, BANK_GUARANTEE)
 
     PERSONAL = 'p'
     COMPANY = 'c'
@@ -182,94 +186,101 @@ class Cheque(BaseModel):
 
         if not self.is_paid:
 
-            data['besAccount'] = self.lastAccount.id
-            if self.lastFloatAccount:
-                data['besFloatAccount'] = self.lastFloatAccount.id
-            if self.lastCostCenter:
-                data['besCostCenter'] = self.lastCostCenter.id
-
-            if to_status == 'revoked' or to_status == 'bounced':
-                lastAccount = self.account
-                data['bedAccount'] = self.account.id
-                if self.floatAccount:
-                    lastFloatAccount = self.floatAccount
-                    data['bedFloatAccount'] = self.floatAccount.id
-                if self.costCenter:
-                    lastCostCenter = self.costCenter
-                    data['bedCostCenter'] = self.costCenter.id
-
-            elif to_status == 'notPassed':
-                defaultAccount = DefaultAccount.get('receivedCheque')
-                lastAccount = defaultAccount.account
-                lastFloatAccount = defaultAccount.floatAccount
-                lastCostCenter = defaultAccount.costCenter
-                data['bedAccount'] = lastAccount.id
-
+            if self.type in self.GUARANTEE_TYPES:
+                data['besAccount'] = DefaultAccount.get('receivedGuaranteeFrom')
+                lastAccount = data['bedAccount'] = DefaultAccount.get('receivedGuarantee')
             else:
-                lastAccount = account
-                data['bedAccount'] = account.id
-                if floatAccount:
-                    lastFloatAccount = floatAccount
-                    data['bedFloatAccount'] = floatAccount.id
-                if costCenter:
-                    lastCostCenter = costCenter
-                    data['bedCostCenter'] = costCenter.id
-
-        else:
-
-            if self.status == 'blank' and to_status == 'revoked':
-                lastAccount = self.lastAccount
-                lastFloatAccount = self.lastFloatAccount
-                lastCostCenter = self.lastCostCenter
-            else:
-
-                data['bedAccount'] = self.lastAccount.id
+                data['besAccount'] = self.lastAccount.id
                 if self.lastFloatAccount:
-                    data['bedFloatAccount'] = self.lastFloatAccount.id
+                    data['besFloatAccount'] = self.lastFloatAccount.id
                 if self.lastCostCenter:
-                    data['bedCostCenter'] = self.lastCostCenter.id
+                    data['besCostCenter'] = self.lastCostCenter.id
 
                 if to_status == 'revoked' or to_status == 'bounced':
                     lastAccount = self.account
-                    data['besAccount'] = self.account.id
+                    data['bedAccount'] = self.account.id
                     if self.floatAccount:
                         lastFloatAccount = self.floatAccount
-                        data['besFloatAccount'] = self.floatAccount.id
+                        data['bedFloatAccount'] = self.floatAccount.id
                     if self.costCenter:
                         lastCostCenter = self.costCenter
-                        data['besCostCenter'] = self.costCenter.id
-
-                elif to_status == 'passed':
-                    lastAccount = self.chequebook.account
-                    data['besAccount'] = self.chequebook.account.id
-                    if self.chequebook.floatAccount:
-                        lastFloatAccount = self.chequebook.floatAccount
-                        data['besFloatAccount'] = self.chequebook.floatAccount.id
-                    if self.chequebook.costCenter:
-                        lastCostCenter = self.chequebook.costCenter
-                        data['besCostCenter'] = self.chequebook.costCenter.id
+                        data['bedCostCenter'] = self.costCenter.id
 
                 elif to_status == 'notPassed':
-                    defaultAccount = DefaultAccount.get('paidCheque')
+                    defaultAccount = DefaultAccount.get('receivedCheque')
                     lastAccount = defaultAccount.account
                     lastFloatAccount = defaultAccount.floatAccount
                     lastCostCenter = defaultAccount.costCenter
-
-                    data['besAccount'] = lastAccount.id
-                    if lastFloatAccount:
-                        data['besFloatAccount'] = lastFloatAccount.id
-                    if lastCostCenter:
-                        data['besCostCenter'] = lastCostCenter.id
+                    data['bedAccount'] = lastAccount.id
 
                 else:
                     lastAccount = account
-                    data['besAccount'] = account.id
+                    data['bedAccount'] = account.id
                     if floatAccount:
                         lastFloatAccount = floatAccount
-                        data['besFloatAccount'] = floatAccount.id
+                        data['bedFloatAccount'] = floatAccount.id
                     if costCenter:
                         lastCostCenter = costCenter
-                        data['besCostCenter'] = costCenter.id
+                        data['bedCostCenter'] = costCenter.id
+
+        else:
+            if self.type in self.GUARANTEE_TYPES:
+                data['besAccount'] = DefaultAccount.get('paidGuaranteeTo')
+                lastAccount = data['bedAccount'] = DefaultAccount.get('paidGuarantee')
+            else:
+                if self.status == 'blank' and to_status == 'revoked':
+                    lastAccount = self.lastAccount
+                    lastFloatAccount = self.lastFloatAccount
+                    lastCostCenter = self.lastCostCenter
+                else:
+
+                    data['bedAccount'] = self.lastAccount.id
+                    if self.lastFloatAccount:
+                        data['bedFloatAccount'] = self.lastFloatAccount.id
+                    if self.lastCostCenter:
+                        data['bedCostCenter'] = self.lastCostCenter.id
+
+                    if to_status == 'revoked' or to_status == 'bounced':
+                        lastAccount = self.account
+                        data['besAccount'] = self.account.id
+                        if self.floatAccount:
+                            lastFloatAccount = self.floatAccount
+                            data['besFloatAccount'] = self.floatAccount.id
+                        if self.costCenter:
+                            lastCostCenter = self.costCenter
+                            data['besCostCenter'] = self.costCenter.id
+
+                    elif to_status == 'passed':
+                        lastAccount = self.chequebook.account
+                        data['besAccount'] = self.chequebook.account.id
+                        if self.chequebook.floatAccount:
+                            lastFloatAccount = self.chequebook.floatAccount
+                            data['besFloatAccount'] = self.chequebook.floatAccount.id
+                        if self.chequebook.costCenter:
+                            lastCostCenter = self.chequebook.costCenter
+                            data['besCostCenter'] = self.chequebook.costCenter.id
+
+                    elif to_status == 'notPassed':
+                        defaultAccount = DefaultAccount.get('paidCheque')
+                        lastAccount = defaultAccount.account
+                        lastFloatAccount = defaultAccount.floatAccount
+                        lastCostCenter = defaultAccount.costCenter
+
+                        data['besAccount'] = lastAccount.id
+                        if lastFloatAccount:
+                            data['besFloatAccount'] = lastFloatAccount.id
+                        if lastCostCenter:
+                            data['besCostCenter'] = lastCostCenter.id
+
+                    else:
+                        lastAccount = account
+                        data['besAccount'] = account.id
+                        if floatAccount:
+                            lastFloatAccount = floatAccount
+                            data['besFloatAccount'] = floatAccount.id
+                        if costCenter:
+                            lastCostCenter = costCenter
+                            data['besCostCenter'] = costCenter.id
 
         from cheques.serializers import StatusChangeSerializer
         serialized = StatusChangeSerializer(data=data)

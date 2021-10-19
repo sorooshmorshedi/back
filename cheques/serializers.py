@@ -103,7 +103,7 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
 
         AccountValidator.tafsili(data)
 
-        is_paid = data.get('is_paid', False) == 'true'
+        is_paid = data.get('is_paid', False) == True
 
         if self.instance:
             if self.instance.chequebook and not is_paid:
