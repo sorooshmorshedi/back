@@ -75,7 +75,7 @@ class Factor(BaseModel, DefinableMixin, LockableMixin):
                                      null=True)
     costCenter = models.ForeignKey(FloatAccount, on_delete=models.PROTECT, related_name='factorsAsCostCenter',
                                    blank=True, null=True)
-    explanation = models.CharField(max_length=255, blank=True)
+    explanation = EXPLANATION()
     type = models.CharField(max_length=15, choices=FACTOR_TYPES)
     bijak = models.IntegerField(null=True, blank=True)
 
