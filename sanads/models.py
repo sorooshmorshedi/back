@@ -187,7 +187,7 @@ class SanadItem(BaseModel):
     bed = models.DecimalField(max_digits=24, decimal_places=0, default=0)
     bes = models.DecimalField(max_digits=24, decimal_places=0, default=0)
 
-    explanation = models.CharField(max_length=255, blank=True, verbose_name='توضیحات')
+    explanation = EXPLANATION()
 
     order = models.IntegerField(default=0)
 
