@@ -96,6 +96,7 @@ class SanadFilter(filters.FilterSet):
             'explanation': BASE_FIELD_FILTERS,
             'date': BASE_FIELD_FILTERS,
             'is_auto_created': ['exact'],
+            'is_defined': ['exact'],
             'created_by__name': ['icontains']
         }
         filter_overrides = {
