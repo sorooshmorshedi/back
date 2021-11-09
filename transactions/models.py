@@ -152,7 +152,7 @@ class Transaction(BaseModel, DefinableMixin, LockableMixin):
             if cheque_data:
                 if not item.get('id'):
                     cheque_data['has_transaction'] = True
-                    cheque = SubmitChequeApiView.submitCheque(
+                    cheque = Cheque.submit_cheque(
                         user,
                         cheque_data,
                         is_guarantee=self.type in (self.PAYMENT_GUARANTEE, self.RECEIVED_GUARANTEE)

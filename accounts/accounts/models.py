@@ -1,4 +1,5 @@
 from builtins import tuple
+from typing import Union
 
 from django.db import models
 from django.db.models import Sum
@@ -355,3 +356,45 @@ class AccountBalance(BaseModel):
         bed, bes = AccountBalance.get_bed_bes(account, floatAccount, costCenter)
         balance = bed - bes
         return balance
+
+
+class AccountGroup:
+    def __init__(
+            self,
+            account: Union[Account, int, str],
+            float_account: Union[FloatAccount, int, str] = None,
+            cost_center: Union[FloatAccount, int, str] = None
+    ):
+        if account:
+            if not isinstance(account, Account):
+                account = Account.objects.get(pk=account)
+
+        if float_account:
+            if isinstance(float_account, FloatAccount):
+                assert float_account.is_cost_center == False
+            else:
+                float_account: FloatAccount = FloatAccount.objects.get(is_cost_center=False, pk=float_account)
+                assert account.floatAccountGroup in float_account.floatAccountGroups.all()
+
+        if cost_center:
+            if isinstance(cost_center, FloatAccount):
+                assert cost_center.is_cost_center == True
+            else:
+                cost_center: FloatAccount = FloatAccount.objects.get(is_cost_center=True, pk=cost_center)
+                assert account.floatAccountGroup in cost_center.floatAccountGroups.all()
+
+        self.account = account
+        self.floatAccount = float_account
+        self.costCenter = cost_center
+
+    @property
+    def account_id(self):
+        return self.account.id if self.account else None
+
+    @property
+    def floatAccount_id(self):
+        return self.floatAccount.id if self.floatAccount else None
+
+    @property
+    def costCenter_id(self):
+        return self.costCenter.id if self.costCenter else None

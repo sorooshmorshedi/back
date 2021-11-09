@@ -84,12 +84,13 @@ class Chequebook(BaseModel):
         return res
 
     def _create_cheques(self):
-        from cheques.models.ChequeModel import Cheque
+        from cheques.models.ChequeModel import BLANK, CHEQUE
         for i in range(self.serial_from, self.serial_to + 1):
             self.cheques.create(
                 serial=i,
-                status='blank',
+                status=BLANK,
                 is_paid=True,
+                type=CHEQUE,
                 account=self.account,
                 floatAccount=self.floatAccount,
                 costCenter=self.costCenter,

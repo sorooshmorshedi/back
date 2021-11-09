@@ -1,155 +1,138 @@
+from cheques.models.ChequeModel import PASSED, TRANSFERRED, BOUNCED, CASHED, IN_FLOW, REVOKED, NOT_PASSED
+from cheques.models.StatusChangeModel import StatusChange
 from helpers.auto_sanad import AutoSanad
-from helpers.functions import get_object_accounts, sanad_exp
-from transactions.models import Transaction
+from helpers.functions import get_object_accounts, sanad_exp, date_to_str
 
 
 class StatusChangeSanad(AutoSanad):
 
-    def get_sanad_rows(self, instance: StatusChangeSanad) -> list:
-        data = {
-            'cheque': self.id,
-            'fromStatus': self.status,
-            'toStatus': to_status,
-            'financial_year': user.active_financial_year.id,
-            'date': date,
-            'explanation': explanation
-        }
+    def get_sanad_rows(self, instance: StatusChange) -> list:
+        value = instance.cheque.value
 
-        if sanad:
-            data['sanad'] = sanad.id
+        rows = [
+            {
+                'bed': value,
+                'explanation': self.get_explanations()[1],
+                'account': instance.bedAccount,
+                'floatAccount': instance.bedFloatAccount,
+                'costCenter': instance.bedCostCenter,
+            },
+            {
+                'bes': value,
+                'explanation': self.get_explanations()[2],
+                'account': instance.besAccount,
+                'floatAccount': instance.besFloatAccount,
+                'costCenter': instance.besCostCenter,
+            },
+        ]
 
-        lastFloatAccount = None
-        lastCostCenter = None
+        return rows
 
-        if not self.is_paid:
+    def get_sanad_date(self):
+        return self.instance.cheque.date
 
-            data['besAccount'] = self.lastAccount.id
-            if self.lastFloatAccount:
-                data['besFloatAccount'] = self.lastFloatAccount.id
-            if self.lastCostCenter:
-                data['besCostCenter'] = self.lastCostCenter.id
+    def get_sanad_explanations(self):
+        return self.get_explanations()[0]
 
-            if to_status == 'revoked' or to_status == 'bounced':
-                lastAccount = self.account
-                data['bedAccount'] = self.account.id
-                if self.floatAccount:
-                    lastFloatAccount = self.floatAccount
-                    data['bedFloatAccount'] = self.floatAccount.id
-                if self.costCenter:
-                    lastCostCenter = self.costCenter
-                    data['bedCostCenter'] = self.costCenter.id
+    def get_explanations(self):
+        instance = self.instance
+        cheque = instance.cheque
 
-            elif to_status == 'notPassed':
-                defaultAccount = DefaultAccount.get('receivedCheque')
-                lastAccount = defaultAccount.account
-                lastFloatAccount = defaultAccount.floatAccount
-                lastCostCenter = defaultAccount.costCenter
-                data['bedAccount'] = lastAccount.id
+        base_explanation = sanad_exp(
+            "چک به شماره سریال",
+            cheque.serial,
+            "به تاریخ سررسید",
+            date_to_str(cheque.due),
+            "جهت",
+            cheque.explanation
+        )
 
+        if instance.toStatus == NOT_PASSED and instance.fromStatus != IN_FLOW:
+
+            if cheque.is_paid:
+                explanation = sanad_exp(
+                    "بابت پرداخت",
+                    base_explanation,
+                )
             else:
-                lastAccount = account
-                data['bedAccount'] = account.id
-                if floatAccount:
-                    lastFloatAccount = floatAccount
-                    data['bedFloatAccount'] = floatAccount.id
-                if costCenter:
-                    lastCostCenter = costCenter
-                    data['bedCostCenter'] = costCenter.id
+                explanation = sanad_exp(
+                    "بابت دریافت",
+                    base_explanation,
+                )
+
+            bed_explanation = sanad_exp(
+                "بابت دریافت",
+                base_explanation
+            )
+            bes_explanation = sanad_exp(
+                "بابت پرداخت",
+                base_explanation
+            )
 
         else:
-
-            if self.status == 'blank' and to_status == 'revoked':
-                lastAccount = self.lastAccount
-                lastFloatAccount = self.lastFloatAccount
-                lastCostCenter = self.lastCostCenter
-            else:
-
-                data['bedAccount'] = self.lastAccount.id
-                if self.lastFloatAccount:
-                    data['bedFloatAccount'] = self.lastFloatAccount.id
-                if self.lastCostCenter:
-                    data['bedCostCenter'] = self.lastCostCenter.id
-
-                if to_status == 'revoked' or to_status == 'bounced':
-                    lastAccount = self.account
-                    data['besAccount'] = self.account.id
-                    if self.floatAccount:
-                        lastFloatAccount = self.floatAccount
-                        data['besFloatAccount'] = self.floatAccount.id
-                    if self.costCenter:
-                        lastCostCenter = self.costCenter
-                        data['besCostCenter'] = self.costCenter.id
-
-                elif to_status == 'passed':
-                    lastAccount = self.chequebook.account
-                    data['besAccount'] = self.chequebook.account.id
-                    if self.chequebook.floatAccount:
-                        lastFloatAccount = self.chequebook.floatAccount
-                        data['besFloatAccount'] = self.chequebook.floatAccount.id
-                    if self.chequebook.costCenter:
-                        lastCostCenter = self.chequebook.costCenter
-                        data['besCostCenter'] = self.chequebook.costCenter.id
-
-                elif to_status == 'notPassed':
-                    defaultAccount = DefaultAccount.get('paidCheque')
-                    lastAccount = defaultAccount.account
-                    lastFloatAccount = defaultAccount.floatAccount
-                    lastCostCenter = defaultAccount.costCenter
-
-                    data['besAccount'] = lastAccount.id
-                    if lastFloatAccount:
-                        data['besFloatAccount'] = lastFloatAccount.id
-                    if lastCostCenter:
-                        data['besCostCenter'] = lastCostCenter.id
-
+            new_status = instance.toStatus
+            if new_status == PASSED:
+                if cheque.is_paid:
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت پاس شدن",
+                        base_explanation,
+                    )
                 else:
-                    lastAccount = account
-                    data['besAccount'] = account.id
-                    if floatAccount:
-                        lastFloatAccount = floatAccount
-                        data['besFloatAccount'] = floatAccount.id
-                    if costCenter:
-                        lastCostCenter = costCenter
-                        data['besCostCenter'] = costCenter.id
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت وصول",
+                        base_explanation,
+                    )
+            elif new_status == TRANSFERRED:
+                explanation = sanad_exp(
+                    "بابت انتقال",
+                    base_explanation,
+                )
+                bed_explanation = sanad_exp(
+                    "بابت پرداخت طی انتقال",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp(
+                    "بابت انتقال چک",
+                    base_explanation,
+                )
 
-        from cheques.serializers import StatusChangeSerializer
-        serialized = StatusChangeSerializer(data=data)
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
+            elif new_status == BOUNCED:
+                explanation = bed_explanation = sanad_exp(
+                    "بابت برگشت",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp("بابت برگشت", base_explanation)
 
-        self.lastAccount = lastAccount
-        self.lastFloatAccount = lastFloatAccount
-        self.lastCostCenter = lastCostCenter
-        self.status = to_status
-        self.save()
+            elif new_status == CASHED:
+                if cheque.is_paid:
+                    explanation = bed_explanation = bes_explanation = sanad_exp(
+                        "بابت پرداخت نقدی",
+                        base_explanation,
+                    )
+                else:
+                    explanation = bed_explanation = sanad_exp(
+                        "بابت وصول نقدی",
+                        base_explanation,
+                    )
+                    bes_explanation = sanad_exp(
+                        "بابت پرداخت نقدی",
+                        base_explanation,
+                    )
 
-        return serialized.instance
+            elif new_status == IN_FLOW:
+                explanation = bed_explanation = bes_explanation = sanad_exp(
+                    "بابت درجریان قراردادن",
+                    base_explanation,
+                )
 
-    def get_sanad_explanation(self):
-        explanation = ''
-        if self.instance.type == self.instance.RECEIVE:
-            explanation = sanad_exp(
-                'بابت دریافت',
-                'شماره',
-                self.instance.code,
-                self.instance.explanation
-            )
-        elif self.instance.type in (self.instance.PAYMENT, self.instance.BANK_TRANSFER):
-            explanation = sanad_exp(
-                'بابت پرداخت',
-                'شماره',
-                self.instance.code,
-                'مورخ',
-                self.instance.date,
-                self.instance.explanation
-            )
-        elif self.instance.type == self.instance.IMPREST:
-            explanation = sanad_exp(
-                'بابت پرداخت تنخواه شماره',
-                self.instance.code,
-                'مورخ',
-                self.instance.date,
-                'جهت',
-                self.instance.explanation
-            )
-        return explanation
+            elif new_status == REVOKED:
+                explanation = bed_explanation = sanad_exp(
+                    "بابت ابطال",
+                    base_explanation,
+                )
+                bes_explanation = sanad_exp("بابت برگشت", base_explanation)
+            else:
+                raise Exception(f"وضعیت {new_status} تعریف نشده است ")
+
+        return explanation, bed_explanation, bes_explanation
+

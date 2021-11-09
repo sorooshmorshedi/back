@@ -21,6 +21,8 @@ labels = {
     'mobile': 'موبایل',
     'phone': 'موبایل',
     'account': 'حساب',
+    'bedAccount': 'حساب',
+    'besAccount': 'حساب',
     'date': 'تاریخ',
     'type': 'نوع',
 

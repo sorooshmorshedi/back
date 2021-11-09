@@ -29,6 +29,7 @@ from helpers.views.confirm_view import ConfirmView
 from imprests.models import ImprestSettlement, ImprestSettlementItem
 from transactions.models import Transaction
 from transactions.serializers import TransactionCreateUpdateSerializer
+from transactions.transaction_sanad import TransactionSanad
 
 
 class DriverModelView(viewsets.ModelViewSet):
@@ -413,7 +414,7 @@ class OtherDriverPaymentModelView(viewsets.ModelViewSet):
                 explanation=explanation,
             )
 
-        payment.updateSanad(request.user)
+        TransactionSanad(payment).update()
 
         return Response(OtherDriverPaymentListRetrieveSerializer(instance=instance).data, status=status.HTTP_200_OK)
 

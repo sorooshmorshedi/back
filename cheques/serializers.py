@@ -2,25 +2,36 @@ from rest_framework import serializers
 
 from accounts.accounts.serializers import AccountRetrieveSerializer, FloatAccountSerializer, AccountSimpleSerializer
 from accounts.accounts.validators import AccountValidator
-from cheques.models.ChequeModel import Cheque
+from cheques.models.ChequeModel import Cheque, STATUS_TREE, BLANK, REVOKED, NOT_PASSED, PASSED, TRANSFERRED, CASHED, IN_FLOW
 from cheques.models.ChequebookModel import Chequebook
 from cheques.models.StatusChangeModel import StatusChange
 from helpers.serializers import validate_required_fields
 from sanads.serializers import SanadRetrieveSerializer
 
 
-class StatusChangeSerializer(serializers.ModelSerializer):
+class StatusChangeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StatusChange
         fields = '__all__'
 
     def validate(self, data):
         cheque = data['cheque']
+        from_status = data['fromStatus']
+        to_status = data['toStatus']
 
-        # if cheque.statusChanges.count() > 1:
-        #     raise serializers.ValidationError("ابتدا تغییر وضعیت های چک را پاک کنید")
+        if cheque.is_paid:
+            status_tree = STATUS_TREE['p']
+        else:
+            status_tree = STATUS_TREE['r']
 
-        if cheque.status == 'blank' and data['toStatus'] == 'revoked':
+        valid_destinations = status_tree.get(from_status)
+        if valid_destinations:
+            if to_status not in valid_destinations:
+                raise serializers.ValidationError("تغییر وضعیت از {} به {} امکان پذیر نمی باشد".format(from_status, to_status))
+        else:
+            raise serializers.ValidationError("امکان تغییر وضعیت {} وجود ندارد".format(from_status))
+
+        if cheque.status == BLANK and to_status == REVOKED:
             validate_required_fields(data, ['explanation'])
         else:
             if 'bedAccount' not in data or 'besAccount' not in data:
@@ -29,24 +40,16 @@ class StatusChangeSerializer(serializers.ModelSerializer):
             if data['bedAccount'] == data['besAccount']:
                 raise serializers.ValidationError("حساب بدهکار و بستانکار نمی تواند یکی باشد")
 
-            AccountValidator.tafsili(data, account_key='besAccount', float_account_key='besFloatAccount',
-                                     cost_center_key='besCostCenter')
-            AccountValidator.tafsili(data, account_key='bedAccount', float_account_key='bedFloatAccount',
-                                     cost_center_key='bedCostCenter')
+            if not cheque.value:
+                raise serializers.ValidationError("لطفا مبلغ چک را وارد کنید")
+            if not cheque.due:
+                raise serializers.ValidationError("لطفا تاریخ سر رسید چک را وارد کنید")
+            if not cheque.date:
+                raise serializers.ValidationError("لطفا تاریخ دریافت/پرداخت چک را وارد کنید")
 
-            if data['fromStatus'] == 'blank':
-                if data['toStatus'] != 'notPassed':
-                    raise serializers.ValidationError("ابتدا چک را ثبت کنید")
-                else:
-                    if not cheque.value:
-                        raise serializers.ValidationError("لطفا مبلغ چک را وارد کنید")
-                    if not cheque.due:
-                        raise serializers.ValidationError("لطفا تاریخ سر رسید چک را وارد کنید")
-                    if not cheque.date:
-                        raise serializers.ValidationError("لطفا تاریخ دریافت/پرداخت چک را وارد کنید")
+        if to_status in [PASSED, TRANSFERRED, CASHED, IN_FLOW]:
+            validate_required_fields(data, ['bedAccount', 'besAccount'])
 
-        if data['fromStatus'] == data['toStatus']:
-            raise serializers.ValidationError("لطفا وضعیت جدیدی برای تغییر انتخاب کنید")
 
         return data
 
@@ -106,8 +109,9 @@ class ChequeCreateUpdateSerializer(serializers.ModelSerializer):
         is_paid = data.get('is_paid', False) == True
 
         if self.instance:
-            if self.instance.chequebook and not is_paid:
-                raise serializers.ValidationError("نوع چک غیر قابل قبول است")
+            cheque: Cheque = self.instance
+            if cheque.statusChanges.count() >= 1:
+                raise serializers.ValidationError("چک غیر قابل ویرایش می باشد")
 
         return data
 
