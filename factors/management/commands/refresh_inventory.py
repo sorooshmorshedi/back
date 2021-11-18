@@ -1,5 +1,6 @@
 import datetime
 from django.core.management.base import BaseCommand, CommandParser
+from django.db.transaction import atomic
 from rest_framework.exceptions import ValidationError
 
 from factors.models import Factor
@@ -65,7 +66,7 @@ class Command(BaseCommand):
         qs = Factor.objects.filter(
             financial_year=financial_year,
             is_defined=True
-        ).all()
+        ).order_by('-code')
 
         errors = []
         for factor in queryset_iterator(qs, key=('definition_date',)):
@@ -95,6 +96,7 @@ class Command(BaseCommand):
 
         print("Done!")
 
+    @atomic
     def handle(self, *args, **options):
         user = User.objects.get(pk=options['user_id'])
         financial_year = user.active_financial_year

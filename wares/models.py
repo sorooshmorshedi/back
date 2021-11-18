@@ -366,7 +366,7 @@ class WareInventory(BaseModel):
         log = "Financial Year #{}: dec {} #{} from #{}, revert:{}".format(
             financial_year.id, count, ware.id, warehouse.id, revert
         )
-        # print(log)
+        print(log)
         # Bale.to_me(log)
         WareInventory.logger.info(log)
 
