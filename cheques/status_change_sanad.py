@@ -29,7 +29,7 @@ class StatusChangeSanad(AutoSanad):
         return rows
 
     def get_sanad_date(self):
-        return self.instance.cheque.date
+        return self.instance.date
 
     def get_sanad_explanations(self):
         return self.get_explanations()[0]

@@ -50,7 +50,6 @@ class StatusChangeCreateUpdateSerializer(serializers.ModelSerializer):
         if to_status in [PASSED, TRANSFERRED, CASHED, IN_FLOW]:
             validate_required_fields(data, ['bedAccount', 'besAccount'])
 
-
         return data
 
 
