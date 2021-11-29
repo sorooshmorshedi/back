@@ -5,7 +5,7 @@ body {
 }
 
 /* Table ----------------------------------------------- */
-.table-bordered, .table-bordered td, .table-bordered th{
+.table-bordered, .table-bordered td, .table-bordered th {
     border-color: black !important;
 }
 
@@ -25,12 +25,15 @@ th, td {
     direction: ltr !important;
     text-align: left !important;
 }
+
 .break-after {
     page-break-after: always;
 }
+
 .text-left {
     text-align: left !important;
 }
+
 .text-right {
     text-align: right !important;
 }
@@ -39,6 +42,7 @@ th, td {
 .form-header {
     /* font-weight: bold; */
 }
+
 .form-header span {
     font-weight: normal;
     text-align: justify;
@@ -46,4 +50,18 @@ th, td {
 
 .part {
     margin-bottom: 15px;
+}
+
+tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+}
+
+@media print {
+    .tr {
+        page-break-inside: avoid !important;
+        -webkit-column-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-region-break-inside: avoid;
+    }
 }
