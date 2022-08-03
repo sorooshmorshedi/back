@@ -1,5 +1,3 @@
-from ctypes.wintypes import RECT
-
 from django.db import models
 from django_jalali.db import models as jmodels
 from django.core.validators import MinLengthValidator, MaxLengthValidator
