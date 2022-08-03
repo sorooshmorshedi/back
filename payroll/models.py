@@ -1,12 +1,15 @@
 from django.db import models
 from django_jalali.db import models as jmodels
-from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.core.validators import MinLengthValidator, MaxLengthValidator, RegexValidator
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL
 from users.models import City
 
 
+
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
+    company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE)
+
     code = models.IntegerField()
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
@@ -134,7 +137,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     )
 
     company = models.ForeignKey(Company, related_name='personnel', on_delete=models.CASCADE)
-    workshop = models.ForeignKey(Workshop, related_name='personnel', on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -142,7 +144,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     country = models.CharField(max_length=50, blank=True, null=True)
     nationality = models.CharField(max_length=1, choices=NATIONALITY_TYPE, default=IRANIAN)
 
-    personnel_code = models.IntegerField(max_length=20)
+    personnel_code = models.IntegerField(max_length=20, unique=True)
 
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
@@ -164,8 +166,11 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     city_phone_code = models.IntegerField(max_length=3)
     phone_number = models.CharField(max_length=10)
-    mobile_number_1 = models.IntegerField(max_length=11)
-    mobile_number_2 = models.IntegerField(max_length=11, null=True, blank=True)
+    mobile_number_1 = models.IntegerField(
+        validators=[RegexValidator(regex='^(09){1}[0-9]{9}$', message='phone number format: 09*********')])
+    mobile_number_2 = models.IntegerField(
+        validators=[RegexValidator(regex='^(09){1}[0-9]{9}$', message='phone number format: 09*********')],
+        null=True, blank=True)
     address = models.CharField(max_length=255)
     postal_code = POSTAL_CODE()
 
@@ -179,6 +184,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     account_bank_name = models.CharField(max_length=50, blank=True, null=True)
     account_bank_number = models.IntegerField(max_length=16, blank=True, null=True)
+    sheba_number = models.IntegerField(max_length=50, blank=True, null=True)
 
     is_personnel_active = models.BooleanField(default=False)
 
@@ -196,6 +202,21 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.personnel', 'ویرایش پرسنل خود'),
             ('deleteOwn.personnel', 'حذف پرسنل خود'),
         )
+
+    @property
+    def system_code(self):
+        try:
+            company_personnel = Personnel.objects.filter(company=self.company).first()
+            personnel_code = company_personnel.personnel_code
+            code = personnel_code + 1
+        except:
+            code = 100
+        return code
+
+    def save(self, *args, **kwargs):
+        if not self.id and not self.personnel_code:
+            self.personnel_code = self.system_code
+        super().save(*args, **kwargs)
 
 
 class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
@@ -299,9 +320,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
     Personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
 
-    contract_from_date = jmodels.jDateField(blank=True, null=True)
-    contract_to_date = jmodels.jDateField(blank=True, null=True)
-
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
     work_title = models.CharField(blank=True, null=True)
@@ -332,4 +350,26 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
             ('getOwn.workshop_personnel', 'مشاهده پرسنل کارگاه خود'),
             ('updateOwn.workshop_personnel', 'ویرایش پرسنل کارگاه خود'),
             ('deleteOwn.workshop_personnel', 'حذف پرسنل کارگاه خود'),
+        )
+
+
+class ContractTime(BaseModel, LockableMixin, DefinableMixin):
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract_time', on_delete=models.CASCADE)
+    code = models.IntegerField()
+    contract_from_date = jmodels.jDateField()
+    contract_to_date = jmodels.jDateField()
+    quit_job_date = jmodels.jDateField(blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'ContractTime'
+        permission_basename = 'contract_time'
+        permissions = (
+            ('get.contract_time', 'مشاهده قرارداد کارگاه'),
+            ('create.contract_time', 'تعریف قرارداد کارگاه'),
+            ('update.contract_time', 'ویرایش قرارداد کارگاه'),
+            ('delete.contract_time', 'حذف قرارداد کارگاه'),
+
+            ('getOwn.contract_time', 'مشاهده قرارداد کارگاه خود'),
+            ('updateOwn.contract_time', 'ویرایش قرارداد کارگاه خود'),
+            ('deleteOwn.contract_time', 'حذف قرارداد کارگاه خود'),
         )

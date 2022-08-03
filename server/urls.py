@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^cheques/', include('cheques.urls')),
     url(r'^factors/', include('factors.urls')),
     url(r'^reports/', include('reports.urls')),
+    url(r'^payroll/', include('payroll.urls')),
 
     url(r'^imprests/', include('imprests.urls')),
 

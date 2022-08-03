@@ -5,9 +5,9 @@ from rest_framework.views import APIView
 from helpers.auth import BasicCRUDPermission
 from rest_framework import status
 from rest_framework.response import Response
-from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel
+from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, ContractTime
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
-    ContractRowSerializer, WorkshopPersonnelSerializer
+    ContractRowSerializer, WorkshopPersonnelSerializer, ContractTimeSerializer
 
 
 class WorkshopApiView(APIView):
@@ -229,6 +229,52 @@ class WorkshopPersonnelDetail(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         serializer = WorkshopPersonnelSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ContractTimeApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_time'
+
+    def get(self, request):
+        query = ContractTime.objects.all()
+        serializers = ContractTimeSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ContractTimeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractTimeDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_time'
+
+    def get_object(self, pk):
+        try:
+            return ContractTime.objects.get(pk=pk)
+        except ContractTime.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ContractTimeSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ContractTimeSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
