@@ -73,14 +73,13 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
 
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
-
     IRANIAN = 'i'
     OTHER = 'o'
 
     NATIONALITY_TYPE = (
         (IRANIAN, 'ایرانی'),
         (OTHER, 'غیر ایرانی')
-        )
+    )
 
     MALE = 'm'
     FEMALE = 'f'
@@ -98,7 +97,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (DONE, 'انجام داده'),
         (NOT_DONE, 'انجام نداده'),
         (EXEMPT, 'معاف')
-        )
+    )
 
     SINGLE = 's'
     MARRIED = 'm'
@@ -108,7 +107,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (SINGLE, 'مجرد'),
         (MARRIED, 'متاهل'),
         (CHILDREN_WARDSHIP, 'سرپرست فرزند')
-        )
+    )
 
     UNDER_DIPLOMA = 'un'
     DIPLOMA = 'di'
@@ -172,8 +171,8 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     address = models.CharField(max_length=255)
     postal_code = POSTAL_CODE()
 
-    Insurance = models.BooleanField(default=False)
-    Insurance_code = models.IntegerField(max_length=20, blank=True, null=True)
+    insurance = models.BooleanField(default=False)
+    insurance_code = models.IntegerField(max_length=20, blank=True, null=True)
 
     degree_of_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
     field_of_study = models.CharField(max_length=100)
@@ -222,7 +221,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         (SINGLE, 'مجرد'),
         (MARRIED, 'متاهل'),
         (CHILDREN_WARDSHIP, 'سرپرست فرزند')
-        )
+    )
 
     DONE = 'd'
     NOT_DONE = 'n'
@@ -232,7 +231,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         (DONE, 'انجام داده'),
         (NOT_DONE, 'انجام نداده'),
         (EXEMPT, 'معاف')
-        )
+    )
 
     STUDENT = 's'
     NON_STUDENT = 'n'
@@ -282,4 +281,57 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         )
 
 
+class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
+    PART_TIME = 'p'
+    FULL_TIME = 'f'
 
+    CONTRACT_TYPES = (
+        (PART_TIME, 'پاره وقت'),
+        (FULL_TIME, 'تمام وقت')
+    )
+
+    CONTRACTUAL = 'c'
+    PERMANENT = 'p'
+
+    EMPLOYMENTS_TYPES = (
+        (CONTRACTUAL, 'قراردادی'),
+        (PERMANENT, 'رسمی')
+    )
+
+    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
+    Personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
+
+    contract_from_date = jmodels.jDateField(blank=True, null=True)
+    contract_to_date = jmodels.jDateField(blank=True, null=True)
+
+    insurance = models.BooleanField(default=False)
+    insurance_add_date = jmodels.jDateField(blank=True, null=True)
+    work_title = models.CharField(blank=True, null=True)
+
+    previous_insurance_history_out_workshop = models.IntegerField()
+    previous_insurance_history_in_workshop = models.IntegerField()
+    current_insurance_history_in_workshop = models.IntegerField()
+    insurance_history_totality = models.IntegerField()
+
+    job_position = models.CharField(max_length=100)
+    job_group = models.CharField(max_length=100)
+    job_location = models.CharField(max_length=100)
+    job_location_status = models.CharField(max_length=100)
+
+    employment_type = models.CharField(max_length=1, choices=EMPLOYMENTS_TYPES, default=CONTRACTUAL)
+    contract_type = models.CharField(max_length=1, choices=CONTRACT_TYPES, default=FULL_TIME)
+    employee_status = models.CharField(max_length=100)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'WorkshopPersonnel'
+        permission_basename = 'workshop_personnel'
+        permissions = (
+            ('get.workshop_personnel', 'مشاهده پرسنل کارگاه'),
+            ('create.workshop_personnel', 'تعریف پرسنل کارگاه'),
+            ('update.workshop_personnel', 'ویرایش پرسنل کارگاه'),
+            ('delete.workshop_personnel', 'حذف پرسنل کارگاه'),
+
+            ('getOwn.workshop_personnel', 'مشاهده پرسنل کارگاه خود'),
+            ('updateOwn.workshop_personnel', 'ویرایش پرسنل کارگاه خود'),
+            ('deleteOwn.workshop_personnel', 'حذف پرسنل کارگاه خود'),
+        )
