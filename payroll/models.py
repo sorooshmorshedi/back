@@ -115,6 +115,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     BACHELOR = 'ba'
     MASTER = 'ma'
     DOCTORAL = 'do'
+    POSTDOCTORAL = 'pd'
 
     DEGREE_TYPE = (
         (UNDER_DIPLOMA, 'زیر دیپلم'),
@@ -122,7 +123,8 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (ASSOCIATES, 'کاردانی'),
         (BACHELOR, 'لیسانس'),
         (MASTER, 'فوق لیسانس'),
-        (DOCTORAL, 'دکترا')
+        (DOCTORAL, 'دکترا'),
+        (POSTDOCTORAL, 'فوق دکترا')
     )
 
     STATE = 'st'
@@ -302,18 +304,50 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     PART_TIME = 'p'
     FULL_TIME = 'f'
+    CONTRACTUAL = 'c'
+    TEMPORARY = 't'
+    HOURLY = 'h'
 
     CONTRACT_TYPES = (
         (PART_TIME, 'پاره وقت'),
-        (FULL_TIME, 'تمام وقت')
+        (FULL_TIME, 'تمام وقت'),
+        (TEMPORARY, 'موقت'),
+        (HOURLY, 'ساعتی'),
+        (CONTRACTUAL, 'پیمانی')
+
     )
 
-    CONTRACTUAL = 'c'
+    CONVENTIONAL = 'co'
     PERMANENT = 'p'
+    CORPORATE = 'cr'
+    FUNCTIONARY = 'fu'
+    OTHERS = 'or'
 
     EMPLOYMENTS_TYPES = (
-        (CONTRACTUAL, 'قراردادی'),
+        (CONTRACTUAL, 'پیمانی'),
+        (CONVENTIONAL, 'قراردادی'),
+        (CORPORATE, 'َشرکتی'),
+        (FUNCTIONARY, 'مامور'),
+        (OTHERS, 'سایر'),
         (PERMANENT, 'رسمی')
+    )
+
+    NORMAL = 'nr'
+    FALLEN_CHILD = 'fc'
+    STUNTMAN = 'st'
+    FREEDMAN = 'fr'
+    ARM = 'ar'
+    BAND19 = 'bn'
+    FOREIGN = 'fo'
+
+    EMPLOYEE_TYPES = (
+        (NORMAL, 'معمولی'),
+        (FALLEN_CHILD, 'فرزند شهید'),
+        (STUNTMAN, 'جانباز'),
+        (FREEDMAN, 'آزاده'),
+        (ARM, 'نیروهای مسلح'),
+        (BAND19, 'مشمولین بند چهارده ماده نود و هفت'),
+        (FOREIGN, 'اتباع خارجی مشمول قانون اجتناب از اخذ مالیات مضاعف')
     )
 
     workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
@@ -333,9 +367,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     job_location = models.CharField(max_length=100)
     job_location_status = models.CharField(max_length=100)
 
-    employment_type = models.CharField(max_length=1, choices=EMPLOYMENTS_TYPES, default=CONTRACTUAL)
-    contract_type = models.CharField(max_length=1, choices=CONTRACT_TYPES, default=FULL_TIME)
-    employee_status = models.CharField(max_length=100)
+    employment_type = models.CharField(max_length=2, choices=EMPLOYMENTS_TYPES, default=CONVENTIONAL)
+    contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=FULL_TIME)
+    employee_status = models.CharField(max_length=2, choices=EMPLOYEE_TYPES, default=NORMAL)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'WorkshopPersonnel'
