@@ -1,9 +1,11 @@
 from django.db import models
+from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.validators import MinLengthValidator, MaxLengthValidator, RegexValidator
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL
 from users.models import City
+
 
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
@@ -299,6 +301,21 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.personnel_family', 'ویرایش خانواده پرسنل خود'),
             ('deleteOwn.personnel_family', 'حذف خانواده پرسنل خود'),
         )
+
+    def save(self, *args, **kwargs):
+        if self.relative == 'c' and not self.id:
+            personnel = self.Personnel
+            personnel.number_of_childes +=1
+            personnel.save()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.relative == 'c':
+            personnel = self.Personnel
+            personnel.number_of_childes -= 1
+            personnel.save()
+        super().delete()
+
 
 
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
