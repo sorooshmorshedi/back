@@ -6,7 +6,6 @@ from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE
 from users.models import City
 
 
-
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE)
 
@@ -14,7 +13,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
-    employer_insurance_contribution = models.IntegerField(max_length=2, validators=[
+    employer_insurance_contribution = models.IntegerField(validators=[
         MinLengthValidator(limit_value=0, message='درصد صحیح نبست'),
         MaxLengthValidator(limit_value=3, message='درصد صحیح نبست')
     ])
@@ -39,7 +38,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     workshop = models.ForeignKey(Workshop, related_name='contract_row', on_delete=models.CASCADE)
-    contract_row = models.IntegerField(blank=True, null=True)
+    contract_row = models.IntegerField()
     contract_number = models.IntegerField()
     registration_date = jmodels.jDateField(blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
@@ -48,7 +47,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     is_activate = models.BooleanField(default=False)
 
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
-    assignor_national_code = models.IntegerField(max_length=10, unique=True, validators=[
+    assignor_national_code = models.IntegerField(unique=True, validators=[
         MinLengthValidator(limit_value=9, message='کد ملی باید ده رقم باشد'),
         MaxLengthValidator(limit_value=11, message='کد ملی باید ده رقم باشد')
     ])
@@ -144,17 +143,17 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     country = models.CharField(max_length=50, blank=True, null=True)
     nationality = models.CharField(max_length=1, choices=NATIONALITY_TYPE, default=IRANIAN)
 
-    personnel_code = models.IntegerField(max_length=20, unique=True)
+    personnel_code = models.IntegerField(unique=True)
 
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
 
-    national_code = models.IntegerField(max_length=10, unique=True, validators=[
+    national_code = models.IntegerField(unique=True, validators=[
         MinLengthValidator(limit_value=9, message='کد ملی باید ده رقم باشد'),
         MaxLengthValidator(limit_value=11, message='کد ملی باید ده رقم باشد')
     ])
 
-    identity_code = models.IntegerField(max_length=10, unique=True)
+    identity_code = models.IntegerField(unique=True)
     date_of_birth = jmodels.jDateField()
     date_of_exportation = jmodels.jDateField()
     location_of_birth = City()
@@ -162,10 +161,10 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     sector_of_exportation = City()
 
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
-    number_of_childes = models.IntegerField(max_length=2, blank=True, null=True, default=0, editable=False)
+    number_of_childes = models.IntegerField(default=0)
 
-    city_phone_code = models.IntegerField(max_length=3)
-    phone_number = models.CharField(max_length=10)
+    city_phone_code = models.IntegerField()
+    phone_number = models.IntegerField()
     mobile_number_1 = models.IntegerField(
         validators=[RegexValidator(regex='^(09){1}[0-9]{9}$', message='phone number format: 09*********')])
     mobile_number_2 = models.IntegerField(
@@ -175,7 +174,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     postal_code = POSTAL_CODE()
 
     insurance = models.BooleanField(default=False)
-    insurance_code = models.IntegerField(max_length=20, blank=True, null=True)
+    insurance_code = models.IntegerField(blank=True, null=True)
 
     degree_of_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
     field_of_study = models.CharField(max_length=100)
@@ -183,8 +182,8 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     university_name = models.CharField(max_length=50, blank=True, null=True)
 
     account_bank_name = models.CharField(max_length=50, blank=True, null=True)
-    account_bank_number = models.IntegerField(max_length=16, blank=True, null=True)
-    sheba_number = models.IntegerField(max_length=50, blank=True, null=True)
+    account_bank_number = models.IntegerField(blank=True, null=True)
+    sheba_number = models.IntegerField(blank=True, null=True)
 
     is_personnel_active = models.BooleanField(default=False)
 
@@ -274,7 +273,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     row = models.IntegerField()
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    national_code = models.IntegerField(max_length=10, unique=True, validators=[
+    national_code = models.IntegerField(unique=True, validators=[
         MinLengthValidator(limit_value=9, message='کد ملی باید ده رقم باشد'),
         MaxLengthValidator(limit_value=11, message='کد ملی باید ده رقم باشد')
     ])
@@ -322,7 +321,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
-    work_title = models.CharField(blank=True, null=True)
+    work_title = models.CharField(max_length=100, blank=True, null=True)
 
     previous_insurance_history_out_workshop = models.IntegerField()
     previous_insurance_history_in_workshop = models.IntegerField()
