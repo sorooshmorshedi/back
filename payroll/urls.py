@@ -1,5 +1,9 @@
 from django.urls import path
+from django.conf.urls import url
 
+from payroll.lists.filters import PersonnelFamilyFilter
+from payroll.lists.views import WorkshopListView, WorkshopPersonnelListView, PersonnelListView, ContractRowListView, \
+    ContractTimeListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, ContractTimeApiView, ContractTimeDetail
@@ -22,4 +26,14 @@ urlpatterns = [
 
     path('contract/time', ContractTimeApiView.as_view(), name='contractTimeApi'),
     path('contract/time/<int:pk>/', ContractTimeDetail.as_view(), name='contractTimeDetail')
+]
+
+urlpatterns += [
+    url(r'^workshop/all$', WorkshopListView.as_view(), name='workshopList'),
+    url(r'^personnel/all$', PersonnelListView.as_view(), name='personnelList'),
+    url(r'^workshop/personnel/all$', WorkshopPersonnelListView.as_view(), name='workshopPersonnelList'),
+    url(r'^personnel/family/all$', PersonnelFamilyFilter.as_view(), name='personnelFamilyList'),
+    url(r'^conractrow/all$', ContractRowListView.as_view(), name='contractRowList'),
+    url(r'^conract/time/all$', ContractTimeListView.as_view(), name='contractTimeList'),
+
 ]
