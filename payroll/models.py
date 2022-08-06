@@ -273,8 +273,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         (MAIM, 'نفص عضو')
     )
 
-    Personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
-    row = models.IntegerField()
+    personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     national_code = models.IntegerField(unique=True, validators=[
@@ -305,7 +304,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     def save(self, *args, **kwargs):
         if self.relative == 'c' and not self.id:
             personnel = self.Personnel
-            personnel.number_of_childes +=1
+            personnel.number_of_childes += 1
             personnel.save()
         super().save(*args, **kwargs)
 
@@ -368,7 +367,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     )
 
     workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
-    Personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
+    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
 
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
