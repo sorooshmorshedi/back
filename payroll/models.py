@@ -158,9 +158,9 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     identity_code = models.IntegerField(unique=True)
     date_of_birth = jmodels.jDateField()
     date_of_exportation = jmodels.jDateField()
-    location_of_birth = City()
-    location_of_exportation = City()
-    sector_of_exportation = City()
+    location_of_birth = models.CharField(max_length=50, blank=True, null=True)
+    location_of_exportation = models.CharField(max_length=50, blank=True, null=True)
+    sector_of_exportation = models.CharField(max_length=50, blank=True, null=True)
 
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     number_of_childes = models.IntegerField(default=0)
@@ -302,6 +302,10 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.personnel_family', 'ویرایش خانواده پرسنل خود'),
             ('deleteOwn.personnel_family', 'حذف خانواده پرسنل خود'),
         )
+
+    @property
+    def full_name(self):
+        return self.name + ' ' + self.last_name
 
     def save(self, *args, **kwargs):
         if self.relative == 'c' and not self.id:
