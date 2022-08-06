@@ -3,8 +3,8 @@ from io import BytesIO
 import xlsxwriter
 from django.http import HttpResponse
 
-from payroll.lists.views import WorkshopListView, PersonnelListView
-from payroll.models import Workshop, Personnel, PersonnelFamily
+from payroll.lists.views import WorkshopListView, PersonnelListView, PersonnelFamilyListView, ContractRowListView
+from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
 
@@ -210,10 +210,9 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
         return data
 
 
-
-class PersonnelFamilyExportview(WorkshopListView, BaseExportView):
+class PersonnelFamilyExportview(PersonnelFamilyListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
-    filename = 'Personnel_family'
+    filename = 'personnel_family'
 
     context = {
         'title': 'خانواده پرسنل',
@@ -297,5 +296,97 @@ class PersonnelFamilyExportview(WorkshopListView, BaseExportView):
                 form.get_military_service_display(),
                 form.get_study_status_display(),
                 form.get_physical_condition_display(),
+            ])
+        return data
+
+
+class ContractRowExportview(ContractRowListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'contract_row'
+
+    context = {
+        'title': 'ردیف پیمان',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+
+        context = {
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user,
+            'print_document': print_document
+        }
+
+        template_prefix = self.get_template_prefix()
+        context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
+        context['right_header_template'] = 'export/{}_right_header.html'.format(template_prefix)
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(contract_row: ContractRow):
+        data = [
+            [
+                'لیست ردیف پیمان'
+            ],
+            ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
+                'کد ملی واگذار کننده', 'کد انبار واگذار کننده', 'حداقل مبلغ پیمان', 'شعبه']
+        ]
+        for form in contract_row:
+            data.append([
+                form.workshop.name,
+                form.contract_row,
+                form.contract_number,
+                form.registration_date,
+                form.from_date,
+                form.to_date,
+                form.assignor_name,
+                form.assignor_national_code,
+                form.assignor_workshop_code,
+                form.contract_initial_amount,
+                form.branch
+
             ])
         return data
