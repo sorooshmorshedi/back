@@ -4,7 +4,7 @@ from django.conf.urls import url
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
-    ContractApiView, ContractDetail, PersonnelVerifyApi
+    ContractApiView, ContractDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -22,6 +22,10 @@ urlpatterns = [
 
     path('contract/row', ContractRowApiView.as_view(), name='contractRowApi'),
     path('contract/row/<int:pk>/', ContractRowDetail.as_view(), name='contractRowDetail'),
+
+    path('hrletter', HRLetterApiView.as_view(), name='HRLetterApiView'),
+    path('hrletter/<int:pk>/', HRLetterDetail.as_view(), name='HRLetterDetail'),
+
 ]
 
 urlpatterns += [
