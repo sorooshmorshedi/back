@@ -9,9 +9,9 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
-from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, Contract
+from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, Contract, HRLetter
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
-    ContractRowSerializer, ContactSerializer
+    ContractRowSerializer, ContactSerializer, HRLetterSerializer
 
 
 class WorkshopApiView(APIView):
@@ -332,3 +332,49 @@ class PersonnelVerifyApi(APIView):
             personnel.save()
             return Response({'status': 'personnel verify done'}, status=status.HTTP_200_OK)
         return Response({'status': 'personnel verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class HRLetterApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get(self, request):
+        query = HRLetter.objects.all()
+        serializers = HRLetterSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = HRLetterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HRLetterDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get_object(self, pk):
+        try:
+            return HRLetter.objects.get(pk=pk)
+        except HRLetter.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = HRLetterSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = HRLetterSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

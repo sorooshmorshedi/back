@@ -1,6 +1,8 @@
 from django.db import models
 from django_jalali.db import models as jmodels
 from django.core.validators import MinLengthValidator, MaxLengthValidator, RegexValidator
+from django.core.exceptions import ValidationError
+
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
     is_valid_melli_code
@@ -419,7 +421,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         (PENSION, 'مستمر'),
         (UN_PENSION, 'غیر مستمر')
     )
-    contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.PROTECT)
+    contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
+                                 blank=True, null=True)
+    is_template = models.BooleanField(default=False)
 
     hoghooghe_roozane = models.BooleanField()
     hoghooghe_roozane_use_tax = models.BooleanField()
@@ -675,8 +679,10 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.hr_letter', 'حذف حکم کار گزینی خود'),
         )
 
-
-
-
-
-
+    def save(self, *args, **kwargs):
+        if self.is_template:
+            self.contract = None
+        else:
+            if not self.contract:
+                ValidationError(message='قرارداد را وارد کنید')
+        super().save(*args, **kwargs)
