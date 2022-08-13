@@ -423,6 +423,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     )
     contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
                                  blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
     is_template = models.BooleanField(default=False)
 
     hoghooghe_roozane_use_tax = models.BooleanField()
@@ -642,6 +643,8 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     def save(self, *args, **kwargs):
         if self.is_template:
             self.contract = None
+            if not self.name:
+                ValidationError(message='برای قالب حکم کارگزینی خود نام وارد کنید')
         else:
             if not self.contract:
                 ValidationError(message='قرارداد را وارد کنید')
