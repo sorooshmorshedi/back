@@ -249,11 +249,13 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     DONE = 'd'
     NOT_DONE = 'n'
     EXEMPT = 'e'
+    NONE = 'x'
 
     MILITARY_SERVICE_STATUS = (
         (DONE, 'انجام داده'),
         (NOT_DONE, 'انجام نداده'),
-        (EXEMPT, 'معاف')
+        (EXEMPT, 'معاف'),
+        (NONE, 'هیچ کدام')
     )
 
     STUDENT = 's'
@@ -277,11 +279,11 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    national_code = models.IntegerField(unique=True, validators=[
-        MinLengthValidator(limit_value=9, message='کد ملی باید ده رقم باشد'),
-        MaxLengthValidator(limit_value=11, message='کد ملی باید ده رقم باشد')
-    ])
+    national_code = models.IntegerField(unique=True, validators=[is_valid_melli_code])
     date_of_birth = jmodels.jDateField()
+    mobile_number = models.IntegerField(null=True, blank=True, validators=[
+        RegexValidator(regex='^(09){1}[0-9]{9}$', message='ساختار شماره موبایل صحیح نبست')]
+                                        )
     relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, default=SPOUSE)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
