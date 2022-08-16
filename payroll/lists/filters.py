@@ -3,7 +3,8 @@ from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
 from helpers.filters import BASE_FIELD_FILTERS
-from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract
+from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
+    LeaveOrAbsence
 
 
 class WorkshopFilter(filters.FilterSet):
@@ -163,6 +164,25 @@ class ContractRowFilter(filters.FilterSet):
             'assignor_workshop_code': ('exact',),
             'contract_initial_amount': BASE_FIELD_FILTERS,
             'branch': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class LeaveOrAbsenceFilter(filters.FilterSet):
+    class Meta:
+        model = LeaveOrAbsence
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'workshop_personnel': ('exact',),
+            'leave_type': ('exact',),
+            'entitlement_leave_type': ('exact',),
+            'from_date': BASE_FIELD_FILTERS,
+            'to_date': BASE_FIELD_FILTERS,
+            'explanation': ('exact',),
         }
         filter_overrides = {
             jmodels.jDateField: {

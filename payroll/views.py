@@ -9,9 +9,10 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
-from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract
+from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
+    LeaveOrAbsence
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
-    ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer
+    ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, LeaveOrAbsenceSerializer
 
 
 class WorkshopApiView(APIView):
@@ -416,6 +417,52 @@ class HRLetterDetail(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         serializer = HRLetterSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LeaveOrAbsenceApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'leave_or_absence'
+
+    def get(self, request):
+        query = LeaveOrAbsence.objects.all()
+        serializers = LeaveOrAbsenceSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = LeaveOrAbsenceSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeaveOrAbsenceDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'leave_or_absence'
+
+    def get_object(self, pk):
+        try:
+            return LeaveOrAbsence.objects.get(pk=pk)
+        except LeaveOrAbsence.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = LeaveOrAbsenceSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = LeaveOrAbsenceSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

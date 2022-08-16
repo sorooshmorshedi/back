@@ -1,4 +1,5 @@
-from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract
+from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
+    LeaveOrAbsence
 from rest_framework import serializers
 
 
@@ -45,6 +46,13 @@ class HRLetterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HRLetter
+        fields = '__all__'
+
+
+class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LeaveOrAbsence
         fields = '__all__'
 
 

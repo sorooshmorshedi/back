@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
-    is_valid_melli_code
+    is_valid_melli_code, EXPLANATION
 from users.models import City
 
 
@@ -424,14 +424,91 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
         verbose_name = 'Contract'
         permission_basename = 'contract'
         permissions = (
-            ('get.workshop_personnel', 'مشاهده قرارداد'),
-            ('create.workshop_personnel', 'تعریف قرارداد'),
-            ('update.workshop_personnel', 'ویرایش قرارداد'),
-            ('delete.workshop_personnel', 'حذف قرارداد'),
+            ('get.contract', 'مشاهده قرارداد'),
+            ('create.contract', 'تعریف قرارداد'),
+            ('update.contract', 'ویرایش قرارداد'),
+            ('delete.contract', 'حذف قرارداد'),
 
-            ('getOwn.workshop_personnel', 'مشاهده قرارداد خود'),
-            ('updateOwn.workshop_personnel', 'ویرایش قرارداد خود'),
-            ('deleteOwn.workshop_personnel', 'حذف قرارداد خود'),
+            ('getOwn.contract', 'مشاهده قرارداد خود'),
+            ('updateOwn.contract', 'ویرایش قرارداد خود'),
+            ('deleteOwn.contract', 'حذف قرارداد خود'),
+        )
+
+
+class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
+    ENTITLEMENT = 'e'
+    ILLNESS = 'i'
+    WITHOUT_SALARY = 'w'
+    ABSENCE = 'a'
+
+    LEAVE_TYPES = (
+        (ENTITLEMENT, 'استحقاقی'),
+        (ILLNESS, 'استعلاجی'),
+        (WITHOUT_SALARY, 'بدون حقوق'),
+        (ABSENCE, 'غیبت'),
+    )
+
+    HOURLY = 'h'
+    DAILY = 'd'
+
+    ENTITLEMENT_LEAVE_TYPES = (
+        (HOURLY, 'ساعتی'),
+        (DAILY, 'روزانه'),
+
+    )
+
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
+    leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, default=WITHOUT_SALARY)
+    entitlement_leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, blank=True, null=True)
+    from_date = jmodels.jDateField(blank=True, null=True)
+    to_date = jmodels.jDateField(blank=True, null=True)
+    from_hour = jmodels.jDateTimeField(blank=True, null=True)
+    to_hour = jmodels.jDateTimeField(blank=True, null=True)
+    explanation = EXPLANATION()
+
+    def save(self, *args, **kwargs):
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            self.from_date, self.to_date, self.explanation = None, None, None
+            if not self.from_hour or not self.to_hour:
+                raise ValidationError('برای مرخصی ساعتی ساعت شروع و پایان را وارد کنید')
+        elif self.leave_type == 'e' and self.entitlement_leave_type == 'd':
+            self.from_date, self.to_date, self.explanation = None, None, None
+            if not self.from_date or not self.to_date:
+                raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
+        elif self.leave_type == 'i':
+            self.from_hour, self.to_hour = None, None
+            if not self.from_date or not self.to_date:
+                raise ValidationError('برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید')
+            if not self.explanation:
+                raise ValidationError('برای مرخصی استعلاجی علت حادثه را وارد کنید')
+        elif self.leave_type == 'w' or self.leave_type == 'a':
+            self.from_hour, self.to_hour = None, None
+            if not self.from_date or not self.to_date:
+                raise ValidationError(' تاریح شروع و پایان را وارد کنید')
+        super().save(*args, **kwargs)
+
+    @property
+    def final_by_day(self):
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            difference = self.to_hour - self.from_hour
+            final_by_day = (difference.seconds / 60) / 440
+        else:
+            difference = self.to_date - self.from_date
+            final_by_day = difference.days
+        return final_by_day
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'LeaveOrAbsence'
+        permission_basename = 'leave_or_absence'
+        permissions = (
+            ('get.leave_or_absence', 'مشاهده مرخصی'),
+            ('create.leave_or_absence', 'تعریف مرخصی'),
+            ('update.leave_or_absence', 'ویرایش مرخصی'),
+            ('delete.leave_or_absence', 'حذف مرخصی'),
+
+            ('getOwn.leave_or_absence', 'مشاهده مرخصی خود'),
+            ('updateOwn.leave_or_absence', 'ویرایش مرخصی خود'),
+            ('deleteOwn.leave_or_absence', 'حذف مرخصی خود'),
         )
 
 
