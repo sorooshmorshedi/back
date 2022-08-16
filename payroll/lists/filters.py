@@ -3,7 +3,7 @@ from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
 from helpers.filters import BASE_FIELD_FILTERS
-from payroll.models import Workshop, Personnel, PersonnelFamily, Contract, ContractRow
+from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract
 
 
 class WorkshopFilter(filters.FilterSet):
@@ -98,9 +98,9 @@ class PersonnelFamilyFilter(filters.FilterSet):
         }
 
 
-class ContractFilter(filters.FilterSet):
+class WorkshopPersonnelFilter(filters.FilterSet):
     class Meta:
-        model = Contract
+        model = WorkshopPersonnel
         fields = {
             'id': ('exact',),
             'personnel': ('exact',),
@@ -119,6 +119,24 @@ class ContractFilter(filters.FilterSet):
             'employment_type': ('exact',),
             'contract_type': ('exact',),
             'employee_status': ('exact',),
+
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class ContractFilter(filters.FilterSet):
+    class Meta:
+        model = Contract
+        fields = {
+            'id': ('exact',),
+            'workshop_personnel': ('exact',),
+            'contract_from_date': BASE_FIELD_FILTERS,
+            'contract_to_date': BASE_FIELD_FILTERS,
+            'quit_job_date': BASE_FIELD_FILTERS,
 
         }
         filter_overrides = {

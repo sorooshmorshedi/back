@@ -323,7 +323,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         super().delete()
 
 
-class Contract(BaseModel, LockableMixin, DefinableMixin):
+class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     PART_TIME = 'p'
     FULL_TIME = 'f'
     CONTRACTUAL = 'c'
@@ -394,13 +394,13 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
     contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=FULL_TIME)
     employee_status = models.CharField(max_length=2, choices=EMPLOYEE_TYPES, default=NORMAL)
 
-    contract_from_date = jmodels.jDateField()
-    contract_to_date = jmodels.jDateField()
-    quit_job_date = jmodels.jDateField(blank=True, null=True)
+    @property
+    def title(self):
+        return self.personnel.full_name + ' in ' + self.workshop.name
 
     class Meta(BaseModel.Meta):
-        verbose_name = 'Contact'
-        permission_basename = 'contract'
+        verbose_name = 'WorkshopPersonnel'
+        permission_basename = 'workshop_personnel'
         permissions = (
             ('get.workshop_personnel', 'مشاهده پرسنل کارگاه'),
             ('create.workshop_personnel', 'تعریف پرسنل کارگاه'),
@@ -410,6 +410,28 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
             ('getOwn.workshop_personnel', 'مشاهده پرسنل کارگاه خود'),
             ('updateOwn.workshop_personnel', 'ویرایش پرسنل کارگاه خود'),
             ('deleteOwn.workshop_personnel', 'حذف پرسنل کارگاه خود'),
+        )
+
+
+class Contract(BaseModel, LockableMixin, DefinableMixin):
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
+                                           on_delete=models.CASCADE, blank=True, null=True)
+    contract_from_date = jmodels.jDateField(blank=True, null=True)
+    contract_to_date = jmodels.jDateField(blank=True, null=True)
+    quit_job_date = jmodels.jDateField(blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'Contract'
+        permission_basename = 'contract'
+        permissions = (
+            ('get.workshop_personnel', 'مشاهده قرارداد'),
+            ('create.workshop_personnel', 'تعریف قرارداد'),
+            ('update.workshop_personnel', 'ویرایش قرارداد'),
+            ('delete.workshop_personnel', 'حذف قرارداد'),
+
+            ('getOwn.workshop_personnel', 'مشاهده قرارداد خود'),
+            ('updateOwn.workshop_personnel', 'ویرایش قرارداد خود'),
+            ('deleteOwn.workshop_personnel', 'حذف قرارداد خود'),
         )
 
 
@@ -423,7 +445,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         (PENSION, 'مستمر'),
         (UN_PENSION, 'غیر مستمر')
     )
-    contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
+    contract = models.ForeignKey(WorkshopPersonnel, related_name='hr_letter', on_delete=models.CASCADE,
                                  blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     is_template = models.BooleanField(default=False)

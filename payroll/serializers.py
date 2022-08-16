@@ -1,4 +1,4 @@
-from payroll.models import Workshop, Contract, Personnel, PersonnelFamily, ContractRow, HRLetter
+from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract
 from rest_framework import serializers
 
 
@@ -14,9 +14,9 @@ class PersonnelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ContactSerializer(serializers.ModelSerializer):
+class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Contract
+        model = WorkshopPersonnel
         fields = '__all__'
 
 
@@ -31,6 +31,13 @@ class PersonnelFamilySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonnelFamily
+        fields = '__all__'
+
+
+class ContractSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Contract
         fields = '__all__'
 
 

@@ -4,7 +4,8 @@ from django.conf.urls import url
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
-    ContractApiView, ContractDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail
+    WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
+    ContractApiView, ContractDetail
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -17,15 +18,17 @@ urlpatterns = [
     path('personnel/family', PersonnelFamilyApiView.as_view(), name='personnelFamilyApi'),
     path('personnel/family/<int:pk>/', PersonnelFamilyDetail.as_view(), name='personnelFamilyDetail'),
 
-    path('contract/', ContractApiView.as_view(), name='workshopPersonnelApi'),
-    path('contract/<int:pk>/', ContractDetail.as_view(), name='workshopPersonnelDetail'),
+    path('contract/', WorkshopPersonnelApiView.as_view(), name='workshopPersonnelApi'),
+    path('contract/<int:pk>/', WorkshopPersonnelDetail.as_view(), name='workshopPersonnelDetail'),
 
     path('contract/row', ContractRowApiView.as_view(), name='contractRowApi'),
     path('contract/row/<int:pk>/', ContractRowDetail.as_view(), name='contractRowDetail'),
 
+    path('contract/', ContractApiView.as_view(), name='contractApi'),
+    path('contract/<int:pk>/', ContractDetail.as_view(), name='contractDetail'),
+
     path('hrletter', HRLetterApiView.as_view(), name='HRLetterApiView'),
     path('hrletter/<int:pk>/', HRLetterDetail.as_view(), name='HRLetterDetail'),
-
 ]
 
 urlpatterns += [
