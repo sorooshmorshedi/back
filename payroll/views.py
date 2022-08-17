@@ -1,3 +1,4 @@
+import jdatetime
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.http import Http404
@@ -13,6 +14,7 @@ from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, Wo
     LeaveOrAbsence
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, LeaveOrAbsenceSerializer
+from users.models import User
 
 
 class WorkshopApiView(APIView):
@@ -472,3 +474,44 @@ class LeaveOrAbsenceDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CalculationsPayrollDetail(APIView):
+    def get(self, pk,  request):
+        try:
+            workshop_personnel = WorkshopPersonnel.objects.get(pk=pk)
+            contracts = Contract.objects.filter(workshop_personnel=workshop_personnel)
+        except(LeaveOrAbsence.DoesNotExist, WorkshopPersonnel.DoesNotExist):
+            raise Http404
+        data = request.GET
+        period_from_date = data['from_date']
+        period_to_date = data['to_date']
+        from_date = jdatetime.datetime.strptime(period_from_date, '%d/%m/%Y')
+        to_date = jdatetime.datetime.strptime(period_to_date, '%d/%m/%Y')
+        months_days = {1: 31, 2: 31, 3: 31, 4: 31, 5: 31, 6: 31, 7: 30, 8: 30, 9: 30, 10: 30, 11: 30, 12: 29}
+        normal_job_time = None
+        for contract in contracts:
+            if not contract.quit_job_date:
+                if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date)\
+                        and contract.contract_from_date.__le__(to_date):
+                    normal_job_time = months_days[from_date.month]
+                elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date):
+                    normal_job_time = months_days[from_date.month] - from_date.day + 1
+                elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
+                        and contract.contract_to_date.__gt__(from_date):
+                    normal_job_time = contract.contract_from_date.day
+                elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
+                    normal_job_time = contract.contract_to_date.day - contract.contract_from_date.day
+            else:
+                if contract.quit_job_date and contract.quit_job_date.__gt__(from_date) and contract.quit_job_date.__lt__(to_date):
+                    if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date):
+                        normal_job_time = contract.quit_job_date.day
+                    elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date)\
+                            and contract.contract_from_date.__le__(to_date):
+                        normal_job_time =contract.quit_job_date.day - contract.contract_from_date.day
+                    elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
+                            and contract.contract_to_date.__gt__(from_date):
+                        normal_job_time = contract.quit_job_date.day
+                    elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
+                        normal_job_time = contract.quit_job_date.day - contract.contract_from_date.day
+        return Response({'normal_job_time': normal_job_time}, status=status.HTTP_200_OK)

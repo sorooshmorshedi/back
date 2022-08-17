@@ -416,6 +416,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 class Contract(BaseModel, LockableMixin, DefinableMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
                                            on_delete=models.CASCADE, blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
     contract_from_date = jmodels.jDateField(blank=True, null=True)
     contract_to_date = jmodels.jDateField(blank=True, null=True)
     quit_job_date = jmodels.jDateField(blank=True, null=True)
