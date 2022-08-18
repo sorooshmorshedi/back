@@ -1,0 +1,32 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>کد کارگاه</th>
+            <th>ردیف پیمان</th>
+            <th>نام کارگاه</th>
+            <th>نام کارفرما</th>
+            <th>آدرس کارگاه</th>
+            <th>کد پستی</th>
+            <th>نرخ بیمه حق کارفرما</th>
+            <th>کد شعبه</th>
+            <th>نام شعبه</th>
+
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.code }}</td>
+                <td>{{ form.contract_row }}</td>
+                <td>{{ form.name }}</td>
+                <td>{{ form.employer_name }}</td>
+                <td>{{ form.address }}</td>
+                <td>{{ form.postal_code }}</td>
+                <td>{{ form.employer_insurance_contribution }} %</td>
+                <td>{{ form.branch_code }}</td>
+                <td>{{ form.branch_name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

@@ -13,11 +13,13 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE,)
 
     code = models.IntegerField()
+    contract_row = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=10, validators=[
+        RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')], blank=True, null=True)
     employer_insurance_contribution = models.IntegerField()
-
     branch_code = models.IntegerField(blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
 
@@ -39,7 +41,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
-    workshop = models.ForeignKey(Workshop, related_name='contract_row', on_delete=models.CASCADE)
+    workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.IntegerField()
     contract_number = models.IntegerField()
     registration_date = jmodels.jDateField(blank=True, null=True)

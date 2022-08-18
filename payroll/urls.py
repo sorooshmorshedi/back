@@ -1,6 +1,8 @@
 from django.urls import path
 from django.conf.urls import url
 
+from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, WorkshopPersonnelExportView, \
+    PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
@@ -41,5 +43,12 @@ urlpatterns += [
     url(r'^personnel/family/all$', PersonnelListView.as_view(), name='personnelFamilyList'),
     url(r'^conractrow/all$', ContractRowListView.as_view(), name='contractRowList'),
     url(r'^contract/all$', ContractListView.as_view(), name='contractRowList'),
+    url(r'^workshop/all/(?P<export_type>\S+)', WorkshopExportview.as_view(), name=''),
+    url(r'^personnel/all/(?P<export_type>\S+)', PersonnelExportview.as_view(), name=''),
+    url(r'^workshop/personnel/all/(?P<export_type>\S+)', WorkshopPersonnelExportView.as_view(), name=''),
+    url(r'^personnel/family/all/(?P<export_type>\S+)', PersonnelFamilyExportview.as_view(), name=''),
+    url(r'^contractrow/all/(?P<export_type>\S+)', ContractRowExportview.as_view(), name=''),
+    url(r'^contract/all/(?P<export_type>\S+)', ContractExportView.as_view(), name=''),
+    url(r'^absence/all/(?P<export_type>\S+)', LeaveOrAbsenceExportView.as_view(), name=''),
 
 ]

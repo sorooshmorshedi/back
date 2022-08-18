@@ -27,7 +27,10 @@ class WorkshopApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = WorkShopSerializer(data=request.data)
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
+        serializer = WorkShopSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
