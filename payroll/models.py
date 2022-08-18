@@ -10,16 +10,13 @@ from users.models import City
 
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
-    company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE,)
 
     code = models.IntegerField()
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
-    employer_insurance_contribution = models.IntegerField(validators=[
-        MinLengthValidator(limit_value=0, message='درصد صحیح نبست'),
-        MaxLengthValidator(limit_value=3, message='درصد صحیح نبست')
-    ])
+    employer_insurance_contribution = models.IntegerField()
 
     branch_code = models.IntegerField(blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
@@ -37,6 +34,8 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.workshop', 'ویرایش کارگاه خود'),
             ('deleteOwn.workshop', 'حذف کارگاه خود'),
         )
+    def __str__(self):
+        return self.name + ' ' + self.company.name
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
@@ -148,14 +147,14 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     country = models.CharField(max_length=50, blank=True, null=True)
     nationality = models.CharField(max_length=1, choices=NATIONALITY_TYPE, default=IRANIAN)
 
-    personnel_code = models.IntegerField(unique=True, blank=True, null=True)
+    personnel_code = models.IntegerField(blank=True, null=True)
 
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
 
-    national_code = models.IntegerField(unique=True, blank=True, null=True)
+    national_code = models.CharField(max_length=15, unique=True, blank=True, null=True)
 
-    identity_code = models.IntegerField(unique=True, blank=True, null=True)
+    identity_code = models.CharField(max_length=15, unique=True, blank=True, null=True)
     date_of_birth = jmodels.jDateField(blank=True, null=True)
     date_of_exportation = jmodels.jDateField(blank=True, null=True)
     location_of_birth = models.CharField(max_length=50, blank=True, null=True)
@@ -222,6 +221,9 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             self.personnel_code = self.system_code
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.full_name + ' in ' + self.company.name
+
 
 class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     FATHER = 'f'
@@ -279,8 +281,8 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    national_code = models.IntegerField(unique=True, validators=[is_valid_melli_code])
-    date_of_birth = jmodels.jDateField()
+    national_code = models.CharField(max_length=10, unique=True, validators=[is_valid_melli_code])
+    date_of_birth = jmodels.jDateField(blank=True, null=True)
     mobile_number = models.IntegerField(null=True, blank=True, validators=[
         RegexValidator(regex='^(09){1}[0-9]{9}$', message='ساختار شماره موبایل صحیح نبست')]
                                         )
@@ -321,6 +323,9 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
             personnel.number_of_childes -= 1
             personnel.save()
         super().delete()
+
+    def __str__(self):
+        return self.personnel.full_name
 
 
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
@@ -374,7 +379,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     workshop = models.ForeignKey(Workshop, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
     personnel = models.ForeignKey(Personnel, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
-    contract_row = models.ManyToManyField(ContractRow, related_name='contract')
+    contract_row = models.ManyToManyField(ContractRow, related_name='contract_rows', blank=True)
 
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
