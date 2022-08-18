@@ -133,9 +133,9 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     STATE = 'st'
     OPEN = 'op'
-    NONE_PROFIT = 'NP'
+    NONE_PROFIT = 'np'
 
-    university_types = (
+    UNIVERSITY_TYPES = (
         (STATE, 'دولتی'),
         (OPEN, 'آزاد'),
         (NONE_PROFIT, 'غیر انتفاعی')
@@ -178,7 +178,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     degree_of_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
     field_of_study = models.CharField(max_length=100, null=True, blank=True)
-    university_type = models.CharField(max_length=2, choices=university_types, blank=True, null=True)
+    university_type = models.CharField(max_length=2, choices=UNIVERSITY_TYPES, blank=True, null=True)
     university_name = models.CharField(max_length=50, blank=True, null=True)
 
     account_bank_name = models.CharField(max_length=50, blank=True, null=True)
