@@ -202,7 +202,7 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
                 form.postal_code,
                 form.insurance,
                 form.insurance_code,
-                form.get_degree_of_education_dispaly(),
+                form.get_degree_education_display(),
                 form.field_of_study,
                 form.get_university_type_display(),
                 form.university_name,

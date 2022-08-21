@@ -76,6 +76,9 @@ class PersonnelApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
         serializer = PersonnelSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -202,7 +205,6 @@ class ContractRowDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class ContractApiView(APIView):
@@ -358,10 +360,10 @@ class PersonnelVerifyApi(APIView):
             postal_code_validator(personnel.postal_code)
         elif personnel.insurance and not personnel.insurance_code:
             ValidationError(message="َشماره بیمه را وارد کنید")
-        elif personnel.degree_of_education == 'di':
+        elif personnel.degree_education == 'di':
             if not personnel.field_of_study:
                 ValidationError(message="رشته تحصیلی را وارد کنید")
-        elif personnel.degree_of_education != 'un':
+        elif personnel.degree_education != 'un':
             if not personnel.field_of_study:
                 ValidationError(message="رشته تحصیلی را وارد کنید")
             elif not personnel.university_type:

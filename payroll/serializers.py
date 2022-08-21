@@ -16,6 +16,10 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 
 class WorkshopPersonnelSerializer(serializers.ModelSerializer):
+    personnel_name = serializers.CharField(source='personnel.name', read_only=True)
+    personnel_last_name = serializers.CharField(source='personnel.last_name', read_only=True)
+    workshop_name = serializers.CharField(source='workshop.name', read_only=True)
+
     class Meta:
         model = WorkshopPersonnel
         fields = '__all__'

@@ -10,7 +10,7 @@ from users.models import City
 
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
-    company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE,)
+    company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE, )
 
     code = models.IntegerField()
     contract_row = models.IntegerField(default=0)
@@ -36,11 +36,20 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.workshop', 'ویرایش کارگاه خود'),
             ('deleteOwn.workshop', 'حذف کارگاه خود'),
         )
+
     def __str__(self):
         return self.name + ' ' + self.company.name
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
+    ACTIVE = 'a'
+    NO_ACTIVE = 'n'
+
+    ACTIVE_TYPE = (
+        (ACTIVE, 'فعال'),
+        (NO_ACTIVE, 'راکد')
+    )
+
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.IntegerField()
     contract_number = models.IntegerField()
@@ -48,10 +57,9 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
 
-    is_activate = models.BooleanField(default=False)
-
+    status = models.CharField(max_length=1, choices=ACTIVE_TYPE, default=NO_ACTIVE)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
-    assignor_national_code = models.IntegerField(unique=True, validators=[is_valid_melli_code])
+    assignor_national_code = models.IntegerField(unique=True)
     assignor_workshop_code = models.IntegerField()
 
     contract_initial_amount = DECIMAL()
@@ -166,25 +174,25 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     number_of_childes = models.IntegerField(default=0)
 
-    city_phone_code = models.IntegerField(blank=True, null=True)
-    phone_number = models.IntegerField(blank=True, null=True)
-    mobile_number_1 = models.IntegerField(null=True, blank=True)
-    mobile_number_2 = models.IntegerField(null=True, blank=True)
+    city_phone_code = models.CharField(max_length=50, blank=True, null=True)
+    phone_number = models.CharField(max_length=50, blank=True, null=True)
+    mobile_number_1 = models.CharField(max_length=50, blank=True, null=True)
+    mobile_number_2 = models.CharField(max_length=50, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = POSTAL_CODE(null=True, blank=True)
 
     insurance = models.BooleanField(default=False)
     insurance_code = models.IntegerField(blank=True, null=True)
 
-    degree_of_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
+    degree_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
     field_of_study = models.CharField(max_length=100, null=True, blank=True)
     university_type = models.CharField(max_length=2, choices=UNIVERSITY_TYPES, blank=True, null=True)
     university_name = models.CharField(max_length=50, blank=True, null=True)
 
     account_bank_name = models.CharField(max_length=50, blank=True, null=True)
-    account_bank_number = models.IntegerField(blank=True, null=True)
-    bank_cart_number = models.IntegerField(blank=True, null=True)
-    sheba_number = models.IntegerField(blank=True, null=True)
+    account_bank_number = models.CharField(max_length=50, blank=True, null=True)
+    bank_cart_number = models.CharField(max_length=50, blank=True, null=True)
+    sheba_number = models.CharField(max_length=50, blank=True, null=True)
 
     is_personnel_active = models.BooleanField(default=False, null=True, blank=True)
     is_personnel_verified = models.BooleanField(default=False, null=True, blank=True)
@@ -285,9 +293,6 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     last_name = models.CharField(max_length=255)
     national_code = models.CharField(max_length=10, unique=True, validators=[is_valid_melli_code])
     date_of_birth = jmodels.jDateField(blank=True, null=True)
-    mobile_number = models.IntegerField(null=True, blank=True, validators=[
-        RegexValidator(regex='^(09){1}[0-9]{9}$', message='ساختار شماره موبایل صحیح نبست')]
-                                        )
     relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, default=SPOUSE)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
@@ -333,9 +338,9 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     PART_TIME = 'p'
     FULL_TIME = 'f'
-    CONTRACTUAL = 'c'
     TEMPORARY = 't'
     HOURLY = 'h'
+    CONTRACTUAL = 'c'
 
     CONTRACT_TYPES = (
         (PART_TIME, 'پاره وقت'),
@@ -346,10 +351,11 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     )
 
+    CONTRACTUAL = 'c'
     CONVENTIONAL = 'co'
-    PERMANENT = 'p'
     CORPORATE = 'cr'
     FUNCTIONARY = 'fu'
+    PERMANENT = 'p'
     OTHERS = 'or'
 
     EMPLOYMENTS_TYPES = (
@@ -357,8 +363,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (CONVENTIONAL, 'قراردادی'),
         (CORPORATE, 'َشرکتی'),
         (FUNCTIONARY, 'مامور'),
-        (OTHERS, 'سایر'),
-        (PERMANENT, 'رسمی')
+        (PERMANENT, 'رسمی'),
+        (OTHERS, 'سایر')
+
     )
 
     NORMAL = 'nr'
@@ -379,6 +386,60 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (FOREIGN, 'اتباع خارجی مشمول قانون اجتناب از اخذ مالیات مضاعف')
     )
 
+    NORMAL = 'nr'
+    DEPRIVED_AREAS = 'dp'
+    FREE_TRADE_ZONE = 'ft'
+    SCIENCE_PARK = 'sp'
+
+    JOB_LOCATION_STATUSES = (
+        (NORMAL, 'معمولی'),
+        (DEPRIVED_AREAS, 'مناطق کمتر توسعه یافته'),
+        (FREE_TRADE_ZONE, 'مناطق آزاد تجاری'),
+        (SCIENCE_PARK, 'پارک علم و فناوری'),
+    )
+
+    STUDY = 'st'
+    FINANCIAL = 'fn'
+    SOCIAL = 'so'
+    HEALTH = 'he'
+    IT = 'it'
+    SERVICES = 'se'
+    ENGINEER = 'en'
+    ARGI = 'ar'
+    PRODUCT = 'pr'
+    SEARCH = 'sr'
+    WORKER = 'wo'
+    SECURITY = 'sc'
+    TRANSFORM = 'tr'
+    SALE = 'sa'
+    JUDGE = 'ju'
+    WAREHOUSE = 'wa'
+    CONTROL = 'co'
+    MASTER = 'ma'
+    OTHER = 'ot'
+
+    JOB_POSITION_TYPES = (
+        (STUDY, 'آموزشي و فرهنگي'),
+        (FINANCIAL, 'اداري و مالي'),
+        (SOCIAL, 'اموراجتماعي'),
+        (HEALTH, 'درماني و بهداشتي'),
+        (IT, 'اطلاعات فناوري'),
+        (SERVICES, 'خدمات'),
+        (ENGINEER, 'فني و مهندسي'),
+        (ARGI, 'كشاورزي ومحيط زيست'),
+        (PRODUCT, 'تولیدی'),
+        (SEARCH, 'تحقیقاتی'),
+        (WORKER, 'کارگری'),
+        (SECURITY, 'حراست و نگهبانی'),
+        (TRANSFORM, 'ترابری'),
+        (SALE, 'بازاریابی و فروش'),
+        (JUDGE, 'قضات'),
+        (WAREHOUSE, 'انبارداری'),
+        (CONTROL, 'کنترل کیفی'),
+        (MASTER, 'هیات علمی'),
+        (OTHER, 'سایر'),
+    )
+
     workshop = models.ForeignKey(Workshop, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
     personnel = models.ForeignKey(Personnel, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
     contract_row = models.ManyToManyField(ContractRow, related_name='contract_rows', blank=True)
@@ -395,7 +456,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     job_position = models.CharField(max_length=100)
     job_group = models.CharField(max_length=100)
     job_location = models.CharField(max_length=100)
-    job_location_status = models.CharField(max_length=100)
+    job_location_status = models.CharField(max_length=2, choices=JOB_LOCATION_STATUSES, default=NORMAL)
 
     employment_type = models.CharField(max_length=2, choices=EMPLOYMENTS_TYPES, default=CONVENTIONAL)
     contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=FULL_TIME)
@@ -418,6 +479,11 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.workshop_personnel', 'ویرایش پرسنل کارگاه خود'),
             ('deleteOwn.workshop_personnel', 'حذف پرسنل کارگاه خود'),
         )
+
+    def save(self, *args, **kwargs):
+        if not self.insurance:
+            self.insurance_add_date = None
+        super().save(*args, **kwargs)
 
 
 class Contract(BaseModel, LockableMixin, DefinableMixin):
@@ -470,27 +536,28 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     entitlement_leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
-    from_hour = jmodels.jDateTimeField(blank=True, null=True)
-    to_hour = jmodels.jDateTimeField(blank=True, null=True)
+    date = jmodels.jDateField(blank=True, null=True)
+    from_hour = models.TimeField(blank=True, null=True)
+    to_hour = models.TimeField(blank=True, null=True)
     explanation = EXPLANATION()
 
     def save(self, *args, **kwargs):
         if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
             self.from_date, self.to_date, self.explanation = None, None, None
-            if not self.from_hour or not self.to_hour:
-                raise ValidationError('برای مرخصی ساعتی ساعت شروع و پایان را وارد کنید')
+            if not self.from_hour or not self.to_hour or not self.date:
+                raise ValidationError('برای مرخصی ساعتی ساعت شروع و پایان و تاریخ را وارد کنید')
         elif self.leave_type == 'e' and self.entitlement_leave_type == 'd':
-            self.from_date, self.to_date, self.explanation = None, None, None
+            self.date, self.from_hour, self.to_hour, self.explanation = None, None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
         elif self.leave_type == 'i':
-            self.from_hour, self.to_hour = None, None
+            self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید')
             if not self.explanation:
                 raise ValidationError('برای مرخصی استعلاجی علت حادثه را وارد کنید')
         elif self.leave_type == 'w' or self.leave_type == 'a':
-            self.from_hour, self.to_hour = None, None
+            self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError(' تاریح شروع و پایان را وارد کنید')
         super().save(*args, **kwargs)
