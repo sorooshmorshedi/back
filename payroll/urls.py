@@ -7,7 +7,7 @@ from payroll.lists.views import WorkshopListView, ContractListView, PersonnelLis
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
-    ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail
+    ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -16,6 +16,7 @@ urlpatterns = [
     path('personnel/', PersonnelApiView.as_view(), name='personnelApi'),
     path('personnel/<int:pk>/', PersonnelDetail.as_view(), name='personnelDetail'),
     path('personnel/verify/<int:pk>/', PersonnelVerifyApi.as_view(), name='personnelVerifyApi'),
+    path('personnel/search/<int:code>/', SearchPersonnelByCode.as_view(), name='searchPersonnelByCode'),
 
     path('personnel/family/', PersonnelFamilyApiView.as_view(), name='personnelFamilyApi'),
     path('personnel/family/<int:pk>/', PersonnelFamilyDetail.as_view(), name='personnelFamilyDetail'),
@@ -29,7 +30,7 @@ urlpatterns = [
     path('contract/', ContractApiView.as_view(), name='contractApi'),
     path('contract/<int:pk>/', ContractDetail.as_view(), name='contractDetail'),
 
-    path('hrletter', HRLetterApiView.as_view(), name='HRLetterApiView'),
+    path('hrletter/', HRLetterApiView.as_view(), name='HRLetterApiView'),
     path('hrletter/<int:pk>/', HRLetterDetail.as_view(), name='HRLetterDetail'),
 
     path('absence/', LeaveOrAbsenceApiView.as_view(), name='leaveOrAbsenceApiView'),

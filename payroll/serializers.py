@@ -40,6 +40,9 @@ class PersonnelFamilySerializer(serializers.ModelSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
+    personnel_name = serializers.CharField(source='workshop_personnel.personnel.name', read_only=True)
+    personnel_last_name = serializers.CharField(source='workshop_personnel.personnel.last_name', read_only=True)
+    workshop_name = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
 
     class Meta:
         model = Contract
