@@ -4,10 +4,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from helpers.auth import BasicCRUDPermission
 from payroll.lists.filters import WorkshopFilter, PersonnelFilter, PersonnelFamilyFilter, WorkshopPersonnelFilter, \
-    ContractRowFilter, LeaveOrAbsenceFilter
+    ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
-    WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer
+    WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer, ContractSerializer
 
 
 class WorkshopListView(generics.ListAPIView):
@@ -49,12 +49,25 @@ class PersonnelFamilyListView(generics.ListAPIView):
         return PersonnelFamily.objects.hasAccess('get', self.permission_codename).all()
 
 
+class SpecificPersonnelFamilyListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.personnel_family"
+    serializer_class = PersonnelFamilySerializer
+    filterset_class = PersonnelFamilyFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return PersonnelFamily.objects.hasAccess('get', self.permission_codename).filter()
+
+
 class ContractListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     permission_codename = "get.contract"
-    serializer_class = Contract
-    filterset_class = Contract
+    serializer_class = ContractSerializer
+    filterset_class = ContractFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
 
@@ -66,8 +79,8 @@ class WorkshopPersonnelListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     permission_codename = "get.workshop_personnel"
-    serializer_class = WorkshopPersonnel
-    filterset_class = WorkshopPersonnel
+    serializer_class = WorkshopPersonnelSerializer
+    filterset_class = WorkshopPersonnelFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
 

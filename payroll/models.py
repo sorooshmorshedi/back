@@ -1,4 +1,3 @@
-from astroid.modutils import _get_relative_base_path
 from django.db import models
 from django_jalali.db import models as jmodels
 from django.core.validators import MinLengthValidator, MaxLengthValidator, RegexValidator
@@ -8,7 +7,7 @@ from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
     is_valid_melli_code, EXPLANATION
 from users.models import City
-
+import datetime
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE, )
@@ -295,7 +294,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    national_code = models.CharField(max_length=10, unique=True, validators=[is_valid_melli_code])
+    national_code = models.CharField(max_length=10, unique=True)
     date_of_birth = jmodels.jDateField(blank=True, null=True)
     relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, default=SPOUSE)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
@@ -444,9 +443,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (OTHER, 'سایر'),
     )
 
-    workshop = models.ForeignKey(Workshop, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
-    personnel = models.ForeignKey(Personnel, related_name='contract', on_delete=models.CASCADE, blank=True, null=True)
-    contract_row = models.ManyToManyField(ContractRow, related_name='contract_rows', blank=True)
+    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True, null=True)
+    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True, null=True)
+    contract_row = models.ManyToManyField(ContractRow, related_name='workshop_personnel', blank=True)
 
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
@@ -457,7 +456,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     current_insurance_history_in_workshop = models.IntegerField()
     insurance_history_totality = models.IntegerField()
 
-    job_position = models.CharField(max_length=100)
+    job_position = models.CharField(max_length=2, choices=JOB_POSITION_TYPES)
     job_group = models.CharField(max_length=100)
     job_location = models.CharField(max_length=100)
     job_location_status = models.CharField(max_length=2, choices=JOB_LOCATION_STATUSES, default=NORMAL)
@@ -467,7 +466,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     employee_status = models.CharField(max_length=2, choices=EMPLOYEE_TYPES, default=NORMAL)
 
     @property
-    def title(self):
+    def my_title(self):
         return self.personnel.full_name + ' in ' + self.workshop.name
 
     class Meta(BaseModel.Meta):
@@ -489,8 +488,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
             self.insurance_add_date = None
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.title
 
 
 class Contract(BaseModel, LockableMixin, DefinableMixin):
@@ -552,37 +549,41 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     from_hour = models.TimeField(blank=True, null=True)
     to_hour = models.TimeField(blank=True, null=True)
     explanation = EXPLANATION()
+    cause_of_incident = EXPLANATION()
+    time_period = models.DecimalField(blank=True, null=True, max_digits=24, decimal_places=2)
+
+    @property
+    def final_by_day(self):
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
+                                            minutes=self.to_hour.minute - self.from_hour.minute)
+            final_by_day = (duration.seconds / 60) / 440
+        else:
+            difference = self.to_date - self.from_date
+            final_by_day = difference.days
+        return final_by_day
 
     def save(self, *args, **kwargs):
         if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
-            self.from_date, self.to_date, self.explanation = None, None, None
+            self.from_date, self.to_date, = None, None
             if not self.from_hour or not self.to_hour or not self.date:
                 raise ValidationError('برای مرخصی ساعتی ساعت شروع و پایان و تاریخ را وارد کنید')
         elif self.leave_type == 'e' and self.entitlement_leave_type == 'd':
-            self.date, self.from_hour, self.to_hour, self.explanation = None, None, None, None
+            self.date, self.from_hour, self.to_hour = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
         elif self.leave_type == 'i':
             self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید')
-            if not self.explanation:
+            if not self.cause_of_incident:
                 raise ValidationError('برای مرخصی استعلاجی علت حادثه را وارد کنید')
         elif self.leave_type == 'w' or self.leave_type == 'a':
             self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError(' تاریح شروع و پایان را وارد کنید')
+        self.time_period = self.final_by_day
         super().save(*args, **kwargs)
-
-    @property
-    def final_by_day(self):
-        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
-            difference = self.to_hour - self.from_hour
-            final_by_day = (difference.seconds / 60) / 440
-        else:
-            difference = self.to_date - self.from_date
-            final_by_day = difference.days
-        return final_by_day
 
     class Meta(BaseModel.Meta):
         verbose_name = 'LeaveOrAbsence'
