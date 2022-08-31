@@ -1,5 +1,5 @@
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
-    LeaveOrAbsence
+    LeaveOrAbsence, Mission
 from rest_framework import serializers
 
 
@@ -80,6 +80,14 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LeaveOrAbsence
+        fields = '__all__'
+
+
+class MissionSerializer(serializers.ModelSerializer):
+    mmission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
+
+    class Meta:
+        model = Mission
         fields = '__all__'
 
 
