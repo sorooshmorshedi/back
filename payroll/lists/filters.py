@@ -106,7 +106,6 @@ class WorkshopPersonnelFilter(filters.FilterSet):
             'id': ('exact',),
             'personnel': ('exact',),
             'workshop': ('exact',),
-            'insurance': BASE_FIELD_FILTERS,
             'insurance_add_date': BASE_FIELD_FILTERS,
             'work_title': ['icontains'],
             'previous_insurance_history_out_workshop': ('exact',),
@@ -135,6 +134,7 @@ class ContractFilter(filters.FilterSet):
         fields = {
             'id': ('exact',),
             'workshop_personnel': ('exact',),
+            'insurance': BASE_FIELD_FILTERS,
             'contract_from_date': BASE_FIELD_FILTERS,
             'contract_to_date': BASE_FIELD_FILTERS,
             'quit_job_date': BASE_FIELD_FILTERS,

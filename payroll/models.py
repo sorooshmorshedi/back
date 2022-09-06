@@ -1,6 +1,7 @@
 from django.db import models
+from django.db.models import Q
 from django_jalali.db import models as jmodels
-from django.core.validators import MinLengthValidator, MaxLengthValidator, RegexValidator
+from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
 from companies.models import Company
@@ -9,7 +10,7 @@ from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE
 from users.models import City
 import datetime
 
-from decimal import *
+from decimal import Decimal
 
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
@@ -58,10 +59,12 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     tatil_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     kasre_kar_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     shab_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    aele_mandi_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    mission_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
 
     sanavat_type = models.CharField(max_length=1, choices=SANAVAT_TYPES, default=CONTINUOUS)
 
@@ -69,10 +72,12 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
     kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
+    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
+    mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Workshop'
@@ -87,6 +92,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.workshop', 'ویرایش کارگاه خود'),
             ('deleteOwn.workshop', 'حذف کارگاه خود'),
         )
+    @property
+    def workshop_title(self):
+        return self.name + ' ' + str(self.code)
 
     def __str__(self):
         return self.name + ' ' + self.company.name
@@ -286,7 +294,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.full_name + ' in ' + self.company.name
+        return self.full_name + ' در ' + self.company.name
 
 
 class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
@@ -472,7 +480,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     MASTER = 'ma'
     OTHER = 'ot'
 
-    JOB_POSITION_TYPES = (
+    JOB_GROUP_TYPES = (
         (STUDY, 'آموزشي و فرهنگي'),
         (FINANCIAL, 'اداري و مالي'),
         (SOCIAL, 'اموراجتماعي'),
@@ -498,17 +506,16 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True, null=True)
     contract_row = models.ManyToManyField(ContractRow, related_name='workshop_personnel', blank=True)
 
-    insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
     work_title = models.CharField(max_length=100, blank=True, null=True)
 
-    previous_insurance_history_out_workshop = models.IntegerField()
-    previous_insurance_history_in_workshop = models.IntegerField()
-    current_insurance_history_in_workshop = models.IntegerField()
-    insurance_history_totality = models.IntegerField()
+    previous_insurance_history_out_workshop = models.IntegerField(blank=True, null=True)
+    previous_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
+    current_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
+    insurance_history_totality = models.IntegerField(blank=True, null=True)
 
-    job_position = models.CharField(max_length=2, choices=JOB_POSITION_TYPES)
-    job_group = models.CharField(max_length=100)
+    job_position = models.CharField(max_length=100)
+    job_group = models.CharField(max_length=2, choices=JOB_GROUP_TYPES)
     job_location = models.CharField(max_length=100)
     job_location_status = models.CharField(max_length=2, choices=JOB_LOCATION_STATUSES, default=NORMAL)
 
@@ -518,7 +525,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def my_title(self):
-        return self.personnel.full_name + ' in ' + self.workshop.name
+        return self.personnel.full_name + ' در کارگاه ' + self.workshop.name
 
     class Meta(BaseModel.Meta):
         verbose_name = 'WorkshopPersonnel'
@@ -535,15 +542,23 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def save(self, *args, **kwargs):
-        if not self.insurance:
-            self.insurance_add_date = None
+        if not self.id:
+            self.current_insurance_history_in_workshop = 0
+        self.insurance_history_totality = self.previous_insurance_history_in_workshop +\
+                                            self.previous_insurance_history_out_workshop +\
+                                            self.current_insurance_history_in_workshop
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.my_title
+
 
 
 class Contract(BaseModel, LockableMixin, DefinableMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
                                             on_delete=models.CASCADE, blank=True, null=True)
     code = models.IntegerField(blank=True, null=True)
+    insurance = models.BooleanField(default=False)
     contract_from_date = jmodels.jDateField(blank=True, null=True)
     contract_to_date = jmodels.jDateField(blank=True, null=True)
     quit_job_date = jmodels.jDateField(blank=True, null=True)
@@ -561,6 +576,28 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.contract', 'ویرایش قرارداد خود'),
             ('deleteOwn.contract', 'حذف قرارداد خود'),
         )
+
+    def save(self, *args, **kwargs):
+        if not self.insurance:
+            self.workshop_personnel.insurance_add_date = None
+        else:
+            self.workshop_personnel.insurance_add_date = self.contract_from_date
+        if not self.quit_job_date:
+            self.workshop_personnel.current_insurance_history_in_workshop =\
+                self.contract_to_date.month + self.contract_from_date.month
+        if self.quit_job_date:
+            self.workshop_personnel.current_insurance_history_in_workshop =\
+                self.quit_job_date.month + self.contract_from_date.month
+
+        self.workshop_personnel.save()
+        super().save(*args, **kwargs)
+
+    @property
+    def workshop_personnel_display(self):
+        return self.workshop_personnel.my_title
+
+    def __str__(self):
+        return str(self.code) + ' برای ' + self.workshop_personnel_display
 
 
 class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
@@ -605,7 +642,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
             final_by_day = (duration.seconds / 60) / 440
         else:
             difference = self.to_date - self.from_date
-            final_by_day = difference.days
+            final_by_day = difference.days + 1
         return final_by_day
 
     def save(self, *args, **kwargs):
@@ -645,7 +682,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def __str__(self):
-        return str(self.final_by_day) + ' for ' + self.workshop_personnel.personnel.full_name
+        return str(self.final_by_day) + 'روز برای ' + self.workshop_personnel.personnel.full_name
 
 
 class HRLetter(BaseModel, LockableMixin, DefinableMixin):
@@ -680,140 +717,141 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     hoghooghe_roozane_use_tax = models.BooleanField(default=False)
     hoghooghe_roozane_use_insurance = models.BooleanField(default=False)
     hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    hoghooghe_roozane_amount = DECIMAL(blank=True, null=True)
+    hoghooghe_roozane_amount = DECIMAL(default=0)
     hoghooghe_roozane_base = models.BooleanField(default=False)
 
     paye_sanavat_use_tax = models.BooleanField(default=False)
     paye_sanavat_use_insurance = models.BooleanField(default=False)
     paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    paye_sanavat_amount = DECIMAL(blank=True, null=True)
+    paye_sanavat_amount = DECIMAL(default=0)
     paye_sanavat_base = models.BooleanField(default=False)
 
     haghe_sarparasti_use_tax = models.BooleanField(default=False)
     haghe_sarparasti_use_insurance = models.BooleanField(default=False)
     haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_sarparasti_amount = DECIMAL(blank=True, null=True)
+    haghe_sarparasti_amount = DECIMAL(default=0)
     haghe_sarparasti_base = models.BooleanField(default=False)
 
     haghe_modiriyat_use_tax = models.BooleanField(default=False)
     haghe_modiriyat_use_insurance = models.BooleanField(default=False)
     haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_modiriyat_amount = DECIMAL(blank=True, null=True)
+    haghe_modiriyat_amount = DECIMAL(default=0)
     haghe_modiriyat_base = models.BooleanField(default=False)
 
     haghe_jazb_use_tax = models.BooleanField(default=False)
     haghe_jazb_use_insurance = models.BooleanField(default=False)
     haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_jazb_amount = DECIMAL(blank=True, null=True)
+    haghe_jazb_amount = DECIMAL(default=0)
     haghe_jazb_base = models.BooleanField(default=False)
 
     fogholade_shoghl_use_tax = models.BooleanField(default=False)
     fogholade_shoghl_use_insurance = models.BooleanField(default=False)
     fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    fogholade_shoghl_amount = DECIMAL(blank=True, null=True)
+    fogholade_shoghl_amount = DECIMAL(default=0)
     fogholade_shoghl_base = models.BooleanField(default=False)
 
     haghe_tahsilat_use_tax = models.BooleanField(default=False)
     haghe_tahsilat_use_insurance = models.BooleanField(default=False)
     haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_tahsilat_amount = DECIMAL(blank=True, null=True)
+    haghe_tahsilat_amount = DECIMAL(default=0)
     haghe_tahsilat_base = models.BooleanField(default=False)
 
     fogholade_sakhti_kar_use_tax = models.BooleanField(default=False)
     fogholade_sakhti_kar_use_insurance = models.BooleanField(default=False)
     fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    fogholade_sakhti_kar_amount = DECIMAL(blank=True, null=True)
+    fogholade_sakhti_kar_amount = DECIMAL(default=0)
     fogholade_sakhti_kar_base = models.BooleanField(default=False)
 
     haghe_ankal_use_tax = models.BooleanField(default=False)
     haghe_ankal_use_insurance = models.BooleanField(default=False)
     haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_ankal_amount = DECIMAL(blank=True, null=True)
+    haghe_ankal_amount = DECIMAL(default=0)
     haghe_ankal_base = models.BooleanField(default=False)
 
     fogholade_badi_abohava_use_tax = models.BooleanField(default=False)
     fogholade_badi_abohava_use_insurance = models.BooleanField(default=False)
     fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    fogholade_badi_abohava_amount = DECIMAL(blank=True, null=True)
+    fogholade_badi_abohava_amount = DECIMAL(default=0)
     fogholade_badi_abohava_base = models.BooleanField(default=False)
 
     mahroomiat_tashilat_zendegi_use_tax = models.BooleanField(default=False)
     mahroomiat_tashilat_zendegi_use_insurance = models.BooleanField(default=False)
     mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    mahroomiat_tashilat_zendegi_amount = DECIMAL(blank=True, null=True)
+    mahroomiat_tashilat_zendegi_amount = DECIMAL(default=0)
     mahroomiat_tashilat_zendegi_base = models.BooleanField(default=False)
 
     fogholade_mahal_khedmat_use_tax = models.BooleanField(default=False)
     fogholade_mahal_khedmat_use_insurance = models.BooleanField(default=False)
     fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    fogholade_mahal_khedmat_amount = DECIMAL(blank=True, null=True)
+    fogholade_mahal_khedmat_amount = DECIMAL(default=0)
     fogholade_mahal_khedmat_base = models.BooleanField(default=False)
 
     fogholade_sharayet_mohit_kar_use_tax = models.BooleanField(default=False)
     fogholade_sharayet_mohit_kar_use_insurance = models.BooleanField(default=False)
     fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    fogholade_sharayet_mohit_kar_amount = DECIMAL(blank=True, null=True)
+    fogholade_sharayet_mohit_kar_amount = DECIMAL(default=0)
     fogholade_sharayet_mohit_kar_base = models.BooleanField(default=False)
 
     haghe_maskan_use_tax = models.BooleanField(default=False)
     haghe_maskan_use_insurance = models.BooleanField(default=False)
     haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_maskan_amount = DECIMAL(blank=True, null=True)
+    haghe_maskan_amount = DECIMAL(default=0)
     haghe_maskan_base = models.BooleanField(default=False)
 
     ayabo_zahab_use_tax = models.BooleanField(default=False)
     ayabo_zahab_use_insurance = models.BooleanField(default=False)
     ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    ayabo_zahab_amount = DECIMAL(blank=True, null=True)
+    ayabo_zahab_amount = DECIMAL(default=0)
     ayabo_zahab_base = models.BooleanField(default=False)
 
     bon_kharo_bar_use_tax = models.BooleanField(default=False)
     bon_kharo_bar_use_insurance = models.BooleanField(default=False)
     bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    bon_kharo_bar_amount = DECIMAL(blank=True, null=True)
+    bon_kharo_bar_amount = DECIMAL(default=0)
     bon_kharo_bar_base = models.BooleanField(default=False)
 
     yarane_ghaza_use_tax = models.BooleanField(default=False)
     yarane_ghaza_use_insurance = models.BooleanField(default=False)
     yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    yarane_ghaza_amount = DECIMAL(blank=True, null=True)
+    yarane_ghaza_amount = DECIMAL(default=0)
     yarane_ghaza_base = models.BooleanField(default=False)
 
     haghe_shir_use_tax = models.BooleanField(default=False)
     haghe_shir_use_insurance = models.BooleanField(default=False)
     haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_shir_amount = DECIMAL(blank=True, null=True)
+    haghe_shir_amount = DECIMAL(default=0)
     haghe_shir_base = models.BooleanField(default=False)
 
     haghe_taahol_use_tax = models.BooleanField(default=False)
     haghe_taahol_use_insurance = models.BooleanField(default=False)
     haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_taahol_amount = DECIMAL(blank=True, null=True)
+    haghe_taahol_amount = DECIMAL(default=0)
     haghe_taahol_base = models.BooleanField(default=False)
 
     komakhazine_mahdekoodak_use_tax = models.BooleanField(default=False)
     komakhazine_mahdekoodak_use_insurance = models.BooleanField(default=False)
     komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    komakhazine_mahdekoodak_amount = DECIMAL(blank=True, null=True)
+    komakhazine_mahdekoodak_amount = DECIMAL(default=0)
     komakhazine_mahdekoodak_base = models.BooleanField(default=False)
 
     komakhazine_varzesh_use_tax = models.BooleanField(default=False)
     komakhazine_varzesh_use_insurance = models.BooleanField(default=False)
     komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    komakhazine_varzesh_amount = DECIMAL(blank=True, null=True)
+    komakhazine_varzesh_amount = DECIMAL(default=0)
     komakhazine_varzesh_base= models.BooleanField(default=False)
 
     komakhazine_mobile_use_tax = models.BooleanField(default=False)
     komakhazine_mobile_use_insurance = models.BooleanField(default=False)
     komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    komakhazine_mobile_amount = DECIMAL(blank=True, null=True)
+    komakhazine_mobile_amount = DECIMAL(default=0)
     komakhazine_mobile_base = models.BooleanField(default=False)
 
-    haghe_owlad_use_tax = models.BooleanField(default=False)
-    haghe_owlad_use_insurance = models.BooleanField(default=False)
-    haghe_owlad_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
-    haghe_owlad_amount = DECIMAL(blank=True, null=True)
-    haghe_owlad_use_base = models.BooleanField(default=False)
+
+    def __str__(self):
+        if self.contract:
+            return ' حکم کارگزینی ' + self.contract.workshop_personnel_display
+        else:
+            return 'قالب حکم کارگزینی ' + self.name
 
 
     class Meta(BaseModel.Meta):
@@ -855,11 +893,10 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         hr_letter_items.append({'base': self.komakhazine_mahdekoodak_base, 'amount': self.komakhazine_mahdekoodak_amount})
         hr_letter_items.append({'base': self.komakhazine_varzesh_base, 'amount': self.komakhazine_varzesh_amount})
         hr_letter_items.append({'base': self.komakhazine_mobile_base, 'amount': self.komakhazine_mobile_amount})
-        hr_letter_items.append({'base': self.haghe_owlad_use_base, 'amount': self.haghe_owlad_amount})
 
         daily, monthly = 0, 0
 
-        for i in range(0, 23):
+        for i in range(0, 22):
             if hr_letter_items[i]['base'] and hr_letter_items[i]['amount']:
                 if i < 2:
                     daily += int(hr_letter_items[i]['amount'])
@@ -907,6 +944,7 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
     to_hour = models.TimeField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     explanation = EXPLANATION()
+    topic = EXPLANATION()
     is_in_payment = models.BooleanField(default=False)
     time_period = models.DecimalField(blank=True, null=True, max_digits=24, decimal_places=2)
 
@@ -918,7 +956,7 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
             final_by_day = (duration.seconds / 60) / 440
         else:
             difference = self.to_date - self.from_date
-            final_by_day = difference.days
+            final_by_day = difference.days + 1
         return final_by_day
 
     class Meta(BaseModel.Meta):
@@ -949,3 +987,381 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return str(self.time_period) + ' برای ' + self.workshop_personnel.personnel.full_name
+
+
+class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
+
+    workshop = models.ForeignKey(Workshop, related_name="list_of_pay", on_delete=models.CASCADE,
+                                 null=True, blank=True)
+    year = models.IntegerField(default=0)
+    month = models.IntegerField(default=0)
+    month_days = models.IntegerField(default=30)
+    start_date = jmodels.jDateField()
+    end_date = jmodels.jDateField()
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'ListOfPay'
+        permission_basename = 'list_of_pay'
+        permissions = (
+            ('get.list_of_pay', 'مشاهده حقوق و دستمزد'),
+            ('create.list_of_pay', 'تعریف حقوق و دستمزد'),
+            ('update.list_of_pay', 'ویرایش حقوق و دستمزد'),
+            ('delete.list_of_pay', 'حذف حقوق و دستمزد'),
+
+            ('getOwn.list_of_pay', 'مشاهده حقوق و دستمزد خود'),
+            ('updateOwn.list_of_pay', 'ویرایش حقوق و دستمزد خود'),
+            ('deleteOwn.list_of_pay', 'حذف حقوق و دستمزد خود'),
+        )
+
+    @property
+    def info_for_itams(self):
+        personnels = []
+        contracts = []
+        personnel_normal_worktime = {}
+        workshop_personnel = WorkshopPersonnel.objects.filter(workshop=self.workshop)
+        workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
+        for personnel in Personnel.objects.filter(workshop_personnel__in=workshop_personnel):
+            personnel_normal_worktime[personnel.id] = 0
+        for contract in workshop_contracts:
+            if not contract.quit_job_date:
+                end = contract.contract_to_date
+            else:
+                end = contract.quit_job_date
+            if contract.contract_from_date.__le__(self.start_date) and end.__ge__(self.end_date):
+                contracts.append(contract.id)
+                personnel_normal_worktime[contract.workshop_personnel.personnel.id] += self.month_days
+            if contract.contract_from_date.__ge__(self.start_date) and end.__le__(self.end_date):
+                contracts.append(contract.id)
+                personnel_normal_worktime[contract.workshop_personnel.personnel.id] += \
+                    end.day - contract.contract_from_date.day
+            if contract.contract_from_date.__le__(self.start_date) and end.__gt__(self.start_date) and \
+                    end.__lt__(self.end_date):
+                contracts.append(contract.id)
+                personnel_normal_worktime[contract.workshop_personnel.personnel.id] += \
+                    end.day
+            if contract.contract_from_date.__ge__(self.start_date) and end.__ge__(self.end_date) and \
+                    contract.contract_from_date.__lt__(self.end_date):
+                contracts.append(contract.id)
+                personnel_normal_worktime[contract.workshop_personnel.personnel.id] += \
+                    self.month_days - contract.contract_from_date.day + 1
+
+        filtered_contracts = Contract.objects.filter(pk__in=contracts)
+
+        for contract in filtered_contracts:
+            personnels.append(contract.workshop_personnel.personnel.id)
+        personnels = Personnel.objects.filter(Q(pk__in=personnels) & Q(is_personnel_active=True))
+        filtered_workshops = WorkshopPersonnel.objects.filter(Q(personnel__in=personnels) &
+                                                              Q(workshop=self.workshop))
+
+        filtered_absence = LeaveOrAbsence.objects.filter(workshop_personnel__in=filtered_workshops)
+        filtered_mission = Mission.objects.filter(workshop_personnel__in=filtered_workshops)
+
+        response_data = []
+        for personnel in personnels:
+            absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0}
+            mission_day = 0
+            workshop_personnel = WorkshopPersonnel.objects.get(personnel=personnel)
+            contracts = filtered_contracts.filter(workshop_personnel=workshop_personnel).all()
+            print(len(contracts))
+            for absence in filtered_absence.all():
+                if absence.workshop_personnel.personnel == personnel:
+                    if absence.from_date.__ge__(self.start_date) and absence.to_date.__le__(self.end_date):
+                        absence_types[absence.leave_type] += absence.time_period
+                    elif absence.from_date.__lt__(self.start_date) and absence.to_date.__le__(self.end_date) and \
+                            absence.to_date.__gt__(self.start_date):
+                        absence_types[absence.leave_type] += absence.to_date.day
+                    elif absence.from_date.__gt__(self.start_date) and absence.to_date.__gt__(self.end_date) and \
+                            absence.from_date.__le__(self.end_date):
+                        absence_types[absence.leave_type] += self.month_days - absence.from_date.day
+                    elif absence.from_date.__le__(self.start_date) and absence.to_date.__ge__(self.end_date):
+                        absence_types[absence.leave_type] += self.month_days
+
+
+
+            for mission in filtered_mission.all():
+                if mission.workshop_personnel.personnel == personnel and mission.mission_type != 'h' and\
+                        mission.is_in_payment:
+                    if mission.from_date.__ge__(self.start_date) and mission.to_date.__le__(self.end_date):
+                        mission_day += mission.time_period
+                    elif mission.from_date.__lt__(self.start_date) and mission.to_date.__le__(self.end_date) and \
+                            mission.to_date.__gt__(self.start_date):
+                        mission_day += mission.to_date.day
+                    elif mission.from_date.__gt__(self.start_date) and mission.to_date.__gt__(self.end_date) and \
+                            mission.from_date.__le__(self.end_date):
+                        mission_day += self.month_days - mission.from_date.day
+                    elif mission.from_date.__le__(self.start_date) and mission.to_date.__ge__(self.end_date):
+                        mission_day += self.month_days
+
+            normal = personnel_normal_worktime[personnel.id]
+            real_work = normal - absence_types['a'] - int(absence_types['i']) - int(absence_types['w'])
+            response_data.append(
+                {
+                    'pk': personnel.id,
+                    'leaves': absence_types,
+                    'name': personnel.name + ' ' + personnel.last_name,
+                    'normal_work': normal,
+                    'real_work': real_work,
+                    'mission': mission_day
+                }
+            )
+        return response_data
+
+    def __str__(self):
+        return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' +\
+               self.workshop.workshop_title
+
+
+class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
+    list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
+                                     blank=True, null=True)
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name="list_of_pay_item",
+                                           on_delete=models.CASCADE, blank=True, null=True)
+
+    hoghoogh_roozane = DECIMAL()
+    pay_base = models.IntegerField(default=0)
+    sanavat_base = DECIMAL(default=0)
+    sanavat_month = models.IntegerField(default=0)
+    aele_mandi_child = models.IntegerField(default=0)
+    total_insurance_month = models.IntegerField(default=0)
+
+    hourly_pay_base = models.IntegerField(default=0)
+    normal_worktime = models.IntegerField(default=0)
+
+    entitlement_leave_day = models.DecimalField(blank=True, null=True, max_digits=24, decimal_places=2)
+
+    absence_day = models.IntegerField(default=0)
+    illness_leave_day = models.IntegerField(default=0)
+    without_salary_leave_day = models.IntegerField(default=0)
+    mission_day = models.IntegerField(default=0)
+
+
+    real_worktime = models.IntegerField(default=0)
+
+    mission_amount = DECIMAL(default=0, blank=True, null=True)
+    mission_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
+
+
+    ezafe_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    ezafe_kari_amount = DECIMAL(default=0)
+    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+
+    tatil_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    tatil_kari_amount = DECIMAL(default=0)
+    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+
+
+    kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    kasre_kar_amount = DECIMAL(default=0)
+    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
+
+
+    shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    shab_kari_amount = DECIMAL(default=0)
+    shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
+
+
+    nobat_kari_sob_asr = models.IntegerField(default=0)
+    nobat_kari_sob_asr_amount = DECIMAL(default=0)
+    nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
+
+
+    nobat_kari_sob_shab = models.IntegerField(default=0)
+    nobat_kari_sob_shab_amount = DECIMAL(default=0)
+    nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
+
+
+    nobat_kari_asr_shab = models.IntegerField(default=0)
+    nobat_kari_asr_shab_amount = DECIMAL(default=0)
+    nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
+
+
+    nobat_kari_sob_asr_shab = models.IntegerField(default=0)
+    nobat_kari_sob_asr_shab_amount = DECIMAL(default=0)
+    nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
+
+
+    aele_mandi_amount = DECIMAL(default=0)
+    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
+
+    sayer_ezafat = DECIMAL(default=0)
+    calculate_payment = models.BooleanField(default=False)
+
+    total_payment = DECIMAL(default=0)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'ListOfPayItem'
+        permission_basename = 'list_of_pay_item'
+        permissions = (
+            ('get.list_of_pay_item', 'مشاهده آیتم های حقوق و دستمزد'),
+            ('create.list_of_pay_item', 'تعریف آیتم های حقوق و دستمزد'),
+            ('update.list_of_pay_item', 'ویرایش آیتم های حقوق و دستمزد'),
+            ('delete.list_of_pay_item', 'حذف آیتم های حقوق و دستمزد'),
+
+            ('getOwn.list_of_pay_item', 'مشاهده آیتم های حقوق و دستمزد خود'),
+            ('updateOwn.list_of_pay_item', 'ویرایش آیتم های حقوق و دستمزد خود'),
+            ('deleteOwn.list_of_pay_item', 'حذف آیتم های حقوق و دستمزد خود'),
+        )
+
+    @property
+    def get_hr_letter(self):
+        last_contract = Contract.objects.filter(workshop_personnel=self.workshop_personnel)
+        hr = HRLetter.objects.filter(contract__in=last_contract).first()
+        return hr
+
+    @property
+    def get_aele_mandi_info(self):
+        personnel_family = PersonnelFamily.objects.filter(personnel=self.workshop_personnel.personnel)
+        aele_mandi_child = 0
+        self.total_insurance_month = self.workshop_personnel.insurance_history_totality
+        for person in personnel_family:
+            if person.relative == 'c' and person.marital_status == 's':
+                person_age = self.list_of_pay.year - person.date_of_birth.year
+                if person_age <= 18:
+                    aele_mandi_child += 1
+                elif person.study_status == 's' or person.physical_condition != 'h':
+                    aele_mandi_child += 1
+        return aele_mandi_child
+
+    @property
+    def get_sanavt_info(self):
+        hr = self.get_hr_letter
+        sanavat_base = hr.paye_sanavat_amount
+        sanavat_month = 0
+        if self.workshop_personnel.workshop.sanavat_type == 'c':
+            sanavat_month = self.workshop_personnel.current_insurance_history_in_workshop
+        elif self.workshop_personnel.workshop.sanavat_type == 'n':
+            sanavat_month = self.workshop_personnel.current_insurance_history_in_workshop +\
+                                 self.workshop_personnel.previous_insurance_history_in_workshop
+        return sanavat_base, sanavat_month
+
+
+    @property
+    def get_total_payment(self):
+        hr = self.get_hr_letter
+        month_day = self.list_of_pay.month_days
+        total = Decimal(0)
+
+        total += self.hoghoogh_roozane * Decimal(self.real_worktime)
+
+        if self.sanavat_month >= 12:
+            total += self.sanavat_base * Decimal(self.real_worktime)
+        if self.total_insurance_month >= 24:
+            total += Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
+                     Decimal(self.real_worktime) / Decimal(month_day)
+
+        total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
+        total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
+        total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
+        total -= self.kasre_kar_amount * Decimal(self.kasre_kar_amount) * Decimal(self.tatil_kari)
+        total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
+        total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
+        total += Decimal(self.nobat_kari_sob_shab) * self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount
+        total += Decimal(self.nobat_kari_asr_shab) * self.nobat_kari_asr_shab_nerkh * self.nobat_kari_asr_shab_amount
+        total += Decimal(self.nobat_kari_sob_asr_shab) * self.nobat_kari_sob_asr_shab_nerkh * \
+                 self.nobat_kari_sob_asr_shab_amount
+        total += Decimal(self.real_worktime) * hr.haghe_sarparasti_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_modiriyat_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_jazb_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.fogholade_shoghl_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_tahsilat_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.fogholade_sakhti_kar_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_ankal_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.fogholade_badi_abohava_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.mahroomiat_tashilat_zendegi_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.mahroomiat_tashilat_zendegi_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.fogholade_mahal_khedmat_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.fogholade_sharayet_mohit_kar_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_maskan_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.ayabo_zahab_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.bon_kharo_bar_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.yarane_ghaza_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_shir_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.haghe_taahol_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.komakhazine_mahdekoodak_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.komakhazine_varzesh_amount / Decimal(month_day)
+        total += Decimal(self.real_worktime) * hr.komakhazine_mobile_amount / Decimal(month_day)
+        total += self.sayer_ezafat
+        return total
+
+    def set_info_from_workshop(self):
+        hr = self.get_hr_letter
+        self.hoghoogh_roozane = hr.hoghooghe_roozane_amount
+        hourly_pay = round(self.hoghoogh_roozane / Decimal(7.33))
+
+        if self.workshop_personnel.workshop.base_pay_type == 'd':
+            self.pay_base = hr.daily_pay_base
+            self.hourly_pay_base = hr.day_hourly_pay_base
+        elif self.workshop_personnel.workshop.base_pay_type == 'm':
+            self.pay_base = hr.monthly_pay_base
+            self.hourly_pay_base = hr.month_hourly_pay_base
+
+        self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh
+        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'd':
+            self.ezafe_kari_amount = hourly_pay
+        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'b':
+            self.ezafe_kari_amount = self.hourly_pay_base
+
+        self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh
+        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'd':
+            self.tatil_kari_amount = hourly_pay
+        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'b':
+            self.tatil_kari_amount = self.hourly_pay_base
+
+        self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh
+        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'd':
+            self.kasre_kar_amount = hourly_pay
+        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'b':
+            self.kasre_kar_amount = self.hourly_pay_base
+
+        self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh
+        if self.workshop_personnel.workshop.shab_kari_pay_type == 'd':
+            self.shab_kari_amount = hourly_pay
+        if self.workshop_personnel.workshop.shab_kari_pay_type == 'b':
+            self.shab_kari_amount = self.hourly_pay_base
+
+        self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'd':
+            self.nobat_kari_sob_asr_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'b':
+            self.nobat_kari_sob_asr_amount = self.pay_base
+
+        self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'd':
+            self.nobat_kari_sob_shab_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'b':
+            self.nobat_kari_sob_shab_amount = self.pay_base
+
+        self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'd':
+            self.nobat_kari_asr_shab_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'b':
+            self.nobat_kari_asr_shab_amount = self.pay_base
+
+        self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'd':
+            self.nobat_kari_sob_asr_shab_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'b':
+            self.nobat_kari_sob_asr_shab_amount = self.pay_base
+
+        self.aele_mandi_nerkh = self.workshop_personnel.workshop.aele_mandi_nerkh
+        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'd':
+            self.aele_mandi_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'b':
+            self.aele_mandi_amount = self.pay_base
+
+        self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh
+        if self.workshop_personnel.workshop.mission_pay_type == 'd':
+            self.mission_amount = self.hoghoogh_roozane
+        if self.workshop_personnel.workshop.mission_pay_type == 'b':
+            self.mission_amount = self.pay_base
+
+
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.sanavat_base, self.sanavat_month = self.get_sanavt_info
+            self.set_info_from_workshop()
+            self.aele_mandi_child = self.get_aele_mandi_info
+        if self.calculate_payment:
+            self.total_payment = self.get_total_payment
+        super().save(*args, **kwargs)

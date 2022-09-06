@@ -1,5 +1,5 @@
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
-    LeaveOrAbsence, Mission
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem
 from rest_framework import serializers
 
 
@@ -23,14 +23,14 @@ class PersonnelSerializer(serializers.ModelSerializer):
 
 
 class WorkshopPersonnelSerializer(serializers.ModelSerializer):
-    personnel_name = serializers.CharField(source='personnel.name', read_only=True)
+    personnel_name = serializers.CharField(source='personnel.full_name', read_only=True)
     personnel_last_name = serializers.CharField(source='personnel.last_name', read_only=True)
-    workshop_name = serializers.CharField(source='workshop.name', read_only=True)
+    workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     job_location_status_display = serializers.CharField(source='get_job_location_status_display', read_only=True)
     employment_type_display = serializers.CharField(source='get_employment_type_display', read_only=True)
     contract_type_display = serializers.CharField(source='get_contract_type_display', read_only=True)
     employee_status_display = serializers.CharField(source='get_employee_status_display', read_only=True)
-    job_position_display = serializers.CharField(source='get_job_position_display', read_only=True)
+    job_group_display = serializers.CharField(source='get_job_group_display', read_only=True)
 
 
     class Meta:
@@ -59,9 +59,10 @@ class PersonnelFamilySerializer(serializers.ModelSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
-    personnel_name = serializers.CharField(source='workshop_personnel.personnel.name', read_only=True)
+    personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
     personnel_last_name = serializers.CharField(source='workshop_personnel.personnel.last_name', read_only=True)
     workshop_name = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
+    workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
 
     class Meta:
         model = Contract
@@ -77,6 +78,8 @@ class HRLetterSerializer(serializers.ModelSerializer):
 
 class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
     leave_type_display = serializers.CharField(source='get_leave_type_display', read_only=True)
+    workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
+
 
     class Meta:
         model = LeaveOrAbsence
@@ -84,10 +87,33 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
 
 
 class MissionSerializer(serializers.ModelSerializer):
-    mmission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
-
+    mission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
+    workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     class Meta:
         model = Mission
         fields = '__all__'
+
+
+class ListOfPayItemSerializer(serializers.ModelSerializer):
+    personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
+
+    class Meta:
+        model = ListOfPayItem
+        fields = '__all__'
+
+
+class ListOfPaySerializer(serializers.ModelSerializer):
+    list_of_pay_item = ListOfPayItemSerializer(many=True)
+    class Meta:
+        model = ListOfPay
+        fields = '__all__'
+
+
+class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListOfPayItem
+        fields = 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', 'nobat_kari_sob_shab',\
+                 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat'
+
 
 

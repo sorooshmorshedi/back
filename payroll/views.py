@@ -13,10 +13,11 @@ from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
-    LeaveOrAbsence, Mission
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
-    LeaveOrAbsenceSerializer, MissionSerializer
+    LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
+    ListOfPayItemSerializer
 from users.models import User
 
 
@@ -432,6 +433,17 @@ class HRLetterApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class GetHRLetterTemplatesApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get(self, request):
+        query = HRLetter.objects.filter(is_template='t')
+        serializers = HRLetterSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+
 class HRLetterDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'hr_letter'
@@ -598,11 +610,68 @@ class SearchPersonnelByCode(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel'
 
-    def get(self, request, code):
+    def get_object(self, code):
         national_code = str(code)
-        query = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code)).first()
+        try:
+            personnel = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code)).first()
+            return Personnel.objects.get(pk=personnel.pk)
+        except AttributeError:
+            raise Http404
+
+    def get(self, request, code):
+        query = self.get_object(code)
         serializers = PersonnelSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ListOfPayApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get(self, request):
+        query = ListOfPay.objects.all()
+        serializers = ListOfPaySerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ListOfPayDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPaySerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListOfPayItemsCalculate(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayItemsAddInfoSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentList(APIView):
@@ -640,79 +709,28 @@ class PaymentList(APIView):
         month = self.months[month]
         start_date = jdatetime.date(year, month, 1, locale='fa_IR')
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
-        personnels = []
-        contracts = []
-        personnel_normal_worktime = {}
-        workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
+        workshop = Workshop.objects.get(pk=pk)
+        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month,
+                                                    month_days=month_days, start_date=start_date, end_date=end_date)
+        payroll_list.save()
+        response = payroll_list.info_for_itams
 
-        workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
-        for personnel in Personnel.objects.filter(workshop_personnel__in=workshop_personnel):
-            personnel_normal_worktime[personnel.id] = 0
-        for contract in workshop_contracts:
-            if not contract.quit_job_date:
-                end = contract.contract_to_date
-            else:
-                end = contract.quit_job_date
-            if contract.contract_from_date.__le__(start_date) and end.__ge__(end_date):
-                contracts.append(contract.id)
-                personnel_normal_worktime[contract.workshop_personnel.personnel.id] += month_days
-            if contract.contract_from_date.__ge__(start_date) and end.__le__(end_date):
-                contracts.append(contract.id)
-                personnel_normal_worktime[contract.workshop_personnel.personnel.id] +=\
-                    end.day - contract.contract_from_date.day
-            if contract.contract_from_date.__le__(start_date) and end.__gt__(start_date) and\
-                    end.__lt__(end_date):
-                contracts.append(contract.id)
-                personnel_normal_worktime[contract.workshop_personnel.personnel.id] +=\
-                    end.day
-            if contract.contract_from_date.__ge__(start_date) and end.__ge__(end_date) and \
-                    contract.contract_from_date.__lt__(end_date):
-                contracts.append(contract.id)
-                personnel_normal_worktime[contract.workshop_personnel.personnel.id] +=\
-                    month_days - contract.contract_from_date.day + 1
-
-        filtered_contracts = Contract.objects.filter(pk__in=contracts)
-
-        for contract in filtered_contracts:
-            personnels.append(contract.workshop_personnel.personnel.id)
-        personnels = Personnel.objects.filter(Q(pk__in=personnels) & Q(is_personnel_active=True))
-        filtered_workshops = WorkshopPersonnel.objects.filter(Q(personnel__in=personnels) & Q(workshop=pk))
-
-        filtered_absence = LeaveOrAbsence.objects.filter(Q(workshop_personnel__in=filtered_workshops))
-
-        filtered_absence = filtered_absence.filter(workshop_personnel__in=filtered_workshops)
-        personnel_absence = filtered_absence.exclude(leave_type='e')
-
-        response_data = []
-        counter = 0
-        for personnel in personnels:
-            day_of_absence = 0
-            for absence in personnel_absence.all():
-                if absence.workshop_personnel.personnel == personnel:
-                    if absence.from_date.__ge__(start_date) and absence.to_date.__le__(end_date):
-                        day_of_absence += absence.time_period
-                    elif absence.from_date.__lt__(start_date) and absence.to_date.__le__(end_date) and \
-                            absence.to_date.__gt__(start_date):
-                        day_of_absence += absence.to_date.day
-                    elif absence.from_date.__gt__(start_date) and absence.to_date.__gt__(end_date) and \
-                            absence.from_date.__le__(end_date):
-                        day_of_absence += month_days - absence.from_date.day
-                    elif absence.from_date.__le__(start_date) and absence.to_date.__ge__(end_date):
-                        day_of_absence += month_days
-            normal = personnel_normal_worktime[personnel.id]
-            real_work = normal - int(day_of_absence)
-            response_data.append(
-                {
-                    'row': counter,
-                    'id': personnel.id,
-                    'name': personnel.name + ' ' + personnel.last_name,
-                    'normal_work': normal,
-                    'real_work': real_work,
-                }
+        for item in response:
+            payroll_list_item = ListOfPayItem.objects.create(
+                list_of_pay=payroll_list,
+                workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
+                normal_worktime=item['normal_work'],
+                real_worktime=item['real_work'],
+                mission_day=item['mission'],
+                absence_day=item['leaves']['a'],
+                entitlement_leave_day=item['leaves']['e'],
+                illness_leave_day=item['leaves']['i'],
+                without_salary_leave_day=item['leaves']['w'],
             )
-            counter += 1
-
-        return Response(response_data, status=status.HTTP_200_OK)
+            payroll_list_item.save()
+        list_of_pay = payroll_list
+        list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
+        return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
 
 
 
