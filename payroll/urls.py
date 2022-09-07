@@ -4,12 +4,13 @@ from django.conf.urls import url
 from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, WorkshopPersonnelExportView, \
     PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
-    PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView
+    PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
-    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi
+    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
+    ListOfPayItemDetail
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -46,6 +47,7 @@ urlpatterns = [
     path('paylist/<int:pk>/', ListOfPayDetail.as_view(), name='listOfPayDetail'),
 
     path('paylist/item/<int:pk>/', ListOfPayItemsCalculate.as_view(), name='listOfPayItemsCalculate'),
+    path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
 
     path('payment/<int:year>/<str:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),
 ]
@@ -59,6 +61,7 @@ urlpatterns += [
     url(r'^contract/all$', ContractListView.as_view(), name='contractRowList'),
     url(r'^absence/all$', LeaveOrAbsenceListView.as_view(), name='leaveOrAbsenceList'),
     url(r'^mission/all$', MissionListView.as_view(), name='missionListView'),
+    url(r'^hrletter/all$', HRLetterListView.as_view(), name='hrLetterListView'),
     url(r'^workshop/all/(?P<export_type>\S+)', WorkshopExportview.as_view(), name=''),
     url(r'^personnel/all/(?P<export_type>\S+)', PersonnelExportview.as_view(), name=''),
     url(r'^workshop/personnel/all/(?P<export_type>\S+)', WorkshopPersonnelExportView.as_view(), name=''),

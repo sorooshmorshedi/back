@@ -1062,6 +1062,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             mission_day = 0
             workshop_personnel = WorkshopPersonnel.objects.get(personnel=personnel)
             contracts = filtered_contracts.filter(workshop_personnel=workshop_personnel).all()
+            is_insurance = contracts.first().insurance
             print(len(contracts))
             for absence in filtered_absence.all():
                 if absence.workshop_personnel.personnel == personnel:
@@ -1101,7 +1102,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                     'name': personnel.name + ' ' + personnel.last_name,
                     'normal_work': normal,
                     'real_work': real_work,
-                    'mission': mission_day
+                    'mission': mission_day,
+                    'insurance': is_insurance,
                 }
             )
         return response_data
@@ -1112,6 +1114,14 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
+    YES = 'y'
+    NO = 'n'
+
+    INCURANCE_TYPES = (
+        (YES, 'بله'),
+        (NO, 'خیر'),
+    )
+
     list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                      blank=True, null=True)
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name="list_of_pay_item",
@@ -1123,6 +1133,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     sanavat_month = models.IntegerField(default=0)
     aele_mandi_child = models.IntegerField(default=0)
     total_insurance_month = models.IntegerField(default=0)
+    is_insurance = models.CharField(max_length=2, choices=INCURANCE_TYPES, default=NO)
 
     hourly_pay_base = models.IntegerField(default=0)
     normal_worktime = models.IntegerField(default=0)
@@ -1182,11 +1193,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     aele_mandi_amount = DECIMAL(default=0)
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
+    aele_mandi = models.IntegerField(default=0)
 
     sayer_ezafat = DECIMAL(default=0)
     calculate_payment = models.BooleanField(default=False)
 
-    total_payment = DECIMAL(default=0)
+    total_payment = models.IntegerField(default=0)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
@@ -1248,11 +1260,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.total_insurance_month >= 24:
             total += Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
                      Decimal(self.real_worktime) / Decimal(month_day)
-
+            self.aele_mandi = int(Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
+                     Decimal(self.real_worktime) / Decimal(month_day))
         total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
         total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
         total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
-        total -= self.kasre_kar_amount * Decimal(self.kasre_kar_amount) * Decimal(self.tatil_kari)
+        total -= self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar)
         total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
         total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
         total += Decimal(self.nobat_kari_sob_shab) * self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount
@@ -1356,12 +1369,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.mission_amount = self.pay_base
 
 
-
     def save(self, *args, **kwargs):
         if not self.id:
             self.sanavat_base, self.sanavat_month = self.get_sanavt_info
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
-            self.total_payment = self.get_total_payment
+            self.total_payment = int(self.get_total_payment)
         super().save(*args, **kwargs)

@@ -4,11 +4,12 @@ from rest_framework.permissions import IsAuthenticated
 
 from helpers.auth import BasicCRUDPermission
 from payroll.lists.filters import WorkshopFilter, PersonnelFilter, PersonnelFamilyFilter, WorkshopPersonnelFilter, \
-    ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter
+    ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter, HRLetterFilter
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
-    LeaveOrAbsence, Mission
+    LeaveOrAbsence, Mission, HRLetter
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
-    WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer, ContractSerializer, MissionSerializer
+    WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer, ContractSerializer, MissionSerializer, \
+    HRLetterSerializer
 
 
 class WorkshopListView(generics.ListAPIView):
@@ -126,4 +127,17 @@ class MissionListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Mission.objects.hasAccess('get', self.permission_codename).all()
+
+
+class HRLetterListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.hr_letter"
+    serializer_class = HRLetterSerializer
+    filterset_class = HRLetterFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return HRLetter.objects.hasAccess('get', self.permission_codename).all()
 

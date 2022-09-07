@@ -634,6 +634,22 @@ class ListOfPayApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
+class ListOfPayItemDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.filter(list_of_pay=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayItemSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
 class ListOfPayDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
@@ -716,12 +732,17 @@ class PaymentList(APIView):
         response = payroll_list.info_for_itams
 
         for item in response:
+            if item['insurance']:
+                insurance = 'y'
+            else:
+                insurance = 'n'
             payroll_list_item = ListOfPayItem.objects.create(
                 list_of_pay=payroll_list,
                 workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
                 normal_worktime=item['normal_work'],
                 real_worktime=item['real_work'],
                 mission_day=item['mission'],
+                is_insurance=insurance,
                 absence_day=item['leaves']['a'],
                 entitlement_leave_day=item['leaves']['e'],
                 illness_leave_day=item['leaves']['i'],

@@ -70,6 +70,7 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 class HRLetterSerializer(serializers.ModelSerializer):
+    is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
 
     class Meta:
         model = HRLetter
@@ -96,6 +97,9 @@ class MissionSerializer(serializers.ModelSerializer):
 
 class ListOfPayItemSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
+    is_insurance_display = serializers.CharField(source='get_is_insurance_display', read_only=True)
+    insurance_workshop = serializers.CharField(source='workshop_personnel.current_insurance_history_in_workshop',
+                                               read_only=True)
 
     class Meta:
         model = ListOfPayItem
@@ -104,6 +108,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
 
 class ListOfPaySerializer(serializers.ModelSerializer):
     list_of_pay_item = ListOfPayItemSerializer(many=True)
+
     class Meta:
         model = ListOfPay
         fields = '__all__'
@@ -112,8 +117,8 @@ class ListOfPaySerializer(serializers.ModelSerializer):
 class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPayItem
-        fields = 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', 'nobat_kari_sob_shab',\
-                 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat'
+        fields = 'id', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', 'nobat_kari_sob_shab',\
+                 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', 'list_of_pay', 'calculate_payment'
 
 
 
