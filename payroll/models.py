@@ -1155,20 +1155,24 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     ezafe_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     ezafe_kari_amount = DECIMAL(default=0)
     ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+    ezafe_kari_total = models.IntegerField(default=0)
 
     tatil_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     tatil_kari_amount = DECIMAL(default=0)
     tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+    tatil_kari_total = models.IntegerField(default=0)
 
 
     kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     kasre_kar_amount = DECIMAL(default=0)
     kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
+    kasre_kar_total = models.IntegerField(default=0)
 
 
     shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     shab_kari_amount = DECIMAL(default=0)
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
+    shab_kari_total = models.IntegerField(default=0)
 
 
     nobat_kari_sob_asr = models.IntegerField(default=0)
@@ -1262,9 +1266,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                      Decimal(self.real_worktime) / Decimal(month_day)
             self.aele_mandi = int(Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
                      Decimal(self.real_worktime) / Decimal(month_day))
+        self.ezafe_kari_total = int(self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari))
         total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
+        self.tatil_kari_total = int(self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari))
         total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
+        self.shab_kari_total = int(self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount))
         total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
+        self.kasre_kar_total = int(self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar))
         total -= self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar)
         total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
         total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
