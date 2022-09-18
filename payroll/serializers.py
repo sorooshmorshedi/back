@@ -1,5 +1,5 @@
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
-    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow
 from rest_framework import serializers
 
 
@@ -32,7 +32,6 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     employee_status_display = serializers.CharField(source='get_employee_status_display', read_only=True)
     job_group_display = serializers.CharField(source='get_job_group_display', read_only=True)
 
-
     class Meta:
         model = WorkshopPersonnel
         fields = '__all__'
@@ -40,6 +39,8 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
 
 class ContractRowSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
+    name = serializers.CharField(source='title', read_only=True)
 
     class Meta:
         model = ContractRow
@@ -53,6 +54,7 @@ class PersonnelFamilySerializer(serializers.ModelSerializer):
     military_service_display = serializers.CharField(source='get_military_service_display', read_only=True)
     study_status_display = serializers.CharField(source='get_study_status_display', read_only=True)
     physical_condition_display = serializers.CharField(source='get_physical_condition_display', read_only=True)
+
     class Meta:
         model = PersonnelFamily
         fields = '__all__'
@@ -81,7 +83,6 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
     leave_type_display = serializers.CharField(source='get_leave_type_display', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
 
-
     class Meta:
         model = LeaveOrAbsence
         fields = '__all__'
@@ -90,6 +91,7 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
 class MissionSerializer(serializers.ModelSerializer):
     mission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
+
     class Meta:
         model = Mission
         fields = '__all__'
@@ -100,6 +102,10 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     is_insurance_display = serializers.CharField(source='get_is_insurance_display', read_only=True)
     insurance_workshop = serializers.CharField(source='workshop_personnel.current_insurance_history_in_workshop',
                                                read_only=True)
+    total_mission = serializers.IntegerField(source='mission_total', read_only=True)
+    montly_pay = serializers.IntegerField(source='hoghoogh_mahane', read_only=True)
+    sanavat_montly_pay = serializers.IntegerField(source='sanavat_mahane', read_only=True)
+    contract_row_title = serializers.IntegerField(source='contract_row.contract_row', read_only=True)
 
     class Meta:
         model = ListOfPayItem
@@ -114,11 +120,22 @@ class ListOfPaySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class WorkshopTaxRowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkshopTaxRow
+        fields = '__all__'
+
+
 class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPayItem
-        fields = 'id', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', 'nobat_kari_sob_shab',\
-                 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', 'list_of_pay', 'calculate_payment'
+        fields = 'id', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', \
+                 'nobat_kari_sob_shab', 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', \
+                 'list_of_pay', 'calculate_payment', 'contract_row'
 
 
-
+class ListOfPayItemsKosooratSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListOfPayItem
+        fields = 'id', 'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
+                 'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax',

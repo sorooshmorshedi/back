@@ -4,17 +4,23 @@ from django.conf.urls import url
 from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, WorkshopPersonnelExportView, \
     PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
-    PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView
+    PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
+    TaxRowListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
     MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
-    ListOfPayItemDetail
+    ListOfPayItemDetail, WorkshopContractRowsDetail, ListOfPayItemKosooratTaxDetail, WorkshopTaxRowApiView, \
+    WorkshopTaxRowDetail
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
     path('workshop/<int:pk>/', WorkshopDetail.as_view(), name='workshopDetail'),
+    path('workshop/contract/row/<int:pk>/', WorkshopContractRowsDetail.as_view(), name='workshopContractRowsDetail'),
+
+    path('tax/row/', WorkshopTaxRowApiView.as_view(), name='workshopTaxRowApiView'),
+    path('tax/row/<int:pk>/', WorkshopTaxRowDetail.as_view(), name='workshopTaxRowDetail'),
 
     path('personnel/', PersonnelApiView.as_view(), name='personnelApi'),
     path('personnel/<int:pk>/', PersonnelDetail.as_view(), name='personnelDetail'),
@@ -47,6 +53,8 @@ urlpatterns = [
     path('paylist/<int:pk>/', ListOfPayDetail.as_view(), name='listOfPayDetail'),
 
     path('paylist/item/<int:pk>/', ListOfPayItemsCalculate.as_view(), name='listOfPayItemsCalculate'),
+    path('paylist/item/kosoorat/<int:pk>/', ListOfPayItemKosooratTaxDetail.as_view(),
+         name='listOfPayItemKosooratTaxDetail'),
     path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
 
     path('payment/<int:year>/<str:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),
@@ -54,6 +62,7 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^workshop/all$', WorkshopListView.as_view(), name='workshopList'),
+    url(r'^tax/row/all$', TaxRowListView.as_view(), name='taxRowListView'),
     url(r'^personnel/all$', PersonnelListView.as_view(), name='personnelList'),
     url(r'^workshop/personnel/all$', WorkshopPersonnelListView.as_view(), name='workshopPersonnelList'),
     url(r'^personnel/family/all$', PersonnelFamilyListView.as_view(), name='personnelFamilyList'),
