@@ -2,9 +2,10 @@
 from django.contrib import admin
 
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, HRLetter, \
-    LeaveOrAbsence, ListOfPay, ListOfPayItem, WorkshopTaxRow
+    LeaveOrAbsence, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax
 
 admin.site.register(Workshop)
+admin.site.register(WorkshopTax)
 admin.site.register(WorkshopTaxRow)
 admin.site.register(Personnel)
 admin.site.register(PersonnelFamily)

@@ -12,11 +12,12 @@ from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
-    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
-    ListOfPayItemSerializer, ListOfPayItemsKosooratSerializer, WorkshopTaxRowSerializer
+    ListOfPayItemSerializer, ListOfPayItemsKosooratSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
+    WorkShopTaxSerializer
 
 
 class WorkshopApiView(APIView):
@@ -52,6 +53,30 @@ class WorkshopContractRowsDetail(APIView):
         query = self.get_object(pk)
         serializers = ContractRowSerializer(query, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class WorkshopSettingDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get_object(self, pk):
+        try:
+            return Workshop.objects.get(pk=pk)
+        except Workshop.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkShopSettingSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = WorkShopSettingSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkshopDetail(APIView):
@@ -118,6 +143,52 @@ class WorkshopTaxRowDetail(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         serializer = WorkshopTaxRowSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WorkshopTaxApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_tax'
+
+    def get(self, request):
+        query = WorkshopTax.objects.all()
+        serializers = WorkShopTaxSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = WorkShopTaxSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopTaxDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_tax'
+
+    def get_object(self, pk):
+        try:
+            return WorkshopTax.objects.get(pk=pk)
+        except WorkshopTax.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkShopTaxSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = WorkShopTaxSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -331,6 +402,22 @@ class WorkshopPersonnelApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopAllPersonnelDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+
+    def get_object(self, pk):
+        try:
+            return WorkshopPersonnel.objects.filter(workshop_id=pk)
+        except WorkshopPersonnel.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkshopPersonnelSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
 
 class WorkshopPersonnelDetail(APIView):

@@ -22,7 +22,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
         (MONTHLY, 'مزد مبنای ماهیانه')
     )
 
-    TYPE1 = 7/7
+    TYPE1 = 1
     TYPE2 = 3/7
     TAX_EMPLOYER_TYPES = (
         (TYPE1, '7/7'),
@@ -86,10 +86,12 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
     employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
 
-    hade_aghal_hoghoogh = DECIMAL(default=0)
+    hade_aghal_hoghoogh = DECIMAL(default=1400000)
 
+    made_86_nerkh = DECIMAL(default=0.1)
     hade_aksar_mashmool_bime = models.BooleanField(default=True)
-    moafial_maliat_haghe_bime_sahme_bime_shavande = models.IntegerField(choices=TAX_EMPLOYER_TYPES, default=TYPE1)
+
+    tax_employer_type = models.IntegerField(choices=TAX_EMPLOYER_TYPES, default=TYPE1)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Workshop'
@@ -113,13 +115,43 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
         return self.name + ' ' + self.company.name
 
 
+class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    from_date = jmodels.jDateField(blank=True, null=True)
+    to_date = jmodels.jDateField(blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'WorkshopTax'
+        permission_basename = 'workshop_tax'
+        permissions = (
+            ('get.workshop_tax', 'مشاهده  معاف مالیات'),
+            ('create.workshop_tax', 'تعریف  معاف مالیات'),
+            ('update.workshop_tax', 'ویرایش  معاف مالیات'),
+            ('delete.workshop_tax', 'حذف  معاف مالیات'),
+
+            ('getOwn.workshop_tax', 'مشاهده  معاف مالیات خود'),
+            ('updateOwn.workshop_tax', 'ویرایش  معاف مالیات خود'),
+            ('deleteOwn.workshop_tax', 'حذف  معاف مالیات خود'),
+        )
+
+    def __str__(self):
+        return 'از ' + self.from_date.__str__() + ' تا' + self.to_date.__str__()
+
+    def save(self, *args, **kwargs):
+        if self.from_date.__ge__(self.to_date):
+            raise ValidationError('تاریخ شروع باید از تاریخ پایان کوچکتر باشد')
+        super().save(*args, **kwargs)
+
+
 class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
-    workshop = models.ForeignKey(Workshop, related_name='tax_row', on_delete=models.CASCADE, blank=True, null=True)
+    workshop_tax = models.ForeignKey(WorkshopTax, related_name='tax_row', on_delete=models.CASCADE,
+                                     blank=True, null=True)
     from_amount = DECIMAL(default=0)
     to_amount = DECIMAL(default=0)
     ratio = models.IntegerField(default=0)
 
     class Meta(BaseModel.Meta):
+        ordering = ['-pk']
         verbose_name = 'WorkshopTaxRow'
         permission_basename = 'workshop_tax_row'
         permissions = (
@@ -133,8 +165,33 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.workshop_tax_row', 'حذف ردیف معاف مالیات خود'),
         )
 
+    @property
+    def auto_from_amount(self):
+        query = WorkshopTaxRow.objects.filter(workshop_tax=self.workshop_tax).first()
+        return query.to_amount + Decimal(1)
+
+    @property
+    def monthly_from_amount(self):
+        return round(self.from_amount / Decimal(12), 2)
+
+    @property
+    def monthly_to_amount(self):
+        return round(self.to_amount / Decimal(12), 2)
+
     def __str__(self):
-        return 'از ' + str(round(self.from_amount)) + ' تا ' + str(round(self.to_amount)) + ' : ' + str(self.ratio)
+        return 'از ' + str(round(self.from_amount)) + ' تا ' + str(round(self.to_amount)) + ' : ' \
+               + str(self.ratio) + ' % '
+
+    def save(self, *args, **kwargs):
+        query = WorkshopTaxRow.objects.filter(workshop_tax=self.workshop_tax)
+        if len(query) < 1:
+            self.from_amount = 0
+            self.ratio = 0
+        else:
+            self.from_amount = self.auto_from_amount
+        if self.from_amount >= self.to_amount:
+            raise ValidationError('مقدار مبلغ پایان باید بزرگتر از مبلغ شروع باشد')
+        super().save(*args, **kwargs)
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
@@ -924,7 +981,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
 
     maskan = models.BooleanField(default=False)
     otomobil = models.BooleanField(default=False)
-
+    include_made_86 = models.BooleanField(default=False)
 
     def __str__(self):
         if self.contract:
@@ -1692,7 +1749,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         tax = Decimal(0)
         year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
         year_amount = self.get_year_payment + self.tax_included_payment
-        tax_rows = self.list_of_pay.workshop.tax_row
+        tax = WorkshopTax.objects.first()
+        tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=tax)
         tax_row = tax_rows.get(from_amount=Decimal(0))
         start = 0
         while year_amount >= Decimal(0):
