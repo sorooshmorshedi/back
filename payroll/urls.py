@@ -11,7 +11,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
     MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
-    ListOfPayItemDetail, WorkshopContractRowsDetail, ListOfPayItemKosooratTaxDetail, WorkshopTaxRowApiView, \
+    ListOfPayItemDetail, WorkshopContractRowsDetail, WorkshopTaxRowApiView, \
     WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail
 
 urlpatterns = [
@@ -58,8 +58,6 @@ urlpatterns = [
     path('paylist/<int:pk>/', ListOfPayDetail.as_view(), name='listOfPayDetail'),
 
     path('paylist/item/<int:pk>/', ListOfPayItemsCalculate.as_view(), name='listOfPayItemsCalculate'),
-    path('paylist/item/kosoorat/<int:pk>/', ListOfPayItemKosooratTaxDetail.as_view(),
-         name='listOfPayItemKosooratTaxDetail'),
     path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
 
     path('payment/<int:year>/<str:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),

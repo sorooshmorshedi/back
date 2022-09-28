@@ -141,6 +141,8 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     montly_pay = serializers.IntegerField(source='hoghoogh_mahane', read_only=True)
     sanavat_montly_pay = serializers.IntegerField(source='sanavat_mahane', read_only=True)
     contract_row_title = serializers.IntegerField(source='contract_row.contract_row', read_only=True)
+    haghe_bime = serializers.IntegerField(source='haghe_bime_bime_shavande', read_only=True)
+
 
     class Meta:
         model = ListOfPayItem
@@ -166,11 +168,8 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
         model = ListOfPayItem
         fields = 'id', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', \
                  'nobat_kari_sob_shab', 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', \
-                 'list_of_pay', 'calculate_payment', 'contract_row'
-
-
-class ListOfPayItemsKosooratSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ListOfPayItem
-        fields = 'id', 'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
+                 'list_of_pay', 'calculate_payment', 'contract_row', 'mazaya_gheyr_mostamar',\
+                 'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
                  'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax',
+
+

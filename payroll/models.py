@@ -16,11 +16,25 @@ from decimal import Decimal
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
     DAILY = 'd'
     MONTHLY = 'm'
+    YEARLY = 'y'
 
     BASE_PAY_TYPES = (
         (DAILY, 'مزد مبنای روزانه'),
         (MONTHLY, 'مزد مبنای ماهیانه')
     )
+
+    REWARD_TYPES = (
+        (MONTHLY, 'ماهانه'),
+        (YEARLY, 'سالانه')
+     )
+
+    CERTAIN = 'c'
+    ON_ACCOUNT = 'o'
+
+    HAGHE_SANAVAT_TYPES = (
+        (CERTAIN, 'قطعی'),
+        (ON_ACCOUNT, 'علی الحساب')
+     )
 
     TYPE1 = 1
     TYPE2 = 3/7
@@ -31,10 +45,16 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
     DAILY_PAY = 'd'
     BASE_PAY = 'b'
+    HR_PAY = 'h'
 
     PAY_TYPES = (
         (DAILY_PAY, 'حداقل حقوق روزانه'),
         (BASE_PAY, 'مزد مبنا')
+    )
+
+    LEAVE_SAVE_PAY_TYPES = (
+        (DAILY_PAY, 'حداقل حقوق روزانه'),
+        (HR_PAY, 'جمع تمام مزایای حکم کارگزینی')
     )
 
     CONTINUOUS = 'c'
@@ -69,6 +89,12 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     nobat_kari_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     mission_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    leave_save_pay_type = models.CharField(max_length=1, choices=LEAVE_SAVE_PAY_TYPES, default=DAILY_PAY)
+
+    haghe_sanavat_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    eydi_padash_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    haghe_sanavat_identification = models.CharField(max_length=1, choices=REWARD_TYPES, default=YEARLY)
+    eydi_padash_identification = models.CharField(max_length=1, choices=REWARD_TYPES, default=YEARLY)
 
     sanavat_type = models.CharField(max_length=1, choices=SANAVAT_TYPES, default=CONTINUOUS)
 
@@ -86,6 +112,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
     employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
 
+    haghe_sanavat_type = models.CharField(max_length=1, choices=HAGHE_SANAVAT_TYPES, default=CERTAIN)
     hade_aghal_hoghoogh = DECIMAL(default=1400000)
 
     made_86_nerkh = DECIMAL(default=0.1)
@@ -622,6 +649,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=FULL_TIME)
     employee_status = models.CharField(max_length=2, choices=EMPLOYEE_TYPES, default=NORMAL)
 
+    haghe_sanavat_days = models.IntegerField(default=0)
+    haghe_sanavat_identify_amount = DECIMAL(default=0)
+
     @property
     def my_title(self):
         return self.personnel.full_name + ' در کارگاه ' + self.workshop.name
@@ -705,12 +735,14 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     ILLNESS = 'i'
     WITHOUT_SALARY = 'w'
     ABSENCE = 'a'
+    MATTER_73 = 'm'
 
     LEAVE_TYPES = (
         (ENTITLEMENT, 'استحقاقی'),
         (ILLNESS, 'استعلاجی'),
         (WITHOUT_SALARY, 'بدون حقوق'),
         (ABSENCE, 'غیبت'),
+        (MATTER_73, 'ماده 73'),
     )
 
     HOURLY = 'h'
@@ -722,9 +754,25 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
 
     )
 
+    CHILDBIRTH = 'c'
+    MARRIAGE = 'm'
+    SPOUSAL_DEATH = 's'
+    CHILD_DEATH = 'd'
+    PARENT_DEATH = 'p'
+
+    MATTER_73_LEAVE_TYPES = (
+        (CHILDBIRTH, 'زایمان'),
+        (MARRIAGE, 'ازدواج'),
+        (SPOUSAL_DEATH, 'مرگ همسر'),
+        (CHILD_DEATH, 'مرگ فرزند'),
+        (PARENT_DEATH, 'مرگ پدر یا مادر'),
+
+    )
+
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
     leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, default=WITHOUT_SALARY)
     entitlement_leave_type = models.CharField(max_length=2, choices=ENTITLEMENT_LEAVE_TYPES, blank=True, null=True)
+    matter_73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
@@ -743,9 +791,15 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
         else:
             difference = self.to_date - self.from_date
             final_by_day = difference.days + 1
+            if self.leave_type == 'm' and final_by_day > 3:
+                final_by_day = 3
         return final_by_day
 
     def save(self, *args, **kwargs):
+        if self.leave_type == 'm':
+            duration = datetime.timedelta(days=2)
+            if self.to_date.day - self.from_date.day > 2:
+                self.to_date = self.from_date + duration
         if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
             self.from_date, self.to_date, = None, None
             if not self.from_hour or not self.to_hour or not self.date:
@@ -808,6 +862,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                                     blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     is_template = models.CharField(max_length=1, choices=HRLETTER_TYPES)
+
     pay_done = models.BooleanField(default=False)
     daily_pay_base = models.IntegerField(default=0)
     monthly_pay_base = models.IntegerField(default=0)
@@ -817,167 +872,177 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     insurance_benefit = models.IntegerField(default=0)
     insurance_not_included = models.IntegerField(default=0)
 
-    hoghooghe_roozane_use_tax = models.BooleanField(default=False)
-    hoghooghe_roozane_use_insurance = models.BooleanField(default=False)
+    hoghooghe_roozane_use_tax = models.BooleanField(default=True)
+    hoghooghe_roozane_use_insurance = models.BooleanField(default=True)
     hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     hoghooghe_roozane_amount = DECIMAL(default=0)
     hoghooghe_roozane_base = models.BooleanField(default=False)
 
-    paye_sanavat_use_tax = models.BooleanField(default=False)
-    paye_sanavat_use_insurance = models.BooleanField(default=False)
+    paye_sanavat_use_tax = models.BooleanField(default=True)
+    paye_sanavat_use_insurance = models.BooleanField(default=True)
     paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     paye_sanavat_amount = DECIMAL(default=0)
     paye_sanavat_base = models.BooleanField(default=False)
 
-    haghe_sarparasti_use_tax = models.BooleanField(default=False)
-    haghe_sarparasti_use_insurance = models.BooleanField(default=False)
+    haghe_sarparasti_use_tax = models.BooleanField(default=True)
+    haghe_sarparasti_use_insurance = models.BooleanField(default=True)
     haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_sarparasti_amount = DECIMAL(default=0)
     haghe_sarparasti_base = models.BooleanField(default=False)
 
-    haghe_modiriyat_use_tax = models.BooleanField(default=False)
-    haghe_modiriyat_use_insurance = models.BooleanField(default=False)
+    haghe_modiriyat_use_tax = models.BooleanField(default=True)
+    haghe_modiriyat_use_insurance = models.BooleanField(default=True)
     haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_modiriyat_amount = DECIMAL(default=0)
     haghe_modiriyat_base = models.BooleanField(default=False)
 
-    haghe_jazb_use_tax = models.BooleanField(default=False)
-    haghe_jazb_use_insurance = models.BooleanField(default=False)
+    haghe_jazb_use_tax = models.BooleanField(default=True)
+    haghe_jazb_use_insurance = models.BooleanField(default=True)
     haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_jazb_amount = DECIMAL(default=0)
     haghe_jazb_base = models.BooleanField(default=False)
 
-    fogholade_shoghl_use_tax = models.BooleanField(default=False)
-    fogholade_shoghl_use_insurance = models.BooleanField(default=False)
+    fogholade_shoghl_use_tax = models.BooleanField(default=True)
+    fogholade_shoghl_use_insurance = models.BooleanField(default=True)
     fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     fogholade_shoghl_amount = DECIMAL(default=0)
     fogholade_shoghl_base = models.BooleanField(default=False)
 
-    haghe_tahsilat_use_tax = models.BooleanField(default=False)
-    haghe_tahsilat_use_insurance = models.BooleanField(default=False)
+    haghe_tahsilat_use_tax = models.BooleanField(default=True)
+    haghe_tahsilat_use_insurance = models.BooleanField(default=True)
     haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_tahsilat_amount = DECIMAL(default=0)
     haghe_tahsilat_base = models.BooleanField(default=False)
 
-    fogholade_sakhti_kar_use_tax = models.BooleanField(default=False)
-    fogholade_sakhti_kar_use_insurance = models.BooleanField(default=False)
+    fogholade_sakhti_kar_use_tax = models.BooleanField(default=True)
+    fogholade_sakhti_kar_use_insurance = models.BooleanField(default=True)
     fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     fogholade_sakhti_kar_amount = DECIMAL(default=0)
     fogholade_sakhti_kar_base = models.BooleanField(default=False)
 
-    haghe_ankal_use_tax = models.BooleanField(default=False)
-    haghe_ankal_use_insurance = models.BooleanField(default=False)
+    haghe_ankal_use_tax = models.BooleanField(default=True)
+    haghe_ankal_use_insurance = models.BooleanField(default=True)
     haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_ankal_amount = DECIMAL(default=0)
     haghe_ankal_base = models.BooleanField(default=False)
 
-    fogholade_badi_abohava_use_tax = models.BooleanField(default=False)
-    fogholade_badi_abohava_use_insurance = models.BooleanField(default=False)
+    fogholade_badi_abohava_use_tax = models.BooleanField(default=True)
+    fogholade_badi_abohava_use_insurance = models.BooleanField(default=True)
     fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     fogholade_badi_abohava_amount = DECIMAL(default=0)
     fogholade_badi_abohava_base = models.BooleanField(default=False)
 
-    mahroomiat_tashilat_zendegi_use_tax = models.BooleanField(default=False)
-    mahroomiat_tashilat_zendegi_use_insurance = models.BooleanField(default=False)
+    mahroomiat_tashilat_zendegi_use_tax = models.BooleanField(default=True)
+    mahroomiat_tashilat_zendegi_use_insurance = models.BooleanField(default=True)
     mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     mahroomiat_tashilat_zendegi_amount = DECIMAL(default=0)
     mahroomiat_tashilat_zendegi_base = models.BooleanField(default=False)
 
-    fogholade_mahal_khedmat_use_tax = models.BooleanField(default=False)
-    fogholade_mahal_khedmat_use_insurance = models.BooleanField(default=False)
+    fogholade_mahal_khedmat_use_tax = models.BooleanField(default=True)
+    fogholade_mahal_khedmat_use_insurance = models.BooleanField(default=True)
     fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     fogholade_mahal_khedmat_amount = DECIMAL(default=0)
     fogholade_mahal_khedmat_base = models.BooleanField(default=False)
 
-    fogholade_sharayet_mohit_kar_use_tax = models.BooleanField(default=False)
-    fogholade_sharayet_mohit_kar_use_insurance = models.BooleanField(default=False)
+    fogholade_sharayet_mohit_kar_use_tax = models.BooleanField(default=True)
+    fogholade_sharayet_mohit_kar_use_insurance = models.BooleanField(default=True)
     fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     fogholade_sharayet_mohit_kar_amount = DECIMAL(default=0)
     fogholade_sharayet_mohit_kar_base = models.BooleanField(default=False)
 
-    haghe_maskan_use_tax = models.BooleanField(default=False)
-    haghe_maskan_use_insurance = models.BooleanField(default=False)
+    haghe_maskan_use_tax = models.BooleanField(default=True)
+    haghe_maskan_use_insurance = models.BooleanField(default=True)
     haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_maskan_amount = DECIMAL(default=0)
     haghe_maskan_base = models.BooleanField(default=False)
 
-    ayabo_zahab_use_tax = models.BooleanField(default=False)
-    ayabo_zahab_use_insurance = models.BooleanField(default=False)
+    ayabo_zahab_use_tax = models.BooleanField(default=True)
+    ayabo_zahab_use_insurance = models.BooleanField(default=True)
     ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     ayabo_zahab_amount = DECIMAL(default=0)
     ayabo_zahab_base = models.BooleanField(default=False)
 
-    bon_kharo_bar_use_tax = models.BooleanField(default=False)
-    bon_kharo_bar_use_insurance = models.BooleanField(default=False)
+    bon_kharo_bar_use_tax = models.BooleanField(default=True)
+    bon_kharo_bar_use_insurance = models.BooleanField(default=True)
     bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     bon_kharo_bar_amount = DECIMAL(default=0)
     bon_kharo_bar_base = models.BooleanField(default=False)
 
-    yarane_ghaza_use_tax = models.BooleanField(default=False)
-    yarane_ghaza_use_insurance = models.BooleanField(default=False)
+    yarane_ghaza_use_tax = models.BooleanField(default=True)
+    yarane_ghaza_use_insurance = models.BooleanField(default=True)
     yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     yarane_ghaza_amount = DECIMAL(default=0)
     yarane_ghaza_base = models.BooleanField(default=False)
 
-    haghe_shir_use_tax = models.BooleanField(default=False)
-    haghe_shir_use_insurance = models.BooleanField(default=False)
+    haghe_shir_use_tax = models.BooleanField(default=True)
+    haghe_shir_use_insurance = models.BooleanField(default=True)
     haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_shir_amount = DECIMAL(default=0)
     haghe_shir_base = models.BooleanField(default=False)
 
-    haghe_taahol_use_tax = models.BooleanField(default=False)
-    haghe_taahol_use_insurance = models.BooleanField(default=False)
+    haghe_taahol_use_tax = models.BooleanField(default=True)
+    haghe_taahol_use_insurance = models.BooleanField(default=True)
     haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     haghe_taahol_amount = DECIMAL(default=0)
     haghe_taahol_base = models.BooleanField(default=False)
 
-    komakhazine_mahdekoodak_use_tax = models.BooleanField(default=False)
-    komakhazine_mahdekoodak_use_insurance = models.BooleanField(default=False)
+    komakhazine_mahdekoodak_use_tax = models.BooleanField(default=True)
+    komakhazine_mahdekoodak_use_insurance = models.BooleanField(default=True)
     komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     komakhazine_mahdekoodak_amount = DECIMAL(default=0)
     komakhazine_mahdekoodak_base = models.BooleanField(default=False)
 
-    komakhazine_varzesh_use_tax = models.BooleanField(default=False)
-    komakhazine_varzesh_use_insurance = models.BooleanField(default=False)
+    komakhazine_varzesh_use_tax = models.BooleanField(default=True)
+    komakhazine_varzesh_use_insurance = models.BooleanField(default=True)
     komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     komakhazine_varzesh_amount = DECIMAL(default=0)
     komakhazine_varzesh_base= models.BooleanField(default=False)
 
-    komakhazine_mobile_use_tax = models.BooleanField(default=False)
-    komakhazine_mobile_use_insurance = models.BooleanField(default=False)
+    komakhazine_mobile_use_tax = models.BooleanField(default=True)
+    komakhazine_mobile_use_insurance = models.BooleanField(default=True)
     komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     komakhazine_mobile_amount = DECIMAL(default=0)
     komakhazine_mobile_base = models.BooleanField(default=False)
 
-    mazaya_mostamar_gheyre_naghdi_use_tax = models.BooleanField(default=False)
-    mazaya_mostamar_gheyre_naghdi_use_insurance = models.BooleanField(default=False)
-    mazaya_mostamar_gheyre_naghdi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    mazaya_mostamar_gheyre_naghdi_use_tax = models.BooleanField(default=True)
+    mazaya_mostamar_gheyre_naghdi_use_insurance = models.BooleanField(default=True)
+    mazaya_mostamar_gheyre_naghdi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=PENSION)
     mazaya_mostamar_gheyre_naghdi_amount = DECIMAL(default=0)
     mazaya_mostamar_gheyre_naghdi_base = models.BooleanField(default=False)
 
-    ezafe_kari_use_tax = models.BooleanField(default=False)
-    ezafe_kari_use_insurance = models.BooleanField(default=False)
-    ezafe_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    ezafe_kari_use_tax = models.BooleanField(default=True)
+    ezafe_kari_use_insurance = models.BooleanField(default=True)
+    ezafe_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
 
-    jome_kari_use_tax = models.BooleanField(default=False)
-    jome_kari_use_insurance = models.BooleanField(default=False)
-    jome_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_owlad_use_tax = models.BooleanField(default=True)
+    haghe_owlad_use_insurance = models.BooleanField(default=True)
+    haghe_owlad_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
 
-    shab_kari_use_tax = models.BooleanField(default=False)
-    shab_kari_use_insurance = models.BooleanField(default=False)
-    shab_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    jome_kari_use_tax = models.BooleanField(default=True)
+    jome_kari_use_insurance = models.BooleanField(default=True)
+    jome_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
 
-    tatil_kari_use_tax = models.BooleanField(default=False)
-    tatil_kari_use_insurance = models.BooleanField(default=False)
-    tatil_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    shab_kari_use_tax = models.BooleanField(default=True)
+    shab_kari_use_insurance = models.BooleanField(default=True)
+    shab_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
 
-    nobat_kari_use_tax = models.BooleanField(default=False)
-    nobat_kari_use_insurance = models.BooleanField(default=False)
-    nobat_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    tatil_kari_use_tax = models.BooleanField(default=True)
+    tatil_kari_use_insurance = models.BooleanField(default=True)
+    tatil_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
 
-    haghe_maamooriat_use_tax = models.BooleanField(default=False)
-    haghe_maamooriat_use_insurance = models.BooleanField(default=False)
-    haghe_maamooriat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    nobat_kari_use_tax = models.BooleanField(default=True)
+    nobat_kari_use_insurance = models.BooleanField(default=True)
+    nobat_kari_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
+
+    haghe_maamooriat_use_tax = models.BooleanField(default=True)
+    haghe_maamooriat_use_insurance = models.BooleanField(default=True)
+    haghe_maamooriat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=UN_PENSION)
+
+    haghe_sanavat_use_tax = models.BooleanField(default=True)
+    haghe_sanavat_use_insurance = models.BooleanField(default=True)
+
+    eydi_padash_use_tax = models.BooleanField(default=True)
+    eydi_padash_use_insurance = models.BooleanField(default=True)
 
     maskan = models.BooleanField(default=False)
     otomobil = models.BooleanField(default=False)
@@ -1168,6 +1233,19 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
 
 
     @property
+    def calculate_save_leave_base(self):
+        daily = 0
+        hr_letter_items = self.get_hr_items
+        for i in range(0, 23):
+            if hr_letter_items[i]['amount']:
+                if i < 2:
+                    daily += round(hr_letter_items[i]['amount'])
+                else:
+                    daily += round(hr_letter_items[i]['amount'] / 30)
+        return daily
+
+
+    @property
     def calculate_insurance_pay_base(self):
         insurance_pay_base = 0
         hr_letter_items = self.get_hr_items
@@ -1177,6 +1255,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     insurance_pay_base += round(hr_letter_items[i]['amount'])
                 else:
                     insurance_pay_base += round(hr_letter_items[i]['amount'] / 30)
+        print('base ' , insurance_pay_base)
         return insurance_pay_base
 
     @property
@@ -1189,6 +1268,8 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     insurance_benefit += round(hr_letter_items[i]['amount'] * 30)
                 else:
                     insurance_benefit += round(hr_letter_items[i]['amount'])
+        print('benifit ', insurance_benefit)
+
         return insurance_benefit
 
     @property
@@ -1382,8 +1463,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_PRATE': 0,
             'DSK_BIMH': 0,
             'DSK_PYM': '000',
-
-
         }
         return DSKKAR, items_data
 
@@ -1444,7 +1523,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             contract_personnel[contract.id] = contract.workshop_personnel.personnel.id
         response_data = []
         for contract in contract_personnel:
-            absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0, 'eh': 0, 'ed': 0}
+            absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0, 'm': 0, 'eh': 0, 'ed': 0}
             mission_day = 0
             contract = Contract.objects.get(pk=contract)
             workshop_personnel = contract.workshop_personnel
@@ -1542,6 +1621,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     hourly_pay_base = models.IntegerField(default=0)
     normal_worktime = models.IntegerField(default=0)
     entitlement_leave_day = models.DecimalField(max_digits=24, decimal_places=2, default=0)
+    matter_47_leave_day = models.DecimalField(max_digits=24, decimal_places=2, default=0)
     daily_entitlement_leave_day = models.IntegerField(default=0)
     hourly_entitlement_leave_day = models.IntegerField(default=0)
     absence_day = models.IntegerField(default=0)
@@ -1630,7 +1710,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        return self.contract.hr_letter.first()
+        try:
+            return self.contract.hr_letter.first()
+        except AttributeError:
+            raise ValidationError('حکم کارگزینی ثبت نشده')
+
 
     @property
     def tax_included_payment(self):
@@ -1640,6 +1724,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.hoghoogh_roozane * Decimal(self.real_worktime)
         if hr.paye_sanavat_use_tax and self.sanavat_month >= 12:
             total += self.sanavat_base * Decimal(self.real_worktime)
+        if hr.haghe_owlad_use_tax:
+            total += self.aele_mandi
         if hr.ezafe_kari_use_tax:
             total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
         if hr.tatil_kari_use_tax:
@@ -1696,12 +1782,41 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if hr.komakhazine_mobile_use_tax:
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
 
+        return round(total)
+
+    @property
+    def tax_included_naghdi_payment(self):
+        total = self.tax_included_payment
+        total -= self.tax_moafiat['hazine_made_137']
+        total -= self.tax_moafiat['tamin_ejemae']
+        total -= self.tax_moafiat['hagh_made_137']
+        total -= self.tax_moafiat['sayer_moafiat']
+        total -= self.tax_moafiat['sayer_gheyre_mostamar_naghdi']
+        if self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi'] < 0:
+            total += self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi']
+        total -= self.tax_moafiat['band_10_made_91']
+        total -= self.tax_moafiat['band_5_made_91']
+        total -= self.tax_moafiat['manategh_tejari_moafiat']
+        total -= self.tax_moafiat['ejtenab_maliat_mozaaf']
+        total -= self.tax_moafiat['naghdi_gheye_naghdi_tax']
+
         return total
+
+    @property
+    def tax_included_ghyer_naghdi_payment(self):
+        if self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi'] < 0:
+            total = - self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi']
+        else:
+            total = 0
+        return total
+
 
     @property
     def pension_payment(self):
         hr = self.get_hr_letter
         total = Decimal(0)
+        if hr.haghe_owlad_nature == 'p':
+            total += self.aele_mandi
         if hr.hoghooghe_roozane_nature == 'p':
             total += self.hoghoogh_roozane * Decimal(self.real_worktime)
         if hr.paye_sanavat_nature == 'p' and self.sanavat_month >= 12:
@@ -1749,6 +1864,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += hr.mazaya_mostamar_gheyre_naghdi_amount
         return total
 
+
     @property
     def un_pension_payment(self):
         hr = self.get_hr_letter
@@ -1757,7 +1873,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.hoghoogh_roozane * Decimal(self.real_worktime)
         if hr.paye_sanavat_nature == 'u' and self.sanavat_month >= 12:
             total += self.sanavat_base * Decimal(self.real_worktime)
-
+        if hr.haghe_owlad_nature == 'u':
+            total += self.aele_mandi
         total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
         total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
         total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
@@ -1814,17 +1931,23 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def tax_moafiat(self):
         hr = self.get_hr_letter
+        year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
+        tax = WorkshopTax.objects.first()
+        tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=tax)
+        tax_row = tax_rows.get(from_amount=Decimal(0))
+
         response = {}
         response['hazine_made_137'] = self.hazine_made_137
-        response['hagh_made_137'] = self.kosoorat_insurance +\
-        (self.data_for_insurance['DSW_BIME'] * self.workshop_personnel.workshop.moafial_maliat_haghe_bime_sahme_bime_shavande)
+        response['tamin_ejemae'] = self.data_for_insurance['DSW_BIME'] * self.workshop_personnel.workshop.tax_employer_type
+        response['hagh_made_137'] = response['tamin_ejemae'] + round(self.kosoorat_insurance)
         response['sayer_moafiat'] = self.sayer_moafiat
         if not hr.haghe_maamooriat_use_tax:
-            response['qeyre_mostamar_naghdi'] = self.mission_total
+            response['sayer_gheyre_mostamar_naghdi'] = round(self.mission_total)
         else:
-            response['qeyre_mostamar_naghdi'] = 0
-        response['mazaya_gheyre_naghdi'] = round(self.mazaya_gheyr_mostamar) +\
-                                           round(hr.mazaya_mostamar_gheyre_naghdi_amount)
+            response['sayer_gheyre_mostamar_naghdi'] = 0
+        moafiat = 2 / 12 * round(tax_row.to_amount) / 12
+        response['mande_moafiat_mazaya_gheyre_naghdi'] = moafiat - round(self.mazaya_gheyr_mostamar) + \
+                                                         round(hr.mazaya_mostamar_gheyre_naghdi_amount)
         response['band_10_made_91'] = 0
         response['band_5_made_91'] = 0
         if self.workshop_personnel.job_location_status == 'dp':
@@ -1832,9 +1955,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             job_loc_zarib = 1
         response['job_location_status'] = job_loc_zarib
-        response['manategh_tejari_moafiat'] = self.manategh_tejari_moafiat
-        response['ejtenab_maliat_mozaaf'] = self.ejtenab_maliat_mozaaf
-        response['naghdi_gheye_naghdi_tax'] = self.naghdi_gheye_naghdi_tax
+        response['manategh_tejari_moafiat'] = round(self.manategh_tejari_moafiat)
+        response['ejtenab_maliat_mozaaf'] = round(self.ejtenab_maliat_mozaaf)
+        response['naghdi_gheye_naghdi_tax'] = round(self.naghdi_gheye_naghdi_tax)
         return response
 
     @property
@@ -1844,7 +1967,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                              Q(workshop_personnel=self.workshop_personnel)).all()
         year_payment = Decimal(0)
         for item in items:
-            year_payment += item.tax_included_payment
+            year_payment += item.tax_included_naghdi_payment
+            year_payment += item.tax_included_ghyer_naghdi_payment
         return year_payment
 
     @property
@@ -1858,32 +1982,36 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return 0
     @property
     def calculate_month_tax(self):
-        tax = Decimal(0)
-        year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
-        year_amount = self.get_year_payment + self.tax_included_payment
-        tax = WorkshopTax.objects.first()
-        tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=tax)
-        tax_row = tax_rows.get(from_amount=Decimal(0))
-        start = 0
-        while year_amount >= Decimal(0):
-            if year_amount + start <= (tax_row.to_amount * Decimal(month) / Decimal(12)):
-                tax += (year_amount * tax_row.ratio / 100)
-                return round(tax) - round(self.get_last_tax)
-            elif year_amount + start > (tax_row.to_amount * Decimal(month) / Decimal(12)):
-                tax += ((tax_row.to_amount * Decimal(month) / Decimal(12))
-                        - (tax_row.from_amount * Decimal(month) / Decimal(12))) * tax_row.ratio / 100
-                year_amount -= ((tax_row.to_amount * Decimal(month) / Decimal(12)) -
-                                (tax_row.from_amount * Decimal(month) / Decimal(12)))
-                try:
-                    tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
-                    start = tax_row.from_amount * Decimal(month) / Decimal(12)
-                except:
+        hr = self.get_hr_letter
+        if hr.include_made_86:
+            tax = (self.tax_included_naghdi_payment + self.tax_included_ghyer_naghdi_payment) / 10
+        else:
+            tax = Decimal(0)
+            year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
+            year_amount = self.get_year_payment + self.tax_included_ghyer_naghdi_payment + self.tax_included_naghdi_payment
+            mytax = WorkshopTax.objects.first()
+            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            start = 0
+            while year_amount >= Decimal(0):
+                if year_amount + start <= (tax_row.to_amount * Decimal(month) / Decimal(12)):
+                    tax += (year_amount * tax_row.ratio / 100)
                     return round(tax) - round(self.get_last_tax)
+                elif year_amount + start > (tax_row.to_amount * Decimal(month) / Decimal(12)):
+                    tax += ((tax_row.to_amount * Decimal(month) / Decimal(12))
+                            - (tax_row.from_amount * Decimal(month) / Decimal(12))) * tax_row.ratio / 100
+                    year_amount -= ((tax_row.to_amount * Decimal(month) / Decimal(12)) -
+                                    (tax_row.from_amount * Decimal(month) / Decimal(12)))
+                    try:
+                        tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
+                        start = tax_row.from_amount * Decimal(month) / Decimal(12)
+                    except:
+                        return round(tax) - round(self.get_last_tax)
         return round(tax) - round(self.get_last_tax)
 
     @property
     def get_tax_report(self):
-        hr = self.get_hr_letter()
+        hr = self.get_hr_letter
         response = {}
         response['jame_nakhales_mostamar_naghdi'] = self.pension_payment -\
                                                     Decimal(hr.mazaya_mostamar_gheyre_naghdi_amount)
@@ -1893,6 +2021,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                              response['nakhales_ezafe_kari']
         response['mazaya_mostamar_gheyre_naghdi'] = hr.mazaya_mostamar_gheyre_naghdi_amount
         response['mazaya_gheyre_mostamar_gheyre_naghdi'] = self.mazaya_gheyr_mostamar
+        return response
+
+    @property
+    def haghe_bime_bime_shavande(self):
+        hr = self.get_hr_letter
+        response = round((hr.insurance_benefit + hr.insurance_pay_day) *
+              self.workshop_personnel.workshop.employee_insurance_nerkh )
         return response
 
 
@@ -1932,9 +2067,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                        self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
             'DSW_TOTL': hr.insurance_benefit + hr.insurance_not_included + hr.insurance_pay_day *
                        self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
-            'DSW_BIME': round(hr.insurance_benefit + hr.insurance_pay_day *
-                        self.workshop_personnel.workshop.employee_insurance_nerkh *
-                        self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)),
+            'DSW_BIME': self.haghe_bime_bime_shavande,
             'DSW_PRATE': 0,
             'DSW_JOB': 0,
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
@@ -2108,6 +2241,138 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.mission_pay_type == 'b':
             self.mission_amount = self.pay_base
 
+    @property
+    def calculate_yearly_haghe_sanavat(self):
+        hr = self.get_hr_letter
+        year_worktime = 0
+        if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+
+        previous_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                      & Q(list_of_pay__year__lt=self.list_of_pay.year))
+        if self.workshop_personnel.workshop.haghe_sanavat_type == 'o':
+            work_years = []
+            for item in previous_items:
+                if item.list_of_pay.year not in work_years:
+                    work_years.append(item.list_of_pay.year)
+            total_worktime = 0
+            list_of_pay_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                      & Q(list_of_pay__year__lte=self.list_of_pay.year))
+            for pay_list in list_of_pay_items:
+                total_worktime += pay_list.real_worktime
+                total_worktime += pay_list.illness_leave_day
+
+            until_this_year = round(base_pay) * 30 * total_worktime / (len(work_years) + 1)
+            list_of_pay_item = ListOfPayItem.objects.filter(list_of_pay__year=work_years[0]).first()
+            return until_this_year - list_of_pay_item.calculate_yearly_haghe_sanavat
+
+
+        elif self.workshop_personnel.workshop.haghe_sanavat_type == 'c':
+            items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                 & Q(list_of_pay__year=self.list_of_pay.year))
+            for item in items:
+                year_worktime += item.real_worktime
+                year_worktime += item.illness_leave_day
+            return round(base_pay) * 30 * year_worktime / 365
+
+    @property
+    def calculate_yearly_eydi(self):
+        hr = self.get_hr_letter
+        year_worktime = 0
+        if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+
+        items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                             & Q(list_of_pay__year=self.list_of_pay.year))
+        for item in items:
+            year_worktime += item.real_worktime
+            year_worktime += item.illness_leave_day
+        return round(base_pay) * 60 * year_worktime / 365
+
+    @property
+    def calculate_monthly_haghe_sanavat(self):
+        hr = self.get_hr_letter
+        if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+        return round(base_pay) * 30 * (self.real_worktime + self.illness_leave_day) / 365
+
+    @property
+    def calculate_monthly_eydi(self):
+        hr = self.get_hr_letter
+        if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+        return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
+
+    @property
+    def calculate_monthly_eydi_tax(self):
+        hr = self.get_hr_letter
+        if hr.eydi_padash_use_tax:
+            mytax = WorkshopTax.objects.first()
+            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = tax_row.to_amount / 12 /12
+            eydi = self.calculate_monthly_eydi
+            moaf = moafiat_limit - eydi
+            if moaf <= 0:
+                eydi_tax = -moaf
+            else:
+                eydi_tax = 0
+
+            return eydi_tax
+        else:
+            return 0
+
+    @property
+    def calculate_yearly_eydi_tax(self):
+        hr = self.get_hr_letter
+        if hr.eydi_padash_use_tax:
+            mytax = WorkshopTax.objects.first()
+            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = tax_row.to_amount / 12
+            eydi = self.calculate_yearly_eydi
+            moaf = moafiat_limit - eydi
+            if moaf <= 0:
+                eydi_tax = -moaf
+            else:
+                eydi_tax = 0
+
+            return eydi_tax
+        else:
+            return 0
+
+    @property
+    def calculate_save_leave(self):
+        hr = self.get_hr_letter
+        year_worktime = 0
+        items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                             & Q(list_of_pay__year=self.list_of_pay.year))
+        leave_available = 29
+        for item in items:
+            leave_available -= item.entitlement_leave_day
+            year_worktime += item.real_worktime
+        if leave_available >= 9:
+            save_leave = 9
+        else:
+            save_leave = leave_available
+        if self.workshop_personnel.workshop.leave_save_pay_type == 'h':
+            pay_base = hr.calculate_save_leave_base
+        else:
+            pay_base = self.workshop_personnel.workshop.hade_aghal_hoghoogh
+
+        save_leave_amount = save_leave * pay_base * year_worktime / 365
+
+
+        return save_leave, save_leave_amount
+
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -2117,3 +2382,4 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.calculate_payment:
             self.total_payment = int(self.get_total_payment)
         super().save(*args, **kwargs)
+

@@ -16,7 +16,7 @@ from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, Wo
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
-    ListOfPayItemSerializer, ListOfPayItemsKosooratSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
+    ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
     WorkShopTaxSerializer
 
 
@@ -796,25 +796,6 @@ class ListOfPayItemDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
-class ListOfPayItemKosooratTaxDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay_item'
-
-    def get_object(self, pk):
-        try:
-            return ListOfPayItem.objects.get(pk=pk)
-        except ListOfPayItem.DoesNotExist:
-            raise Http404
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = ListOfPayItemsKosooratSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ListOfPayDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
@@ -915,6 +896,7 @@ class PaymentList(APIView):
                 hourly_entitlement_leave_day=item['leaves']['eh'],
                 illness_leave_day=item['leaves']['i'],
                 without_salary_leave_day=item['leaves']['w'],
+                matter_47_leave_day=item['leaves']['m']
             )
             payroll_list_item.save()
         list_of_pay = payroll_list
