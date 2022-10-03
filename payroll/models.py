@@ -120,6 +120,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
     tax_employer_type = models.IntegerField(choices=TAX_EMPLOYER_TYPES, default=TYPE1)
 
+    save_absence_limit = models.BooleanField(default=True)
+    save_absence_transfer_next_year = models.BooleanField(default=False)
+
     class Meta(BaseModel.Meta):
         verbose_name = 'Workshop'
         permission_basename = 'workshop'
@@ -682,10 +685,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         return self.my_title
 
 
-
 class Contract(BaseModel, LockableMixin, DefinableMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
-                                            on_delete=models.CASCADE, blank=True, null=True)
+                                           on_delete=models.CASCADE, blank=True, null=True)
     code = models.IntegerField(blank=True, null=True)
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
@@ -1376,10 +1378,12 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     month_days = models.IntegerField(default=30)
     start_date = jmodels.jDateField()
     end_date = jmodels.jDateField()
+    ultimate = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPay'
         permission_basename = 'list_of_pay'
+        ordering = ('month',)
         permissions = (
             ('get.list_of_pay', 'مشاهده حقوق و دستمزد'),
             ('create.list_of_pay', 'تعریف حقوق و دستمزد'),
@@ -1390,6 +1394,33 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.list_of_pay', 'ویرایش حقوق و دستمزد خود'),
             ('deleteOwn.list_of_pay', 'حذف حقوق و دستمزد خود'),
         )
+
+    def save(self, *args, **kwargs):
+        same = ListOfPay.objects.filter(Q(workshop=self.workshop)
+                                        & Q(year=self.year)
+                                        & Q(month=self.month)
+                                        & Q(ultimate=True))
+        if len(same) == 0:
+            self.ultimate = True
+        super().save(*args, **kwargs)
+
+    @property
+    def month_display(self):
+        months = {
+            1: 'فروردین',
+            2: 'اردیبهشت',
+            3: 'خرداد',
+            4: 'تیر',
+            5: 'مرداد',
+            6: 'شهریور',
+            7: 'مهر',
+            8: 'آبان',
+            9: 'آذر',
+            10: 'دی',
+            11: 'بهمن',
+            12: 'اسفند',
+        }
+        return months[self.month]
 
     @property
     def get_contracts(self):
@@ -1532,6 +1563,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             filtered_mission = Mission.objects.filter(workshop_personnel=workshop_personnel)
 
             for absence in filtered_absence.all():
+                print(absence)
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and\
                             absence.date.__ge__(contract_start[contract.id]) and absence.date.__le__(contract_end[contract.id]):
@@ -1964,7 +1996,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_year_payment(self):
         items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                              Q(list_of_pay__month__lt=self.list_of_pay.month) &
-                                             Q(workshop_personnel=self.workshop_personnel)).all()
+                                             Q(workshop_personnel=self.workshop_personnel) &
+                                             Q(list_of_pay__ultimate=True)).all()
         year_payment = Decimal(0)
         for item in items:
             year_payment += item.tax_included_naghdi_payment
@@ -1975,7 +2008,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_last_tax(self):
         item = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                              Q(list_of_pay__month__lt=self.list_of_pay.month) &
-                                             Q(workshop_personnel=self.workshop_personnel)).first()
+                                             Q(workshop_personnel=self.workshop_personnel) &
+                                             Q(list_of_pay__ultimate=True)).first()
         if item:
             return item.calculate_month_tax
         else:
@@ -2251,7 +2285,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             base_pay = hr.hoghooghe_roozane_amount
 
         previous_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                      & Q(list_of_pay__year__lt=self.list_of_pay.year))
+                                                      & Q(list_of_pay__year__lt=self.list_of_pay.year)
+                                                      & Q(list_of_pay__ultimate=True))
         if self.workshop_personnel.workshop.haghe_sanavat_type == 'o':
             work_years = []
             for item in previous_items:
@@ -2259,7 +2294,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     work_years.append(item.list_of_pay.year)
             total_worktime = 0
             list_of_pay_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                      & Q(list_of_pay__year__lte=self.list_of_pay.year))
+                                                      & Q(list_of_pay__year__lte=self.list_of_pay.year)
+                                                      & Q(list_of_pay__ultimate=True))
             for pay_list in list_of_pay_items:
                 total_worktime += pay_list.real_worktime
                 total_worktime += pay_list.illness_leave_day
@@ -2271,7 +2307,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         elif self.workshop_personnel.workshop.haghe_sanavat_type == 'c':
             items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                 & Q(list_of_pay__year=self.list_of_pay.year))
+                                                 & Q(list_of_pay__year=self.list_of_pay.year)
+                                                 & Q(list_of_pay__ultimate=True))
             for item in items:
                 year_worktime += item.real_worktime
                 year_worktime += item.illness_leave_day
@@ -2287,11 +2324,21 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             base_pay = hr.hoghooghe_roozane_amount
 
         items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                             & Q(list_of_pay__year=self.list_of_pay.year))
+                                             & Q(list_of_pay__year=self.list_of_pay.year)
+                                             & Q(list_of_pay__ultimate=True))
         for item in items:
             year_worktime += item.real_worktime
             year_worktime += item.illness_leave_day
         return round(base_pay) * 60 * year_worktime / 365
+
+    @property
+    def calculate_monthly_eydi(self):
+        hr = self.get_hr_letter
+        if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+        return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
 
     @property
     def calculate_monthly_haghe_sanavat(self):
@@ -2302,14 +2349,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             base_pay = hr.hoghooghe_roozane_amount
         return round(base_pay) * 30 * (self.real_worktime + self.illness_leave_day) / 365
 
-    @property
-    def calculate_monthly_eydi(self):
-        hr = self.get_hr_letter
-        if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
-            base_pay = hr.daily_pay_base
-        else:
-            base_pay = hr.hoghooghe_roozane_amount
-        return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
 
     @property
     def calculate_monthly_eydi_tax(self):
@@ -2339,7 +2378,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             tax_row = tax_rows.get(from_amount=Decimal(0))
             moafiat_limit = tax_row.to_amount / 12
             eydi = self.calculate_yearly_eydi
-            moaf = moafiat_limit - eydi
+            moaf = round(moafiat_limit) - round(eydi)
             if moaf <= 0:
                 eydi_tax = -moaf
             else:
@@ -2347,19 +2386,31 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
             return eydi_tax
         else:
-            return 0
+            return self.calculate_yearly_eydi
 
     @property
     def calculate_save_leave(self):
         hr = self.get_hr_letter
         year_worktime = 0
         items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                             & Q(list_of_pay__year=self.list_of_pay.year))
+                                             & Q(list_of_pay__year=self.list_of_pay.year)
+                                             & Q(list_of_pay__ultimate=True))
         leave_available = 29
+
+        if self.workshop_personnel.workshop.save_absence_transfer_next_year:
+            previous_years = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                          & Q(list_of_pay__year__lt=self.list_of_pay.year)
+                                                          & Q(list_of_pay__month=12)
+                                                          & Q(list_of_pay__ultimate=True)
+                                                          )
+            for item in previous_years:
+                save_leaves = item.calculate_save_leave
+                leave_available += save_leaves
+
         for item in items:
             leave_available -= item.entitlement_leave_day
             year_worktime += item.real_worktime
-        if leave_available >= 9:
+        if leave_available >= 9 and self.workshop_personnel.workshop.save_absence_limit:
             save_leave = 9
         else:
             save_leave = leave_available
@@ -2370,8 +2421,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         save_leave_amount = save_leave * pay_base * year_worktime / 365
 
-
-        return save_leave, save_leave_amount
+        return save_leave, round(save_leave_amount)
 
 
     def save(self, *args, **kwargs):

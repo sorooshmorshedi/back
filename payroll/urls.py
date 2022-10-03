@@ -5,7 +5,7 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
-    TaxRowListView, TaxListView
+    TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
@@ -75,6 +75,9 @@ urlpatterns += [
     url(r'^absence/all$', LeaveOrAbsenceListView.as_view(), name='leaveOrAbsenceList'),
     url(r'^mission/all$', MissionListView.as_view(), name='missionListView'),
     url(r'^hrletter/all$', HRLetterListView.as_view(), name='hrLetterListView'),
+    url(r'^listOfPay/all$', ListOfPayListView.as_view(), name='listOfPayListView'),
+    url(r'^listOfPayItem/all$', ListOfPayItemListView.as_view(), name='listOfPayItemListView'),
+
     url(r'^workshop/all/(?P<export_type>\S+)', WorkshopExportview.as_view(), name=''),
     url(r'^personnel/all/(?P<export_type>\S+)', PersonnelExportview.as_view(), name=''),
     url(r'^workshop/personnel/all/(?P<export_type>\S+)', WorkshopPersonnelExportView.as_view(), name=''),

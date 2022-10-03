@@ -4,7 +4,7 @@ from django_jalali.db import models as jmodels
 
 from helpers.filters import BASE_FIELD_FILTERS
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
-    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax
+    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem
 
 
 class WorkshopFilter(filters.FilterSet):
@@ -217,6 +217,28 @@ class HRLetterFilter(filters.FilterSet):
             'contract': ('exact',),
             'name': BASE_FIELD_FILTERS,
             'is_template': BASE_FIELD_FILTERS,
+        }
+
+
+class ListOfPayFilter(filters.FilterSet):
+    class Meta:
+        model = ListOfPay
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'workshop': ('exact',),
+            'year': BASE_FIELD_FILTERS,
+            'month': BASE_FIELD_FILTERS,
+        }
+
+
+class ListOfPayItemFilter(filters.FilterSet):
+    class Meta:
+        model = ListOfPayItem
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'list_of_pay': ('exact',),
+            'workshop_personnel': ('exact',),
+            'contract': ('exact',),
         }
 
 

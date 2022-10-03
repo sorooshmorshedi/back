@@ -151,6 +151,8 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
 
 class ListOfPaySerializer(serializers.ModelSerializer):
     list_of_pay_item = ListOfPayItemSerializer(many=True)
+    workshop_display = serializers.CharField(source='workshop.workshop_title', read_only=True)
+    month_name = serializers.CharField(source='month_display', read_only=True)
 
     class Meta:
         model = ListOfPay

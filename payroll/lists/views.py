@@ -4,12 +4,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from helpers.auth import BasicCRUDPermission
 from payroll.lists.filters import WorkshopFilter, PersonnelFilter, PersonnelFamilyFilter, WorkshopPersonnelFilter, \
-    ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter, HRLetterFilter, TaxRowFilter, TaxFilter
+    ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter, HRLetterFilter, TaxRowFilter, TaxFilter, \
+    ListOfPayFilter, ListOfPayItemFilter
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
-    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax
+    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer, ContractSerializer, MissionSerializer, \
-    HRLetterSerializer, WorkshopTaxRowSerializer, WorkShopTaxSerializer
+    HRLetterSerializer, WorkshopTaxRowSerializer, WorkShopTaxSerializer, ListOfPaySerializer, ListOfPayItemSerializer
 
 
 class WorkshopListView(generics.ListAPIView):
@@ -140,6 +141,31 @@ class HRLetterListView(generics.ListAPIView):
 
     def get_queryset(self):
         return HRLetter.objects.hasAccess('get', self.permission_codename).all()
+
+class ListOfPayListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.list_of_pay"
+    serializer_class = ListOfPaySerializer
+    filterset_class = ListOfPayFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return ListOfPay.objects.hasAccess('get', self.permission_codename).all()
+
+
+class ListOfPayItemListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.list_of_pay_item"
+    serializer_class = ListOfPayItemSerializer
+    filterset_class = ListOfPayItemFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename).all()
 
 
 class TaxRowListView(generics.ListAPIView):
