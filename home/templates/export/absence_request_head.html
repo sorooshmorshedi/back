@@ -1,0 +1,16 @@
+{% load report_filters %}
+
+<div class="row form-header">
+    <div class="col-xs-12 ">
+        <span>پرسنل : </span>
+        <span> {{user}} </span>
+    </div>
+    <div class="col-xs-12 ">
+        <span>تاریخ  : </span>
+        <span dir="ltr">{% today %}</span>
+    </div>
+    <div class="col-xs-12 ">
+        <h6>کارگاه  : </h6>
+        <h4> {{ forms.first.workshop_personnel.workshop.workshop_title }}</h4>
+    </div>
+</div>

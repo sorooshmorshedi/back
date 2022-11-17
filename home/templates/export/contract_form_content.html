@@ -1,0 +1,33 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>پرسنل در کارگاه</th>
+            <th>تاریخ شروع قرارداد</th>
+            <th>تاریخ پایان قرارداد</th>
+            <th>تاریخ ترک کار</th>
+            <th>بیمه می شود؟</th>
+            <th>تاریخ اضافه شدن به لیست بیمه</th>
+
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.workshop_personnel.my_title }}</td>
+                <td>{{ form.contract_from_date }}</td>
+                <td>{{ form.contract_to_date }}</td>
+                <td>{{ form.quit_job_date }}</td>
+                {% if  form.insurance %}
+                    <td>بله</td>
+                {% endif %}
+                {% if not form.insurance %}
+                    <td>خیر</td>
+                {% endif %}
+
+                <td>{{ form.insurance_add_date }}</td>
+
+            </tr>
+        {% endfor %}
+    </table>
+</div>

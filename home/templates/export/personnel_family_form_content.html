@@ -1,0 +1,33 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>پرسنل</th>
+            <th>نام</th>
+            <th>نام خانوادگی</th>
+            <th>تاریخ تولد</th>
+            <th>کد ملی</th>
+            <th>نسبت</th>
+            <th>وضعیت تاهل</th>
+            <th>خدمت سربازی</th>
+            <th>وضعیت تحصیل</th>
+            <th>وضعیت جسمی</th>
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.personnel.full_name }}</td>
+                <td>{{ form.name }}</td>
+                <td>{{ form.last_name }}</td>
+                <td>{{ form.date_of_birth }}</td>
+                <td>{{ form.national_code }}</td>
+                <td>{{ form.get_relative_display }}</td>
+                <td>{{ form.get_marital_status_display }}</td>
+                <td>{{ form.get_military_service_display }}</td>
+                <td>{{ form.get_study_status_display }}</td>
+                <td>{{ form.get_physical_condition_display }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

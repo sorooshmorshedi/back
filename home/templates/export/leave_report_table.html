@@ -1,0 +1,65 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for i in forms.personnel %}
+
+
+    {% endfor %}
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th rowspan="3" class="text-center">ردیف</th>
+            <th rowspan="3" class="text-center"> نام و نام خانوادگی</th>
+            <th rowspan="3" class="text-center">میزان مجاز مرخصی استحقاقی نسبت به کارکرد</th>
+            <th rowspan="3" class="text-center">میزان مجاز مرخصی ماده 73 قانون کار</th>
+            <th rowspan="3" class="text-center">جمع کل مرخصی استحقاقی قابل استفاده</th>
+            <th colspan={{ forms.col_number }} class="text-center">مرخصی استفاده شده طی سال {{ forms.year }}</th>
+            <th rowspan="3" class="text-center">جمع مرخصی استحقاقی</th>
+            <th rowspan="3" class="text-center">جمع مرخصی ماده 73</</th>
+            <th rowspan="3" class="text-center">جمع مرخصی استعلاجی</th>
+            <th rowspan="3" class="text-center">جمع مرخصی بدون حقوق</th>
+            <th rowspan="3" class="text-center">جمع غیبت</th>
+            <th rowspan="3" class="text-center">سقف ذخیره مجاز مرخصی</th>
+            <th rowspan="3" class="text-center">مانده مرخصی</th>
+
+        </tr>
+        <tr>
+            {% for month in forms.months_display %}
+                <th colspan="5" class="text-center"> {{ month }}</th>
+            {% endfor %}
+        </tr>
+            <tr>
+                {% for month in forms.months %}
+                    <th class="text-center">استحقاقی </th>
+                    <th class="text-center"> ماده 73</th>
+                    <th class="text-center"> استعلاجی</th>
+                    <th class="text-center"> بدون حقوق</th>
+                    <th class="text-center"> غیبت</th>
+                {% endfor %}
+
+            </tr>
+        {% for person in forms.personnel%}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ person.total.name }}</td>
+                <td class="text-center">{{ person.total.limit }}</td>
+                <td class="text-center">{{ person.total.matter_73_limit }}</td>
+                <td class="text-center">{{ person.total.total_limit }}</td>
+                {% for month_info in person.months %}
+                    <td class="text-center">{{ month_info.entitlement }} </td>
+                    <td class="text-center">{{ month_info.matter_73 }}</td>
+                    <td class="text-center"> {{ month_info.illness }}</td>
+                    <td class="text-center"> {{ month_info.without_salary }}</td>
+                    <td class="text-center"> {{ month_info.absence }}</td>
+                {% endfor %}
+                <td class="text-center">{{ person.total.entitlement }}</td>
+                <td class="text-center">{{ person.total.matter_73 }}</td>
+                <td class="text-center">{{ person.total.illness }}</td>
+                <td class="text-center">{{ person.total.without_salary }}</td>
+                <td class="text-center">{{ person.total.absence }}</td>
+                <td class="text-center">{{ person.total.save_limit }}</td>
+                <td class="text-center">{{ person.total.remaining }}</td>
+
+            </tr>
+        {% endfor %}
+    </table>
+</div>

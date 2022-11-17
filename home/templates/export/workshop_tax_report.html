@@ -1,0 +1,94 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>شماره پرونده</th>
+                <td>{{ form.data_for_tax.TFN }}</td>
+            </tr>
+            <tr>
+                <th>کد شعبه</th>
+                <td>{{ form.data_for_tax.branch }}</td>
+            </tr>
+            <tr>
+                <th>سال</th>
+                <td>{{ form.data_for_tax.year }}</td>
+            </tr>
+            <tr>
+                <th>ماه</th>
+                <td>{{ form.data_for_tax.month }}</td>
+            </tr>
+            <tr>
+                <th>نوع شخصیت پرداخت کننده حقوق</th>
+                <td>{{ form.data_for_tax.payer }}</td>
+            </tr>
+            <tr>
+                <th>نوع شخص حقوق شخصیت پرداخت کننده حقوق</th>
+                <td>{{ form.data_for_tax.payer_type }}</td>
+            </tr>
+            <tr>
+                <th>نام پرداخت کننده حقوق</th>
+                <td>{{ form.data_for_tax.payer_name }}</td>
+            </tr>
+            <tr>
+                <th>نام خانوادگی پرداخت کننده حقوق</th>
+                <td>{{ form.data_for_tax.payer_lname }}</td>
+            </tr>
+            <tr>
+                <th>نام شعبه</th>
+                <td>{{ form.data_for_tax.branch_name }}</td>
+            </tr>
+            <tr>
+                <th>شماره اقتصادی / کد ملی</th>
+                <td>{{ form.data_for_tax.melli_code }}</td>
+            </tr>
+            <tr>
+                <th>کد پستی</th>
+                <td>{{ form.data_for_tax.postal_code }}</td>
+            </tr>
+            <tr>
+                <th>تلفن</th>
+                <td>{{ form.data_for_tax.phone }}</td>
+            </tr>
+            <tr>
+                <th>آدرس</th>
+                <td>{{ form.data_for_tax.address }}</td>
+            </tr>
+            <tr>
+                <th>کد ملی صاحب امضا مجاز(اول)</th>
+                <td>{{ form.data_for_tax.assigner_melli_code }}</td>
+            </tr>
+            <tr>
+                <th>نام  صاحب امضا مجاز (اول)</th>
+                <td>{{ form.data_for_tax.assigner_name }}</td>
+            </tr>
+            <tr>
+                <th>نام خانوادگی صاحب امضا مجاز (اول)</th>
+                <td>{{ form.data_for_tax.assigner_lname }}</td>
+            </tr>
+            <tr>
+                <th>سمت صاحب امضا مجاز (اول)</th>
+                <td>{{ form.data_for_tax.assigner_work_title }}</td>
+            </tr>
+            <tr>
+                <th>کد ملی صاحب امضا مجاز(دوم)</th>
+                <td>{{ form.data_for_tax.assigner2_melli_code }}</td>
+            </tr>
+            <tr>
+                <th>نام  صاحب امضا مجاز (دوم)</th>
+                <td>{{ form.data_for_tax.assigner2_name }}</td>
+            </tr>
+            <tr>
+                <th>نام خانوادگی صاحب امضا مجاز (دوم)</th>
+                <td>{{ form.data_for_tax.assigner2_lname }}</td>
+            </tr>
+            <tr>
+                <th>سمت صاحب امضا مجاز (دوم)</th>
+                <td>{{ form.data_for_tax.assigner2_work_title }}</td>
+            </tr>
+
+        </table>
+    {% endfor %}
+
+</div>

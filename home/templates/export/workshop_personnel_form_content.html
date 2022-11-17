@@ -1,0 +1,41 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>کارگاه</th>
+            <th>پرسنل</th>
+            <th>عنوان شغلی</th>
+            <th>سابقه بیمه قبلی خارچ از کارگاه</th>
+            <th>سابقه بیمه قبلی در این کارگاه</th>
+            <th>سابقه سابقه بیمه جاری در این کارگاه</th>
+            <th>مجموع سوابق بیمه ای</th>
+            <th>سمت</th>
+            <th>رسته شغلی</th>
+            <th>محل خدمت</th>
+            <th>وضعییت محل خدمت</th>
+            <th>نوع استخدام</th>
+            <th>نوع قرارداد</th>
+            <th>وضعییت کارمند</th>
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.workshop.workshop_title }}</td>
+                <td>{{ form.personnel.full_name }}</td>
+                <td>{{ form.work_title }}</td>
+                <td>{{ form.previous_insurance_history_out_workshop }}</td>
+                <td>{{ form.previous_insurance_history_in_workshop }}</td>
+                <td>{{ form.current_insurance_history_in_workshop }}</td>
+                <td>{{ form.insurance_history_totality }}</td>
+                <td>{{ form.job_position }}</td>
+                <td>{{ form.get_job_group_display }}</td>
+                <td>{{ form.job_location }}</td>
+                <td>{{ form.get_job_location_status_display }}</td>
+                <td>{{ form.get_employment_type_display }}</td>
+                <td>{{ form.get_contract_type_display }}</td>
+                <td>{{ form.get_employee_status_display }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

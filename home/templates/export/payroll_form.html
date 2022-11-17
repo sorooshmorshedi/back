@@ -1,0 +1,192 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th class="text-center">ردیف</th>
+                <th class="text-center">نام و نام خانوادگی</th>
+                <th class="text-center">تاریخ شروع به کار</th>
+                <th class="text-center">تاریخ تسوبه</th>
+                <th class="text-center">عنوان شغل</th>
+                <th class="text-center">بیمه میشود؟</th>
+                <th class="text-center">سابقه بیمه در کارگاه</th>
+                <th class="text-center">ردیف پیمان</th>
+                <th class="text-center">کارکرد عادی</th>
+                <th colspan="3" class="text-center">مرخصی استحقاقی</th>
+                <th class="text-center">مرخصی استعلاجی</th>
+                <th class="text-center">مرخصی ماده 73</th>
+                <th class="text-center">مرخصی بدون حقوق</th>
+                <th class="text-center">غیبت</th>
+                <th class="text-center">کارکرد واقعی</th>
+                <th class="text-center">حداقل مزد روزانه</th>
+                <th class="text-center">حقوق پایه ماهانه</th>
+                <th class="text-center">پایه سنوات روزانه</th>
+                <th class="text-center">پایه سنوات ماهانه</th>
+                <th colspan="2" class="text-center">اضافه کاری</th>
+                <th colspan="2" class="text-center">تعطیل کاری</th>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-center">ساعتی</td>
+                <td class="text-center">روزانه</td>
+                <td class="text-center">جمع</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-center">ساعت</td>
+                <td class="text-center">مبلغ</td>
+                <td class="text-center">ساعت</td>
+                <td class="text-center">مبلغ</td>
+            </tr>
+            {% for item in form.get_items %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td class="text-center">{{ item.workshop_personnel.personnel.full_name }}</td>
+                    <td class="text-center">{{ item.contract.contract_from_date }}</td>
+                    <td class="text-center"></td>
+                    <td class="text-center">{{ item.workshop_personnel.work_title }}</td>
+                    <td class="text-center">
+                        {% if item.contract.insurance %}
+                            بله
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ item.workshop_personnel.get_insurance_in_workshop }}</td>
+                    <td class="text-center">{{ item.contract_row.contract_row }}</td>
+                    <td class="text-center">{{ item.normal_worktime }}</td>
+                    <td class="text-center">{{ item.hourly_entitlement_leave_day }}</td>
+                    <td class="text-center">{{ item.daily_entitlement_leave_day }}</td>
+                    <td class="text-center">{{ item.entitlement_leave_day }}</td>
+                    <td class="text-center">{{ item.illness_leave_day }}</td>
+                    <td class="text-center">{{ item.matter_47_leave_day }}</td>
+                    <td class="text-center">{{ item.without_salary_leave_day }}</td>
+                    <td class="text-center">{{ item.absence_day }}</td>
+                    <td class="text-center">{{ item.real_worktime }}</td>
+                    <td class="text-center">{{ item.hoghoogh_roozane }}</td>
+                    <td class="text-center">{{ item.hoghoogh_mahane }}</td>
+                    <td class="text-center">{{ item.sanavat_base }}</td>
+                    <td class="text-center">{{ item.sanavat_mahane }}</td>
+                    <td class="text-center">{{ item.ezafe_kari }}</td>
+                    <td class="text-center">{{ item.ezafe_kari_total }}</td>
+                    <td class="text-center">{{ item.tatil_kari }}</td>
+                    <td class="text-center">{{ item.tatil_kari_total }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th colspan="2" class="text-center">شب کاری</th>
+                <th colspan="2" class="text-center">کسر کار</th>
+                <th colspan="2" class="text-center">ماموریت</th>
+                <th class="text-center">حق خاروبار</th>
+                <th class="text-center">حق مسکن</th>
+                <th colspan="2" class="text-center">حق اولاد</th>
+                <th class="text-center">حق جذب</th>
+                <th class="text-center">پورسانت</th>
+                <th class="text-center">سایر اضافات</th>
+                <th class="text-center">حقوق مزایای کل ماهانه</th>
+            </tr>
+            <tr>
+                <td class="text-center">ساعت</td>
+                <td class="text-center">مبلغ</td>
+                <td class="text-center">ساعت</td>
+                <td class="text-center">مبلغ</td>
+                <td class="text-center">روز</td>
+                <td class="text-center">مبلغ</td>
+                <td></td>
+                <td></td>
+                <td class="text-center">تعداد اولاد</td>
+                <td class="text-center">مبلغ</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% for item in form.get_items %}
+
+                <tr>
+                    <td class="text-center">{{ item.shab_kari }}</td>
+                    <td class="text-center">{{ item.shab_kari_total }}</td>
+                    <td class="text-center">{{ item.kasre_kar }}</td>
+                    <td class="text-center">{{ item.kasre_kar_total }}</td>
+                    <td class="text-center">{{ item.mission_day }}</td>
+                    <td class="text-center">{{ item.mission_total }}</td>
+                    <td class="text-center">{{ item.get_payslip.additions.kharo_bar }}</td>
+                    <td class="text-center">{{ item.get_payslip.additions.hagh_maskan }}</td>
+                    <td class="text-center">{{ item.aele_mandi_child }}</td>
+                    <td class="text-center">{{ item.aele_mandi }}</td>
+                    <td class="text-center">{{ item.get_payslip.additions.hagh_jazb }}</td>
+                    <td></td>
+                    <td class="text-center">{{ item.sayer_ezafat }}</td>
+                    <td class="text-center">{{ item.total_payment }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th colspan="4" class="text-center">بــیـمـه</th>
+                <th class="text-center">حق بیمه سهم بیمه شده</th>
+                <th class="text-center">معافیت مالیاتی حقوق</th>
+                <th class="text-center">حقوق مشمول مالیات</th>
+                <th class="text-center"> مالیات حقوق</th>
+                <th colspan="3" class="text-center"> بدهی متفرقه</th>
+                <th class="text-center"> حقوق و دستمزد پرداختنی</th>
+                <th class="text-center"> حق بیمه سهم کارفرما</th>
+                <th class="text-center"> بیمه بیکاری</th>
+
+            </tr>
+            <tr>
+                <td class="text-center"> دستمزد ماهانه </td>
+                <td class="text-center">مزایای ماهانه مشمول مستمر و غیر مستمر</td>
+                <td class="text-center">جمع دستمزد مزایای ماهانه مشمول </td>
+                <td class="text-center">جمع کل دستمزد و مزایای ماهانه </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-center">مساعده</td>
+                <td class="text-center">وام</td>
+                <td class="text-center">غیره</td>
+                <td></td>
+                <td></td>
+                <td></td>
+
+            </tr>
+            {% for item in form.get_items %}
+
+                <tr>
+                    <td class="text-center">{{ item.data_for_insurance.DSW_MAH}}</td>
+                    <td class="text-center">{{ item.data_for_insurance.DSW_MAZ}}</td>
+                    <td class="text-center">{{ item.data_for_insurance.DSW_MASH}}</td>
+                    <td class="text-center">{{ item.data_for_insurance.DSW_TOTL}}</td>
+                    <td class="text-center">{{ item.data_for_insurance.DSW_BIME}}</td>
+                    <td class="text-center" >{{ item.moaf_sum }}</td>
+                    <td>{{ item.tax_included }}</td>
+                    <td>{{ item.calculate_month_tax }}</td>
+                    <td class="text-center">{{ item.check_and_get_dept_episode }}</td>
+                    <td class="text-center">{{ item.check_and_get_loan_episode }}</td>
+                    <td class="text-center">{{ item.check_and_get_optional_deduction_episode }}</td>
+                    <td class="text-center">{{ item.payable }}</td>
+                    <td class="text-center">{{ item.employer_insurance }}</td>
+                    <td class="text-center">{{ item.un_employer_insurance }}</td>
+
+                </tr>
+            {% endfor %}
+        </table>
+    {% endfor %}
+
+</div>

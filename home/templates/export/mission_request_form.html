@@ -1,0 +1,102 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        {% for form in forms %}
+            <tr>
+                <td class="text-center" colspan="5">
+                    <h6>
+                        به آگاهی میرساند اینجانب ({{ form.workshop_personnel.personnel.full_name }} ) با کد پرسنلی
+                        ({{ form.workshop_personnel.personnel.personnel_code }}) مشغول در واحد
+                        ({{ form.workshop_personnel.get_job_group_display }}) به منظور
+                        ({{ form.topic }})
+                         نیاز به صدور حکم ماموریت {{ form.get_mission_type_display  }}
+                        را به شرح ذیل دارم
+
+                    </h6>
+                </td>
+            </tr>
+            <tr>
+                {% if form.mission_type == 'h' %}
+                    <td class="text-center">
+                        <h5>
+                            به مدت {{ form.hour }} ساعت
+                        </h5>
+                    </td>
+                    <td class="text-center">
+                        <h5>
+                            در تاریخ {{ form.date }}
+                        </h5>
+                    </td>
+                    <td class="text-center">
+                        <h5>
+                            از ساعت {{ form.from_hour }}
+                        </h5>
+                    </td>
+                    <td class="text-center">
+                        <h5>
+                            تا ساعت {{ form.to_hour }}
+                        </h5>
+                    </td>
+                {% endif %}
+
+                {% if form.mission_type == 'd' %}
+                    <td class="text-center">
+                        <h5>
+                            به مدت {{ form.time_period }} روز
+                        </h5>
+                    </td>
+                    <td class="text-center">
+                        <h5>
+                            از تاریخ {{ form.from_date }}
+                        </h5>
+                    </td>
+                    <td class="text-center">
+                    <h5>
+                        تا تاریخ {{ form.to_date }}
+                    </h5>
+                {% endif %}
+            </tr>
+            {% if form.leave_type == 'i' %}
+
+                <tr>
+                    <td class="text-right" colspan="5">
+                        <h5>
+                            علت حادثه : {{ form.cause_of_incident }}
+                        </h5>
+                    </td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td class="text-right" colspan="5">
+                    <h5>
+                        توضیحات : {{ form.explanation }}
+                    </h5>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-right" colspan="2">
+                    <h5>
+                        در خواست کننده : {{ form.workshop_personnel.personnel.full_name }}
+                    </h5>
+                    <h4>
+                        امضا :
+                    </h4>
+                    توضیحات : ...........................................................................
+
+                </td>
+                <td class="text-right" colspan="3">
+                    <h5>
+                        مدیر عامل : {{ form.workshop_personnel.workshop.employer_name }}
+                    </h5>
+                    <h4>
+                        امضا :
+                    </h4>
+                    توضیحات : ...........................................................................
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

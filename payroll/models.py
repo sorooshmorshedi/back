@@ -3,14 +3,14 @@ from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
     is_valid_melli_code, EXPLANATION
+from payroll.functions import is_shenase_meli
 from users.models import City
 import datetime
-
 from decimal import Decimal
+import jdatetime
 
 
 class Workshop(BaseModel, LockableMixin, DefinableMixin):
@@ -26,7 +26,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     REWARD_TYPES = (
         (MONTHLY, 'ماهانه'),
         (YEARLY, 'سالانه')
-     )
+    )
 
     CERTAIN = 'c'
     ON_ACCOUNT = 'o'
@@ -34,10 +34,10 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     HAGHE_SANAVAT_TYPES = (
         (CERTAIN, 'قطعی'),
         (ON_ACCOUNT, 'علی الحساب')
-     )
+    )
 
     TYPE1 = 1
-    TYPE2 = 3/7
+    TYPE2 = 3 / 7
     TAX_EMPLOYER_TYPES = (
         (TYPE1, '7/7'),
         (TYPE2, '2/7')
@@ -67,14 +67,13 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE, )
     code = models.IntegerField()
-    contract_row = models.IntegerField(default=0)
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=10, validators=[
         RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')], blank=True, null=True)
-    employer_insurance_contribution = models.IntegerField()
-    branch_code = models.IntegerField(blank=True, null=True)
+    employer_insurance_contribution = models.IntegerField(default=3, blank=True, null=True)
+    branch_code = models.CharField(max_length=100, blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
 
     # Workshop settings
@@ -84,6 +83,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     kasre_kar_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     shab_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     aele_mandi_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    jome_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
@@ -104,6 +104,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
+    jome_kari_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
@@ -123,6 +124,66 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     save_absence_limit = models.BooleanField(default=True)
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
+    @property
+    def workshop_title(self):
+        return self.name + ' ' + str(self.code)
+
+    @staticmethod
+    def month_display(month):
+        months = {
+            1: 'فروردین',
+            2: 'اردیبهشت',
+            3: 'خرداد',
+            4: 'تیر',
+            5: 'مرداد',
+            6: 'شهریور',
+            7: 'مهر',
+            8: 'آبان',
+            9: 'آذر',
+            10: 'دی',
+            11: 'بهمن',
+            12: 'اسفند',
+        }
+        return months[month]
+
+    def absence_report(self, year, months):
+        response = {}
+        response['months'] = months
+        response['year'] = year
+        personnel = []
+        personnel_ids = []
+        for person in self.workshop_personnel.all():
+            person_report = person.absence_report(year, months)
+            person_report['id'] = person.id
+            personnel.append(person_report)
+        response['personnel'] = personnel
+        response['personnel_ids'] = personnel_ids
+        month_display = []
+        for month in response['months']:
+            month_display.append(self.month_display(month))
+        response['months_display'] = month_display
+
+        return response
+
+    def save_leave_report(self, year, months):
+        response = {}
+        response['months'] = months
+        response['year'] = year
+        personnel = []
+        personnel_ids = []
+        for person in self.workshop_personnel.all():
+            person_report = person.save_leave_report(year, months)
+            person_report['id'] = person.id
+            personnel.append(person_report)
+        response['personnel'] = personnel
+        response['personnel_ids'] = personnel_ids
+        month_display = []
+        for month in response['months']:
+            month_display.append(self.month_display(month))
+        response['months_display'] = month_display
+
+        return response
+
     class Meta(BaseModel.Meta):
         verbose_name = 'Workshop'
         permission_basename = 'workshop'
@@ -137,12 +198,10 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.workshop', 'حذف کارگاه خود'),
         )
 
-    @property
-    def workshop_title(self):
-        return self.name + ' ' + str(self.code)
 
     def __str__(self):
         return self.name + ' ' + self.company.name
+
 
 
 class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
@@ -225,6 +284,7 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
+
     ACTIVE = 'a'
     NO_ACTIVE = 'n'
 
@@ -243,7 +303,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     status = models.CharField(max_length=1, choices=ACTIVE_TYPE, default=NO_ACTIVE)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
-    assignor_national_code = models.IntegerField(unique=True)
+    assignor_national_code = models.CharField(max_length=20, validators=[is_shenase_meli], blank=True, null=True)
     assignor_workshop_code = models.IntegerField()
 
     contract_initial_amount = DECIMAL()
@@ -273,8 +333,8 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
 
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
-    IRANIAN = 'i'
-    OTHER = 'o'
+    IRANIAN = 1
+    OTHER = 2
 
     NATIONALITY_TYPE = (
         (IRANIAN, 'ایرانی'),
@@ -312,15 +372,17 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (CHILDREN_WARDSHIP, 'سرپرست فرزند')
     )
 
-    UNDER_DIPLOMA = 'un'
-    DIPLOMA = 'di'
-    ASSOCIATES = 'as'
-    BACHELOR = 'ba'
-    MASTER = 'ma'
-    DOCTORAL = 'do'
-    POSTDOCTORAL = 'pd'
+    NO_EDUCATE = 1
+    UNDER_DIPLOMA = 2
+    DIPLOMA = 3
+    ASSOCIATES = 4
+    BACHELOR = 5
+    MASTER = 6
+    DOCTORAL = 7
+    POSTDOCTORAL = 8
 
     DEGREE_TYPE = (
+        (NO_EDUCATE, 'کم سواد'),
         (UNDER_DIPLOMA, 'زیر دیپلم'),
         (DIPLOMA, 'دیپلم'),
         (ASSOCIATES, 'کاردانی'),
@@ -346,9 +408,9 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     father_name = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
-    nationality = models.CharField(max_length=1, choices=NATIONALITY_TYPE, default=IRANIAN)
+    nationality = models.IntegerField(choices=NATIONALITY_TYPE, default=1)
 
-    personnel_code = models.IntegerField(blank=True, null=True)
+    personnel_code = models.CharField(max_length=10, blank=True, null=True)
 
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
@@ -375,7 +437,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     insurance = models.BooleanField(default=False)
     insurance_code = models.IntegerField(blank=True, null=True)
 
-    degree_education = models.CharField(max_length=2, choices=DEGREE_TYPE, default=DIPLOMA)
+    degree_education = models.IntegerField(choices=DEGREE_TYPE, default=DIPLOMA)
     field_of_study = models.CharField(max_length=100, null=True, blank=True)
     university_type = models.CharField(max_length=2, choices=UNIVERSITY_TYPES, blank=True, null=True)
     university_name = models.CharField(max_length=50, blank=True, null=True)
@@ -387,6 +449,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     is_personnel_active = models.BooleanField(default=False, null=True, blank=True)
     is_personnel_verified = models.BooleanField(default=False, null=True, blank=True)
+
 
     class Meta(BaseModel.Meta):
         ordering = ['-pk', ]
@@ -407,14 +470,22 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     def full_name(self):
         return self.name + ' ' + self.last_name
 
+
+    @property
+    def insurance_for_tax(self):
+        if self.insurance:
+            return 2
+        else:
+            return 5
+
     @property
     def system_code(self):
         try:
             company_personnel = Personnel.objects.filter(company=self.company).first()
-            personnel_code = company_personnel.personnel_code
-            code = personnel_code + 1
+            personnel_code = int(company_personnel.personnel_code)
+            code = str(personnel_code + 1)
         except:
-            code = 100
+            code = '100'
         return code
 
     def save(self, *args, **kwargs):
@@ -527,11 +598,11 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
 
 
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
-    PART_TIME = 'p'
-    FULL_TIME = 'f'
-    TEMPORARY = 't'
-    HOURLY = 'h'
-    CONTRACTUAL = 'c'
+    PART_TIME = 2
+    FULL_TIME = 1
+    TEMPORARY = 3
+    HOURLY = 5
+    CONTRACTUAL = 4
 
     CONTRACT_TYPES = (
         (PART_TIME, 'پاره وقت'),
@@ -542,12 +613,12 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     )
 
-    CONTRACTUAL = 'c'
-    CONVENTIONAL = 'co'
-    CORPORATE = 'cr'
-    FUNCTIONARY = 'fu'
-    PERMANENT = 'p'
-    OTHERS = 'or'
+    CONVENTIONAL = 1
+    CORPORATE = 2
+    PERMANENT = 3
+    CONTRACTUAL = 4
+    FUNCTIONARY = 5
+    OTHERS = 6
 
     EMPLOYMENTS_TYPES = (
         (CONTRACTUAL, 'پیمانی'),
@@ -559,55 +630,56 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     )
 
-    NORMAL = 'nr'
-    FALLEN_CHILD = 'fc'
-    STUNTMAN = 'st'
-    FREEDMAN = 'fr'
-    ARM = 'ar'
-    BAND19 = 'bn'
-    FOREIGN = 'fo'
+
+    NORMAL = 1
+    STUNTMAN = 2
+    FALLEN_CHILD = 3
+    FREEDMAN = 4
+    ARM = 5
+    BAND_12 = 6
+    FOREIGN = 7
+
 
     EMPLOYEE_TYPES = (
-        (NORMAL, 'معمولی'),
-        (FALLEN_CHILD, 'فرزند شهید'),
+        (NORMAL, 'عادی'),
         (STUNTMAN, 'جانباز'),
+        (FALLEN_CHILD, 'فرزند شهید'),
         (FREEDMAN, 'آزاده'),
         (ARM, 'نیروهای مسلح'),
-        (BAND19, 'مشمولین بند چهارده ماده نود و هفت'),
-        (FOREIGN, 'اتباع خارجی مشمول قانون اجتناب از اخذ مالیات مضاعف')
+        (BAND_12, 'سایر مشمولین بند14ماده11'),
+        (FOREIGN, ' قانون اجتناب از اخذ مالیات مضاعف اتباع خارجی مشمول')
     )
 
-    NORMAL = 'nr'
-    DEPRIVED_AREAS = 'dp'
-    FREE_TRADE_ZONE = 'ft'
-    SCIENCE_PARK = 'sp'
+    NORMAL = 1
+    UN_DEVOLOPED = 2
+    FREE_ZONE = 3
+
 
     JOB_LOCATION_STATUSES = (
         (NORMAL, 'معمولی'),
-        (DEPRIVED_AREAS, 'مناطق کمتر توسعه یافته'),
-        (FREE_TRADE_ZONE, 'مناطق آزاد تجاری'),
-        (SCIENCE_PARK, 'پارک علم و فناوری'),
+        (UN_DEVOLOPED, 'مناطق کمتر توسعه یافته'),
+        (FREE_ZONE, 'مناطق آزاد تجاری'),
     )
 
-    STUDY = 'st'
-    FINANCIAL = 'fn'
-    SOCIAL = 'so'
-    HEALTH = 'he'
-    IT = 'it'
-    SERVICES = 'se'
-    ENGINEER = 'en'
-    ARGI = 'ar'
-    PRODUCT = 'pr'
-    SEARCH = 'sr'
-    WORKER = 'wo'
-    SECURITY = 'sc'
-    TRANSFORM = 'tr'
-    SALE = 'sa'
-    JUDGE = 'ju'
-    WAREHOUSE = 'wa'
-    CONTROL = 'co'
-    MASTER = 'ma'
-    OTHER = 'ot'
+    STUDY = 2
+    FINANCIAL = 1
+    SOCIAL = 3
+    IT = 4
+    HEALTH = 5
+    ENGINEER = 6
+    SERVICES = 7
+    ARGI = 8
+    SALE = 9
+    SECURITY = 10
+    WORKER = 11
+    TRANSFORM = 12
+    PRODUCT = 13
+    CONTROL = 14
+    SEARCH = 15
+    WAREHOUSE = 16
+    JUDGE = 17
+    MASTER = 18
+    OTHER = 0
 
     JOB_GROUP_TYPES = (
         (STUDY, 'آموزشي و فرهنگي'),
@@ -631,11 +703,13 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (OTHER, 'سایر'),
     )
 
-    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True, null=True)
-    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True, null=True)
+    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True,
+                                 null=True)
+    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True,
+                                  null=True)
     contract_row = models.ManyToManyField(ContractRow, related_name='workshop_personnel', blank=True)
 
-    insurance_add_date = jmodels.jDateField(blank=True, null=True)
+    employment_date = jmodels.jDateField(blank=True, null=True)
     work_title = models.CharField(max_length=100, blank=True, null=True)
 
     previous_insurance_history_out_workshop = models.IntegerField(blank=True, null=True)
@@ -644,20 +718,293 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     insurance_history_totality = models.IntegerField(blank=True, null=True)
 
     job_position = models.CharField(max_length=100)
-    job_group = models.CharField(max_length=2, choices=JOB_GROUP_TYPES)
+    job_group = models.IntegerField(choices=JOB_GROUP_TYPES, default=OTHERS)
     job_location = models.CharField(max_length=100)
-    job_location_status = models.CharField(max_length=2, choices=JOB_LOCATION_STATUSES, default=NORMAL)
+    job_location_status = models.IntegerField(choices=JOB_LOCATION_STATUSES, default=NORMAL)
 
-    employment_type = models.CharField(max_length=2, choices=EMPLOYMENTS_TYPES, default=CONVENTIONAL)
-    contract_type = models.CharField(max_length=2, choices=CONTRACT_TYPES, default=FULL_TIME)
-    employee_status = models.CharField(max_length=2, choices=EMPLOYEE_TYPES, default=NORMAL)
+    employment_type = models.IntegerField(choices=EMPLOYMENTS_TYPES, default=CONVENTIONAL)
+    contract_type = models.IntegerField(choices=CONTRACT_TYPES, default=FULL_TIME)
+    employee_status = models.IntegerField(choices=EMPLOYEE_TYPES, default=NORMAL)
 
     haghe_sanavat_days = models.IntegerField(default=0)
     haghe_sanavat_identify_amount = DECIMAL(default=0)
 
+    save_leaave = models.IntegerField(default=0)
+
+    @property
+    def current_insurance(self):
+        now = jdatetime.date.today()
+        delta = now - self.employment_date
+        return round(delta.days / 30)
+
+    @property
+    def total_insurance(self):
+        return self.current_insurance + self.previous_insurance_history_in_workshop
+
+    @property
+    def insurance_history_total(self):
+        return self.total_insurance + self.previous_insurance_history_out_workshop
+
+    @property
+    def quit_job_date(self):
+        for contract in self.contract.all():
+            if contract.quit_job_date:
+                return True
+        return False
+
+    @property
+    def payment_balance(self):
+
+        response = []
+        for item in self.list_of_pay_item.all():
+            month = {}
+            month['amount'] = item.payable
+            month['paid'] = item.paid_amount
+            month['upaid'] = item.unpaid
+            month['month'] = item.list_of_pay.month
+            month['year'] = item.list_of_pay.year
+            month['bank_date'] = item.list_of_pay.bank_pay_date
+            month['total'] = item.total_unpaid
+            response.append(month)
+        return response
+
+    @property
+    def real_work(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.real_worktime
+        return total
+
     @property
     def my_title(self):
         return self.personnel.full_name + ' در کارگاه ' + self.workshop.name
+
+    @property
+    def last_haghe_owlad(self):
+        return self.list_of_pay_item.first().aele_mandi
+
+    @property
+    def quit_job(self):
+        response = False
+        contracts = self.contract.all()
+        for contract in contracts:
+            if contract.quit_job_date:
+                response = contract.quit_job_date
+        return response
+
+
+    @property
+    def absence_total(self):
+        return len(self.leave.all())
+
+    @property
+    def get_save_leave(self):
+        item = ListOfPayItem.objects.filter(workshop_personnel=self.id).first()
+        day_amount = item.get_save_leave_day_amount
+        day = item.get_save_leave_day
+        amount = item.get_save_leave_amount
+        day += self.save_leaave
+        return round((day * day_amount) + amount)
+
+    @property
+    def get_eydi(self):
+        item = ListOfPayItem.objects.filter(workshop_personnel=self.id).first()
+        eydi = item.calculate_yearly_eydi - item.calculate_yearly_eydi_tax
+        return round(eydi)
+
+    @property
+    def get_haghe_sanavat(self):
+        item = ListOfPayItem.objects.filter(workshop_personnel=self.id).first()
+        return round(item.calculate_yearly_haghe_sanavat)
+
+    @property
+    def settlement(self):
+        response = {}
+        bes = {}
+        bed = {}
+        total_hoghoogh = 0
+        for item in self.list_of_pay_item.all():
+            total_hoghoogh += item.payable
+            total_hoghoogh -= item.paid_amount
+        bes['hoghoogh'] = total_hoghoogh
+        bes['total_save_leave'] = self.get_save_leave
+        bes['total'] = total_hoghoogh + self.get_save_leave + self.get_eydi + self.get_haghe_sanavat
+        if self.workshop.haghe_sanavat_identification == 'y':
+            response['identification'] = True
+            bes['eydi'] = self.get_eydi
+            bes['haghe_sanavat'] = self.get_haghe_sanavat
+
+        else:
+            response['identification'] = False
+
+        loans = self.loan.all()
+        deductions = self.deduction.all()
+        bed['loan'] = 0
+        bed['dept'] = 0
+        bed['deduction'] = 0
+        for loan in loans:
+            if not loan.pay_done and loan.loan_type == 'l':
+                bed['loan'] += loan.settlement
+            elif not loan.pay_done and loan.loan_type == 'd':
+                bed['dept'] += loan.settlement
+        for deduction in deductions:
+            bed['deduction'] += deduction.settlement
+        bed['total'] = bed['deduction'] + bed['dept'] + bed['loan']
+        contract = self.contract.first()
+        hr_letter = HRLetter.objects.filter(contract=contract.id).first()
+        hr = {}
+        hr['base_pay'] = hr_letter.hoghooghe_roozane_amount
+        hr['bon_kargari'] = hr_letter.bon_kharo_bar_amount
+        hr['fogholade'] = hr_letter.fogholade_sakhti_kar_amount
+        hr['hagh_maskan'] = hr_letter.haghe_maskan_amount
+        hr['ayab_zahab'] = hr_letter.ayabo_zahab_amount
+        hr['hagh_owlad'] = hr_letter.get_aele_mandi_amount
+
+        response['hr'] = hr_letter
+        response['bed'] = bed
+        response['bes'] = bes
+        response['total'] = bes['total'] - bed['total']
+        return response
+
+
+    def absence_report(self, year, months_list):
+        response = {}
+        months = {}
+        by_month = []
+
+        for month in months_list:
+            item = ListOfPayItem.objects.filter(Q(workshop_personnel__id=self.id) & Q(list_of_pay__year=year)
+                                                & Q(list_of_pay__month=month) & Q(list_of_pay__ultimate=True)).first()
+            report = {}
+            if item:
+                report['display'] = item.list_of_pay.month_display
+                report['limit'] = Decimal(26 / 12 * len(months_list))
+                report['matter_73_limit'] = Decimal(item.matter_47_leave_day)
+                report['total_limit'] = report['limit'] + report['matter_73_limit']
+                report['save_limit'] = Decimal(9 / 12 * len(months_list))
+                report['entitlement'] = Decimal(item.entitlement_leave_day)
+                report['matter_73'] = Decimal(item.matter_47_leave_day)
+                report['without_salary'] = Decimal(item.without_salary_leave_day)
+                report['illness'] = Decimal(item.illness_leave_day)
+                report['absence'] = Decimal(item.absence_day)
+            else:
+                report['display'] = 0
+                report['limit'] = Decimal(26 / 12 * len(months_list))
+                report['matter_73_limit'] = Decimal(0)
+                report['total_limit'] = Decimal(26 / 12 * len(months_list))
+                report['save_limit'] = Decimal(9 / 12 * len(months_list))
+                report['entitlement'] = Decimal(0)
+                report['matter_73'] = Decimal(0)
+                report['without_salary'] = Decimal(0)
+                report['illness'] = Decimal(0)
+                report['absence'] = Decimal(0)
+                report['remaining'] = Decimal(26 / 12 * len(months_list))
+            by_month.append(report)
+
+        response['total'] = {
+            'name': self.personnel.full_name,
+            'limit': 0,
+            'matter_73_limit': 0,
+            'total_limit': 0,
+            'save_limit': 0,
+            'entitlement': 0,
+            'matter_73': 0,
+            'without_salary': 0,
+            'illness': 0,
+            'absence': 0,
+            'remaining': 0,
+        }
+
+        for month in by_month:
+            response['total']['limit'] = round((response['total']['limit'] + month['limit']), 2)
+            response['total']['matter_73_limit'] = round((response['total']['matter_73_limit'] +
+                                                          month['matter_73_limit']), 2)
+            response['total']['total_limit'] = round((response['total']['total_limit'] +
+                                                      month['total_limit']), 2)
+            response['total']['save_limit'] = round((response['total']['save_limit'] +
+                                                     month['save_limit']), 2)
+            response['total']['entitlement'] = round((response['total']['entitlement'] +
+                                                      month['entitlement']), 2)
+            response['total']['matter_73'] = round((response['total']['matter_73'] + month['matter_73']), 2)
+            response['total']['without_salary'] = round((response['total']['without_salary'] +
+                                                         month['without_salary']), 2)
+            response['total']['illness'] = round((response['total']['illness'] + month['illness']), 2)
+            response['total']['absence'] = round((response['total']['absence'] + month['absence']), 2)
+            response['total']['remaining'] = response['total']['total_limit'] - \
+                                             response['total']['entitlement'] - response['total']['matter_73']
+        response['months'] = by_month
+
+        return response
+
+    def save_leave_report(self, year, months_list):
+        response = {}
+        months = {}
+        by_month = []
+        day_amount = 0
+        for month in months_list:
+            item = ListOfPayItem.objects.filter(Q(workshop_personnel__id=self.id) & Q(list_of_pay__year=year)
+                                                & Q(list_of_pay__month=month) & Q(list_of_pay__ultimate=True)).first()
+            report = {}
+            if item:
+                report['display'] = item.list_of_pay.month_display
+                report['limit'] = Decimal(26 / 12 * len(months_list))
+                report['matter_73_limit'] = Decimal(item.matter_47_leave_day)
+                report['total_limit'] = report['limit'] + report['matter_73_limit']
+                report['save_limit'] = Decimal(9 / 12 * len(months_list))
+                report['entitlement'] = Decimal(item.entitlement_leave_day)
+                report['matter_73'] = Decimal(item.matter_47_leave_day)
+                report['total_leave'] = report['entitlement'] + report['matter_73']
+                report['remaining'] = Decimal(26 / 12 * len(months_list))
+                day_amount = item.get_save_leave_day_amount
+
+            else:
+                report['display'] = 0
+                report['limit'] = Decimal(26 / 12 * len(months_list))
+                report['matter_73_limit'] = Decimal(0)
+                report['total_limit'] = Decimal(26 / 12 * len(months_list))
+                report['save_limit'] = Decimal(9 / 12 * len(months_list))
+                report['entitlement'] = Decimal(0)
+                report['matter_73'] = Decimal(0)
+                report['total_leave'] = Decimal(0)
+                report['remaining'] = Decimal(26 / 12 * len(months_list))
+
+            by_month.append(report)
+
+        response['total'] = {
+            'name': self.personnel.full_name,
+            'limit': 0,
+            'matter_73_limit': 0,
+            'total_limit': 0,
+            'save_limit': 0,
+            'entitlement': 0,
+            'matter_73': 0,
+            'total_leave': 0,
+            'remaining': 0,
+            'day_amount': 0,
+            'amount': 0,
+        }
+
+        for month in by_month:
+            response['total']['limit'] = round((response['total']['limit'] + month['limit']), 2)
+            response['total']['matter_73_limit'] = round((response['total']['matter_73_limit'] +
+                                                          month['matter_73_limit']), 2)
+            response['total']['total_limit'] = round((response['total']['total_limit'] +
+                                                      month['total_limit']), 2)
+            response['total']['save_limit'] = round((response['total']['save_limit'] +
+                                                     month['save_limit']), 2)
+            response['total']['entitlement'] = round((response['total']['entitlement'] +
+                                                      month['entitlement']), 2)
+            response['total']['matter_73'] = round((response['total']['matter_73'] + month['matter_73']), 2)
+            response['total']['total_leave'] = round((response['total']['total_leave'] + month['total_leave']), 2)
+            response['total']['remaining'] = response['total']['total_limit'] - \
+                                             response['total']['entitlement'] - response['total']['matter_73']
+
+        response['months'] = by_month
+        response['total']['day_amount'] = day_amount
+        print(day_amount)
+        response['total']['amount'] = day_amount * response['total']['remaining']
+
+        return response
 
     class Meta(BaseModel.Meta):
         verbose_name = 'WorkshopPersonnel'
@@ -673,12 +1020,16 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.workshop_personnel', 'حذف پرسنل کارگاه خود'),
         )
 
+    @property
+    def get_insurance_in_workshop(self):
+        return self.previous_insurance_history_in_workshop + self.current_insurance_history_in_workshop
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.current_insurance_history_in_workshop = 0
-        self.insurance_history_totality = self.previous_insurance_history_in_workshop +\
-                                            self.previous_insurance_history_out_workshop +\
-                                            self.current_insurance_history_in_workshop
+        self.insurance_history_totality = self.previous_insurance_history_in_workshop + \
+                                          self.previous_insurance_history_out_workshop + \
+                                          self.current_insurance_history_in_workshop
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -715,10 +1066,10 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
         else:
             self.workshop_personnel.insurance_add_date = self.contract_from_date
         if not self.quit_job_date:
-            self.workshop_personnel.current_insurance_history_in_workshop =\
+            self.workshop_personnel.current_insurance_history_in_workshop = \
                 self.contract_to_date.month + self.contract_from_date.month
         if self.quit_job_date:
-            self.workshop_personnel.current_insurance_history_in_workshop =\
+            self.workshop_personnel.current_insurance_history_in_workshop = \
                 self.quit_job_date.month + self.contract_from_date.month
 
         self.workshop_personnel.save()
@@ -728,8 +1079,220 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
     def workshop_personnel_display(self):
         return self.workshop_personnel.my_title
 
+    @property
+    def find_hr(self):
+        return self.hr_letter.first()
+
     def __str__(self):
         return str(self.code) + ' برای ' + self.workshop_personnel_display
+
+
+class Loan(BaseModel, LockableMixin, DefinableMixin):
+    LOAN = 'l'
+    DEPT = 'd'
+
+    LOAN_TYPES = (
+        (LOAN, 'وام'),
+        (DEPT, 'مساعده'),
+    )
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='loan', on_delete=models.CASCADE)
+    amount = DECIMAL(default=0)
+    episode = models.IntegerField(default=1)
+    pay_date = jmodels.jDateField(blank=True, null=True)
+    loan_type = models.CharField(max_length=1, choices=LOAN_TYPES, default=DEPT)
+    explanation = EXPLANATION()
+    episode_payed = models.IntegerField(default=0)
+    pay_done = models.BooleanField(default=False)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'Loan'
+        permission_basename = 'loan'
+        permissions = (
+            ('get.contract', 'مشاهده وام'),
+            ('create.contract', 'تعریف وام'),
+            ('update.contract', 'ویرایش وام'),
+            ('delete.contract', 'حذف وام'),
+
+            ('getOwn.contract', 'مشاهده وام خود'),
+            ('updateOwn.contract', 'ویرایش وام خود'),
+            ('deleteOwn.contract', 'حذف وام خود'),
+        )
+
+    def __str__(self):
+        return str(self.amount) + ' به ' + self.workshop_personnel.my_title
+
+    @property
+    def get_pay_episode(self):
+        return self.amount / Decimal(self.episode)
+
+    @property
+    def settlement(self):
+        total = self.amount
+        for item in self.item:
+            total -= item.payed_amount
+        return total
+
+    @property
+    def get_pay_month(self):
+        months = []
+        month_base = 1
+        for i in range(0, self.episode):
+            if self.pay_date.month + i > 12:
+                pay_date = jdatetime.date(self.pay_date.year + int((self.pay_date.month + i) / 12), month_base,
+                                          self.pay_date.day)
+                month_base += 1
+                if month_base > 12:
+                    month_base = 1
+            else:
+                pay_date = jdatetime.date(self.pay_date.year, self.pay_date.month + i, self.pay_date.day)
+            months.append(pay_date)
+        return {'months': months}
+
+    @property
+    def end_date(self):
+        end = self.get_pay_month['months'][-1]
+        return str(end.year) + '-' + str(end.month)
+
+    def save(self, *args, **kwargs):
+        if self.loan_type == 'd':
+            self.episode = 1
+        super().save(*args, **kwargs)
+
+        for date in self.get_pay_month['months']:
+            LoanItem.objects.create(
+                loan=self,
+                amount=self.get_pay_episode,
+                date=date,
+            )
+
+
+class LoanItem(BaseModel, LockableMixin, DefinableMixin):
+    loan = models.ForeignKey(Loan, related_name='item', on_delete=models.CASCADE, blank=True, null=True)
+    amount = DECIMAL(default=0)
+    payed_amount = DECIMAL(default=0)
+    date = jmodels.jDateField(blank=True, null=True)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'LoanItem'
+        permission_basename = 'loan_item'
+        permissions = (
+            ('get.contract', 'مشاهده قسط وام'),
+            ('create.contract', 'تعریف قسط وام'),
+            ('update.contract', 'ویرایش قسط وام'),
+            ('delete.contract', 'حذف قسط وام'),
+
+            ('getOwn.contract', 'مشاهده قسط وام خود'),
+            ('updateOwn.contract', 'ویرایش وام قسط خود'),
+            ('deleteOwn.contract', 'حذف وام قسط خود'),
+        )
+
+    @property
+    def un_paid(self):
+        return self.amount - self.payed_amount
+
+    @property
+    def pay_done(self):
+        return self.amount - self.payed_amount == 0
+
+    @property
+    def bed_or_bes(self):
+        return self.payed_amount - self.amount
+
+    @property
+    def cumulative_balance(self):
+        items = LoanItem.objects.filter(
+            Q(loan=self.loan) & Q(date__lte=self.date)
+        )
+        amount = self.loan.amount
+        for item in items:
+            amount -= item.payed_amount
+        return amount
+
+    @property
+    def month_display(self):
+        months = {
+            1: 'فروردین',
+            2: 'اردیبهشت',
+            3: 'خرداد',
+            4: 'تیر',
+            5: 'مرداد',
+            6: 'شهریور',
+            7: 'مهر',
+            8: 'آبان',
+            9: 'آذر',
+            10: 'دی',
+            11: 'بهمن',
+            12: 'اسفند',
+        }
+        return months[self.date.month]
+
+
+class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin):
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='deduction',
+                                           on_delete=models.CASCADE, blank=True, null=True)
+    is_template = models.BooleanField(default=False)
+    template_name = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    amount = DECIMAL(default=0)
+    episode = models.IntegerField(default=1)
+    start_date = jmodels.jDateField(blank=True, null=True)
+    explanation = EXPLANATION()
+    pay_done = models.BooleanField(default=False)
+    episode_payed = models.IntegerField(default=0)
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'Deductions'
+        permission_basename = 'deductions'
+        permissions = (
+            ('get.contract', 'مشاهده کسورات اختیاری'),
+            ('create.contract', 'تعریف کسورات اختیاری'),
+            ('update.contract', 'ویرایش کسورات اختیاری'),
+            ('delete.contract', 'حذف کسورات اختیاری'),
+
+            ('getOwn.contract', 'مشاهده کسورات اختیاری خود'),
+            ('updateOwn.contract', 'ویرایش وام کسورات اختیاری'),
+            ('deleteOwn.contract', 'حذف وام کسورات اختیاری'),
+        )
+
+    def __str__(self):
+        return str(self.amount) + ' از ' + self.workshop_personnel.my_title
+
+    @property
+    def get_pay_episode(self):
+        return self.amount / Decimal(self.episode)
+
+    @property
+    def settlement(self):
+        return round(self.amount) - (round(self.episode_payed) * self.get_pay_episode)
+
+    @property
+    def get_pay_month(self):
+        months = []
+        month_base = 1
+        for i in range(0, self.episode):
+            if self.start_date.month + i > 12:
+                pay_date = jdatetime.date(self.start_date.year + int((self.start_date.month + i) / 12),
+                                          month_base, self.start_date.day)
+                month_base += 1
+                if month_base > 12:
+                    month_base = 1
+            else:
+                pay_date = jdatetime.date(self.start_date.year, self.start_date.month + i, self.start_date.day)
+            months.append(pay_date)
+        return {'months': months}
+
+    @property
+    def end_date(self):
+        end = self.get_pay_month['months'][-1]
+        return str(end.year) + '-' + str(end.month)
+
+    def save(self, *args, **kwargs):
+        if not self.is_template and not self.workshop_personnel:
+            raise ValidationError('پرسنل در کارگاه را انتخاب کنید')
+        if self.workshop_personnel:
+            self.is_template = False
+            self.template_name = None
+        super().save(*args, **kwargs)
 
 
 class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
@@ -774,7 +1337,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
     leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, default=WITHOUT_SALARY)
     entitlement_leave_type = models.CharField(max_length=2, choices=ENTITLEMENT_LEAVE_TYPES, blank=True, null=True)
-    matter_73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
+    matter73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
@@ -788,7 +1351,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     def final_by_day(self):
         if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
-                                            minutes=self.to_hour.minute - self.from_hour.minute)
+                                          minutes=self.to_hour.minute - self.from_hour.minute)
             final_by_day = (duration.seconds / 60) / 440
         else:
             difference = self.to_date - self.from_date
@@ -796,6 +1359,15 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
             if self.leave_type == 'm' and final_by_day > 3:
                 final_by_day = 3
         return final_by_day
+
+    @property
+    def hour(self):
+        hour = 0
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
+                                          minutes=self.to_hour.minute - self.from_hour.minute)
+            hour = (duration.seconds / 60) / 60
+        return round(hour)
 
     def save(self, *args, **kwargs):
         if self.leave_type == 'm':
@@ -861,7 +1433,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     )
 
     contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
-                                    blank=True, null=True)
+                                 blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     is_template = models.CharField(max_length=1, choices=HRLETTER_TYPES)
 
@@ -998,7 +1570,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     komakhazine_varzesh_use_insurance = models.BooleanField(default=True)
     komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
     komakhazine_varzesh_amount = DECIMAL(default=0)
-    komakhazine_varzesh_base= models.BooleanField(default=False)
+    komakhazine_varzesh_base = models.BooleanField(default=False)
 
     komakhazine_mobile_use_tax = models.BooleanField(default=True)
     komakhazine_mobile_use_insurance = models.BooleanField(default=True)
@@ -1050,12 +1622,30 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     otomobil = models.BooleanField(default=False)
     include_made_86 = models.BooleanField(default=False)
 
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
+    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
+
+
+    @property
+    def get_aele_mandi_amount(self):
+        if self.contract.workshop_personnel.workshop.aele_mandi_pay_type == 'd':
+            return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.hoghooghe_roozane_amount
+        else:
+            return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.daily_pay_base
+
+    @property
+    def contract_info(self):
+        response = {}
+        response['personnel_name'] = self.contract.workshop_personnel.personnel.full_name
+        response['workshop_name'] = self.contract.workshop_personnel.workshop.workshop_title
+        return response
+
     def __str__(self):
         if self.contract:
             return ' حکم کارگزینی ' + self.contract.workshop_personnel_display
         else:
             return 'قالب حکم کارگزینی ' + self.name
-
 
     class Meta(BaseModel.Meta):
         verbose_name = 'HRLetter'
@@ -1121,7 +1711,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         hr_letter_items.append({
             'insurance': self.fogholade_sakhti_kar_use_insurance,
             'nature': self.fogholade_sakhti_kar_nature,
-             'base': self.fogholade_sakhti_kar_base,
+            'base': self.fogholade_sakhti_kar_base,
             'amount': self.fogholade_sakhti_kar_amount
         })
         hr_letter_items.append({
@@ -1157,7 +1747,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         hr_letter_items.append({
             'insurance': self.haghe_maskan_use_insurance,
             'nature': self.haghe_maskan_nature,
-             'base': self.haghe_maskan_base,
+            'base': self.haghe_maskan_base,
             'amount': self.haghe_maskan_base
         })
         hr_letter_items.append({
@@ -1233,6 +1823,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         day_hourly = daily / 7.33
         return daily, monthly, day_hourly, month_hourly
 
+    @property
+    def hoghoogh_mahanae(self):
+        return round(self.hoghooghe_roozane_amount * Decimal(30))
 
     @property
     def calculate_save_leave_base(self):
@@ -1246,7 +1839,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     daily += round(hr_letter_items[i]['amount'] / 30)
         return daily
 
-
     @property
     def calculate_insurance_pay_base(self):
         insurance_pay_base = 0
@@ -1257,7 +1849,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     insurance_pay_base += round(hr_letter_items[i]['amount'])
                 else:
                     insurance_pay_base += round(hr_letter_items[i]['amount'] / 30)
-        print('base ' , insurance_pay_base)
+        print('base ', insurance_pay_base)
         return insurance_pay_base
 
     @property
@@ -1270,7 +1862,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     insurance_benefit += round(hr_letter_items[i]['amount'] * 30)
                 else:
                     insurance_benefit += round(hr_letter_items[i]['amount'])
-        print('benifit ', insurance_benefit)
 
         return insurance_benefit
 
@@ -1290,7 +1881,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         if self.pay_done:
             raise ValidationError(message='حکم غیرقابل تفییر است')
 
-        self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base =\
+        self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
         self.insurance_benefit = self.calculate_insurance_benefit
@@ -1332,12 +1923,21 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
     def final_by_day(self):
         if self.mission_type == 'h':
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
-                                            minutes=self.to_hour.minute - self.from_hour.minute)
+                                          minutes=self.to_hour.minute - self.from_hour.minute)
             final_by_day = (duration.seconds / 60) / 440
         else:
             difference = self.to_date - self.from_date
             final_by_day = difference.days + 1
         return final_by_day
+
+    @property
+    def hour(self):
+        hour = 0
+        if self.mission_type == 'h':
+            duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
+                                          minutes=self.to_hour.minute - self.from_hour.minute)
+            hour = (duration.seconds / 60) / 60
+        return round(hour)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Mission'
@@ -1370,15 +1970,22 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
-
     workshop = models.ForeignKey(Workshop, related_name="list_of_pay", on_delete=models.CASCADE,
                                  null=True, blank=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
     year = models.IntegerField(default=0)
     month = models.IntegerField(default=0)
     month_days = models.IntegerField(default=30)
     start_date = jmodels.jDateField()
     end_date = jmodels.jDateField()
     ultimate = models.BooleanField(default=False)
+    use_in_calculate = models.BooleanField(default=False)
+
+    '''for payment'''
+    pay_done = models.BooleanField(default=False)
+    pay_form_create_date = jmodels.jDateField(blank=True, null=True)
+    bank_pay_date = jmodels.jDateField(blank=True, null=True)
+
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPay'
@@ -1402,6 +2009,10 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                                         & Q(ultimate=True))
         if len(same) == 0:
             self.ultimate = True
+        elif self.ultimate:
+            for list_of_pay in same:
+                list_of_pay.ultimate = False
+                list_of_pay.save()
         super().save(*args, **kwargs)
 
     @property
@@ -1421,6 +2032,13 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             12: 'اسفند',
         }
         return months[self.month]
+
+    @property
+    def is_ultimate(self):
+        if self.ultimate:
+            return 'نهایی'
+        else:
+            return ''
 
     @property
     def get_contracts(self):
@@ -1451,22 +2069,18 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         contracts = self.get_contracts
         personnel_count = []
         items = self.list_of_pay_item
-        items_data = []
-        for item in items.all():
-            items_data.append(item.data_for_insurance)
         total_worktime = 0
         total_day_pay = 0
         total_month_pay = 0
         total_benefit = 0
         total_base = 0
         total_insurance = 0
-        for item in items_data:
-            total_worktime += item['DSW_ROOZ']
-            total_day_pay += item['DSW_ROOZ']
-            total_month_pay += item['DSW_MAH']
-            total_benefit += item['DSW_MAZ']
-            total_base += item['DSW_TOTL']
-            total_insurance += item['DSW_BIME']
+        for item in items.all():
+            total_day_pay += item.insurance_worktime
+            total_month_pay += item.insurance_monthly_payment
+            total_benefit += item.insurance_monthly_benefit
+            total_base += item.insurance_total_included
+            total_insurance += item.haghe_bime_bime_shavande
         for contract in contracts:
             if contract.workshop_personnel.personnel.id not in personnel_count:
                 personnel_count.append(contract.workshop_personnel.personnel.id)
@@ -1495,7 +2109,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_BIMH': 0,
             'DSK_PYM': '000',
         }
-        return DSKKAR, items_data
+        return DSKKAR
 
     def personnel_insurance_worktime(self, pk):
         workshop_contracts = self.get_contracts
@@ -1563,46 +2177,59 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             filtered_mission = Mission.objects.filter(workshop_personnel=workshop_personnel)
 
             for absence in filtered_absence.all():
-                print(absence)
                 if absence.workshop_personnel == workshop_personnel:
-                    if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and\
-                            absence.date.__ge__(contract_start[contract.id]) and absence.date.__le__(contract_end[contract.id]):
+                    if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \
+                            absence.date.__ge__(contract_start[contract.id]) and absence.date.__le__(
+                        contract_end[contract.id]):
                         absence_types['eh'] += absence.to_hour.hour - absence.from_hour.hour
-                    if absence.leave_type == 'e' and absence.entitlement_leave_type == 'd':
-                        if absence.from_date.__ge__(contract_start[contract.id]) and absence.to_date.__le__(contract_end[contract.id]):
+                    if absence.leave_type == 'e' and absence.entitlement_leave_type != 'h':
+                        if absence.from_date.__ge__(contract_start[contract.id]) and absence.to_date.__le__(
+                                contract_end[contract.id]):
                             absence_types['ed'] += absence.time_period
-                        elif absence.from_date.__lt__(contract_start[contract.id]) and absence.to_date.__le__(contract_end[contract.id]) and \
+                        elif absence.from_date.__lt__(contract_start[contract.id]) and absence.to_date.__le__(
+                                contract_end[contract.id]) and \
                                 absence.to_date.__gt__(contract_start[contract.id]):
                             absence_types['ed'] += absence.to_date.day
-                        elif absence.from_date.__gt__(contract_start[contract.id]) and absence.to_date.__gt__(contract_end[contract.id]) and \
+                        elif absence.from_date.__gt__(contract_start[contract.id]) and absence.to_date.__gt__(
+                                contract_end[contract.id]) and \
                                 absence.from_date.__le__(contract_end[contract.id]):
                             absence_types['ed'] += contract_end[contract.id].day - absence.from_date.day
-                        elif absence.from_date.__le__(contract_start[contract.id]) and absence.to_date.__ge__(contract_end[contract.id]):
+                        elif absence.from_date.__le__(contract_start[contract.id]) and absence.to_date.__ge__(
+                                contract_end[contract.id]):
                             absence_types['ed'] += contract_end[contract.id].day - contract_start[contract.id].day
-                    if absence.from_date.__ge__(contract_start[contract.id]) and absence.to_date.__le__(contract_end[contract.id]):
+                    if absence.from_date.__ge__(contract_start[contract.id]) and absence.to_date.__le__(
+                            contract_end[contract.id]):
                         absence_types[absence.leave_type] += absence.time_period
-                    elif absence.from_date.__lt__(contract_start[contract.id]) and absence.to_date.__le__(contract_end[contract.id]) and \
+                    elif absence.from_date.__lt__(contract_start[contract.id]) and absence.to_date.__le__(
+                            contract_end[contract.id]) and \
                             absence.to_date.__gt__(contract_start[contract.id]):
                         absence_types[absence.leave_type] += absence.to_date.day
-                    elif absence.from_date.__gt__(contract_start[contract.id]) and absence.to_date.__gt__(contract_end[contract.id]) and \
+                    elif absence.from_date.__gt__(contract_start[contract.id]) and absence.to_date.__gt__(
+                            contract_end[contract.id]) and \
                             absence.from_date.__le__(contract_end[contract.id]):
                         absence_types[absence.leave_type] += contract_end[contract.id].day - absence.from_date.day + 1
-                    elif absence.from_date.__le__(contract_start[contract.id]) and absence.to_date.__ge__(contract_end[contract.id]):
-                        absence_types[absence.leave_type] += contract_end[contract.id].day - contract_start[contract.id].day
+                    elif absence.from_date.__le__(contract_start[contract.id]) and absence.to_date.__ge__(
+                            contract_end[contract.id]):
+                        absence_types[absence.leave_type] += contract_end[contract.id].day - contract_start[
+                            contract.id].day
                     absence_types['e'] = absence_types['ed'] + Decimal(round(absence_types['eh'] / 7.33, 2))
 
             for mission in filtered_mission.all():
-                if mission.workshop_personnel.personnel == workshop_personnel.personnel and mission.mission_type != 'h'\
+                if mission.workshop_personnel.personnel == workshop_personnel.personnel and mission.mission_type != 'h' \
                         and mission.is_in_payment:
-                    if mission.from_date.__ge__(contract_start[contract.id]) and mission.to_date.__le__(contract_end[contract.id]):
+                    if mission.from_date.__ge__(contract_start[contract.id]) and mission.to_date.__le__(
+                            contract_end[contract.id]):
                         mission_day += mission.time_period
-                    elif mission.from_date.__lt__(contract_start[contract.id]) and mission.to_date.__le__(contract_end[contract.id]) and \
+                    elif mission.from_date.__lt__(contract_start[contract.id]) and mission.to_date.__le__(
+                            contract_end[contract.id]) and \
                             mission.to_date.__gt__(contract_start[contract.id]):
                         mission_day += mission.to_date.day
-                    elif mission.from_date.__gt__(contract_start[contract.id]) and mission.to_date.__gt__(contract_end[contract.id]) and \
+                    elif mission.from_date.__gt__(contract_start[contract.id]) and mission.to_date.__gt__(
+                            contract_end[contract.id]) and \
                             mission.from_date.__le__(contract_end[contract.id]):
                         mission_day += contract_end[contract.id].day - mission.from_date.day
-                    elif mission.from_date.__le__(contract_start[contract.id]) and mission.to_date.__ge__(contract_end[contract.id]):
+                    elif mission.from_date.__le__(contract_start[contract.id]) and mission.to_date.__ge__(
+                            contract_end[contract.id]):
                         mission_day += contract_end[contract.id].day - contract_start[contract.id].day
 
             normal = personnel_normal_worktime[contract.id]
@@ -1621,8 +2248,34 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             )
         return response_data
 
+    @property
+    def bank_report(self):
+        response = []
+        for item in self.list_of_pay_item.all():
+            response.append(item.bank_report)
+        return response
+
+
+    @property
+    def get_items(self):
+        return self.list_of_pay_item.all()
+
+
+    @property
+    def month_tax(self):
+        tax = 0
+        for item in self.list_of_pay_item.all():
+            tax += item.calculate_month_tax
+        return tax
+
+    @property
+    def sign_date(self):
+        date = jdatetime.date(self.year, self.month, self.month_days)
+        return date.__str__().replace('-', ''),
+
+
     def __str__(self):
-        return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' +\
+        return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' + \
                self.workshop.workshop_title
 
 
@@ -1636,11 +2289,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     )
 
     list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
-                                     blank=True, null=True)
+                                    blank=True, null=True)
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name="list_of_pay_item",
                                            on_delete=models.CASCADE, blank=True, null=True)
     contract = models.ForeignKey(Contract, related_name="list_of_pay_item",
-                                           on_delete=models.CASCADE, blank=True, null=True)
+                                 on_delete=models.CASCADE, blank=True, null=True)
     contract_row = models.ForeignKey(ContractRow, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                      blank=True, null=True)
     hoghoogh_roozane = DECIMAL()
@@ -1675,48 +2328,47 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
     tatil_kari_total = models.IntegerField(default=0)
 
-
     kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     kasre_kar_amount = DECIMAL(default=0)
     kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
     kasre_kar_total = models.IntegerField(default=0)
-
 
     shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     shab_kari_amount = DECIMAL(default=0)
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
     shab_kari_total = models.IntegerField(default=0)
 
-
     nobat_kari_sob_asr = models.IntegerField(default=0)
     nobat_kari_sob_asr_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
-
 
     nobat_kari_sob_shab = models.IntegerField(default=0)
     nobat_kari_sob_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
 
-
     nobat_kari_asr_shab = models.IntegerField(default=0)
     nobat_kari_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
-
 
     nobat_kari_sob_asr_shab = models.IntegerField(default=0)
     nobat_kari_sob_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
 
-
     aele_mandi_amount = DECIMAL(default=0)
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
     aele_mandi = models.IntegerField(default=0)
 
+    haghe_sanavat_total = DECIMAL(default=0)
+    saved_leaves_total = DECIMAL(default=0)
+
     sayer_ezafat = DECIMAL(default=0)
+    sayer_kosoorat = DECIMAL(default=0)
+    padash_total = DECIMAL(default=0)
     mazaya_gheyr_mostamar = DECIMAL(default=0)
     calculate_payment = models.BooleanField(default=False)
 
-    #tax kosoorat
+
+    # tax kosoorat
     hazine_made_137 = models.IntegerField(default=0)
     kosoorat_insurance = models.IntegerField(default=0)
     sayer_moafiat = models.IntegerField(default=0)
@@ -1725,6 +2377,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     naghdi_gheye_naghdi_tax = models.IntegerField(default=0)
 
     total_payment = models.IntegerField(default=0)
+
+    '''for payment'''
+    payment_done = models.BooleanField(default=False)
+    paid_amount = models.IntegerField(default=0)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
@@ -1741,118 +2397,264 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         )
 
     @property
-    def get_hr_letter(self):
-        try:
-            return self.contract.hr_letter.first()
-        except AttributeError:
-            raise ValidationError('حکم کارگزینی ثبت نشده')
+    def year_real_work_month(self):
+        items = ListOfPayItem.objects.filter(
+            Q(list_of_pay__year=self.list_of_pay.year) &
+            Q(list_of_pay__month__lte=self.list_of_pay.month) &
+            Q(list_of_pay__ultimate=True) &
+            Q(workshop_personnel=self.workshop_personnel)
+        )
+        return len(items)
 
+
+    def set_info_from_workshop(self):
+        hr = self.get_hr_letter
+        self.hoghoogh_roozane = hr.hoghooghe_roozane_amount
+        hourly_pay = round(self.hoghoogh_roozane / Decimal(7.33))
+        if self.workshop_personnel.workshop.base_pay_type == 'd':
+            self.pay_base = hr.daily_pay_base
+            self.hourly_pay_base = hr.day_hourly_pay_base
+        elif self.workshop_personnel.workshop.base_pay_type == 'm':
+            self.pay_base = hr.monthly_pay_base
+            self.hourly_pay_base = hr.month_hourly_pay_base
+
+        self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh
+        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'd':
+            self.ezafe_kari_amount = hourly_pay
+        elif self.workshop_personnel.workshop.ezafe_kari_pay_type == 'b':
+            self.ezafe_kari_amount = self.hourly_pay_base
+
+        self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh
+        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'd':
+            self.tatil_kari_amount = hourly_pay
+        elif self.workshop_personnel.workshop.tatil_kari_pay_type == 'b':
+            self.tatil_kari_amount = self.hourly_pay_base
+
+        self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh
+        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'd':
+            self.kasre_kar_amount = hourly_pay
+        elif self.workshop_personnel.workshop.kasre_kar_pay_type == 'b':
+            self.kasre_kar_amount = self.hourly_pay_base
+
+        self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh
+        if self.workshop_personnel.workshop.shab_kari_pay_type == 'd':
+            self.shab_kari_amount = hourly_pay
+        elif self.workshop_personnel.workshop.shab_kari_pay_type == 'b':
+            self.shab_kari_amount = self.hourly_pay_base
+
+        self.jome_kar_nerkh = self.workshop_personnel.workshop.jome_kari_nerkh
+        if self.workshop_personnel.workshop.jome_kari_pay_type == 'd':
+            self.jome_kar_amount = hourly_pay
+        elif self.workshop_personnel.workshop.jome_kari_pay_type == 'b':
+            self.jome_kar_amount = self.hourly_pay_base
+
+        self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'd':
+            self.nobat_kari_sob_asr_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'b':
+            self.nobat_kari_sob_asr_amount = self.pay_base
+
+        self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'd':
+            self.nobat_kari_sob_shab_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'b':
+            self.nobat_kari_sob_shab_amount = self.pay_base
+
+        self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'd':
+            self.nobat_kari_asr_shab_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'b':
+            self.nobat_kari_asr_shab_amount = self.pay_base
+
+        self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh
+        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'd':
+            self.nobat_kari_sob_asr_shab_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'b':
+            self.nobat_kari_sob_asr_shab_amount = self.pay_base
+
+        self.aele_mandi_nerkh = self.workshop_personnel.workshop.aele_mandi_nerkh
+        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'd':
+            self.aele_mandi_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.aele_mandi_pay_type == 'b':
+            self.aele_mandi_amount = self.pay_base
+
+        self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh
+        if self.workshop_personnel.workshop.mission_pay_type == 'd':
+            self.mission_amount = self.hoghoogh_roozane
+        elif self.workshop_personnel.workshop.mission_pay_type == 'b':
+            self.mission_amount = self.pay_base
 
     @property
-    def tax_included_payment(self):
+    def get_hr_letter(self):
+        hr = self.contract.hr_letter.first()
+        if hr == None:
+            raise ValidationError('حکم کارگزینی ثبت نشده')
+        else:
+            return hr
+
+    def calculate_hr_item_in_real_work_time(self, item):
+        total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
+        return total
+
+    @property
+    def get_pension_gheyre_naghdi(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+
+    @property
+    def get_aele_mandi_info(self):
+        personnel_family = PersonnelFamily.objects.filter(personnel=self.workshop_personnel.personnel)
+        aele_mandi_child = 0
+        self.total_insurance_month = self.workshop_personnel.insurance_history_total
+        for person in personnel_family:
+            if person.relative == 'c' and person.marital_status == 's':
+                person_age = self.list_of_pay.year - person.date_of_birth.year
+                if person_age <= 18:
+                    aele_mandi_child += 1
+                elif person.study_status == 's' or person.physical_condition != 'h':
+                    aele_mandi_child += 1
+        self.aele_mandi_child = aele_mandi_child
+        return aele_mandi_child
+
+    @property
+    def get_sanavt_info(self):
+        hr = self.get_hr_letter
+        sanavat_base = hr.paye_sanavat_amount
+        sanavat_month = 0
+        if self.workshop_personnel.workshop.sanavat_type == 'c':
+            sanavat_month = self.workshop_personnel.total_insurance
+        elif self.workshop_personnel.workshop.sanavat_type == 'n':
+            sanavat_month = self.workshop_personnel.total_insurance + \
+                            self.workshop_personnel.previous_insurance_history_in_workshop
+        return sanavat_base, sanavat_month
+
+    @property
+    def hoghoogh_mahane(self):
+        return round(self.hoghoogh_roozane * self.real_worktime, 2)
+
+    @property
+    def sanavat_mahane(self):
+        if self.sanavat_month >= 12:
+            return round(self.sanavat_base * self.real_worktime, 2)
+        else:
+            return 0
+
+    @property
+    def mission_total(self):
+        return round(Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount)
+
+    @property
+    def get_aele_mandi(self):
+        month_day = self.list_of_pay.month_days
+        if self.total_insurance_month >= 24:
+            aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
+            Decimal(self.real_worktime) / Decimal(month_day)
+            self.aele_mandi = aele_mandi
+            return aele_mandi
+        else:
+            return 0
+
+    @property
+    def get_ezafe_kari(self):
+        return self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
+
+    @property
+    def get_tatil_kari(self):
+        return self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
+
+    @property
+    def get_shab_kari(self):
+        return self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
+
+    @property
+    def get_kasre_kar(self):
+        return self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar)
+
+    @property
+    def nobat_kari_sob_shab_total(self):
+        return round(Decimal(self.nobat_kari_sob_shab) *
+                     self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount)
+
+    @property
+    def nobat_kari_sob_asr_total(self):
+        return round(Decimal(self.nobat_kari_sob_asr) *
+                     self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount)
+
+    @property
+    def nobat_kari_asr_shab_total(self):
+        return round(Decimal(self.nobat_kari_asr_shab) *
+                     self.nobat_kari_asr_shab_nerkh * self.nobat_kari_asr_shab_amount)
+
+    @property
+    def nobat_kari_sob_asr_shab_total(self):
+        return round(Decimal(self.nobat_kari_sob_asr_shab) *
+                     self.nobat_kari_sob_asr_shab_nerkh * self.nobat_kari_sob_asr_shab_amount)
+
+    @property
+    def get_total_payment(self):
         hr = self.get_hr_letter
         total = Decimal(0)
-        if hr.hoghooghe_roozane_use_tax:
-            total += self.hoghoogh_roozane * Decimal(self.real_worktime)
-        if hr.paye_sanavat_use_tax and self.sanavat_month >= 12:
-            total += self.sanavat_base * Decimal(self.real_worktime)
-        if hr.haghe_owlad_use_tax:
-            total += self.aele_mandi
-        if hr.ezafe_kari_use_tax:
-            total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
-        if hr.tatil_kari_use_tax:
-            total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
-        if hr.shab_kari_use_tax:
-            total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
-        total -= self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar)
-        if hr.haghe_maamooriat_use_tax:
-            total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
-        if hr.nobat_kari_use_tax:
-            total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
-            total += Decimal(self.nobat_kari_sob_shab) * self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount
-            total += Decimal(self.nobat_kari_asr_shab) * self.nobat_kari_asr_shab_nerkh * self.nobat_kari_asr_shab_amount
-            total += Decimal(self.nobat_kari_sob_asr_shab) * self.nobat_kari_sob_asr_shab_nerkh * \
-                    self.nobat_kari_sob_asr_shab_amount
-        if hr.haghe_sarparasti_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
-        if hr.haghe_modiriyat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
-        if hr.haghe_jazb_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
-        if hr.fogholade_shoghl_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
-        if hr.haghe_tahsilat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
-        if hr.fogholade_sakhti_kar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
-        if hr.haghe_ankal_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
-        if hr.fogholade_badi_abohava_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
-        if hr.mahroomiat_tashilat_zendegi_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
-        if hr.fogholade_mahal_khedmat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
-        if hr.fogholade_sharayet_mohit_kar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
-        if hr.haghe_maskan_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
-        if hr.ayabo_zahab_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
-        if hr.bon_kharo_bar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
-        if hr.yarane_ghaza_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
-        if hr.haghe_shir_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
-        if hr.haghe_taahol_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
-        if hr.komakhazine_mahdekoodak_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
-        if hr.komakhazine_varzesh_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
-        if hr.komakhazine_mobile_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
 
-        return round(total)
+        total += self.hoghoogh_mahane
+        total += self.sanavat_mahane
+        total += self.mission_total
 
-    @property
-    def tax_included_naghdi_payment(self):
-        total = self.tax_included_payment
-        total -= self.tax_moafiat['hazine_made_137']
-        total -= self.tax_moafiat['tamin_ejemae']
-        total -= self.tax_moafiat['hagh_made_137']
-        total -= self.tax_moafiat['sayer_moafiat']
-        total -= self.tax_moafiat['sayer_gheyre_mostamar_naghdi']
-        if self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi'] < 0:
-            total += self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi']
-        total -= self.tax_moafiat['band_10_made_91']
-        total -= self.tax_moafiat['band_5_made_91']
-        total -= self.tax_moafiat['manategh_tejari_moafiat']
-        total -= self.tax_moafiat['ejtenab_maliat_mozaaf']
-        total -= self.tax_moafiat['naghdi_gheye_naghdi_tax']
+
+        total += self.get_aele_mandi
+        self.aele_mandi = round(self.get_aele_mandi)
+
+        total += self.get_ezafe_kari
+        self.ezafe_kari_total = self.get_ezafe_kari
+
+        total += self.get_tatil_kari
+        self.tatil_kari_total = round(self.get_tatil_kari)
+
+        total += self.get_shab_kari
+        self.shab_kari_total = round(self.get_shab_kari)
+
+        total += self.nobat_kari_sob_asr_total
+        total += self.nobat_kari_sob_shab_total
+        total += self.nobat_kari_asr_shab_total
+        total += self.nobat_kari_sob_asr_shab_total
+
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+
+        total += self.mazaya_gheyr_mostamar
+        total += self.sayer_ezafat
+
+        total += self.get_padash
+        total += Decimal(self.get_hagh_sanavat)
+        total += Decimal(self.get_save_leave)
+
+        total -= self.get_kasre_kar
+        self.kasre_kar_total = round(self.get_kasre_kar)
 
         return total
-
-    @property
-    def tax_included_ghyer_naghdi_payment(self):
-        if self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi'] < 0:
-            total = - self.tax_moafiat['mande_moafiat_mazaya_gheyre_naghdi']
-        else:
-            total = 0
-        return total
-
 
     @property
     def pension_payment(self):
         hr = self.get_hr_letter
         total = Decimal(0)
-        if hr.haghe_owlad_nature == 'p':
-            total += self.aele_mandi
-        if hr.hoghooghe_roozane_nature == 'p':
-            total += self.hoghoogh_roozane * Decimal(self.real_worktime)
-        if hr.paye_sanavat_nature == 'p' and self.sanavat_month >= 12:
-            total += self.sanavat_base * Decimal(self.real_worktime)
         if hr.haghe_sarparasti_nature == 'p':
             total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
         if hr.haghe_modiriyat_nature == 'p':
@@ -1893,29 +2695,43 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
         if hr.komakhazine_mobile_nature == 'p':
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
-        total += hr.mazaya_mostamar_gheyre_naghdi_amount
+        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+
+        total -= self.get_kasre_kar
+
         return total
+
+    @property
+    def naghdi_pension(self):
+        hr = self.get_hr_letter
+        total = self.pension_payment
+        total += self.hoghoogh_mahane
+        total += self.sanavat_mahane
+        total -= self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+        return total
+
+
+    @property
+    def gheyre_naghdi_pension(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
 
 
     @property
     def un_pension_payment(self):
         hr = self.get_hr_letter
         total = Decimal(0)
-        if hr.hoghooghe_roozane_nature == 'u':
-            total += self.hoghoogh_roozane * Decimal(self.real_worktime)
-        if hr.paye_sanavat_nature == 'u' and self.sanavat_month >= 12:
-            total += self.sanavat_base * Decimal(self.real_worktime)
-        if hr.haghe_owlad_nature == 'u':
-            total += self.aele_mandi
-        total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
-        total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
-        total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
-        total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
-        total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
-        total += Decimal(self.nobat_kari_sob_shab) * self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount
-        total += Decimal(self.nobat_kari_asr_shab) * self.nobat_kari_asr_shab_nerkh * self.nobat_kari_asr_shab_amount
-        total += Decimal(self.nobat_kari_sob_asr_shab) * self.nobat_kari_sob_asr_shab_nerkh * \
-                 self.nobat_kari_sob_asr_shab_amount
+
+        total += self.get_aele_mandi
+        total += self.mission_total
+        total += self.ezafe_kari_total
+        total += self.shab_kari_total
+        total += self.tatil_kari_total
+        total += self.nobat_kari_sob_asr_total
+        total += self.nobat_kari_sob_shab_total
+        total += self.nobat_kari_asr_shab_total
+        total += self.nobat_kari_sob_asr_shab_total
+
         if hr.haghe_sarparasti_nature == 'u':
             total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
         if hr.haghe_modiriyat_nature == 'u':
@@ -1925,7 +2741,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if hr.fogholade_shoghl_nature == 'u':
             total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
         if hr.haghe_tahsilat_nature == 'u':
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+            total += Decimal(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
         if hr.fogholade_sakhti_kar_nature == 'u':
             total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
         if hr.haghe_ankal_nature == 'u':
@@ -1956,324 +2772,40 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
         if hr.komakhazine_mobile_nature == 'u':
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
+
         total += self.mazaya_gheyr_mostamar
         total += Decimal(self.sayer_ezafat)
+
         return total
 
     @property
-    def tax_moafiat(self):
+    def naghdi_un_pension(self):
+        return self.un_pension_payment - self.mazaya_gheyr_mostamar
+
+    @property
+    def total_naghdi(self):
+        return self.naghdi_pension + self.gheyre_naghdi_pension
+
+    @property
+    def total_gheyre_naghdi(self):
         hr = self.get_hr_letter
-        year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
-        tax = WorkshopTax.objects.first()
-        tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=tax)
-        tax_row = tax_rows.get(from_amount=Decimal(0))
-
-        response = {}
-        response['hazine_made_137'] = self.hazine_made_137
-        response['tamin_ejemae'] = self.data_for_insurance['DSW_BIME'] * self.workshop_personnel.workshop.tax_employer_type
-        response['hagh_made_137'] = response['tamin_ejemae'] + round(self.kosoorat_insurance)
-        response['sayer_moafiat'] = self.sayer_moafiat
-        if not hr.haghe_maamooriat_use_tax:
-            response['sayer_gheyre_mostamar_naghdi'] = round(self.mission_total)
-        else:
-            response['sayer_gheyre_mostamar_naghdi'] = 0
-        moafiat = 2 / 12 * round(tax_row.to_amount) / 12
-        response['mande_moafiat_mazaya_gheyre_naghdi'] = moafiat - round(self.mazaya_gheyr_mostamar) + \
-                                                         round(hr.mazaya_mostamar_gheyre_naghdi_amount)
-        response['band_10_made_91'] = 0
-        response['band_5_made_91'] = 0
-        if self.workshop_personnel.job_location_status == 'dp':
-            job_loc_zarib = 0.5
-        else:
-            job_loc_zarib = 1
-        response['job_location_status'] = job_loc_zarib
-        response['manategh_tejari_moafiat'] = round(self.manategh_tejari_moafiat)
-        response['ejtenab_maliat_mozaaf'] = round(self.ejtenab_maliat_mozaaf)
-        response['naghdi_gheye_naghdi_tax'] = round(self.naghdi_gheye_naghdi_tax)
-        return response
-
-    @property
-    def get_year_payment(self):
-        items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
-                                             Q(workshop_personnel=self.workshop_personnel) &
-                                             Q(list_of_pay__ultimate=True)).all()
-        year_payment = Decimal(0)
-        for item in items:
-            year_payment += item.tax_included_naghdi_payment
-            year_payment += item.tax_included_ghyer_naghdi_payment
-        return year_payment
-
-    @property
-    def get_last_tax(self):
-        item = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
-                                             Q(workshop_personnel=self.workshop_personnel) &
-                                             Q(list_of_pay__ultimate=True)).first()
-        if item:
-            return item.calculate_month_tax
-        else:
-            return 0
-    @property
-    def calculate_month_tax(self):
-        hr = self.get_hr_letter
-        if hr.include_made_86:
-            tax = (self.tax_included_naghdi_payment + self.tax_included_ghyer_naghdi_payment) / 10
-        else:
-            tax = Decimal(0)
-            year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
-            year_amount = self.get_year_payment + self.tax_included_ghyer_naghdi_payment + self.tax_included_naghdi_payment
-            mytax = WorkshopTax.objects.first()
-            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
-            tax_row = tax_rows.get(from_amount=Decimal(0))
-            start = 0
-            while year_amount >= Decimal(0):
-                if year_amount + start <= (tax_row.to_amount * Decimal(month) / Decimal(12)):
-                    tax += (year_amount * tax_row.ratio / 100)
-                    return round(tax) - round(self.get_last_tax)
-                elif year_amount + start > (tax_row.to_amount * Decimal(month) / Decimal(12)):
-                    tax += ((tax_row.to_amount * Decimal(month) / Decimal(12))
-                            - (tax_row.from_amount * Decimal(month) / Decimal(12))) * tax_row.ratio / 100
-                    year_amount -= ((tax_row.to_amount * Decimal(month) / Decimal(12)) -
-                                    (tax_row.from_amount * Decimal(month) / Decimal(12)))
-                    try:
-                        tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
-                        start = tax_row.from_amount * Decimal(month) / Decimal(12)
-                    except:
-                        return round(tax) - round(self.get_last_tax)
-        return round(tax) - round(self.get_last_tax)
-
-    @property
-    def get_tax_report(self):
-        hr = self.get_hr_letter
-        response = {}
-        response['jame_nakhales_mostamar_naghdi'] = self.pension_payment -\
-                                                    Decimal(hr.mazaya_mostamar_gheyre_naghdi_amount)
-        response['nakhales_ezafe_kari'] = self.ezafe_kari_amount + self.tatil_kari_amount
-
-        response['gheyre_mostamar_naghdi'] = self.un_pension_payment - self.mazaya_gheyr_mostamar - \
-                                             response['nakhales_ezafe_kari']
-        response['mazaya_mostamar_gheyre_naghdi'] = hr.mazaya_mostamar_gheyre_naghdi_amount
-        response['mazaya_gheyre_mostamar_gheyre_naghdi'] = self.mazaya_gheyr_mostamar
-        return response
-
-    @property
-    def haghe_bime_bime_shavande(self):
-        hr = self.get_hr_letter
-        response = round((hr.insurance_benefit + hr.insurance_pay_day) *
-              self.workshop_personnel.workshop.employee_insurance_nerkh )
-        return response
+        return round(self.mazaya_gheyr_mostamar, 2) +\
+               round(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
 
 
     @property
-    def data_for_insurance(self):
-        hr = self.get_hr_letter
-        contracts = self.list_of_pay.get_contracts
-        contract = contracts.filter(workshop_personnel=self.workshop_personnel).last()
-        if contract.quit_job_date:
-            quit_job_date = contract.quit_job_date.__str__().replace('-', '')
-        else:
-            quit_job_date = '000000'
-        DSKWOR = {
-            'DSW_ID': str(self.workshop_personnel.workshop.code),
-            'DSW_YY': int(str(self.list_of_pay.year)[2:]),
-            'DSW_MM': self.list_of_pay.month,
-            'DSW_LISTNO': '0',
-            'DSW_ID1': str(self.workshop_personnel.personnel.insurance_code),
-            'DSW_FNAME': self.workshop_personnel.personnel.name,
-            'DSW_LNAME': self.workshop_personnel.personnel.last_name,
-            'DSW_DNAME': self.workshop_personnel.personnel.father_name,
-            'DSW_IDNO': str(self.workshop_personnel.personnel.identity_code),
-            'DSW_IDPLC': str(self.workshop_personnel.personnel.location_of_exportation),
-            'DSW_IDATE': self.workshop_personnel.personnel.date_of_exportation.__str__().replace('-', ''),
-            'DSW_BDATE': self.workshop_personnel.personnel.location_of_birth.__str__().replace('-', ''),
-            'DSW_SEX': self.workshop_personnel.personnel.get_gender_display(),
-            'DSW_NAT': self.workshop_personnel.personnel.get_nationality_display(),
-            'DSW_OCP': self.workshop_personnel.work_title,
-            'DSW_SDATE': contract.insurance_add_date.__str__().replace('-', ''),
-            'DSW_EDATE': quit_job_date,
-            'DSW_DD': self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
-            'DSW_ROOZ': hr.insurance_pay_day,
-            'DSW_MAH': hr.insurance_pay_day *
-                        self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
-            'DSW_MAZ': hr.insurance_benefit,
-            'DSW_MASH': hr.insurance_benefit + hr.insurance_pay_day *
-                       self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
-            'DSW_TOTL': hr.insurance_benefit + hr.insurance_not_included + hr.insurance_pay_day *
-                       self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id),
-            'DSW_BIME': self.haghe_bime_bime_shavande,
-            'DSW_PRATE': 0,
-            'DSW_JOB': 0,
-            'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
+    def payable(self):
+        payable_amount = round(self.total_payment) -\
+                         round(self.data_for_insurance['DSW_BIME']) -\
+                         round(self.calculate_month_tax) -\
+                         self.check_and_get_optional_deduction_episode - \
+                         self.check_and_get_loan_episode
+        payable_amount += self.get_padash
+        payable_amount += self.get_hagh_sanavat
+        payable_amount += self.get_save_leave
+        return round(payable_amount)
 
-        }
-        return DSKWOR
-
-    @property
-    def hoghoogh_mahane(self):
-        return round(self.hoghoogh_roozane * self.real_worktime, 2)
-
-    @property
-    def sanavat_mahane(self):
-        return round(self.sanavat_base * self.real_worktime, 2)
-
-    @property
-    def mission_total(self):
-        return round(Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount)
-
-    @property
-    def get_aele_mandi_info(self):
-        personnel_family = PersonnelFamily.objects.filter(personnel=self.workshop_personnel.personnel)
-        aele_mandi_child = 0
-        self.total_insurance_month = self.workshop_personnel.insurance_history_totality
-        for person in personnel_family:
-            if person.relative == 'c' and person.marital_status == 's':
-                person_age = self.list_of_pay.year - person.date_of_birth.year
-                if person_age <= 18:
-                    aele_mandi_child += 1
-                elif person.study_status == 's' or person.physical_condition != 'h':
-                    aele_mandi_child += 1
-        return aele_mandi_child
-
-    @property
-    def get_sanavt_info(self):
-        hr = self.get_hr_letter
-        sanavat_base = hr.paye_sanavat_amount
-        sanavat_month = 0
-        if self.workshop_personnel.workshop.sanavat_type == 'c':
-            sanavat_month = self.workshop_personnel.current_insurance_history_in_workshop
-        elif self.workshop_personnel.workshop.sanavat_type == 'n':
-            sanavat_month = self.workshop_personnel.current_insurance_history_in_workshop +\
-                                 self.workshop_personnel.previous_insurance_history_in_workshop
-        return sanavat_base, sanavat_month
-
-    def calculate_hr_item_in_real_work_time(self, item):
-        total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
-        return total
-
-    @property
-    def get_total_payment(self):
-        hr = self.get_hr_letter
-        month_day = self.list_of_pay.month_days
-        total = Decimal(0)
-        total += self.hoghoogh_roozane * Decimal(self.real_worktime)
-        if self.sanavat_month >= 12:
-            total += self.sanavat_base * Decimal(self.real_worktime)
-        if self.total_insurance_month >= 24:
-            total += Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
-                     Decimal(self.real_worktime) / Decimal(month_day)
-            self.aele_mandi = round(Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh *\
-                     Decimal(self.real_worktime) / Decimal(month_day))
-        self.ezafe_kari_total = int(self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari))
-        total += self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
-        self.tatil_kari_total = round(self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari))
-        total += self.tatil_kari_amount * Decimal(self.tatil_kari_nerkh) * Decimal(self.tatil_kari)
-        self.shab_kari_total = round(self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount))
-        total += self.shab_kari * Decimal(self.shab_kari_nerkh) * Decimal(self.shab_kari_amount)
-        self.kasre_kar_total = round(self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar))
-        total -= self.kasre_kar_amount * Decimal(self.kasre_kar_nerkh) * Decimal(self.kasre_kar)
-        total += Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount
-        total += Decimal(self.nobat_kari_sob_asr) * self.nobat_kari_sob_asr_nerkh * self.nobat_kari_sob_asr_amount
-        total += Decimal(self.nobat_kari_sob_shab) * self.nobat_kari_sob_shab_nerkh * self.nobat_kari_sob_shab_amount
-        total += Decimal(self.nobat_kari_asr_shab) * self.nobat_kari_asr_shab_nerkh * self.nobat_kari_asr_shab_amount
-        total += Decimal(self.nobat_kari_sob_asr_shab) * self.nobat_kari_sob_asr_shab_nerkh * \
-                 self.nobat_kari_sob_asr_shab_amount
-
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
-
-        total += self.mazaya_gheyr_mostamar
-        total += self.sayer_ezafat
-        return total
-
-
-    def set_info_from_workshop(self):
-        hr = self.get_hr_letter
-        self.hoghoogh_roozane = hr.hoghooghe_roozane_amount
-        hourly_pay = round(self.hoghoogh_roozane / Decimal(7.33))
-        if self.workshop_personnel.workshop.base_pay_type == 'd':
-            self.pay_base = hr.daily_pay_base
-            self.hourly_pay_base = hr.day_hourly_pay_base
-        elif self.workshop_personnel.workshop.base_pay_type == 'm':
-            self.pay_base = hr.monthly_pay_base
-            self.hourly_pay_base = hr.month_hourly_pay_base
-
-        self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh
-        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'd':
-            self.ezafe_kari_amount = hourly_pay
-        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'b':
-            self.ezafe_kari_amount = self.hourly_pay_base
-
-        self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh
-        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'd':
-            self.tatil_kari_amount = hourly_pay
-        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'b':
-            self.tatil_kari_amount = self.hourly_pay_base
-
-        self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh
-        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'd':
-            self.kasre_kar_amount = hourly_pay
-        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'b':
-            self.kasre_kar_amount = self.hourly_pay_base
-
-        self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh
-        if self.workshop_personnel.workshop.shab_kari_pay_type == 'd':
-            self.shab_kari_amount = hourly_pay
-        if self.workshop_personnel.workshop.shab_kari_pay_type == 'b':
-            self.shab_kari_amount = self.hourly_pay_base
-
-        self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'd':
-            self.nobat_kari_sob_asr_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'b':
-            self.nobat_kari_sob_asr_amount = self.pay_base
-
-        self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'd':
-            self.nobat_kari_sob_shab_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'b':
-            self.nobat_kari_sob_shab_amount = self.pay_base
-
-        self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'd':
-            self.nobat_kari_asr_shab_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'b':
-            self.nobat_kari_asr_shab_amount = self.pay_base
-
-        self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'd':
-            self.nobat_kari_sob_asr_shab_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'b':
-            self.nobat_kari_sob_asr_shab_amount = self.pay_base
-
-        self.aele_mandi_nerkh = self.workshop_personnel.workshop.aele_mandi_nerkh
-        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'd':
-            self.aele_mandi_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'b':
-            self.aele_mandi_amount = self.pay_base
-
-        self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh
-        if self.workshop_personnel.workshop.mission_pay_type == 'd':
-            self.mission_amount = self.hoghoogh_roozane
-        if self.workshop_personnel.workshop.mission_pay_type == 'b':
-            self.mission_amount = self.pay_base
+    '''calculate'''
 
     @property
     def calculate_yearly_haghe_sanavat(self):
@@ -2294,8 +2826,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     work_years.append(item.list_of_pay.year)
             total_worktime = 0
             list_of_pay_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                      & Q(list_of_pay__year__lte=self.list_of_pay.year)
-                                                      & Q(list_of_pay__ultimate=True))
+                                                             & Q(list_of_pay__year__lte=self.list_of_pay.year)
+                                                             & Q(list_of_pay__ultimate=True))
             for pay_list in list_of_pay_items:
                 total_worktime += pay_list.real_worktime
                 total_worktime += pay_list.illness_leave_day
@@ -2313,6 +2845,120 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 year_worktime += item.real_worktime
                 year_worktime += item.illness_leave_day
             return round(base_pay) * 30 * year_worktime / 365
+
+    @property
+    def calculate_monthly_haghe_sanavat(self):
+        hr = self.get_hr_letter
+        if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
+            base_pay = hr.daily_pay_base
+        else:
+            base_pay = hr.hoghooghe_roozane_amount
+        return round(base_pay) * 30 * (self.real_worktime + self.illness_leave_day) / 365
+
+    @property
+    def get_hagh_sanavat(self):
+        sanavat = 0
+        if self.list_of_pay.workshop.haghe_sanavat_identification == 'm':
+            sanavat += self.calculate_monthly_haghe_sanavat
+
+        if self.list_of_pay.workshop.haghe_sanavat_identification == 'y' and self.list_of_pay.month == 12:
+            sanavat += self.calculate_yearly_haghe_sanavat
+        self.haghe_sanavat_total = sanavat
+        return sanavat
+
+
+    @property
+    def calculate_save_leave(self):
+        hr = self.get_hr_letter
+        year_worktime = 0
+        items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                             & Q(list_of_pay__year=self.list_of_pay.year)
+                                             & Q(list_of_pay__ultimate=True))
+        leave_available = 29
+
+        if self.workshop_personnel.workshop.save_absence_transfer_next_year:
+            previous_years = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                          & Q(list_of_pay__year__lte=self.list_of_pay.year)
+                                                          & Q(list_of_pay__month=12)
+                                                          & Q(list_of_pay__ultimate=True)
+                                                          )
+            for item in previous_years:
+                save_leaves = item.calculate_save_leave
+                leave_available += save_leaves
+
+        for item in items:
+            leave_available -= item.entitlement_leave_day
+            leave_available -= item.matter_47_leave_day
+            year_worktime += item.real_worktime
+        if leave_available >= 9 and self.workshop_personnel.workshop.save_absence_limit:
+            save_leave = 9
+        else:
+            save_leave = leave_available
+        if self.workshop_personnel.workshop.leave_save_pay_type == 'h':
+            pay_base = hr.calculate_save_leave_base
+        else:
+            pay_base = self.workshop_personnel.workshop.hade_aghal_hoghoogh
+
+        save_leave_amount = save_leave * pay_base * year_worktime / 365
+
+        return save_leave, round(save_leave_amount), round(pay_base)
+
+
+
+    @property
+    def get_save_leave_day(self):
+        day, amount, day_amount = self.calculate_save_leave
+        return day
+
+    @property
+    def get_save_leave_day_amount(self):
+        day, amount, day_amount = self.calculate_save_leave
+        return day_amount
+
+    @property
+    def get_save_leave_amount(self):
+        day, amount, day_amount = self.calculate_save_leave
+        return amount
+
+    @property
+    def get_save_leave(self):
+        if self.list_of_pay.month == 12 and not self.workshop_personnel.workshop.save_absence_transfer_next_year:
+            return self.get_save_leave_amount
+        elif self.list_of_pay.month == 12 and self.workshop_personnel.workshop.save_absence_transfer_next_year:
+            self.workshop_personnel.save_leaave += self.get_save_leave_day
+            self.workshop_personnel.save()
+            return 0
+        else:
+            return 0
+
+    @property
+    def get_hagh_sanavat_and_save_leaves(self):
+        return self.get_hagh_sanavat + self.get_save_leave
+
+
+    @property
+    def unpaid(self):
+        return round(self.payable - self.paid_amount) + self.get_unpaid_of_year
+
+    @property
+    def get_unpaid_of_year(self):
+        items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                             Q(workshop_personnel=self.workshop_personnel) &
+                                             Q(list_of_pay__ultimate=True)).all()
+        unpaid = 0
+        for item in items:
+            unpaid = item.unpaid
+        return round(unpaid)
+
+    @property
+    def total_unpaid(self):
+        return round(self.get_unpaid_of_year) + round(self.payable)
+
+    @property
+    def unpaid_till_this_month(self):
+        return round(self.get_unpaid_of_year) + round(self.payable) - self.paid_amount
+
 
     @property
     def calculate_yearly_eydi(self):
@@ -2341,13 +2987,384 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
 
     @property
-    def calculate_monthly_haghe_sanavat(self):
+    def get_padash(self):
+        padash = 0
+        if self.list_of_pay.workshop.eydi_padash_identification == 'm':
+            padash = self.calculate_monthly_eydi
+        elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
+            padash = self.calculate_yearly_eydi
+        self.padash_total = padash
+        return padash
+
+
+    '''report'''
+
+    @property
+    def bank_report(self):
+        response = {}
+        response['name'] = self.workshop_personnel.personnel.full_name
+        response['previous'] = self.get_unpaid_of_year
+        response['payable'] = self.payable
+        response['unpaid'] = self.unpaid
+        response['total'] = self.total_unpaid
+        response['paid'] = self.paid_amount
+        response['card'] = self.workshop_personnel.personnel.bank_cart_number
+        response['account'] = self.workshop_personnel.personnel.account_bank_number
+        response['sheba'] = self.workshop_personnel.personnel.sheba_number
+        return response
+
+    @property
+    def check_and_get_loan_episode(self):
+        month_episode = 0
+        personnel_loans = Loan.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
+                                              Q(pay_date__lte=self.list_of_pay.end_date) &
+                                              Q(pay_done=False) &
+                                              Q(loan_type='l'))
+        for loan in personnel_loans:
+            for episode_date in loan.get_pay_month['months']:
+                if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
+                    month_episode = loan.get_pay_episode
+        return month_episode
+
+    @property
+    def check_and_get_dept_episode(self):
+        month_episode = 0
+        personnel_loans = Loan.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
+                                              Q(pay_date__lte=self.list_of_pay.end_date) &
+                                              Q(pay_done=False) &
+                                              Q(loan_type='d'))
+        for loan in personnel_loans:
+            for episode_date in loan.get_pay_month['months']:
+                if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
+                    month_episode = loan.get_pay_episode
+        return month_episode
+
+    @property
+    def check_and_get_optional_deduction_episode(self):
+        month_episode = 0
+        personnel_deductions = OptionalDeduction.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
+                                                                Q(start_date__lte=self.list_of_pay.end_date) &
+                                                                Q(pay_done=False))
+        for deduction in personnel_deductions:
+            for episode_date in deduction.get_pay_month['months']:
+                if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
+                    month_episode += deduction.get_pay_episode
+        return month_episode
+
+
+    @property
+    def get_payslip(self):
         hr = self.get_hr_letter
-        if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
-            base_pay = hr.daily_pay_base
+        payslip = {}
+        deduction = {}
+        additions = {}
+        additions['hagh_maskan'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount))
+        additions['kharo_bar'] = round(self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount))
+
+        additions['hagh_sarparasti'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
+        additions['hagh_modiriat'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
+        additions['hagh_jazb'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount))
+        additions['fogholade_shoghl'] = round(self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
+        additions['haghe_tahsilat'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
+        additions['fogholade_sakhti_kar'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount))
+        additions['haghe_ankal'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount))
+        additions['fogholade_badi_abohava'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount))
+        additions['mahroomiat_tashilat_zendegi'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount))
+        additions['fogholade_mahal_khedmat'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount))
+        additions['fogholade_sharayet_mohit_kar'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount))
+        additions['ayabo_zahab'] = round(self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount))
+        additions['yarane_ghaza'] = round(self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount))
+        additions['haghe_shir'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount))
+        additions['haghe_taahol'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount))
+        additions['komakhazine_mahdekoodak'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount))
+        additions['komakhazine_varzesh'] = round(
+            self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount))
+        additions['komakhazine_mobile'] = round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
+        additions['mazaya_mostamar_gheyre_naghdi'] = \
+            round(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
+
+        payslip['additions'] = additions
+        payslip['deduction'] = deduction
+        return payslip
+
+
+    '''insurance'''
+
+    @property
+    def haghe_bime_bime_shavande(self):
+        hr = self.get_hr_letter
+        return self.insurance_total_included * hr.worker_insurance_nerkh
+
+    @property
+    def employer_insurance(self):
+        hr = self.get_hr_letter
+        return round(self.insurance_total_included * hr.employer_insurance_nerkh)
+
+    @property
+    def un_employer_insurance(self):
+        hr = self.get_hr_letter
+        return round(self.insurance_total_included * hr.unemployed_insurance_nerkh)
+
+    @property
+    def insurance_monthly_benefit(self):
+        hr = self.get_hr_letter
+        benefit = Decimal(hr.insurance_benefit)
+        if hr.ezafe_kari_use_insurance:
+            benefit = benefit + Decimal(self.ezafe_kari_total)
+        if hr.haghe_owlad_use_insurance:
+            benefit = benefit + Decimal(self.aele_mandi)
+        if hr.shab_kari_use_insurance:
+            benefit = benefit + Decimal(self.shab_kari_total)
+        if hr.tatil_kari_use_insurance:
+            benefit = benefit + Decimal(self.tatil_kari_total)
+        if hr.nobat_kari_use_insurance:
+            benefit = benefit + self.nobat_kari_sob_shab_total
+            benefit = benefit + self.nobat_kari_sob_asr_total
+            benefit = benefit + self.nobat_kari_asr_shab_total
+            benefit = benefit + self.nobat_kari_sob_asr_shab_total
+        if hr.haghe_maamooriat_use_insurance:
+            benefit = benefit + Decimal(self.mission_total)
+        if hr.haghe_sanavat_use_insurance:
+            benefit = benefit + Decimal(self.haghe_sanavat_total)
+        if hr.eydi_padash_use_insurance:
+            benefit = benefit + Decimal(self.padash_total)
+        return benefit
+
+    @property
+    def insurance_monthly_payment(self):
+        hr = self.get_hr_letter
+        return hr.insurance_pay_day * self.list_of_pay.personnel_insurance_worktime(
+            self.workshop_personnel.personnel.id)
+
+    @property
+    def insurance_worktime(self):
+        return self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)
+
+    @property
+    def insurance_total_included(self):
+        hr = self.get_hr_letter
+        total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
+        return total
+
+    @property
+    def data_for_insurance(self):
+        hr = self.get_hr_letter
+        contracts = self.list_of_pay.get_contracts
+        contract = contracts.filter(workshop_personnel=self.workshop_personnel).last()
+        if contract.quit_job_date:
+            quit_job_date = contract.quit_job_date.__str__().replace('-', '')
         else:
-            base_pay = hr.hoghooghe_roozane_amount
-        return round(base_pay) * 30 * (self.real_worktime + self.illness_leave_day) / 365
+            quit_job_date = '000000'
+
+        DSKWOR = {
+            'DSW_ID': str(self.workshop_personnel.workshop.code),
+            'DSW_YY': int(str(self.list_of_pay.year)[2:]),
+            'DSW_MM': self.list_of_pay.month,
+            'DSW_LISTNO': '0',
+            'DSW_ID1': str(self.workshop_personnel.personnel.insurance_code),
+            'DSW_FNAME': self.workshop_personnel.personnel.name,
+            'DSW_LNAME': self.workshop_personnel.personnel.last_name,
+            'DSW_DNAME': self.workshop_personnel.personnel.father_name,
+            'DSW_IDNO': str(self.workshop_personnel.personnel.identity_code),
+            'DSW_IDPLC': str(self.workshop_personnel.personnel.location_of_exportation),
+            'DSW_IDATE': self.workshop_personnel.personnel.date_of_exportation.__str__().replace('-', ''),
+            'DSW_BDATE': self.workshop_personnel.personnel.location_of_birth.__str__().replace('-', ''),
+            'DSW_SEX': self.workshop_personnel.personnel.get_gender_display(),
+            'DSW_NAT': self.workshop_personnel.personnel.get_nationality_display(),
+            'DSW_OCP': self.workshop_personnel.work_title,
+            'DSW_SDATE': contract.insurance_add_date.__str__().replace('-', ''),
+            'DSW_EDATE': quit_job_date,
+            'DSW_DD': self.insurance_worktime,
+            'DSW_ROOZ': hr.insurance_pay_day,
+            'DSW_MAH': self.insurance_monthly_payment,
+            'DSW_MAZ': self.insurance_monthly_benefit,
+            'DSW_MASH': self.insurance_total_included,
+            'DSW_TOTL': self.total_payment,
+            'DSW_BIME': (self.insurance_monthly_benefit + hr.insurance_pay_day *
+                         self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)) *
+                        self.workshop_personnel.workshop.worker_insurance_nerkh,
+            'DSW_PRATE': 0,
+            'DSW_JOB': 0,
+            'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
+
+        }
+        print('data for insurance loaded')
+        return DSKWOR
+
+
+    '''tax'''
+
+    @property
+    def tamin_ejtemaee_moafiat(self):
+        return self.haghe_bime_bime_shavande * self.workshop_personnel.workshop.tax_employer_type
+
+    @property
+    def haghe_bime_moafiat(self):
+        return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
+
+
+    @property
+    def ezafe_kari_nakhales(self):
+        return self.ezafe_kari_total + self.tatil_kari_total
+
+    @property
+    def hr_tax_not_included(self):
+        hr = self.get_hr_letter
+        total = Decimal(0)
+
+        if not hr.hoghooghe_roozane_use_tax:
+            total += self.hoghoogh_mahane
+        if not hr.paye_sanavat_use_tax:
+            total += self.sanavat_mahane
+        if not hr.haghe_owlad_use_tax:
+            total += self.get_aele_mandi
+        if not hr.ezafe_kari_use_tax:
+            total += self.get_ezafe_kari
+        if not hr.tatil_kari_use_tax:
+            total += self.get_tatil_kari
+        if not hr.shab_kari_use_tax:
+            total += self.get_shab_kari
+        if not hr.nobat_kari_use_tax:
+            total += self.nobat_kari_sob_asr_total
+            total += self.nobat_kari_sob_shab_total
+            total += self.nobat_kari_asr_shab_total
+            total += self.nobat_kari_sob_asr_shab_total
+        if not hr.haghe_sarparasti_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
+        if not hr.haghe_modiriyat_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
+        if not hr.haghe_jazb_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+        if not hr.fogholade_shoghl_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
+        if not hr.haghe_tahsilat_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+        if not hr.fogholade_sakhti_kar_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
+        if not hr.haghe_ankal_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
+        if not hr.fogholade_badi_abohava_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
+        if not hr.mahroomiat_tashilat_zendegi_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
+        if not hr.fogholade_mahal_khedmat_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
+        if not hr.fogholade_sharayet_mohit_kar_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
+        if not hr.haghe_maskan_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+        if not hr.ayabo_zahab_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
+        if not hr.bon_kharo_bar_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+        if not hr.yarane_ghaza_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
+        if not hr.haghe_taahol_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
+        if not hr.haghe_shir_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
+        if not hr.komakhazine_mahdekoodak_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
+        if not hr.komakhazine_varzesh_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
+        if not hr.komakhazine_mobile_use_tax:
+            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
+
+        return total
+
+    @property
+    def total_sayer_moafiat(self):
+        total = 0
+        total += self.sayer_moafiat
+        if self.list_of_pay.workshop.eydi_padash_identification == 'm':
+            total += self.calculate_monthly_eydi_tax
+        elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
+            total += self.calculate_yearly_eydi_tax
+        if self.workshop_personnel.job_location_status == 2:
+            total += (self.calculate_month_tax / 2)
+        total += self.hr_tax_not_included
+        return total
+
+
+    @property
+    def moaf_sum(self):
+        total = 0
+        total += self.hazine_made_137
+        total += self.total_sayer_moafiat
+        total += self.mission_total
+        total += Decimal(self.get_hagh_sanavat_and_save_leaves)
+        total += self.haghe_bime_moafiat
+        total += self.manategh_tejari_moafiat
+        total += self.ejtenab_maliat_mozaaf
+
+        return round(total)
+
+
+    @property
+    def tax_included_payment(self):
+        return round(self.get_total_payment) - self.moaf_sum
+
+    @property
+    def get_year_payment(self):
+        items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                             Q(workshop_personnel=self.workshop_personnel) &
+                                             Q(list_of_pay__ultimate=True)).all()
+        year_payment = Decimal(0)
+        for item in items:
+            year_payment = year_payment + Decimal(item.tax_included_payment)
+        return year_payment
+
+    @property
+    def get_last_tax(self):
+        items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                             Q(workshop_personnel=self.workshop_personnel) &
+                                             Q(list_of_pay__ultimate=True))
+        tax = Decimal(0)
+        for item in items:
+            tax += item.calculate_month_tax
+        return tax
+
+    @property
+    def calculate_month_tax(self):
+        year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
+        hr = self.get_hr_letter
+        if hr.include_made_86:
+            tax = self.tax_included_payment / 10
+        else:
+            items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                                 Q(list_of_pay__month__lte=self.list_of_pay.month) &
+                                                 Q(workshop_personnel=self.workshop_personnel) &
+                                                 Q(list_of_pay__ultimate=True))
+            tax = Decimal(0)
+            year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
+            mytax = WorkshopTax.objects.first()
+            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            start = 0
+            while year_amount >= Decimal(0):
+                if year_amount + start <= (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
+                    tax += (year_amount * tax_row.ratio / 100)
+                    print('tax :', tax)
+                    return round(tax) - round(self.get_last_tax)
+                elif year_amount + start > (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
+                    tax += ((tax_row.to_amount * Decimal(len(items)) / Decimal(12))
+                            - (tax_row.from_amount * Decimal(len(items)) / Decimal(12))) * tax_row.ratio / 100
+                    year_amount -= ((tax_row.to_amount * Decimal(len(items)) / Decimal(12)) -
+                                    (tax_row.from_amount * Decimal(len(items)) / Decimal(12)))
+                    try:
+                        tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
+                        start = tax_row.from_amount * Decimal(len(items)) / Decimal(12)
+                    except:
+                        return round(tax) - round(self.get_last_tax)
+        return round(tax) - round(self.get_last_tax)
 
 
     @property
@@ -2357,7 +3374,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             mytax = WorkshopTax.objects.first()
             tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
             tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12 /12
+            moafiat_limit = tax_row.to_amount / 12 / 12
             eydi = self.calculate_monthly_eydi
             moaf = moafiat_limit - eydi
             if moaf <= 0:
@@ -2368,6 +3385,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return eydi_tax
         else:
             return 0
+
 
     @property
     def calculate_yearly_eydi_tax(self):
@@ -2386,42 +3404,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
             return eydi_tax
         else:
-            return self.calculate_yearly_eydi
-
-    @property
-    def calculate_save_leave(self):
-        hr = self.get_hr_letter
-        year_worktime = 0
-        items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                             & Q(list_of_pay__year=self.list_of_pay.year)
-                                             & Q(list_of_pay__ultimate=True))
-        leave_available = 29
-
-        if self.workshop_personnel.workshop.save_absence_transfer_next_year:
-            previous_years = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                          & Q(list_of_pay__year__lt=self.list_of_pay.year)
-                                                          & Q(list_of_pay__month=12)
-                                                          & Q(list_of_pay__ultimate=True)
-                                                          )
-            for item in previous_years:
-                save_leaves = item.calculate_save_leave
-                leave_available += save_leaves
-
-        for item in items:
-            leave_available -= item.entitlement_leave_day
-            year_worktime += item.real_worktime
-        if leave_available >= 9 and self.workshop_personnel.workshop.save_absence_limit:
-            save_leave = 9
-        else:
-            save_leave = leave_available
-        if self.workshop_personnel.workshop.leave_save_pay_type == 'h':
-            pay_base = hr.calculate_save_leave_base
-        else:
-            pay_base = self.workshop_personnel.workshop.hade_aghal_hoghoogh
-
-        save_leave_amount = save_leave * pay_base * year_worktime / 365
-
-        return save_leave, round(save_leave_amount)
+            return 0
 
 
     def save(self, *args, **kwargs):
@@ -2430,6 +3413,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
-            self.total_payment = int(self.get_total_payment)
+            self.total_payment = round(self.get_total_payment)
         super().save(*args, **kwargs)
+
+
 

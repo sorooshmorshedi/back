@@ -1,0 +1,38 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>نام</th>
+            <th>نام خانوادگی</th>
+            <th>نام پدر</th>
+            <th>تاریخ تولد</th>
+            <th>کد ملی</th>
+            <th>کد پرسنلی</th>
+            <th>تلفن</th>
+            <th>موبایل</th>
+            <th>وضعیت پرسنل</th>
+
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.name }}</td>
+                <td>{{ form.last_name }}</td>
+                <td>{{ form.father_name }}</td>
+                <td>{{ form.date_of_birth }}</td>
+                <td>{{ form.national_code }}</td>
+                <td>{{ form.personnel_code }}</td>
+                <td>{{ form.phone_number }} - {{ form.city_phone_code }} </td>
+                <td>{{ form.mobile_number_1 }}</td>
+                {% if form.is_personnel_active %}
+                    <td >فعال</td>
+                {% endif %}
+                {% if not form.is_personnel_active %}
+                    <td >غیر فعال</td>
+                {% endif %}
+
+            </tr>
+        {% endfor %}
+    </table>
+</div>

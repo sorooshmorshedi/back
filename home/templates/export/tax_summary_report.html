@@ -1,0 +1,78 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>سال</th>
+                <td>{{ form.year }}</td>
+            </tr>
+            <tr>
+                <th>ماه</th>
+                <td>{{ form.month }}</td>
+            </tr>
+            <tr>
+                <th>بدهی مالیاتی ماه جاری</th>
+                <td>{{ form.month_tax }}</td>
+            </tr>
+            <tr>
+                <th>بدهی مالیاتی ماه گذشته</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>تاریخ ثبت در دفتر روزنامه</th>
+                <td>{{ form.sign_date }}</td>
+            </tr>
+            <tr>
+                <th>
+                    نحوه پرداخت
+                </th>
+                <td>6</td>
+            </tr>
+            <tr>
+                <th>
+                    شماره سریال چک
+                </th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>تاریخ چک</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>
+                    کد نام بانک
+                </th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>
+                    نام شعبه
+                </th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>شماره حساب</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>
+                    مبلغ پرداختی/مبلغ چک
+                </th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>
+                    تاریخ پرداخت خزانه
+                </th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>مبلغ پرداختی خزانه</th>
+                <td></td>
+            </tr>
+
+        </table>
+    {% endfor %}
+
+</div>

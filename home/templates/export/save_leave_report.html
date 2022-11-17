@@ -1,0 +1,47 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for i in forms.personnel %}
+
+
+    {% endfor %}
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th rowspan="2" class="text-center">ردیف</th>
+            <th rowspan="2" class="text-center"> نام و نام خانوادگی</th>
+            <th rowspan="2" class="text-center">میزان مجاز مرخصی استحقاقی نسبت به کارکرد</th>
+            <th rowspan="2" class="text-center">میزان مجاز مرخصی ماده 73 قانون کار</th>
+            <th rowspan="2" class="text-center">جمع کل مرخصی استحقاقی قابل استفاده</th>
+            <th colspan={{ forms.col_number }} class="text-center">مرخصی استفاده شده طی سال {{ forms.year }}</th>
+            <th rowspan="2" class="text-center">جمع مرخصی استحقاقی</th>
+            <th rowspan="2" class="text-center">سقف ذخیره مجاز مرخصی سالانه</th>
+            <th rowspan="2" class="text-center">مانده مرخصی</th>
+            <th rowspan="2" class="text-center">مزایای یک روز</th>
+            <th rowspan="2" class="text-center">کسورات و اضافات ذخیره مرخصی</th>
+
+        </tr>
+        <tr>
+            {% for month in forms.months_display %}
+                <th class="text-center"> {{ month }}</th>
+            {% endfor %}
+        </tr>
+        {% for person in forms.personnel %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ person.total.name }}</td>
+                <td class="text-center">{{ person.total.limit }}</td>
+                <td class="text-center">{{ person.total.matter_73_limit }}</td>
+                <td class="text-center">{{ person.total.total_limit }}</td>
+                {% for month_info in person.months %}
+                    <td class="text-center">{{ month_info.total_leave }} </td>
+                {% endfor %}
+                <td class="text-center">{{ person.total.total_leave }}</td>
+                <td class="text-center">{{ person.total.save_limit }}</td>
+                <td class="text-center">{{ person.total.remaining }}</td>
+                <td class="text-center">{{ person.total.day_amount }}</td>
+                <td class="text-center">{{ person.total.amount }}</td>
+
+            </tr>
+        {% endfor %}
+    </table>
+</div>

@@ -1,0 +1,102 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>نوع تابعیت</th>
+                <td>{{ form.personnel.nationality }}</td>
+            </tr>
+            <tr>
+                <th>نوع اطلاعات</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>کد ملی/کد فراگیر تابعیت</th>
+                <td>{{ form.personnel.national_code }}</td>
+            </tr>
+            <tr>
+                <th>نام </th>
+                <td>{{ form.personnel.name }}</td>
+            </tr>
+            <tr>
+                <th>نام خانوادگی</th>
+                <td>{{ form.personnel.last_name }}</td>
+            </tr>
+
+            <tr>
+                <th>کشور</th>
+                <td>{{ form.personnel.country }}</td>
+            </tr>
+            <tr>
+                <th>شناسه کارمند</th>
+                <td>{{ form.personnel.personnel_code }}</td>
+            </tr>
+            <tr>
+                <th>مدرک تحصیلی</th>
+                <td>{{ form.personnel.degree_education }}</td>
+            </tr>
+            <tr>
+                <th>سمت</th>
+                <td>{{ form.work_title }}</td>
+            </tr>
+            <tr>
+                <th>نوع بیمه</th>
+                <td>{{ form.personnel.insurance_for_tax}}</td>
+            </tr>
+            <tr>
+                <th>نام بیمه</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>شماره بیمه</th>
+                <td>{{ form.personnel.insurance_code }}</td>
+            </tr>
+            <tr>
+                <th>کد پستی محل سکونت</th>
+                <td>{{ form.personnel.postal_code }}</td>
+            </tr>
+            <tr>
+                <th>نشانی محل سکونت</th>
+                <td>{{ form.personnel.address }}</td>
+            </tr>
+            <tr>
+                <th>تاریخ استخدام</th>
+                <td>{{ form.employment_date }}</td>
+            </tr>
+            <tr>
+                <th>نوع استخدام</th>
+                <td>{{ form.employment_type }}</td>
+            </tr>
+            <tr>
+                <th>محل خدمت</th>
+                <td>{{ form.job_location }}</td>
+            </tr>
+            <tr>
+                <th>وضعیت محل خدمت</th>
+                <td>{{ form.job_location_status }}</td>
+            </tr>
+            <tr>
+                <th>نوع قرارداد</th>
+                <td>{{ form.contract_type }}</td>
+            </tr>
+            <tr>
+                <th> پایان کار</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>وضعیت کارمند</th>
+                <td>{{ form.employee_status }}</td>
+            </tr>
+            <tr>
+                <th>شماره تلفن همراه</th>
+                <td>{{ form.personnel.mobile_number_1 }}</td>
+            </tr>
+            <tr>
+                <th>پست الکترونیک</th>
+                <td></td>
+            </tr>
+        </table>
+    {% endfor %}
+
+</div>

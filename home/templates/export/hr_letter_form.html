@@ -1,0 +1,144 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            {% if form.is_template == 'p' %}
+                <tr>
+                    <th class="text-center"> پرسنل : {{ form.contract_info.personnel_name }}</th>
+                    <th class="text-center"> کارگاه : {{ form.contract_info.workshop_name }}</th>
+                    <th class="text-center">شماره قرارداد : {{ form.contract.code }}</th>
+                    <th class="text-center">از : {{ form.contract.contract_from_date }} تا
+                        : {{ form.contract.contract_to_date }}</th>
+
+                </tr>
+            {% endif %}
+            {% if form.is_template == 't' %}
+                <tr>
+                    <th class="text-center" colspan="4"> قالب {{ form.name }}</th>
+
+                </tr>
+            {% endif %}
+            <tr class="bad-font-color">
+                <th class="text-center" colspan="2">عنوان</th>
+                <th class="text-center" colspan="2">مبلغ</th>
+            </tr>
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حداقل مزد روزانه</td>
+                <td class="text-center" colspan="2">{{ form.hoghooghe_roozane_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">پایه سنوات روزانه</td>
+                <td class="text-center" colspan="2">{{ form.paye_sanavat_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق مسکن</td>
+                <td class="text-center" colspan="2">{{ form.haghe_maskan_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">بن خار و بار</td>
+                <td class="text-center" colspan="2">{{ form.bon_kharo_bar_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق سرپرستی</td>
+                <td class="text-center" colspan="2">{{ form.haghe_sarparasti_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق مدیریت</td>
+                <td class="text-center" colspan="2">{{ form.haghe_modiriyat_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق جذب</td>
+                <td class="text-center" colspan="2">{{ form.haghe_jazb_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">فوق العاده شغل</td>
+                <td class="text-center" colspan="2">{{ form.fogholade_shoghl_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق تحصیلات</td>
+                <td class="text-center" colspan="2">{{ form.haghe_tahsilat_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">فوق العاده سختی کار</td>
+                <td class="text-center" colspan="2">{{ form.fogholade_sakhti_kar_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق آنکال</td>
+                <td class="text-center" colspan="2">{{ form.haghe_ankal_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">فوق العاده بدی هوا</td>
+                <td class="text-center" colspan="2">{{ form.fogholade_badi_abohava_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">محرومیت از تسحیلات</td>
+                <td class="text-center" colspan="2">{{ form.mahroomiat_tashilat_zendegi_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">فوق العاده محل خدمت</td>
+                <td class="text-center" colspan="2">{{ form.fogholade_mahal_khedmat_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">فوق العاده محیط کار</td>
+                <td class="text-center" colspan="2">{{ form.fogholade_sharayet_mohit_kar_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">ایاب و ذهاب</td>
+                <td class="text-center" colspan="2">{{ form.ayabo_zahab_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">یارانه غذا</td>
+                <td class="text-center" colspan="2">{{ form.yarane_ghaza_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق شیر</td>
+                <td class="text-center" colspan="2">{{ form.haghe_shir_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">حق تاهل</td>
+                <td class="text-center" colspan="2">{{ form.haghe_taahol_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">کمک هزینه مهدکودک</td>
+                <td class="text-center" colspan="2">{{ form.komakhazine_mahdekoodak_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">کمک هزینه ورزش</td>
+                <td class="text-center" colspan="2">{{ form.komakhazine_varzesh_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">کمک هزینه موبایل</td>
+                <td class="text-center" colspan="2">{{ form.komakhazine_mobile_amount }} </td>
+            </tr>
+
+            <tr class="bad-font-color">
+                <td class="text-center" colspan="2">مزایای مستمر غیرنقدی</td>
+                <td class="text-center" colspan="2">{{ form.mazaya_mostamar_gheyre_naghdi_amount }} </td>
+            </tr>
+
+
+        </table>
+    {% endfor %}
+</div>

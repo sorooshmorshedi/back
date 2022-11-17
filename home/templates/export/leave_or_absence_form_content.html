@@ -1,0 +1,40 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>پرسنل در کارگاه</th>
+            <th>نوع مرخصی</th>
+            <th>نوع</th>
+            <th>از تاربخ</th>
+            <th>تا تاربخ</th>
+            <th>از ساعت</th>
+            <th>تا ساعت</th>
+            <th> تاربخ</th>
+            <th>علت مرخصی</th>
+            <th>توضیحات</th>
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.workshop_personnel.my_title }}</td>
+                <td>{{ form.get_leave_type_display }}</td>
+                <td>
+                    {% if form.leave_type == 'e' %}
+                    {{ form.get_entitlement_leave_type_display }}
+                    {% endif %}
+                    {% if form.leave_type == 'm' %}
+                    {{ form.get_matter73_leave_type_display }}
+                    {% endif %}
+                </td>
+                <td>{{ form.from_date }}</td>
+                <td>{{ form.to_date }}</td>
+                <td>{{ form.from_hour }}</td>
+                <td>{{ form.to_hour }}</td>
+                <td>{{ form.date }}</td>
+                <td>{{ form.cause_of_incident }}</td>
+                <td>{{ form.explanation }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

@@ -1,0 +1,148 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>کد ملی/کد فراگیر</th>
+                <td>{{ form.workshop_personnel.personnel.national_code }}</td>
+            </tr>
+            <tr>
+                <th>نوع پرداخت</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>تعداد ماههای کارکرد واقعی از ابتدای سال جاری</th>
+                <td>{{ form.year_real_work_month }}</td>
+            </tr>
+            <tr>
+                <th>یا این ماه آخرین ماه فعالیت کاریحقوق بگیر میباشد؟</th>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <th>نوع ارز</th>
+                <td>85</td>
+            </tr>
+            <tr>
+                <th>نرخ تسعیر ارز</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>تاریخ شروع به کار</th>
+                <td>{{ form.workshop_personnel.employment_date }}</td>
+            </tr>
+            <tr>
+                <th>تاریخ پایان کار</th>
+                <td></td>
+            </tr>
+            <tr>
+                <th>وضعیت کارمند</th>
+                <td>{{ form.workshop_personnel.employee_status }}</td>
+            </tr>
+            <tr>
+                <th>وضعیت محل خدمت</th>
+                <td>{{ form.workshop_personnel.job_location_status }}</td>
+            </tr>
+            <tr>
+                <th>ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی</th>
+                <td>{{ form.naghdi_pension }}</td>
+            </tr>
+            <tr>
+                <th>پرداختهای مستمر معوق که مالیاتی برای آنها محاسبه نشده است</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>مسکن</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>مبلغ کسر شده از حقوق کارمند بابت مسکن ماه جاری</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>وسیله نقلیه</th>
+                <td>1</td>
+            </tr>
+            <tr>
+                <th>مبلغ کسر شده از حقوق کارمند بابت وسیله نقلیه ماه جاری</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>پرداخت مزایای مستمر غیر نقدی ماه جاری</th>
+                <td>{{ form.gheyre_naghdi_pension }}</td>
+            </tr>
+            <tr>
+                <th> هزینه های درمانی موضوع ماده 37 ق.م.م.</th>
+                <td>{{ form.hazine_made_137 }}</td>
+            </tr>
+            <tr>
+                <th> حق بیمه پرداختی موضوع ماده 37 ق.م.م.</th>
+                <td>{{ form.haghe_bime_moafiat }}</td>
+            </tr>
+            <tr>
+                <th>تسهیلات اعتباری مسکن از بانکها</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>سایر معافیتها</th>
+                <td>{{ form.total_sayer_moafiat }}</td>
+            </tr>
+
+            <tr>
+                <th>ناخالص اضافه کاری ماه جاری</th>
+                <td>{{ form.ezafe_kari_nakhales }}</td>
+            </tr>
+            <tr>
+                <th>سایر پرداختهای غیر مستمر نقدی ماه جاری</th>
+                <td>{{ form.naghdi_un_pension }}</td>
+            </tr>
+            <tr>
+                <th>پاداش های مورد یماه جاری</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>پرداختهای غیر مستمر نقدی معوقه ماه جاری</th>
+                <td>0</td>
+            </tr>
+            <tr>
+                <th>کسر میشود:معافیت های غیر مستمر نقدی(شامل بند6ماده91)</th>
+                <td>{{ form.mission_total }}</td>
+            </tr>
+            <tr>
+                <th>پرداخت مزایای غیر مستمر غیر نقدی ماه جاری</th>
+                <td>{{ form.mazaya_gheyr_mostamar }}</td>
+            </tr>
+            <tr>
+                <th>عیدی و مزایای پایان سال</th>
+                <td>{{ form.get_padash }}</td>
+            </tr>
+            <tr>
+                <th>بازخرید مرخصی و بازخرید سنوات-ریالی</th>
+                <td>{{ form.get_hagh_sanavat_and_save_leaves }}</td>
+            </tr>
+            <tr>
+                <th>کسر میشود:معافیت(فقط برای بند5ماده91)</th>
+                <td>{{ form.get_hagh_sanavat_and_save_leaves }}</td>
+            </tr>
+            <tr>
+                <th>معافیت مربوط به مناطق آزاد تجاری</th>
+                <td>{{ form.manategh_tejari_moafiat }}</td>
+            </tr>
+            <tr>
+                <th>معافیت موضوع قانون اجتناب از اخذ مالیات مضاعف</th>
+                <td>{{ form.ejtenab_maliat_mozaaf }}</td>
+            </tr>
+            <tr>
+                <th>
+                    مالیات متعلّقه حقوق و دستمزد مستمر نقدی، درآمدها و مزایای غیر نقدی، پرداختهای غیر مستمر نقدی وغیر نقدی،
+                    عیدی و مزایا، بازخرید مرخصی و سنوات ماه جاری
+
+                </th>
+                <td>{{ form.calculate_month_tax }}</td>
+            </tr>
+
+        </table>
+    {% endfor %}
+
+</div>

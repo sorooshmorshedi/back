@@ -2,17 +2,29 @@ from django.urls import path
 from django.conf.urls import url
 
 from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, WorkshopPersonnelExportView, \
-    PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView
+    PersonnelFamilyExportview, ContractRowExportview, ContractExportView, LeaveOrAbsenceExportView, \
+    AbsenceRequestExportView, MissionExportView, MissionRequestExportView, ContractFormExportView, HRLetterExportView, \
+    LoanExportView, DeductionExportView, LoanRequestExportView, PayslipExportView, BankReportExportView, \
+    PayrollExportView, LoanItemExportView, PersonInsuranceReportExportView, WorkshopInsuranceReportExportView, \
+    PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
+    NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
+    AccountBalanceReportExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
-    TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView
+    TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
+    LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
+    write_person_insurance_diskette, \
+    write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
     MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
     ListOfPayItemDetail, WorkshopContractRowsDetail, WorkshopTaxRowApiView, \
-    WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail
+    WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail, \
+    LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
+    TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
+    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -23,6 +35,16 @@ urlpatterns = [
 
     path('tax/', WorkshopTaxApiView.as_view(), name='workshopTaxApiView'),
     path('tax/<int:pk>/', WorkshopTaxDetail.as_view(), name='workshopTaxDetail'),
+
+    path('loan/', LoanApiView.as_view(), name='loanApiView'),
+    path('loan/<int:pk>/', LoanDetail.as_view(), name='loanDetail'),
+    path('loan/item/<int:pk>/', LoanItemDetail.as_view(), name='loanItemDetail'),
+    path('personnel/loan/<int:pk>/', PersonnelLoanDetail.as_view(), name='personnelLoanDetail'),
+
+    path('deduction/', DeductionApiView.as_view(), name='deductionApiView'),
+    path('deduction/<int:pk>/', DeductionDetail.as_view(), name='deductionDetail'),
+    path('deduction/template/', TemplateDeductionDetail.as_view(), name='templateDeductionDetail'),
+    path('personnel/deduction/<int:pk>/', PersonnelDeductionDetail.as_view(), name='personnelDeductionDetail'),
 
     path('tax/row/', WorkshopTaxRowApiView.as_view(), name='workshopTaxRowApiView'),
     path('tax/row/<int:pk>/', WorkshopTaxRowDetail.as_view(), name='workshopTaxRowDetail'),
@@ -56,17 +78,36 @@ urlpatterns = [
 
     path('paylist/', ListOfPayApiView.as_view(), name='listOfPayApiView'),
     path('paylist/<int:pk>/', ListOfPayDetail.as_view(), name='listOfPayDetail'),
+    path('paylist/less/<int:pk>/', ListOfPayLessDetail.as_view(), name='listOfPayLessDetail'),
 
+    path('pay/<int:pk>/', PayAPI.as_view(), name='payAPI'),
     path('paylist/item/<int:pk>/', ListOfPayItemsCalculate.as_view(), name='listOfPayItemsCalculate'),
+    path('paylist/bank/<int:pk>/', ListOfPayBankDetail.as_view(), name='listOfPayBankDetail'),
     path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
+    path('paylist/item/detail/<int:pk>/', PayItemDetail.as_view(), name='payItemDetail'),
 
     path('payment/<int:year>/<str:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),
+
+    path('diskette/tax/<int:pk>/', write_tax_diskette),
+    path('diskette/tax/newPerson/<int:pk>/', write_new_person_diskette),
+    path('diskette/tax/summary/<int:pk>/', write_summary_tax_diskette),
+
+    path('diskette/insurance/<int:pk>/', write_insurance_diskette),
+    path('diskette/insurance/person/<int:pk>/', write_person_insurance_diskette),
+
+    path('absence/report/<int:year>/<str:month>/', AbsenceReportExportView.as_view()),
+    path('saveLeave/report/<int:year>/<str:month>/', SaveLeaveReportExportView.as_view()),
+    path('settlement/<int:personnel>/<str:export_type>', SettlementExportView.as_view()),
+
+    path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),
+    path('listOfPayItem/pay/<int:pk>/', ListOfPayItemPaymentAPI.as_view(), name='listOfPayItemPaymentAPI'),
+
 ]
 
 urlpatterns += [
     url(r'^workshop/all$', WorkshopListView.as_view(), name='workshopList'),
     url(r'^tax/row/all$', TaxRowListView.as_view(), name='taxRowListView'),
-    url(r'^tax/all$', TaxListView.as_view(), name='taxListView'),
+    url(r'^tax/all$', TaxMoafListView.as_view(), name='taxListView'),
     url(r'^personnel/all$', PersonnelListView.as_view(), name='personnelList'),
     url(r'^workshop/personnel/all$', WorkshopPersonnelListView.as_view(), name='workshopPersonnelList'),
     url(r'^personnel/family/all$', PersonnelFamilyListView.as_view(), name='personnelFamilyList'),
@@ -77,6 +118,10 @@ urlpatterns += [
     url(r'^hrletter/all$', HRLetterListView.as_view(), name='hrLetterListView'),
     url(r'^listOfPay/all$', ListOfPayListView.as_view(), name='listOfPayListView'),
     url(r'^listOfPayItem/all$', ListOfPayItemListView.as_view(), name='listOfPayItemListView'),
+    url(r'^listOfPayItem/less$', ListOfPayItemLessListView.as_view(), name='listOfPayItemListView'),
+    url(r'^loan/item/all$', LoanItemListView.as_view(), name='loanItemListView'),
+    url(r'^loan/all$', LoanListView.as_view(), name='loanListView'),
+    url(r'^deduction/all$', DeductionListView.as_view(), name='deductionListView'),
 
     url(r'^workshop/all/(?P<export_type>\S+)', WorkshopExportview.as_view(), name=''),
     url(r'^personnel/all/(?P<export_type>\S+)', PersonnelExportview.as_view(), name=''),
@@ -84,6 +129,26 @@ urlpatterns += [
     url(r'^personnel/family/all/(?P<export_type>\S+)', PersonnelFamilyExportview.as_view(), name=''),
     url(r'^contractrow/all/(?P<export_type>\S+)', ContractRowExportview.as_view(), name=''),
     url(r'^contract/all/(?P<export_type>\S+)', ContractExportView.as_view(), name=''),
+    url(r'^contract/form/(?P<export_type>\S+)', ContractFormExportView.as_view(), name=''),
     url(r'^absence/all/(?P<export_type>\S+)', LeaveOrAbsenceExportView.as_view(), name=''),
+    url(r'^hrletter/all/(?P<export_type>\S+)', HRLetterExportView.as_view(), name=''),
+    url(r'^absence/request/(?P<export_type>\S+)', AbsenceRequestExportView.as_view(), name=''),
+    url(r'^mission/all/(?P<export_type>\S+)', MissionExportView.as_view(), name=''),
+    url(r'^mission/request/(?P<export_type>\S+)', MissionRequestExportView.as_view(), name=''),
+    url(r'^loan/all/(?P<export_type>\S+)', LoanExportView.as_view(), name=''),
+    url(r'^loan/item/(?P<export_type>\S+)', LoanItemExportView.as_view(), name=''),
+    url(r'^loan/request/(?P<export_type>\S+)', LoanRequestExportView.as_view(), name=''),
+    url(r'^deduction/all/(?P<export_type>\S+)', DeductionExportView.as_view(), name=''),
+    url(r'^payslip/(?P<export_type>\S+)', PayslipExportView.as_view(), name=''),
+    url(r'^payForm/(?P<export_type>\S+)', PayFormExportView.as_view(), name=''),
+    url(r'^bankReport/(?P<export_type>\S+)', BankReportExportView.as_view(), name=''),
+    url(r'^total/insurance/report/(?P<export_type>\S+)', WorkshopInsuranceReportExportView.as_view(), name=''),
+    url(r'^person/insurance/report/(?P<export_type>\S+)', PersonInsuranceReportExportView.as_view(), name=''),
+    url(r'^tax/report/(?P<export_type>\S+)', TaxReportExportView.as_view(), name=''),
+    url(r'^personTax/report/(?P<export_type>\S+)', PersonTaxReportExportView.as_view(), name=''),
+    url(r'^month/tax/(?P<export_type>\S+)', MonthTaxReportExportView.as_view(), name=''),
+    url(r'^diskette/person/(?P<export_type>\S+)', NewPersonTaxReportExportView.as_view(), name=''),
+    url(r'^payroll/(?P<export_type>\S+)', PayrollExportView.as_view(), name=''),
+    url(r'^balance/(?P<export_type>\S+)', AccountBalanceReportExportView.as_view(), name=''),
 
 ]

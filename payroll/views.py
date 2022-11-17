@@ -1,8 +1,8 @@
 import jdatetime
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db.models import Q
 from django.http import Http404
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
@@ -12,12 +12,13 @@ from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
-    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
     ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
-    WorkShopTaxSerializer
+    WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
+    ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer
 
 
 class WorkshopApiView(APIView):
@@ -230,12 +231,19 @@ class PersonnelDetail(APIView):
         except Personnel.DoesNotExist:
             raise Http404
 
+    def edit_personnel(self, pk):
+        person = self.get_object(pk)
+        person.is_personnel_verified = False
+        person.save()
+
+
     def get(self, request, pk):
         query = self.get_object(pk)
         serializers = PersonnelSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
+        self.edit_personnel(pk)
         query = self.get_object(pk)
         serializer = PersonnelSerializer(query, data=request.data)
         if serializer.is_valid():
@@ -460,40 +468,36 @@ class PersonnelVerifyApi(APIView):
             personnel.military_service = 'x'
         if not personnel.name or not personnel.last_name:
             self.validate_status = False
-            print(1)
-            raise ValidationError(message="نام یا نام خانوادگی را وارد کنید")
+            raise ValidationError("نام یا نام خانوادگی را وارد کنید")
         if not personnel.father_name:
-            print(2)
             self.validate_status = False
-            raise ValidationError(message="نام پدر را وارد کنید")
+            raise ValidationError("نام پدر را وارد کنید")
         if not personnel.country:
             self.validate_status = False
-            print(3)
-            raise ValidationError(message="کشور را وارد کنید")
+            raise ValidationError("کشور را وارد کنید")
         if not personnel.national_code:
             self.validate_status = False
-            print(4)
-            raise ValidationError(message="کد ملی را وارد کنید")
+            raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
         if not personnel.identity_code:
             self.validate_status = False
-            raise ValidationError(message="شماره شنانامه را وارد کنید")
+            raise ValidationError("شماره شنانامه را وارد کنید")
         if not personnel.date_of_birth:
             self.validate_status = False
-            raise ValidationError(message="تاریخ تولذ را وارد کنید")
+            raise ValidationError("تاریخ تولذ را وارد کنید")
         if not personnel.date_of_exportation:
             self.validate_status = False
-            raise ValidationError(message="تاریخ صدور شناسنامه را وارد کنید")
+            raise ValidationError("تاریخ صدور شناسنامه را وارد کنید")
         if not personnel.location_of_birth:
             self.validate_status = False
-            raise ValidationError(message="محل تولد شناسنامه را وارد کنید")
+            raise ValidationError("محل تولد شناسنامه را وارد کنید")
         if not personnel.location_of_exportation:
             self.validate_status = False
-            raise ValidationError(message="محل صدور شناسنامه را وارد کنید")
+            raise ValidationError("محل صدور شناسنامه را وارد کنید")
         if not personnel.city_phone_code:
             self.validate_status = False
-            raise ValidationError(message="کد تلفن شهر را وارد کنید")
+            raise ValidationError("کد تلفن شهر را وارد کنید")
         if personnel.city_phone_code:
             city_phone_validator = RegexValidator(regex='^(0){1}[0-9]{2}$',
                                                   message='کد باید از سه عدد تشکیل شوذ و با صفر شروع شوذ',
@@ -501,10 +505,10 @@ class PersonnelVerifyApi(APIView):
             city_phone_validator(personnel.city_phone_code)
         if not personnel.phone_number:
             self.validate_status = False
-            raise ValidationError(message="تلفن را وارد کنید")
+            raise ValidationError("تلفن را وارد کنید")
         if not personnel.mobile_number_1:
             self.validate_status = False
-            raise ValidationError(message="شماره موبایل را وارد کنید")
+            raise ValidationError("شماره موبایل را وارد کنید")
         if personnel.mobile_number_1:
             length_validator = RegexValidator(regex='^.{11}$', message='طول شماره موبایل باید 11 رقم باشد',
                                               code='nomatch')
@@ -519,34 +523,34 @@ class PersonnelVerifyApi(APIView):
             format_validator(personnel.mobile_number_2)
         if not personnel.address:
             self.validate_status = False
-            raise ValidationError(message="آدرس را وارد کنید")
+            raise ValidationError("آدرس را وارد کنید")
         if personnel.postal_code:
             postal_code_validator = RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد',
                                                    code='nomatch')
             postal_code_validator(personnel.postal_code)
         if personnel.insurance and not personnel.insurance_code:
             self.validate_status = False
-            raise ValidationError(message="َشماره بیمه را وارد کنید")
+            raise ValidationError("َشماره بیمه را وارد کنید")
         if personnel.degree_education == 'di':
             if not personnel.field_of_study:
                 self.validate_status = False
-                raise ValidationError(message="رشته تحصیلی را وارد کنید")
+                raise ValidationError("رشته تحصیلی را وارد کنید")
         if personnel.degree_education != 'un':
             if not personnel.field_of_study:
                 self.validate_status = False
-                raise ValidationError(message="رشته تحصیلی را وارد کنید")
+                raise ValidationError("رشته تحصیلی را وارد کنید")
             elif not personnel.university_type:
                 self.validate_status = False
-                raise ValidationError(message="نوع دانشگاه را وارد کنید")
+                raise ValidationError("نوع دانشگاه را وارد کنید")
             elif not personnel.university_name:
                 self.validate_status = False
-                raise ValidationError(message="نام دانشگاه را وارد کنید")
+                raise ValidationError("نام دانشگاه را وارد کنید")
         if not personnel.account_bank_name:
             self.validate_status = False
-            raise ValidationError(message="نام بانک حساب را وارد کنید")
+            raise ValidationError("نام بانک حساب را وارد کنید")
         if not personnel.account_bank_number:
             self.validate_status = False
-            raise ValidationError(message="شماره حساب حقوق را وارد کنید")
+            raise ValidationError("شماره حساب حقوق را وارد کنید")
         if personnel.bank_cart_number:
             cart_number_validator = RegexValidator(regex='^.{16}$', message='طول شماره کارت باید 16 رقم باشد',
                                                    code='nomatch')
@@ -663,6 +667,138 @@ class LeaveOrAbsenceDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LoanApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan'
+
+    def get(self, request):
+        query = Loan.objects.all()
+        serializers = LoanSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = LoanSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoanDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan'
+
+    def get_object(self, pk):
+        try:
+            return Loan.objects.get(pk=pk)
+        except Loan.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = LoanSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = LoanSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PersonnelLoanDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan'
+
+    def get_object(self, pk):
+        try:
+            return Loan.objects.filter(workshop_personnel=pk)
+        except Loan.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = LoanSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+class DeductionApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request):
+        query = OptionalDeduction.objects.all()
+        serializers = DeductionSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = DeductionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TemplateDeductionDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request):
+        query = OptionalDeduction.objects.filter(is_template=True)
+        serializers = DeductionSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class DeductionDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get_object(self, pk):
+        try:
+            return OptionalDeduction.objects.get(pk=pk)
+        except OptionalDeduction.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = DeductionSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = DeductionSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PersonnelDeductionDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get_object(self, pk):
+        try:
+            return OptionalDeduction.objects.filter(workshop_personnel=pk)
+        except OptionalDeduction.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = DeductionSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
 
 class CalculationsPayrollDetail(APIView):
@@ -786,14 +922,50 @@ class ListOfPayItemDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return ListOfPayItem.objects.filter(list_of_pay=pk)
+            return ListOfPayItem.objects.get(list_of_pay=pk)
         except ListOfPayItem.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
         query = self.get_object(pk)
-        serializers = ListOfPayItemSerializer(query, many=True)
+        serializers = ListOfPayItemSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+
+class PayItemDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayItemSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class PayAPI(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayItemPaySerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ListOfPayDetail(APIView):
@@ -815,6 +987,22 @@ class ListOfPayDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ListOfPayLessDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayLessSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
 
 
 class ListOfPayItemsCalculate(APIView):
@@ -866,13 +1054,15 @@ class PaymentList(APIView):
         'es': 12,
     }
 
-    def get(self, request, year, month, pk):
+    def post(self, request, year, month, pk):
         month_days = self.months_day[month]
         month = self.months[month]
         start_date = jdatetime.date(year, month, 1, locale='fa_IR')
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
         workshop = Workshop.objects.get(pk=pk)
-        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month,
+        data = request.data
+        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
+                                                use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
         payroll_list.save()
         response = payroll_list.info_for_items
@@ -905,6 +1095,84 @@ class PaymentList(APIView):
 
 
 
+class LoanItemDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan_item'
+
+    def get_object(self, pk):
+        try:
+            return LoanItem.objects.get(pk=pk)
+        except LoanItem.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = LoanItemSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = LoanItemSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListOfPayBankDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayBankSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
 
 
+class ListOfPayPaymentAPI(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayPaySerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayPaySerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListOfPayItemPaymentAPI(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayItemAddPaySerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

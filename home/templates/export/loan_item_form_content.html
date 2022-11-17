@@ -1,0 +1,47 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th class="text-center">نام پرسنل</th>
+            <td class="text-center">{{ forms.first.loan.workshop_personnel.personnel.full_name }}</td>
+            <th class="text-center">نام کارگاه</th>
+            <td class="text-center">{{ forms.first.loan.workshop_personnel.workshop.workshop_title }}</td>
+            <th class="text-center">مبلغ وام</th>
+            <td class="text-center">{{ forms.first.loan.amount }}</td>
+            <th class="text-center">تعداد اقساط</th>
+            <td class="text-center">{{ forms.first.loan.episode }}</td>
+            <th class="text-center">تاریخ شروع</th>
+            <td class="text-center">{{ forms.first.loan.pay_date }}</td>
+            <th class="text-center">تاریخ سررسید</th>
+            <td class="text-center">{{ forms.first.loan.end_date }}</td>
+
+        </tr>
+
+    </table>
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>ردیف</th>
+            <th>ماه</th>
+            <th>مبلغ هر قسط</th>
+            <th>کارمزد</th>
+            <th>مبلغ قابل پرداخت ماهانه</th>
+            <th>مبلغ پرداخت شده</th>
+            <th>اضافه/کسر پرداخت ماه جاری</th>
+            <th>مانده تجمیعی وام</th>
+
+        </tr>
+        {% for form in forms.reverse %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ form.month_display }}</td>
+                <td class="text-center">{{ form.amount }}</td>
+                <td class="text-center">-</td>
+                <td class="text-center">{{ form.amount }}</td>
+                <td class="text-center">{{ form.payed_amount }}</td>
+                <td class="text-center">{{ form.bed_or_bes }} </td>
+                <td class="text-center">{{ form.cumulative_balance }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

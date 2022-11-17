@@ -1,0 +1,68 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th class="text-center">
+                نام و نام خانوادگی
+            </th>
+            <td class="text-center">
+                {{ forms.personnel.full_name }}
+            </td>
+            <th class="text-center">
+                کد ملی
+            </th>
+            <td class="text-center">
+                {{ forms.personnel.national_code }}
+            </td>
+            <th class="text-center">
+                کارگاه
+            <td class="text-center">
+                {{ forms.workshop.workshop_title }}
+            </td>
+        </tr>
+        <tr>
+            <th class="text-center">
+                سال حقوق
+            </th>
+            <th class="text-center">
+                ماه حقوق
+            </th>
+            <th class="text-center">
+                مبلغ حقوق
+            </th>
+            <th class="text-center">
+                مبلغ پرداخت شده
+            <th class="text-center">
+                مبلغ باقیمانده
+            </th>
+            <th class="text-center">
+                تاریخ پرداخت بانک
+            </th>
+        </tr>
+        {% for item in form %}
+            <tr>
+            <tr>
+                <td class="text-center">
+                    {{ item.year }}
+                </td>
+                <td class="text-center">
+                    {{ item.month }}
+                </td>
+                <td class="text-center">
+                    {{ item.amount }}
+                </td>
+                <td class="text-center">
+                    {{ item.paid }}
+                </td>
+                <td class="text-center">
+                    {{ item.upaid }}
+                <td class="text-center">
+                    {{ item.bank_date }}
+                </td>
+            </tr>
+
+        {% endfor %}
+    </table>
+
+</div>

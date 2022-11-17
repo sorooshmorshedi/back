@@ -4,7 +4,8 @@ from django_jalali.db import models as jmodels
 
 from helpers.filters import BASE_FIELD_FILTERS
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
-    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem
+    LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem, Loan, OptionalDeduction, \
+    LoanItem
 
 
 class WorkshopFilter(filters.FilterSet):
@@ -106,7 +107,6 @@ class WorkshopPersonnelFilter(filters.FilterSet):
             'id': ('exact',),
             'personnel': ('exact',),
             'workshop': ('exact',),
-            'insurance_add_date': BASE_FIELD_FILTERS,
             'work_title': ['icontains'],
             'previous_insurance_history_out_workshop': ('exact',),
             'previous_insurance_history_in_workshop': ('exact',),
@@ -250,7 +250,7 @@ class TaxRowFilter(filters.FilterSet):
         }
 
 
-class TaxFilter(filters.FilterSet):
+class TaxMoafFilter(filters.FilterSet):
     class Meta:
         model = WorkshopTax
         fields = {
@@ -265,4 +265,74 @@ class TaxFilter(filters.FilterSet):
             },
         }
 
+
+class LoanFilter(filters.FilterSet):
+    class Meta:
+        model = Loan
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'workshop_personnel': ('exact',),
+            'amount': BASE_FIELD_FILTERS,
+            'pay_done': BASE_FIELD_FILTERS,
+            'episode': ('exact',),
+            'loan_type': ('exact',),
+            'pay_date': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+class LoanItemFilter(filters.FilterSet):
+    class Meta:
+        model = LoanItem
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'loan': ('exact',),
+            'amount': BASE_FIELD_FILTERS,
+            'payed_amount': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class DeductionFilter(filters.FilterSet):
+    class Meta:
+        model = OptionalDeduction
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'workshop_personnel': ('exact',),
+            'amount': BASE_FIELD_FILTERS,
+            'pay_done': BASE_FIELD_FILTERS,
+            'episode': ('exact',),
+            'start_date': BASE_FIELD_FILTERS,
+            'name': BASE_FIELD_FILTERS,
+            'template_name': BASE_FIELD_FILTERS,
+            'is_template': ('exact',),
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class TaxFilter(filters.FilterSet):
+    class Meta:
+        model = ListOfPayItem
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+        }
+
+class WorkshopTaxFilter(filters.FilterSet):
+    class Meta:
+        model = ListOfPay
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+        }
 

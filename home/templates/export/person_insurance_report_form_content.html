@@ -1,0 +1,71 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th class="text-center" >کد کارگاه</th>
+                <th class="text-center" >سال عملکرد</th>
+                <th class="text-center" >ماه عملکرد</th>
+                <th class="text-center" >شماره لیست</th>
+                <th class="text-center" >شماره بیمه</th>
+                <th class="text-center" >نام</th>
+                <th class="text-center" >نام خانوادگی</th>
+                <th class="text-center" >نام پدر</th>
+                <th class="text-center" >شماره شناسنامه</th>
+                <th class="text-center" >محل صدور</th>
+                <th class="text-center" >تاریخ صدور</th>
+                <th class="text-center" >تاریخ تولد</th>
+                <th class="text-center" >جنسیت</th>
+                <th class="text-center" >ملیت</th>
+                <th class="text-center" >شرح شغل</th>
+                <th class="text-center" >تاریخ شروع به کار</th>
+                <th class="text-center" >تاریخ ترک کار</th>
+                <th class="text-center" >تعداد روز های کارکرد</th>
+
+            </tr>
+            <tr>
+                <td class="text-center">{{ form.data_for_insurance.DSW_ID }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_YY }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_MM }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_LISTNO }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_ID1 }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_FNAME }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_LNAME }} </td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_DNAME }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_IDNO }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_IDPLC }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_IDATE }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_BDATE }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_SEX }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_NAT }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_OCP }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_SDATE }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_EDATE }}</td>
+                <td class="text-center">{{ form.data_for_insurance.DSW_DD }}</td>
+            </tr>
+            <tr>
+                <th class="text-center" colspan="2">دستمزد روزانه</th>
+                <th class="text-center" colspan="2">دستمزد ماهانه</th>
+                <th class="text-center" colspan="2">مزایای ماهانه</th>
+                <th class="text-center" colspan="2">مجموع دستمزد و مزایای مشمول</th>
+                <th class="text-center" colspan="2">مجموع کل دستمزد و مزایای ماهانه</th>
+                <th class="text-center" colspan="2">حق بیمه سهم بیمه شده</th>
+                <th class="text-center" colspan="2">نرخ پورسانتاژ</th>
+                <th class="text-center" colspan="2">کد شغل</th>
+                <th class="text-center" colspan="2" >کد ملی</th>
+            </tr>
+            <tr>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_ROOZ }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_MAH }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_MAZ }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_MASH }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_TOTL }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_BIME }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_PRATE }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.DSW_JOB }}</td>
+                <td colspan="2" class="text-center">{{ form.data_for_insurance.PER_NATCOD }}</td>
+            </tr>
+        </table>
+    {% endfor %}
+</div>

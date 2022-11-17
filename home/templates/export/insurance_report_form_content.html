@@ -1,0 +1,59 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>کد کارگاه</th>
+            <th>نام کارگاه</th>
+            <th>نام کارفرما</th>
+            <th>آدرس کارگاه</th>
+            <th>نوع لیست</th>
+            <th>سال عملکرد</th>
+            <th>ماه عملکرد</th>
+            <th>شماره لیست</th>
+            <th>شرح لیست</th>
+            <th>تعداد کارکنان</th>
+            <th>مجموع روز های کارکرد</th>
+            <th>مجموع دستمزد روزانه</th>
+            <th>مجموع دستمزد ماهانه</th>
+            <th>مجموع مزایای ماهانه مشمول</th>
+            <th>مجموع دستمزد و مزایای ماهانه مشمول</th>
+            <th>مجموع کل دستمزد و مزایای ماهانه </th>
+            <th>مجموع حق بیمه سهم بیمه شده </th>
+            <th>مجموع حق بیمه سهم کارفرما </th>
+            <th>مجموع حق بیمه بیکاری </th>
+            <th>نرخ حق بیمه </th>
+            <th>نرخ پورسانتاژ </th>
+            <th>نرخ مشاغل زیان آور </th>
+            <th>ردیف پیمان </th>
+
+        </tr>
+        <tr>
+            <td class="text-center">{{ form.data_for_insurance.DSK_ID}}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_NAME }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_FARM }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_ADRS }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_KIND }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_YY }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_MM }} </td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_LISTNO }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_DISC }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_NUM }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TDD }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TROOZ }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TMAH }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TMAZ}}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TMASH }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TTOTL }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TBIME }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TKOSO}}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_TBIC }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_RATE }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_PRATE }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_BIMH }}</td>
+            <td class="text-center">{{ form.data_for_insurance.DSK_PYM }}</td>
+        </tr>
+    </table>
+    {% endfor %}
+</div>
