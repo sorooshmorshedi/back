@@ -88,18 +88,16 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
             [
                 'لیست کارگاه ها'
             ],
-            ['کد کارگاه', 'ردیف پیمان', 'نام کارگاه', 'نام کارفرما', 'آدرس', 'کد پستی', 'نرخ بیمه سهم کارفرما',
+            ['کد کارگاه', 'نام کارگاه', 'نام کارفرما', 'آدرس', 'کد پستی',
              'کد شعبه', 'نام شعبه']
         ]
         for form in workshop:
             data.append([
                 form.code,
-                form.contract_row,
                 form.name,
                 form.employer_name,
                 form.address,
                 form.postal_code,
-                form.employer_insurance_contribution,
                 form.branch_code,
                 form.branch_name,
             ])
