@@ -1,0 +1,252 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+        <tr>
+            <td colspan="13" class="text-center">قرارداد</td>
+        </tr>
+        <tr>
+            <th>کد</th>
+            <th>عنوان</th>
+            <th>پیمانکار</th>
+            <th>مناقصه</th>
+            <th>مبلغ قرارداد</th>
+            <th>از تاریخ</th>
+            <th>تا تاریخ</th>
+            <th>حداکثر میزان تغییر مبلغ</th>
+            <th>تاریخ ثبت</th>
+            <th>تاریخ شروع</th>
+            <th>حسن انجام کار</th>
+            <th>علی الحساب بیمه</th>
+            <th>سایر</th>
+        </tr>
+        {% for form in forms %}
+            <tr>
+                <td>{{ form.code }}</td>
+                <td>{{ form.title }}</td>
+                <td>{{ form.contractor }}</td>
+                <td>{{ form.tender }}</td>
+                <td>{{ form.amount }}</td>
+                <td>{{ form.from_date }}</td>
+                <td>{{ form.to_date }}</td>
+                <td>{{ form.max_change_amount }}%</td>
+                <td>{{ form.registration }}</td>
+                <td>{{ form.inception }}</td>
+                <td>{{ form.doing_job_well }}</td>
+                <td>{{ form.insurance_payment }}</td>
+                <td>{{ form.other }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <table class="table table-bordered table-striped">
+        <tr>
+            <td colspan="13" class="text-center">صورت وضعیت های قرارداد</td>
+        </tr>
+
+        <tr>
+            <th>کد</th>
+            <th>سریال</th>
+            <th>قرارداد</th>
+            <th>تاریخ جدید قرارداد</th>
+            <th>مبلغ ناخالص کارکرد</th>
+            <th>مبلغ ناخالص کارکرد تا صورت وضعیت قبلی</th>
+            <th>مبلغ ناخالص کارکرد بااین صورت وضعیت</th>
+            <th>تاریخ</th>
+            <th>توضیحات</th>
+        </tr>
+        {% for form in statement %}
+            <tr>
+                <td>{{ form.code }}</td>
+                <td>{{ form.serial }}</td>
+                <td>{{ form.contract }}</td>
+                <td>{{ form.type }}</td>
+                <td>{{ form.value }}</td>
+                <td>{{ form.previous_statement_value }}</td>
+                <td>{{ form.present_statement_value }}</td>
+                <td>{{ form.date }}</td>
+                <td>{{ form.explanation }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+    </table>
+    <table class="table table-bordered table-striped">
+        <tr>
+            <td colspan="13" class="text-center">الحاقیه های قرارداد</td>
+        </tr>
+        <tr>
+            <th>کد</th>
+            <th>قرارداد</th>
+            <th>تاریخ جدید قرارداد</th>
+            <th>مبلغ تغییر</th>
+            <th>تاریخ ثبت الحاقیه</th>
+            <th>توضیحات</th>
+        </tr>
+        {% for form in supplement %}
+            <tr>
+                <td>{{ form.code }}</td>
+                <td>{{ form.contract }}</td>
+                <td>{{ form.new_contract_date }}</td>
+                <td>{{ form.value }}</td>
+                <td>{{ form.date }}</td>
+                <td>{{ form.explanation }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+    </table>
+
+    <div class="row">
+        <h3>اسناد ضمانتی پرداختی</h3>
+        {% for payment in payments %}
+            <div class="col-xs-6">
+                <span> کد و نام حساب: </span>
+                <span> {{ payment.account }} </span>
+            </div>
+            {% if payment.floatAccount %}
+                <div class="col-xs-6">
+                    <span> حساب شناور: </span>
+                    <span> {{ payment.account }} </span>
+                </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span> کد اقتصادی: </span>
+                <span> {{ payment.account.eghtesadi_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span> شماره ملی: </span>
+                <span> {{ payment.account.melli_code | default:'-' }} </span>
+            </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 ">
+                    <div class="row">
+                        <span class="col-xs-2">شرح : </span>
+                        <span class="col-xs-10"> {{ payment.explanation | default:'-' }} </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row"
+                 style="margin-top: 15px;">
+            <div class="col-xs-12">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>نوع</th>
+                        <th>نام حساب</th>
+                        <th>مبلغ</th>
+                        <th>شماره پیگیری</th>
+                        <th>تاریخ دریافت</th>
+                        <th>سررسید</th>
+                        <th>نام بانک</th>
+                        <th>شرح ردیف</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in paymentItem %}
+                        {% if item.transaction.id == payment.id %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>
+                                    {{ item.type.account }}
+                                    {% if item.type.floatAccount %}
+                                        - {{ item.type.floatAccount }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.value | money }}</td>
+                                <td>{{ item.documentNumber | default:'-' }}</td>
+                                <td>{{ item.date | default:'-' }}</td>
+                                <td>{{ item.due | default:'-' }}</td>
+                                <td>{{ item.bankName | default:'-' }}</td>
+                                <td>{{ item.explanation | default:'-' }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    <tr>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+        </div>
+
+    <div class="row">
+        <h3>دریافت</h3>
+        {% for rec in receive %}
+            <div class="col-xs-6">
+                <span> کد و نام حساب: </span>
+                <span> {{ rec.account }} </span>
+            </div>
+            {% if payment.floatAccount %}
+                <div class="col-xs-6">
+                    <span> حساب شناور: </span>
+                    <span> {{ rec.account }} </span>
+                </div>
+            {% endif %}
+            <div class="col-xs-3">
+                <span> کد اقتصادی: </span>
+                <span> {{ rec.account.eghtesadi_code | default:'-' }} </span>
+            </div>
+            <div class="col-xs-3">
+                <span> شماره ملی: </span>
+                <span> {{ rec.account.melli_code | default:'-' }} </span>
+            </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 ">
+                    <div class="row">
+                        <span class="col-xs-2">شرح : </span>
+                        <span class="col-xs-10"> {{ rec.explanation | default:'-' }} </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row"
+                 style="margin-top: 15px;">
+            <div class="col-xs-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>نوع</th>
+                    <th>نام حساب</th>
+                    <th>مبلغ</th>
+                    <th>شماره پیگیری</th>
+                    <th>تاریخ دریافت</th>
+                    <th>سررسید</th>
+                    <th>نام بانک</th>
+                    <th>شرح ردیف</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in receieveItem %}
+                    {% if item.transaction.id == rec.id %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.type }}</td>
+                            <td>
+                                {{ item.type.account }}
+                                {% if item.type.floatAccount %}
+                                    - {{ item.type.floatAccount }}
+                                {% endif %}
+                            </td>
+                            <td>{{ item.value | money }}</td>
+                            <td>{{ item.documentNumber | default:'-' }}</td>
+                            <td>{{ item.date | default:'-' }}</td>
+                            <td>{{ item.due | default:'-' }}</td>
+                            <td>{{ item.bankName | default:'-' }}</td>
+                            <td>{{ item.explanation | default:'-' }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+        </div>
+        </div>
+
+
+</div>

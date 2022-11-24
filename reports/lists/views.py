@@ -5,6 +5,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 
 from cheques.views import get_cheque_permission_basename
+from contracting.serializers import TenderSerializer, ContractSerializer, StatementSerializer, SupplementSerializer
 from factors.models.warehouse_handling import WarehouseHandlingItem
 from factors.serializers import TransferListRetrieveSerializer, AdjustmentListRetrieveSerializer, \
     WarehouseHandlingListRetrieveSerializer, FactorsAggregatedSanadListSerializer
@@ -239,3 +240,55 @@ class WareSalePriceChangeListView(generics.ListAPIView):
 
     def get_queryset(self):
         return WareSalePriceChange.objects.hasAccess('get', self.permission_codename).all()
+
+
+class TenderListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.tender"
+    serializer_class = TenderSerializer
+    filterset_class = TenderFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Tender.objects.hasAccess('get', self.permission_codename).all()
+
+
+class ContractListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.contract"
+    serializer_class = ContractSerializer
+    filterset_class = ContractFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Contract.objects.hasAccess('get', self.permission_codename).all()
+
+
+class StatementListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.statement"
+    serializer_class = StatementSerializer
+    filterset_class = StatementFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Statement.objects.hasAccess('get', self.permission_codename).all()
+
+
+class SupplementListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.supplement"
+    serializer_class = SupplementSerializer
+    filterset_class = SupplementFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        return Supplement.objects.hasAccess('get', self.permission_codename).all()

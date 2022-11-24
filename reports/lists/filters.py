@@ -5,6 +5,7 @@ from django_jalali.db import models as jmodels
 
 from cheques.models.ChequeModel import Cheque
 from cheques.models.ChequebookModel import Chequebook
+from contracting.models import Tender, Contract, Statement, Supplement
 from factors.models import Factor, Adjustment
 from factors.models.transfer_model import Transfer
 from factors.models.warehouse_handling import WarehouseHandling
@@ -20,6 +21,8 @@ class TransactionFilter(filters.FilterSet):
         model = Transaction
         fields = {
             'id': ['exact'],
+            'contract_received': ['exact'],
+            'contract_guarantee': ['exact'],
             'code': BASE_FIELD_FILTERS,
             'account': ['exact'],
             'account__name': ['exact', 'icontains'],
@@ -302,3 +305,103 @@ class WareSalePriceChangeFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
+
+
+class TenderFilter(filters.FilterSet):
+    class Meta:
+        model = Tender
+        fields = {
+            'id': ('exact',),
+            'code': BASE_FIELD_FILTERS,
+            'title': BASE_FIELD_FILTERS,
+            'explanation': BASE_FIELD_FILTERS,
+            'province': BASE_FIELD_FILTERS,
+            'city':BASE_FIELD_FILTERS,
+            'classification': ('exact',),
+            'bidder': BASE_FIELD_FILTERS,
+            'bidder_address': BASE_FIELD_FILTERS,
+            'bidder_postal_code': BASE_FIELD_FILTERS,
+            'received_deadline': BASE_FIELD_FILTERS,
+            'send_offer_deadline': BASE_FIELD_FILTERS,
+            'opening_date':BASE_FIELD_FILTERS,
+            'offer_expiration': BASE_FIELD_FILTERS,
+            'transaction__code': BASE_FIELD_FILTERS,
+
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class ContractFilter(filters.FilterSet):
+    class Meta:
+        model = Contract
+        fields = {
+            'id': ('exact',),
+            'tender': ('exact',),
+            'title': BASE_FIELD_FILTERS,
+            'contractor': ('exact',),
+            'code': BASE_FIELD_FILTERS,
+            'amount': BASE_FIELD_FILTERS,
+            'inception': BASE_FIELD_FILTERS,
+            'registration': BASE_FIELD_FILTERS,
+            'max_change_amount': BASE_FIELD_FILTERS,
+            'from_date': BASE_FIELD_FILTERS,
+            'to_date': BASE_FIELD_FILTERS,
+            'doing_job_well': BASE_FIELD_FILTERS,
+            'insurance_payment': BASE_FIELD_FILTERS,
+            'other': BASE_FIELD_FILTERS,
+            'received_transaction__code': BASE_FIELD_FILTERS,
+            'guarantee_document_transaction__code': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class StatementFilter(filters.FilterSet):
+    class Meta:
+        model = Statement
+        fields = {
+            'id': ('exact',),
+            'code': BASE_FIELD_FILTERS,
+            'type': ('exact',),
+            'contract': ('exact',),
+            'value': BASE_FIELD_FILTERS,
+            'previous_statement_value': BASE_FIELD_FILTERS,
+            'serial': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+            'explanation':BASE_FIELD_FILTERS,
+            'present_statement_value': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class SupplementFilter(filters.FilterSet):
+    class Meta:
+        model = Supplement
+        fields = {
+            'id': ('exact',),
+            'contract': ('exact',),
+            'new_contract_date': BASE_FIELD_FILTERS,
+            'explanation': ['icontains'],
+            'increase': ('exact',),
+            'value': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+            'code': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+

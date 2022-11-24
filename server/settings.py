@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'home',
     'imprests',
     'payroll',
+    'contracting',
 
     'sobhan_admin',
 
