@@ -24,7 +24,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail, \
     LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
     TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
-    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI
+    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -86,7 +86,7 @@ urlpatterns = [
     path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
     path('paylist/item/detail/<int:pk>/', PayItemDetail.as_view(), name='payItemDetail'),
 
-    path('payment/<int:year>/<str:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),
+    path('payment/<int:year>/<int:month>/<int:pk>/', PaymentList.as_view(), name='paymentList'),
 
     path('diskette/tax/<int:pk>/', write_tax_diskette),
     path('diskette/tax/newPerson/<int:pk>/', write_new_person_diskette),
@@ -101,6 +101,9 @@ urlpatterns = [
 
     path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),
     path('listOfPayItem/pay/<int:pk>/', ListOfPayItemPaymentAPI.as_view(), name='listOfPayItemPaymentAPI'),
+
+    path('listOfPay/workshop/<int:pk>/', WorkshopListOfPayApiView.as_view(), name='workshopListOfPayApiView'),
+    path('listOfPay/copy/<int:pk>/', ListOfPayCopy.as_view(), name='listOfPayCopy'),
 
 ]
 

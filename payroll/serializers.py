@@ -334,3 +334,9 @@ class ListOfPayItemAddPaySerializer(serializers.ModelSerializer):
         fields = 'id', 'paid_amount'
 
 
+class ListOfPayCopyPaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListOfPay
+        fields = '__all__'
+
+

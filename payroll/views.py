@@ -18,7 +18,8 @@ from payroll.serializers import WorkShopSerializer, PersonnelSerializer, Personn
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
     ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
     WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
-    ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer
+    ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer, \
+    ListOfPayCopyPaySerializer
 
 
 class WorkshopApiView(APIView):
@@ -1026,37 +1027,22 @@ class ListOfPayItemsCalculate(APIView):
 
 class PaymentList(APIView):
     months_day = {
-        'fa': 31,
-        'or': 31,
-        'kh': 31,
-        'ti': 31,
-        'mo': 31,
-        'sh': 31,
-        'me': 30,
-        'ab': 30,
-        'az': 30,
-        'de': 30,
-        'ba': 30,
-        'es': 29,
-    }
-    months = {
-        'fa': 1,
-        'or': 2,
-        'kh': 3,
-        'ti': 4,
-        'mo': 5,
-        'sh': 6,
-        'me': 7,
-        'ab': 8,
-        'az': 9,
-        'de': 10,
-        'ba': 11,
-        'es': 12,
+        1: 31,
+        2: 31,
+        3: 31,
+        4: 31,
+        5: 31,
+        6: 31,
+        7: 30,
+        8: 30,
+        9: 30,
+        10: 30,
+        11: 30,
+        12: 29,
     }
 
     def post(self, request, year, month, pk):
         month_days = self.months_day[month]
-        month = self.months[month]
         start_date = jdatetime.date(year, month, 1, locale='fa_IR')
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
         workshop = Workshop.objects.get(pk=pk)
@@ -1176,3 +1162,66 @@ class ListOfPayItemPaymentAPI(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopListOfPayApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get(self, request, pk):
+        query = ListOfPay.objects.filter(workshop=pk)
+        serializers = ListOfPayCopyPaySerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+class ListOfPayCopy(APIView):
+    months_day = {
+        1: 31,
+        2: 31,
+        3: 31,
+        4: 31,
+        5: 31,
+        6: 31,
+        7: 30,
+        8: 30,
+        9: 30,
+        10: 30,
+        11: 30,
+        12: 29,
+    }
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def post(self, request, pk):
+
+        list_of_pay = self.get_object(pk)
+        items = ListOfPayItem.objects.filter(list_of_pay=pk)
+        data = request.data
+        new_list_of_pay = list_of_pay
+        new_list_of_pay.id = None
+        new_list_of_pay.name = data['name']
+        new_list_of_pay.year = data['year']
+        new_list_of_pay.month = data['month']
+        new_list_of_pay.month_days = self.months_day[data['month']]
+        new_list_of_pay.start_dat = jdatetime.date(data['year'],
+                                                  data['month'],
+                                                  1,
+                                                  locale='fa_IR')
+        new_list_of_pay.end_date = jdatetime.date(data['year'],
+                                                  data['month'],
+                                                  self.months_day[data['month']],
+                                                  locale='fa_IR')
+        new_list_of_pay.save()
+        print(items)
+
+        for item in items:
+            new_item = item
+            new_item.id = None
+            new_item.list_of_pay = ListOfPay.objects.get(pk=new_list_of_pay.id)
+            new_item.save()
+            print(new_item)
+        return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
