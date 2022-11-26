@@ -1,0 +1,41 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+
+        <tr>
+            <th>شماره مناقصه</th>
+            <th>عنوان</th>
+            <th>شرح مناقصه</th>
+    <th>طبقه بندی موضوعی</th>
+    <th>استان محل اجرا</th>
+    <th>شهر محل اجرا</th>
+    <th>مناقصه گزار</th>
+    <th>کد پستی مناقصه گزار</th>
+    <th>آدرس مناقصه گزار</th>
+    <th>مهلت دریافت اسناد</th>
+    <th>مهلت ارسال پاکت های پیشنهاد</th>
+    <th>زمان بازگشایی پاکت ها</th>
+    <th>"زمان اعتبار پیشنهاد</th>
+  </tr>
+          {% for form in forms %}
+
+  <tr>
+      <td>{{ form.code}}</td>
+      <td>{{ form.title}}</td>
+      <td>{{ form.explanation}}</td>
+      <td>{{ form.get_classification_display}}</td>
+      <td>{{ form.province}}</td>
+      <td>{{ form.city}}</td>
+      <td>{{ form.bidder}}</td>
+      <td>{{ form.bidder_postal_code}}</td>
+      <td>{{ form.bidder_address}}</td>
+      <td>{{ form.received_deadline}}</td>
+      <td>{{ form.send_offer_deadline}}</td>
+      <td>{{ form.opening_date}}</td>
+      <td>{{ form.offer_expiration}}</td>
+
+  </tr>
+        {% endfor %}
+</table>
+</div>

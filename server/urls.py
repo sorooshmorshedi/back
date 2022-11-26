@@ -53,6 +53,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
 
+    url(r'^contracting/', include('contracting.urls')),
     url('sobhanAdmin/', include('sobhan_admin.urls')),
 
     url(r'^dashtbashi/', include('_dashtbashi.urls')),
