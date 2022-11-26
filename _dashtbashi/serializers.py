@@ -153,7 +153,7 @@ class LadingCreateUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         validators = [
             UniqueTogetherValidator(
-                queryset=Lading.objects.inFinancialYear(),
+                queryset=Lading.objects.all(),
                 fields=["lading_number", "financial_year"],
                 message="شماره بارگیری تکراری است"
             )

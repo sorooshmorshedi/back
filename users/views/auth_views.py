@@ -55,8 +55,8 @@ class SecretKeyView(APIView):
 
         return Response([])
 
-
-class ObtainAuthTokenView(ObtainAuthToken, RecaptchaView):
+#RecaptchaView
+class ObtainAuthTokenView(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
 
@@ -71,7 +71,7 @@ class ObtainAuthTokenView(ObtainAuthToken, RecaptchaView):
             else:
                 return Response({'need_two_factor_authentication': True})
 
-        self.verify_recaptcha()
+        #self.verify_recaptcha()
 
         Token.objects.filter(user=user).delete()
         token, created = Token.objects.get_or_create(user=user)
