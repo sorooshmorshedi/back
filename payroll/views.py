@@ -1168,8 +1168,8 @@ class WorkshopListOfPayApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
 
-    def get(self, request, pk):
-        query = ListOfPay.objects.filter(workshop=pk)
+    def get(self, request, pk, month, year):
+        query = ListOfPay.objects.filter(Q(workshop=pk) & Q(month=month) & Q(year=int(year)))
         serializers = ListOfPayCopyPaySerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -1225,3 +1225,5 @@ class ListOfPayCopy(APIView):
             new_item.save()
             print(new_item)
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
+
+

@@ -2038,7 +2038,14 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         if self.ultimate:
             return 'نهایی'
         else:
-            return ''
+            return 'غیر نهایی'
+
+    @property
+    def is_use_in_calculate(self):
+        if self.use_in_calculate:
+            return 'محاسبه شده'
+        else:
+            return 'محاسبه نمی شود'
 
     @property
     def get_contracts(self):
@@ -2296,6 +2303,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                  on_delete=models.CASCADE, blank=True, null=True)
     contract_row = models.ForeignKey(ContractRow, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                      blank=True, null=True)
+    cumulative_absence = models.IntegerField(default=0)
+    cumulative_mission = models.IntegerField(default=0)
+    cumulative_entitlement = models.IntegerField(default=0)
+    cumulative_illness = models.IntegerField(default=0)
+    cumulative_without_salary = models.IntegerField(default=0)
+
     hoghoogh_roozane = DECIMAL()
     pay_base = models.IntegerField(default=0)
     sanavat_base = DECIMAL(default=0)
@@ -2366,6 +2379,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     padash_total = DECIMAL(default=0)
     mazaya_gheyr_mostamar = DECIMAL(default=0)
     calculate_payment = models.BooleanField(default=False)
+
 
 
     # tax kosoorat
@@ -3413,7 +3427,19 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
+            self.entitlement_leave_day += Decimal(self.cumulative_entitlement)
+            self.absence_day += Decimal(self.cumulative_absence)
+            self.without_salary_leave_day += Decimal(self.cumulative_without_salary)
+            self.illness_leave_day += Decimal(self.cumulative_illness)
+            self.mission_day += Decimal(self.mission_total)
+
+            self.real_worktime -= self.cumulative_absence
+            self.real_worktime -= self.cumulative_without_salary
+            self.real_worktime -= self.cumulative_illness
+
             self.total_payment = round(self.get_total_payment)
+
+        self.calculate_payment = False
         super().save(*args, **kwargs)
 
 

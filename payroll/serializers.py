@@ -260,11 +260,12 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
     workshop_display = serializers.CharField(source='workshop.workshop_title', read_only=True)
     month_name = serializers.CharField(source='month_display', read_only=True)
     ultimate_display = serializers.CharField(source='is_ultimate', read_only=True)
+    calculate_display = serializers.CharField(source='is_use_in_calculate', read_only=True)
 
     class Meta:
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
-                 'end_date', 'pay_done'
+                 'end_date', 'pay_done', 'calculate_display', 'ultimate_display', 'name'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
@@ -301,7 +302,15 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
                  'nobat_kari_sob_shab', 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', \
                  'list_of_pay', 'calculate_payment', 'contract_row', 'mazaya_gheyr_mostamar',\
                  'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
-                 'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax', 'sayer_kosoorat'
+                 'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax', 'cumulative_illness', 'cumulative_without_salary',\
+                 'cumulative_entitlement', 'cumulative_mission', 'cumulative_absence'
+
+class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListOfPayItem
+        fields = 'id' , 'sayer_kosoorat', 'cumulative_absence ', \
+                        'cumulative_mission ', 'cumulative_entitlement ',\
+                        'cumulative_illness ', 'cumulative_without_salary '
 
 
 class PersonTaxSerializer(serializers.ModelSerializer):
@@ -337,6 +346,6 @@ class ListOfPayItemAddPaySerializer(serializers.ModelSerializer):
 class ListOfPayCopyPaySerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPay
-        fields = '__all__'
+        fields = 'name', 'id'
 
 

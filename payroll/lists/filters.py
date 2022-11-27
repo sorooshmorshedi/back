@@ -225,10 +225,22 @@ class ListOfPayFilter(filters.FilterSet):
         model = ListOfPay
         fields = {
             'id': BASE_FIELD_FILTERS,
+            'name': BASE_FIELD_FILTERS,
             'workshop': ('exact',),
             'year': BASE_FIELD_FILTERS,
             'month': BASE_FIELD_FILTERS,
+            'ultimate': BASE_FIELD_FILTERS,
+            'use_in_calculate': BASE_FIELD_FILTERS,
+            'pay_done': BASE_FIELD_FILTERS,
+            'pay_form_create_date': BASE_FIELD_FILTERS,
+            'bank_pay_date': BASE_FIELD_FILTERS,
         }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
 
 
 class ListOfPayItemFilter(filters.FilterSet):

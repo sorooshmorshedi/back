@@ -102,7 +102,8 @@ urlpatterns = [
     path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),
     path('listOfPayItem/pay/<int:pk>/', ListOfPayItemPaymentAPI.as_view(), name='listOfPayItemPaymentAPI'),
 
-    path('listOfPay/workshop/<int:pk>/', WorkshopListOfPayApiView.as_view(), name='workshopListOfPayApiView'),
+    path('listOfPay/workshop/<int:pk>/<int:month>/<str:year>/', WorkshopListOfPayApiView.as_view(),
+         name='workshopListOfPayApiView'),
     path('listOfPay/copy/<int:pk>/', ListOfPayCopy.as_view(), name='listOfPayCopy'),
 
 ]
