@@ -337,8 +337,8 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
         }
 
         template_prefix = self.get_template_prefix()
-        context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
-        context['right_header_template'] = 'export/{}_right_header.html'.format(template_prefix)
+        context['form_content_template'] = 'export/contract_row_content.html'
+        context['right_header_template'] = 'export/sample_head.html'
 
         context.update(self.context)
 
@@ -382,7 +382,7 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 'لیست ردیف پیمان'
             ],
             ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
-             'کد ملی واگذار کننده', 'کد انبار واگذار کننده', 'حداقل مبلغ پیمان', 'شعبه']
+             'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', 'حداقل مبلغ پیمان', 'شعبه']
         ]
         for form in contract_row:
             data.append([
@@ -706,6 +706,61 @@ class AbsenceRequestExportView(LeaveOrAbsenceListView, BaseExportView):
 
         return context
 
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(absence: LeaveOrAbsence):
+        data = [
+            [
+                'لیست مرخصی و غیبت ها'
+            ],
+            ['پرسنل در کارگاه', 'نوع مرخصی', 'نوع  ', 'نوع  ', 'از تاربخ',
+             'تا تاربخ ', 'از ساعت', 'تا ساعت', 'علت مرخصی', 'توضیحات']
+        ]
+        for form in absence:
+            data.append([
+                form.workshop_personnel.my_title,
+                form.get_leave_type_display(),
+                form.get_entitlement_leave_type_display(),
+                form.get_matter73_leave_type_display(),
+                form.from_date,
+                form.to_date,
+                form.from_hour,
+                form.to_hour,
+                form.cause_of_incident,
+                form.explanation
+            ])
+        return data
+
 
 class MissionExportView(MissionListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -830,6 +885,30 @@ class MissionRequestExportView(MissionListView, BaseExportView):
 
         return context
 
+    @staticmethod
+    def get_xlsx_data(mission: Mission):
+        data = [
+            [
+                'لیست ماموریت ها'
+            ],
+            ['پرسنل در کارگاه', 'نوع ماموریت', 'موضوع', 'از تاربخ',
+             'تا تاربخ ', 'از ساعت', 'تا ساعت', 'تاربخ', 'مکان', 'توضیحات']
+        ]
+        data.append([
+            mission.workshop_personnel.my_title,
+            mission.get_mission_type_display(),
+            mission.topic,
+            mission.from_date,
+            mission.to_date,
+            mission.from_hour,
+            mission.to_hour,
+            mission.date,
+            mission.location,
+            mission.explanation
+        ])
+        return data
+
+
 
 class ContractFormExportView(ContractListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -863,6 +942,54 @@ class ContractFormExportView(ContractListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(contract: Contract):
+        data = [
+            [
+                'لیست قرارداد ها'
+            ],
+            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار']
+        ]
+        for form in contract:
+            data.append([
+                form.workshop_personnel.my_title,
+                form.contract_from_date,
+                form.contract_to_date,
+                form.quit_job_date
+            ])
+        return data
 
 
 class HRLetterExportView(HRLetterListView, BaseExportView):
@@ -1383,6 +1510,59 @@ class LoanRequestExportView(LoanListView, BaseExportView):
             response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
             return response
 
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(loan: Loan):
+        data = [
+            [
+                'لیست وام یا مساعده ها'
+            ],
+            ['پرسنل در کارگاه', 'نوع', 'مبلغ', 'تعداد قسط',
+             'مبلغ قسط', ' تاربخ پرداخت', 'تاربخ سررسید', ' اقساط پرداخت شده', 'تصفیه شد']
+        ]
+        for form in loan:
+            data.append([
+                form.workshop_personnel.my_title,
+                form.get_loan_type_display(),
+                form.amount,
+                form.episode,
+                form.get_pay_episode,
+                form.pay_date,
+                form.end_date,
+                form.episode_payed,
+                form.pay_done,
+            ])
+        return data
 
 class PayslipExportView(ListOfPayItemListView, BaseExportView):
     template_name = 'export/sample_form_export.html'

@@ -3,6 +3,8 @@ from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
+
 from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
     is_valid_melli_code, EXPLANATION
@@ -1065,14 +1067,12 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
             self.workshop_personnel.insurance_add_date = None
         else:
             self.workshop_personnel.insurance_add_date = self.contract_from_date
-        if not self.quit_job_date:
-            self.workshop_personnel.current_insurance_history_in_workshop = \
-                self.contract_to_date.month + self.contract_from_date.month
-        if self.quit_job_date:
-            self.workshop_personnel.current_insurance_history_in_workshop = \
-                self.quit_job_date.month + self.contract_from_date.month
-
         self.workshop_personnel.save()
+        sign_date = self.workshop_personnel.employment_date
+        if self.contract_from_date.__lt__(sign_date):
+            raise ValidationError('تاریخ شروع قرارداد باید بعد از ' + sign_date.__str__() + '  تاریخ استخدام باشد')
+        if self.contract_from_date.__ge__(self.contract_to_date):
+            raise ValidationError('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
         super().save(*args, **kwargs)
 
     @property
@@ -1082,6 +1082,14 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
     @property
     def find_hr(self):
         return self.hr_letter.first()
+
+    @property
+    def is_insurance_display(self):
+        if self.insurance:
+            return 'بیمه شده'
+        else:
+            return 'بیمه نشده'
+
 
     def __str__(self):
         return str(self.code) + ' برای ' + self.workshop_personnel_display
@@ -1128,7 +1136,7 @@ class Loan(BaseModel, LockableMixin, DefinableMixin):
     @property
     def settlement(self):
         total = self.amount
-        for item in self.item:
+        for item in self.item.all():
             total -= item.payed_amount
         return total
 
@@ -1176,14 +1184,14 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
         verbose_name = 'LoanItem'
         permission_basename = 'loan_item'
         permissions = (
-            ('get.contract', 'مشاهده قسط وام'),
-            ('create.contract', 'تعریف قسط وام'),
-            ('update.contract', 'ویرایش قسط وام'),
-            ('delete.contract', 'حذف قسط وام'),
+            ('get.loan_item', 'مشاهده قسط وام'),
+            ('create.loan_item', 'تعریف قسط وام'),
+            ('update.loan_item', 'ویرایش قسط وام'),
+            ('delete.loan_item', 'حذف قسط وام'),
 
-            ('getOwn.contract', 'مشاهده قسط وام خود'),
-            ('updateOwn.contract', 'ویرایش وام قسط خود'),
-            ('deleteOwn.contract', 'حذف وام قسط خود'),
+            ('getOwn.loan_item', 'مشاهده قسط وام خود'),
+            ('updateOwn.loan_item', 'ویرایش وام قسط خود'),
+            ('deleteOwn.loan_item', 'حذف وام قسط خود'),
         )
 
     @property
@@ -2656,7 +2664,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.mazaya_gheyr_mostamar
         total += self.sayer_ezafat
 
-        total += self.get_padash
+        total += Decimal(self.get_padash)
         total += Decimal(self.get_hagh_sanavat)
         total += Decimal(self.get_save_leave)
 
@@ -2809,14 +2817,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def payable(self):
-        payable_amount = round(self.total_payment) -\
+        payable_amount = Decimal(round(self.total_payment) -\
                          round(self.data_for_insurance['DSW_BIME']) -\
                          round(self.calculate_month_tax) -\
                          self.check_and_get_optional_deduction_episode - \
-                         self.check_and_get_loan_episode
-        payable_amount += self.get_padash
-        payable_amount += self.get_hagh_sanavat
-        payable_amount += self.get_save_leave
+                         self.check_and_get_loan_episode)
+        payable_amount += Decimal(self.get_padash)
+        payable_amount += Decimal(self.get_hagh_sanavat)
+        payable_amount += Decimal(self.get_save_leave)
         return round(payable_amount)
 
     '''calculate'''

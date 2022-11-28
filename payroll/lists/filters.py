@@ -134,7 +134,9 @@ class ContractFilter(filters.FilterSet):
         fields = {
             'id': ('exact',),
             'workshop_personnel': ('exact',),
+            'code': BASE_FIELD_FILTERS,
             'insurance': BASE_FIELD_FILTERS,
+            'insurance_add_date': BASE_FIELD_FILTERS,
             'contract_from_date': BASE_FIELD_FILTERS,
             'contract_to_date': BASE_FIELD_FILTERS,
             'quit_job_date': BASE_FIELD_FILTERS,

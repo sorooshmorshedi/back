@@ -556,6 +556,10 @@ class PersonnelVerifyApi(APIView):
             cart_number_validator = RegexValidator(regex='^.{16}$', message='طول شماره کارت باید 16 رقم باشد',
                                                    code='nomatch')
             cart_number_validator(personnel.bank_cart_number)
+        if not personnel.sheba_number:
+            self.validate_status = False
+            raise ValidationError("شماره شبا حقوق را وارد کنید")
+
         if personnel.sheba_number:
             sheba_validator = RegexValidator(regex='^.{24}$', message='طول شماره شبا باید 24 رقم باشد',
                                              code='nomatch')
