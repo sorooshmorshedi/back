@@ -13,7 +13,7 @@ from payroll.lists.views import WorkshopListView, PersonnelListView, PersonnelFa
     LoanListView, DeductionListView, ListOfPayItemListView, ListOfPayListView, LoanItemListView, \
     ListOfPayInsuranceListView, ListOfPayItemInsuranceListView, PersonTaxListView, TaxListView, WorkshopAbsenceListView
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, Contract, \
-    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem
+    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem, ListOfPay
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
 
@@ -473,7 +473,7 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
             [
                 'لیست  پرسنل در کارگاه ها'
             ],
-            ['کارگاه', 'پرسنل',  'تاریخ استخدام', 'عنوان شغلی',
+            ['کارگاه', 'پرسنل', 'تاریخ استخدام', 'عنوان شغلی',
              'سابقه بیمه قبلی خارچ از کارگاه', 'سابقه بیمه قبلی در این کارگاه', 'سابقه سابقه بیمه جاری در این کارگاه',
              'مجموع سوابق بیمه ای', 'سمت', 'رسته شغلی', 'محل خدمت', ' وضعییت محل خدمت', 'نوع استخدام',
              'نوع قرارداد', 'وضعییت کارمند']
@@ -909,7 +909,6 @@ class MissionRequestExportView(MissionListView, BaseExportView):
         return data
 
 
-
 class ContractFormExportView(ContractListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'contract_form'
@@ -1211,6 +1210,7 @@ class LoanExportView(LoanListView, BaseExportView):
         context.update(self.context)
 
         return context
+
     def xlsx_response(self, request, *args, **kwargs):
         sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
 
@@ -1264,8 +1264,6 @@ class LoanExportView(LoanListView, BaseExportView):
                 form.pay_done,
             ])
         return data
-
-
 
 
 class LoanRequestExportView(LoanListView, BaseExportView):
@@ -1563,6 +1561,7 @@ class LoanRequestExportView(LoanListView, BaseExportView):
                 form.pay_done,
             ])
         return data
+
 
 class PayslipExportView(ListOfPayItemListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -2063,6 +2062,82 @@ class PayrollExportView(ListOfPayListView, BaseExportView):
 
         return context
 
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        counter = 1
+        data = [
+            [
+                'حقوق و دستمزد جامع '
+            ],
+            ['ردیف', 'نام و نام خانوادگی', 'تاریخ شروع به کار', 'تاریخ تسوبه', 'عنوان شغل', 'بیمه میشود؟',
+             'سابقه بیمه در کارگاه',
+             'ردیف پیمان', 'کارکرد عادی', 'مرخصی استحقاقی', '', '', 'مرخصی استعلاجی', 'مرخصی ماده 73',
+             'مرخصی بدون حقوق', 'غیبت',
+             'کارکرد واقعی', 'حداقل مزد روزانه', 'حقوق پایه ماهانه', 'پایه سنوات روزانه', 'پایه سنوات ماهانه',
+             'اضافه کاری', '', 'تعطیل کاری', '', 'شب کاری', '',
+             'کسر کار', '', 'ماموریت', '', 'حق خاروبار', 'حق مسکن', 'حق اولاد', '', 'حق جذب', 'پورسانت', 'سایر اضافات',
+             'حقوق مزایای کل ماهانه', 'بــیـمـه', '', '', '',
+             'حق بیمه سهم بیمه شده', 'معافیت مالیاتی حقوق', 'حقوق مشمول مالیات', 'مالیات حقوق', 'بدهی متفرقه', '', '',
+             'حقوق و دستمزد پرداختنی', 'حق بیمه سهم کارفرما', 'بیمه بیکاری'],
+
+            ['', '', '', '', '', '', '', '', '', 'ساعتی', 'روزانه', 'جمع', '', '', '', '',
+             '', '', '', '', '', 'ساعت', 'مبلغ', 'ساعت', 'مبلغ', 'ساعت', 'مبلغ',
+             'ساعت', 'مبلغ', 'روز', 'مبلغ', '', '', 'تعداد اولاد', 'مبلغ', '', '', '', '', 'دستمزد ماهانه',
+             'مزایای ماهانه مشمول مستمر و غیر مستمر',
+             'جمع دستمزد مزایای ماهانه مشمول', 'جمع کل دستمزد و مزایای ماهانه',
+             '', '', '', '', 'مساعده', 'وام', 'غیره', '   ', '', '']
+        ]
+        for form in list_of_pay.first().get_items:
+            data.append(
+            [counter, form.workshop_personnel.personnel.full_name, form.contract.contract_from_date,
+             '', form.workshop_personnel.work_title, form.contract.insurance, form.workshop_personnel.get_insurance_in_workshop,
+             '', form.normal_worktime, form.hourly_entitlement_leave_day, form.daily_entitlement_leave_day,
+             form.entitlement_leave_day, form.illness_leave_day, form.matter_47_leave_day, form.without_salary_leave_day,
+             form.absence_day, form.real_worktime, form.hoghoogh_roozane, form.hoghoogh_mahane,  form.sanavat_base, form.sanavat_mahane,
+             form.ezafe_kari, form.ezafe_kari_total, form.tatil_kari, form.tatil_kari_total, form.shab_kari, form.shab_kari_total,
+             form.kasre_kar, form.kasre_kar_total, form.mission_day, form.mission_total, form.get_payslip['additions']['kharo_bar'],
+             form.get_payslip['additions']['hagh_maskan'], form.aele_mandi_child, form.aele_mandi, form.get_payslip['additions']['hagh_jazb'], '',
+             form.sayer_ezafat, form.total_payment,  form.data_for_insurance['DSW_MAH'], form.data_for_insurance['DSW_MAZ'],
+             form.data_for_insurance['DSW_MASH'], form.data_for_insurance['DSW_TOTL'], form.data_for_insurance['DSW_BIME'],
+             form.moaf_sum, form.tax_included_payment, form.calculate_month_tax, form.check_and_get_dept_episode,
+             form.check_and_get_loan_episode, form.check_and_get_optional_deduction_episode, form.payable,
+             form.employer_insurance, form.un_employer_insurance]
+
+            )
+            counter += 1
+        return data
+
 
 class LoanItemExportView(LoanItemListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -2151,7 +2226,6 @@ class LoanItemExportView(LoanItemListView, BaseExportView):
         return data
 
 
-
 class WorkshopInsuranceReportExportView(ListOfPayInsuranceListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'workshop_insurance_report'
@@ -2184,6 +2258,140 @@ class WorkshopInsuranceReportExportView(ListOfPayInsuranceListView, BaseExportVi
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        data = [
+            [
+                'گزارش بیمه '
+            ],
+        ]
+        for form in list_of_pay:
+            data.append([
+                'کد کارگاه',
+                form.data_for_insurance['DSK_ID'],
+            ])
+            data.append([
+                'نام کارگاه',
+                form.data_for_insurance['DSK_NAME'],
+            ])
+            data.append([
+                'نام کارفرما',
+                form.data_for_insurance['DSK_FARM'],
+            ])
+            data.append([
+                'آدرس کارگاه',
+                form.data_for_insurance['DSK_ADRS'],
+            ])
+            data.append([
+                'سال عملکرد',
+                form.data_for_insurance['DSK_YY'],
+            ])
+            data.append([
+                'ماه عملکرد',
+                form.data_for_insurance['DSK_MM'],
+            ])
+            data.append([
+                'شماره لیست',
+                form.data_for_insurance['DSK_LISTNO'],
+            ])
+            data.append([
+                'شرح لیست',
+                form.data_for_insurance['DSK_DISC'],
+            ])
+            data.append([
+                'تعداد کارکنان',
+                form.data_for_insurance['DSK_NUM'],
+            ])
+            data.append([
+                'مجموع روز های کارکرد',
+                form.data_for_insurance['DSK_TDD'],
+            ])
+            data.append([
+                'مجموع دستمزد روزانه',
+                form.data_for_insurance['DSK_TROOZ'],
+            ])
+            data.append([
+                'مجموع دستمزد ماهانه',
+                form.data_for_insurance['DSK_TMAH'],
+            ])
+            data.append([
+                'مجموع مزایای ماهانه مشمول',
+                form.data_for_insurance['DSK_TMAZ'],
+            ])
+            data.append([
+                'مجموع دستمزد و مزایای ماهانه مشمول',
+                form.data_for_insurance['DSK_TMASH'],
+            ])
+            data.append([
+                'مجموع دستمزد و مزایای ماهانه مشمول',
+                form.data_for_insurance['DSK_TMASH'],
+            ])
+            data.append([
+                'مجموع کل دستمزد و مزایای ماهانه',
+                form.data_for_insurance['DSK_TTOTL'],
+            ])
+            data.append([
+                'مجموع حق بیمه سهم بیمه شده',
+                form.data_for_insurance['DSK_TBIME'],
+            ])
+            data.append([
+                'مجموع حق بیمه سهم کارفرما',
+                form.data_for_insurance['DSK_TKOSO'],
+            ])
+            data.append([
+                'مجموع حق بیمه بیکاری',
+                form.data_for_insurance['DSK_TBIC'],
+            ])
+            data.append([
+                'نرخ حق بیمه',
+                form.data_for_insurance['DSK_RATE'],
+            ])
+            data.append([
+                'نرخ پورسانتاژ',
+                form.data_for_insurance['DSK_PRATE'],
+            ])
+            data.append([
+                'نرخ مشاغل زیان آور',
+                form.data_for_insurance['DSK_BIMH'],
+            ])
+            data.append([
+                'ردیف پیمان',
+                form.data_for_insurance['DSK_PYM'],
+            ])
+
+        return data
 
 
 class PersonInsuranceReportExportView(ListOfPayItemInsuranceListView, BaseExportView):
@@ -2584,7 +2792,6 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
         return data
 
 
-
 class TaxReportExportView(TaxListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'tax_report'
@@ -2624,7 +2831,7 @@ class MonthTaxReportExportView(TaxListView, BaseExportView):
     filename = 'month_tax_report'
 
     context = {
-        'title': 'خلاصه گزارش مالیات',
+        'title': ' گزارش خلاصه مالیات',
     }
     pagination_class = None
 
@@ -2651,6 +2858,104 @@ class MonthTaxReportExportView(TaxListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        data = [
+            [
+                ' گزارش  خلاصه مالیات '
+            ],
+        ]
+        for form in list_of_pay:
+            data.append([
+                'سال',
+                form.year,
+            ])
+            data.append([
+                'ماه',
+                form.month,
+            ])
+            data.append([
+                'بدهی مالیاتی ماه جاری',
+                form.month_tax,
+            ])
+            data.append([
+                'بدهی مالیاتی ماه گذشته',
+                0,
+            ])
+            data.append([
+                'تاریخ ثبت در دفتر روزنامه',
+                form.sign_date,
+            ])
+            data.append([
+                'نحوه پرداخت',
+                6,
+            ])
+            data.append([
+                'شماره سریال چک',
+                '',
+            ])
+            data.append([
+                'تاریخ چک',
+                '',
+            ])
+            data.append([
+                'کد نام بانک',
+                '',
+            ])
+            data.append([
+                'نام شعبه',
+                '',
+            ])
+            data.append([
+                'شماره حساب',
+                '',
+            ])
+            data.append([
+                'مبلغ پرداختی/مبلغ چک',
+                '',
+            ])
+            data.append([
+                'تاریخ پرداخت خزانه',
+                '',
+            ])
+            data.append([
+                'مبلغ پرداختی خزانه',
+                '',
+            ])
+
+        return data
 
 
 class AbsenceReportExportView(WorkshopAbsenceListView, BaseExportView):
@@ -2940,7 +3245,7 @@ class SettlementExportView(WorkshopPersonnelListView, BaseExportView):
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.personnel
         context = {
-            'now' : jdatetime.date.today(),
+            'now': jdatetime.date.today(),
             'form': qs,
             'settlement': qs.settlement,
             'company': user.active_company,
