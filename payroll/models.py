@@ -1634,6 +1634,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
     employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
 
+    is_calculated = models.BooleanField(default=False)
 
     @property
     def get_aele_mandi_amount(self):
@@ -1886,9 +1887,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         return insurance_not_included
 
     def save(self, *args, **kwargs):
-        if self.pay_done:
-            raise ValidationError(message='حکم غیرقابل تفییر است')
-
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
@@ -2615,6 +2613,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_total_payment(self):
         hr = self.get_hr_letter
+        hr.is_calculated = True
+        hr.save()
         total = Decimal(0)
 
         total += self.hoghoogh_mahane
@@ -2669,6 +2669,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += Decimal(self.get_save_leave)
 
         total -= self.get_kasre_kar
+        total -= self.sayer_kosoorat
         self.kasre_kar_total = round(self.get_kasre_kar)
 
         return total
@@ -3436,10 +3437,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
             self.entitlement_leave_day += Decimal(self.cumulative_entitlement)
+            self.daily_entitlement_leave_day += Decimal(self.cumulative_entitlement)
             self.absence_day += Decimal(self.cumulative_absence)
             self.without_salary_leave_day += Decimal(self.cumulative_without_salary)
             self.illness_leave_day += Decimal(self.cumulative_illness)
-            self.mission_day += Decimal(self.mission_total)
+            self.mission_day += Decimal(self.cumulative_mission)
 
             self.real_worktime -= self.cumulative_absence
             self.real_worktime -= self.cumulative_without_salary

@@ -70,6 +70,7 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     total_insurance_month = serializers.IntegerField(source='insurance_history_total', read_only=True)
     current_insurance_month = serializers.IntegerField(source='current_insurance', read_only=True)
     quit_job = serializers.BooleanField(source='quit_job_date', read_only=True)
+    insurance_history_show = serializers.IntegerField(source='quit_job_date', read_only=True)
 
     class Meta:
         model = WorkshopPersonnel
@@ -304,7 +305,7 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
                  'list_of_pay', 'calculate_payment', 'contract_row', 'mazaya_gheyr_mostamar',\
                  'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
                  'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax', 'cumulative_illness', 'cumulative_without_salary',\
-                 'cumulative_entitlement', 'cumulative_mission', 'cumulative_absence'
+                 'cumulative_entitlement', 'cumulative_mission', 'cumulative_absence', 'sayer_kosoorat'
 
 class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):
     class Meta:

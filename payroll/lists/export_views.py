@@ -13,7 +13,7 @@ from payroll.lists.views import WorkshopListView, PersonnelListView, PersonnelFa
     LoanListView, DeductionListView, ListOfPayItemListView, ListOfPayListView, LoanItemListView, \
     ListOfPayInsuranceListView, ListOfPayItemInsuranceListView, PersonTaxListView, TaxListView, WorkshopAbsenceListView
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, Contract, \
-    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem
+    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
 
@@ -1628,6 +1628,339 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
             response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
             return response
 
+    @staticmethod
+    def get_xlsx_data(list_of_pay_item: ListOfPayItem):
+        data = [
+            [
+                'فیش حقوق'
+            ],
+        ]
+        for form in list_of_pay_item:
+            data.append([
+                'کد پرسنلی',
+                form.workshop_personnel.personnel.personnel_code,
+                'نام و نام خانوادگی',
+                form.workshop_personnel.personnel.full_name,
+                'شماره حساب',
+                form.workshop_personnel.personnel.bank_cart_number,
+            ])
+            data.append([
+                'کارکرد',
+                '',
+                'اضافات(ريال)',
+                '',
+                'کسورات(ريال)',
+                '',
+            ])
+            data.append([
+                'کارکرد عادی(روز)',
+                form.normal_worktime,
+                'حقوق پایه',
+                form.hoghoogh_mahane,
+                'بیمه تامین اجتماعی',
+                form.haghe_bime_bime_shavande,
+            ])
+            data.append([
+                'کارکرد اضافه کاری (ساعت)',
+                form.ezafe_kari,
+                'مبلغ اضافه کاری',
+                form.ezafe_kari_total,
+                'مالیات',
+                form.calculate_month_tax,
+            ])
+            data.append([
+                'تعطیل کاری (ساعت)',
+                form.tatil_kari,
+                'مبلغ تعطیل کاری',
+                form.tatil_kari_total,
+                'سایر بدهی ها',
+                0,
+            ])
+            data.append([
+                'کسر کار (ساعت)',
+                form.kasre_kar,
+                'حق مسکن',
+                form.get_payslip['additions']['hagh_maskan'],
+                'مبلغ کسر کار',
+                form.kasre_kar_total,
+            ])
+            data.append([
+                'غیبت',
+                form.absence_day,
+                'حق خارو بار (بن کارگری)',
+                form.get_payslip['additions']['kharo_bar'],
+                'سایر کسورات',
+                form.sayer_kosoorat,
+            ])
+            data.append([
+                'کارکرد واقعی',
+                form.real_worktime,
+                'حق جذب',
+                form.get_payslip['additions']['hagh_jazb'],
+                'مساعده یا وام',
+                form.check_and_get_loan_episode,
+            ])
+            data.append([
+                'جمع مرخصی استحقاقی',
+                form.entitlement_leave_day,
+                'پایه سنوات',
+                form.sanavat_mahane,
+                'کسورات اختیاری',
+                form.check_and_get_optional_deduction_episode,
+            ])
+            data.append([
+                'جمع مرخصی استعلاجی',
+                form.illness_leave_day,
+                'مبلغ ماموریت',
+                form.mission_total,
+                '',
+                '',
+            ])
+            if form.shab_kari_total != 0:
+                data.append([
+                    'شب کاری(روز)',
+                    form.shab_kari,
+                    'مبلغ شب کاری',
+                    form.shab_kari_total,
+                    '',
+                    '',
+                ])
+            if form.nobat_kari_sob_shab_total != 0:
+                data.append([
+                    ' نوبت کاری صبح و شب(روز)',
+                    form.nobat_kari_sob_shab,
+                    'مبلغ نوبت کاری صبح و شب',
+                    form.nobat_kari_sob_shab_total,
+                    '',
+                    '',
+                ])
+            if form.nobat_kari_sob_asr_total != 0:
+                data.append([
+                    ' نوبت کاری صبح و عصر(روز)',
+                    form.nobat_kari_sob_asr,
+                    'مبلغ نوبت کاری صبح و عصر',
+                    form.nobat_kari_sob_asr_total,
+                    '',
+                    '',
+                ])
+            if form.nobat_kari_asr_shab_total != 0:
+                data.append([
+                    ' نوبت کاری عصر و شب(روز)',
+                    form.nobat_kari_asr_shab,
+                    'مبلغ نوبت کاری عصر و شب',
+                    form.nobat_kari_asr_shab_total,
+                    '',
+                    '',
+                ])
+            if form.nobat_kari_sob_asr_shab_total != 0:
+                data.append([
+                    ' نوبت کاری صبح، عصر و شب(روز)',
+                    form.nobat_kari_sob_asr_shab,
+                    'مبلغ نوبت کاری صبح، عصر و شب',
+                    form.nobat_kari_sob_asr_shab_total,
+                    '',
+                    '',
+                ])
+            if form.get_padash != 0:
+                data.append([
+                    '',
+                    '',
+                    'عیدی یا پاداش',
+                    form.get_padash,
+                    '',
+                    '',
+                ])
+            if form.get_hagh_sanavat != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق سنوات',
+                    form.get_hagh_sanavat,
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['hagh_sarparasti'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق سرپرستی',
+                    form.get_payslip['additions']['hagh_sarparasti'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['hagh_modiriat'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق مدیریت',
+                    form.get_payslip['additions']['hagh_modiriat'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['fogholade_shoghl'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'فوق العاده شفل',
+                    form.get_payslip['additions']['fogholade_shoghl'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['haghe_tahsilat'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق تحصیلات',
+                    form.get_payslip['additions']['haghe_tahsilat'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['fogholade_sakhti_kar'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق تحصیلات',
+                    form.get_payslip['additions']['fogholade_sakhti_kar'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['haghe_ankal'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق آنکال',
+                    form.get_payslip['additions']['haghe_ankal'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['fogholade_badi_abohava'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'فوق العاده بدی آب و هوا',
+                    form.get_payslip['additions']['fogholade_badi_abohava'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['mahroomiat_tashilat_zendegi'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'فوق العاده محرومیت از تسهیلات زندگی',
+                    form.get_payslip['additions']['mahroomiat_tashilat_zendegi'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['fogholade_mahal_khedmat'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'فوق العاده محل خدمت',
+                    form.get_payslip['additions']['fogholade_mahal_khedmat'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['fogholade_sharayet_mohit_kar'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'فوق العاده محیط کار',
+                    form.get_payslip['additions']['fogholade_sharayet_mohit_kar'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['ayabo_zahab'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'ایاب و ذهاب',
+                    form.get_payslip['additions']['ayabo_zahab'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['yarane_ghaza'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'یارانه غذا',
+                    form.get_payslip['additions']['yarane_ghaza'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['haghe_shir'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق شیر',
+                    form.get_payslip['additions']['haghe_shir'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['haghe_taahol'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'حق تاهل',
+                    form.get_payslip['additions']['haghe_taahol'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['komakhazine_mahdekoodak'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'کمک هزینه مهدکودک',
+                    form.get_payslip['additions']['komakhazine_mahdekoodak'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['komakhazine_varzesh'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'کمک هزینه ورزش',
+                    form.get_payslip['additions']['komakhazine_varzesh'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['komakhazine_mobile'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'کمک هزینه موبایل',
+                    form.get_payslip['additions']['komakhazine_mobile'],
+                    '',
+                    '',
+                ])
+            if form.get_payslip['additions']['mazaya_mostamar_gheyre_naghdi'] != 0:
+                data.append([
+                    '',
+                    '',
+                    'مزایای مستمر غیر نقدی',
+                    form.get_payslip['additions']['mazaya_mostamar_gheyre_naghdi'],
+                    '',
+                    '',
+                ])
+            if form.mazaya_gheyr_mostamar != 0:
+                data.append([
+                    '',
+                    '',
+                    'مزایای غیر مستمر غیر نقدی',
+                    form.mazaya_gheyr_mostamar,
+                    '',
+                    '',
+                ])
+            if form.sayer_ezafat != 0:
+                data.append([
+                    '',
+                    '',
+                    'سایر اضافات',
+                    form.sayer_ezafat,
+                    '',
+                    '',
+                ])
+        return data
+
 
 class BankReportExportView(ListOfPayListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -1886,6 +2219,159 @@ class PersonInsuranceReportExportView(ListOfPayItemInsuranceListView, BaseExport
 
         return context
 
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay_item: ListOfPayItem):
+        data = [
+            [
+                'گزارش بیمه'
+            ],
+        ]
+        for form in list_of_pay_item:
+            data.append([
+                'کد کارگاه',
+                form.data_for_insurance['DSW_ID'],
+            ])
+            data.append([
+                'سال عملکرد',
+                form.data_for_insurance['DSW_YY'],
+            ])
+            data.append([
+                'ماه عملکرد',
+                form.data_for_insurance['DSW_MM'],
+            ])
+            data.append([
+                'شماره لیست',
+                form.data_for_insurance['DSW_LISTNO'],
+            ])
+            data.append([
+                'شماره بیمه',
+                form.data_for_insurance['DSW_ID1'],
+            ])
+            data.append([
+                'نام ',
+                form.data_for_insurance['DSW_FNAME'],
+            ])
+            data.append([
+                'نام خانوادگی',
+                form.data_for_insurance['DSW_LNAME'],
+            ])
+            data.append([
+                'نام پدر',
+                form.data_for_insurance['DSW_DNAME'],
+            ])
+            data.append([
+                'شماره شناسنامه',
+                form.data_for_insurance['DSW_IDNO'],
+            ])
+            data.append([
+                'محل صدور',
+                form.data_for_insurance['DSW_IDPLC'],
+            ])
+            data.append([
+                'تاریخ صدور',
+                form.data_for_insurance['DSW_IDATE'],
+            ])
+            data.append([
+                'تاریخ تولد',
+                form.data_for_insurance['DSW_BDATE'],
+            ])
+            data.append([
+                'جنسیت',
+                form.data_for_insurance['DSW_SEX'],
+            ])
+            data.append([
+                'ملیت',
+                form.data_for_insurance['DSW_NAT'],
+            ])
+            data.append([
+                'شرح شغل',
+                form.data_for_insurance['DSW_OCP'],
+            ])
+            data.append([
+                'شرح شغل',
+                form.data_for_insurance['DSW_OCP'],
+            ])
+            data.append([
+                'تاریخ شروع به کار',
+                form.data_for_insurance['DSW_SDATE'],
+            ])
+            data.append([
+                'تاریخ ترک کار',
+                form.data_for_insurance['DSW_EDATE'],
+            ])
+            data.append([
+                'تعداد روز های کارکرد',
+                form.data_for_insurance['DSW_DD'],
+            ])
+            data.append([
+                'دستمزد روزانه',
+                form.data_for_insurance['DSW_ROOZ'],
+            ])
+            data.append([
+                'دستمزد ماهانه',
+                form.data_for_insurance['DSW_MAH'],
+            ])
+            data.append([
+                'مزایای ماهانه',
+                form.data_for_insurance['DSW_MAZ'],
+            ])
+            data.append([
+                'مجموع دستمزد و مزایای مشمول',
+                form.data_for_insurance['DSW_MASH'],
+            ])
+            data.append([
+                'مجموع کل دستمزد و مزایای ماهانه',
+                form.data_for_insurance['DSW_TOTL'],
+            ])
+            data.append([
+                'حق بیمه سهم بیمه شده',
+                form.data_for_insurance['DSW_BIME'],
+            ])
+            data.append([
+                'نرخ پورسانتاژ',
+                form.data_for_insurance['DSW_PRATE'],
+            ])
+            data.append([
+                'کد شغل',
+                form.data_for_insurance['DSW_JOB'],
+            ])
+            data.append([
+                'کد ملی',
+                form.data_for_insurance['PER_NATCOD'],
+            ])
+        return data
+
 
 class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -1919,6 +2405,184 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay_item: ListOfPayItem):
+        data = [
+            [
+                'گزارش مالیات'
+            ],
+        ]
+        for form in list_of_pay_item:
+            data.append([
+                'کد ملی/کد فراگیر',
+                form.workshop_personnel.personnel.national_code,
+            ])
+            data.append([
+                'نوع پرداخت',
+                1,
+            ])
+            data.append([
+                'تعداد ماههای کارکرد واقعی از ابتدای سال جاری',
+                form.year_real_work_month,
+            ])
+            data.append([
+                'یا این ماه آخرین ماه فعالیت کاریحقوق بگیر میباشد؟',
+                0,
+            ])
+            data.append([
+                'نوع ارز',
+                85,
+            ])
+            data.append([
+                'نرخ تسعیر ارز',
+                1,
+            ])
+            data.append([
+                'تاریخ شروع به کار',
+                form.workshop_personnel.employment_date,
+            ])
+            data.append([
+                'تاریخ پایان کار',
+                '',
+            ])
+            data.append([
+                'وضعیت کارمند',
+                form.workshop_personnel.employee_status,
+            ])
+            data.append([
+                'وضعیت محل خدمت',
+                form.workshop_personnel.job_location_status,
+            ])
+            data.append([
+                'ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی',
+                form.naghdi_pension,
+            ])
+            data.append([
+                'پرداختهای مستمر معوق که مالیاتی برای آنها محاسبه نشده است',
+                0,
+            ])
+            data.append([
+                'مسکن',
+                1,
+            ])
+            data.append([
+                'مبلغ کسر شده از حقوق کارمند بابت مسکن ماه جاری',
+                0,
+            ])
+            data.append([
+                'وسیله نقلیه',
+                1,
+            ])
+            data.append([
+                'مبلغ کسر شده از حقوق کارمند بابت وسیله نقلیه ماه جاری',
+                0,
+            ])
+            data.append([
+                'وسیله نقلیه',
+                1,
+            ])
+            data.append([
+                'پرداخت مزایای مستمر غیر نقدی ماه جاری',
+                form.gheyre_naghdi_pension,
+            ])
+            data.append([
+                'هزینه های درمانی موضوع ماده 37 ق.م.م.',
+                form.hazine_made_137,
+            ])
+            data.append([
+                'حق بیمه پرداختی موضوع ماده 37 ق.م.م.',
+                form.haghe_bime_moafiat,
+            ])
+            data.append([
+                'تسهیلات اعتباری مسکن از بانکها',
+                0,
+            ])
+            data.append([
+                'سایر معافیتها',
+                form.total_sayer_moafiat,
+            ])
+            data.append([
+                'ناخالص اضافه کاری ماه جاری',
+                form.ezafe_kari_nakhales,
+            ])
+            data.append([
+                'سایر پرداختهای غیر مستمر نقدی ماه جاری',
+                form.naghdi_un_pension,
+            ])
+            data.append([
+                'پاداش های مورد یماه جاری',
+                0,
+            ])
+            data.append([
+                'پرداختهای غیر مستمر نقدی معوقه ماه جاری',
+                0,
+            ])
+            data.append([
+                'کسر میشود:معافیت های غیر مستمر نقدی(شامل بند6ماده91)',
+                form.mission_total,
+            ])
+            data.append([
+                'پرداخت مزایای غیر مستمر غیر نقدی ماه جاری',
+                form.mazaya_gheyr_mostamar,
+            ])
+            data.append([
+                'عیدی و مزایای پایان سال',
+                form.get_padash,
+            ])
+            data.append([
+                'بازخرید مرخصی و بازخرید سنوات-ریالی',
+                form.get_hagh_sanavat_and_save_leaves,
+            ])
+            data.append([
+                'کسر میشود:معافیت(فقط برای بند5ماده91)',
+                form.get_hagh_sanavat_and_save_leaves,
+            ])
+            data.append([
+                'معافیت مربوط به مناطق آزاد تجاری',
+                form.manategh_tejari_moafiat,
+            ])
+            data.append([
+                'معافیت موضوع قانون اجتناب از اخذ مالیات مضاعف',
+                form.ejtenab_maliat_mozaaf,
+            ])
+            data.append([
+                'مالیات متعلّقه حقوق و دستمزد مستمر نقدی، درآمدها و مزایای غیر نقدی، پرداختهای غیر مستمر نقدی وغیر نقدی، عیدی و مزایا، بازخرید مرخصی و سنوات ماه جاری',
+                form.calculate_month_tax,
+            ])
+        return data
+
 
 
 class TaxReportExportView(TaxListView, BaseExportView):
@@ -2133,6 +2797,128 @@ class NewPersonTaxReportExportView(WorkshopPersonnelListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay_item: ListOfPayItem):
+        data = [
+            [
+                '  اطلاعات حقوق بگیر (مالیات)'
+            ],
+        ]
+        for form in list_of_pay_item:
+            data.append([
+                'کد ملی/کد فراگیر',
+                form.personnel.national_code,
+            ])
+            data.append([
+                'نام',
+                form.personnel.name,
+            ])
+            data.append([
+                'نام خانوادگی',
+                form.personnel.last_name,
+            ])
+            data.append([
+                'کشور',
+                form.personnel.country,
+            ])
+            data.append([
+                'شناسه کارمند',
+                form.personnel.personnel_code,
+            ])
+            data.append([
+                'مدرک تحصیلی',
+                form.personnel.degree_education,
+            ])
+            data.append([
+                'سمت',
+                form.work_title,
+            ])
+            data.append([
+                'نوع بیمه',
+                form.personnel.insurance_for_tax,
+            ])
+            data.append([
+                'نام بیمه',
+                '',
+            ])
+            data.append([
+                'شماره بیمه',
+                form.personnel.insurance_code,
+            ])
+            data.append([
+                'کد پستی محل سکونت',
+                form.personnel.postal_code,
+            ])
+            data.append([
+                'نشانی محل سکونت',
+                form.personnel.address,
+            ])
+            data.append([
+                'نوع استخدام',
+                form.employment_type,
+            ])
+            data.append([
+                'محل خدمت',
+                form.job_location,
+            ])
+            data.append([
+                'وضعیت محل خدمت',
+                form.job_location_status,
+            ])
+            data.append([
+                'نوع قرارداد',
+                form.contract_type,
+            ])
+            data.append([
+                'پایان کار',
+                '',
+            ])
+            data.append([
+                'وضعیت کارمند',
+                form.employee_status,
+            ])
+            data.append([
+                'شماره تلفن همراه',
+                form.personnel.mobile_number_1,
+            ])
+            data.append([
+                'پست الکترونیک',
+                '',
+            ])
+
+        return data
 
 
 class SettlementExportView(WorkshopPersonnelListView, BaseExportView):
