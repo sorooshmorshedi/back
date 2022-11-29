@@ -402,6 +402,12 @@ class WorkshopPersonnelApiView(APIView):
 
     def get(self, request):
         query = WorkshopPersonnel.objects.all()
+        workshop_personnel = []
+        for person in query:
+            if not person.quit_job_date:
+                workshop_personnel.append(person.id)
+        query = WorkshopPersonnel.objects.filter(id__in=workshop_personnel)
+
         serializers = WorkshopPersonnelSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
