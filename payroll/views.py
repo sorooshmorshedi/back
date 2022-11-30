@@ -1063,7 +1063,8 @@ class PaymentList(APIView):
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
         workshop = Workshop.objects.get(pk=pk)
         data = request.data
-        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
+        company = request.user.active_company
+        payroll_list = ListOfPay.objects.create(workshop=workshop, company=company,year=year, month=month, name=data['name'],
                                                 use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
         payroll_list.save()
@@ -1075,6 +1076,7 @@ class PaymentList(APIView):
             else:
                 insurance = 'n'
             payroll_list_item = ListOfPayItem.objects.create(
+                company=company,
                 list_of_pay=payroll_list,
                 workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
                 contract=Contract.objects.get(pk=item['contract']),

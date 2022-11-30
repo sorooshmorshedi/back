@@ -437,7 +437,7 @@ class ListOfPayListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 
 class ListOfPayInsuranceListView(generics.ListAPIView):
@@ -451,7 +451,7 @@ class ListOfPayInsuranceListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 
 class ListOfPayItemInsuranceListView(generics.ListAPIView):
@@ -465,7 +465,7 @@ class ListOfPayItemInsuranceListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 
 class ListOfPayItemLessListView(generics.ListAPIView):
@@ -480,7 +480,7 @@ class ListOfPayItemLessListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 class ListOfPayItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -494,7 +494,7 @@ class ListOfPayItemListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 
 class TaxRowListView(generics.ListAPIView):
@@ -597,7 +597,9 @@ class PersonTaxListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPayItem.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
+            .filter(company=user.active_company).distinct('pk')
 
 
 class TaxListView(generics.ListAPIView):
@@ -612,7 +614,7 @@ class TaxListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
 
 
 class WorkshopAbsenceListView(generics.ListAPIView):
@@ -627,4 +629,4 @@ class WorkshopAbsenceListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Workshop.objects.hasAccess('get', self.permission_codename)\
-            .filter(personnel__company=user.active_company).distinct('pk')
+            .filter(company=user.active_company).distinct('pk')
