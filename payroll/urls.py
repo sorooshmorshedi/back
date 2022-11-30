@@ -8,7 +8,7 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PayrollExportView, LoanItemExportView, PersonInsuranceReportExportView, WorkshopInsuranceReportExportView, \
     PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
     NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
-    AccountBalanceReportExportView
+    AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
@@ -97,6 +97,8 @@ urlpatterns = [
 
     path('absence/report/<int:year>/<str:month>/', AbsenceReportExportView.as_view()),
     path('saveLeave/report/<int:year>/<str:month>/', SaveLeaveReportExportView.as_view()),
+    path('eydi/report/<int:year>/<str:month>/', EydiReportExportView.as_view()),
+    path('sanavat/report/<int:year>/<str:month>/', SanavatReportExportView.as_view()),
     path('settlement/<int:personnel>/<str:export_type>', SettlementExportView.as_view()),
 
     path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),

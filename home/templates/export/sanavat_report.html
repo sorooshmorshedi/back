@@ -1,0 +1,32 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for i in forms.personnel %}
+
+
+    {% endfor %}
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th rowspan="2" class="text-center">ردیف</th>
+            <th rowspan="2" class="text-center"> نام و نام خانوادگی</th>
+            <th colspan={{ forms.col_number }} class="text-center">حق سنوات پرداخت شده طی سال {{ forms.year }}</th>
+            <th rowspan="2" class="text-center">جمع حق سنوات</th>
+
+        </tr>
+        <tr>
+            {% for month in forms.months_display %}
+                <th class="text-center"> {{ month }}</th>
+            {% endfor %}
+        </tr>
+        {% for person in forms.personnel %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ person.total.name }}</td>
+                {% for month_info in person.months %}
+                    <td class="text-center">{{ month_info.sanavat }} </td>
+                {% endfor %}
+                <td class="text-center">{{ person.total.total }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

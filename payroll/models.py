@@ -186,6 +186,46 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
         return response
 
+    def eydi_report(self, year, months):
+        response = {}
+        response['months'] = months
+        response['year'] = year
+        personnel = []
+        personnel_ids = []
+        for person in self.workshop_personnel.all():
+            personnel_ids.append(person.id)
+            person_report = person.eydi_report(year, months)
+            person_report['id'] = person.id
+            personnel.append(person_report)
+        response['personnel'] = personnel
+        response['personnel_ids'] = personnel_ids
+        month_display = []
+        for month in response['months']:
+            month_display.append(self.month_display(month))
+        response['months_display'] = month_display
+
+        return response
+
+    def hagh_sanavat_report(self, year, months):
+        response = {}
+        response['months'] = months
+        response['year'] = year
+        personnel = []
+        personnel_ids = []
+        for person in self.workshop_personnel.all():
+            personnel_ids.append(person.id)
+            person_report = person.hagh_sanavat_report(year, months)
+            person_report['id'] = person.id
+            personnel.append(person_report)
+        response['personnel'] = personnel
+        response['personnel_ids'] = personnel_ids
+        month_display = []
+        for month in response['months']:
+            month_display.append(self.month_display(month))
+        response['months_display'] = month_display
+
+        return response
+
     class Meta(BaseModel.Meta):
         verbose_name = 'Workshop'
         permission_basename = 'workshop'
@@ -1006,6 +1046,62 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         print(day_amount)
         response['total']['amount'] = day_amount * response['total']['remaining']
 
+        return response
+
+    def eydi_report(self, year, months_list):
+        response = {}
+        by_month = []
+        for month in months_list:
+            item = ListOfPayItem.objects.filter(Q(workshop_personnel__id=self.id) & Q(list_of_pay__year=year)
+                                                & Q(list_of_pay__month=month) & Q(list_of_pay__ultimate=True)).first()
+            report = {}
+            if item:
+                report['display'] = item.list_of_pay.month_display
+                report['eydi'] = item.padash_total
+
+            else:
+                report['display'] = 0
+                report['eydi'] = 0
+
+            by_month.append(report)
+
+        response['total'] = {
+            'name': self.personnel.full_name,
+            'total': 0,
+        }
+
+        for month in by_month:
+            response['total']['total'] = round((response['total']['total'] + month['eydi']), 2)
+
+        response['months'] = by_month
+        return response
+
+    def hagh_sanavat_report(self, year, months_list):
+        response = {}
+        by_month = []
+        for month in months_list:
+            item = ListOfPayItem.objects.filter(Q(workshop_personnel__id=self.id) & Q(list_of_pay__year=year)
+                                                & Q(list_of_pay__month=month) & Q(list_of_pay__ultimate=True)).first()
+            report = {}
+            if item:
+                report['display'] = item.list_of_pay.month_display
+                report['sanavat'] = item.haghe_sanavat_total
+
+            else:
+                report['display'] = 0
+                report['sanavat'] = 0
+
+            by_month.append(report)
+
+        response['total'] = {
+            'name': self.personnel.full_name,
+            'total': 0,
+        }
+
+        for month in by_month:
+            response['total']['total'] = round((response['total']['total'] + month['sanavat']), 2)
+
+        response['months'] = by_month
         return response
 
     class Meta(BaseModel.Meta):
@@ -3217,7 +3313,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
 
         }
-        print('data for insurance loaded')
         return DSKWOR
 
 

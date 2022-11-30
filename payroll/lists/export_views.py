@@ -3069,6 +3069,113 @@ class SaveLeaveReportExportView(WorkshopAbsenceListView, BaseExportView):
 
         return context
 
+class EydiReportExportView(WorkshopAbsenceListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'eydi_report'
+    month = []
+    year = None
+
+    def __init__(self):
+        self.month = []
+
+    context = {
+        'title': ' گزارش جامع عیدی و پاداش',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, year, month, *args, **kwargs):
+        months = month
+        self.year = year
+        while len(months) > 0:
+            self.month.append(int(months[:2]))
+            new_months = ""
+            for i in range(len(months)):
+                if i != 0 and i != 1:
+                    new_months = new_months + months[i]
+
+            months = new_months
+        self.month = unique(self.month)
+        return self.export(request, 'html', *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+        qs = qs.first()
+        form = qs.eydi_report(self.year, self.month)
+        form['col_number'] = len(form['months'])
+        self.month = []
+
+        context = {
+            'forms': form,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user.get_full_name(),
+            'print_document': print_document
+        }
+
+        context['form_content_template'] = 'export/eydi_report.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
+
+class SanavatReportExportView(WorkshopAbsenceListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'haghe_sanavat_report'
+    month = []
+    year = None
+
+    def __init__(self):
+        self.month = []
+
+    context = {
+        'title': ' گزارش جامع حق سنوات',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, year, month, *args, **kwargs):
+        months = month
+        self.year = year
+        while len(months) > 0:
+            self.month.append(int(months[:2]))
+            new_months = ""
+            for i in range(len(months)):
+                if i != 0 and i != 1:
+                    new_months = new_months + months[i]
+
+            months = new_months
+        self.month = unique(self.month)
+        return self.export(request, 'html', *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+        qs = qs.first()
+        form = qs.hagh_sanavat_report(self.year, self.month)
+        form['col_number'] = len(form['months'])
+        self.month = []
+
+        context = {
+            'forms': form,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user.get_full_name(),
+            'print_document': print_document
+        }
+
+        context['form_content_template'] = 'export/sanavat_report.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
 
 class NewPersonTaxReportExportView(WorkshopPersonnelListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
