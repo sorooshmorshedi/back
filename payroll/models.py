@@ -2078,7 +2078,6 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
 
 class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
 
-    company = models.ForeignKey(Company, related_name='list_of_pay', on_delete=models.CASCADE, blank=True, null=True)
 
     workshop = models.ForeignKey(Workshop, related_name="list_of_pay", on_delete=models.CASCADE,
                                  null=True, blank=True)
@@ -2405,7 +2404,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         (NO, 'خیر'),
     )
 
-    company = models.ForeignKey(Company, related_name='list_of_pay_item', on_delete=models.CASCADE, blank=True, null=True)
 
     list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                     blank=True, null=True)

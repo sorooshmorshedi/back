@@ -435,9 +435,10 @@ class ListOfPayListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(workshop__in=workhops)
 
 
 class ListOfPayInsuranceListView(generics.ListAPIView):
@@ -449,9 +450,10 @@ class ListOfPayInsuranceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(workshop__in=workhops)
 
 
 class ListOfPayItemInsuranceListView(generics.ListAPIView):
@@ -463,9 +465,14 @@ class ListOfPayItemInsuranceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        items = []
+        for workshop in workhops:
+            for item in workshop.list_of_pay.all():
+                items.append(item)
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(list_of_pay__in=items)
 
 
 class ListOfPayItemLessListView(generics.ListAPIView):
@@ -478,9 +485,14 @@ class ListOfPayItemLessListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        items = []
+        for workshop in workhops:
+            for item in workshop.list_of_pay.all():
+                items.append(item)
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(list_of_pay__in=items)
 
 class ListOfPayItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -492,9 +504,14 @@ class ListOfPayItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        items = []
+        for workshop in workhops:
+            for item in workshop.list_of_pay.all():
+                items.append(item)
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(list_of_pay__in=items)
 
 
 class TaxRowListView(generics.ListAPIView):
@@ -597,9 +614,10 @@ class PersonTaxListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(workshop__in=workhops)
 
 
 class TaxListView(generics.ListAPIView):
@@ -612,9 +630,10 @@ class TaxListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
         return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(company=user.active_company).distinct('pk')
+            .filter(workshop__in=workhops)
 
 
 class WorkshopAbsenceListView(generics.ListAPIView):
