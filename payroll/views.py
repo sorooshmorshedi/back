@@ -27,7 +27,10 @@ class WorkshopApiView(APIView):
     permission_basename = 'workshop'
 
     def get(self, request):
-        query = Workshop.objects.all()
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
+        query = Workshop.objects.filter(company=company)
         serializers = WorkShopSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -161,7 +164,8 @@ class WorkshopTaxApiView(APIView):
     permission_basename = 'workshop_tax'
 
     def get(self, request):
-        query = WorkshopTax.objects.all()
+        company = request.user.active_company.pk
+        query = WorkshopTax.objects.filter(company=company)
         serializers = WorkShopTaxSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -210,7 +214,8 @@ class PersonnelApiView(APIView):
     permission_basename = 'personnel'
 
     def get(self, request):
-        query = Personnel.objects.all()
+        company = request.user.active_company.pk
+        query = Personnel.objects.filter(company=company)
         serializers = PersonnelSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -358,7 +363,10 @@ class ContractApiView(APIView):
     permission_basename = 'contract'
 
     def get(self, request):
-        query = Contract.objects.all()
+        company = request.user.active_company
+        workshop = company.workshop.all()
+        workshop_personnel = WorkshopPersonnel.objects.filter(workshop__in=workshop)
+        query = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
         serializers = ContractSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -404,7 +412,9 @@ class WorkshopPersonnelApiView(APIView):
     permission_basename = 'workshop_personnel'
 
     def get(self, request):
-        query = WorkshopPersonnel.objects.all()
+        company = request.user.active_company
+        workshops = company.workshop.all()
+        query = WorkshopPersonnel.objects.filter(workshop__in=workshops)
         workshop_personnel = []
         for person in query:
             if not person.quit_job_date:
@@ -426,11 +436,17 @@ class WorkshopAllPersonnelDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_personnel'
 
-    def get_object(self, pk):
+    def get_object(self, request, pk):
         try:
-            return WorkshopPersonnel.objects.filter(workshop_id=pk)
+            workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
         except WorkshopPersonnel.DoesNotExist:
             raise Http404
+
+        workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
+        company = request.user.active_company
+        workshops = company.workshop.all()
+        persons = workshop_personnel.filter(workshop_in=workshops)
+        return persons
 
     def get(self, request, pk):
         query = self.get_object(pk)
@@ -605,7 +621,8 @@ class GetHRLetterTemplatesApi(APIView):
     permission_basename = 'hr_letter'
 
     def get(self, request):
-        query = HRLetter.objects.filter(is_template='t')
+        company = request.user.active_company.pk
+        query = HRLetter.objects.filter(Q(is_template='t') & Q(company=company))
         serializers = HRLetterSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -1063,8 +1080,7 @@ class PaymentList(APIView):
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
         workshop = Workshop.objects.get(pk=pk)
         data = request.data
-        company = request.user.active_company
-        payroll_list = ListOfPay.objects.create(workshop=workshop, company=company,year=year, month=month, name=data['name'],
+        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
                                                 use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
         payroll_list.save()
@@ -1076,7 +1092,6 @@ class PaymentList(APIView):
             else:
                 insurance = 'n'
             payroll_list_item = ListOfPayItem.objects.create(
-                company=company,
                 list_of_pay=payroll_list,
                 workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
                 contract=Contract.objects.get(pk=item['contract']),
