@@ -268,14 +268,16 @@ def write_new_person_diskette(request, pk):
 class WorkshopListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
-    permission_codename = "get.workshop"
+    permission_codename = "getOwn.workshop"
     serializer_class = WorkShopSerializer
     filterset_class = WorkshopFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Workshop.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return Workshop.objects.hasAccess('get', self.permission_codename).filter(company=user.active_company)\
+            .distinct('pk')
 
 
 class PersonnelListView(generics.ListAPIView):
@@ -288,7 +290,9 @@ class PersonnelListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Personnel.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return Personnel.objects.hasAccess('get', self.permission_codename).filter(company=user.active_company)\
+            .distinct('pk')
 
 
 class PersonnelFamilyListView(generics.ListAPIView):
@@ -301,20 +305,9 @@ class PersonnelFamilyListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return PersonnelFamily.objects.hasAccess('get', self.permission_codename).all()
-
-
-class SpecificPersonnelFamilyListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-
-    permission_codename = "get.personnel_family"
-    serializer_class = PersonnelFamilySerializer
-    filterset_class = PersonnelFamilyFilter
-    ordering_fields = '__all__'
-    pagination_class = LimitOffsetPagination
-
-    def get_queryset(self):
-        return PersonnelFamily.objects.hasAccess('get', self.permission_codename).filter()
+        user = self.request.user
+        return PersonnelFamily.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 
 class ContractListView(generics.ListAPIView):
@@ -327,7 +320,17 @@ class ContractListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Contract.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        workhops_personnel, workhops_personnel_id = [], []
+        for workshop in workhops:
+            workhops_personnel.append(workshop.workshop_personnel.all())
+        for workshop in workhops_personnel:
+            for person in workshop:
+                if person.id not in workhops_personnel_id:
+                    workhops_personnel_id.append(person.id)
+        return Contract.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
 
 
 class WorkshopPersonnelListView(generics.ListAPIView):
@@ -340,7 +343,10 @@ class WorkshopPersonnelListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return WorkshopPersonnel.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        return WorkshopPersonnel.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop__in=workhops).distinct('pk')
 
 
 class ContractRowListView(generics.ListAPIView):
@@ -353,7 +359,10 @@ class ContractRowListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ContractRow.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        return ContractRow.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop__in=workhops).distinct('pk')
 
 
 class LeaveOrAbsenceListView(generics.ListAPIView):
@@ -366,7 +375,17 @@ class LeaveOrAbsenceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return LeaveOrAbsence.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        workhops_personnel, workhops_personnel_id = [], []
+        for workshop in workhops:
+            workhops_personnel.append(workshop.workshop_personnel.all())
+        for workshop in workhops_personnel:
+            for person in workshop:
+                if person.id not in workhops_personnel_id:
+                    workhops_personnel_id.append(person.id)
+        return LeaveOrAbsence.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
 
 
 class MissionListView(generics.ListAPIView):
@@ -379,7 +398,17 @@ class MissionListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Mission.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        workhops_personnel, workhops_personnel_id = [], []
+        for workshop in workhops:
+            workhops_personnel.append(workshop.workshop_personnel.all())
+        for workshop in workhops_personnel:
+            for person in workshop:
+                if person.id not in workhops_personnel_id:
+                    workhops_personnel_id.append(person.id)
+        return Mission.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
 
 
 class HRLetterListView(generics.ListAPIView):
@@ -392,11 +421,13 @@ class HRLetterListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return HRLetter.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return HRLetter.objects.hasAccess('get', self.permission_codename).filter(company=user.active_company)\
+            .distinct('pk')
 
 class ListOfPayListView(generics.ListAPIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_codename = "get.list_of_pay"
     serializer_class = ListOfPayLessSerializer
     filterset_class = ListOfPayFilter
@@ -404,12 +435,13 @@ class ListOfPayListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPay.objects.hasAccess('get', self.permission_codename).all().prefetch_related('list_of_pay_item')
+        user = self.request.user
+        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 
 class ListOfPayInsuranceListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-
     permission_codename = "get.list_of_pay"
     serializer_class = ListOfPayInsuranceSerializer
     filterset_class = ListOfPayFilter
@@ -417,11 +449,13 @@ class ListOfPayInsuranceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPay.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
+
 
 class ListOfPayItemInsuranceListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-
     permission_codename = "get.list_of_pay"
     serializer_class = ListOfPayItemInsuranceSerializer
     filterset_class = ListOfPayItemFilter
@@ -429,7 +463,9 @@ class ListOfPayItemInsuranceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPayItem.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 
 class ListOfPayItemLessListView(generics.ListAPIView):
@@ -442,7 +478,9 @@ class ListOfPayItemLessListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPayItem.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 class ListOfPayItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -454,7 +492,9 @@ class ListOfPayItemListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPayItem.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 
 class TaxRowListView(generics.ListAPIView):
@@ -467,7 +507,10 @@ class TaxRowListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return WorkshopTaxRow.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        tax = company.tax.all()
+        return WorkshopTaxRow.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_tax__in=tax).distinct('pk')
 
 
 class TaxMoafListView(generics.ListAPIView):
@@ -480,7 +523,9 @@ class TaxMoafListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return WorkshopTax.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return WorkshopTax.objects.hasAccess('get', self.permission_codename)\
+            .filter(company=user.active_company).distinct('pk')
 
 
 class LoanListView(generics.ListAPIView):
@@ -493,7 +538,17 @@ class LoanListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Loan.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        workhops_personnel, workhops_personnel_id = [], []
+        for workshop in workhops:
+            workhops_personnel.append(workshop.workshop_personnel.all())
+        for workshop in workhops_personnel:
+            for person in workshop:
+                if person.id not in workhops_personnel_id:
+                    workhops_personnel_id.append(person.id)
+        return Loan.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
 
 
 class LoanItemListView(generics.ListAPIView):
@@ -519,7 +574,17 @@ class DeductionListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return OptionalDeduction.objects.hasAccess('get', self.permission_codename).all()
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        workhops_personnel, workhops_personnel_id = [], []
+        for workshop in workhops:
+            workhops_personnel.append(workshop.workshop_personnel.all())
+        for workshop in workhops_personnel:
+            for person in workshop:
+                if person.id not in workhops_personnel_id:
+                    workhops_personnel_id.append(person.id)
+        return OptionalDeduction.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
 
 
 class PersonTaxListView(generics.ListAPIView):
@@ -545,7 +610,9 @@ class TaxListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return ListOfPay.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')
 
 
 class WorkshopAbsenceListView(generics.ListAPIView):
@@ -558,4 +625,6 @@ class WorkshopAbsenceListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        return Workshop.objects.hasAccess('get', self.permission_codename).all()
+        user = self.request.user
+        return Workshop.objects.hasAccess('get', self.permission_codename)\
+            .filter(personnel__company=user.active_company).distinct('pk')

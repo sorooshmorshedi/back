@@ -166,6 +166,9 @@ class WorkshopTaxApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
         serializer = WorkShopTaxSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -587,6 +590,9 @@ class HRLetterApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
         serializer = HRLetterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

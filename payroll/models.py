@@ -247,6 +247,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
 
 class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
+
+    company = models.ForeignKey(Company, related_name='tax', on_delete=models.CASCADE, blank=True, null=True)
+
     name = models.CharField(max_length=100, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
@@ -444,7 +447,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (NONE_PROFIT, 'غیر انتفاعی')
     )
 
-    company = models.ForeignKey(Company, related_name='personnel', on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, related_name='personnel', on_delete=models.CASCADE, blank=True, null=True)
 
     name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
@@ -1536,6 +1539,8 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         (PERSONNEL, 'شخصی')
     )
 
+    company = models.ForeignKey(Company, related_name='hr_letter', on_delete=models.CASCADE, blank=True, null=True)
+
     contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
                                  blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -2072,6 +2077,9 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
+
+    company = models.ForeignKey(Company, related_name='list_of_pay', on_delete=models.CASCADE, blank=True, null=True)
+
     workshop = models.ForeignKey(Workshop, related_name="list_of_pay", on_delete=models.CASCADE,
                                  null=True, blank=True)
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -2396,6 +2404,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         (YES, 'بله'),
         (NO, 'خیر'),
     )
+
+    company = models.ForeignKey(Company, related_name='list_of_pay_item', on_delete=models.CASCADE, blank=True, null=True)
 
     list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                     blank=True, null=True)
