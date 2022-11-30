@@ -1760,21 +1760,21 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                     '',
                     '',
                 ])
-            if form.get_padash != 0:
+            if form.padash_total != 0:
                 data.append([
                     '',
                     '',
                     'عیدی یا پاداش',
-                    form.get_padash,
+                    form.padash_total,
                     '',
                     '',
                 ])
-            if form.get_hagh_sanavat != 0:
+            if form.haghe_sanavat_total != 0:
                 data.append([
                     '',
                     '',
                     'حق سنوات',
-                    form.get_hagh_sanavat,
+                    form.haghe_sanavat_total,
                     '',
                     '',
                 ])
@@ -2822,6 +2822,7 @@ class TaxReportExportView(TaxListView, BaseExportView):
         context['right_header_template'] = 'export/sample_head.html'
 
         context.update(self.context)
+        print(qs)
 
         return context
 

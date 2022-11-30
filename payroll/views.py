@@ -926,16 +926,18 @@ class SearchPersonnelByCode(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel'
 
-    def get_object(self, code):
+    def get_object(self, code, request):
         national_code = str(code)
         try:
-            personnel = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code)).first()
+            company = request.user.active_company.pk
+            personnel = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code) &
+                                                 Q(company=company)).first()
             return Personnel.objects.get(pk=personnel.pk)
         except AttributeError:
             raise Http404
 
     def get(self, request, code):
-        query = self.get_object(code)
+        query = self.get_object(code, request)
         serializers = PersonnelSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 

@@ -616,8 +616,12 @@ class PersonTaxListView(generics.ListAPIView):
     def get_queryset(self):
         company = self.request.user.active_company
         workhops = company.workshop.all()
-        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(workshop__in=workhops)
+        items = []
+        for workshop in workhops:
+            for item in workshop.list_of_pay.all():
+                items.append(item)
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
+            .filter(list_of_pay__in=items)
 
 
 class TaxListView(generics.ListAPIView):
@@ -632,8 +636,12 @@ class TaxListView(generics.ListAPIView):
     def get_queryset(self):
         company = self.request.user.active_company
         workhops = company.workshop.all()
-        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
-            .filter(workshop__in=workhops)
+        items = []
+        for workshop in workhops:
+            for item in workshop.list_of_pay.all():
+                items.append(item)
+        return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
+            .filter(list_of_pay__in=items)
 
 
 class WorkshopAbsenceListView(generics.ListAPIView):

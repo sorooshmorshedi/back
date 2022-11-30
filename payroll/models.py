@@ -2159,7 +2159,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_contracts(self):
         contracts = []
-        workshop_personnel = WorkshopPersonnel.objects.filter(workshop=self.workshop)
+        personnel = Personnel.objects.filter(Q(is_personnel_active=True) & Q(is_personnel_verified=True))
+        workshop_personnel = WorkshopPersonnel.objects.filter(Q(workshop=self.workshop) & Q(personnel__in=personnel))
         workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
         for contract in workshop_contracts:
             if not contract.quit_job_date:
@@ -2178,7 +2179,11 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                 contracts.append(contract.id)
 
         filtered_contracts = Contract.objects.filter(pk__in=contracts)
-        return filtered_contracts
+        if len(filtered_contracts) == 0:
+            raise ValidationError('قراردادی در این زمان ثبت نشده')
+        else:
+            return filtered_contracts
+
 
     @property
     def data_for_insurance(self):
@@ -2254,9 +2259,12 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         personnel_normal_worktime = {}
         contract_start = {}
         contract_end = {}
+        contract_personnel = {}
+
         filtered_contracts = self.get_contracts
         for contract in filtered_contracts:
             if contract.workshop_personnel.personnel.is_personnel_active:
+                contract_personnel[contract.id] = contract.workshop_personnel.personnel.id
                 if not contract.quit_job_date:
                     end = contract.contract_to_date
                 else:
@@ -2279,9 +2287,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                     personnel_normal_worktime[contract.id] = self.month_days - contract.contract_from_date.day + 1
                     contract_start[contract.id] = contract.contract_from_date
                     contract_end[contract.id] = self.end_date
-        contract_personnel = {}
-        for contract in filtered_contracts:
-            contract_personnel[contract.id] = contract.workshop_personnel.personnel.id
         response_data = []
         for contract in contract_personnel:
             absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0, 'm': 0, 'eh': 0, 'ed': 0}
@@ -2291,7 +2296,9 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             is_insurance = contract.insurance
             filtered_absence = LeaveOrAbsence.objects.filter(workshop_personnel=workshop_personnel)
             filtered_mission = Mission.objects.filter(workshop_personnel=workshop_personnel)
-
+            print(contract_start)
+            print(contract_end)
+            print(filtered_contracts)
             for absence in filtered_absence.all():
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \
@@ -2481,12 +2488,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
     aele_mandi = models.IntegerField(default=0)
 
-    haghe_sanavat_total = DECIMAL(default=0)
+    haghe_sanavat_total = models.IntegerField(default=0)
     saved_leaves_total = DECIMAL(default=0)
 
     sayer_ezafat = DECIMAL(default=0)
     sayer_kosoorat = DECIMAL(default=0)
-    padash_total = DECIMAL(default=0)
+    padash_total = models.IntegerField(default=0)
     mazaya_gheyr_mostamar = DECIMAL(default=0)
     calculate_payment = models.BooleanField(default=False)
 
@@ -2654,12 +2661,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def hoghoogh_mahane(self):
-        return round(self.hoghoogh_roozane * self.real_worktime, 2)
+        return round(self.hoghoogh_roozane * self.real_worktime)
 
     @property
     def sanavat_mahane(self):
         if self.sanavat_month >= 12:
-            return round(self.sanavat_base * self.real_worktime, 2)
+            return round(self.sanavat_base * self.real_worktime)
         else:
             return 0
 
@@ -2990,7 +2997,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         if self.list_of_pay.workshop.haghe_sanavat_identification == 'y' and self.list_of_pay.month == 12:
             sanavat += self.calculate_yearly_haghe_sanavat
-        self.haghe_sanavat_total = sanavat
+        self.haghe_sanavat_total = round(sanavat)
         return sanavat
 
 
@@ -3120,7 +3127,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             padash = self.calculate_monthly_eydi
         elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
             padash = self.calculate_yearly_eydi
-        self.padash_total = padash
+        self.padash_total = round(padash)
         return padash
 
 
@@ -3226,7 +3233,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def haghe_bime_bime_shavande(self):
         hr = self.get_hr_letter
-        return self.insurance_total_included * hr.worker_insurance_nerkh
+        return round(self.insurance_total_included * hr.worker_insurance_nerkh)
 
     @property
     def employer_insurance(self):
@@ -3502,7 +3509,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             tax_row = tax_rows.get(from_amount=Decimal(0))
             moafiat_limit = tax_row.to_amount / 12 / 12
             eydi = self.calculate_monthly_eydi
-            moaf = moafiat_limit - eydi
+            moaf = moafiat_limit - Decimal(eydi)
             if moaf <= 0:
                 eydi_tax = -moaf
             else:
