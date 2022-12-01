@@ -1085,34 +1085,39 @@ class PaymentList(APIView):
         payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
                                                 use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
-        payroll_list.save()
-        response = payroll_list.info_for_items
+        contract = payroll_list.get_contracts
+        print(contract)
+        if len(contract) == 0:
+            raise ValidationError('no contract')
+        else:
+            payroll_list.save()
+            response = payroll_list.info_for_items
+            for item in response:
+                if item['insurance']:
+                    insurance = 'y'
+                else:
+                    insurance = 'n'
 
-        for item in response:
-            if item['insurance']:
-                insurance = 'y'
-            else:
-                insurance = 'n'
-            payroll_list_item = ListOfPayItem.objects.create(
-                list_of_pay=payroll_list,
-                workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
-                contract=Contract.objects.get(pk=item['contract']),
-                normal_worktime=item['normal_work'],
-                real_worktime=item['real_work'],
-                mission_day=item['mission'],
-                is_insurance=insurance,
-                absence_day=item['leaves']['a'],
-                entitlement_leave_day=item['leaves']['e'],
-                daily_entitlement_leave_day=item['leaves']['ed'],
-                hourly_entitlement_leave_day=item['leaves']['eh'],
-                illness_leave_day=item['leaves']['i'],
-                without_salary_leave_day=item['leaves']['w'],
-                matter_47_leave_day=item['leaves']['m']
-            )
-            payroll_list_item.save()
-        list_of_pay = payroll_list
-        list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
-        return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
+                payroll_list_item = ListOfPayItem.objects.create(
+                    list_of_pay=payroll_list,
+                    workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
+                    contract=Contract.objects.get(pk=item['contract']),
+                    normal_worktime=item['normal_work'],
+                    real_worktime=item['real_work'],
+                    mission_day=item['mission'],
+                    is_insurance=insurance,
+                    absence_day=item['leaves']['a'],
+                    entitlement_leave_day=item['leaves']['e'],
+                    daily_entitlement_leave_day=item['leaves']['ed'],
+                    hourly_entitlement_leave_day=item['leaves']['eh'],
+                    illness_leave_day=item['leaves']['i'],
+                    without_salary_leave_day=item['leaves']['w'],
+                    matter_47_leave_day=item['leaves']['m']
+                )
+                payroll_list_item.save()
+            list_of_pay = payroll_list
+            list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
+            return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
 
 
 

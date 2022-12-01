@@ -2161,7 +2161,11 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         contracts = []
         personnel = Personnel.objects.filter(Q(is_personnel_active=True) & Q(is_personnel_verified=True))
         workshop_personnel = WorkshopPersonnel.objects.filter(Q(workshop=self.workshop) & Q(personnel__in=personnel))
+        if len(workshop_personnel) == 0:
+            raise ValidationError('پرسنل فعال و نهایی برای کارگاه ثبت نشده')
         workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
+        if len(workshop_contracts) == 0:
+            raise ValidationError('قراردادی  برای پرسنل فعال ثبت نشده')
         for contract in workshop_contracts:
             if not contract.quit_job_date:
                 end = contract.contract_to_date
