@@ -477,7 +477,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     mobile_number_1 = models.CharField(max_length=50, blank=True, null=True)
     mobile_number_2 = models.CharField(max_length=50, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
-    postal_code = POSTAL_CODE(null=True, blank=True)
+    postal_code = models.CharField(max_length=255, null=True, blank=True)
 
     insurance = models.BooleanField(default=False)
     insurance_code = models.IntegerField(blank=True, null=True)
@@ -2166,6 +2166,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
         if len(workshop_contracts) == 0:
             raise ValidationError('قراردادی  برای پرسنل فعال ثبت نشده')
+
         for contract in workshop_contracts:
             if not contract.quit_job_date:
                 end = contract.contract_to_date
