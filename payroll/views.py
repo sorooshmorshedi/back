@@ -1,4 +1,5 @@
 import jdatetime
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db.models import Q
 from django.http import Http404
@@ -215,7 +216,7 @@ class PersonnelApiView(APIView):
 
     def get(self, request):
         company = request.user.active_company.pk
-        query = Personnel.objects.filter(company=company)
+        query = Personnel.objects.filter(Q(company=company) & Q(is_personnel_active=True) & Q(is_personnel_verified=True))
         serializers = PersonnelSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -482,6 +483,15 @@ class WorkshopPersonnelDetail(APIView):
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class PersonnelUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel'
+    def get(self, request, pk):
+        personnel = Personnel.objects.get(pk=pk)
+        personnel.is_personnel_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+
 
 class PersonnelVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -498,20 +508,35 @@ class PersonnelVerifyApi(APIView):
         if not personnel.father_name:
             self.validate_status = False
             raise ValidationError("نام پدر را وارد کنید")
+        if not personnel.nationality:
+            self.validate_status = False
+            raise ValidationError("ملیت را وارد کنید")
+        if personnel.nationality == 1:
+            personnel.country = 'ایران'
+            personnel.military_service = 'x'
         if not personnel.country:
             self.validate_status = False
             raise ValidationError("کشور را وارد کنید")
+        if not personnel.gender:
+            self.validate_status = False
+            raise ValidationError("جنسیت را وارد کنید")
+        if personnel.gender == 'm' and not personnel.military_service:
+            self.validate_status = False
+            raise ValidationError("وضعییت خدمت سربازی را وارد کنید")
+        if not personnel.identity_code:
+            self.validate_status = False
+            raise ValidationError("شماره شناسنامه را وارد کنید")
         if not personnel.national_code:
             self.validate_status = False
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
-        if not personnel.identity_code:
+        if not personnel.marital_status:
             self.validate_status = False
-            raise ValidationError("شماره شنانامه را وارد کنید")
+            raise ValidationError("وضعیت تاهل را وارد کنید")
         if not personnel.date_of_birth:
             self.validate_status = False
-            raise ValidationError("تاریخ تولذ را وارد کنید")
+            raise ValidationError("تاریخ تولد را وارد کنید")
         if not personnel.date_of_exportation:
             self.validate_status = False
             raise ValidationError("تاریخ صدور شناسنامه را وارد کنید")
@@ -521,54 +546,58 @@ class PersonnelVerifyApi(APIView):
         if not personnel.location_of_exportation:
             self.validate_status = False
             raise ValidationError("محل صدور شناسنامه را وارد کنید")
-        if not personnel.city_phone_code:
+        if not personnel.address:
             self.validate_status = False
-            raise ValidationError("کد تلفن شهر را وارد کنید")
-        if personnel.city_phone_code:
-            city_phone_validator = RegexValidator(regex='^(0){1}[0-9]{2}$',
-                                                  message='کد باید از سه عدد تشکیل شوذ و با صفر شروع شوذ',
-                                                  code='nomatch')
-            city_phone_validator(personnel.city_phone_code)
-        if not personnel.phone_number:
-            self.validate_status = False
-            raise ValidationError("تلفن را وارد کنید")
+            raise ValidationError("آدرس را وارد کنید")
+        if not personnel.postal_code:
+            raise ValidationError("کد پستی را وارد کنید")
+        if personnel.postal_code:
+            if len(personnel.postal_code) > 10 or len(personnel.postal_code) < 10:
+                raise ValidationError("طول کد پستی باید 10 رقم باشد")
         if not personnel.mobile_number_1:
             self.validate_status = False
             raise ValidationError("شماره موبایل را وارد کنید")
         if personnel.mobile_number_1:
-            length_validator = RegexValidator(regex='^.{11}$', message='طول شماره موبایل باید 11 رقم باشد',
-                                              code='nomatch')
-            format_validator = RegexValidator(regex='^(09){1}[0-9]{9}$', message='ساختار شماره موبایل صحیح نبست')
-            length_validator(personnel.mobile_number_1)
-            format_validator(personnel.mobile_number_1)
+            if len(personnel.mobile_number_1) > 11 or len(personnel.mobile_number_1) < 11:
+                raise ValidationError("طول شماره موبایل باید 11 رقم باشد")
+            if personnel.mobile_number_1[0] != '0':
+                raise ValidationError(" شماره موبایل با صفر شروع میشود")
+            for char in personnel.mobile_number_1:
+                try:
+                    int(char)
+                except ValueError:
+                    raise ValidationError('ساختار شماره موبایل صحیح نیست')
         if personnel.mobile_number_2:
-            length_validator = RegexValidator(regex='^.{11}$', message='طول شماره موبایل باید 11 رقم باشد',
-                                              code='nomatch')
-            format_validator = RegexValidator(regex='^(09){1}[0-9]{9}$', message='ساختار شماره موبایل صحیح نبست')
-            length_validator(personnel.mobile_number_2)
-            format_validator(personnel.mobile_number_2)
-        if not personnel.address:
-            self.validate_status = False
-            raise ValidationError("آدرس را وارد کنید")
-        if personnel.postal_code:
-            postal_code_validator = RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد',
-                                                   code='nomatch')
-            postal_code_validator(personnel.postal_code)
+            if len(personnel.mobile_number_2) > 11 or len(personnel.mobile_number_2) < 11:
+                raise ValidationError("طول شماره موبایل باید 11 رقم باشد")
+            if personnel.mobile_number_2[0] != '0':
+                raise ValidationError(" شماره موبایل با صفر شروع میشود")
+            for char in personnel.mobile_number_2:
+                try:
+                    int(char)
+                except ValueError:
+                    raise ValidationError('ساختار شماره موبایل صحیح نیست')
         if personnel.insurance and not personnel.insurance_code:
             self.validate_status = False
             raise ValidationError("َشماره بیمه را وارد کنید")
-        if personnel.degree_education == 'di':
+        if personnel.insurance_code:
+            if len(personnel.insurance_code) > 8 or len(personnel.insurance_code) < 8:
+                raise ValidationError("طول َشماره بیمه باید 8 رقم باشد")
+        if not personnel.degree_education:
+            self.validate_status = False
+            raise ValidationError("مدرک تحصیلی را وارد کنید")
+
+        if personnel.degree_education == 3 and not personnel.field_of_study:
+            self.validate_status = False
+            raise ValidationError("رشته تحصیلی را وارد کنید")
+        if personnel.degree_education != 1 and personnel.degree_education != 2:
             if not personnel.field_of_study:
                 self.validate_status = False
                 raise ValidationError("رشته تحصیلی را وارد کنید")
-        if personnel.degree_education != 'un':
-            if not personnel.field_of_study:
-                self.validate_status = False
-                raise ValidationError("رشته تحصیلی را وارد کنید")
-            elif not personnel.university_type:
+            elif personnel.degree_education != 3 and not personnel.university_type:
                 self.validate_status = False
                 raise ValidationError("نوع دانشگاه را وارد کنید")
-            elif not personnel.university_name:
+            elif personnel.degree_education != 3 and not personnel.university_name:
                 self.validate_status = False
                 raise ValidationError("نام دانشگاه را وارد کنید")
         if not personnel.account_bank_name:
@@ -577,6 +606,8 @@ class PersonnelVerifyApi(APIView):
         if not personnel.account_bank_number:
             self.validate_status = False
             raise ValidationError("شماره حساب حقوق را وارد کنید")
+        if not personnel.bank_cart_number:
+            raise ValidationError("شماره کارت حقوق را وارد کنید")
         if personnel.bank_cart_number:
             cart_number_validator = RegexValidator(regex='^.{16}$', message='طول شماره کارت باید 16 رقم باشد',
                                                    code='nomatch')
@@ -584,7 +615,6 @@ class PersonnelVerifyApi(APIView):
         if not personnel.sheba_number:
             self.validate_status = False
             raise ValidationError("شماره شبا حقوق را وارد کنید")
-
         if personnel.sheba_number:
             sheba_validator = RegexValidator(regex='^.{24}$', message='طول شماره شبا باید 24 رقم باشد',
                                              code='nomatch')
@@ -594,6 +624,57 @@ class PersonnelVerifyApi(APIView):
             personnel.save()
             return Response({'status': 'personnel verify done'}, status=status.HTTP_200_OK)
         return Response({'status': 'personnel verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class PersonnelFamilyVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel_family'
+    validate_message = ''
+    validate_status = True
+    def get(self, request, pk):
+        personnel = PersonnelFamily.objects.get(pk=pk)
+        if not personnel.relative:
+            self.validate_status = False
+            raise ValidationError("نسبت وارد کنید")
+        if not personnel.name or not personnel.last_name:
+            self.validate_status = False
+            raise ValidationError("نام یا نام خانوادگی را وارد کنید")
+        if not personnel.national_code:
+            self.validate_status = False
+            raise ValidationError("کد ملی را وارد کنید")
+        if personnel.national_code:
+            is_valid_melli_code(personnel.national_code)
+        if not personnel.date_of_birth:
+            self.validate_status = False
+            raise ValidationError("تاریخ تولد را وارد کنید")
+        if not personnel.marital_status:
+            self.validate_status = False
+            raise ValidationError("وضعییت تاهل را وارد کنید")
+        if not personnel.study_status:
+            self.validate_status = False
+            raise ValidationError("وضعییت تحصیل را وارد کنید")
+        if not personnel.military_service:
+            self.validate_status = False
+            raise ValidationError(" خدمت سربازی را وارد کنید")
+        if not personnel.physical_condition:
+            self.validate_status = False
+            raise ValidationError("وضعییت جسمی را وارد کنید")
+        if self.validate_status:
+            personnel.is_verified = True
+            personnel.save()
+            return Response({'status': 'personnel family verify done'}, status=status.HTTP_200_OK)
+        return Response({'status': 'personnel family verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class PersonnelFamilyUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel_family'
+    def get(self, request, pk):
+        personnel = PersonnelFamily.objects.get(pk=pk)
+        personnel.is_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+
 
 
 class HRLetterApiView(APIView):

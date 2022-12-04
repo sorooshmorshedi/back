@@ -24,7 +24,8 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail, \
     LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
     TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
-    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy
+    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, PersonnelUnVerifyApi, \
+    PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -52,10 +53,13 @@ urlpatterns = [
     path('personnel/', PersonnelApiView.as_view(), name='personnelApi'),
     path('personnel/<int:pk>/', PersonnelDetail.as_view(), name='personnelDetail'),
     path('personnel/verify/<int:pk>/', PersonnelVerifyApi.as_view(), name='personnelVerifyApi'),
+    path('personnel/unverify/<int:pk>/', PersonnelUnVerifyApi.as_view(), name='personnelUnVerifyApi'),
     path('personnel/search/<int:code>/', SearchPersonnelByCode.as_view(), name='searchPersonnelByCode'),
 
     path('personnel/family/', PersonnelFamilyApiView.as_view(), name='personnelFamilyApi'),
     path('personnel/family/<int:pk>/', PersonnelFamilyDetail.as_view(), name='personnelFamilyDetail'),
+    path('personnel/family/verify/<int:pk>/', PersonnelFamilyVerifyApi.as_view(), name='personnelFamilyVerifyApi'),
+    path('personnel/family/unverify/<int:pk>/', PersonnelFamilyUnVerifyApi.as_view(), name='personnelFamilyUnVerifyApi'),
 
     path('workshop/personnel/', WorkshopPersonnelApiView.as_view(), name='workshopPersonnelApi'),
     path('workshop/personnel/<int:pk>/', WorkshopPersonnelDetail.as_view(), name='workshopPersonnelDetail'),

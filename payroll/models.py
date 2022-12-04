@@ -339,8 +339,8 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     )
 
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
-    contract_row = models.CharField(max_length=10, blank=True, null=True)
-    contract_number = models.IntegerField()
+    contract_row = models.CharField(max_length=255, blank=True, null=True)
+    contract_number = models.IntegerField(default=0)
     registration_date = jmodels.jDateField(blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
@@ -349,9 +349,9 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     status = models.CharField(max_length=1, choices=ACTIVE_TYPE, default=NO_ACTIVE)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
     assignor_national_code = models.CharField(max_length=20, validators=[is_shenase_meli], blank=True, null=True)
-    assignor_workshop_code = models.IntegerField()
+    assignor_workshop_code = models.IntegerField(default=0)
 
-    contract_initial_amount = DECIMAL()
+    contract_initial_amount = DECIMAL(default=0)
     branch = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
@@ -375,6 +375,19 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     @property
     def title(self):
         return str(self.contract_row) + ' در کارگاه ' + self.workshop.name
+
+    def save(self, *args, **kwargs):
+        if self.from_date and self.to_date:
+            if self.from_date >= self.to_date:
+                raise ValidationError('تاریخ شروع قرارداد نمیتواند بزرگتر یا مساوی تاریخ پایان باشد')
+        elif self.from_date and not self.to_date:
+            raise ValidationError('تاریخ پایان را وارد کنید')
+        elif self.to_date and not self.from_date:
+            raise ValidationError('تاریخ شروع را وارد کنید')
+
+        if not self.contract_row:
+            raise ValidationError('ردیف پیمان را وارد کنید')
+        super().save(*args, **kwargs)
 
 
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
@@ -536,6 +549,11 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     def save(self, *args, **kwargs):
         if not self.id and not self.personnel_code:
             self.personnel_code = self.system_code
+        if self.gender == 'f':
+            self.military_service == 'x'
+        if self.degree_education == 1 or  self.degree_education == 2 or self.degree_education == 3:
+            self.university_type = None
+            self.university_name = None
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -563,6 +581,14 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         (SINGLE, 'مجرد'),
         (MARRIED, 'متاهل'),
         (CHILDREN_WARDSHIP, 'سرپرست فرزند')
+    )
+
+    MALE = 'm'
+    FEMALE = 'f'
+
+    GENDER_TYPE = (
+        (MALE, 'مرد'),
+        (FEMALE, 'زن')
     )
 
     DONE = 'd'
@@ -596,15 +622,19 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     )
 
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    national_code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
+    national_code = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = jmodels.jDateField(blank=True, null=True)
     relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, default=SPOUSE)
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
     study_status = models.CharField(max_length=1, choices=STUDY_TYPE, default=STUDENT)
     physical_condition = models.CharField(max_length=1, choices=PHYSICAL_TYPE, default=HEALTHY)
+
+    is_verified = models.BooleanField(default=False, null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
+    is_active = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'PersonnelFamily'
@@ -2639,7 +2669,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi_info(self):
-        personnel_family = PersonnelFamily.objects.filter(personnel=self.workshop_personnel.personnel)
+        personnel_family = PersonnelFamily.objects.filter(Q(personnel=self.workshop_personnel.personnel) &
+                                                          Q(is_active=True))
         aele_mandi_child = 0
         self.total_insurance_month = self.workshop_personnel.insurance_history_total
         for person in personnel_family:
