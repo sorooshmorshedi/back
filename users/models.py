@@ -194,6 +194,7 @@ class PhoneVerification(BaseModel):
 
 class City(BaseModel):
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
 
     class Meta(BaseModel.Meta):
         default_permissions = ()
@@ -208,7 +209,8 @@ class City(BaseModel):
             ('updateOwn.city', 'ویرایش شهر های خود'),
             ('deleteOwn.city', 'حذف شهر های خود'),
         )
-
+    def __str__(self):
+        return self.name + ' ' + str(self.code)
 
 class Notification(BaseModel):
     SEND_BY_USER = 'su'

@@ -419,6 +419,65 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (NONE, 'هبچ کدام')
 
     )
+    BANSAR = 'BANSAR'
+    BCDEVE = 'BCDEVE'
+    BCENTR = 'BCENTR'
+    BCITY = 'BCITY'
+    BDAY = 'BDAY'
+    BEDIRA = 'BEDIRA'
+    BEGHTE = 'BEGHTE'
+    BGHARZ = 'BGHARZ'
+    BHEKMA = 'BHEKMA'
+    BINDMI = 'BINDMI'
+    BKARAF = 'BKARAF'
+    BKESHA = 'BKESHA'
+    BMASKA = 'BMASKA'
+    BMELLA = 'BMELLA'
+    BMELLI = 'BMELLI'
+    BPARSI = 'BPARSI'
+    BPASAR = 'BPASAR'
+    BPOST = 'BPOST'
+    BREFAH = 'BREFAH'
+    BSADER = 'BSADER'
+    BSAMAN = 'BSAMAN'
+    BSARMA = 'BSARMA'
+    BSEPAH = 'BSEPAH'
+    BSINA = 'BSINA'
+    BTAT = 'BTAT'
+    BTEJAR = 'BTEJAR'
+    BTOURI = 'BTOURI'
+    BRESALA = 'BRESALA'
+
+    BANK_NAMES = (
+        (BANSAR, 'بانک انصار'),
+        (BCDEVE, 'بانک توسعه تعاون'),
+        (BCENTR, 'بانک مرکزی ایران'),
+        (BCITY, 'بانک شهر'),
+        (BDAY, 'بانک دی'),
+        (BEDIRA, 'بانک  صادرات توسعه ایران'),
+        (BEGHTE, 'بانک اقتصاد نوین'),
+        (BGHARZ, 'بانک قرض الحسنه مهر'),
+        (BHEKMA, 'بانک حکمت ایرانیان'),
+        (BINDMI, 'بانک صنعت و معدن'),
+        (BKARAF, 'بانک کارآفرین'),
+        (BKESHA, 'بانک کشاورزی'),
+        (BMASKA, 'بانک مسکن'),
+        (BMELLA, 'بانک ملت'),
+        (BMELLI, 'بانک  ملی ایران'),
+        (BPARSI, 'بانک پارسیان'),
+        (BPASAR, 'بانک پاسارگاد'),
+        (BPOST, 'پست بانک'),
+        (BREFAH, 'بانک  رفاه کارگران'),
+        (BSADER, 'بانک صادرات'),
+        (BSAMAN, 'بانک سامان'),
+        (BSARMA, 'بانک سرمایه'),
+        (BSEPAH, 'بانک  سپه'),
+        (BSINA, 'بانک سینا'),
+        (BTAT, 'بانک تات'),
+        (BTEJAR, 'بانک تجارت'),
+        (BTOURI, 'بانک  گردشگری'),
+        (BRESALA, 'بانک رسالت'),
+    )
 
     SINGLE = 's'
     MARRIED = 'm'
@@ -478,9 +537,10 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     identity_code = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = jmodels.jDateField(blank=True, null=True)
     date_of_exportation = jmodels.jDateField(blank=True, null=True)
-    location_of_birth = models.CharField(max_length=50, blank=True, null=True)
-    location_of_exportation = models.CharField(max_length=50, blank=True, null=True)
-    sector_of_exportation = models.CharField(max_length=50, blank=True, null=True)
+
+    location_of_birth = models.ForeignKey(City, related_name='location_of_birth', on_delete=models.SET_NULL, blank=True, null=True)
+    location_of_exportation = models.ForeignKey(City, related_name='location_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
+    sector_of_exportation = models.ForeignKey(City, related_name='sector_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
 
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
     number_of_childes = models.IntegerField(default=0)
@@ -500,7 +560,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     university_type = models.CharField(max_length=2, choices=UNIVERSITY_TYPES, blank=True, null=True)
     university_name = models.CharField(max_length=50, blank=True, null=True)
 
-    account_bank_name = models.CharField(max_length=50, blank=True, null=True)
+    account_bank_name = models.CharField(max_length=10, choices=BANK_NAMES, blank=True, null=True)
     account_bank_number = models.CharField(max_length=50, blank=True, null=True)
     bank_cart_number = models.CharField(max_length=50, blank=True, null=True)
     sheba_number = models.CharField(max_length=50, blank=True, null=True)
@@ -685,7 +745,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (TEMPORARY, 'موقت'),
         (HOURLY, 'ساعتی'),
         (CONTRACTUAL, 'پیمانی')
-
     )
 
     CONVENTIONAL = 1
@@ -778,28 +837,25 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (OTHER, 'سایر'),
     )
 
-    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True,
-                                 null=True)
-    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE, blank=True,
-                                  null=True)
-    contract_row = models.ManyToManyField(ContractRow, related_name='workshop_personnel', blank=True)
+    workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
+    personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
 
-    employment_date = jmodels.jDateField(blank=True, null=True)
-    work_title = models.CharField(max_length=100, blank=True, null=True)
+    employment_date = jmodels.jDateField()
+    work_title = models.CharField(max_length=100)
 
-    previous_insurance_history_out_workshop = models.IntegerField(blank=True, null=True)
-    previous_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
-    current_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
-    insurance_history_totality = models.IntegerField(blank=True, null=True)
+    previous_insurance_history_out_workshop = models.IntegerField(default=0)
+    previous_insurance_history_in_workshop = models.IntegerField(default=0)
+    current_insurance_history_in_workshop = models.IntegerField(default=0)
+    insurance_history_totality = models.IntegerField(default=0)
 
     job_position = models.CharField(max_length=100)
-    job_group = models.IntegerField(choices=JOB_GROUP_TYPES, default=OTHERS)
+    job_group = models.IntegerField(choices=JOB_GROUP_TYPES)
     job_location = models.CharField(max_length=100)
-    job_location_status = models.IntegerField(choices=JOB_LOCATION_STATUSES, default=NORMAL)
+    job_location_status = models.IntegerField(choices=JOB_LOCATION_STATUSES)
 
-    employment_type = models.IntegerField(choices=EMPLOYMENTS_TYPES, default=CONVENTIONAL)
-    contract_type = models.IntegerField(choices=CONTRACT_TYPES, default=FULL_TIME)
-    employee_status = models.IntegerField(choices=EMPLOYEE_TYPES, default=NORMAL)
+    employment_type = models.IntegerField(choices=EMPLOYMENTS_TYPES)
+    contract_type = models.IntegerField(choices=CONTRACT_TYPES)
+    employee_status = models.IntegerField(choices=EMPLOYEE_TYPES)
 
     haghe_sanavat_days = models.IntegerField(default=0)
     haghe_sanavat_identify_amount = DECIMAL(default=0)
@@ -1472,7 +1528,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
     )
 
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
-    leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, default=WITHOUT_SALARY)
+    leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES)
     entitlement_leave_type = models.CharField(max_length=2, choices=ENTITLEMENT_LEAVE_TYPES, blank=True, null=True)
     matter73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
@@ -1507,28 +1563,45 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
         return round(hour)
 
     def save(self, *args, **kwargs):
-        if self.leave_type == 'm':
+        if self.leave_type == 'e':
+            if not self.entitlement_leave_type:
+                raise ValidationError('نوع مرخصی استحقاقی را مشخص کنید')
+            if self.entitlement_leave_type == 'h':
+                self.from_date, self.to_date, = None, None
+                if not self.from_hour or not self.to_hour or not self.date:
+                    raise ValidationError('برای مرخصی ساعتی تاریخ، ساعت شروع و پایان  را وارد کنید')
+            elif self.entitlement_leave_type == 'd':
+                self.date, self.from_hour, self.to_hour = None, None, None
+                if not self.from_date or not self.to_date:
+                    raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
+
+        elif self.leave_type == 'm':
+            if not self.matter73_leave_type:
+                raise ValidationError('دلیل مرخصی ماده 73 را مشخص کنید')
+            if not self.to_date or not self.from_date:
+                raise ValidationError(' تاریح شروع و پایان را وارد کنید')
             duration = datetime.timedelta(days=2)
             if self.to_date.day - self.from_date.day > 2:
                 self.to_date = self.from_date + duration
-        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
-            self.from_date, self.to_date, = None, None
-            if not self.from_hour or not self.to_hour or not self.date:
-                raise ValidationError('برای مرخصی ساعتی ساعت شروع و پایان و تاریخ را وارد کنید')
-        elif self.leave_type == 'e' and self.entitlement_leave_type == 'd':
-            self.date, self.from_hour, self.to_hour = None, None, None
-            if not self.from_date or not self.to_date:
-                raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
+
         elif self.leave_type == 'i':
             self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید')
             if not self.cause_of_incident:
                 raise ValidationError('برای مرخصی استعلاجی علت حادثه را وارد کنید')
+
         elif self.leave_type == 'w' or self.leave_type == 'a':
             self.from_hour, self.to_hour, self.date = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError(' تاریح شروع و پایان را وارد کنید')
+
+        if self.from_date.__gt__(self.to_date):
+            raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
+
+        if self.from_hour.__gt__(self.to_hour):
+            raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
+
         self.time_period = self.final_by_day
         super().save(*args, **kwargs)
 
@@ -2044,7 +2117,7 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
     )
 
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='mission', on_delete=models.CASCADE)
-    mission_type = models.CharField(max_length=2, choices=MISSION_TYPES, default=DAILY)
+    mission_type = models.CharField(max_length=2, choices=MISSION_TYPES)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
@@ -2099,6 +2172,13 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
             self.date, self.from_hour, self.to_hour = None, None, None
             if not self.from_date or not self.to_date:
                 raise ValidationError('برای ماموریت روزانه تاریح شروع و پایان را وارد کنید')
+
+        if self.from_date and self.to_date and self.from_date.__gt__(self.to_date):
+            raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
+
+        if self.from_hour and self.to_hour and self.from_hour.__gt__(self.to_hour):
+            raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
+
         self.time_period = self.final_by_day
         super().save(*args, **kwargs)
 
