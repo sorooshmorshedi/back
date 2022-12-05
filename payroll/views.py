@@ -216,11 +216,13 @@ class PersonnelApiView(APIView):
 
     def get(self, request):
         company = request.user.active_company.pk
-        query = Personnel.objects.filter(Q(company=company) & Q(is_personnel_active=True) & Q(is_personnel_verified=True))
+        query = Personnel.objects.filter(Q(company=company) & Q(is_personnel_active=True) &
+                                         Q(is_personnel_verified=True))
         serializers = PersonnelSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
@@ -531,6 +533,12 @@ class PersonnelVerifyApi(APIView):
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
+            same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) &
+                                                 Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
+            print(same_code)
+            if len(same_code) > 0:
+                self.validate_status = False
+                raise ValidationError("کد ملی تکراری می باشد")
         if not personnel.marital_status:
             self.validate_status = False
             raise ValidationError("وضعیت تاهل را وارد کنید")
@@ -554,6 +562,16 @@ class PersonnelVerifyApi(APIView):
         if personnel.postal_code:
             if len(personnel.postal_code) > 10 or len(personnel.postal_code) < 10:
                 raise ValidationError("طول کد پستی باید 10 رقم باشد")
+        if personnel.city_phone_code:
+            if len(personnel.city_phone_code) != 3:
+                self.validate_status = False
+                raise ValidationError("کد تلفن شهر باید سه رقمی باشد")
+            if personnel.city_phone_code[0] != '0':
+                self.validate_status = False
+                raise ValidationError("کد تلفن شهر باید با صفر شروع شود")
+        if personnel.phone_number and len(personnel.phone_number) != 8:
+            self.validate_status = False
+            raise ValidationError(" تلفن شهر باید 8 رقمی باشد")
         if not personnel.mobile_number_1:
             self.validate_status = False
             raise ValidationError("شماره موبایل را وارد کنید")
@@ -581,8 +599,11 @@ class PersonnelVerifyApi(APIView):
             self.validate_status = False
             raise ValidationError("َشماره بیمه را وارد کنید")
         if personnel.insurance_code:
-            if len(personnel.insurance_code) > 8 or len(personnel.insurance_code) < 8:
-                raise ValidationError("طول َشماره بیمه باید 8 رقم باشد")
+            if len(personnel.insurance_code) > 10 or len(personnel.insurance_code) < 10:
+                raise ValidationError("طول شماره بیمه باید 10 رقم باشد")
+            if personnel.insurance_code[:2] != '00':
+                raise ValidationError(" شماره بیمه باید با 00 شروع شود")
+
         if not personnel.degree_education:
             self.validate_status = False
             raise ValidationError("مدرک تحصیلی را وارد کنید")
@@ -644,6 +665,11 @@ class PersonnelFamilyVerifyApi(APIView):
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
+            same_code = PersonnelFamily.objects.filter(Q(national_code=personnel.national_code) &
+                                                       Q(personnel_id=personnel.personnel) & Q(is_verified=True))
+            if len(same_code) > 0:
+                self.validate_status = False
+                raise ValidationError("کد ملی تکراری می باشد")
         if not personnel.date_of_birth:
             self.validate_status = False
             raise ValidationError("تاریخ تولد را وارد کنید")
@@ -659,10 +685,17 @@ class PersonnelFamilyVerifyApi(APIView):
         if not personnel.physical_condition:
             self.validate_status = False
             raise ValidationError("وضعییت جسمی را وارد کنید")
+        same = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel) & Q(relative=personnel.relative) &
+                                              Q(is_verified=True))
+        if len(same) != 0:
+            self.validate_status = False
+            raise ValidationError("این نسبت قبلا ثبت شده")
+
         if self.validate_status:
             personnel.is_verified = True
             personnel.save()
             return Response({'status': 'personnel family verify done'}, status=status.HTTP_200_OK)
+
         return Response({'status': 'personnel family verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
 
 

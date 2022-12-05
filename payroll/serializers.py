@@ -1,3 +1,5 @@
+from attr import fields
+
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
     LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem
 from rest_framework import serializers
@@ -48,10 +50,17 @@ class PersonnelSerializer(serializers.ModelSerializer):
     degree_education_display = serializers.CharField(source='get_degree_education_display', read_only=True)
     university_type_display = serializers.CharField(source='get_university_type_display', read_only=True)
     verified = serializers.BooleanField(source='is_personnel_verified', read_only=True)
+    bank_name = serializers.CharField(source='get_account_bank_name_display', read_only=True)
+    is_insurance = serializers.CharField(source='insurance_display', read_only=True)
+    is_verify = serializers.CharField(source='verify_display', read_only=True)
+    is_active = serializers.CharField(source='active_display', read_only=True)
+    birth_city = serializers.CharField(source='location_of_birth', read_only=True)
+    exportation_city = serializers.CharField(source='location_of_exportation', read_only=True)
+    exportation_sector = serializers.CharField(source='sector_of_exportation', read_only=True)
 
     class Meta:
         model = Personnel
-        exclude = ('is_personnel_verified', )
+        fields = '__all__'
 
 
 class WorkshopPersonnelSerializer(serializers.ModelSerializer):

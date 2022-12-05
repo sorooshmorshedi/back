@@ -73,7 +73,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=10, validators=[
-        RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')], blank=True, null=True)
+        RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')])
     employer_insurance_contribution = models.IntegerField(default=3, blank=True, null=True)
     branch_code = models.CharField(max_length=100, blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
@@ -346,7 +346,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     to_date = jmodels.jDateField(blank=True, null=True)
     topic = models.CharField(max_length=255, blank=True, null=True)
 
-    status = models.CharField(max_length=1, choices=ACTIVE_TYPE, default=NO_ACTIVE)
+    status = models.CharField(max_length=1, choices=ACTIVE_TYPE)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
     assignor_national_code = models.CharField(max_length=20, validators=[is_shenase_meli], blank=True, null=True)
     assignor_workshop_code = models.IntegerField(default=0)
@@ -378,15 +378,31 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     def save(self, *args, **kwargs):
         if self.from_date and self.to_date:
-            if self.from_date >= self.to_date:
+            if self.from_date > self.to_date:
                 raise ValidationError('تاریخ شروع قرارداد نمیتواند بزرگتر یا مساوی تاریخ پایان باشد')
         elif self.from_date and not self.to_date:
             raise ValidationError('تاریخ پایان را وارد کنید')
         elif self.to_date and not self.from_date:
             raise ValidationError('تاریخ شروع را وارد کنید')
+        elif self.to_date and not self.from_date:
+            raise ValidationError('تاریخ شروع را وارد کنید')
 
         if not self.contract_row:
             raise ValidationError('ردیف پیمان را وارد کنید')
+        if self.contract_row and len(self.contract_row) < 3:
+            row = '0' * (3 - len(self.contract_row))
+            contract_row = row + self.contract_row
+            self.contract_row = contract_row
+        if not self.contract_number:
+            raise ValidationError('شماره قرارداد را وارد کنید')
+        if not self.assignor_name:
+            raise ValidationError('نام واگذارکننده را وارد کنید')
+        if not self.assignor_national_code:
+            raise ValidationError('شناسه ملی واگذارکننده را وارد کنید')
+        if not self.assignor_workshop_code:
+            raise ValidationError('کد کارگاه واگذارکننده را وارد کنید')
+        if not self.status:
+            raise ValidationError('وضعییت را وارد کنید')
         super().save(*args, **kwargs)
 
 
@@ -525,12 +541,12 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     father_name = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=50, blank=True, null=True)
-    nationality = models.IntegerField(choices=NATIONALITY_TYPE, default=1)
+    nationality = models.IntegerField(choices=NATIONALITY_TYPE, blank=True, null=True)
 
     personnel_code = models.CharField(max_length=10, blank=True, null=True)
 
-    gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
-    military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
+    gender = models.CharField(max_length=1, choices=GENDER_TYPE, blank=True, null=True)
+    military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, blank=True, null=True)
 
     national_code = models.CharField(max_length=15, blank=True, null=True)
 
@@ -542,7 +558,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     location_of_exportation = models.ForeignKey(City, related_name='location_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
     sector_of_exportation = models.ForeignKey(City, related_name='sector_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
 
-    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
+    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, blank=True, null=True)
     number_of_childes = models.IntegerField(default=0)
 
     city_phone_code = models.CharField(max_length=50, blank=True, null=True)
@@ -553,9 +569,9 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     postal_code = models.CharField(max_length=255, null=True, blank=True)
 
     insurance = models.BooleanField(default=False)
-    insurance_code = models.IntegerField(blank=True, null=True)
+    insurance_code = models.CharField(max_length=255, blank=True, null=True)
 
-    degree_education = models.IntegerField(choices=DEGREE_TYPE, default=DIPLOMA)
+    degree_education = models.IntegerField(choices=DEGREE_TYPE, blank=True, null=True)
     field_of_study = models.CharField(max_length=100, null=True, blank=True)
     university_type = models.CharField(max_length=2, choices=UNIVERSITY_TYPES, blank=True, null=True)
     university_name = models.CharField(max_length=50, blank=True, null=True)
@@ -595,6 +611,27 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             return 2
         else:
             return 5
+
+    @property
+    def insurance_display(self):
+        if self.insurance:
+            return 'دارد'
+        else:
+            return 'ندارد'
+
+    @property
+    def verify_display(self):
+        if self.is_personnel_verified:
+            return 'نهایی'
+        else:
+            return 'اولیه'
+
+    @property
+    def active_display(self):
+        if self.is_personnel_active:
+            return 'فعال'
+        else:
+            return 'غیر فعال'
 
     @property
     def system_code(self):
@@ -686,14 +723,14 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     national_code = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = jmodels.jDateField(blank=True, null=True)
-    relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, default=SPOUSE)
-    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, default=SINGLE)
-    military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, default=NOT_DONE)
-    study_status = models.CharField(max_length=1, choices=STUDY_TYPE, default=STUDENT)
-    physical_condition = models.CharField(max_length=1, choices=PHYSICAL_TYPE, default=HEALTHY)
+    relative = models.CharField(max_length=1, choices=RELATIVE_TYPE, blank=True, null=True)
+    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, blank=True, null=True)
+    military_service = models.CharField(max_length=1, choices=MILITARY_SERVICE_STATUS, blank=True, null=True)
+    study_status = models.CharField(max_length=1, choices=STUDY_TYPE, blank=True, null=True)
+    physical_condition = models.CharField(max_length=1, choices=PHYSICAL_TYPE, blank=True, null=True)
 
     is_verified = models.BooleanField(default=False, null=True, blank=True)
-    gender = models.CharField(max_length=1, choices=GENDER_TYPE, default=MALE)
+    gender = models.CharField(max_length=1, choices=GENDER_TYPE, blank=True, null=True)
     is_active = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):

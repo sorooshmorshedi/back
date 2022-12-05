@@ -8,6 +8,7 @@ from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonn
     LoanItem
 
 
+
 class WorkshopFilter(filters.FilterSet):
     class Meta:
         model = Workshop
@@ -19,7 +20,8 @@ class WorkshopFilter(filters.FilterSet):
             'employer_name': BASE_FIELD_FILTERS,
             'address': ['icontains'],
             'employer_insurance_contribution': ('exact',),
-            'branch_code': ('exact',),
+            'postal_code': BASE_FIELD_FILTERS,
+            'branch_code': BASE_FIELD_FILTERS,
             'branch_name': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
@@ -67,7 +69,8 @@ class PersonnelFilter(filters.FilterSet):
             'account_bank_name': BASE_FIELD_FILTERS,
             'account_bank_number': ('exact',),
             'sheba_number': ('exact',),
-            'is_personnel_active': BASE_FIELD_FILTERS,
+            'is_personnel_active': ('exact',),
+            'is_personnel_verified': ('exact',),
 
         }
         filter_overrides = {
