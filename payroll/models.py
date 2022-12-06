@@ -340,19 +340,22 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.CharField(max_length=255, blank=True, null=True)
-    contract_number = models.IntegerField(default=0)
+    contract_number = models.IntegerField(blank=True, null=True)
     registration_date = jmodels.jDateField(blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
     topic = models.CharField(max_length=255, blank=True, null=True)
 
-    status = models.CharField(max_length=1, choices=ACTIVE_TYPE)
+    status = models.BooleanField(default=False)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
-    assignor_national_code = models.CharField(max_length=20, validators=[is_shenase_meli], blank=True, null=True)
-    assignor_workshop_code = models.IntegerField(default=0)
+    assignor_national_code = models.CharField(max_length=20, blank=True, null=True)
+    assignor_workshop_code = models.IntegerField(blank=True, null=True)
 
-    contract_initial_amount = DECIMAL(default=0)
+    contract_initial_amount = DECIMAL(blank=True, null=True)
     branch = models.CharField(max_length=100, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+
+    use_in_insurance_list = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         ordering = ['-pk']
@@ -377,32 +380,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
         return str(self.contract_row) + ' در کارگاه ' + self.workshop.name
 
     def save(self, *args, **kwargs):
-        if self.from_date and self.to_date:
-            if self.from_date > self.to_date:
-                raise ValidationError('تاریخ شروع قرارداد نمیتواند بزرگتر یا مساوی تاریخ پایان باشد')
-        elif self.from_date and not self.to_date:
-            raise ValidationError('تاریخ پایان را وارد کنید')
-        elif self.to_date and not self.from_date:
-            raise ValidationError('تاریخ شروع را وارد کنید')
-        elif self.to_date and not self.from_date:
-            raise ValidationError('تاریخ شروع را وارد کنید')
-
-        if not self.contract_row:
-            raise ValidationError('ردیف پیمان را وارد کنید')
-        if self.contract_row and len(self.contract_row) < 3:
-            row = '0' * (3 - len(self.contract_row))
-            contract_row = row + self.contract_row
-            self.contract_row = contract_row
-        if not self.contract_number:
-            raise ValidationError('شماره قرارداد را وارد کنید')
-        if not self.assignor_name:
-            raise ValidationError('نام واگذارکننده را وارد کنید')
-        if not self.assignor_national_code:
-            raise ValidationError('شناسه ملی واگذارکننده را وارد کنید')
-        if not self.assignor_workshop_code:
-            raise ValidationError('کد کارگاه واگذارکننده را وارد کنید')
-        if not self.status:
-            raise ValidationError('وضعییت را وارد کنید')
         super().save(*args, **kwargs)
 
 
@@ -437,7 +414,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     )
     BANSAR = 'BANSAR'
     BCDEVE = 'BCDEVE'
-    BCENTR = 'BCENTR'
     BCITY = 'BCITY'
     BDAY = 'BDAY'
     BEDIRA = 'BEDIRA'
@@ -463,17 +439,25 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     BTEJAR = 'BTEJAR'
     BTOURI = 'BTOURI'
     BRESALA = 'BRESALA'
+    BAYAN = 'BAYAN'
+    CHART = 'CHART'
+    EURO = 'CHART'
+    KHAVA = 'KHAVA'
+    VENE = 'VENE'
+    ESLA = 'ESLA'
+    FUTU = 'FUTU'
+    CASP = 'CASP'
+    TOSE = 'TOSE'
+    MELAL = 'MELAL'
+    NOR = 'NOR'
 
     BANK_NAMES = (
-        (BANSAR, 'بانک انصار'),
         (BCDEVE, 'بانک توسعه تعاون'),
-        (BCENTR, 'بانک مرکزی ایران'),
         (BCITY, 'بانک شهر'),
         (BDAY, 'بانک دی'),
-        (BEDIRA, 'بانک  صادرات توسعه ایران'),
+        (BEDIRA, 'بانک توسعه صادرات  ایران'),
         (BEGHTE, 'بانک اقتصاد نوین'),
-        (BGHARZ, 'بانک قرض الحسنه مهر'),
-        (BHEKMA, 'بانک حکمت ایرانیان'),
+        (BGHARZ, 'بانک قرض الحسنه مهر ایران'),
         (BINDMI, 'بانک صنعت و معدن'),
         (BKARAF, 'بانک کارآفرین'),
         (BKESHA, 'بانک کشاورزی'),
@@ -492,7 +476,18 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (BTAT, 'بانک تات'),
         (BTEJAR, 'بانک تجارت'),
         (BTOURI, 'بانک  گردشگری'),
-        (BRESALA, 'بانک رسالت'),
+        (BRESALA, 'بانک قرض الحسنه رسالت'),
+        (BAYAN, 'بانک آینده'),
+        (CHART, 'استاندارد چارترد'),
+        (EURO, 'بانک تجاری ایران و اروپا'),
+        (KHAVA, 'بانک خاورمیانه'),
+        (VENE, 'بانک مشترک ایران - ونزوئلا'),
+        (ESLA, 'تعاون اسلامی برای سرمایه‌گذاری (مصرف التعاون الاسلامی للاستثمار)'),
+        (FUTU, 'فیوچر بانک (المستقبل)'),
+        (CASP, 'مؤسسه اعتباری غیربانکی کاسپین '),
+        (TOSE, 'مؤسسه اعتباری غیربانکی توسعه '),
+        (MELAL, 'مؤسسه اعتباری غیربانکی ملل '),
+        (NOR, 'مؤسسه اعتباری غیربانکی نور '),
     )
 
     SINGLE = 's'
@@ -555,6 +550,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     date_of_exportation = jmodels.jDateField(blank=True, null=True)
 
     location_of_birth = models.ForeignKey(City, related_name='location_of_birth', on_delete=models.SET_NULL, blank=True, null=True)
+    location_of_foreign_birth = models.CharField(max_length=255, null=True, blank=True)
     location_of_exportation = models.ForeignKey(City, related_name='location_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
     sector_of_exportation = models.ForeignKey(City, related_name='sector_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -565,6 +561,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     mobile_number_1 = models.CharField(max_length=50, blank=True, null=True)
     mobile_number_2 = models.CharField(max_length=50, blank=True, null=True)
+    city = models.ForeignKey(City, related_name='city_of_personnel', on_delete=models.SET_NULL, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
 
@@ -3711,7 +3708,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.real_worktime -= self.cumulative_illness
 
             self.total_payment = round(self.get_total_payment)
-
+            if self.contract_row:
+                self.contract_row.use_in_insurance_list = True
         self.calculate_payment = False
         super().save(*args, **kwargs)
 

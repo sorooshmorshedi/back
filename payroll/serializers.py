@@ -86,7 +86,6 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
 
 
 class ContractRowSerializer(serializers.ModelSerializer):
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     name = serializers.CharField(source='title', read_only=True)
 

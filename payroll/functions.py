@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 
 import json
 from pprint import pprint
@@ -8,6 +7,7 @@ from django.apps import apps
 from django.core.management import CommandParser
 from django.core.management.base import BaseCommand
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 from companies.models import FinancialYear
 from distributions.models import Path
@@ -72,7 +72,7 @@ class Command(BaseCommand):
 def is_shenase_meli(input_code):
     code = str(input_code)
     if len(code) != 11:
-        raise ValidationError("َشناسه ملی باید یازده رقم باشد")
+        raise ValidationError("شناسه ملی باید یازده رقم باشد")
     control_number = int(code[10])
     tens_digit_plus_two = int(code[9]) + 2
     tens_coefficients = (29, 27, 23, 19, 17)

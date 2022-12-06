@@ -1,4 +1,6 @@
 import django_filters
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django_filters import rest_framework as filters
 from django_jalali.db import models as jmodels
 
@@ -95,6 +97,8 @@ class PersonnelFamilyFilter(filters.FilterSet):
             'military_service': ('exact',),
             'study_status': ('exact',),
             'physical_condition': ('exact',),
+            'is_active': ('exact',),
+            'is_verified': ('exact',),
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -163,12 +167,13 @@ class ContractRowFilter(filters.FilterSet):
             'registration_date': BASE_FIELD_FILTERS,
             'from_date': BASE_FIELD_FILTERS,
             'to_date': BASE_FIELD_FILTERS,
-            'status': BASE_FIELD_FILTERS,
             'assignor_name': BASE_FIELD_FILTERS,
             'assignor_national_code': ('exact',),
             'assignor_workshop_code': ('exact',),
             'contract_initial_amount': BASE_FIELD_FILTERS,
             'branch': BASE_FIELD_FILTERS,
+            'status': ('exact',),
+            'is_verified': ('exact',),
         }
         filter_overrides = {
             jmodels.jDateField: {

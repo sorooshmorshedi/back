@@ -12,6 +12,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from helpers.models import is_valid_melli_code
+from payroll.functions import is_shenase_meli
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
     LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
@@ -51,7 +52,7 @@ class WorkshopContractRowsDetail(APIView):
     permission_basename = 'contract_row'
     def get_object(self, pk):
         try:
-            return ContractRow.objects.filter(workshop=pk)
+            return ContractRow.objects.filter(Q(workshop=pk) & Q(status=True) & Q(is_verified=True))
         except ContractRow.DoesNotExist:
             raise Http404
 
@@ -361,6 +362,68 @@ class ContractRowDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class ContractRowVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contracct_row'
+    validate_message = ''
+    validate_status = True
+    def get(self, request, pk):
+        contract_row = ContractRow.objects.get(pk=pk)
+        if not contract_row.contract_row:
+            raise ValidationError('ردیف پیمان را وارد کنید')
+        if contract_row.contract_row and len(contract_row.contract_row) < 3:
+            row = '0' * (3 - len(contract_row.contract_row))
+            new_row = row + contract_row.contract_row
+            contract_row.contract_row = new_row
+        if not contract_row.contract_number:
+            self.validate_status = False
+            raise ValidationError('شماره قرارداد را وارد کنید')
+        if not contract_row.registration_date:
+            self.validate_status = False
+            raise ValidationError('تاریخ قرارداد را وارد کنید')
+        if not contract_row.from_date:
+            self.validate_status = False
+            raise ValidationError('تاریخ شروع را وارد کنید')
+        if not contract_row.to_date:
+            self.validate_status = False
+            raise ValidationError('تاریخ پایان را وارد کنید')
+        if contract_row.from_date > contract_row.to_date:
+            self.validate_status = False
+            raise ValidationError('تاریخ شروع قرارداد نمیتواند بزرگتر تاریخ پایان باشد')
+        if not contract_row.assignor_national_code:
+            self.validate_status = False
+            raise ValidationError('شناسه ملی واگذارکننده را وارد کنید')
+        if contract_row.assignor_national_code:
+            is_shenase_meli(contract_row.assignor_national_code)
+        if not contract_row.assignor_name:
+            self.validate_status = False
+            raise ValidationError('نام واگذارکننده را وارد کنید')
+        if not contract_row.assignor_workshop_code:
+            self.validate_status = False
+            raise ValidationError('کد کارگاه واگذارکننده را وارد کنید')
+        if not contract_row.contract_initial_amount:
+            self.validate_status = False
+            raise ValidationError('مبلغ اولیه قرارداد را وارد کنید')
+        if not contract_row.status:
+            self.validate_status = False
+            raise ValidationError('وضعییت را وارد کنید')
+        if self.validate_status:
+            contract_row.is_verified = True
+            contract_row.save()
+            return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+        return Response({'وضعییت': 'ثبت نهایی ردیف پیمان رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+
+class ContractRowUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+    def get(self, request, pk):
+        personnel = ContractRow.objects.get(pk=pk)
+        personnel.is_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+
 class ContractApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'contract'
@@ -515,46 +578,51 @@ class PersonnelVerifyApi(APIView):
             raise ValidationError("ملیت را وارد کنید")
         if personnel.nationality == 1:
             personnel.country = 'ایران'
-            personnel.military_service = 'x'
         if not personnel.country:
             self.validate_status = False
             raise ValidationError("کشور را وارد کنید")
         if not personnel.gender:
             self.validate_status = False
             raise ValidationError("جنسیت را وارد کنید")
-        if personnel.gender == 'm' and not personnel.military_service:
+        if personnel.gender == 'm' and not personnel.military_service and personnel.nationality == 1:
             self.validate_status = False
             raise ValidationError("وضعییت خدمت سربازی را وارد کنید")
-        if not personnel.identity_code:
+        if not personnel.identity_code and personnel.nationality == 1:
             self.validate_status = False
             raise ValidationError("شماره شناسنامه را وارد کنید")
         if not personnel.national_code:
             self.validate_status = False
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
-            is_valid_melli_code(personnel.national_code)
             same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) &
                                                  Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
-            print(same_code)
-            if len(same_code) > 0:
+            if personnel.nationality == 1:
+                is_valid_melli_code(personnel.national_code)
+                if len(same_code) > 0:
+                    self.validate_status = False
+                    raise ValidationError("کد ملی تکراری می باشد")
+            if personnel.nationality == 2 and len(same_code) > 0:
                 self.validate_status = False
-                raise ValidationError("کد ملی تکراری می باشد")
+                raise ValidationError("کد فراگیر تابعیت تکراری می باشد")
         if not personnel.marital_status:
             self.validate_status = False
             raise ValidationError("وضعیت تاهل را وارد کنید")
         if not personnel.date_of_birth:
             self.validate_status = False
             raise ValidationError("تاریخ تولد را وارد کنید")
-        if not personnel.date_of_exportation:
+        if not personnel.date_of_exportation and personnel.nationality == 1:
             self.validate_status = False
             raise ValidationError("تاریخ صدور شناسنامه را وارد کنید")
-        if not personnel.location_of_birth:
+        if not personnel.location_of_birth and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("محل تولد شناسنامه را وارد کنید")
-        if not personnel.location_of_exportation:
+            raise ValidationError("محل تولد  را وارد کنید")
+        if not personnel.location_of_foreign_birth and personnel.nationality == 2:
+            self.validate_status = False
+            raise ValidationError("محل تولد  را وارد کنید")
+        if not personnel.location_of_exportation and personnel.nationality == 1:
             self.validate_status = False
             raise ValidationError("محل صدور شناسنامه را وارد کنید")
-        if not personnel.address:
+        if not personnel.address :
             self.validate_status = False
             raise ValidationError("آدرس را وارد کنید")
         if not personnel.postal_code:
@@ -643,8 +711,8 @@ class PersonnelVerifyApi(APIView):
         if self.validate_status:
             personnel.is_personnel_verified = True
             personnel.save()
-            return Response({'status': 'personnel verify done'}, status=status.HTTP_200_OK)
-        return Response({'status': 'personnel verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({'status': 'ثبت نهایی پرسنل انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'status': 'ثبت نهایی پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
 
 
 class PersonnelFamilyVerifyApi(APIView):
@@ -685,18 +753,18 @@ class PersonnelFamilyVerifyApi(APIView):
         if not personnel.physical_condition:
             self.validate_status = False
             raise ValidationError("وضعییت جسمی را وارد کنید")
-        same = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel) & Q(relative=personnel.relative) &
-                                              Q(is_verified=True))
-        if len(same) != 0:
-            self.validate_status = False
-            raise ValidationError("این نسبت قبلا ثبت شده")
+        if personnel.relative == 'f' or personnel.relative == 'm':
+            same = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel) & Q(relative=personnel.relative) &
+                                                  Q(is_verified=True))
+            if len(same) != 0:
+                self.validate_status = False
+                raise ValidationError("این نسبت قبلا ثبت شده")
 
         if self.validate_status:
             personnel.is_verified = True
             personnel.save()
-            return Response({'status': 'personnel family verify done'}, status=status.HTTP_200_OK)
-
-        return Response({'status': 'personnel family verify failed'}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({'status': 'ثبت نهایی خانواده پرسنل انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'status': 'ثبت نهایی خانواده پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
 
 
 class PersonnelFamilyUnVerifyApi(APIView):

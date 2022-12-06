@@ -25,7 +25,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
     TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
     ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, PersonnelUnVerifyApi, \
-    PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi
+    PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -66,6 +66,8 @@ urlpatterns = [
 
     path('contract/row/', ContractRowApiView.as_view(), name='contractRowApi'),
     path('contract/row/<int:pk>/', ContractRowDetail.as_view(), name='contractRowDetail'),
+    path('contract/row/verify/<int:pk>/', ContractRowVerifyApi.as_view(), name='contractRowVerifyApi'),
+    path('contract/row/unverify/<int:pk>/', ContractRowUnVerifyApi.as_view(), name='contractRowUnVerifyApi'),
 
     path('contract/', ContractApiView.as_view(), name='contractApi'),
     path('contract/<int:pk>/', ContractDetail.as_view(), name='contractDetail'),
