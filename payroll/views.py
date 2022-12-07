@@ -696,7 +696,7 @@ class PersonnelVerifyApi(APIView):
             raise ValidationError("شماره حساب حقوق را وارد کنید")
         if not personnel.bank_cart_number:
             raise ValidationError("شماره کارت حقوق را وارد کنید")
-        if personnel.bank_cart_number and len(personnel.sheba_number) != 16:
+        if personnel.bank_cart_number and len(personnel.bank_cart_number) != 16:
             raise ValidationError("طول شماره کارت باید 16 رقم باشد")
         if not personnel.sheba_number:
             self.validate_status = False

@@ -650,8 +650,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             self.university_name = None
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.full_name + ' در ' + self.company.name
 
 
 class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
