@@ -1,6 +1,4 @@
 import jdatetime
-from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db.models import Q
 from django.http import Http404
 from rest_framework.exceptions import ValidationError
@@ -698,17 +696,13 @@ class PersonnelVerifyApi(APIView):
             raise ValidationError("شماره حساب حقوق را وارد کنید")
         if not personnel.bank_cart_number:
             raise ValidationError("شماره کارت حقوق را وارد کنید")
-        if personnel.bank_cart_number:
-            cart_number_validator = RegexValidator(regex='^.{16}$', message='طول شماره کارت باید 16 رقم باشد',
-                                                   code='nomatch')
-            cart_number_validator(personnel.bank_cart_number)
+        if personnel.bank_cart_number and len(personnel.sheba_number) != 16:
+            raise ValidationError("طول شماره کارت باید 16 رقم باشد")
         if not personnel.sheba_number:
             self.validate_status = False
             raise ValidationError("شماره شبا حقوق را وارد کنید")
-        if personnel.sheba_number:
-            sheba_validator = RegexValidator(regex='^.{24}$', message='طول شماره شبا باید 24 رقم باشد',
-                                             code='nomatch')
-            sheba_validator(personnel.sheba_number)
+        if personnel.sheba_number and len(personnel.sheba_number) != 24:
+            raise ValidationError("طول شماره شبا باید 24 رقم باشد")
         if self.validate_status:
             personnel.is_personnel_verified = True
             personnel.save()
