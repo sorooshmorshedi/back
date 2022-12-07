@@ -126,6 +126,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     save_absence_limit = models.BooleanField(default=True)
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
+    is_active = models.BooleanField(default=True)
+
+
     @property
     def workshop_title(self):
         return self.name + ' ' + str(self.code)
@@ -374,6 +377,9 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return str(self.contract_row) + ' در ' + self.workshop.workshop_title
+    @property
+    def round_amount(self):
+        return round(self.contract_initial_amount)
 
     @property
     def title(self):
@@ -409,7 +415,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (DONE, 'انجام داده'),
         (NOT_DONE, 'انجام نداده'),
         (EXEMPT, 'معاف'),
-        (NONE, 'هبچ کدام')
+        (NONE, 'هیچ کدام')
 
     )
     BANSAR = 'BANSAR'
@@ -435,13 +441,12 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     BSARMA = 'BSARMA'
     BSEPAH = 'BSEPAH'
     BSINA = 'BSINA'
-    BTAT = 'BTAT'
     BTEJAR = 'BTEJAR'
     BTOURI = 'BTOURI'
     BRESALA = 'BRESALA'
     BAYAN = 'BAYAN'
     CHART = 'CHART'
-    EURO = 'CHART'
+    EURO = 'EURO'
     KHAVA = 'KHAVA'
     VENE = 'VENE'
     ESLA = 'ESLA'
@@ -450,6 +455,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     TOSE = 'TOSE'
     MELAL = 'MELAL'
     NOR = 'NOR'
+    ZAMIN = 'ZAMIN'
 
     BANK_NAMES = (
         (BCDEVE, 'بانک توسعه تعاون'),
@@ -473,7 +479,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (BSARMA, 'بانک سرمایه'),
         (BSEPAH, 'بانک  سپه'),
         (BSINA, 'بانک سینا'),
-        (BTAT, 'بانک تات'),
         (BTEJAR, 'بانک تجارت'),
         (BTOURI, 'بانک  گردشگری'),
         (BRESALA, 'بانک قرض الحسنه رسالت'),
@@ -482,12 +487,14 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         (EURO, 'بانک تجاری ایران و اروپا'),
         (KHAVA, 'بانک خاورمیانه'),
         (VENE, 'بانک مشترک ایران - ونزوئلا'),
-        (ESLA, 'تعاون اسلامی برای سرمایه‌گذاری (مصرف التعاون الاسلامی للاستثمار)'),
+        (ESLA, 'تعاون اسلامی برای سرمایه‌گذاری'),
         (FUTU, 'فیوچر بانک (المستقبل)'),
         (CASP, 'مؤسسه اعتباری غیربانکی کاسپین '),
         (TOSE, 'مؤسسه اعتباری غیربانکی توسعه '),
         (MELAL, 'مؤسسه اعتباری غیربانکی ملل '),
         (NOR, 'مؤسسه اعتباری غیربانکی نور '),
+        (ZAMIN, 'بانک ایران زمین'),
+
     )
 
     SINGLE = 's'
@@ -710,7 +717,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     PHYSICAL_TYPE = (
         (HEALTHY, 'سالم'),
         (PATIENT, 'بیمار'),
-        (MAIM, 'نفص عضو')
+        (MAIM, 'نقض عضو')
     )
 
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)

@@ -210,7 +210,7 @@ class City(BaseModel):
             ('deleteOwn.city', 'حذف شهر های خود'),
         )
     def __str__(self):
-        return self.name + ' ' + str(self.code)
+        return self.name
 
 class Notification(BaseModel):
     SEND_BY_USER = 'su'
