@@ -729,8 +729,10 @@ class PersonnelFamilyVerifyApi(APIView):
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
-            same_code = PersonnelFamily.objects.filter(Q(company=company) & Q(personnel_id=personnel.personnel)
-                                                       & Q(is_verified=True))
+            print(personnel.personnel.id)
+            relative = Personnel.objects.get(id=personnel.personnel.id)
+            same_code = PersonnelFamily.objects.filter(Q(personnel_id=personnel.personnel.id)
+                                                       & Q(is_verified=True) & Q(national_code=relative.national_code))
             same_with_personnel = Personnel.objects.filter(national_code=personnel.national_code)
             if len(same_code) > 0:
                 self.validate_status = False
