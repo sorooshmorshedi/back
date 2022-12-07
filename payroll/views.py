@@ -564,6 +564,7 @@ class PersonnelVerifyApi(APIView):
     validate_message = ''
     validate_status = True
     def get(self, request, pk):
+        company = request.user.active_company.pk
         personnel = Personnel.objects.get(pk=pk)
         if personnel.gender == 'f':
             personnel.military_service = 'x'
@@ -594,7 +595,7 @@ class PersonnelVerifyApi(APIView):
             self.validate_status = False
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
-            same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) &
+            same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) & Q(company=company) &
                                                  Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
             if personnel.nationality == 1:
                 is_valid_melli_code(personnel.national_code)
@@ -721,6 +722,7 @@ class PersonnelFamilyVerifyApi(APIView):
     validate_message = ''
     validate_status = True
     def get(self, request, pk):
+        company = request.user.active_company.pk
         personnel = PersonnelFamily.objects.get(pk=pk)
         if not personnel.relative:
             self.validate_status = False
@@ -733,11 +735,15 @@ class PersonnelFamilyVerifyApi(APIView):
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
-            same_code = PersonnelFamily.objects.filter(Q(national_code=personnel.national_code) &
-                                                       Q(personnel_id=personnel.personnel) & Q(is_verified=True))
+            same_code = PersonnelFamily.objects.filter(Q(company=company) & Q(personnel_id=personnel.personnel)
+                                                       & Q(is_verified=True))
+            same_with_personnel = Personnel.objects.filter(national_code=personnel.national_code)
             if len(same_code) > 0:
                 self.validate_status = False
                 raise ValidationError("کد ملی تکراری می باشد")
+            if len(same_with_personnel) > 0:
+                self.validate_status = False
+                raise ValidationError("کد ملی با پرسنل برابر می باشد")
         if not personnel.date_of_birth:
             self.validate_status = False
             raise ValidationError("تاریخ تولد را وارد کنید")
