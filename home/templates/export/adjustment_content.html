@@ -1,0 +1,30 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+
+    <table class="table table-bordered table-striped">
+        <tr>
+            <th>ردیف پیمان</th>
+            <th>تاریخ ثبت</th>
+            <th>تاریخ تعدیل</th>
+            <th>مبلغ تعدیل</th>
+            <th>نوع</th>
+            <th>توضیحات</th>
+
+        </tr>
+        {% for form in forms %}
+        <tr>
+            <td>{{ form.contract_row.title }}</td>
+            <td>{{ form.date }}</td>
+            <td>{{ form.change_date }}</td>
+            <td>{{ form.amount }}</td>
+            <td>{{ form.status_display }}</td>
+            <td>{{ form.explanation }}</td>
+
+        </tr>
+        {% endfor %}
+
+
+    </table>
+
+</div>

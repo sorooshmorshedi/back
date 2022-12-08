@@ -11,9 +11,10 @@ from numpy import unique
 from payroll.lists.views import WorkshopListView, PersonnelListView, PersonnelFamilyListView, ContractRowListView, \
     ContractListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     LoanListView, DeductionListView, ListOfPayItemListView, ListOfPayListView, LoanItemListView, \
-    ListOfPayInsuranceListView, ListOfPayItemInsuranceListView, PersonTaxListView, TaxListView, WorkshopAbsenceListView
+    ListOfPayInsuranceListView, ListOfPayItemInsuranceListView, PersonTaxListView, TaxListView, WorkshopAbsenceListView, \
+    AdjustmentListView
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, Contract, \
-    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem, ListOfPay
+    LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem, ListOfPay, Adjustment
 from reports.lists.export_views import BaseExportView, BaseListExportView
 
 
@@ -3400,3 +3401,102 @@ class AccountBalanceReportExportView(WorkshopPersonnelListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+
+class AdjustmentExportView(AdjustmentListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'adjustment'
+
+    context = {
+        'title': 'تعدیل',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+
+        context = {
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user.get_full_name(),
+            'print_document': print_document
+        }
+
+        context['form_content_template'] = 'export/adjustment_content.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(adjustment: Adjustment):
+        data = [
+            [
+                'تعدیل'
+            ],
+        ]
+        for form in adjustment:
+            data.append([
+                'ردیف پیمان',
+                form.contract_row.title,
+            ])
+            data.append([
+                'تاریخ ثبت',
+                form.date,
+            ])
+            data.append([
+                'تاریخ تعدیل',
+                form.change_date,
+            ])
+            data.append([
+                'مبلغ تعدیل',
+                form.amount,
+            ])
+            data.append([
+                'نوع',
+                form.status_display,
+            ])
+            data.append([
+                'توضیحات',
+                form.explanation,
+            ])
+        return data

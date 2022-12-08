@@ -96,7 +96,8 @@ class ContractRowSerializer(serializers.ModelSerializer):
 
 
 class AdjustmentSerializer(serializers.ModelSerializer):
-
+    contract_row_display = serializers.CharField(source='contract_row.title', read_only=True)
+    status_dis = serializers.CharField(source='status_display', read_only=True)
     class Meta:
         model = Adjustment
         fields = '__all__'

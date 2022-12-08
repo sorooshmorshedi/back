@@ -8,13 +8,13 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PayrollExportView, LoanItemExportView, PersonInsuranceReportExportView, WorkshopInsuranceReportExportView, \
     PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
     NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
-    AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView
+    AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView, AdjustmentExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
     write_person_insurance_diskette, \
-    write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette
+    write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, AdjustmentListView
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
@@ -128,6 +128,7 @@ urlpatterns += [
     url(r'^workshop/personnel/all$', WorkshopPersonnelListView.as_view(), name='workshopPersonnelList'),
     url(r'^personnel/family/all$', PersonnelFamilyListView.as_view(), name='personnelFamilyList'),
     url(r'^contractRows/all$', ContractRowListView.as_view(), name='contractRowList'),
+    url(r'^adjustment/all$', AdjustmentListView.as_view(), name='adjustmentListView'),
     url(r'^contract/all$', ContractListView.as_view(), name='contractRowList'),
     url(r'^absence/all$', LeaveOrAbsenceListView.as_view(), name='leaveOrAbsenceList'),
     url(r'^mission/all$', MissionListView.as_view(), name='missionListView'),
@@ -144,6 +145,7 @@ urlpatterns += [
     url(r'^workshop/personnel/all/(?P<export_type>\S+)', WorkshopPersonnelExportView.as_view(), name=''),
     url(r'^personnel/family/all/(?P<export_type>\S+)', PersonnelFamilyExportview.as_view(), name=''),
     url(r'^contractRows/all/(?P<export_type>\S+)', ContractRowExportview.as_view(), name=''),
+    url(r'^adjustment/all/(?P<export_type>\S+)', AdjustmentExportView.as_view(), name=''),
     url(r'^contract/all/(?P<export_type>\S+)', ContractExportView.as_view(), name=''),
     url(r'^contract/form/(?P<export_type>\S+)', ContractFormExportView.as_view(), name=''),
     url(r'^absence/all/(?P<export_type>\S+)', LeaveOrAbsenceExportView.as_view(), name=''),

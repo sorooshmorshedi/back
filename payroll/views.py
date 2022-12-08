@@ -468,9 +468,6 @@ class ContractRowVerifyApi(APIView):
         if not contract_row.contract_initial_amount:
             self.validate_status = False
             raise ValidationError('مبلغ اولیه قرارداد را وارد کنید')
-        if not contract_row.status:
-            self.validate_status = False
-            raise ValidationError('وضعییت را وارد کنید')
         if self.validate_status:
             contract_row.is_verified = True
             contract_row.save()

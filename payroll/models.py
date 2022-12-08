@@ -397,6 +397,7 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
     date = jmodels.jDateField(blank=True, null=True)
     change_date = jmodels.jDateField()
     explanation = EXPLANATION()
+    status = models.BooleanField(default=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'adjustment'
@@ -414,12 +415,21 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return 'تعدیل برای ' + self.contract_row.title
+    @property
+    def status_display(self):
+        if self.status:
+            return 'افزایشی'
+        else:
+            return 'کاهشی'
 
     def save(self, *args, **kwargs):
         if not self.id:
             if not self.date:
                 self.date = jdatetime.date.today()
-            self.contract_row.contract_initial_amount += self.amount
+            if self.status:
+                self.contract_row.contract_initial_amount += self.amount
+            else:
+                self.contract_row.contract_initial_amount -= self.amount
             self.contract_row.to_date = self.change_date
             self.contract_row.save()
         super().save(*args, **kwargs)
@@ -2137,7 +2147,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
                     insurance_pay_base += round(hr_letter_items[i]['amount'])
                 else:
                     insurance_pay_base += round(hr_letter_items[i]['amount'] / 30)
-        print('base ', insurance_pay_base)
         return insurance_pay_base
 
     @property
@@ -3121,13 +3130,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def payable(self):
         payable_amount = Decimal(round(self.total_payment) -\
-                         round(self.data_for_insurance['DSW_BIME']) -\
                          round(self.calculate_month_tax) -\
                          self.check_and_get_optional_deduction_episode - \
                          self.check_and_get_loan_episode)
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
+        if self.get_hr_letter.contract.insurance:
+            payable_amount = payable_amount - round(self.data_for_insurance['DSW_BIME'])
         return round(payable_amount)
 
     '''calculate'''
