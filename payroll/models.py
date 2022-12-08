@@ -1635,7 +1635,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
             if not self.from_date or not self.to_date:
                 raise ValidationError(' تاریح شروع و پایان را وارد کنید')
 
-        if self.from_date.__gt__(self.to_date):
+        if self.entitlement_leave_type != 'h' and self.from_date.__gt__(self.to_date):
             raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
 
         if self.from_hour.__gt__(self.to_hour):
@@ -3621,6 +3621,23 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return tax
 
     @property
+    def get_tax_row(self):
+        company_id = self.workshop_personnel.workshop.company.id
+        date = self.list_of_pay.end_date
+        taxs = WorkshopTax.objects.filter(company_id=company_id)
+        if len(taxs) == 0:
+            raise ValidationError('در این شرکت جدول معافیت مالیات ثبت نشده')
+        month_tax = None
+        for tax in taxs:
+            if tax.from_date.__le__(date) and tax.to_date.__ge__(date):
+                month_tax = tax
+        if month_tax:
+            return month_tax
+        else:
+            raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
+
+
+    @property
     def calculate_month_tax(self):
         year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
         hr = self.get_hr_letter
@@ -3633,8 +3650,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                                  Q(list_of_pay__ultimate=True))
             tax = Decimal(0)
             year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
-            mytax = WorkshopTax.objects.first()
-            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
             start = 0
             while year_amount >= Decimal(0):

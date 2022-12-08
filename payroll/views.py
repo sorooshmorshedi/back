@@ -112,53 +112,6 @@ class WorkshopDetail(APIView):
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class WorkshopTaxRowApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_tax_row'
-
-    def get(self, request):
-        query = WorkshopTaxRow.objects.all()
-        serializers = WorkshopTaxRowSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = WorkshopTaxRowSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WorkshopTaxRowDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_tax_row'
-
-    def get_object(self, pk):
-        try:
-            return WorkshopTaxRow.objects.get(pk=pk)
-        except WorkshopTaxRow.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = WorkshopTaxRowSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = WorkshopTaxRowSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 class WorkshopTaxApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_tax'
@@ -207,6 +160,53 @@ class WorkshopTaxDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class WorkshopTaxRowApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_tax_row'
+
+    def get(self, request):
+        query = WorkshopTaxRow.objects.all()
+        serializers = WorkshopTaxRowSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = WorkshopTaxRowSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopTaxRowDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_tax_row'
+
+    def get_object(self, pk):
+        try:
+            return WorkshopTaxRow.objects.get(pk=pk)
+        except WorkshopTaxRow.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkshopTaxRowSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = WorkshopTaxRowSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 class PersonnelApiView(APIView):
