@@ -389,6 +389,42 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
 
+
+class Adjustment(BaseModel, LockableMixin, DefinableMixin):
+
+    contract_row = models.ForeignKey(ContractRow, related_name='adjustment', on_delete=models.CASCADE)
+    amount = DECIMAL(default=0)
+    date = jmodels.jDateField(blank=True, null=True)
+    change_date = jmodels.jDateField()
+    explanation = EXPLANATION()
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'adjustment'
+        permission_basename = 'adjustment'
+        permissions = (
+            ('get.adjustment', 'مشاهده تعدیل'),
+            ('create.adjustment', 'تعریف تعدیل'),
+            ('update.adjustment', 'ویرایش تعدیل'),
+            ('delete.adjustment', 'حذف تعدیل'),
+
+            ('getOwn.adjustment', 'مشاهده تعدیل خود'),
+            ('updateOwn.adjustment', 'ویرایش تعدیل خود'),
+            ('deleteOwn.adjustment', 'حذف تعدیل خود'),
+        )
+
+    def __str__(self):
+        return 'تعدیل برای ' + self.contract_row.title
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            if not self.date:
+                self.date = jdatetime.date.today()
+            self.contract_row.contract_initial_amount += self.amount
+            self.contract_row.to_date = self.change_date
+            self.contract_row.save()
+        super().save(*args, **kwargs)
+
+
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
     IRANIAN = 1
     OTHER = 2

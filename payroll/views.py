@@ -12,14 +12,15 @@ from rest_framework.response import Response
 from helpers.models import is_valid_melli_code
 from payroll.functions import is_shenase_meli
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
-    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem, \
+    Adjustment
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
     ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
     WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
     ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer, \
-    ListOfPayCopyPaySerializer
+    ListOfPayCopyPaySerializer, AdjustmentSerializer
 
 
 class WorkshopApiView(APIView):
@@ -358,6 +359,71 @@ class ContractRowDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class AdjustmentApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get(self, request):
+        company = request.user.active_company.pk
+        workshops = Workshop.objects.filter(company=company)
+        contract_rows = ContractRow.objects.filter(workshop__in=workshops)
+        query = Adjustment.objects.filter(contract_row__in=contract_rows)
+        serializers = AdjustmentSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = AdjustmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdjustmentDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get_object(self, pk):
+        try:
+            return Adjustment.objects.get(pk=pk)
+        except Adjustment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = AdjustmentSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = AdjustmentSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ContractRowAdjustmentDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get_object(self, pk):
+        try:
+            return Adjustment.objects.filter(contract_row=pk)
+        except Adjustment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = AdjustmentSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
 
 
 class ContractRowVerifyApi(APIView):

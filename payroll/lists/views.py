@@ -5,15 +5,17 @@ from rest_framework.permissions import IsAuthenticated
 from helpers.auth import BasicCRUDPermission
 from payroll.lists.filters import WorkshopFilter, PersonnelFilter, PersonnelFamilyFilter, WorkshopPersonnelFilter, \
     ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter, HRLetterFilter, TaxRowFilter, TaxFilter, \
-    ListOfPayFilter, ListOfPayItemFilter, LoanFilter, DeductionFilter, LoanItemFilter, WorkshopTaxFilter, TaxMoafFilter
+    ListOfPayFilter, ListOfPayItemFilter, LoanFilter, DeductionFilter, LoanItemFilter, WorkshopTaxFilter, TaxMoafFilter, \
+    AdjustmentFilter
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
     LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem, Loan, OptionalDeduction, \
-    LoanItem
+    LoanItem, Adjustment
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     WorkshopPersonnelSerializer, ContractRowSerializer, LeaveOrAbsenceSerializer, ContractSerializer, MissionSerializer, \
     HRLetterSerializer, WorkshopTaxRowSerializer, WorkShopTaxSerializer, ListOfPaySerializer, ListOfPayItemSerializer, \
     LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayItemLessSerializer, ListOfPayLessSerializer, \
-    ListOfPayInsuranceSerializer, ListOfPayItemInsuranceSerializer, PersonTaxSerializer, TaxSerializer
+    ListOfPayInsuranceSerializer, ListOfPayItemInsuranceSerializer, PersonTaxSerializer, TaxSerializer, \
+    AdjustmentSerializer
 
 from django.http import HttpResponse
 
@@ -363,6 +365,23 @@ class ContractRowListView(generics.ListAPIView):
         workhops = company.workshop.all()
         return ContractRow.objects.hasAccess('get', self.permission_codename)\
             .filter(workshop__in=workhops).distinct('pk')
+
+
+class AdjustmentListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.adjustment"
+    serializer_class = AdjustmentSerializer
+    filterset_class = AdjustmentFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        contracct_rows = ContractRow.objects.filter(workshop__in=workhops)
+        return Adjustment.objects.hasAccess('get', self.permission_codename)\
+            .filter(contract_row__in=contracct_rows).distinct('pk')
 
 
 class LeaveOrAbsenceListView(generics.ListAPIView):

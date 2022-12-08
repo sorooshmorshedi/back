@@ -7,8 +7,7 @@ from django_jalali.db import models as jmodels
 from helpers.filters import BASE_FIELD_FILTERS
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
     LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem, Loan, OptionalDeduction, \
-    LoanItem
-
+    LoanItem, Adjustment
 
 
 class WorkshopFilter(filters.FilterSet):
@@ -174,6 +173,24 @@ class ContractRowFilter(filters.FilterSet):
             'branch': BASE_FIELD_FILTERS,
             'status': ('exact',),
             'is_verified': ('exact',),
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }
+
+
+class AdjustmentFilter(filters.FilterSet):
+    class Meta:
+        model = Adjustment
+        fields = {
+            'id': ('exact',),
+            'contract_row': ('exact',),
+            'date': BASE_FIELD_FILTERS,
+            'change_date': BASE_FIELD_FILTERS,
+            'amount': BASE_FIELD_FILTERS,
+            'explanation': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {

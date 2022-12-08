@@ -1,6 +1,7 @@
 
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
-    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem
+    LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem, \
+    Adjustment
 from rest_framework import serializers
 
 
@@ -91,6 +92,13 @@ class ContractRowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContractRow
+        fields = '__all__'
+
+
+class AdjustmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Adjustment
         fields = '__all__'
 
 
