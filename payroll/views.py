@@ -431,49 +431,65 @@ class ContractRowVerifyApi(APIView):
     permission_basename = 'contracct_row'
     validate_message = ''
     validate_status = True
+    error_messages = []
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
     def get(self, request, pk):
         contract_row = ContractRow.objects.get(pk=pk)
         if not contract_row.contract_row:
-            raise ValidationError('ردیف پیمان را وارد کنید')
+            self.validate_status = False
+            self.error_messages.append('ردیف پیمان را وارد کنید')
         if contract_row.contract_row and len(contract_row.contract_row) < 3:
             row = '0' * (3 - len(contract_row.contract_row))
             new_row = row + contract_row.contract_row
             contract_row.contract_row = new_row
         if not contract_row.contract_number:
             self.validate_status = False
-            raise ValidationError('شماره قرارداد را وارد کنید')
+            self.error_messages.append('شماره قرارداد را وارد کنید')
         if not contract_row.registration_date:
             self.validate_status = False
-            raise ValidationError('تاریخ قرارداد را وارد کنید')
+            self.error_messages.append('تاریخ قرارداد را وارد کنید')
         if not contract_row.from_date:
             self.validate_status = False
-            raise ValidationError('تاریخ شروع را وارد کنید')
+            self.error_messages.append('تاریخ شروع را وارد کنید')
         if not contract_row.to_date:
             self.validate_status = False
-            raise ValidationError('تاریخ پایان را وارد کنید')
-        if contract_row.from_date > contract_row.to_date:
+            self.error_messages.append('تاریخ پایان را وارد کنید')
+        if contract_row.from_date and contract_row.to_date and\
+                contract_row.from_date > contract_row.to_date:
             self.validate_status = False
-            raise ValidationError('تاریخ شروع قرارداد نمیتواند بزرگتر تاریخ پایان باشد')
+            self.error_messages.append('تاریخ شروع قرارداد نمیتواند بزرگتر تاریخ پایان باشد')
         if not contract_row.assignor_national_code:
             self.validate_status = False
-            raise ValidationError('شناسه ملی واگذارکننده را وارد کنید')
+            self.error_messages.append('شناسه ملی واگذارکننده را وارد کنید')
         if contract_row.assignor_national_code:
             is_shenase_meli(contract_row.assignor_national_code)
         if not contract_row.assignor_name:
             self.validate_status = False
-            raise ValidationError('نام واگذارکننده را وارد کنید')
+            self.error_messages.append('نام واگذارکننده را وارد کنید')
         if not contract_row.assignor_workshop_code:
             self.validate_status = False
-            raise ValidationError('کد کارگاه واگذارکننده را وارد کنید')
+            self.error_messages.append('کد کارگاه واگذارکننده را وارد کنید')
+        if contract_row.assignor_workshop_code and len(contract_row.assignor_workshop_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه واگذارکننده باید 10 رقمی باشد')
         if not contract_row.contract_initial_amount:
             self.validate_status = False
-            raise ValidationError('مبلغ اولیه قرارداد را وارد کنید')
+            self.error_messages.append('مبلغ اولیه قرارداد را وارد کنید')
+        if contract_row.status == None:
+            self.validate_status = False
+            self.error_messages.append('وضعییت را وارد کنید')
         if self.validate_status:
             contract_row.is_verified = True
             contract_row.save()
             return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
-
-        return Response({'وضعییت': 'ثبت نهایی ردیف پیمان رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+        else:
+            message = ''
+            for error in self.error_messages:
+                message += error
+                message += ' و '
+            raise ValidationError(message)
 
 
 class ContractRowUnVerifyApi(APIView):
@@ -557,6 +573,79 @@ class WorkshopPersonnelApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopPersonnelVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+    validate_message = ''
+    validate_status = True
+    def get(self, request, pk):
+        company = request.user.active_company.pk
+        personnel = WorkshopPersonnel.objects.get(pk=pk)
+        if not personnel.work_title:
+            self.validate_status = False
+            raise ValidationError("عنوان شغلی(بیمه) را وارد کنید")
+        if not personnel.job_location:
+            self.validate_status = False
+            raise ValidationError("محل را خدمت")
+        if not personnel.employee_status:
+            self.validate_status = False
+            raise ValidationError("وضعیت کارمند را وارد کنید")
+        if not personnel.job_location_status:
+            raise ValidationError("وضعیت محل کار را وارد کنید")
+        if  personnel.previous_insurance_history_out_workshop == None:
+            self.validate_status = False
+            raise ValidationError("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
+        if personnel.previous_insurance_history_out_workshop and\
+            personnel.previous_insurance_history_out_workshop > 1000:
+            raise ValidationError("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
+        if  personnel.previous_insurance_history_in_workshop == None:
+            self.validate_status = False
+            raise ValidationError("سابقه بیمه قبلی در این کارگاه را وارد کنید")
+        if personnel.previous_insurance_history_in_workshop and\
+            personnel.previous_insurance_history_in_workshop > 1000:
+            raise ValidationError("سابقه بیمه قبلی در این کارگاه نمیتواند بزرگتر از 1000 باشد")
+        if not personnel.job_position:
+            self.validate_status = False
+            raise ValidationError("سمت یا شغل (دارایی) را وارد کنید")
+        if not personnel.job_group:
+            self.validate_status = False
+            raise ValidationError("رسته شغلی را وارد کنید")
+        if not personnel.employment_type:
+            self.validate_status = False
+            raise ValidationError(" نوع استخدام را وارد کنید")
+        if not personnel.contract_type:
+            self.validate_status = False
+            raise ValidationError("نوع قرارداد را وارد کنید")
+        if not personnel.employment_date:
+            self.validate_status = False
+            raise ValidationError("تاریخ استخدام را وارد کنید")
+        if personnel.haghe_sanavat_days and personnel.haghe_sanavat_days > 20000:
+            raise ValidationError("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
+
+        same_personnel = WorkshopPersonnel.objects.filter(Q(workshop=personnel.workshop) &
+                                                          Q(personnel=personnel.personnel))
+        quit = []
+        for same_person in same_personnel:
+            if same_person.quit_job_date:
+                quit.append(same_person)
+        if len(same_personnel) - len(quit) > 1:
+            raise ValidationError('این انتصاب تکراری است')
+        if self.validate_status:
+            personnel.is_verified = True
+            personnel.save()
+            return Response({'status': 'ثبت نهایی  پرسنل انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'status': 'ثبت نهایی  پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+
+class WorkshopPersonnelUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+    def get(self, request, pk):
+        personnel = WorkshopPersonnel.objects.get(pk=pk)
+        personnel.is_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
 
 
 class WorkshopAllPersonnelDetail(APIView):
@@ -792,11 +881,11 @@ class PersonnelFamilyVerifyApi(APIView):
             raise ValidationError("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
-            print(personnel.personnel.id)
-            relative = Personnel.objects.get(id=personnel.personnel.id)
-            same_code = PersonnelFamily.objects.filter(Q(personnel_id=personnel.personnel.id)
-                                                       & Q(is_verified=True) & Q(national_code=relative.national_code))
-            same_with_personnel = Personnel.objects.filter(national_code=personnel.national_code)
+            same_code = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel.id) & Q(is_verified=True) &
+                                                       Q(national_code=personnel.national_code))
+
+            same_with_personnel = Personnel.objects.filter(Q(national_code=personnel.national_code) &
+                                                           Q(company=company))
             if len(same_code) > 0:
                 self.validate_status = False
                 raise ValidationError("کد ملی تکراری می باشد")
@@ -1514,3 +1603,29 @@ class ListOfPayCopy(APIView):
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
 
 
+class PaymentVerifyApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request, year, month, pk):
+        date = jdatetime.date(year, month, 1, locale='fa_IR')
+        workshop = Workshop.objects.get(pk=pk)
+        verify_tax_row = workshop.get_tax_row(date)
+        verify_personnel = workshop.get_personnel
+        verify_cotract = workshop.get_contract
+        verify_hr = workshop.get_hr_letter
+        error = False
+        error_response = {}
+        if not verify_tax_row:
+            error = True
+            error_response['ردیف مالیات'] = 'موجود نیست'
+        if len(verify_personnel) == 0:
+            error = True
+            error_response['پرسنل فعال'] = 'موجود نیست'
+        if verify_cotract == 0:
+            error = True
+            error_response['قرارداد'] = 'موجود نیست'
+        if error:
+            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'وضعیت': 'چک شد'}, status=status.HTTP_200_OK)

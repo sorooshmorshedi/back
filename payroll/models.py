@@ -68,7 +68,8 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     )
 
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE, )
-    code = models.IntegerField()
+    workshop_code = models.CharField(max_length=50, blank=True, null=True)
+    code = models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=100)
     employer_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
@@ -126,12 +127,68 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     save_absence_limit = models.BooleanField(default=True)
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField()
 
+    def save(self, *args, **kwargs):
+        if not self.workshop_code:
+            raise ValidationError('کد کارگاه را وارد کنید')
+        if len(self.workshop_code) != 10:
+            raise ValidationError('کد کارگاه باید 10 رقمی باشد')
+        super().save(*args, **kwargs)
 
     @property
     def workshop_title(self):
         return self.name + ' ' + str(self.code)
+
+    @property
+    def get_personnel(self):
+        active_personnel = Personnel.objects.filter(Q(company=self.company) & Q(is_personnel_active=True) &
+                                                    Q(is_personnel_verified=True))
+        personnel = self.workshop_personnel.filter(personnel__in=active_personnel)
+        if len(personnel) != 0:
+            return personnel
+        else:
+            raise ValidationError('در این کارگاه پرسنلی ثبت نشده')
+
+    def get_tax_row(self, date):
+        company_id = self.company.id
+        taxs = WorkshopTax.objects.filter(company_id=company_id)
+        if len(taxs) == 0:
+            raise ValidationError('در این شرکت جدول معافیت مالیات ثبت نشده')
+        month_tax = None
+        for tax in taxs:
+            if tax.from_date.__le__(date) and tax.to_date.__ge__(date):
+                month_tax = tax
+        if month_tax:
+            return month_tax
+        else:
+            raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
+
+    @property
+    def get_contract(self):
+        person_contract = []
+        contracts = []
+        for person in self.get_personnel:
+            contract = person.contract.all()
+            if len(contract) != 0:
+                person_contract.append(person)
+                contracts.append(contract)
+        if len(person_contract) == 0:
+            raise ValidationError('برای پرسنل های این کارگاه قراردادی ثبت نشده')
+        return contracts
+
+    @property
+    def get_hr_letter(self):
+        hr = []
+        for person in self.get_contract:
+            for contract in person:
+                contract_hr = contract.hr_letter.all()
+                if len(contract_hr) == 0:
+                    raise ValidationError('برای قراردادی در این کارگاه حکم کارگزینی ثبت نشده')
+                else:
+                    hr.append(contract_hr)
+        return hr
+
 
     @staticmethod
     def month_display(month):
@@ -352,7 +409,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     status = models.BooleanField(default=False)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
     assignor_national_code = models.CharField(max_length=20, blank=True, null=True)
-    assignor_workshop_code = models.IntegerField(blank=True, null=True)
+    assignor_workshop_code = models.CharField(max_length=20, blank=True, null=True)
 
     contract_initial_amount = DECIMAL(blank=True, null=True)
     branch = models.CharField(max_length=100, blank=True, null=True)
@@ -631,7 +688,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     bank_cart_number = models.CharField(max_length=50, blank=True, null=True)
     sheba_number = models.CharField(max_length=50, blank=True, null=True)
 
-    is_personnel_active = models.BooleanField(default=False, null=True, blank=True)
+    is_personnel_active = models.BooleanField(null=True, blank=True)
     is_personnel_verified = models.BooleanField(default=False, null=True, blank=True)
 
 
@@ -855,7 +912,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     FALLEN_CHILD = 3
     FREEDMAN = 4
     ARM = 5
-    BAND_12 = 6
+    BAND_14 = 6
     FOREIGN = 7
 
 
@@ -865,7 +922,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
         (FALLEN_CHILD, 'فرزند شهید'),
         (FREEDMAN, 'آزاده'),
         (ARM, 'نیروهای مسلح'),
-        (BAND_12, 'سایر مشمولین بند14ماده11'),
+        (BAND_14, 'سایر مشمولین بند14ماده91'),
         (FOREIGN, ' قانون اجتناب از اخذ مالیات مضاعف اتباع خارجی مشمول')
     )
 
@@ -875,7 +932,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
 
     JOB_LOCATION_STATUSES = (
-        (NORMAL, 'معمولی'),
+        (NORMAL, 'عادی'),
         (UN_DEVOLOPED, 'مناطق کمتر توسعه یافته'),
         (FREE_ZONE, 'مناطق آزاد تجاری'),
     )
@@ -925,41 +982,53 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     workshop = models.ForeignKey(Workshop, related_name='workshop_personnel', on_delete=models.CASCADE)
     personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
 
-    employment_date = jmodels.jDateField()
-    work_title = models.CharField(max_length=100)
+    employment_date = jmodels.jDateField(blank=True, null=True)
+    work_title = models.CharField(max_length=100, blank=True, null=True)
+    work_title_code = models.CharField(max_length=10, blank=True, null=True)
 
-    previous_insurance_history_out_workshop = models.IntegerField(default=0)
-    previous_insurance_history_in_workshop = models.IntegerField(default=0)
+    previous_insurance_history_out_workshop = models.IntegerField(blank=True, null=True)
+    previous_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
     current_insurance_history_in_workshop = models.IntegerField(default=0)
     insurance_history_totality = models.IntegerField(default=0)
 
-    job_position = models.CharField(max_length=100)
-    job_group = models.IntegerField(choices=JOB_GROUP_TYPES)
-    job_location = models.CharField(max_length=100)
-    job_location_status = models.IntegerField(choices=JOB_LOCATION_STATUSES)
+    job_position = models.CharField(max_length=100, blank=True, null=True)
+    job_group = models.IntegerField(choices=JOB_GROUP_TYPES, blank=True, null=True)
+    job_location = models.CharField(max_length=100, blank=True, null=True)
+    job_location_status = models.IntegerField(choices=JOB_LOCATION_STATUSES, blank=True, null=True)
 
-    employment_type = models.IntegerField(choices=EMPLOYMENTS_TYPES)
-    contract_type = models.IntegerField(choices=CONTRACT_TYPES)
-    employee_status = models.IntegerField(choices=EMPLOYEE_TYPES)
+    employment_type = models.IntegerField(choices=EMPLOYMENTS_TYPES, blank=True, null=True)
+    contract_type = models.IntegerField(choices=CONTRACT_TYPES, blank=True, null=True)
+    employee_status = models.IntegerField(choices=EMPLOYEE_TYPES, blank=True, null=True)
 
     haghe_sanavat_days = models.IntegerField(default=0)
     haghe_sanavat_identify_amount = DECIMAL(default=0)
 
     save_leaave = models.IntegerField(default=0)
 
+    is_verified = models.BooleanField(default=False)
+
     @property
     def current_insurance(self):
-        now = jdatetime.date.today()
-        delta = now - self.employment_date
-        return round(delta.days / 30)
+        if self.employment_date:
+            now = jdatetime.date.today()
+            delta = now - self.employment_date
+            return round(delta.days / 30)
+        else:
+            return 0
 
     @property
     def total_insurance(self):
-        return self.current_insurance + self.previous_insurance_history_in_workshop
+        if self.previous_insurance_history_in_workshop:
+            return self.current_insurance + self.previous_insurance_history_in_workshop
+        else:
+            return self.current_insurance
 
     @property
     def insurance_history_total(self):
-        return self.total_insurance + self.previous_insurance_history_out_workshop
+        if self.previous_insurance_history_out_workshop:
+            return self.total_insurance + self.previous_insurance_history_out_workshop
+        else:
+            self.total_insurance
 
     @property
     def quit_job_date(self):
@@ -1299,9 +1368,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     def save(self, *args, **kwargs):
         if not self.id:
             self.current_insurance_history_in_workshop = 0
-        self.insurance_history_totality = self.previous_insurance_history_in_workshop + \
-                                          self.previous_insurance_history_out_workshop + \
-                                          self.current_insurance_history_in_workshop
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -1416,8 +1482,7 @@ class Loan(BaseModel, LockableMixin, DefinableMixin):
         month_base = 1
         for i in range(0, self.episode):
             if self.pay_date.month + i > 12:
-                pay_date = jdatetime.date(self.pay_date.year + int((self.pay_date.month + i) / 12), month_base,
-                                          self.pay_date.day)
+                pay_date = jdatetime.date(self.pay_date.year + int((self.pay_date.month + i) / 12), month_base, 1)
                 month_base += 1
                 if month_base > 12:
                     month_base = 1
@@ -3359,6 +3424,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             for episode_date in loan.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
                     month_episode = loan.get_pay_episode
+                    items = loan.item.all()
+                    for item in items:
+                        if item.date.month == self.list_of_pay.month:
+                            item.payed_amount = item.amount
+                            item.save()
         return month_episode
 
     @property
@@ -3372,6 +3442,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             for episode_date in loan.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
                     month_episode = loan.get_pay_episode
+                    items = loan.item.all()
+                    for item in items:
+                        if item.date.month == self.list_of_pay.month:
+                            item.payed_amount = item.amount
+                            item.save()
         return month_episode
 
     @property
