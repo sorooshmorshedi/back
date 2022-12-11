@@ -381,7 +381,7 @@ class AdjustmentListView(generics.ListAPIView):
         workhops = company.workshop.all()
         contracct_rows = ContractRow.objects.filter(workshop__in=workhops)
         return Adjustment.objects.hasAccess('get', self.permission_codename)\
-            .filter(contract_row__in=contracct_rows).distinct('pk')
+            .filter(contract_row__in=contracct_rows).distinct('pk').reverse()
 
 
 class LeaveOrAbsenceListView(generics.ListAPIView):

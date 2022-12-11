@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company
-from helpers.models import BaseModel, LockableMixin, DefinableMixin, POSTAL_CODE, DECIMAL, \
+from helpers.models import BaseModel, LockableMixin, DefinableMixin, DECIMAL, \
     is_valid_melli_code, EXPLANATION
 from payroll.functions import is_shenase_meli
 from users.models import City
@@ -138,7 +138,12 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def workshop_title(self):
-        return self.name + ' ' + str(self.code)
+        if not self.name:
+            return self.workshop_code
+        elif not self.workshop_code:
+            return self.name
+        else:
+            return self.name + ' ' + self.workshop_code
 
     @property
     def get_personnel(self):
@@ -404,13 +409,14 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     registration_date = jmodels.jDateField(blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
+    initial_to_date = jmodels.jDateField(blank=True, null=True)
     topic = models.CharField(max_length=255, blank=True, null=True)
 
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(blank=True, null=True)
     assignor_name = models.CharField(max_length=100, blank=True, null=True)
     assignor_national_code = models.CharField(max_length=20, blank=True, null=True)
     assignor_workshop_code = models.CharField(max_length=20, blank=True, null=True)
-
+    amount = DECIMAL(blank=True, null=True)
     contract_initial_amount = DECIMAL(blank=True, null=True)
     branch = models.CharField(max_length=100, blank=True, null=True)
     is_verified = models.BooleanField(default=False)
@@ -439,10 +445,21 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
         return round(self.contract_initial_amount)
 
     @property
+    def have_adjustment(self):
+        if len(self.adjustment.all()) > 0:
+            print(self.adjustment.all())
+            return True
+        else:
+            return False
+
+    @property
     def title(self):
         return str(self.contract_row) + ' در کارگاه ' + self.workshop.name
 
     def save(self, *args, **kwargs):
+        if not self.id:
+            self.amount = self.contract_initial_amount
+            self.to_date = self.initial_to_date
         super().save(*args, **kwargs)
 
 
@@ -450,11 +467,11 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     contract_row = models.ForeignKey(ContractRow, related_name='adjustment', on_delete=models.CASCADE)
-    amount = DECIMAL(default=0)
+    amount = DECIMAL(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
-    change_date = jmodels.jDateField()
+    change_date = jmodels.jDateField(blank=True, null=True)
     explanation = EXPLANATION()
-    status = models.BooleanField(default=True)
+    status = models.BooleanField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'adjustment'
@@ -476,20 +493,38 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
     def status_display(self):
         if self.status:
             return 'افزایشی'
-        else:
+        if self.status == False:
             return 'کاهشی'
+        else:
+            return ''
 
     def save(self, *args, **kwargs):
         if not self.id:
-            if not self.date:
-                self.date = jdatetime.date.today()
-            if self.status:
-                self.contract_row.contract_initial_amount += self.amount
-            else:
-                self.contract_row.contract_initial_amount -= self.amount
-            self.contract_row.to_date = self.change_date
+            self.date = self.contract_row.to_date
+            if self.amount:
+                if self.status == None:
+                    raise ValidationError('نوع تعدیل را وارد کنید')
+                if self.status:
+                    self.contract_row.amount += self.amount
+                else:
+                    self.contract_row.amount -= self.amount
+            if self.change_date:
+                self.contract_row.to_date = self.change_date
+            elif not self.change_date:
+                self.change_date = self.contract_row.to_date
             self.contract_row.save()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.amount:
+            if self.status:
+                self.contract_row.amount -= self.amount
+            else:
+                self.contract_row.amount += self.amount
+        if self.change_date:
+            self.contract_row.to_date = self.date
+        self.contract_row.save()
+        super(Adjustment, self).delete()
 
 
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
@@ -633,11 +668,17 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     STATE = 'st'
     OPEN = 'op'
     NONE_PROFIT = 'np'
+    ELMI = 'el'
+    PAYAM = 'pa'
+    PARDIS = 'pr'
 
     UNIVERSITY_TYPES = (
         (STATE, 'دولتی'),
         (OPEN, 'آزاد'),
-        (NONE_PROFIT, 'غیر انتفاعی')
+        (NONE_PROFIT, 'غیر انتفاعی'),
+        (ELMI, 'علمی کاربردی'),
+        (PAYAM, 'پیام نور'),
+        (PARDIS, 'پردیس خودگردان وابسته به دولت'),
     )
 
     company = models.ForeignKey(Company, related_name='personnel', on_delete=models.CASCADE, blank=True, null=True)
@@ -706,6 +747,28 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.personnel', 'ویرایش پرسنل خود'),
             ('deleteOwn.personnel', 'حذف پرسنل خود'),
         )
+
+    @property
+    def child_number(self):
+
+        childes = PersonnelFamily.objects.filter(
+            Q(personnel_id=self.id) &
+            Q(relative='c') &
+            Q(is_active=True) &
+            Q(is_verified=True)
+        )
+        return len(childes)
+
+    @property
+    def childs(self):
+
+        childes = PersonnelFamily.objects.filter(
+            Q(personnel_id=self.id) &
+            Q(relative='c') &
+            Q(is_active=True) &
+            Q(is_verified=True)
+        )
+        return childes
 
     @property
     def full_name(self):
@@ -820,7 +883,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     PHYSICAL_TYPE = (
         (HEALTHY, 'سالم'),
         (PATIENT, 'بیمار'),
-        (MAIM, 'نقض عضو')
+        (MAIM, 'نقص عضو')
     )
 
     personnel = models.ForeignKey(Personnel, related_name='personnel_family', on_delete=models.CASCADE)
@@ -855,20 +918,6 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     @property
     def full_name(self):
         return self.name + ' ' + self.last_name
-
-    def save(self, *args, **kwargs):
-        if self.relative == 'c' and not self.id:
-            personnel = self.personnel
-            personnel.number_of_childes += 1
-            personnel.save()
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.relative == 'c':
-            personnel = self.personnel
-            personnel.number_of_childes -= 1
-            personnel.save()
-        super().delete()
 
     def __str__(self):
         return self.full_name + ' ' + self.get_relative_display() + ' ' + self.personnel.full_name
@@ -1399,16 +1448,19 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def save(self, *args, **kwargs):
-        if not self.insurance:
-            self.workshop_personnel.insurance_add_date = None
+        if self.workshop_personnel:
+            if not self.insurance:
+                self.workshop_personnel.insurance_add_date = None
+            else:
+                self.workshop_personnel.insurance_add_date = self.contract_from_date
+            self.workshop_personnel.save()
+            sign_date = self.workshop_personnel.employment_date
+            if self.contract_from_date.__lt__(sign_date):
+                raise ValidationError('تاریخ شروع قرارداد باید بعد از ' + sign_date.__str__() + '  تاریخ استخدام باشد')
+            if self.contract_from_date.__ge__(self.contract_to_date):
+                raise ValidationError('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
         else:
-            self.workshop_personnel.insurance_add_date = self.contract_from_date
-        self.workshop_personnel.save()
-        sign_date = self.workshop_personnel.employment_date
-        if self.contract_from_date.__lt__(sign_date):
-            raise ValidationError('تاریخ شروع قرارداد باید بعد از ' + sign_date.__str__() + '  تاریخ استخدام باشد')
-        if self.contract_from_date.__ge__(self.contract_to_date):
-            raise ValidationError('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
+            raise ValidationError('پرسنل در کارگاه نمی تواند خالی باشد')
         super().save(*args, **kwargs)
 
     @property
@@ -2171,6 +2223,23 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         return hr_letter_items
 
     @property
+    def aele_mandi_sum(self):
+        if self.contract:
+            personnel_family = self.contract.workshop_personnel.personnel.childs
+            aele_mandi_child = 0
+            for person in personnel_family:
+                if person.marital_status == 's':
+                    person_age = self.contract.contract_to_date.year - person.date_of_birth.year
+                    if person_age <= 18:
+                        aele_mandi_child += 1
+                    elif person.study_status == 's' or person.physical_condition != 'h':
+                        aele_mandi_child += 1
+            return aele_mandi_child
+        else:
+            return 0
+
+
+    @property
     def calculate_pay_bases(self):
         daily, monthly = 0, 0
         hr_letter_items = self.get_hr_items
@@ -2240,6 +2309,8 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         return insurance_not_included
 
     def save(self, *args, **kwargs):
+        if self.is_template == 't':
+            raise ValidationError('is_template')
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
@@ -2898,12 +2969,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi_info(self):
-        personnel_family = PersonnelFamily.objects.filter(Q(personnel=self.workshop_personnel.personnel) &
-                                                          Q(is_active=True))
+        personnel_family = self.workshop_personnel.personnel.childs
         aele_mandi_child = 0
         self.total_insurance_month = self.workshop_personnel.insurance_history_total
         for person in personnel_family:
-            if person.relative == 'c' and person.marital_status == 's':
+            if person.marital_status == 's':
                 person_age = self.list_of_pay.year - person.date_of_birth.year
                 if person_age <= 18:
                     aele_mandi_child += 1

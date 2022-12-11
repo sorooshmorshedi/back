@@ -94,7 +94,7 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
         ]
         for form in workshop:
             data.append([
-                form.code,
+                form.workshop_code,
                 form.name,
                 form.employer_name,
                 form.address,
@@ -200,7 +200,7 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
                 form.location_of_exportation,
                 form.sector_of_exportation,
                 form.get_marital_status_display(),
-                form.number_of_childes,
+                form.child_number,
                 form.city_phone_code,
                 form.phone_number,
                 form.mobile_number_1,

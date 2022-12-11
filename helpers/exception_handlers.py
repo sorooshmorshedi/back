@@ -72,9 +72,8 @@ labels = {
 
     #payroll
     'company': 'شرکت',
-    'employer_name': 'نام کارفرما'
-
-
+    'employer_name': 'نام کارفرما',
+    'workshop': 'کارگاه'
 }
 
 
@@ -84,7 +83,6 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None and response.status_code != status.HTTP_500_INTERNAL_SERVER_ERROR:
-        print('exeption run')
         errors = []
         data = response.data
         if isinstance(data, list):

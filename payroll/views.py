@@ -31,7 +31,7 @@ class WorkshopApiView(APIView):
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
-        query = Workshop.objects.filter(company=company)
+        query = Workshop.objects.filter(Q(company=company) & Q(is_active=True))
         serializers = WorkShopSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -453,13 +453,13 @@ class ContractRowVerifyApi(APIView):
         if not contract_row.from_date:
             self.validate_status = False
             self.error_messages.append('تاریخ شروع را وارد کنید')
-        if not contract_row.to_date:
+        if not contract_row.initial_to_date:
             self.validate_status = False
             self.error_messages.append('تاریخ پایان را وارد کنید')
-        if contract_row.from_date and contract_row.to_date and\
-                contract_row.from_date > contract_row.to_date:
+        if contract_row.from_date and contract_row.initial_to_date and\
+                contract_row.from_date > contract_row.initial_to_date:
             self.validate_status = False
-            self.error_messages.append('تاریخ شروع قرارداد نمیتواند بزرگتر تاریخ پایان باشد')
+            self.error_messages.append('تاریخ شروع قرارداد نمیتواند بزرگتر از تاریخ پایان قرارداد باشد')
         if not contract_row.assignor_national_code:
             self.validate_status = False
             self.error_messages.append('شناسه ملی واگذارکننده را وارد کنید')
@@ -486,9 +486,14 @@ class ContractRowVerifyApi(APIView):
             return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
         else:
             message = ''
+            counter = 1
             for error in self.error_messages:
+                message += str(counter)
+                message += '- '
                 message += error
-                message += ' و '
+                message += '\n '
+                message += '\n '
+                counter += 1
             raise ValidationError(message)
 
 
@@ -855,6 +860,8 @@ class PersonnelVerifyApi(APIView):
             raise ValidationError("شماره شبا حقوق را وارد کنید")
         if personnel.sheba_number and len(personnel.sheba_number) != 24:
             raise ValidationError("طول شماره شبا باید 24 رقم باشد")
+        if personnel.is_personnel_active == None:
+            raise ValidationError("وضعییت پرسنل را وارد کنید")
         if self.validate_status:
             personnel.is_personnel_verified = True
             personnel.save()
@@ -884,12 +891,10 @@ class PersonnelFamilyVerifyApi(APIView):
             same_code = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel.id) & Q(is_verified=True) &
                                                        Q(national_code=personnel.national_code))
 
-            same_with_personnel = Personnel.objects.filter(Q(national_code=personnel.national_code) &
-                                                           Q(company=company))
             if len(same_code) > 0:
                 self.validate_status = False
                 raise ValidationError("کد ملی تکراری می باشد")
-            if len(same_with_personnel) > 0:
+            if personnel.national_code == personnel.personnel.national_code:
                 self.validate_status = False
                 raise ValidationError("کد ملی با پرسنل برابر می باشد")
         if not personnel.date_of_birth:

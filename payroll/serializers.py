@@ -57,6 +57,7 @@ class PersonnelSerializer(serializers.ModelSerializer):
     birth_city = serializers.CharField(source='location_of_birth', read_only=True)
     exportation_city = serializers.CharField(source='location_of_exportation', read_only=True)
     exportation_sector = serializers.CharField(source='sector_of_exportation', read_only=True)
+    get_child_number = serializers.IntegerField(source='child_number', read_only=True)
 
     class Meta:
         model = Personnel
@@ -89,6 +90,7 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
 class ContractRowSerializer(serializers.ModelSerializer):
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     name = serializers.CharField(source='title', read_only=True)
+    have_ads = serializers.BooleanField(source='have_adjustment', read_only=True)
 
     class Meta:
         model = ContractRow
@@ -130,7 +132,7 @@ class ContractSerializer(serializers.ModelSerializer):
 
 class HRLetterSerializer(serializers.ModelSerializer):
     is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
-
+    get_aele_mandi_sum = serializers.IntegerField(source='aele_mandi_sum', read_only=True)
     class Meta:
         model = HRLetter
         fields = '__all__'
