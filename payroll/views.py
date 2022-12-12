@@ -583,52 +583,57 @@ class WorkshopPersonnelApiView(APIView):
 class WorkshopPersonnelVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_personnel'
-    validate_message = ''
     validate_status = True
+    error_messages = []
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
     def get(self, request, pk):
-        company = request.user.active_company.pk
         personnel = WorkshopPersonnel.objects.get(pk=pk)
         if not personnel.work_title:
             self.validate_status = False
-            raise ValidationError("عنوان شغلی(بیمه) را وارد کنید")
+            self.error_messages.append('عنوان شغلی(بیمه) را وارد کنید')
         if not personnel.job_location:
             self.validate_status = False
-            raise ValidationError("محل را خدمت")
+            self.error_messages.append("محل را خدمت")
         if not personnel.employee_status:
             self.validate_status = False
-            raise ValidationError("وضعیت کارمند را وارد کنید")
+            self.error_messages.append("وضعیت کارمند را وارد کنید")
         if not personnel.job_location_status:
-            raise ValidationError("وضعیت محل کار را وارد کنید")
-        if  personnel.previous_insurance_history_out_workshop == None:
             self.validate_status = False
-            raise ValidationError("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
+            self.error_messages.append("وضعیت محل کار را وارد کنید")
+        if personnel.previous_insurance_history_out_workshop == None:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
         if personnel.previous_insurance_history_out_workshop and\
             personnel.previous_insurance_history_out_workshop > 1000:
-            raise ValidationError("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
-        if  personnel.previous_insurance_history_in_workshop == None:
             self.validate_status = False
-            raise ValidationError("سابقه بیمه قبلی در این کارگاه را وارد کنید")
+            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
+        if personnel.previous_insurance_history_in_workshop == None:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی در این کارگاه را وارد کنید")
         if personnel.previous_insurance_history_in_workshop and\
             personnel.previous_insurance_history_in_workshop > 1000:
-            raise ValidationError("سابقه بیمه قبلی در این کارگاه نمیتواند بزرگتر از 1000 باشد")
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی در این کارگاه نمیتواند بزرگتر از 1000 باشد")
         if not personnel.job_position:
             self.validate_status = False
-            raise ValidationError("سمت یا شغل (دارایی) را وارد کنید")
+            self.error_messages.append("سمت یا شغل (دارایی) را وارد کنید")
         if not personnel.job_group:
             self.validate_status = False
-            raise ValidationError("رسته شغلی را وارد کنید")
+            self.error_messages.append("رسته شغلی را وارد کنید")
         if not personnel.employment_type:
             self.validate_status = False
-            raise ValidationError(" نوع استخدام را وارد کنید")
+            self.error_messages.append("نوع استخدام را وارد کنید")
         if not personnel.contract_type:
             self.validate_status = False
-            raise ValidationError("نوع قرارداد را وارد کنید")
+            self.error_messages.append("نوع قرارداد را وارد کنید")
         if not personnel.employment_date:
             self.validate_status = False
-            raise ValidationError("تاریخ استخدام را وارد کنید")
+            self.error_messages.append("تاریخ استخدام را وارد کنید")
         if personnel.haghe_sanavat_days and personnel.haghe_sanavat_days > 20000:
-            raise ValidationError("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
-
+            self.validate_status = False
+            self.error_messages.append("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
         same_personnel = WorkshopPersonnel.objects.filter(Q(workshop=personnel.workshop) &
                                                           Q(personnel=personnel.personnel))
         quit = []
@@ -636,12 +641,23 @@ class WorkshopPersonnelVerifyApi(APIView):
             if same_person.quit_job_date:
                 quit.append(same_person)
         if len(same_personnel) - len(quit) > 1:
-            raise ValidationError('این انتصاب تکراری است')
+            self.validate_status = False
+            self.error_messages.append("این انتصاب تکراری است")
         if self.validate_status:
             personnel.is_verified = True
             personnel.save()
-            return Response({'status': 'ثبت نهایی  پرسنل انجام شد'}, status=status.HTTP_200_OK)
-        return Response({'status': 'ثبت نهایی  پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({'وضعییت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            message = ''
+            counter = 1
+            for error in self.error_messages:
+                message += str(counter)
+                message += '- '
+                message += error
+                message += '\n '
+                message += '\n '
+                counter += 1
+            raise ValidationError(message)
 
 class WorkshopPersonnelUnVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -703,6 +719,7 @@ class WorkshopPersonnelDetail(APIView):
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class PersonnelUnVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel'
@@ -716,8 +733,13 @@ class PersonnelUnVerifyApi(APIView):
 class PersonnelVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel'
-    validate_message = ''
     validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
     def get(self, request, pk):
         company = request.user.active_company.pk
         personnel = Personnel.objects.get(pk=pk)
@@ -725,30 +747,30 @@ class PersonnelVerifyApi(APIView):
             personnel.military_service = 'x'
         if not personnel.name or not personnel.last_name:
             self.validate_status = False
-            raise ValidationError("نام یا نام خانوادگی را وارد کنید")
+            self.error_messages.append("نام یا نام خانوادگی را وارد کنید")
         if not personnel.father_name:
             self.validate_status = False
-            raise ValidationError("نام پدر را وارد کنید")
+            self.error_messages.append("نام پدر را وارد کنید")
         if not personnel.nationality:
             self.validate_status = False
-            raise ValidationError("ملیت را وارد کنید")
+            self.error_messages.append("ملیت را وارد کنید")
         if personnel.nationality == 1:
             personnel.country = 'ایران'
         if not personnel.country:
             self.validate_status = False
-            raise ValidationError("کشور را وارد کنید")
+            self.error_messages.append("کشور را وارد کنید")
         if not personnel.gender:
             self.validate_status = False
-            raise ValidationError("جنسیت را وارد کنید")
+            self.error_messages.append("جنسیت را وارد کنید")
         if personnel.gender == 'm' and not personnel.military_service and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("وضعییت خدمت سربازی را وارد کنید")
+            self.error_messages.append("وضعییت خدمت سربازی را وارد کنید")
         if not personnel.identity_code and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("شماره شناسنامه را وارد کنید")
+            self.error_messages.append("شماره شناسنامه را وارد کنید")
         if not personnel.national_code:
             self.validate_status = False
-            raise ValidationError("کد ملی را وارد کنید")
+            self.error_messages.append("کد ملی را وارد کنید")
         if personnel.national_code:
             same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) & Q(company=company) &
                                                  Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
@@ -756,136 +778,150 @@ class PersonnelVerifyApi(APIView):
                 is_valid_melli_code(personnel.national_code)
                 if len(same_code) > 0:
                     self.validate_status = False
-                    raise ValidationError("کد ملی تکراری می باشد")
+                    self.error_messages.append("کد ملی تکراری می باشد")
             if personnel.nationality == 2 and len(same_code) > 0:
                 self.validate_status = False
-                raise ValidationError("کد فراگیر تابعیت تکراری می باشد")
+                self.error_messages.append("کد فراگیر تابعیت تکراری می باشد")
         if not personnel.marital_status:
             self.validate_status = False
-            raise ValidationError("وضعیت تاهل را وارد کنید")
+            self.error_messages.append("وضعیت تاهل را وارد کنید")
         if not personnel.date_of_birth:
             self.validate_status = False
-            raise ValidationError("تاریخ تولد را وارد کنید")
+            self.error_messages.append("تاریخ تولد را وارد کنید")
         if not personnel.date_of_exportation and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("تاریخ صدور شناسنامه را وارد کنید")
+            self.error_messages.append("تاریخ صدور شناسنامه را وارد کنید")
         if not personnel.location_of_birth and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("محل تولد  را وارد کنید")
+            self.error_messages.append("محل تولد  را وارد کنید")
         if not personnel.location_of_foreign_birth and personnel.nationality == 2:
             self.validate_status = False
-            raise ValidationError("محل تولد  را وارد کنید")
+            self.error_messages.append("محل تولد  را وارد کنید")
         if not personnel.location_of_exportation and personnel.nationality == 1:
             self.validate_status = False
-            raise ValidationError("محل صدور شناسنامه را وارد کنید")
-        if not personnel.address :
+            self.error_messages.append("محل صدور شناسنامه را وارد کنید")
+        if not personnel.address:
             self.validate_status = False
-            raise ValidationError("آدرس را وارد کنید")
+            self.error_messages.append("آدرس را وارد کنید")
         if not personnel.postal_code:
-            raise ValidationError("کد پستی را وارد کنید")
+            self.validate_status = False
+            self.error_messages.append("کد پستی را وارد کنید")
         if personnel.postal_code:
             if len(personnel.postal_code) > 10 or len(personnel.postal_code) < 10:
-                raise ValidationError("طول کد پستی باید 10 رقم باشد")
+                self.validate_status = False
+                self.error_messages.append("طول کد پستی باید 10 رقم باشد")
         if personnel.city_phone_code:
             if len(personnel.city_phone_code) != 3:
                 self.validate_status = False
-                raise ValidationError("کد تلفن شهر باید سه رقمی باشد")
+                self.error_messages.append("کد تلفن شهر باید سه رقمی باشد")
             if personnel.city_phone_code[0] != '0':
                 self.validate_status = False
-                raise ValidationError("کد تلفن شهر باید با صفر شروع شود")
+                self.error_messages.append("کد تلفن شهر باید با صفر شروع شود")
         if personnel.phone_number and len(personnel.phone_number) != 8:
             self.validate_status = False
-            raise ValidationError(" تلفن شهر باید 8 رقمی باشد")
+            self.error_messages.append("تلفن شهر باید 8 رقمی باشد")
         if not personnel.mobile_number_1:
             self.validate_status = False
-            raise ValidationError("شماره موبایل را وارد کنید")
+            self.error_messages.append("شماره موبایل را وارد کنید")
         if personnel.mobile_number_1:
             if len(personnel.mobile_number_1) > 11 or len(personnel.mobile_number_1) < 11:
-                raise ValidationError("طول شماره موبایل باید 11 رقم باشد")
+                self.validate_status = False
+                self.error_messages.append("طول شماره موبایل باید 11 رقم باشد")
             if personnel.mobile_number_1[0] != '0':
-                raise ValidationError(" شماره موبایل با صفر شروع میشود")
-            for char in personnel.mobile_number_1:
-                try:
-                    int(char)
-                except ValueError:
-                    raise ValidationError('ساختار شماره موبایل صحیح نیست')
+                self.validate_status = False
+                self.error_messages.append("شماره موبایل با صفر شروع میشود")
         if personnel.mobile_number_2:
             if len(personnel.mobile_number_2) > 11 or len(personnel.mobile_number_2) < 11:
-                raise ValidationError("طول شماره موبایل باید 11 رقم باشد")
+                self.validate_status = False
+                self.error_messages.append("طول شماره موبایل 2 باید 11 رقم باشد")
             if personnel.mobile_number_2[0] != '0':
-                raise ValidationError(" شماره موبایل با صفر شروع میشود")
-            for char in personnel.mobile_number_2:
-                try:
-                    int(char)
-                except ValueError:
-                    raise ValidationError('ساختار شماره موبایل صحیح نیست')
+                self.validate_status = False
+                self.error_messages.append("شماره موبایل 2 با صفر شروع میشود")
         if personnel.insurance and not personnel.insurance_code:
             self.validate_status = False
-            raise ValidationError("َشماره بیمه را وارد کنید")
+            self.error_messages.append("َشماره بیمه را وارد کنید")
         if personnel.insurance_code:
             if len(personnel.insurance_code) > 10 or len(personnel.insurance_code) < 10:
-                raise ValidationError("طول شماره بیمه باید 10 رقم باشد")
+                self.validate_status = False
+                self.error_messages.append("طول شماره بیمه باید 10 رقم باشد")
             if personnel.insurance_code[:2] != '00':
-                raise ValidationError(" شماره بیمه باید با 00 شروع شود")
-
+                self.validate_status = False
+                self.error_messages.append("شماره بیمه باید با 00 شروع شود")
         if not personnel.degree_education:
             self.validate_status = False
-            raise ValidationError("مدرک تحصیلی را وارد کنید")
-
+            self.error_messages.append("مدرک تحصیلی را وارد کنید")
         if personnel.degree_education == 3 and not personnel.field_of_study:
             self.validate_status = False
-            raise ValidationError("رشته تحصیلی را وارد کنید")
+            self.error_messages.append("رشته تحصیلی را وارد کنید")
         if personnel.degree_education != 1 and personnel.degree_education != 2:
             if not personnel.field_of_study:
                 self.validate_status = False
-                raise ValidationError("رشته تحصیلی را وارد کنید")
+                self.error_messages.append("رشته تحصیلی را وارد کنید")
             elif personnel.degree_education != 3 and not personnel.university_type:
                 self.validate_status = False
-                raise ValidationError("نوع دانشگاه را وارد کنید")
+                self.error_messages.append("نوع دانشگاه را وارد کنید")
             elif personnel.degree_education != 3 and not personnel.university_name:
                 self.validate_status = False
-                raise ValidationError("نام دانشگاه را وارد کنید")
+                self.error_messages.append("نام دانشگاه را وارد کنید")
         if not personnel.account_bank_name:
             self.validate_status = False
-            raise ValidationError("نام بانک حساب را وارد کنید")
+            self.error_messages.append("نام بانک حساب را وارد کنید")
         if not personnel.account_bank_number:
             self.validate_status = False
-            raise ValidationError("شماره حساب حقوق را وارد کنید")
+            self.error_messages.append("شماره حساب حقوق را وارد کنید")
         if not personnel.bank_cart_number:
-            raise ValidationError("شماره کارت حقوق را وارد کنید")
+            self.validate_status = False
+            self.error_messages.append("شماره کارت حقوق را وارد کنید")
         if personnel.bank_cart_number and len(personnel.bank_cart_number) != 16:
-            raise ValidationError("طول شماره کارت باید 16 رقم باشد")
+            self.validate_status = False
+            self.error_messages.append("طول شماره کارت باید 16 رقم باشد")
         if not personnel.sheba_number:
             self.validate_status = False
-            raise ValidationError("شماره شبا حقوق را وارد کنید")
+            self.error_messages.append("شماره شبا حقوق را وارد کنید")
         if personnel.sheba_number and len(personnel.sheba_number) != 24:
-            raise ValidationError("طول شماره شبا باید 24 رقم باشد")
+            self.validate_status = False
+            self.error_messages.append("طول شماره شبا باید 24 رقم باشد")
         if personnel.is_personnel_active == None:
-            raise ValidationError("وضعییت پرسنل را وارد کنید")
+            self.validate_status = False
+            self.error_messages.append("وضعییت پرسنل را وارد کنید")
         if self.validate_status:
             personnel.is_personnel_verified = True
             personnel.save()
-            return Response({'status': 'ثبت نهایی پرسنل انجام شد'}, status=status.HTTP_200_OK)
-        return Response({'status': 'ثبت نهایی پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({'وضعییت': 'ثبت نهایی پرسنل  انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            message = ''
+            counter = 1
+            for error in self.error_messages:
+                message += str(counter)
+                message += '- '
+                message += error
+                message += '\n '
+                message += '\n '
+                counter += 1
+            raise ValidationError(message)
 
 
 class PersonnelFamilyVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel_family'
-    validate_message = ''
     validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
     def get(self, request, pk):
-        company = request.user.active_company.pk
         personnel = PersonnelFamily.objects.get(pk=pk)
         if not personnel.relative:
             self.validate_status = False
-            raise ValidationError("نسبت وارد کنید")
+            self.error_messages.append("نسبت وارد کنید")
         if not personnel.name or not personnel.last_name:
             self.validate_status = False
-            raise ValidationError("نام یا نام خانوادگی را وارد کنید")
+            self.error_messages.append("نام یا نام خانوادگی را وارد کنید")
         if not personnel.national_code:
             self.validate_status = False
-            raise ValidationError("کد ملی را وارد کنید")
+            self.error_messages.append("کد ملی را وارد کنید")
         if personnel.national_code:
             is_valid_melli_code(personnel.national_code)
             same_code = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel.id) & Q(is_verified=True) &
@@ -893,37 +929,47 @@ class PersonnelFamilyVerifyApi(APIView):
 
             if len(same_code) > 0:
                 self.validate_status = False
-                raise ValidationError("کد ملی تکراری می باشد")
+                self.error_messages.append("کد ملی تکراری می باشد")
             if personnel.national_code == personnel.personnel.national_code:
                 self.validate_status = False
-                raise ValidationError("کد ملی با پرسنل برابر می باشد")
+                self.error_messages.append("کد ملی با پرسنل برابر می باشد")
         if not personnel.date_of_birth:
             self.validate_status = False
-            raise ValidationError("تاریخ تولد را وارد کنید")
+            self.error_messages.append("تاریخ تولد را وارد کنید")
         if not personnel.marital_status:
             self.validate_status = False
-            raise ValidationError("وضعییت تاهل را وارد کنید")
+            self.error_messages.append("وضعییت تاهل را وارد کنید")
         if not personnel.study_status:
             self.validate_status = False
-            raise ValidationError("وضعییت تحصیل را وارد کنید")
+            self.error_messages.append("وضعییت تحصیل را وارد کنید")
         if not personnel.military_service:
             self.validate_status = False
-            raise ValidationError(" خدمت سربازی را وارد کنید")
+            self.error_messages.append("خدمت سربازی را وارد کنید")
         if not personnel.physical_condition:
             self.validate_status = False
-            raise ValidationError("وضعییت جسمی را وارد کنید")
+            self.error_messages.append("وضعییت جسمی را وارد کنید")
         if personnel.relative == 'f' or personnel.relative == 'm':
             same = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel) & Q(relative=personnel.relative) &
                                                   Q(is_verified=True))
             if len(same) != 0:
                 self.validate_status = False
-                raise ValidationError("این نسبت قبلا ثبت شده")
+                self.error_messages.append("این نسبت قبلا ثبت شده")
 
         if self.validate_status:
-            personnel.is_verified = True
+            personnel.is_personnel_verified = True
             personnel.save()
-            return Response({'status': 'ثبت نهایی خانواده پرسنل انجام شد'}, status=status.HTTP_200_OK)
-        return Response({'status': 'ثبت نهایی خانواده پرسنل رد شد'}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({'وضعییت': 'ثبت نهایی خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            message = ''
+            counter = 1
+            for error in self.error_messages:
+                message += str(counter)
+                message += '- '
+                message += error
+                message += '\n '
+                message += '\n '
+                counter += 1
+            raise ValidationError(message)
 
 
 class PersonnelFamilyUnVerifyApi(APIView):

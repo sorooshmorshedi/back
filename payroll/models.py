@@ -445,6 +445,10 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
         return round(self.contract_initial_amount)
 
     @property
+    def round_now_amount(self):
+        return round(self.amount)
+
+    @property
     def have_adjustment(self):
         if len(self.adjustment.all()) > 0:
             print(self.adjustment.all())
@@ -2313,8 +2317,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         return insurance_not_included
 
     def save(self, *args, **kwargs):
-        if self.is_template == 't':
-            raise ValidationError('is_template')
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
