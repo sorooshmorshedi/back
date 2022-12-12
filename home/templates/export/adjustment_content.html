@@ -4,11 +4,43 @@
 
     <table class="table table-bordered table-striped">
         <tr>
+            <th colspan="6" class="text-center">
+                وضعیت اولیه ردیف پیمان {{ contract_row.contract_row }}
+            </th>
+        </tr>
+        <tr>
             <th>ردیف پیمان</th>
-            <th>تاریخ ثبت</th>
-            <th>تاریخ تعدیل</th>
-            <th>مبلغ تعدیل</th>
-            <th>نوع</th>
+            <th>کد و نام کارگاه</th>
+            <th>تاریخ شروع قرارداد</th>
+            <th>تاریخ پایان قرارداد</th>
+            <th>مبلغ اولیه قرارداد</th>
+            <th>شناسه ملی واگذار کننده</th>
+        </tr>
+            <tr>
+            <td>{{ contract_row.title }}</td>
+            <td>{{ contract_row.workshop.workshop_title }}</td>
+            <td>{{ contract_row.from_date }}</td>
+            <td>{{ contract_row.initial_to_date }}</td>
+            <td>{{ contract_row.contract_initial_amount }}</td>
+            <td>{{ contract_row.assignor_national_code }}</td>
+
+        </tr>
+        <tr>
+            <th colspan="6" class="text-center">
+            </th>
+        </tr>
+        <tr>
+            <th colspan="6" class="text-center">
+                تغییرات ردیف پیمان {{ contract_row.contract_row }}
+            </th>
+        </tr>
+
+        <tr>
+            <th>ردیف پیمان</th>
+            <th>تاریخ ثبت تعدیل</th>
+            <th>تاریخ پایان جدید</th>
+            <th>مبلغ تعدیل قرارداد</th>
+            <th>نوع تعدیل مبلغ</th>
             <th>توضیحات</th>
 
         </tr>
@@ -23,6 +55,32 @@
 
         </tr>
         {% endfor %}
+            <tr>
+            <th colspan="6" class="text-center">
+            </th>
+        </tr>
+        <tr>
+            <th colspan="6" class="text-center">
+                وضعیت فعلی ردیف پیمان {{ contract_row.contract_row }}
+            </th>
+        <tr>
+            <th>ردیف پیمان</th>
+            <th>کد و نام کارگاه</th>
+            <th>تاریخ شروع قرارداد</th>
+            <th>تاریخ پایان قرارداد</th>
+            <th>مبلغ اولیه قرارداد</th>
+            <th>شناسه ملی واگذار کننده</th>
+        </tr>
+        </tr>
+            <tr>
+            <td>{{ contract_row.title }}</td>
+            <td>{{ contract_row.workshop.workshop_title }}</td>
+            <td>{{ contract_row.from_date }}</td>
+            <td>{{ contract_row.to_date }}</td>
+            <td>{{ contract_row.amount }}</td>
+            <td>{{ contract_row.assignor_national_code }}</td>
+
+        </tr>
 
 
     </table>

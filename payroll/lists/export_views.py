@@ -3420,8 +3420,9 @@ class AdjustmentExportView(AdjustmentListView, BaseExportView):
 
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.get_queryset()
-
+        contract_row = qs.first().contract_row
         context = {
+            'contract_row': contract_row,
             'forms': qs,
             'company': user.active_company,
             'financial_year': user.active_financial_year,
@@ -3473,30 +3474,16 @@ class AdjustmentExportView(AdjustmentListView, BaseExportView):
             [
                 'تعدیل'
             ],
+            ['ردیف پیمان', 'تاریخ ثبت تعدیل', 'تاریخ پایان جدید',
+             'مبلغ تعدیل قرارداد', 'نوع تعدیل مبلغ', 'توضیحات']
         ]
         for form in adjustment:
             data.append([
-                'ردیف پیمان',
                 form.contract_row.title,
-            ])
-            data.append([
-                'تاریخ ثبت',
                 form.date,
-            ])
-            data.append([
-                'تاریخ تعدیل',
                 form.change_date,
-            ])
-            data.append([
-                'مبلغ تعدیل',
                 form.amount,
-            ])
-            data.append([
-                'نوع',
                 form.status_display,
-            ])
-            data.append([
-                'توضیحات',
                 form.explanation,
             ])
         return data

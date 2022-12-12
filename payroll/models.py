@@ -467,7 +467,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     contract_row = models.ForeignKey(ContractRow, related_name='adjustment', on_delete=models.CASCADE)
-    amount = DECIMAL(blank=True, null=True)
+    amount = models.IntegerField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
     change_date = jmodels.jDateField(blank=True, null=True)
     explanation = EXPLANATION()
@@ -500,7 +500,7 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.date = self.contract_row.to_date
+            self.date = jdatetime.date.today()
             if self.amount:
                 if self.status == None:
                     raise ValidationError('نوع تعدیل را وارد کنید')
@@ -522,7 +522,11 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
             else:
                 self.contract_row.amount += self.amount
         if self.change_date:
-            self.contract_row.to_date = self.date
+            items = self.contract_row.adjustment.all()
+            for item in items:
+                if item.change_date and item.id != self.id:
+                    self.contract_row.to_date = item.change_date
+                    break
         self.contract_row.save()
         super(Adjustment, self).delete()
 

@@ -24,6 +24,7 @@ class WorkshopFilter(filters.FilterSet):
             'postal_code': BASE_FIELD_FILTERS,
             'branch_code': BASE_FIELD_FILTERS,
             'branch_name': BASE_FIELD_FILTERS,
+            'is_active': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
