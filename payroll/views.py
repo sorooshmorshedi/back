@@ -429,7 +429,6 @@ class ContractRowAdjustmentDetail(APIView):
 class ContractRowVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'contracct_row'
-    validate_message = ''
     validate_status = True
     error_messages = []
     def __init__(self):
@@ -485,16 +484,13 @@ class ContractRowVerifyApi(APIView):
             contract_row.save()
             return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
         else:
-            message = ''
             counter = 1
+            response = []
             for error in self.error_messages:
-                message += str(counter)
-                message += '- '
-                message += error
-                message += '\n '
-                message += '\n '
+                error = str(counter) + '-' + error
                 counter += 1
-            raise ValidationError(message)
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractRowUnVerifyApi(APIView):
@@ -648,16 +644,14 @@ class WorkshopPersonnelVerifyApi(APIView):
             personnel.save()
             return Response({'وضعییت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
         else:
-            message = ''
             counter = 1
+            response = []
             for error in self.error_messages:
-                message += str(counter)
-                message += '- '
-                message += error
-                message += '\n '
-                message += '\n '
+                error = str(counter) + '-' + error
                 counter += 1
-            raise ValidationError(message)
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class WorkshopPersonnelUnVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -762,10 +756,10 @@ class PersonnelVerifyApi(APIView):
         if not personnel.gender:
             self.validate_status = False
             self.error_messages.append("جنسیت را وارد کنید")
-        if personnel.gender == 'm' and not personnel.military_service and personnel.nationality == 1:
+        if personnel.gender != 'f' and not personnel.military_service and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("وضعییت خدمت سربازی را وارد کنید")
-        if not personnel.identity_code and personnel.nationality == 1:
+        if not personnel.identity_code and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("شماره شناسنامه را وارد کنید")
         if not personnel.national_code:
@@ -788,21 +782,24 @@ class PersonnelVerifyApi(APIView):
         if not personnel.date_of_birth:
             self.validate_status = False
             self.error_messages.append("تاریخ تولد را وارد کنید")
-        if not personnel.date_of_exportation and personnel.nationality == 1:
+        if not personnel.date_of_exportation and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("تاریخ صدور شناسنامه را وارد کنید")
-        if not personnel.location_of_birth and personnel.nationality == 1:
+        if not personnel.location_of_birth and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("محل تولد  را وارد کنید")
         if not personnel.location_of_foreign_birth and personnel.nationality == 2:
             self.validate_status = False
             self.error_messages.append("محل تولد  را وارد کنید")
-        if not personnel.location_of_exportation and personnel.nationality == 1:
+        if not personnel.location_of_exportation and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("محل صدور شناسنامه را وارد کنید")
         if not personnel.address:
             self.validate_status = False
             self.error_messages.append("آدرس را وارد کنید")
+        if not personnel.city:
+            self.validate_status = False
+            self.error_messages.append("شهر محل سکونت را وارد کنید")
         if not personnel.postal_code:
             self.validate_status = False
             self.error_messages.append("کد پستی را وارد کنید")
@@ -889,16 +886,13 @@ class PersonnelVerifyApi(APIView):
             personnel.save()
             return Response({'وضعییت': 'ثبت نهایی پرسنل  انجام شد'}, status=status.HTTP_200_OK)
         else:
-            message = ''
             counter = 1
+            response = []
             for error in self.error_messages:
-                message += str(counter)
-                message += '- '
-                message += error
-                message += '\n '
-                message += '\n '
+                error = str(counter) + '-' + error
                 counter += 1
-            raise ValidationError(message)
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonnelFamilyVerifyApi(APIView):
@@ -960,16 +954,13 @@ class PersonnelFamilyVerifyApi(APIView):
             personnel.save()
             return Response({'وضعییت': 'ثبت نهایی خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
         else:
-            message = ''
             counter = 1
+            response = []
             for error in self.error_messages:
-                message += str(counter)
-                message += '- '
-                message += error
-                message += '\n '
-                message += '\n '
+                error = str(counter) + '-' + error
                 counter += 1
-            raise ValidationError(message)
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonnelFamilyUnVerifyApi(APIView):

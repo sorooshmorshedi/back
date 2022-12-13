@@ -91,8 +91,10 @@ class ContractRowSerializer(serializers.ModelSerializer):
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     name = serializers.CharField(source='title', read_only=True)
     have_ads = serializers.BooleanField(source='have_adjustment', read_only=True)
-    round_initial_amount = serializers.IntegerField(source='round_amount', read_only=True)
-    round_amount = serializers.IntegerField(source='round_now_amount', read_only=True)
+    round_initial_amount = serializers.CharField(source='round_amount_with_comma', read_only=True)
+    round_amount = serializers.CharField(source='round_now_amount_with_comma', read_only=True)
+    get_now_date = serializers.DateField(source='now_date', read_only=True)
+    get_now_amount = serializers.IntegerField(source='now_amount', read_only=True)
 
     class Meta:
         model = ContractRow

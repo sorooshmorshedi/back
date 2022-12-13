@@ -440,18 +440,76 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return str(self.contract_row) + ' در ' + self.workshop.workshop_title
+
     @property
     def round_amount(self):
         return round(self.contract_initial_amount)
+
+    @property
+    def now_amount(self):
+        if self.have_adjustment:
+            adjustments = self.adjustment.all()
+            amount = self.contract_initial_amount
+            for adjustment in adjustments:
+                if adjustment.status != None:
+                    if adjustment.status == True:
+                        amount += adjustment.amount
+                    else:
+                        amount -= adjustment.amount
+        else:
+            amount = self.contract_initial_amount
+        return amount
+
+    @property
+    def now_date(self):
+        date = None
+        if self.have_adjustment:
+            adjustments = self.adjustment.all()
+            for adjustment in adjustments:
+                if adjustment.change_date:
+                    date = adjustment.change_date
+                    break
+        if date == None:
+            date = self.initial_to_date
+        return date
+
 
     @property
     def round_now_amount(self):
         return round(self.amount)
 
     @property
+    def round_amount_with_comma(self):
+        amount = str(round(self.contract_initial_amount))[::-1]
+        loop = int(len(amount) / 3)
+        counter = 0
+        if loop > 1:
+            for i in range(1, loop):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        elif loop == 1 and len(amount) > 3:
+            amount = amount[:3] + ',' + amount[3:]
+        return amount[::-1]
+
+    @property
+    def round_now_amount_with_comma(self):
+        amount = str(round(self.now_amount))[::-1]
+        loop = int(len(amount) / 3)
+        counter = 0
+        print(loop)
+        if loop > 1:
+            for i in range(1, loop):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        elif loop == 1 and len(amount) > 3:
+            amount = amount[:3] + ',' + amount[3:]
+        return amount[::-1]
+
+    @property
     def have_adjustment(self):
         if len(self.adjustment.all()) > 0:
-            print(self.adjustment.all())
             return True
         else:
             return False
@@ -464,6 +522,7 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
         if not self.id:
             self.amount = self.contract_initial_amount
             self.to_date = self.initial_to_date
+
         super().save(*args, **kwargs)
 
 
@@ -493,6 +552,7 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return 'تعدیل برای ' + self.contract_row.title
+
     @property
     def status_display(self):
         if self.status:
@@ -502,37 +562,30 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
         else:
             return ''
 
+    @property
+    def amount_with_comma(self):
+        amount = str(round(self.amount))[::-1]
+        loop = int(len(amount) / 3)
+        counter = 0
+        print(loop)
+        if loop > 1:
+            for i in range(1, loop):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        elif loop == 1 and len(amount) > 3:
+            amount = amount[:3] + ',' + amount[3:]
+        return amount[::-1]
+
+
     def save(self, *args, **kwargs):
         if not self.id:
             self.date = jdatetime.date.today()
-            if self.amount:
-                if self.status == None:
-                    raise ValidationError('نوع تعدیل را وارد کنید')
-                if self.status:
-                    self.contract_row.amount += self.amount
-                else:
-                    self.contract_row.amount -= self.amount
-            if self.change_date:
-                self.contract_row.to_date = self.change_date
-            elif not self.change_date:
-                self.change_date = self.contract_row.to_date
-            self.contract_row.save()
+        if self.amount and self.status == None:
+            raise ValidationError('نوع تعدیل را وارد کنید')
+        if not self.amount and not self.change_date:
+            raise ValidationError('تاریخ تغییر یا مبلغ تغییر را وارد کنید')
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.amount:
-            if self.status:
-                self.contract_row.amount -= self.amount
-            else:
-                self.contract_row.amount += self.amount
-        if self.change_date:
-            items = self.contract_row.adjustment.all()
-            for item in items:
-                if item.change_date and item.id != self.id:
-                    self.contract_row.to_date = item.change_date
-                    break
-        self.contract_row.save()
-        super(Adjustment, self).delete()
 
 
 class Personnel(BaseModel, LockableMixin, DefinableMixin):
@@ -710,8 +763,10 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     location_of_birth = models.ForeignKey(City, related_name='location_of_birth', on_delete=models.SET_NULL, blank=True, null=True)
     location_of_foreign_birth = models.CharField(max_length=255, null=True, blank=True)
-    location_of_exportation = models.ForeignKey(City, related_name='location_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
-    sector_of_exportation = models.ForeignKey(City, related_name='sector_of_exportation', on_delete=models.SET_NULL, blank=True, null=True)
+    location_of_exportation = models.CharField(max_length=100, blank=True, null=True)
+    location_of_exportation_code = models.CharField(max_length=100, blank=True, null=True)
+    sector_of_exportation = models.CharField(max_length=100, blank=True, null=True)
+    sector_of_exportation_code = models.CharField(max_length=100, blank=True, null=True)
 
     marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS_TYPES, blank=True, null=True)
     number_of_childes = models.IntegerField(default=0)
@@ -720,7 +775,8 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     phone_number = models.CharField(max_length=50, blank=True, null=True)
     mobile_number_1 = models.CharField(max_length=50, blank=True, null=True)
     mobile_number_2 = models.CharField(max_length=50, blank=True, null=True)
-    city = models.ForeignKey(City, related_name='city_of_personnel', on_delete=models.SET_NULL, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    city_code = models.CharField(max_length=100, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
 
@@ -907,7 +963,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
 
     is_verified = models.BooleanField(default=False, null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, blank=True, null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField()
 
     class Meta(BaseModel.Meta):
         verbose_name = 'PersonnelFamily'

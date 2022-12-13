@@ -21,7 +21,7 @@
             <td>{{ contract_row.workshop.workshop_title }}</td>
             <td>{{ contract_row.from_date }}</td>
             <td>{{ contract_row.initial_to_date }}</td>
-            <td>{{ contract_row.contract_initial_amount }}</td>
+            <td>{{ contract_row.round_amount_with_comma }}</td>
             <td>{{ contract_row.assignor_national_code }}</td>
 
         </tr>
@@ -49,7 +49,7 @@
             <td>{{ form.contract_row.title }}</td>
             <td>{{ form.date }}</td>
             <td>{{ form.change_date }}</td>
-            <td>{{ form.amount }}</td>
+            <td>{{ form.amount_with_comma }}</td>
             <td>{{ form.status_display }}</td>
             <td>{{ form.explanation }}</td>
 
@@ -77,7 +77,7 @@
             <td>{{ contract_row.workshop.workshop_title }}</td>
             <td>{{ contract_row.from_date }}</td>
             <td>{{ contract_row.to_date }}</td>
-            <td>{{ contract_row.amount }}</td>
+            <td>{{ contract_row.round_now_amount_with_comma }}</td>
             <td>{{ contract_row.assignor_national_code }}</td>
 
         </tr>

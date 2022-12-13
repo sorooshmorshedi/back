@@ -383,7 +383,7 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 'لیست ردیف پیمان'
             ],
             ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
-             'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', 'حداقل مبلغ پیمان', 'شعبه']
+             'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', ' مبلغ اولیه پیمان', ' مبلغ فعلی پیمان', 'شعبه']
         ]
         for form in contract_row:
             data.append([
@@ -392,11 +392,12 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 form.contract_number,
                 form.registration_date,
                 form.from_date,
-                form.to_date,
+                form.now_date,
                 form.assignor_name,
                 form.assignor_national_code,
                 form.assignor_workshop_code,
-                form.contract_initial_amount,
+                form.round_amount_with_comma,
+                form.round_now_amount_with_comma,
                 form.branch
 
             ])
@@ -3482,7 +3483,7 @@ class AdjustmentExportView(AdjustmentListView, BaseExportView):
                 form.contract_row.title,
                 form.date,
                 form.change_date,
-                form.amount,
+                form.amount_with_comma,
                 form.status_display,
                 form.explanation,
             ])

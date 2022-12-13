@@ -13,7 +13,8 @@
             <th>نام واگذار کننده</th>
             <th>کد ملی واگذار کننده</th>
             <th>کد کارگاه واگذار کننده</th>
-            <th>حداقل مبلغ پیمان</th>
+            <th> مبلغ اولیه پیمان</th>
+            <th> مبلغ فعلی پیمان</th>
             <th>شعبه</th>
 
         </tr>
@@ -28,7 +29,8 @@
                 <td>{{ form.assignor_name }}</td>
                 <td>{{ form.assignor_national_code }}</td>
                 <td>{{ form.assignor_workshop_code }}</td>
-                <td>{{ form.round_amount }}</td>
+                <td>{{ form.round_amount_with_comma }}</td>
+                <td>{{ form.round_now_amount_with_comma }}</td>
                 <td>{{ form.branch }}</td>
 
             </tr>
