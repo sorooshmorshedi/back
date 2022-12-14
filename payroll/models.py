@@ -471,7 +471,10 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def round_now_amount(self):
-        return round(self.amount)
+        if self.amount:
+            return round(self.amount)
+        else:
+            0
 
     @staticmethod
     def with_comma(input_amount):
@@ -589,18 +592,21 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def amount_with_comma(self):
-        amount = str(round(self.amount))[::-1]
-        loop = int(len(amount) / 3)
-        counter = 0
-        print(loop)
-        if loop > 1:
-            for i in range(1, loop):
-                index = (i * 3) + counter
-                counter += 1
-                amount = amount[:index] + ',' + amount[index:]
-        elif loop == 1 and len(amount) > 3:
-            amount = amount[:3] + ',' + amount[3:]
-        return amount[::-1]
+        if self.amount:
+            amount = str(round(self.amount))[::-1]
+            loop = int(len(amount) / 3)
+            counter = 0
+            print(loop)
+            if loop > 1:
+                for i in range(1, loop):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            elif loop == 1 and len(amount) > 3:
+                amount = amount[:3] + ',' + amount[3:]
+            return amount[::-1]
+        else:
+            return 0
 
 
     def save(self, *args, **kwargs):
