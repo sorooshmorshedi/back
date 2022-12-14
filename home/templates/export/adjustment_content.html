@@ -98,8 +98,8 @@
             <th>ردیف پیمان</th>
             <th>کد و نام کارگاه</th>
             <th>تاریخ شروع قرارداد</th>
-            <th>تاریخ پایان قرارداد</th>
-            <th>مبلغ اولیه قرارداد</th>
+            <th>تاریخ پایان فعلی قرارداد</th>
+            <th>مبلغ فعلی قرارداد</th>
             <th>شناسه ملی واگذار کننده</th>
         </tr>
         </tr>
@@ -107,7 +107,7 @@
             <td>{{ contract_row.title }}</td>
             <td>{{ contract_row.workshop.workshop_title }}</td>
             <td>{{ contract_row.from_date }}</td>
-            <td>{{ contract_row.to_date }}</td>
+            <td>{{ contract_row.now_date }}</td>
             <td>{{ contract_row.round_now_amount_with_comma }}</td>
             <td>{{ contract_row.assignor_national_code }}</td>
 
