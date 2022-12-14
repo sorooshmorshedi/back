@@ -480,32 +480,39 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def round_amount_with_comma(self):
-        amount = str(round(self.contract_initial_amount))[::-1]
-        loop = int(len(amount) / 3)
-        counter = 0
-        if loop > 1:
-            for i in range(1, loop):
-                index = (i * 3) + counter
-                counter += 1
-                amount = amount[:index] + ',' + amount[index:]
-        elif loop == 1 and len(amount) > 3:
-            amount = amount[:3] + ',' + amount[3:]
-        return amount[::-1]
+        if self.contract_initial_amount:
+            amount = str(round(self.contract_initial_amount))[::-1]
+            loop = int(len(amount) / 3)
+            counter = 0
+            if loop > 1:
+                for i in range(1, loop):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            elif loop == 1 and len(amount) > 3:
+                amount = amount[:3] + ',' + amount[3:]
+            return amount[::-1]
+        else:
+            return 0
 
     @property
     def round_now_amount_with_comma(self):
-        amount = str(round(self.now_amount))[::-1]
-        loop = int(len(amount) / 3)
-        counter = 0
-        print(loop)
-        if loop > 1:
-            for i in range(1, loop):
-                index = (i * 3) + counter
-                counter += 1
-                amount = amount[:index] + ',' + amount[index:]
-        elif loop == 1 and len(amount) > 3:
-            amount = amount[:3] + ',' + amount[3:]
-        return amount[::-1]
+        if self.now_amount:
+            amount = str(round(self.now_amount))[::-1]
+            loop = int(len(amount) / 3)
+            counter = 0
+            print(loop)
+            if loop > 1:
+                for i in range(1, loop):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            elif loop == 1 and len(amount) > 3:
+                amount = amount[:3] + ',' + amount[3:]
+            return amount[::-1]
+        else:
+            return 0
+
 
     @property
     def have_adjustment(self):
@@ -761,7 +768,8 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     date_of_birth = jmodels.jDateField(blank=True, null=True)
     date_of_exportation = jmodels.jDateField(blank=True, null=True)
 
-    location_of_birth = models.ForeignKey(City, related_name='location_of_birth', on_delete=models.SET_NULL, blank=True, null=True)
+    location_of_birth = models.CharField(max_length=100, null=True, blank=True)
+    location_of_birth_code = models.CharField(max_length=100, null=True, blank=True)
     location_of_foreign_birth = models.CharField(max_length=255, null=True, blank=True)
     location_of_exportation = models.CharField(max_length=100, blank=True, null=True)
     location_of_exportation_code = models.CharField(max_length=100, blank=True, null=True)
