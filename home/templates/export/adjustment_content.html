@@ -16,7 +16,7 @@
             <th>مبلغ اولیه قرارداد</th>
             <th>شناسه ملی واگذار کننده</th>
         </tr>
-            <tr>
+        <tr>
             <td>{{ contract_row.title }}</td>
             <td>{{ contract_row.workshop.workshop_title }}</td>
             <td>{{ contract_row.from_date }}</td>
@@ -45,17 +45,48 @@
 
         </tr>
         {% for form in forms %}
-        <tr>
-            <td>{{ form.contract_row.title }}</td>
-            <td>{{ form.date }}</td>
-            <td>{{ form.change_date }}</td>
-            <td>{{ form.amount_with_comma }}</td>
-            <td>{{ form.status_display }}</td>
-            <td>{{ form.explanation }}</td>
-
-        </tr>
-        {% endfor %}
             <tr>
+                {% if form.contract_row %}
+                    <td>{{ form.contract_row.title }}</td>
+                {% endif %}
+                {% if not form.contract_row %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                <td>{{ form.date }}</td>
+
+                {% if form.change_date %}
+                    <td>{{ form.change_date }}</td>
+                {% endif %}
+                {% if not form.change_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.amount_with_comma %}
+                    <td>{{ form.amount_with_comma }}</td>
+                {% endif %}
+                {% if not form.amount_with_comma %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.status_display %}
+                    <td>{{ form.status_display }}</td>
+                {% endif %}
+                {% if not form.status_display %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.explanation %}
+                    <td>{{ form.explanation }}</td>
+                {% endif %}
+                {% if not form.explanation %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+
+            </tr>
+        {% endfor %}
+        <tr>
             <th colspan="6" class="text-center">
             </th>
         </tr>
@@ -72,7 +103,7 @@
             <th>شناسه ملی واگذار کننده</th>
         </tr>
         </tr>
-            <tr>
+        <tr>
             <td>{{ contract_row.title }}</td>
             <td>{{ contract_row.workshop.workshop_title }}</td>
             <td>{{ contract_row.from_date }}</td>

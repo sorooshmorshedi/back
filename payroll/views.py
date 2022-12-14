@@ -463,7 +463,11 @@ class ContractRowVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('شناسه ملی واگذارکننده را وارد کنید')
         if contract_row.assignor_national_code:
-            is_shenase_meli(contract_row.assignor_national_code)
+            confirm, message = is_shenase_meli(contract_row.assignor_national_code)
+            if not confirm:
+                self.validate_status = False
+                self.error_messages.append(message)
+
         if not contract_row.assignor_name:
             self.validate_status = False
             self.error_messages.append('نام واگذارکننده را وارد کنید')
@@ -497,10 +501,29 @@ class ContractRowUnVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'contract_row'
     def get(self, request, pk):
-        personnel = ContractRow.objects.get(pk=pk)
-        personnel.is_verified = False
-        personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+        row = ContractRow.objects.get(pk=pk)
+        row.is_verified = False
+        row.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+
+class ContractRowUnActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+    def get(self, request, pk):
+        row = ContractRow.objects.get(pk=pk)
+        row.status = False
+        row.save()
+        return Response({'وضعییت': 'غیر فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+class ContractRowActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+    def get(self, request, pk):
+        row = ContractRow.objects.get(pk=pk)
+        row.status = True
+        row.save()
+        return Response({'وضعییت': ' فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
 
 class ContractApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -794,12 +817,12 @@ class PersonnelVerifyApi(APIView):
         if not personnel.location_of_exportation and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("محل صدور شناسنامه را وارد کنید")
-        if not personnel.address:
-            self.validate_status = False
-            self.error_messages.append("آدرس را وارد کنید")
         if not personnel.city:
             self.validate_status = False
             self.error_messages.append("شهر محل سکونت را وارد کنید")
+        if not personnel.address:
+            self.validate_status = False
+            self.error_messages.append("آدرس را وارد کنید")
         if not personnel.postal_code:
             self.validate_status = False
             self.error_messages.append("کد پستی را وارد کنید")
@@ -847,17 +870,14 @@ class PersonnelVerifyApi(APIView):
         if not personnel.degree_education:
             self.validate_status = False
             self.error_messages.append("مدرک تحصیلی را وارد کنید")
-        if personnel.degree_education == 3 and not personnel.field_of_study:
-            self.validate_status = False
-            self.error_messages.append("رشته تحصیلی را وارد کنید")
-        if personnel.degree_education != 1 and personnel.degree_education != 2:
+        if personnel.degree_education and personnel.degree_education >= 3:
             if not personnel.field_of_study:
                 self.validate_status = False
                 self.error_messages.append("رشته تحصیلی را وارد کنید")
-            elif personnel.degree_education != 3 and not personnel.university_type:
+            if personnel.degree_education > 3 and not personnel.university_type:
                 self.validate_status = False
                 self.error_messages.append("نوع دانشگاه را وارد کنید")
-            elif personnel.degree_education != 3 and not personnel.university_name:
+            if personnel.degree_education > 3 and not personnel.university_name:
                 self.validate_status = False
                 self.error_messages.append("نام دانشگاه را وارد کنید")
         if not personnel.account_bank_name:

@@ -395,17 +395,9 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
-    ACTIVE = 'a'
-    NO_ACTIVE = 'n'
-
-    ACTIVE_TYPE = (
-        (ACTIVE, 'فعال'),
-        (NO_ACTIVE, 'غیر فعال')
-    )
-
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.CharField(max_length=255, blank=True, null=True)
-    contract_number = models.IntegerField(blank=True, null=True)
+    contract_number = models.CharField(max_length=100, blank=True, null=True)
     registration_date = jmodels.jDateField(blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
@@ -447,17 +439,20 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def now_amount(self):
-        if self.have_adjustment:
-            adjustments = self.adjustment.all()
-            amount = self.contract_initial_amount
-            for adjustment in adjustments:
-                if adjustment.status != None:
-                    if adjustment.status == True:
-                        amount += adjustment.amount
-                    else:
-                        amount -= adjustment.amount
+        if self.contract_initial_amount:
+            if self.have_adjustment:
+                adjustments = self.adjustment.all()
+                amount = self.contract_initial_amount
+                for adjustment in adjustments:
+                    if adjustment.status != None:
+                        if adjustment.status == True:
+                            amount += adjustment.amount
+                        else:
+                            amount -= adjustment.amount
+            else:
+                amount = self.contract_initial_amount
         else:
-            amount = self.contract_initial_amount
+            amount = 0
         return amount
 
     @property
@@ -478,38 +473,33 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     def round_now_amount(self):
         return round(self.amount)
 
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
     @property
     def round_amount_with_comma(self):
         if self.contract_initial_amount:
-            amount = str(round(self.contract_initial_amount))[::-1]
-            loop = int(len(amount) / 3)
-            counter = 0
-            if loop > 1:
-                for i in range(1, loop):
-                    index = (i * 3) + counter
-                    counter += 1
-                    amount = amount[:index] + ',' + amount[index:]
-            elif loop == 1 and len(amount) > 3:
-                amount = amount[:3] + ',' + amount[3:]
-            return amount[::-1]
+            return self.with_comma(self.contract_initial_amount)
         else:
             return 0
 
     @property
     def round_now_amount_with_comma(self):
         if self.now_amount:
-            amount = str(round(self.now_amount))[::-1]
-            loop = int(len(amount) / 3)
-            counter = 0
-            print(loop)
-            if loop > 1:
-                for i in range(1, loop):
-                    index = (i * 3) + counter
-                    counter += 1
-                    amount = amount[:index] + ',' + amount[index:]
-            elif loop == 1 and len(amount) > 3:
-                amount = amount[:3] + ',' + amount[3:]
-            return amount[::-1]
+            return self.with_comma(self.now_amount)
         else:
             return 0
 
@@ -524,6 +514,28 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     @property
     def title(self):
         return str(self.contract_row) + ' در کارگاه ' + self.workshop.name
+
+    @property
+    def status_display(self):
+        if self.status:
+            return 'فعال'
+        else:
+            return 'غیر فعال'
+    @property
+    def verify_display(self):
+        if self.is_verified == None:
+            return '-'
+        elif self.is_verified:
+            return 'نهایی'
+        else:
+            return 'غیر نهایی'
+
+    @property
+    def ads_display(self):
+        if self.have_adjustment:
+            return 'دارد'
+        else:
+            return 'ندارد'
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -568,6 +580,12 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
             return 'کاهشی'
         else:
             return ''
+    @property
+    def change_date_display(self):
+        if self.change_date:
+            return self.change_date.__str__()
+        else:
+            return '-'
 
     @property
     def amount_with_comma(self):
@@ -1844,6 +1862,9 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
                 self.from_date, self.to_date, = None, None
                 if not self.from_hour or not self.to_hour or not self.date:
                     raise ValidationError('برای مرخصی ساعتی تاریخ، ساعت شروع و پایان  را وارد کنید')
+                elif self.from_hour.__gt__(self.to_hour):
+                    raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
+
             elif self.entitlement_leave_type == 'd':
                 self.date, self.from_hour, self.to_hour = None, None, None
                 if not self.from_date or not self.to_date:
@@ -1873,8 +1894,6 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
         if self.entitlement_leave_type != 'h' and self.from_date.__gt__(self.to_date):
             raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
 
-        if self.from_hour.__gt__(self.to_hour):
-            raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
 
         self.time_period = self.final_by_day
         super().save(*args, **kwargs)

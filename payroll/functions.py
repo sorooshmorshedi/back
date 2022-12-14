@@ -4,10 +4,10 @@ from pprint import pprint
 
 import pandas as pd
 from django.apps import apps
+from django.core.exceptions import ValidationError
 from django.core.management import CommandParser
 from django.core.management.base import BaseCommand
 from django.db.models import Q
-from rest_framework.exceptions import ValidationError
 
 from companies.models import FinancialYear
 from distributions.models import Path
@@ -70,25 +70,36 @@ class Command(BaseCommand):
 
 
 def is_shenase_meli(input_code):
+    status = True
+    message = 'شناسه ملی تایید شد'
     code = str(input_code)
     if len(code) != 11:
-        raise ValidationError("شناسه ملی باید یازده رقم باشد")
-    try:
-        control_number = int(code[10])
-        tens_digit_plus_two = int(code[9]) + 2
-    except ValueError:
-        raise ValidationError("شناسه ملی وارد شده صحیح نیست")
-
-    tens_coefficients = (29, 27, 23, 19, 17)
-    numbers_sum = 0
-    i = 0
-    while i < 10:
-        my_index = i % 5
-        numbers_sum += (tens_digit_plus_two + int(code[i])) * tens_coefficients[my_index]
-        i += 1
-    numbers_sum = numbers_sum % 11
-    if numbers_sum == 10:
-        numbers_sum = 0
-    if numbers_sum != control_number:
-        raise ValidationError("َشناسه ملی وارد شده صحیح نیست")
+        status = False
+        message = "شناسه ملی باید یازده رقم باشد"
+    if status:
+        try:
+            control_number = int(code[10])
+            tens_digit_plus_two = int(code[9]) + 2
+        except ValueError:
+            status = False
+            message = "شناسه ملی وارد شده صحیح نیست"
+    if status:
+        try:
+            tens_coefficients = (29, 27, 23, 19, 17)
+            numbers_sum = 0
+            i = 0
+            while i < 10:
+                my_index = i % 5
+                numbers_sum += (tens_digit_plus_two + int(code[i])) * tens_coefficients[my_index]
+                i += 1
+            numbers_sum = numbers_sum % 11
+            if numbers_sum == 10:
+                numbers_sum = 0
+            if numbers_sum != control_number:
+                status = False
+                message = "شناسه ملی وارد شده صحیح نیست"
+        except ValueError:
+            status = False
+            message = "شناسه ملی وارد شده صحیح نیست"
+    return status, message
 

@@ -4,34 +4,121 @@
     <table class="table table-bordered table-striped">
 
         <tr>
-            <th>کارگاه</th>
+            <th>کد و نام کارگاه</th>
             <th>ردیف پیمان</th>
             <th>شماره پیمان</th>
-            <th>تاریخ پیمان</th>
-            <th>تاریخ شروع</th>
-            <th>تاریخ پایان</th>
+            <th>تاریخ قرارداد</th>
+            <th>تاریخ شروع قرارداد</th>
+            <th>تاریخ پایان اولیه قرارداد</th>
+            <th>تاریخ پایان  فعلی قرارداد</th>
+            <th>شناسه ملی واگذار کننده</th>
             <th>نام واگذار کننده</th>
-            <th>کد ملی واگذار کننده</th>
             <th>کد کارگاه واگذار کننده</th>
+            <th>شعبه</th>
             <th> مبلغ اولیه پیمان</th>
             <th> مبلغ فعلی پیمان</th>
-            <th>شعبه</th>
+            <th>وضعیت</th>
+            <th>نهایی</th>
+            <th>تعدیل</th>
 
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.workshop.name }}</td>
-                <td>{{ form.contract_row }}</td>
-                <td>{{ form.contract_number }}</td>
-                <td>{{ form.registration_date }}</td>
-                <td>{{ form.from_date }}</td>
-                <td>{{ form.to_date }}</td>
-                <td>{{ form.assignor_name }}</td>
-                <td>{{ form.assignor_national_code }}</td>
-                <td>{{ form.assignor_workshop_code }}</td>
-                <td>{{ form.round_amount_with_comma }}</td>
-                <td>{{ form.round_now_amount_with_comma }}</td>
-                <td>{{ form.branch }}</td>
+                {% if form.workshop %}
+                    <td>{{ form.workshop.workshop_title }}</td>
+                {% endif %}
+                {% if not form.workshop %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.contract_row %}
+                    <td>{{ form.contract_row }}</td>
+                {% endif %}
+                {% if not form.contract_row %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.contract_number %}
+                    <td>{{ form.contract_number }}</td>
+                {% endif %}
+                {% if not form.contract_number %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.registration_date %}
+                    <td>{{ form.registration_date }}</td>
+                {% endif %}
+                {% if not form.registration_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.from_date %}
+                    <td>{{ form.from_date }}</td>
+                {% endif %}
+                {% if not form.from_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.initial_to_date %}
+                    <td>{{ form.initial_to_date }}</td>
+                {% endif %}
+                {% if not form.initial_to_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.now_date %}
+                    <td>{{ form.now_date }}</td>
+                {% endif %}
+                {% if not form.now_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.assignor_national_code %}
+                    <td>{{ form.assignor_national_code }}</td>
+                {% endif %}
+                {% if not form.assignor_national_code %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.assignor_name %}
+                    <td>{{ form.assignor_name }}</td>
+                {% endif %}
+                {% if not form.assignor_name %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.assignor_workshop_code %}
+                    <td>{{ form.assignor_workshop_code }}</td>
+                {% endif %}
+                {% if not form.assignor_workshop_code %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.branch %}
+                    <td>{{ form.branch }}</td>
+                {% endif %}
+                {% if not form.branch %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.round_amount_with_comma %}
+                    <td>{{ form.round_amount_with_comma }}</td>
+                {% endif %}
+                {% if not form.round_amount_with_comma %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.round_now_amount_with_comma %}
+                    <td>{{ form.round_now_amount_with_comma }}</td>
+                {% endif %}
+                {% if not form.round_now_amount_with_comma %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+
+                <td>{{ form.status_display }}</td>
+                <td>{{ form.verify_display }}</td>
+                <td>{{ form.ads_display }}</td>
 
             </tr>
         {% endfor %}
