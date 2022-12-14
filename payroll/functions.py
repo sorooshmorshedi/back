@@ -1,6 +1,7 @@
 
 import json
 from pprint import pprint
+import re
 
 import pandas as pd
 from django.apps import apps
@@ -103,3 +104,11 @@ def is_shenase_meli(input_code):
             message = "شناسه ملی وارد شده صحیح نیست"
     return status, message
 
+def is_valid_melli_code(value):
+    if not re.search(r'^\d{10}$', value):
+        is_valid = False
+    else:
+        check = int(value[9])
+        s = sum([int(value[x]) * (10 - x) for x in range(9)]) % 11
+        is_valid = (2 > s == check) or (s >= 2 and check + s == 11)
+    return is_valid, "کد ملی وارد شده صحیح نیست"

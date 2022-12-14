@@ -9,8 +9,7 @@ from helpers.auth import BasicCRUDPermission
 from rest_framework import status
 from rest_framework.response import Response
 
-from helpers.models import is_valid_melli_code
-from payroll.functions import is_shenase_meli
+from payroll.functions import is_shenase_meli, is_valid_melli_code
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
     LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem, \
     Adjustment
@@ -792,7 +791,10 @@ class PersonnelVerifyApi(APIView):
             same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) & Q(company=company) &
                                                  Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
             if personnel.nationality == 1:
-                is_valid_melli_code(personnel.national_code)
+                is_valid, message = is_valid_melli_code(personnel.national_code)
+                if not is_valid:
+                    self.validate_status = False
+                    self.error_messages.append(message)
                 if len(same_code) > 0:
                     self.validate_status = False
                     self.error_messages.append("کد ملی تکراری می باشد")
