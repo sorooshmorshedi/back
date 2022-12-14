@@ -27,7 +27,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, PersonnelUnVerifyApi, \
     PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, \
     AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView, WorkshopPersonnelVerifyApi, \
-    WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi
+    WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi, WorkshopVerifyApi, WorkshopUnVerifyApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -35,6 +35,8 @@ urlpatterns = [
     path('workshop/worksho_personnel/<int:pk>/', WorkshopAllPersonnelDetail.as_view(), name='workshopAllPersonnelDetail'),
     path('workshop/setting/<int:pk>/', WorkshopSettingDetail.as_view(), name='workshopSettingDetail'),
     path('workshop/contract/row/<int:pk>/', WorkshopContractRowsDetail.as_view(), name='workshopContractRowsDetail'),
+    path('workshop/verify/<int:pk>/', WorkshopVerifyApi.as_view(), name='workshopVerifyApi'),
+    path('workshop/unverify/<int:pk>/', WorkshopUnVerifyApi.as_view(), name='workshopUnVerifyApi'),
 
     path('tax/', WorkshopTaxApiView.as_view(), name='workshopTaxApiView'),
     path('tax/<int:pk>/', WorkshopTaxDetail.as_view(), name='workshopTaxDetail'),

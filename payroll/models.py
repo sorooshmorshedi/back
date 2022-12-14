@@ -70,11 +70,10 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     company = models.ForeignKey(Company, related_name='workshop', on_delete=models.CASCADE, )
     workshop_code = models.CharField(max_length=50, blank=True, null=True)
     code = models.IntegerField(blank=True, null=True)
-    name = models.CharField(max_length=100)
-    employer_name = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-    postal_code = models.CharField(max_length=10, validators=[
-        RegexValidator(regex='^.{10}$', message='طول کد پستی باید 10 رقم باشد', code='nomatch')])
+    name = models.CharField(max_length=100, blank=True, null=True)
+    employer_name = models.CharField(max_length=100, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    postal_code = models.CharField(max_length=10 , blank=True, null=True)
     employer_insurance_contribution = models.IntegerField(default=3, blank=True, null=True)
     branch_code = models.CharField(max_length=100, blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
@@ -127,7 +126,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     save_absence_limit = models.BooleanField(default=True)
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False, null=True, blank=True)
+
 
     def save(self, *args, **kwargs):
         if not self.workshop_code:

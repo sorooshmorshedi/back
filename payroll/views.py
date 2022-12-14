@@ -208,6 +208,66 @@ class WorkshopTaxRowDetail(APIView):
 
 
 
+class WorkshopVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+
+        if not workshop.workshop_code:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه را وارد کنید')
+        if workshop.workshop_code and len(workshop.workshop_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه باید 10 رقمی باشد')
+        if not workshop.name:
+            self.validate_status = False
+            self.error_messages.append('نام کارگاه را وارد کنید')
+        if not workshop.employer_name:
+            self.validate_status = False
+            self.error_messages.append('نام کارفرما را وارد کنید')
+        if not workshop.postal_code:
+            self.validate_status = False
+            self.error_messages.append('کد پستی کارگاه را وارد کنید')
+        if workshop.postal_code and len(workshop.postal_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد پستی کارگاه باید 10 رقمی باشد')
+        if not workshop.address:
+            self.validate_status = False
+            self.error_messages.append('آدرس کارگاه را وارد کنید')
+        if workshop.is_active == None:
+            self.validate_status = False
+            self.error_messages.append('وضعییت را وارد کنید')
+
+        if self.validate_status:
+            workshop.is_verified = True
+            workshop.save()
+            return Response({'وضعییت': 'ثبت نهایی کارگاه انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+        workshop.is_verified = False
+        workshop.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن کارگاه انجام شد'}, status=status.HTTP_200_OK)
+
 
 class PersonnelApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -784,9 +844,12 @@ class PersonnelVerifyApi(APIView):
         if not personnel.identity_code and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("شماره شناسنامه را وارد کنید")
-        if not personnel.national_code:
+        if not personnel.national_code and personnel.nationality != 2:
             self.validate_status = False
             self.error_messages.append("کد ملی را وارد کنید")
+        if not personnel.national_code and personnel.nationality == 2:
+            self.validate_status = False
+            self.error_messages.append("کد فراگیر تابعیت را وارد کنید")
         if personnel.national_code:
             same_code = Personnel.objects.filter(Q(national_code=personnel.national_code) & Q(company=company) &
                                                  Q(is_personnel_verified=True) & Q(is_personnel_verified=True))
