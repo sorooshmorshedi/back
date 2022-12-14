@@ -939,7 +939,10 @@ class PersonnelFamilyVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append("کد ملی را وارد کنید")
         if personnel.national_code:
-            is_valid_melli_code(personnel.national_code)
+            is_valid, message = is_valid_melli_code(personnel.national_code)
+            if not is_valid:
+                self.validate_status = False
+                self.error_messages.append(message)
             same_code = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel.id) & Q(is_verified=True) &
                                                        Q(national_code=personnel.national_code))
 
