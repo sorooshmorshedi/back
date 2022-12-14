@@ -945,7 +945,6 @@ class PersonnelFamilyVerifyApi(APIView):
                 self.error_messages.append(message)
             same_code = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel.id) & Q(is_verified=True) &
                                                        Q(national_code=personnel.national_code))
-
             if len(same_code) > 0:
                 self.validate_status = False
                 self.error_messages.append("کد ملی تکراری می باشد")
@@ -975,7 +974,7 @@ class PersonnelFamilyVerifyApi(APIView):
                 self.error_messages.append("این نسبت قبلا ثبت شده")
 
         if self.validate_status:
-            personnel.is_personnel_verified = True
+            personnel.is_verified = True
             personnel.save()
             return Response({'وضعییت': 'ثبت نهایی خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
         else:
