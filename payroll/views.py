@@ -861,7 +861,7 @@ class WorkshopPersonnelApiView(APIView):
     def get(self, request):
         company = request.user.active_company
         workshops = company.workshop.all()
-        query = WorkshopPersonnel.objects.filter(workshop__in=workshops)
+        query = WorkshopPersonnel.objects.filter(Q(workshop__in=workshops) & Q(is_verified=True))
         workshop_personnel = []
         for person in query:
             if not person.quit_job_date:
@@ -982,7 +982,8 @@ class WorkshopPersonnelVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
         same_personnel = WorkshopPersonnel.objects.filter(Q(workshop=personnel.workshop) &
-                                                          Q(personnel=personnel.personnel))
+                                                          Q(personnel=personnel.personnel) &
+                                                          Q(is_verified=True))
         quit = []
         for same_person in same_personnel:
             if same_person.quit_job_date:
