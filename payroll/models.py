@@ -1155,8 +1155,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     contract_type = models.IntegerField(choices=CONTRACT_TYPES, blank=True, null=True)
     employee_status = models.IntegerField(choices=EMPLOYEE_TYPES, blank=True, null=True)
 
-    haghe_sanavat_days = models.IntegerField(default=0)
-    haghe_sanavat_identify_amount = DECIMAL(default=0)
+    haghe_sanavat_days = models.IntegerField(default=0, blank=True, null=True)
+    haghe_sanavat_identify_amount = DECIMAL(default=0, blank=True, null=True)
 
     save_leaave = models.IntegerField(default=0)
 
