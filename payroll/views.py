@@ -4,6 +4,7 @@ from django.http import Http404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+import datetime
 
 from helpers.auth import BasicCRUDPermission
 from rest_framework import status
@@ -1194,6 +1195,94 @@ class LeaveOrAbsenceDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LeaveOrAbsenceVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'leave_or_absence'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        leave = LeaveOrAbsence.objects.get(pk=pk)
+
+        if leave.leave_type == 'e':
+            if not leave.entitlement_leave_type:
+                self.validate_status = False
+                self.error_messages.append("نوع مرخصی استحقاقی را مشخص کنید")
+            if leave.entitlement_leave_type == 'h':
+                leave.from_date, leave.to_date, = None, None
+                if not leave.from_hour:
+                    self.validate_status = False
+                    self.error_messages.append("برای مرخصی ساعتی ، ساعت شروع را وارد کنید")
+                if not leave.to_hour:
+                    self.validate_status = False
+                    self.error_messages.append("برای مرخصی ساعتی ، ساعت پایان را وارد کنید")
+                if not leave.date:
+                    self.validate_status = False
+                    self.error_messages.append("برای مرخصی ، ساعتی تاریخ را وارد کنید")
+                if leave.from_hour.__gt__(leave.to_hour):
+                    self.validate_status = False
+                    self.error_messages.append("ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد")
+            elif leave.entitlement_leave_type == 'd':
+                leave.date, leave.from_hour, leave.to_hour = None, None, None
+                if not leave.from_date or not leave.to_date:
+                    self.validate_status = False
+                    self.error_messages.append("برای مرخصی روزانه تاریح شروع و پایان را وارد کنید")
+        elif leave.leave_type == 'm':
+            if not leave.matter73_leave_type:
+                self.validate_status = False
+                self.error_messages.append("دلیل مرخصی ماده 73 را مشخص کنید")
+            if not leave.to_date or not leave.from_date:
+                self.validate_status = False
+                self.error_messages.append("تاریح شروع و پایان را وارد کنید")
+            duration = datetime.timedelta(days=2)
+            if leave.to_date.day - leave.from_date.day > 2:
+                leave.to_date = leave.from_date + duration
+        elif leave.leave_type == 'i':
+            leave.from_hour, leave.to_hour, leave.date = None, None, None
+            if not leave.from_date or not leave.to_date:
+                self.validate_status = False
+                self.error_messages.append("برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید")
+            if not leave.cause_of_incident:
+                self.validate_status = False
+                self.error_messages.append("برای مرخصی استعلاجی علت حادثه را وارد کنید")
+        elif leave.leave_type == 'w' or leave.leave_type == 'a':
+            leave.from_hour, leave.to_hour, leave.date = None, None, None
+            if not leave.from_date or not leave.to_date:
+                self.validate_status = False
+                self.error_messages.append("تاریح شروع و پایان را وارد کنید")
+        if leave.entitlement_leave_type != 'h' and leave.from_date.__gt__(leave.to_date):
+            self.validate_status = False
+            self.error_messages.append("تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد")
+        if self.validate_status:
+            leave.is_verified = True
+            leave.save()
+            return Response({'وضعییت': 'ثبت نهایی مرخصی انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeaveOrAbsenceUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'leave_or_absence'
+
+    def get(self, request, pk):
+        leave = LeaveOrAbsence.objects.get(pk=pk)
+        leave.is_verified = False
+        leave.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن مرخصی انجام شد'}, status=status.HTTP_200_OK)
+
 
 
 # Mission APIs

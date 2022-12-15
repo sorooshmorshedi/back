@@ -9,13 +9,14 @@ from companies.models import Company
 from helpers.models import BaseModel, LockableMixin, DefinableMixin, DECIMAL, \
     is_valid_melli_code, EXPLANATION
 from payroll.functions import is_shenase_meli
+from payroll.verify_model import VerifyMixin
 from users.models import City
 import datetime
 from decimal import Decimal
 import jdatetime
 
 
-class Workshop(BaseModel, LockableMixin, DefinableMixin):
+class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     DAILY = 'd'
     MONTHLY = 'm'
     YEARLY = 'y'
@@ -127,7 +128,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
     is_active = models.BooleanField(blank=True, null=True)
-    is_verified = models.BooleanField(default=False, null=True, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -313,13 +313,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
         return self.name + ' ' + self.company.name
 
     @property
-    def verify_display(self):
-        if self.is_verified:
-            return 'نهایی'
-        else:
-            return 'اولیه'
-
-    @property
     def active_display(self):
         if self.is_active:
             return 'فعال'
@@ -410,7 +403,7 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
 
-class ContractRow(BaseModel, LockableMixin, DefinableMixin):
+class ContractRow(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.CharField(max_length=255, blank=True, null=True)
@@ -428,7 +421,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
     amount = DECIMAL(blank=True, null=True)
     contract_initial_amount = DECIMAL(blank=True, null=True)
     branch = models.CharField(max_length=100, blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
 
     use_in_insurance_list = models.BooleanField(default=False)
 
@@ -541,14 +533,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
             return 'فعال'
         else:
             return 'غیر فعال'
-    @property
-    def verify_display(self):
-        if self.is_verified == None:
-            return '-'
-        elif self.is_verified:
-            return 'نهایی'
-        else:
-            return 'غیر نهایی'
 
     @property
     def ads_display(self):
@@ -563,7 +547,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin):
             self.to_date = self.initial_to_date
 
         super().save(*args, **kwargs)
-
 
 
 class Adjustment(BaseModel, LockableMixin, DefinableMixin):
@@ -942,7 +925,7 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
 
 
-class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
+class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     FATHER = 'f'
     MOTHER = 'm'
     CHILD = 'c'
@@ -1014,7 +997,6 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
     study_status = models.CharField(max_length=1, choices=STUDY_TYPE, blank=True, null=True)
     physical_condition = models.CharField(max_length=1, choices=PHYSICAL_TYPE, blank=True, null=True)
 
-    is_verified = models.BooleanField(default=False, null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, blank=True, null=True)
     is_active = models.BooleanField()
 
@@ -1033,13 +1015,6 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         )
 
     @property
-    def verify_display(self):
-        if self.is_verified:
-            return 'نهایی'
-        else:
-            return 'اولیه'
-
-    @property
     def active_display(self):
         if self.is_active:
             return 'فعال'
@@ -1054,7 +1029,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         return self.full_name + ' ' + self.get_relative_display() + ' ' + self.personnel.full_name
 
 
-class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
+class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     PART_TIME = 2
     FULL_TIME = 1
     TEMPORARY = 3
@@ -1184,8 +1159,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     haghe_sanavat_identify_amount = DECIMAL(default=0)
 
     save_leaave = models.IntegerField(default=0)
-
-    is_verified = models.BooleanField(default=False)
 
     @property
     def current_insurance(self):
@@ -1553,12 +1526,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
     def __str__(self):
         return self.my_title
 
-    @property
-    def verify_display(self):
-        if self.is_verified:
-            return 'نهایی'
-        else:
-            return 'اولیه'
 
 
 class Contract(BaseModel, LockableMixin, DefinableMixin):
@@ -1828,7 +1795,7 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
 
-class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
+class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     ENTITLEMENT = 'e'
     ILLNESS = 'i'
     WITHOUT_SALARY = 'w'
@@ -1903,46 +1870,6 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin):
         return round(hour)
 
     def save(self, *args, **kwargs):
-        if self.leave_type == 'e':
-            if not self.entitlement_leave_type:
-                raise ValidationError('نوع مرخصی استحقاقی را مشخص کنید')
-            if self.entitlement_leave_type == 'h':
-                self.from_date, self.to_date, = None, None
-                if not self.from_hour or not self.to_hour or not self.date:
-                    raise ValidationError('برای مرخصی ساعتی تاریخ، ساعت شروع و پایان  را وارد کنید')
-                elif self.from_hour.__gt__(self.to_hour):
-                    raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
-
-            elif self.entitlement_leave_type == 'd':
-                self.date, self.from_hour, self.to_hour = None, None, None
-                if not self.from_date or not self.to_date:
-                    raise ValidationError('برای مرخصی روزانه تاریح شروع و پایان را وارد کنید')
-
-        elif self.leave_type == 'm':
-            if not self.matter73_leave_type:
-                raise ValidationError('دلیل مرخصی ماده 73 را مشخص کنید')
-            if not self.to_date or not self.from_date:
-                raise ValidationError(' تاریح شروع و پایان را وارد کنید')
-            duration = datetime.timedelta(days=2)
-            if self.to_date.day - self.from_date.day > 2:
-                self.to_date = self.from_date + duration
-
-        elif self.leave_type == 'i':
-            self.from_hour, self.to_hour, self.date = None, None, None
-            if not self.from_date or not self.to_date:
-                raise ValidationError('برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید')
-            if not self.cause_of_incident:
-                raise ValidationError('برای مرخصی استعلاجی علت حادثه را وارد کنید')
-
-        elif self.leave_type == 'w' or self.leave_type == 'a':
-            self.from_hour, self.to_hour, self.date = None, None, None
-            if not self.from_date or not self.to_date:
-                raise ValidationError(' تاریح شروع و پایان را وارد کنید')
-
-        if self.entitlement_leave_type != 'h' and self.from_date.__gt__(self.to_date):
-            raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
-
-
         self.time_period = self.final_by_day
         super().save(*args, **kwargs)
 

@@ -27,7 +27,8 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, PersonnelUnVerifyApi, \
     PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, \
     AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView, WorkshopPersonnelVerifyApi, \
-    WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi, WorkshopVerifyApi, WorkshopUnVerifyApi
+    WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi, WorkshopVerifyApi, WorkshopUnVerifyApi, \
+    LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -91,6 +92,8 @@ urlpatterns = [
 
     path('absence/', LeaveOrAbsenceApiView.as_view(), name='leaveOrAbsenceApiView'),
     path('absence/<int:pk>/', LeaveOrAbsenceDetail.as_view(), name='leaveOrAbsenceDetail'),
+    path('absence/verify/<int:pk>/', LeaveOrAbsenceVerifyApi.as_view(), name='leaveOrAbsenceVerifyApi'),
+    path('absence/unverify/<int:pk>/', LeaveOrAbsenceUnVerifyApi.as_view(), name='leaveOrAbsenceUnVerifyApi'),
 
     path('mission/', MissionApiView.as_view(), name='missionApiView'),
     path('mission/<int:pk>/', MissionDetail.as_view(), name='missionDetail'),
