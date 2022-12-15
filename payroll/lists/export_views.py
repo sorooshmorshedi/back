@@ -90,7 +90,7 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
                 'لیست کارگاه ها'
             ],
             ['کد کارگاه', 'نام کارگاه', 'نام کارفرما', 'آدرس', 'کد پستی',
-             'کد شعبه', 'نام شعبه']
+             'کد شعبه','نام شعبه', 'وضعییت', 'نهایی']
         ]
         for form in workshop:
             data.append([
@@ -101,6 +101,8 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
                 form.postal_code,
                 form.branch_code,
                 form.branch_name,
+                form.active_display,
+                form.verify_display,
             ])
         return data
 
@@ -180,7 +182,7 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
              'کد ملی', 'شماره شناسنامه', 'تاریخ تولد', 'تاریخ صدور شناسنامه', 'محل تولد', 'محل صدور شناسنامه',
              'بخش محل صدور', 'وضعیت تاهل', 'تعداد فرزندان', 'پیش شماره', 'تلفن', 'موبایل یک', 'موبایل دو',
              'آدرس', 'کد پستی', 'بیمه تامین اجتماعی', 'شماره بیمه', 'مدرک تحصیلی', 'رشته تحصیلی', 'نوع دانشگاه',
-             'نام دانشگاه', 'نام بانک', 'شماره حساب حقوق', 'َشماره شبا']
+             'نام دانشگاه', 'نام بانک', 'شماره حساب حقوق', 'َشماره شبا', 'وضعییت', 'نهایی']
         ]
         for form in personnel:
             data.append([
@@ -216,6 +218,8 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
                 form.account_bank_name,
                 form.account_bank_number,
                 form.sheba_number,
+                form.active_display,
+                form.verify_display,
 
             ])
         return data
@@ -293,7 +297,7 @@ class PersonnelFamilyExportview(PersonnelFamilyListView, BaseExportView):
                 'لیست خانواده پرسنل'
             ],
             ['پرسنل', 'نام', 'نام خانوادگی', 'کد ملی', 'تاریخ تولد', 'نسبت', 'وضعیت تاهل',
-             'خدمت سربازی', 'وضعیت تحصیل', 'وضعیت جسمی']
+             'خدمت سربازی', 'وضعیت تحصیل', 'وضعیت جسمی', 'وضعییت', 'نهایی']
         ]
         for form in personnel_family:
             data.append([
@@ -307,6 +311,8 @@ class PersonnelFamilyExportview(PersonnelFamilyListView, BaseExportView):
                 form.get_military_service_display(),
                 form.get_study_status_display(),
                 form.get_physical_condition_display(),
+                form.is_verified,
+                form.active_display,
             ])
         return data
 
@@ -383,7 +389,8 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 'لیست ردیف پیمان'
             ],
             ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
-             'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', ' مبلغ اولیه پیمان', ' مبلغ فعلی پیمان', 'شعبه']
+             'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', ' مبلغ اولیه پیمان', ' مبلغ فعلی پیمان',
+             'شعبه', 'وضعییت', 'نهایی']
         ]
         for form in contract_row:
             data.append([
@@ -398,7 +405,9 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 form.assignor_workshop_code,
                 form.round_amount_with_comma,
                 form.round_now_amount_with_comma,
-                form.branch
+                form.branch,
+                form.status_display,
+                form.verify_display
 
             ])
         return data
@@ -478,7 +487,7 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
             ['کارگاه', 'پرسنل', 'تاریخ استخدام', 'عنوان شغلی',
              'سابقه بیمه قبلی خارچ از کارگاه', 'سابقه بیمه قبلی در این کارگاه', 'سابقه سابقه بیمه جاری در این کارگاه',
              'مجموع سوابق بیمه ای', 'سمت', 'رسته شغلی', 'محل خدمت', ' وضعییت محل خدمت', 'نوع استخدام',
-             'نوع قرارداد', 'وضعییت کارمند']
+             'نوع قرارداد', 'وضعییت کارمند', 'نهایی']
         ]
         for form in workshop_personnel:
             data.append([
@@ -497,6 +506,7 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
                 form.get_employment_type_display(),
                 form.get_contract_type_display(),
                 form.get_employee_status_display(),
+                form.verify_display,
             ])
         return data
 

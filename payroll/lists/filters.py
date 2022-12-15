@@ -127,6 +127,7 @@ class WorkshopPersonnelFilter(filters.FilterSet):
             'employment_type': ('exact',),
             'contract_type': ('exact',),
             'employee_status': ('exact',),
+            'is_verified': BASE_FIELD_FILTERS,
 
         }
         filter_overrides = {

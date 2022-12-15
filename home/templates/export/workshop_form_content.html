@@ -11,6 +11,8 @@
             <th>کد پستی</th>
             <th>کد شعبه</th>
             <th>نام شعبه</th>
+            <th>وضعییت</th>
+            <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
@@ -22,6 +24,8 @@
                 <td>{{ form.postal_code }}</td>
                 <td>{{ form.branch_code }}</td>
                 <td>{{ form.branch_name }}</td>
+                <td>{{ form.active_display }}</td>
+                <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}
     </table>

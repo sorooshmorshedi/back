@@ -1770,5 +1770,3 @@ class ListOfPayCopy(APIView):
             new_item.list_of_pay = ListOfPay.objects.get(pk=new_list_of_pay.id)
             new_item.save()
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
-
-

@@ -312,6 +312,20 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
     def __str__(self):
         return self.name + ' ' + self.company.name
 
+    @property
+    def verify_display(self):
+        if self.is_verified:
+            return 'نهایی'
+        else:
+            return 'اولیه'
+
+    @property
+    def active_display(self):
+        if self.is_active:
+            return 'فعال'
+        else:
+            return 'غیر فعال'
+
 
 
 class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
@@ -1019,6 +1033,20 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin):
         )
 
     @property
+    def verify_display(self):
+        if self.is_verified:
+            return 'نهایی'
+        else:
+            return 'اولیه'
+
+    @property
+    def active_display(self):
+        if self.is_active:
+            return 'فعال'
+        else:
+            return 'غیر فعال'
+
+    @property
     def full_name(self):
         return self.name + ' ' + self.last_name
 
@@ -1524,6 +1552,13 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin):
 
     def __str__(self):
         return self.my_title
+
+    @property
+    def verify_display(self):
+        if self.is_verified:
+            return 'نهایی'
+        else:
+            return 'اولیه'
 
 
 class Contract(BaseModel, LockableMixin, DefinableMixin):

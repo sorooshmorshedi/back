@@ -14,6 +14,9 @@
             <th>خدمت سربازی</th>
             <th>وضعیت تحصیل</th>
             <th>وضعیت جسمی</th>
+            <th>وضعیت </th>
+            <th>نهایی</th>
+
         </tr>
         {% for form in forms %}
             <tr>
@@ -27,6 +30,8 @@
                 <td>{{ form.get_military_service_display }}</td>
                 <td>{{ form.get_study_status_display }}</td>
                 <td>{{ form.get_physical_condition_display }}</td>
+                <td>{{ form.active_display }}</td>
+                <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}
     </table>

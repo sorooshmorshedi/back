@@ -18,6 +18,7 @@
             <th>نوع استخدام</th>
             <th>نوع قرارداد</th>
             <th>وضعییت کارمند</th>
+            <th>نهایی</th>
         </tr>
         {% for form in forms %}
             <tr>
@@ -35,6 +36,7 @@
                 <td>{{ form.get_employment_type_display }}</td>
                 <td>{{ form.get_contract_type_display }}</td>
                 <td>{{ form.get_employee_status_display }}</td>
+                <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}
     </table>

@@ -13,6 +13,7 @@
             <th>تلفن</th>
             <th>موبایل</th>
             <th>وضعیت پرسنل</th>
+            <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
@@ -25,12 +26,9 @@
                 <td>{{ form.personnel_code }}</td>
                 <td>{{ form.phone_number }} - {{ form.city_phone_code }} </td>
                 <td>{{ form.mobile_number_1 }}</td>
-                {% if form.is_personnel_active %}
-                    <td >فعال</td>
-                {% endif %}
-                {% if not form.is_personnel_active %}
-                    <td >غیر فعال</td>
-                {% endif %}
+                <td>{{ form.mobile_number_1 }}</td>
+                <td>{{ form.active_display }}</td>
+                <td>{{ form.verify_display }}</td>
 
             </tr>
         {% endfor %}
