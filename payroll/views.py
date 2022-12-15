@@ -22,6 +22,9 @@ from payroll.serializers import WorkShopSerializer, PersonnelSerializer, Personn
     ListOfPayCopyPaySerializer, AdjustmentSerializer
 
 
+# workshop APIs
+
+
 class WorkshopApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop'
@@ -30,7 +33,7 @@ class WorkshopApiView(APIView):
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
-        query = Workshop.objects.filter(Q(company=company) & Q(is_active=True))
+        query = Workshop.objects.filter(Q(company=company) & Q(is_active=True)& Q(is_verified=True))
         serializers = WorkShopSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -45,9 +48,98 @@ class WorkshopApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class WorkshopDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get_object(self, pk):
+        try:
+            return Workshop.objects.get(pk=pk)
+        except Workshop.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkShopSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = WorkShopSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class WorkshopVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+
+        if not workshop.workshop_code:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه را وارد کنید')
+        if workshop.workshop_code and len(workshop.workshop_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه باید 10 رقمی باشد')
+        if not workshop.name:
+            self.validate_status = False
+            self.error_messages.append('نام کارگاه را وارد کنید')
+        if not workshop.employer_name:
+            self.validate_status = False
+            self.error_messages.append('نام کارفرما را وارد کنید')
+        if not workshop.postal_code:
+            self.validate_status = False
+            self.error_messages.append('کد پستی کارگاه را وارد کنید')
+        if workshop.postal_code and len(workshop.postal_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد پستی کارگاه باید 10 رقمی باشد')
+        if not workshop.address:
+            self.validate_status = False
+            self.error_messages.append('آدرس کارگاه را وارد کنید')
+        if workshop.is_active == None:
+            self.validate_status = False
+            self.error_messages.append('وضعییت را وارد کنید')
+
+        if self.validate_status:
+            workshop.is_verified = True
+            workshop.save()
+            return Response({'وضعییت': 'ثبت نهایی کارگاه انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+        workshop.is_verified = False
+        workshop.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن کارگاه انجام شد'}, status=status.HTTP_200_OK)
+
+
 class WorkshopContractRowsDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'contract_row'
+
     def get_object(self, pk):
         try:
             return ContractRow.objects.filter(Q(workshop=pk) & Q(status=True) & Q(is_verified=True))
@@ -83,34 +175,6 @@ class WorkshopSettingDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class WorkshopDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop'
-
-    def get_object(self, pk):
-        try:
-            return Workshop.objects.get(pk=pk)
-        except Workshop.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = WorkShopSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = WorkShopSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class WorkshopTaxApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -161,6 +225,7 @@ class WorkshopTaxDetail(APIView):
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class WorkshopTaxRowApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_tax_row'
@@ -207,66 +272,7 @@ class WorkshopTaxRowDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
-class WorkshopVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop'
-    validate_status = True
-    error_messages = []
-
-    def __init__(self):
-        self.error_messages = []
-        self.validate_status = True
-    def get(self, request, pk):
-        workshop = Workshop.objects.get(pk=pk)
-
-        if not workshop.workshop_code:
-            self.validate_status = False
-            self.error_messages.append('کد کارگاه را وارد کنید')
-        if workshop.workshop_code and len(workshop.workshop_code) != 10:
-            self.validate_status = False
-            self.error_messages.append('کد کارگاه باید 10 رقمی باشد')
-        if not workshop.name:
-            self.validate_status = False
-            self.error_messages.append('نام کارگاه را وارد کنید')
-        if not workshop.employer_name:
-            self.validate_status = False
-            self.error_messages.append('نام کارفرما را وارد کنید')
-        if not workshop.postal_code:
-            self.validate_status = False
-            self.error_messages.append('کد پستی کارگاه را وارد کنید')
-        if workshop.postal_code and len(workshop.postal_code) != 10:
-            self.validate_status = False
-            self.error_messages.append('کد پستی کارگاه باید 10 رقمی باشد')
-        if not workshop.address:
-            self.validate_status = False
-            self.error_messages.append('آدرس کارگاه را وارد کنید')
-        if workshop.is_active == None:
-            self.validate_status = False
-            self.error_messages.append('وضعییت را وارد کنید')
-
-        if self.validate_status:
-            workshop.is_verified = True
-            workshop.save()
-            return Response({'وضعییت': 'ثبت نهایی کارگاه انجام شد'}, status=status.HTTP_200_OK)
-        else:
-            counter = 1
-            response = []
-            for error in self.error_messages:
-                error = str(counter) + '-' + error
-                counter += 1
-                response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WorkshopUnVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop'
-    def get(self, request, pk):
-        workshop = Workshop.objects.get(pk=pk)
-        workshop.is_verified = False
-        workshop.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن کارگاه انجام شد'}, status=status.HTTP_200_OK)
+# personnel APIs
 
 
 class PersonnelApiView(APIView):
@@ -281,7 +287,6 @@ class PersonnelApiView(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
@@ -321,489 +326,6 @@ class PersonnelDetail(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class PersonnelFamilyApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'personnel_family'
-
-    def get(self, request):
-        query = PersonnelFamily.objects.all()
-        serializers = PersonnelFamilySerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = PersonnelFamilySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PersonnelFamilyDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'personnel_family'
-
-    def get_object(self, pk):
-        try:
-            return PersonnelFamily.objects.get(pk=pk)
-        except PersonnelFamily.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = PersonnelFamilySerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = PersonnelFamilySerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ContractRowApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract_row'
-
-    def get(self, request):
-        query = ContractRow.objects.all()
-        serializers = ContractRowSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = ContractRowSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ContractRowDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract_row'
-
-    def get_object(self, pk):
-        try:
-            return ContractRow.objects.get(pk=pk)
-        except ContractRow.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = ContractRowSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = ContractRowSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class AdjustmentApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'adjustment'
-
-    def get(self, request):
-        company = request.user.active_company.pk
-        workshops = Workshop.objects.filter(company=company)
-        contract_rows = ContractRow.objects.filter(workshop__in=workshops)
-        query = Adjustment.objects.filter(contract_row__in=contract_rows)
-        serializers = AdjustmentSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = AdjustmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class AdjustmentDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'adjustment'
-
-    def get_object(self, pk):
-        try:
-            return Adjustment.objects.get(pk=pk)
-        except Adjustment.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = AdjustmentSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = AdjustmentSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ContractRowAdjustmentDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'adjustment'
-
-    def get_object(self, pk):
-        try:
-            return Adjustment.objects.filter(contract_row=pk)
-        except Adjustment.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = AdjustmentSerializer(query, many=True)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-
-
-class ContractRowVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contracct_row'
-    validate_status = True
-    error_messages = []
-    def __init__(self):
-        self.error_messages = []
-        self.validate_status = True
-    def get(self, request, pk):
-        contract_row = ContractRow.objects.get(pk=pk)
-        if not contract_row.contract_row:
-            self.validate_status = False
-            self.error_messages.append('ردیف پیمان را وارد کنید')
-        if contract_row.contract_row and len(contract_row.contract_row) < 3:
-            row = '0' * (3 - len(contract_row.contract_row))
-            new_row = row + contract_row.contract_row
-            contract_row.contract_row = new_row
-        if not contract_row.contract_number:
-            self.validate_status = False
-            self.error_messages.append('شماره قرارداد را وارد کنید')
-        if not contract_row.registration_date:
-            self.validate_status = False
-            self.error_messages.append('تاریخ قرارداد را وارد کنید')
-        if not contract_row.from_date:
-            self.validate_status = False
-            self.error_messages.append('تاریخ شروع را وارد کنید')
-        if not contract_row.initial_to_date:
-            self.validate_status = False
-            self.error_messages.append('تاریخ پایان را وارد کنید')
-        if contract_row.from_date and contract_row.initial_to_date and\
-                contract_row.from_date > contract_row.initial_to_date:
-            self.validate_status = False
-            self.error_messages.append('تاریخ شروع قرارداد نمیتواند بزرگتر از تاریخ پایان قرارداد باشد')
-        if not contract_row.assignor_national_code:
-            self.validate_status = False
-            self.error_messages.append('شناسه ملی واگذارکننده را وارد کنید')
-        if contract_row.assignor_national_code:
-            confirm, message = is_shenase_meli(contract_row.assignor_national_code)
-            if not confirm:
-                self.validate_status = False
-                self.error_messages.append(message)
-
-        if not contract_row.assignor_name:
-            self.validate_status = False
-            self.error_messages.append('نام واگذارکننده را وارد کنید')
-        if not contract_row.assignor_workshop_code:
-            self.validate_status = False
-            self.error_messages.append('کد کارگاه واگذارکننده را وارد کنید')
-        if contract_row.assignor_workshop_code and len(contract_row.assignor_workshop_code) != 10:
-            self.validate_status = False
-            self.error_messages.append('کد کارگاه واگذارکننده باید 10 رقمی باشد')
-        if not contract_row.contract_initial_amount:
-            self.validate_status = False
-            self.error_messages.append('مبلغ اولیه قرارداد را وارد کنید')
-        if contract_row.status == None:
-            self.validate_status = False
-            self.error_messages.append('وضعییت را وارد کنید')
-        if self.validate_status:
-            contract_row.is_verified = True
-            contract_row.save()
-            return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
-        else:
-            counter = 1
-            response = []
-            for error in self.error_messages:
-                error = str(counter) + '-' + error
-                counter += 1
-                response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ContractRowUnVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract_row'
-    def get(self, request, pk):
-        row = ContractRow.objects.get(pk=pk)
-        row.is_verified = False
-        row.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
-
-
-class ContractRowUnActiveApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract_row'
-    def get(self, request, pk):
-        row = ContractRow.objects.get(pk=pk)
-        row.status = False
-        row.save()
-        return Response({'وضعییت': 'غیر فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
-
-class ContractRowActiveApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract_row'
-    def get(self, request, pk):
-        row = ContractRow.objects.get(pk=pk)
-        row.status = True
-        row.save()
-        return Response({'وضعییت': ' فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
-
-class ContractApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract'
-
-    def get(self, request):
-        company = request.user.active_company
-        workshop = company.workshop.all()
-        workshop_personnel = WorkshopPersonnel.objects.filter(workshop__in=workshop)
-        query = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
-        serializers = ContractSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = ContractSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ContractDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'contract'
-
-    def get_object(self, pk):
-        try:
-            return Contract.objects.get(pk=pk)
-        except Contract.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = ContractSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = ContractSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class WorkshopPersonnelApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_personnel'
-
-    def get(self, request):
-        company = request.user.active_company
-        workshops = company.workshop.all()
-        query = WorkshopPersonnel.objects.filter(workshop__in=workshops)
-        workshop_personnel = []
-        for person in query:
-            if not person.quit_job_date:
-                workshop_personnel.append(person.id)
-        query = WorkshopPersonnel.objects.filter(id__in=workshop_personnel)
-
-        serializers = WorkshopPersonnelSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = WorkshopPersonnelSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WorkshopPersonnelVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_personnel'
-    validate_status = True
-    error_messages = []
-    def __init__(self):
-        self.error_messages = []
-        self.validate_status = True
-    def get(self, request, pk):
-        personnel = WorkshopPersonnel.objects.get(pk=pk)
-        if not personnel.work_title:
-            self.validate_status = False
-            self.error_messages.append('عنوان شغلی(بیمه) را وارد کنید')
-        if not personnel.job_location:
-            self.validate_status = False
-            self.error_messages.append("محل را خدمت")
-        if not personnel.employee_status:
-            self.validate_status = False
-            self.error_messages.append("وضعیت کارمند را وارد کنید")
-        if not personnel.job_location_status:
-            self.validate_status = False
-            self.error_messages.append("وضعیت محل کار را وارد کنید")
-        if personnel.previous_insurance_history_out_workshop == None:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
-        if personnel.previous_insurance_history_out_workshop and\
-            personnel.previous_insurance_history_out_workshop > 1000:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
-        if personnel.previous_insurance_history_in_workshop == None:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی در این کارگاه را وارد کنید")
-        if personnel.previous_insurance_history_in_workshop and\
-            personnel.previous_insurance_history_in_workshop > 1000:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی در این کارگاه نمیتواند بزرگتر از 1000 باشد")
-        if not personnel.job_position:
-            self.validate_status = False
-            self.error_messages.append("سمت یا شغل (دارایی) را وارد کنید")
-        if not personnel.job_group:
-            self.validate_status = False
-            self.error_messages.append("رسته شغلی را وارد کنید")
-        if not personnel.employment_type:
-            self.validate_status = False
-            self.error_messages.append("نوع استخدام را وارد کنید")
-        if not personnel.contract_type:
-            self.validate_status = False
-            self.error_messages.append("نوع قرارداد را وارد کنید")
-        if not personnel.employment_date:
-            self.validate_status = False
-            self.error_messages.append("تاریخ استخدام را وارد کنید")
-        if personnel.haghe_sanavat_days and personnel.haghe_sanavat_days > 20000:
-            self.validate_status = False
-            self.error_messages.append("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
-        same_personnel = WorkshopPersonnel.objects.filter(Q(workshop=personnel.workshop) &
-                                                          Q(personnel=personnel.personnel))
-        quit = []
-        for same_person in same_personnel:
-            if same_person.quit_job_date:
-                quit.append(same_person)
-        if len(same_personnel) - len(quit) > 1:
-            self.validate_status = False
-            self.error_messages.append("این انتصاب تکراری است")
-        if self.validate_status:
-            personnel.is_verified = True
-            personnel.save()
-            return Response({'وضعییت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
-        else:
-            counter = 1
-            response = []
-            for error in self.error_messages:
-                error = str(counter) + '-' + error
-                counter += 1
-                response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class WorkshopPersonnelUnVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_personnel'
-    def get(self, request, pk):
-        personnel = WorkshopPersonnel.objects.get(pk=pk)
-        personnel.is_verified = False
-        personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
-
-
-class WorkshopAllPersonnelDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_personnel'
-
-    def get_object(self, request, pk):
-        try:
-            workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
-        except WorkshopPersonnel.DoesNotExist:
-            raise Http404
-
-        workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
-        company = request.user.active_company
-        workshops = company.workshop.all()
-        persons = workshop_personnel.filter(workshop_in=workshops)
-        return persons
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = WorkshopPersonnelSerializer(query, many=True)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-
-class WorkshopPersonnelDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop_personnel'
-
-    def get_object(self, pk):
-        try:
-            return WorkshopPersonnel.objects.get(pk=pk)
-        except WorkshopPersonnel.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = WorkshopPersonnelSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = WorkshopPersonnelSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class PersonnelUnVerifyApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'personnel'
-    def get(self, request, pk):
-        personnel = Personnel.objects.get(pk=pk)
-        personnel.is_personnel_verified = False
-        personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
 
 
 class PersonnelVerifyApi(APIView):
@@ -980,6 +502,61 @@ class PersonnelVerifyApi(APIView):
             return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class PersonnelUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel'
+
+    def get(self, request, pk):
+        personnel = Personnel.objects.get(pk=pk)
+        personnel.is_personnel_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+
+
+# personnel family APIs
+
+
+class PersonnelFamilyApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel_family'
+
+    def get(self, request):
+        query = PersonnelFamily.objects.all()
+        serializers = PersonnelFamilySerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = PersonnelFamilySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PersonnelFamilyDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel_family'
+
+    def get_object(self, pk):
+        try:
+            return PersonnelFamily.objects.get(pk=pk)
+        except PersonnelFamily.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = PersonnelFamilySerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = PersonnelFamilySerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PersonnelFamilyVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'personnel_family'
@@ -1060,6 +637,459 @@ class PersonnelFamilyUnVerifyApi(APIView):
         return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
 
 
+# contract row APIs
+
+
+class ContractRowApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+
+    def get(self, request):
+        query = ContractRow.objects.all()
+        serializers = ContractRowSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ContractRowSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractRowDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+
+    def get_object(self, pk):
+        try:
+            return ContractRow.objects.get(pk=pk)
+        except ContractRow.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ContractRowSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ContractRowSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractRowAdjustmentDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get_object(self, pk):
+        try:
+            return Adjustment.objects.filter(contract_row=pk)
+        except Adjustment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = AdjustmentSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ContractRowVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contracct_row'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        contract_row = ContractRow.objects.get(pk=pk)
+        if not contract_row.contract_row:
+            self.validate_status = False
+            self.error_messages.append('ردیف پیمان را وارد کنید')
+        if contract_row.contract_row and len(contract_row.contract_row) < 3:
+            row = '0' * (3 - len(contract_row.contract_row))
+            new_row = row + contract_row.contract_row
+            contract_row.contract_row = new_row
+        if not contract_row.contract_number:
+            self.validate_status = False
+            self.error_messages.append('شماره قرارداد را وارد کنید')
+        if not contract_row.registration_date:
+            self.validate_status = False
+            self.error_messages.append('تاریخ قرارداد را وارد کنید')
+        if not contract_row.from_date:
+            self.validate_status = False
+            self.error_messages.append('تاریخ شروع را وارد کنید')
+        if not contract_row.initial_to_date:
+            self.validate_status = False
+            self.error_messages.append('تاریخ پایان را وارد کنید')
+        if contract_row.from_date and contract_row.initial_to_date and\
+                contract_row.from_date > contract_row.initial_to_date:
+            self.validate_status = False
+            self.error_messages.append('تاریخ شروع قرارداد نمیتواند بزرگتر از تاریخ پایان قرارداد باشد')
+        if not contract_row.assignor_national_code:
+            self.validate_status = False
+            self.error_messages.append('شناسه ملی واگذارکننده را وارد کنید')
+        if contract_row.assignor_national_code:
+            confirm, message = is_shenase_meli(contract_row.assignor_national_code)
+            if not confirm:
+                self.validate_status = False
+                self.error_messages.append(message)
+
+        if not contract_row.assignor_name:
+            self.validate_status = False
+            self.error_messages.append('نام واگذارکننده را وارد کنید')
+        if not contract_row.assignor_workshop_code:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه واگذارکننده را وارد کنید')
+        if contract_row.assignor_workshop_code and len(contract_row.assignor_workshop_code) != 10:
+            self.validate_status = False
+            self.error_messages.append('کد کارگاه واگذارکننده باید 10 رقمی باشد')
+        if not contract_row.contract_initial_amount:
+            self.validate_status = False
+            self.error_messages.append('مبلغ اولیه قرارداد را وارد کنید')
+        if contract_row.status == None:
+            self.validate_status = False
+            self.error_messages.append('وضعییت را وارد کنید')
+        if self.validate_status:
+            contract_row.is_verified = True
+            contract_row.save()
+            return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractRowUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+    def get(self, request, pk):
+        row = ContractRow.objects.get(pk=pk)
+        row.is_verified = False
+        row.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+
+class ContractRowActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+
+    def get(self, request, pk):
+        row = ContractRow.objects.get(pk=pk)
+        row.status = True
+        row.save()
+        return Response({'وضعییت': ' فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+
+class ContractRowUnActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+
+    def get(self, request, pk):
+        row = ContractRow.objects.get(pk=pk)
+        row.status = False
+        row.save()
+        return Response({'وضعییت': 'غیر فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+
+
+class AdjustmentApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get(self, request):
+        company = request.user.active_company.pk
+        workshops = Workshop.objects.filter(company=company)
+        contract_rows = ContractRow.objects.filter(workshop__in=workshops)
+        query = Adjustment.objects.filter(contract_row__in=contract_rows)
+        serializers = AdjustmentSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = AdjustmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdjustmentDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'adjustment'
+
+    def get_object(self, pk):
+        try:
+            return Adjustment.objects.get(pk=pk)
+        except Adjustment.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = AdjustmentSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = AdjustmentSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# workshop personnel APIs
+
+
+class WorkshopPersonnelApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+
+    def get(self, request):
+        company = request.user.active_company
+        workshops = company.workshop.all()
+        query = WorkshopPersonnel.objects.filter(workshop__in=workshops)
+        workshop_personnel = []
+        for person in query:
+            if not person.quit_job_date:
+                workshop_personnel.append(person.id)
+        query = WorkshopPersonnel.objects.filter(id__in=workshop_personnel)
+
+        serializers = WorkshopPersonnelSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = WorkshopPersonnelSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopPersonnelDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+
+    def get_object(self, pk):
+        try:
+            return WorkshopPersonnel.objects.get(pk=pk)
+        except WorkshopPersonnel.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkshopPersonnelSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = WorkshopPersonnelSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopAllPersonnelDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+
+    def get_object(self, request, pk):
+        try:
+            workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
+        except WorkshopPersonnel.DoesNotExist:
+            raise Http404
+
+        workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
+        company = request.user.active_company
+        workshops = company.workshop.all()
+        persons = workshop_personnel.filter(workshop_in=workshops)
+        return persons
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkshopPersonnelSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class WorkshopPersonnelVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        personnel = WorkshopPersonnel.objects.get(pk=pk)
+        if not personnel.work_title:
+            self.validate_status = False
+            self.error_messages.append('عنوان شغلی(بیمه) را وارد کنید')
+        if not personnel.job_location:
+            self.validate_status = False
+            self.error_messages.append("محل را خدمت")
+        if not personnel.employee_status:
+            self.validate_status = False
+            self.error_messages.append("وضعیت کارمند را وارد کنید")
+        if not personnel.job_location_status:
+            self.validate_status = False
+            self.error_messages.append("وضعیت محل کار را وارد کنید")
+        if personnel.previous_insurance_history_out_workshop == None:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
+        if personnel.previous_insurance_history_out_workshop and\
+            personnel.previous_insurance_history_out_workshop > 1000:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
+        if personnel.previous_insurance_history_in_workshop == None:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی در این کارگاه را وارد کنید")
+        if personnel.previous_insurance_history_in_workshop and\
+            personnel.previous_insurance_history_in_workshop > 1000:
+            self.validate_status = False
+            self.error_messages.append("سابقه بیمه قبلی در این کارگاه نمیتواند بزرگتر از 1000 باشد")
+        if not personnel.job_position:
+            self.validate_status = False
+            self.error_messages.append("سمت یا شغل (دارایی) را وارد کنید")
+        if not personnel.job_group:
+            self.validate_status = False
+            self.error_messages.append("رسته شغلی را وارد کنید")
+        if not personnel.employment_type:
+            self.validate_status = False
+            self.error_messages.append("نوع استخدام را وارد کنید")
+        if not personnel.contract_type:
+            self.validate_status = False
+            self.error_messages.append("نوع قرارداد را وارد کنید")
+        if not personnel.employment_date:
+            self.validate_status = False
+            self.error_messages.append("تاریخ استخدام را وارد کنید")
+        if personnel.haghe_sanavat_days and personnel.haghe_sanavat_days > 20000:
+            self.validate_status = False
+            self.error_messages.append("روز های کارکرد قبل از تعریف نمیتواند بزرگتر از 20000 باشد")
+        same_personnel = WorkshopPersonnel.objects.filter(Q(workshop=personnel.workshop) &
+                                                          Q(personnel=personnel.personnel))
+        quit = []
+        for same_person in same_personnel:
+            if same_person.quit_job_date:
+                quit.append(same_person)
+        if len(same_personnel) - len(quit) > 1:
+            self.validate_status = False
+            self.error_messages.append("این انتصاب تکراری است")
+        if self.validate_status:
+            personnel.is_verified = True
+            personnel.save()
+            return Response({'وضعییت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WorkshopPersonnelUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop_personnel'
+
+    def get(self, request, pk):
+        personnel = WorkshopPersonnel.objects.get(pk=pk)
+        personnel.is_verified = False
+        personnel.save()
+        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+
+
+class SearchPersonnelByCode(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel'
+
+    def get_object(self, code, request):
+        national_code = str(code)
+        try:
+            company = request.user.active_company.pk
+            personnel = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code) &
+                                                 Q(company=company) & Q(is_personnel_verified=True) &
+                                                 Q(is_personnel_active=True)).first()
+            return Personnel.objects.get(pk=personnel.pk)
+        except AttributeError:
+            raise Http404
+
+    def get(self, request, code):
+        query = self.get_object(code, request)
+        serializers = PersonnelSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+# contract APIs
+
+
+class ContractApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract'
+
+    def get(self, request):
+        company = request.user.active_company
+        workshop = company.workshop.all()
+        workshop_personnel = WorkshopPersonnel.objects.filter(workshop__in=workshop)
+        query = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
+        serializers = ContractSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ContractSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract'
+
+    def get_object(self, pk):
+        try:
+            return Contract.objects.get(pk=pk)
+        except Contract.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ContractSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ContractSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Human Resource letter
+
 
 class HRLetterApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -1079,18 +1109,6 @@ class HRLetterApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class GetHRLetterTemplatesApi(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'hr_letter'
-
-    def get(self, request):
-        company = request.user.active_company.pk
-        query = HRLetter.objects.filter(Q(is_template='t') & Q(company=company))
-        serializers = HRLetterSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
 
 
 class HRLetterDetail(APIView):
@@ -1116,10 +1134,19 @@ class HRLetterDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class GetHRLetterTemplatesApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get(self, request):
+        company = request.user.active_company.pk
+        query = HRLetter.objects.filter(Q(is_template='t') & Q(company=company))
+        serializers = HRLetterSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+# Leave Or Absence APIs
 
 
 class LeaveOrAbsenceApiView(APIView):
@@ -1166,6 +1193,58 @@ class LeaveOrAbsenceDetail(APIView):
         query = self.get_object(pk)
         query.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Mission APIs
+
+
+class MissionApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'mission'
+
+    def get(self, request):
+        query = Mission.objects.all()
+        serializers = MissionSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = MissionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MissionDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'mission'
+
+    def get_object(self, pk):
+        try:
+            return Mission.objects.get(pk=pk)
+        except Mission.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = MissionSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = MissionSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Loan APIs
 
 
 class LoanApiView(APIView):
@@ -1229,6 +1308,34 @@ class PersonnelLoanDetail(APIView):
         serializers = LoanSerializer(query, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
+
+class LoanItemDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan_item'
+
+    def get_object(self, pk):
+        try:
+            return LoanItem.objects.get(pk=pk)
+        except LoanItem.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = LoanItemSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = LoanItemSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Deduction APIs
+
+
 class DeductionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'deductions'
@@ -1244,15 +1351,6 @@ class DeductionApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class TemplateDeductionDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'deductions'
-
-    def get(self, request):
-        query = OptionalDeduction.objects.filter(is_template=True)
-        serializers = DeductionSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
 
 
 class DeductionDetail(APIView):
@@ -1284,6 +1382,16 @@ class DeductionDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class TemplateDeductionDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request):
+        query = OptionalDeduction.objects.filter(is_template=True)
+        serializers = DeductionSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
 class PersonnelDeductionDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'deductions'
@@ -1300,112 +1408,7 @@ class PersonnelDeductionDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
-class CalculationsPayrollDetail(APIView):
-    def get(self, pk,  request):
-        try:
-            workshop_personnel = WorkshopPersonnel.objects.get(pk=pk)
-            contracts = Contract.objects.filter(workshop_personnel=workshop_personnel)
-        except(LeaveOrAbsence.DoesNotExist, WorkshopPersonnel.DoesNotExist):
-            raise Http404
-        data = request.GET
-        period_from_date = data['from_date']
-        period_to_date = data['to_date']
-        from_date = jdatetime.datetime.strptime(period_from_date, '%d/%m/%Y')
-        to_date = jdatetime.datetime.strptime(period_to_date, '%d/%m/%Y')
-        months_days = {1: 31, 2: 31, 3: 31, 4: 31, 5: 31, 6: 31, 7: 30, 8: 30, 9: 30, 10: 30, 11: 30, 12: 29}
-        normal_job_time = None
-        for contract in contracts:
-            if not contract.quit_job_date:
-                if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date)\
-                        and contract.contract_from_date.__le__(to_date):
-                    normal_job_time = months_days[from_date.month]
-                elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date):
-                    normal_job_time = months_days[from_date.month] - from_date.day + 1
-                elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
-                        and contract.contract_to_date.__gt__(from_date):
-                    normal_job_time = contract.contract_from_date.day
-                elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
-                    normal_job_time = contract.contract_to_date.day - contract.contract_from_date.day
-            else:
-                if contract.quit_job_date and contract.quit_job_date.__gt__(from_date) and contract.quit_job_date.__lt__(to_date):
-                    if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date):
-                        normal_job_time = contract.quit_job_date.day
-                    elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date)\
-                            and contract.contract_from_date.__le__(to_date):
-                        normal_job_time =contract.quit_job_date.day - contract.contract_from_date.day
-                    elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
-                            and contract.contract_to_date.__gt__(from_date):
-                        normal_job_time = contract.quit_job_date.day
-                    elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
-                        normal_job_time = contract.quit_job_date.day - contract.contract_from_date.day
-        return Response({'normal_job_time': normal_job_time}, status=status.HTTP_200_OK)
-
-
-class MissionApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'mission'
-
-    def get(self, request):
-        query = Mission.objects.all()
-        serializers = MissionSerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = MissionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class MissionDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'mission'
-
-    def get_object(self, pk):
-        try:
-            return Mission.objects.get(pk=pk)
-        except Mission.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = MissionSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = MissionSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class SearchPersonnelByCode(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'personnel'
-
-    def get_object(self, code, request):
-        national_code = str(code)
-        try:
-            company = request.user.active_company.pk
-            personnel = Personnel.objects.filter(Q(personnel_code=code) | Q(national_code=national_code) &
-                                                 Q(company=company)).first()
-            return Personnel.objects.get(pk=personnel.pk)
-        except AttributeError:
-            raise Http404
-
-    def get(self, request, code):
-        query = self.get_object(code, request)
-        serializers = PersonnelSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
+# payroll APIs
 
 class ListOfPayApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -1414,6 +1417,22 @@ class ListOfPayApiView(APIView):
     def get(self, request):
         query = ListOfPay.objects.all()
         serializers = ListOfPaySerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ListOfPayDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPaySerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
@@ -1433,62 +1452,6 @@ class ListOfPayItemDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
-
-class PayItemDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay_item'
-
-    def get_object(self, pk):
-        try:
-            return ListOfPayItem.objects.get(pk=pk)
-        except ListOfPayItem.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = ListOfPayItemSerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-
-class PayAPI(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay_item'
-
-    def get_object(self, pk):
-        try:
-            return ListOfPayItem.objects.get(pk=pk)
-        except ListOfPayItem.DoesNotExist:
-            raise Http404
-
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = ListOfPayItemPaySerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ListOfPayDetail(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay'
-
-    def get_object(self, pk):
-        try:
-            return ListOfPay.objects.get(pk=pk)
-        except ListOfPay.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = ListOfPaySerializer(query)
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
-    def delete(self, request, pk):
-        query = self.get_object(pk)
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 class ListOfPayLessDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
@@ -1505,24 +1468,42 @@ class ListOfPayLessDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
-
-class ListOfPayItemsCalculate(APIView):
+class WorkshopListOfPayApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay_item'
+    permission_basename = 'list_of_pay'
 
-    def get_object(self, pk):
-        try:
-            return ListOfPayItem.objects.get(pk=pk)
-        except ListOfPayItem.DoesNotExist:
-            raise Http404
+    def get(self, request, pk, month, year):
+        query = ListOfPay.objects.filter(Q(workshop=pk) & Q(month=month) & Q(year=int(year)))
+        serializers = ListOfPayCopyPaySerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
-        query = self.get_object(pk)
-        serializer = ListOfPayItemsAddInfoSerializer(query, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PaymentVerifyApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request, year, month, pk):
+        date = jdatetime.date(year, month, 1, locale='fa_IR')
+        workshop = Workshop.objects.get(pk=pk)
+        verify_tax_row = workshop.get_tax_row(date)
+        verify_personnel = workshop.get_personnel
+        verify_cotract = workshop.get_contract
+        verify_hr = workshop.get_hr_letter
+        error = False
+        error_response = {}
+        if not verify_tax_row:
+            error = True
+            error_response['ردیف مالیات'] = 'موجود نیست'
+        if len(verify_personnel) == 0:
+            error = True
+            error_response['پرسنل فعال'] = 'موجود نیست'
+        if verify_cotract == 0:
+            error = True
+            error_response['قرارداد'] = 'موجود نیست'
+        if error:
+            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'وضعیت': 'چک شد'}, status=status.HTTP_200_OK)
 
 
 class PaymentList(APIView):
@@ -1551,7 +1532,6 @@ class PaymentList(APIView):
                                                 use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
         contract = payroll_list.get_contracts
-        print(contract)
         if len(contract) == 0:
             raise ValidationError('no contract')
         else:
@@ -1585,25 +1565,97 @@ class PaymentList(APIView):
             return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
 
 
+class CalculationsPayrollDetail(APIView):
 
-class LoanItemDetail(APIView):
+    def get(self, pk,  request):
+        try:
+            workshop_personnel = WorkshopPersonnel.objects.get(pk=pk)
+            contracts = Contract.objects.filter(workshop_personnel=workshop_personnel)
+        except(LeaveOrAbsence.DoesNotExist, WorkshopPersonnel.DoesNotExist):
+            raise Http404
+        data = request.GET
+        period_from_date = data['from_date']
+        period_to_date = data['to_date']
+        from_date = jdatetime.datetime.strptime(period_from_date, '%d/%m/%Y')
+        to_date = jdatetime.datetime.strptime(period_to_date, '%d/%m/%Y')
+        months_days = {1: 31, 2: 31, 3: 31, 4: 31, 5: 31, 6: 31, 7: 30, 8: 30, 9: 30, 10: 30, 11: 30, 12: 29}
+        normal_job_time = None
+        for contract in contracts:
+            if not contract.quit_job_date:
+                if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date)\
+                        and contract.contract_from_date.__le__(to_date):
+                    normal_job_time = months_days[from_date.month]
+                elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date):
+                    normal_job_time = months_days[from_date.month] - from_date.day + 1
+                elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
+                        and contract.contract_to_date.__gt__(from_date):
+                    normal_job_time = contract.contract_from_date.day
+                elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
+                    normal_job_time = contract.contract_to_date.day - contract.contract_from_date.day
+            else:
+                if contract.quit_job_date and contract.quit_job_date.__gt__(from_date)\
+                        and contract.quit_job_date.__lt__(to_date):
+                    if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date):
+                        normal_job_time = contract.quit_job_date.day
+                    elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date)\
+                            and contract.contract_from_date.__le__(to_date):
+                        normal_job_time =contract.quit_job_date.day - contract.contract_from_date.day
+                    elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
+                            and contract.contract_to_date.__gt__(from_date):
+                        normal_job_time = contract.quit_job_date.day
+                    elif contract.contract_from_date.__gt__(from_date) and contract.contract_to_date.__lt__(to_date):
+                        normal_job_time = contract.quit_job_date.day - contract.contract_from_date.day
+        return Response({'normal_job_time': normal_job_time}, status=status.HTTP_200_OK)
+
+
+class PayAPI(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'loan_item'
+    permission_basename = 'list_of_pay_item'
 
     def get_object(self, pk):
         try:
-            return LoanItem.objects.get(pk=pk)
-        except LoanItem.DoesNotExist:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayItemPaySerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PayItemDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
             raise Http404
 
     def get(self, request, pk):
         query = self.get_object(pk)
-        serializers = LoanItemSerializer(query)
+        serializers = ListOfPayItemSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class ListOfPayItemsCalculate(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.get(pk=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
 
     def put(self, request, pk):
         query = self.get_object(pk)
-        serializer = LoanItemSerializer(query, data=request.data)
+        serializer = ListOfPayItemsAddInfoSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1623,7 +1675,6 @@ class ListOfPayBankDetail(APIView):
         query = self.get_object(pk)
         serializers = ListOfPayBankSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
-
 
 
 class ListOfPayPaymentAPI(APIView):
@@ -1669,15 +1720,6 @@ class ListOfPayItemPaymentAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class WorkshopListOfPayApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'list_of_pay'
-
-    def get(self, request, pk, month, year):
-        query = ListOfPay.objects.filter(Q(workshop=pk) & Q(month=month) & Q(year=int(year)))
-        serializers = ListOfPayCopyPaySerializer(query, many=True, context={'request': request})
-        return Response(serializers.data, status=status.HTTP_200_OK)
-
 class ListOfPayCopy(APIView):
     months_day = {
         1: 31,
@@ -1721,40 +1763,12 @@ class ListOfPayCopy(APIView):
                                                   self.months_day[data['month']],
                                                   locale='fa_IR')
         new_list_of_pay.save()
-        print(items)
 
         for item in items:
             new_item = item
             new_item.id = None
             new_item.list_of_pay = ListOfPay.objects.get(pk=new_list_of_pay.id)
             new_item.save()
-            print(new_item)
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
 
 
-class PaymentVerifyApiView(APIView):
-    permission_classes = (IsAuthenticated, BasicCRUDPermission)
-    permission_basename = 'workshop'
-
-    def get(self, request, year, month, pk):
-        date = jdatetime.date(year, month, 1, locale='fa_IR')
-        workshop = Workshop.objects.get(pk=pk)
-        verify_tax_row = workshop.get_tax_row(date)
-        verify_personnel = workshop.get_personnel
-        verify_cotract = workshop.get_contract
-        verify_hr = workshop.get_hr_letter
-        error = False
-        error_response = {}
-        if not verify_tax_row:
-            error = True
-            error_response['ردیف مالیات'] = 'موجود نیست'
-        if len(verify_personnel) == 0:
-            error = True
-            error_response['پرسنل فعال'] = 'موجود نیست'
-        if verify_cotract == 0:
-            error = True
-            error_response['قرارداد'] = 'موجود نیست'
-        if error:
-            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'وضعیت': 'چک شد'}, status=status.HTTP_200_OK)

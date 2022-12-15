@@ -25,6 +25,7 @@ class WorkshopFilter(filters.FilterSet):
             'branch_code': BASE_FIELD_FILTERS,
             'branch_name': BASE_FIELD_FILTERS,
             'is_active': BASE_FIELD_FILTERS,
+            'is_verified': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {

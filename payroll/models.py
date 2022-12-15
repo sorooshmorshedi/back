@@ -139,9 +139,11 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def workshop_title(self):
-        if not self.name:
+        if not self.name and not self.workshop_code:
+            return 'ثبت اولیه ' + str(self.id)
+        elif not self.name and self.workshop_code:
             return self.workshop_code
-        elif not self.workshop_code:
+        elif not self.workshop_code and self.name:
             return self.name
         else:
             return self.name + ' ' + self.workshop_code
