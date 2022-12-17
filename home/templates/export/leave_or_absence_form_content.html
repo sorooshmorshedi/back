@@ -7,33 +7,95 @@
             <th>پرسنل در کارگاه</th>
             <th>نوع مرخصی</th>
             <th>نوع</th>
-            <th>از تاربخ</th>
-            <th>تا تاربخ</th>
+            <th>از تاریخ</th>
+            <th>تا تاریخ</th>
             <th>از ساعت</th>
             <th>تا ساعت</th>
-            <th> تاربخ</th>
+            <th> تاریخ</th>
             <th>علت مرخصی</th>
             <th>توضیحات</th>
+            <th>نهایی</th>
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.workshop_personnel.my_title }}</td>
-                <td>{{ form.get_leave_type_display }}</td>
+                {% if form.workshop_personnel %}
+                    <td>{{ form.workshop_personnel.my_title }}</td>
+                {% endif %}
+                {% if not form.workshop_personnel %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+                {% if form.leave_type %}
+                    <td>{{ form.get_leave_type_display }}</td>
+                {% endif %}
+                {% if not form.workshop_personnel %}
+                    <
+                    <td class="text-center"> -</td>
+                {% endif %}
                 <td>
                     {% if form.leave_type == 'e' %}
-                    {{ form.get_entitlement_leave_type_display }}
+                        {{ form.get_entitlement_leave_type_display }}
                     {% endif %}
                     {% if form.leave_type == 'm' %}
-                    {{ form.get_matter73_leave_type_display }}
+                        {{ form.get_matter73_leave_type_display }}
                     {% endif %}
                 </td>
-                <td>{{ form.from_date }}</td>
-                <td>{{ form.to_date }}</td>
-                <td>{{ form.from_hour }}</td>
-                <td>{{ form.to_hour }}</td>
-                <td>{{ form.date }}</td>
-                <td>{{ form.cause_of_incident }}</td>
-                <td>{{ form.explanation }}</td>
+
+                {% if form.from_date %}
+                    <td>{{ form.from_date }}</td>
+                {% endif %}
+                {% if not form.from_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.to_date %}
+                    <td>{{ form.to_date }}</td>
+                {% endif %}
+                {% if not form.to_date %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.from_hour %}
+                    <td>{{ form.from_hour }}</td>
+                {% endif %}
+                {% if not form.from_hour %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.to_hour %}
+                    <td>{{ form.to_hour }}</td>
+                {% endif %}
+                {% if not form.to_hour %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.date %}
+                    <td>{{ form.date }}</td>
+                {% endif %}
+                {% if not form.date %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.cause_of_incident %}
+                    <td>{{ form.cause_of_incident }}</td>
+                {% endif %}
+                {% if not form.cause_of_incident %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.explanation %}
+                    <td>{{ form.explanation }}</td>
+                {% endif %}
+                {% if not form.explanation %}
+
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}
     </table>

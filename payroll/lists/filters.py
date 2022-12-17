@@ -66,7 +66,7 @@ class PersonnelFilter(filters.FilterSet):
             'insurance': BASE_FIELD_FILTERS,
             'insurance_code': BASE_FIELD_FILTERS,
             'degree_education': ('exact',),
-            'field_of_study':  BASE_FIELD_FILTERS,
+            'field_of_study': BASE_FIELD_FILTERS,
             'university_type': ('exact',),
             'university_name': ('exact',),
             'account_bank_name': BASE_FIELD_FILTERS,
@@ -149,6 +149,7 @@ class ContractFilter(filters.FilterSet):
             'contract_from_date': BASE_FIELD_FILTERS,
             'contract_to_date': BASE_FIELD_FILTERS,
             'quit_job_date': BASE_FIELD_FILTERS,
+            'is_verified': ('exact',),
 
         }
         filter_overrides = {
@@ -202,7 +203,25 @@ class AdjustmentFilter(filters.FilterSet):
         }
 
 
+def filter_by_name(queryset, name, value):
+    types = {
+        'استحقاقی': 'e',
+        'استعلاجی': 'i',
+        'بدون_حقوق': 'w',
+        'غیبت': 'a',
+        'ماده_73': 'm',
+        'زایمان': 'c'
+    }
+    for type in types:
+        if value in type:
+            return queryset.filter(leave_type=types[type])
+
+    return queryset.filter(**{name: value})
+
+
 class LeaveOrAbsenceFilter(filters.FilterSet):
+    leave_type_display = filters.CharFilter(method=filter_by_name)
+
     class Meta:
         model = LeaveOrAbsence
         fields = {
@@ -212,7 +231,12 @@ class LeaveOrAbsenceFilter(filters.FilterSet):
             'entitlement_leave_type': ('exact',),
             'from_date': BASE_FIELD_FILTERS,
             'to_date': BASE_FIELD_FILTERS,
+            'date': BASE_FIELD_FILTERS,
+            'from_hour': BASE_FIELD_FILTERS,
+            'to_hour': BASE_FIELD_FILTERS,
             'explanation': ('exact',),
+            'is_verified': BASE_FIELD_FILTERS,
+
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -231,6 +255,8 @@ class MissionFilter(filters.FilterSet):
             'from_date': BASE_FIELD_FILTERS,
             'to_date': BASE_FIELD_FILTERS,
             'explanation': ('exact',),
+            'is_verified': BASE_FIELD_FILTERS,
+
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -270,7 +296,6 @@ class ListOfPayFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
-
 
 
 class ListOfPayItemFilter(filters.FilterSet):
@@ -326,6 +351,7 @@ class LoanFilter(filters.FilterSet):
             },
         }
 
+
 class LoanItemFilter(filters.FilterSet):
     class Meta:
         model = LoanItem
@@ -371,10 +397,10 @@ class TaxFilter(filters.FilterSet):
             'id': BASE_FIELD_FILTERS,
         }
 
+
 class WorkshopTaxFilter(filters.FilterSet):
     class Meta:
         model = ListOfPay
         fields = {
             'id': BASE_FIELD_FILTERS,
         }
-

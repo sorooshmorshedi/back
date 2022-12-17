@@ -666,7 +666,7 @@ class LeaveOrAbsenceExportView(LeaveOrAbsenceListView, BaseExportView):
                 'لیست مرخصی و غیبت ها'
             ],
             ['پرسنل در کارگاه', 'نوع مرخصی', 'نوع  ', 'نوع  ', 'از تاربخ',
-             'تا تاربخ ', 'از ساعت', 'تا ساعت', 'علت مرخصی', 'توضیحات']
+             'تا تاربخ ',' تاربخ ', 'از ساعت', 'تا ساعت', 'علت مرخصی', 'توضیحات', 'نهایی']
         ]
         for form in absence:
             data.append([
@@ -676,10 +676,12 @@ class LeaveOrAbsenceExportView(LeaveOrAbsenceListView, BaseExportView):
                 form.get_matter73_leave_type_display(),
                 form.from_date,
                 form.to_date,
+                form.date,
                 form.from_hour,
                 form.to_hour,
                 form.cause_of_incident,
-                form.explanation
+                form.explanation,
+                form.verify_display,
             ])
         return data
 
@@ -846,7 +848,7 @@ class MissionExportView(MissionListView, BaseExportView):
                 'لیست ماموریت ها'
             ],
             ['پرسنل در کارگاه', 'نوع ماموریت', 'موضوع', 'از تاربخ',
-             'تا تاربخ ', 'از ساعت', 'تا ساعت', 'تاربخ', 'مکان', 'توضیحات']
+             'تا تاربخ ', 'از ساعت', 'تا ساعت', 'تاربخ', 'مکان', 'توضیحات', 'نهایی']
         ]
         for form in mission:
             data.append([
@@ -859,7 +861,8 @@ class MissionExportView(MissionListView, BaseExportView):
                 form.to_hour,
                 form.date,
                 form.location,
-                form.explanation
+                form.explanation,
+                form.verify_display
             ])
         return data
 
@@ -991,14 +994,15 @@ class ContractFormExportView(ContractListView, BaseExportView):
             [
                 'لیست قرارداد ها'
             ],
-            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار']
+            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار', 'نهایی' ]
         ]
         for form in contract:
             data.append([
                 form.workshop_personnel.my_title,
                 form.contract_from_date,
                 form.contract_to_date,
-                form.quit_job_date
+                form.quit_job_date,
+                form.verify_display
             ])
         return data
 

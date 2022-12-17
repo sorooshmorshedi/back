@@ -81,6 +81,9 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     current_insurance_month = serializers.IntegerField(source='current_insurance', read_only=True)
     quit_job = serializers.BooleanField(source='quit_job_date', read_only=True)
     insurance_history_show = serializers.IntegerField(source='quit_job_date', read_only=True)
+    personnel_gender = serializers.CharField(source='personnel.gender', read_only=True)
+    personnel_marital = serializers.CharField(source='personnel.marital_status', read_only=True)
+    personnel_insurance = serializers.CharField(source='personnel.insurance', read_only=True)
 
     class Meta:
         model = WorkshopPersonnel

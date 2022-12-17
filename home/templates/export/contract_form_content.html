@@ -10,6 +10,7 @@
             <th>تاریخ ترک کار</th>
             <th>بیمه می شود؟</th>
             <th>تاریخ اضافه شدن به لیست بیمه</th>
+            <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
@@ -27,6 +28,9 @@
 
                 <td>{{ form.insurance_add_date }}</td>
 
+            </tr>
+            <tr>
+            {{ form.verify_display }}
             </tr>
         {% endfor %}
     </table>

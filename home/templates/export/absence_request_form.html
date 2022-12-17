@@ -26,41 +26,65 @@
             <tr>
                 {% if form.entitlement_leave_type == 'h' %}
                     <td class="text-center">
+                        <span>
+                             به مدت
+                        </span>
+
                         <h5>
-                            به مدت {{ form.hour }} ساعت
+                            {{ form.hour }} ساعت
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                             در تاریخ
+                        </span>
                         <h5>
-                            در تاریخ {{ form.date }}
+                            {{ form.date }}
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                             از ساعت
+                        </span>
                         <h5>
-                            از ساعت {{ form.from_hour }}
+                            {{ form.from_hour }}
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                             تا ساعت
+                        </span>
+
                         <h5>
-                            تا ساعت {{ form.to_hour }}
+                            {{ form.to_hour }}
                         </h5>
                     </td>
                 {% endif %}
 
                 {% if form.entitlement_leave_type != 'h' %}
                     <td class="text-center">
+                        <span>
+                             به مدت
+                        </span>
                         <h5>
-                            به مدت {{ form.time_period }} روز
+                            {{ form.time_period }} روز
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                            از تاریخ
+                        </span>
                         <h5>
-                            از تاریخ {{ form.from_date }}
+                            {{ form.from_date }}
                         </h5>
                     </td>
                     <td class="text-center">
+                    <span>
+                            تا تاریخ
+                        </span>
+
                     <h5>
-                        تا تاریخ {{ form.to_date }}
+                        {{ form.to_date }}
                     </h5>
                 {% endif %}
             </tr>
@@ -68,8 +92,11 @@
 
                 <tr>
                     <td class="text-right" colspan="5">
+                        <span>
+                            علت حادثه
+                        </span>
                         <h5>
-                            علت حادثه : {{ form.cause_of_incident }}
+                            {{ form.cause_of_incident }}
                         </h5>
                     </td>
                 </tr>

@@ -14,6 +14,7 @@
             <th> تاربخ</th>
             <th>مکان</th>
             <th>توضیحات</th>
+            <th>نهایی</th>
         </tr>
         {% for form in forms %}
             <tr>
@@ -27,6 +28,7 @@
                 <td>{{ form.date }}</td>
                 <td>{{ form.location }}</td>
                 <td>{{ form.explanation }}</td>
+                <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}
     </table>

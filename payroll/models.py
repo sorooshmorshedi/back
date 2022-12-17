@@ -1155,17 +1155,20 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     contract_type = models.IntegerField(choices=CONTRACT_TYPES, blank=True, null=True)
     employee_status = models.IntegerField(choices=EMPLOYEE_TYPES, blank=True, null=True)
 
-    haghe_sanavat_days = models.IntegerField(default=0, blank=True, null=True)
-    haghe_sanavat_identify_amount = DECIMAL(default=0, blank=True, null=True)
-
     save_leaave = models.IntegerField(default=0)
+
+    sanavat_previuos_days = models.CharField(max_length=100, blank=True, null=True)
+    sanavat_previous_amount = models.CharField(max_length=100, blank=True, null=True)
 
     @property
     def current_insurance(self):
-        if self.employment_date:
-            now = jdatetime.date.today()
-            delta = now - self.employment_date
-            return round(delta.days / 30)
+        if self.list_of_pay_item:
+            lists = self.workshop.list_of_pay.filter(ultimate=True)
+            items = self.list_of_pay_item.filter(list_of_pay__in=lists)
+            total = 0
+            for item in items:
+                total += round((item.real_worktime / item.list_of_pay.month_days), 2)
+            return total
         else:
             return 0
 
@@ -1439,7 +1442,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
         response['months'] = by_month
         response['total']['day_amount'] = day_amount
-        print(day_amount)
         response['total']['amount'] = day_amount * response['total']['remaining']
 
         return response
@@ -1528,12 +1530,13 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
 
 
-class Contract(BaseModel, LockableMixin, DefinableMixin):
+class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
                                            on_delete=models.CASCADE, blank=True, null=True)
-    code = models.IntegerField(blank=True, null=True)
+    code = models.CharField(max_length=100, blank=True, null=True)
     insurance = models.BooleanField(default=False)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
+    insurance_number = models.CharField(max_length=100, blank=True, null=True)
     contract_from_date = jmodels.jDateField(blank=True, null=True)
     contract_to_date = jmodels.jDateField(blank=True, null=True)
     quit_job_date = jmodels.jDateField(blank=True, null=True)
@@ -1559,18 +1562,14 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
             else:
                 self.workshop_personnel.insurance_add_date = self.contract_from_date
             self.workshop_personnel.save()
-            sign_date = self.workshop_personnel.employment_date
-            if self.contract_from_date.__lt__(sign_date):
-                raise ValidationError('تاریخ شروع قرارداد باید بعد از ' + sign_date.__str__() + '  تاریخ استخدام باشد')
-            if self.contract_from_date.__ge__(self.contract_to_date):
-                raise ValidationError('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
-        else:
-            raise ValidationError('پرسنل در کارگاه نمی تواند خالی باشد')
         super().save(*args, **kwargs)
 
     @property
     def workshop_personnel_display(self):
-        return self.workshop_personnel.my_title
+        if self.workshop_personnel:
+            return self.workshop_personnel.my_title
+        else:
+            return ''
 
     @property
     def find_hr(self):
@@ -1585,7 +1584,10 @@ class Contract(BaseModel, LockableMixin, DefinableMixin):
 
 
     def __str__(self):
-        return str(self.code) + ' برای ' + self.workshop_personnel_display
+        if self.code:
+            return str(self.code) + ' برای ' + self.workshop_personnel_display
+        else:
+            return str(self.id) + ' برای ' + self.workshop_personnel_display
 
 
 class Loan(BaseModel, LockableMixin, DefinableMixin):
@@ -1801,6 +1803,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     WITHOUT_SALARY = 'w'
     ABSENCE = 'a'
     MATTER_73 = 'm'
+    CHILD_BORN = 'c'
 
     LEAVE_TYPES = (
         (ENTITLEMENT, 'استحقاقی'),
@@ -1808,6 +1811,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         (WITHOUT_SALARY, 'بدون حقوق'),
         (ABSENCE, 'غیبت'),
         (MATTER_73, 'ماده 73'),
+        (CHILD_BORN, 'زایمان'),
     )
 
     HOURLY = 'h'
@@ -1819,14 +1823,12 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     )
 
-    CHILDBIRTH = 'c'
     MARRIAGE = 'm'
     SPOUSAL_DEATH = 's'
     CHILD_DEATH = 'd'
     PARENT_DEATH = 'p'
 
     MATTER_73_LEAVE_TYPES = (
-        (CHILDBIRTH, 'زایمان'),
         (MARRIAGE, 'ازدواج'),
         (SPOUSAL_DEATH, 'مرگ همسر'),
         (CHILD_DEATH, 'مرگ فرزند'),
@@ -1835,7 +1837,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     )
 
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
-    leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES)
+    leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, blank=True, null=True)
     entitlement_leave_type = models.CharField(max_length=2, choices=ENTITLEMENT_LEAVE_TYPES, blank=True, null=True)
     matter73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
@@ -1849,15 +1851,18 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def final_by_day(self):
-        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h' and \
+            self.to_hour and self.from_hour:
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             final_by_day = (duration.seconds / 60) / 440
-        else:
+        elif self.from_date and self.to_date:
             difference = self.to_date - self.from_date
             final_by_day = difference.days + 1
             if self.leave_type == 'm' and final_by_day > 3:
                 final_by_day = 3
+        else:
+            final_by_day = 0
         return final_by_day
 
     @property
@@ -2390,7 +2395,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
 
-class Mission(BaseModel, LockableMixin, DefinableMixin):
+class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     HOURLY = 'h'
     DAILY = 'd'
 
@@ -2401,7 +2406,7 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
     )
 
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='mission', on_delete=models.CASCADE)
-    mission_type = models.CharField(max_length=2, choices=MISSION_TYPES)
+    mission_type = models.CharField(max_length=2, choices=MISSION_TYPES, blank=True, null=True)
     from_date = jmodels.jDateField(blank=True, null=True)
     to_date = jmodels.jDateField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
@@ -2415,13 +2420,15 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def final_by_day(self):
-        if self.mission_type == 'h':
+        if self.mission_type == 'h' and self.to_hour and self.from_hour:
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             final_by_day = (duration.seconds / 60) / 440
-        else:
+        elif self.to_date and self.from_date:
             difference = self.to_date - self.from_date
             final_by_day = difference.days + 1
+        else :
+            final_by_day = 0
         return final_by_day
 
     @property
@@ -2448,21 +2455,6 @@ class Mission(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def save(self, *args, **kwargs):
-        if self.mission_type == 'h':
-            self.from_date, self.to_date, = None, None
-            if not self.from_hour or not self.to_hour or not self.date:
-                raise ValidationError('برای ماموریت ساعتی ساعت شروع و پایان و تاریخ را وارد کنید')
-        else:
-            self.date, self.from_hour, self.to_hour = None, None, None
-            if not self.from_date or not self.to_date:
-                raise ValidationError('برای ماموریت روزانه تاریح شروع و پایان را وارد کنید')
-
-        if self.from_date and self.to_date and self.from_date.__gt__(self.to_date):
-            raise ValidationError(' تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد')
-
-        if self.from_hour and self.to_hour and self.from_hour.__gt__(self.to_hour):
-            raise ValidationError(' ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد')
-
         self.time_period = self.final_by_day
         super().save(*args, **kwargs)
 
@@ -2688,7 +2680,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                     contract_end[contract.id] = self.end_date
         response_data = []
         for contract in contract_personnel:
-            absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0, 'm': 0, 'eh': 0, 'ed': 0}
+            absence_types = {'i': 0, 'w': 0, 'a': 0, 'e': 0, 'm': 0, 'eh': 0, 'ed': 0, 'c': 0}
             mission_day = 0
             contract = Contract.objects.get(pk=contract)
             workshop_personnel = contract.workshop_personnel
