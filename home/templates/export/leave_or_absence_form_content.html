@@ -33,10 +33,14 @@
                 {% endif %}
                 <td>
                     {% if form.leave_type == 'e' %}
-                        {{ form.get_entitlement_leave_type_display }}
+                        {% if form.get_entitlement_leave_type_display %}
+                            {{ form.get_entitlement_leave_type_display }}
+                        {% endif %}
                     {% endif %}
                     {% if form.leave_type == 'm' %}
+                        {% if form.get_matter73_leave_type_display %}
                         {{ form.get_matter73_leave_type_display }}
+                        {% endif %}
                     {% endif %}
                 </td>
 

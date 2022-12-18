@@ -83,7 +83,8 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     insurance_history_show = serializers.IntegerField(source='quit_job_date', read_only=True)
     personnel_gender = serializers.CharField(source='personnel.gender', read_only=True)
     personnel_marital = serializers.CharField(source='personnel.marital_status', read_only=True)
-    personnel_insurance = serializers.CharField(source='personnel.insurance', read_only=True)
+    personnel_insurance = serializers.BooleanField(source='personnel.insurance', read_only=True)
+    personnel_insurance_code = serializers.CharField(source='personnel.insurance_code', read_only=True)
 
     class Meta:
         model = WorkshopPersonnel
@@ -149,6 +150,8 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
     leave_type_display = serializers.CharField(source='get_leave_type_display', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     person_name = serializers.CharField(source='personnel_name', read_only=True)
+    by_hour = serializers.CharField(source='hour', read_only=True)
+
 
     class Meta:
         model = LeaveOrAbsence
@@ -182,6 +185,8 @@ class DeductionSerializer(serializers.ModelSerializer):
 class MissionSerializer(serializers.ModelSerializer):
     mission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
+    by_hour = serializers.CharField(source='hour', read_only=True)
+
 
     class Meta:
         model = Mission

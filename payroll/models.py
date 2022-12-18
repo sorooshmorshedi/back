@@ -1138,6 +1138,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     personnel = models.ForeignKey(Personnel, related_name='workshop_personnel', on_delete=models.CASCADE)
 
     employment_date = jmodels.jDateField(blank=True, null=True)
+    insurance_add_date = jmodels.jDateField(blank=True, null=True)
     work_title = models.CharField(max_length=100, blank=True, null=True)
     work_title_code = models.CharField(max_length=10, blank=True, null=True)
 
@@ -1529,7 +1530,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         return self.my_title
 
 
-
 class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='contract',
                                            on_delete=models.CASCADE, blank=True, null=True)
@@ -1556,12 +1556,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         )
 
     def save(self, *args, **kwargs):
-        if self.workshop_personnel:
-            if not self.insurance:
-                self.workshop_personnel.insurance_add_date = None
-            else:
-                self.workshop_personnel.insurance_add_date = self.contract_from_date
-            self.workshop_personnel.save()
         super().save(*args, **kwargs)
 
     @property
@@ -1836,7 +1830,8 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     )
 
-    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE)
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='leave', on_delete=models.CASCADE,
+                                           blank=True, null=True)
     leave_type = models.CharField(max_length=2, choices=LEAVE_TYPES, blank=True, null=True)
     entitlement_leave_type = models.CharField(max_length=2, choices=ENTITLEMENT_LEAVE_TYPES, blank=True, null=True)
     matter73_leave_type = models.CharField(max_length=2, choices=MATTER_73_LEAVE_TYPES, blank=True, null=True)
@@ -1865,6 +1860,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             final_by_day = 0
         return final_by_day
 
+
     @property
     def hour(self):
         hour = 0
@@ -1872,10 +1868,29 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             hour = (duration.seconds / 60) / 60
-        return round(hour)
+            minute = (duration.seconds / 60) % 60
+            return str(round(hour)) + ' : ' + str(round(minute))
+        elif self.final_by_day > 0:
+            hour = self.final_by_day * 24
+        else:
+            hour = 0
+        return str(round(hour))
 
     def save(self, *args, **kwargs):
+        if not self.workshop_personnel:
+            raise ValidationError('انتخاب پرسنل در کارگاه برای ثبت اولیه الزامیست')
         self.time_period = self.final_by_day
+        if self.leave_type == 'm':
+            if self.from_date and self.to_date:
+                duration = datetime.timedelta(days=2)
+                if self.to_date.day - self.from_date.day > 2:
+                    self.to_date = self.from_date + duration
+        if self.entitlement_leave_type == 'h' and self.leave_type == 'e':
+            self.from_date, self.to_date, self.cause_of_incident = None, None, ' '
+        elif self.entitlement_leave_type == 'd' and self.leave_type == 'e':
+            self.from_hour, self.to_hour, self.date, self.cause_of_incident = None, None, None, ' '
+        else:
+            self.from_hour, self.to_hour, self.date = None, None, None
         super().save(*args, **kwargs)
 
     class Meta(BaseModel.Meta):
@@ -2434,11 +2449,33 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     @property
     def hour(self):
         hour = 0
+        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
+                                          minutes=self.to_hour.minute - self.from_hour.minute)
+            hour = (duration.seconds / 60) / 60
+            minute = (duration.seconds / 60) % 60
+            return str(round(hour)) + ' : ' + str(round(minute))
+        elif self.final_by_day > 0:
+            hour = self.final_by_day * 24
+        else:
+            hour = 0
+        return str(round(hour))
+
+
+    @property
+    def hour(self):
+        hour = 0
         if self.mission_type == 'h':
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             hour = (duration.seconds / 60) / 60
-        return round(hour)
+            minute = (duration.seconds / 60) % 60
+            return str(round(hour)) + ' : ' + str(round(minute))
+        elif self.final_by_day > 0:
+            hour = self.final_by_day * 24
+        else:
+            hour = 0
+        return str(round(hour))
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Mission'

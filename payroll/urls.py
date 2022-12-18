@@ -34,7 +34,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
     path('workshop/<int:pk>/', WorkshopDetail.as_view(), name='workshopDetail'),
-    path('workshop/worksho_personnel/<int:pk>/', WorkshopAllPersonnelDetail.as_view(), name='workshopAllPersonnelDetail'),
+    path('workshop/workshop_personnel/<int:pk>/', WorkshopAllPersonnelDetail.as_view(), name='workshopAllPersonnelDetail'),
     path('workshop/setting/<int:pk>/', WorkshopSettingDetail.as_view(), name='workshopSettingDetail'),
     path('workshop/contract/row/<int:pk>/', WorkshopContractRowsDetail.as_view(), name='workshopContractRowsDetail'),
     path('workshop/verify/<int:pk>/', WorkshopVerifyApi.as_view(), name='workshopVerifyApi'),

@@ -17,13 +17,55 @@
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.workshop_code }}</td>
-                <td>{{ form.name }}</td>
-                <td>{{ form.employer_name }}</td>
-                <td>{{ form.address }}</td>
-                <td>{{ form.postal_code }}</td>
-                <td>{{ form.branch_code }}</td>
-                <td>{{ form.branch_name }}</td>
+                {% if form.workshop_code %}
+                    <td>{{ form.workshop_code }}</td>
+                {% endif %}
+                {% if not form.workshop_code %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.name %}
+                    <td>{{ form.name }}</td>
+                {% endif %}
+                {% if not form.name %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.employer_name %}
+                    <td>{{ form.employer_name }}</td>
+                {% endif %}
+                {% if not form.employer_name %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.address %}
+                    <td>{{ form.address }}</td>
+                {% endif %}
+                {% if not form.address %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.postal_code %}
+                    <td>{{ form.postal_code }}</td>
+                {% endif %}
+                {% if not form.postal_code %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.branch_code %}
+                    <td>{{ form.branch_code }}</td>
+                {% endif %}
+                {% if not form.branch_code %}
+                    <td> - </td>
+                {% endif %}
+
+                {% if form.branch_name %}
+                    <td>{{ form.branch_name }}</td>
+                {% endif %}
+                {% if not form.branch_name %}
+                    <td> - </td>
+                {% endif %}
+
                 <td>{{ form.active_display }}</td>
                 <td>{{ form.verify_display }}</td>
             </tr>

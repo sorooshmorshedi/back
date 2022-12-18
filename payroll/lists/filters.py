@@ -203,7 +203,7 @@ class AdjustmentFilter(filters.FilterSet):
         }
 
 
-def filter_by_name(queryset, name, value):
+def absence_type_filter(queryset, name, value):
     types = {
         'استحقاقی': 'e',
         'استعلاجی': 'i',
@@ -212,15 +212,15 @@ def filter_by_name(queryset, name, value):
         'ماده_73': 'm',
         'زایمان': 'c'
     }
+    query = queryset.filter(pk=None)
     for type in types:
         if value in type:
-            return queryset.filter(leave_type=types[type])
-
-    return queryset.filter(**{name: value})
+            query = queryset.filter(leave_type=types[type])
+    return query
 
 
 class LeaveOrAbsenceFilter(filters.FilterSet):
-    leave_type_display = filters.CharFilter(method=filter_by_name)
+    leave_type_display = filters.CharFilter(method=absence_type_filter)
 
     class Meta:
         model = LeaveOrAbsence
@@ -245,7 +245,23 @@ class LeaveOrAbsenceFilter(filters.FilterSet):
         }
 
 
+def mission_type_filter(queryset, name, value):
+    print(value)
+    types = {
+        'ساعتی': 'h',
+        'روزانه': 'd',
+    }
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(mission_type=types[type])
+    return query
+
+
+
 class MissionFilter(filters.FilterSet):
+    mission_type_display = filters.CharFilter(method=mission_type_filter)
+
     class Meta:
         model = Mission
         fields = {

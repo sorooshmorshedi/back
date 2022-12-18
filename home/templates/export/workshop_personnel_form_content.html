@@ -22,20 +22,106 @@
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.workshop.workshop_title }}</td>
-                <td>{{ form.personnel.full_name }}</td>
-                <td>{{ form.work_title }}</td>
-                <td>{{ form.previous_insurance_history_out_workshop }}</td>
-                <td>{{ form.previous_insurance_history_in_workshop }}</td>
-                <td>{{ form.current_insurance_history_in_workshop }}</td>
-                <td>{{ form.insurance_history_totality }}</td>
-                <td>{{ form.job_position }}</td>
-                <td>{{ form.get_job_group_display }}</td>
-                <td>{{ form.job_location }}</td>
-                <td>{{ form.get_job_location_status_display }}</td>
-                <td>{{ form.get_employment_type_display }}</td>
-                <td>{{ form.get_contract_type_display }}</td>
-                <td>{{ form.get_employee_status_display }}</td>
+                {% if form.workshop %}
+                    <td>{{ form.workshop.workshop_title }}</td>
+                {% endif %}
+                {% if not form.workshop %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.personnel %}
+                    <td>{{ form.personnel.full_name }}</td>
+                {% endif %}
+                {% if not form.personnel %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.work_title %}
+                    <td>{{ form.work_title }}</td>
+                {% endif %}
+                {% if not form.work_title %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.previous_insurance_history_out_workshop %}
+                    <td>{{ form.previous_insurance_history_out_workshop }}</td>
+                {% endif %}
+                {% if not form.previous_insurance_history_out_workshop %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.previous_insurance_history_in_workshop %}
+                    <td>{{ form.previous_insurance_history_in_workshop }}</td>
+                {% endif %}
+                {% if not form.previous_insurance_history_in_workshop %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.current_insurance_history_in_workshop %}
+                    <td>{{ form.current_insurance_history_in_workshop }}</td>
+                {% endif %}
+                {% if not form.current_insurance_history_in_workshop %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.insurance_history_totality %}
+                    <td>{{ form.insurance_history_totality }}</td>
+                {% endif %}
+                {% if not form.insurance_history_totality %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.job_position %}
+                    <td>{{ form.job_position }}</td>
+                {% endif %}
+                {% if not form.job_position %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.get_job_group_display %}
+                    <td>{{ form.get_job_group_display }}</td>
+                {% endif %}
+                {% if not form.get_job_group_display %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.job_location %}
+                    <td>{{ form.job_location }}</td>
+                {% endif %}
+                {% if not form.job_location %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.get_job_location_status_display %}
+                    <td>{{ form.get_job_location_status_display }}</td>
+                {% endif %}
+                {% if not form.get_job_location_status_display %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.get_employment_type_display %}
+                    <td>{{ form.get_employment_type_display }}</td>
+                {% endif %}
+                {% if not form.get_employment_type_display %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.get_contract_type_display %}
+                    <td>{{ form.get_contract_type_display }}</td>
+                {% endif %}
+                {% if not form.get_contract_type_display %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.get_employee_status_display %}
+                    <td>{{ form.get_employee_status_display }}</td>
+                {% endif %}
+                {% if not form.get_employee_status_display %}
+                    <td> - </td>
+                {% endif %}
+
+
+
                 <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}

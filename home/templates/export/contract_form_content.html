@@ -10,15 +10,40 @@
             <th>تاریخ ترک کار</th>
             <th>بیمه می شود؟</th>
             <th>تاریخ اضافه شدن به لیست بیمه</th>
+            <th>شماره بیمه</th>
             <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.workshop_personnel.my_title }}</td>
-                <td>{{ form.contract_from_date }}</td>
-                <td>{{ form.contract_to_date }}</td>
-                <td>{{ form.quit_job_date }}</td>
+                {% if form.workshop_personnel %}
+                    <td>{{ form.workshop_personnel.my_title }}</td>
+                {% endif %}
+                {% if not form.workshop_personnel %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.contract_from_date %}
+                    <td>{{ form.contract_from_date }}</td>
+                {% endif %}
+                {% if not form.contract_from_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.contract_to_date %}
+                    <td>{{ form.contract_to_date }}</td>
+                {% endif %}
+                {% if not form.contract_to_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.quit_job_date %}
+                    <td>{{ form.quit_job_date }}</td>
+                {% endif %}
+                {% if not form.quit_job_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
                 {% if  form.insurance %}
                     <td>بله</td>
                 {% endif %}
@@ -26,12 +51,26 @@
                     <td>خیر</td>
                 {% endif %}
 
-                <td>{{ form.insurance_add_date }}</td>
+                {% if form.insurance_add_date %}
+                    <td>{{ form.insurance_add_date }}</td>
+                {% endif %}
+                {% if not form.insurance_add_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.insurance_number %}
+                    <td>{{ form.insurance_number }}</td>
+                {% endif %}
+                {% if not form.insurance_number %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+                <td class="text-center">
+                    {{ form.verify_display }}
+                </td>
 
             </tr>
-            <tr>
             {{ form.verify_display }}
-            </tr>
+
         {% endfor %}
     </table>
 </div>

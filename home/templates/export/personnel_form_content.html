@@ -18,15 +18,67 @@
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.name }}</td>
-                <td>{{ form.last_name }}</td>
-                <td>{{ form.father_name }}</td>
-                <td>{{ form.date_of_birth }}</td>
-                <td>{{ form.national_code }}</td>
-                <td>{{ form.personnel_code }}</td>
-                <td>{{ form.phone_number }} - {{ form.city_phone_code }} </td>
-                <td>{{ form.mobile_number_1 }}</td>
-                <td>{{ form.mobile_number_1 }}</td>
+                {% if form.name %}
+                    <td>{{ form.name }}</td>
+                {% endif %}
+                {% if not form.name %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.last_name %}
+                    <td>{{ form.last_name }}</td>
+                {% endif %}
+                {% if not form.last_name %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.father_name %}
+                    <td>{{ form.father_name }}</td>
+                {% endif %}
+                {% if not form.father_name %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.date_of_birth %}
+                    <td>{{ form.date_of_birth }}</td>
+                {% endif %}
+                {% if not form.date_of_birth %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.national_code %}
+                    <td>{{ form.national_code }}</td>
+                {% endif %}
+                {% if not form.national_code %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.personnel_code %}
+                    <td>{{ form.personnel_code }}</td>
+                {% endif %}
+                {% if not form.personnel_code %}
+                    <td> -</td>
+                {% endif %}
+
+                {% if form.phone_number %}
+                    {% if form.city_phone_code %}
+                        <td>{{ form.phone_number }} - {{ form.city_phone_code }} </td>
+                    {% endif %}
+                {% endif %}
+                {% if not form.phone_number %}
+                    {% if not form.city_phone_code %}
+                        <td> -</td>
+                    {% endif %}
+                {% endif %}
+
+                {% if form.mobile_number_1 %}
+                    <td>{{ form.mobile_number_1 }}</td>
+                {% endif %}
+                {% if not form.mobile_number_1 %}
+                    <td> -</td>
+                {% endif %}
+
+
                 <td>{{ form.active_display }}</td>
                 <td>{{ form.verify_display }}</td>
 

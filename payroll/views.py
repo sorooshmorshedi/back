@@ -908,21 +908,9 @@ class WorkshopAllPersonnelDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_personnel'
 
-    def get_object(self, request, pk):
-        try:
-            workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
-        except WorkshopPersonnel.DoesNotExist:
-            raise Http404
-
-        workshop_personnel = WorkshopPersonnel.objects.filter(workshop_id=pk)
-        company = request.user.active_company
-        workshops = company.workshop.all()
-        persons = workshop_personnel.filter(workshop_in=workshops)
-        return persons
-
     def get(self, request, pk):
-        query = self.get_object(pk)
-        serializers = WorkshopPersonnelSerializer(query, many=True)
+        query = WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(is_verified=True))
+        serializers = WorkshopPersonnelSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
@@ -950,16 +938,17 @@ class WorkshopPersonnelVerifyApi(APIView):
         if not personnel.job_location_status:
             self.validate_status = False
             self.error_messages.append("وضعیت محل کار را وارد کنید")
-        if personnel.previous_insurance_history_out_workshop == None:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
+        if personnel.personnel.insurance == True:
+            if personnel.previous_insurance_history_out_workshop == None:
+                self.validate_status = False
+                self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه را وارد کنید")
+            if personnel.previous_insurance_history_in_workshop == None:
+                self.validate_status = False
+                self.error_messages.append("سابقه بیمه قبلی در این کارگاه را وارد کنید")
         if personnel.previous_insurance_history_out_workshop and\
             personnel.previous_insurance_history_out_workshop > 1000:
             self.validate_status = False
             self.error_messages.append("سابقه بیمه قبلی خارج این کارگاه نمیتواند بزرگتر از 1000 باشد")
-        if personnel.previous_insurance_history_in_workshop == None:
-            self.validate_status = False
-            self.error_messages.append("سابقه بیمه قبلی در این کارگاه را وارد کنید")
         if personnel.previous_insurance_history_in_workshop and\
             personnel.previous_insurance_history_in_workshop > 1000:
             self.validate_status = False
@@ -1116,16 +1105,70 @@ class ContractVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('تاریخ پایان را وارد کنید')
         sign_date = contract.workshop_personnel.employment_date
-        if contract.contract_from_date.__lt__(sign_date):
+        if self.validate_status and contract.contract_from_date.__lt__(sign_date):
             self.validate_status = False
-            self.error_messages.append('تاریخ شروع قرارداد باید بعد از ' + sign_date.__str__() + '  تاریخ استخدام باشد')
-        if contract.contract_from_date.__ge__(contract.contract_to_date):
+            self.error_messages.append('تاریخ شروع قرارداد باید بعد از تاریخ استخدام باشد')
+        if self.validate_status and contract.contract_from_date.__ge__(contract.contract_to_date):
             self.validate_status = False
             self.error_messages.append('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
+        if self.validate_status and contract.quit_job_date:
+                if contract.contract_from_date.__ge__(contract.quit_job_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ ترک کار باید بعد از  تاریخ شروع قرارداد باشد')
+                if contract.quit_job_date.__ge__(contract.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ ترک کار باید قبل از  تاریخ پایان قرارداد باشد')
 
-        if contract.insurance == True and not contract.insurance_add_date:
-            self.validate_status = False
-            self.error_messages.append('تاریخ اضافه شدن به لیست بیمه را وارد کنید')
+        if contract.insurance == True:
+            if not contract.insurance_add_date:
+                self.validate_status = False
+                self.error_messages.append('تاریخ اضافه شدن به لیست بیمه را وارد کنید')
+            if contract.insurance_add_date and contract.contract_from_date:
+                if contract.contract_form_date.__gt__(contract.insurance_add_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید بعد تاریخ از شروع قرارداد باشد')
+            if contract.workshop_personnel.personnel.insurance == False:
+                if not contract.insurance_number:
+                    self.validate_status = False
+                    self.error_messages.append('شماره بیمه را وارد کنید')
+                elif contract.insurance_number:
+                    if len(contract.insurance_number) != 10:
+                        self.validate_status = False
+                        self.error_messages.append("طول شماره بیمه باید 10 رقم باشد")
+                    if contract.insurance_number[:2] != '00':
+                        self.validate_status = False
+                        self.error_messages.append("شماره بیمه باید با 00 شروع شود")
+            if self.validate_status:
+                contract.workshop_personnel.insurance_add_date = contract.insurance_add_date
+                contract.workshop_personnel.save()
+                contract.workshop_personnel.personnel.insurance = True
+                contract.workshop_personnel.personnel.insurance_code = contract.insurance_number
+                contract.workshop_personnel.personnel.save()
+
+        if self.validate_status:
+            sames = Contract.objects.filter(Q(is_verified=True) & Q(workshop_personnel=contract.workshop_personnel))
+            for same in sames:
+                if contract.contract_from_date.__ge__(same.contract_from_date) \
+                        and contract.contract_to_date.__le__(same.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
+
+                elif contract.contract_from_date.__le__(same.contract_from_date) and\
+                        contract.contract_to_date.__ge__(same.contract_from_date) and\
+                        contract.contract_from_date.__le__(same.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
+
+                elif contract.contract_from_date.__ge__(same.contract_from_date) and\
+                        contract.contract_from_date.__le__(same.contract_to_date) and\
+                        contract.contract_to_date.__ge__(same.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
+
+                elif contract.contract_from_date.__le__(same.contract_from_date) and\
+                        contract.contract_to_date.__ge__(same.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
 
         if self.validate_status:
             contract.is_verified = True
@@ -1270,55 +1313,55 @@ class LeaveOrAbsenceVerifyApi(APIView):
     def get(self, request, pk):
         leave = LeaveOrAbsence.objects.get(pk=pk)
 
-        if leave.leave_type == 'e':
+        if not leave.leave_type:
+            self.validate_status = False
+            self.error_messages.append("نوع را مشخص کنید")
+        elif leave.leave_type == 'e':
             if not leave.entitlement_leave_type:
                 self.validate_status = False
                 self.error_messages.append("نوع مرخصی استحقاقی را مشخص کنید")
             if leave.entitlement_leave_type == 'h':
-                leave.from_date, leave.to_date, = None, None
+                if not leave.date:
+                    self.validate_status = False
+                    self.error_messages.append("برای مرخصی ساعتی،  تاریخ را وارد کنید")
                 if not leave.from_hour:
                     self.validate_status = False
                     self.error_messages.append("برای مرخصی ساعتی ، ساعت شروع را وارد کنید")
                 if not leave.to_hour:
                     self.validate_status = False
                     self.error_messages.append("برای مرخصی ساعتی ، ساعت پایان را وارد کنید")
-                if not leave.date:
-                    self.validate_status = False
-                    self.error_messages.append("برای مرخصی ساعتی،  تاریخ را وارد کنید")
-                if leave.from_hour.__gt__(leave.to_hour):
+                if leave.from_hour.__gt__(leave.to_hour) and self.validate_status:
                     self.validate_status = False
                     self.error_messages.append("ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد")
             elif leave.entitlement_leave_type == 'd':
-                leave.date, leave.from_hour, leave.to_hour = None, None, None
                 if not leave.from_date or not leave.to_date:
                     self.validate_status = False
-                    self.error_messages.append("برای مرخصی روزانه، تاریح شروع و پایان را وارد کنید")
+                    self.error_messages.append("برای مرخصی روزانه، تاریخ شروع و پایان را وارد کنید")
+
         elif leave.leave_type == 'm':
             if not leave.matter73_leave_type:
                 self.validate_status = False
                 self.error_messages.append("دلیل مرخصی ماده 73 را مشخص کنید")
             if not leave.to_date or not leave.from_date:
                 self.validate_status = False
-                self.error_messages.append("تاریح شروع و پایان را وارد کنید")
-            duration = datetime.timedelta(days=2)
-            if leave.to_date.day - leave.from_date.day > 2:
-                leave.to_date = leave.from_date + duration
+                self.error_messages.append("تاریخ شروع و پایان را وارد کنید")
+
         elif leave.leave_type == 'i':
-            leave.from_hour, leave.to_hour, leave.date = None, None, None
             if not leave.from_date or not leave.to_date:
                 self.validate_status = False
-                self.error_messages.append("برای مرخصی استعلاجی تاریح شروع و پایان را وارد کنید")
+                self.error_messages.append("برای مرخصی استعلاجی تاریخ شروع و پایان را وارد کنید")
             if not leave.cause_of_incident:
                 self.validate_status = False
                 self.error_messages.append("برای مرخصی استعلاجی علت حادثه را وارد کنید")
-        elif leave.leave_type == 'w' or leave.leave_type == 'a':
-            leave.from_hour, leave.to_hour, leave.date = None, None, None
+
+        elif leave.leave_type == 'w' or leave.leave_type == 'a' or leave.leave_type == 'c':
             if not leave.from_date or not leave.to_date:
                 self.validate_status = False
-                self.error_messages.append("تاریح شروع و پایان را وارد کنید")
-        if leave.entitlement_leave_type != 'h' and leave.from_date.__gt__(leave.to_date):
+                self.error_messages.append("تاریخ شروع و پایان را وارد کنید")
+
+        if self.validate_status and leave.entitlement_leave_type != 'h' and leave.from_date.__gt__(leave.to_date):
             self.validate_status = False
-            self.error_messages.append("تاریح شروع نمیتواند از تاریخ پایان بزرگتر باشد")
+            self.error_messages.append("تاریخ شروع نمیتواند از تاریخ پایان بزرگتر باشد")
 
         sames = LeaveOrAbsence.objects.filter(
             Q(is_verified=True) & Q(workshop_personnel=leave.workshop_personnel)
