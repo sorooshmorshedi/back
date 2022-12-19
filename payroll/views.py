@@ -49,6 +49,40 @@ class WorkshopApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class WorkshopDefaultApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+        workshop.is_default = True
+        workshop.save()
+        return Response({workshop.name: workshop.is_default}, status=status.HTTP_200_OK)
+
+
+class WorkshopUnDefaultApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request, pk):
+        workshop = Workshop.objects.get(pk=pk)
+        workshop.is_default = False
+        workshop.save()
+        return Response({workshop.name: workshop.is_default}, status=status.HTTP_200_OK)
+
+
+class WorkshopGetDefaultApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'workshop'
+
+    def get(self, request):
+        company = request.user.active_company.pk
+        query = Workshop.objects.filter(Q(company=company) & Q(is_active=True) &
+                                        Q(is_verified=True) & Q(is_default=True))
+        serializers = WorkShopSerializer(query.first())
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
 class WorkshopDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop'
@@ -296,6 +330,22 @@ class PersonnelApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PersonneNotInWorkshoplApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'personnel'
+
+    def get(self, request, pk):
+        company = request.user.active_company.pk
+        query = Personnel.objects.filter(Q(company=company) & Q(is_personnel_active=True) &
+                                         Q(is_personnel_verified=True))
+        personnel = []
+        for item in query:
+            if not item.is_in_workshop(pk):
+                personnel.append(item.id)
+        query = query.filter(id__in=personnel)
+        serializers = PersonnelSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
 
 class PersonnelDetail(APIView):
@@ -968,6 +1018,12 @@ class WorkshopPersonnelVerifyApi(APIView):
         if not personnel.employment_date:
             self.validate_status = False
             self.error_messages.append("تاریخ استخدام را وارد کنید")
+        if personnel.sanavat_btn and not personnel.sanavat_previuos_days:
+            self.validate_status = False
+            self.error_messages.append("روز های کارکرد قبل از تعریف را وارد کنید")
+        if personnel.sanavat_btn and not personnel.sanavat_previous_amount:
+            self.validate_status = False
+            self.error_messages.append("مبلغ حق سنوات شناسایی شده را وارد کنید")
         if personnel.sanavat_previuos_days and int(personnel.sanavat_previuos_days) >= 20000:
             self.validate_status = False
             self.error_messages.append("روز های کارکرد قبل از تعریف باید کوچک تر از 20000 باشد")
@@ -1124,7 +1180,7 @@ class ContractVerifyApi(APIView):
                 self.validate_status = False
                 self.error_messages.append('تاریخ اضافه شدن به لیست بیمه را وارد کنید')
             if contract.insurance_add_date and contract.contract_from_date:
-                if contract.contract_form_date.__gt__(contract.insurance_add_date):
+                if contract.contract_from_date.__gt__(contract.insurance_add_date):
                     self.validate_status = False
                     self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید بعد تاریخ از شروع قرارداد باشد')
             if contract.workshop_personnel.personnel.insurance == False:
@@ -1363,49 +1419,25 @@ class LeaveOrAbsenceVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append("تاریخ شروع نمیتواند از تاریخ پایان بزرگتر باشد")
 
-        sames = LeaveOrAbsence.objects.filter(
-            Q(is_verified=True) & Q(workshop_personnel=leave.workshop_personnel)
-        )
-        if leave.from_date and leave.to_date and leave.workshop_personnel:
-            for same in sames:
-                if same.from_date and same.to_date:
-                    if leave.from_date.__ge__(same.from_date) and leave.to_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                    elif leave.from_date.__ge__(same.from_date) and leave.from_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                    elif leave.to_date.__ge__(same.from_date) and leave.to_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                    elif leave.from_date.__le__(same.from_date) and leave.to_date.__ge__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                elif same.date and same.to_hour and same.from_hour:
-                    if same.date.__ge__(leave.from_date) and same.date.__le__(leave.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
+        if self.validate_status:
+            is_same = leave.check_with_same
+            if is_same:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت  ثبت شده است")
 
-        if leave.from_hour and leave.to_hour and leave.date and leave.workshop_personnel:
-            for same in sames:
-                if same.date and same.to_hour and same.from_hour:
-                    if leave.date == same.date:
-                        if leave.from_hour.__ge__(same.from_hour) and leave.to_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                        elif leave.from_hour.__ge__(same.from_hour) and leave.from_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                        elif leave.to_hour.__ge__(same.from_hour) and leave.to_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                        elif leave.from_hour.__le__(same.from_hour) and leave.to_hour.__ge__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                elif same.from_date and same.to_date:
-                    if leave.date.__ge__(same.from_date) and leave.date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
+
+        if self.validate_status:
+            is_same_leave = leave.check_with_same_mission
+            if is_same_leave:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده است")
+
+
+        if self.validate_status:
+            check_with_contract = leave.check_with_contract
+            if not check_with_contract:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
 
         if self.validate_status:
             leave.is_verified = True
@@ -1513,49 +1545,28 @@ class MissionVerifyApi(APIView):
             self.error_messages.append("ساعت شروع نمیتواند از ساعت پایان بزرگتر باشد")
 
 
-        sames = Mission.objects.filter(
-            Q(is_verified=True) & Q(workshop_personnel=mission.workshop_personnel)
-        )
-        if mission.from_date and mission.to_date and mission.workshop_personnel:
-            for same in sames:
-                if same.from_date and same.to_date:
-                    if mission.from_date.__ge__(same.from_date) and mission.to_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده")
-                    elif mission.from_date.__ge__(same.from_date) and mission.from_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                    elif mission.to_date.__ge__(same.from_date) and mission.to_date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                    elif mission.from_date.__le__(same.from_date) and mission.to_date.__ge__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                elif same.date and same.to_hour and same.from_hour:
-                    if same.date.__ge__(mission.from_date) and same.date.__le__(mission.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
 
-        if mission.from_hour and mission.to_hour and mission.date and mission.workshop_personnel:
-            for same in sames:
-                if same.date and same.to_hour and same.from_hour:
-                    if mission.date == same.date:
-                        if mission.from_hour.__ge__(same.from_hour) and mission.to_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                        elif mission.from_hour.__ge__(same.from_hour) and mission.from_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                        elif mission.to_hour.__ge__(same.from_hour) and mission.to_hour.__le__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                        elif mission.from_hour.__le__(same.from_hour) and mission.to_hour.__ge__(same.to_hour):
-                            self.validate_status = False
-                            self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
-                elif same.from_date and same.to_date:
-                    if mission.date.__ge__(same.from_date) and mission.date.__le__(same.to_date):
-                        self.validate_status = False
-                        self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده")
+
+        if self.validate_status:
+            is_same = mission.check_with_same
+            if is_same:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده است")
+
+
+        if self.validate_status:
+            is_same_leave = mission.check_with_same_leave
+            if is_same_leave:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل مرخصی یا غیبت ثبت شده است")
+
+
+        if self.validate_status:
+            check_with_contract = mission.check_with_contract
+            if not check_with_contract:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
+
 
         if self.validate_status:
             mission.is_verified = True

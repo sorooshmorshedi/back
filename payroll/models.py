@@ -74,7 +74,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     name = models.CharField(max_length=100, blank=True, null=True)
     employer_name = models.CharField(max_length=100, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    postal_code = models.CharField(max_length=10 , blank=True, null=True)
+    postal_code = models.CharField(max_length=10, blank=True, null=True)
     employer_insurance_contribution = models.IntegerField(default=3, blank=True, null=True)
     branch_code = models.CharField(max_length=100, blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
@@ -129,12 +129,14 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     is_active = models.BooleanField(blank=True, null=True)
 
+    is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if not self.workshop_code:
-            raise ValidationError('کد کارگاه را وارد کنید')
-        if len(self.workshop_code) != 10:
-            raise ValidationError('کد کارگاه باید 10 رقمی باشد')
+        if self.is_default:
+            for workshop in self.company.workshop.all():
+                if workshop.id != self.id:
+                    workshop.is_default = False
+                    workshop.save()
         super().save(*args, **kwargs)
 
     @property
@@ -196,7 +198,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 else:
                     hr.append(contract_hr)
         return hr
-
 
     @staticmethod
     def month_display(month):
@@ -307,7 +308,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             ('updateOwn.workshop', 'ویرایش کارگاه خود'),
             ('deleteOwn.workshop', 'حذف کارگاه خود'),
         )
-
 
     def __str__(self):
         return self.name + ' ' + self.company.name
@@ -477,7 +477,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             date = self.initial_to_date
         return date
 
-
     @property
     def round_now_amount(self):
         if self.amount:
@@ -515,7 +514,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         else:
             return 0
 
-
     @property
     def have_adjustment(self):
         if len(self.adjustment.all()) > 0:
@@ -550,7 +548,6 @@ class ContractRow(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
 
 class Adjustment(BaseModel, LockableMixin, DefinableMixin):
-
     contract_row = models.ForeignKey(ContractRow, related_name='adjustment', on_delete=models.CASCADE)
     amount = models.IntegerField(blank=True, null=True)
     date = jmodels.jDateField(blank=True, null=True)
@@ -583,6 +580,7 @@ class Adjustment(BaseModel, LockableMixin, DefinableMixin):
             return 'کاهشی'
         else:
             return ''
+
     @property
     def change_date_display(self):
         if self.change_date:
@@ -832,7 +830,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     is_personnel_active = models.BooleanField(null=True, blank=True)
     is_personnel_verified = models.BooleanField(default=False, null=True, blank=True)
 
-
     class Meta(BaseModel.Meta):
         ordering = ['-pk', ]
         verbose_name = 'Personnel'
@@ -847,6 +844,14 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.personnel', 'ویرایش پرسنل خود'),
             ('deleteOwn.personnel', 'حذف پرسنل خود'),
         )
+
+    def is_in_workshop(self, pk):
+        workshop_personnel = WorkshopPersonnel.objects.filter(Q(personnel_id=self.id) & Q(is_verified=True)
+                                                              & Q(workshop=pk))
+        if len(workshop_personnel) > 0:
+            return True
+        else:
+            return False
 
     @property
     def child_number(self):
@@ -873,7 +878,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
     @property
     def full_name(self):
         return self.name + ' ' + self.last_name
-
 
     @property
     def insurance_for_tax(self):
@@ -918,11 +922,10 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             self.personnel_code = self.system_code
         if self.gender == 'f':
             self.military_service == 'x'
-        if self.degree_education == 1 or  self.degree_education == 2 or self.degree_education == 3:
+        if self.degree_education == 1 or self.degree_education == 2 or self.degree_education == 3:
             self.university_type = None
             self.university_name = None
         super().save(*args, **kwargs)
-
 
 
 class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
@@ -1061,7 +1064,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     )
 
-
     NORMAL = 1
     STUNTMAN = 2
     FALLEN_CHILD = 3
@@ -1069,7 +1071,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     ARM = 5
     BAND_14 = 6
     FOREIGN = 7
-
 
     EMPLOYEE_TYPES = (
         (NORMAL, 'عادی'),
@@ -1084,7 +1085,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     NORMAL = 1
     UN_DEVOLOPED = 2
     FREE_ZONE = 3
-
 
     JOB_LOCATION_STATUSES = (
         (NORMAL, 'عادی'),
@@ -1158,6 +1158,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     save_leaave = models.IntegerField(default=0)
 
+    sanavat_btn = models.BooleanField(default=False)
     sanavat_previuos_days = models.CharField(max_length=100, blank=True, null=True)
     sanavat_previous_amount = models.CharField(max_length=100, blank=True, null=True)
 
@@ -1234,7 +1235,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 response = contract.quit_job_date
         return response
 
-
     @property
     def absence_total(self):
         return len(self.leave.all())
@@ -1307,7 +1307,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         response['bes'] = bes
         response['total'] = bes['total'] - bed['total']
         return response
-
 
     def absence_report(self, year, months_list):
         response = {}
@@ -1522,6 +1521,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         return self.previous_insurance_history_in_workshop + self.current_insurance_history_in_workshop
 
     def save(self, *args, **kwargs):
+        if self.sanavat_btn == False:
+            self.sanavat_previous_amount = 0
+            self.sanavat_previuos_days = 0
         if not self.id:
             self.current_insurance_history_in_workshop = 0
         super().save(*args, **kwargs)
@@ -1575,7 +1577,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return 'بیمه شده'
         else:
             return 'بیمه نشده'
-
 
     def __str__(self):
         if self.code:
@@ -1847,7 +1848,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     @property
     def final_by_day(self):
         if self.leave_type == 'e' and self.entitlement_leave_type == 'h' and \
-            self.to_hour and self.from_hour:
+                self.to_hour and self.from_hour:
             duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             final_by_day = (duration.seconds / 60) / 440
@@ -1860,7 +1861,6 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             final_by_day = 0
         return final_by_day
 
-
     @property
     def hour(self):
         hour = 0
@@ -1869,12 +1869,86 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             hour = (duration.seconds / 60) / 60
             minute = (duration.seconds / 60) % 60
-            return str(round(hour)) + ' : ' + str(round(minute))
+            minute = round(minute)
+            if minute == 0:
+                minute = '00'
+            elif len(str(minute)) == 1:
+                minute = '0' + str(minute)
+            return '0' + str(round(hour)) + ':' + str(minute)
         elif self.final_by_day > 0:
             hour = self.final_by_day * 24
         else:
             hour = 0
         return str(round(hour))
+
+    @property
+    def check_with_contract(self):
+        contracts = Contract.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_contract = False
+        if self.entitlement_leave_type != 'h':
+            for contract in contracts:
+                if self.from_date.__ge__(contract.contract_from_date) and self.to_date.__le__(
+                        contract.contract_to_date):
+                    is_in_contract = True
+        elif self.leave_type == 'e' and self.entitlement_leave_type == 'h':
+            for contract in contracts:
+                if self.date.__ge__(contract.contract_from_date) and self.date.__le__(contract.contract_to_date):
+                    is_in_contract = True
+        return is_in_contract
+
+    @property
+    def check_with_same(self):
+        leaves = LeaveOrAbsence.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_same = False
+        if self.entitlement_leave_type == 'h':
+            for leave in leaves:
+                if leave.entitlement_leave_type == 'h' and leave.date == self.date:
+                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                elif leave.mission_type == 'd':
+                    if self.date.__ge__(leave.from_date) and self.date.__le__(leave.to_date):
+                        is_in_same = True
+        elif self.entitlement_leave_type != 'h' or self.leave_type != 'e':
+            for leave in leaves:
+                if leave.entitlement_leave_type == 'h':
+                    if leave.date.__ge__(self.from_date) and leave.date.__le__(self.to_date):
+                        is_in_same = True
+                elif leave.entitlement_leave_type != 'h' or leave.leave_type != 'e':
+                    if self.from_date.__ge__(leave.from_date) and self.from_date.__le__(leave.to_date):
+                        is_in_same = True
+                    elif self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                        is_in_same = True
+
+        return is_in_same
+
+    @property
+    def check_with_same_mission(self):
+        missions = Mission.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_same = False
+        if self.entitlement_leave_type == 'h':
+            for mission in missions:
+                if mission.mission_type == 'h' and mission.date == self.date:
+                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                elif mission.mission_type == 'd':
+                    if self.date.__ge__(mission.from_date) and self.date.__le__(mission.to_date):
+                        is_in_same = True
+        elif self.entitlement_leave_type == 'd' or self.leave_type != 'e':
+            for mission in missions:
+                if mission.mission_type == 'h':
+                    if mission.date.__ge__(self.from_date) and mission.date.__le__(self.to_date):
+                        is_in_same = True
+                elif mission.mission_type == 'd':
+                    if self.from_date.__ge__(mission.from_date) and self.from_date.__le__(mission.to_date):
+                        is_in_same = True
+                    elif self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                        is_in_same = True
+
+        return is_in_same
 
     def save(self, *args, **kwargs):
         if not self.workshop_personnel:
@@ -2324,7 +2398,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
-
     @property
     def calculate_pay_bases(self):
         daily, monthly = 0, 0
@@ -2442,25 +2515,9 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         elif self.to_date and self.from_date:
             difference = self.to_date - self.from_date
             final_by_day = difference.days + 1
-        else :
+        else:
             final_by_day = 0
         return final_by_day
-
-    @property
-    def hour(self):
-        hour = 0
-        if self.leave_type == 'e' and self.entitlement_leave_type == 'h':
-            duration = datetime.timedelta(hours=self.to_hour.hour - self.from_hour.hour,
-                                          minutes=self.to_hour.minute - self.from_hour.minute)
-            hour = (duration.seconds / 60) / 60
-            minute = (duration.seconds / 60) % 60
-            return str(round(hour)) + ' : ' + str(round(minute))
-        elif self.final_by_day > 0:
-            hour = self.final_by_day * 24
-        else:
-            hour = 0
-        return str(round(hour))
-
 
     @property
     def hour(self):
@@ -2470,12 +2527,90 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             hour = (duration.seconds / 60) / 60
             minute = (duration.seconds / 60) % 60
-            return str(round(hour)) + ' : ' + str(round(minute))
+            minute = round(minute)
+            if minute == 0:
+                minute = '00'
+            elif len(str(minute)) == 1:
+                minute = '0' + str(minute)
+            return '0' + str(round(hour)) + ':' + str(minute)
         elif self.final_by_day > 0:
             hour = self.final_by_day * 24
         else:
             hour = 0
         return str(round(hour))
+
+    @property
+    def check_with_contract(self):
+        contracts = Contract.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_contract = False
+        if self.mission_type == 'd':
+            for contract in contracts:
+                if self.from_date.__ge__(contract.contract_from_date) and self.to_date.__le__(
+                        contract.contract_to_date):
+                    is_in_contract = True
+        elif self.mission_type == 'h':
+            for contract in contracts:
+                if self.date.__ge__(contract.contract_from_date) and self.date.__le__(contract.contract_to_date):
+                    is_in_contract = True
+        return is_in_contract
+
+    @property
+    def check_with_same(self):
+        missions = Mission.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_same = False
+        if self.mission_type == 'h':
+            for mission in missions:
+                if mission.mission_type == 'h' and mission.date == self.date:
+                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                elif mission.mission_type == 'd':
+                    if self.date.__ge__(mission.from_date) and self.date.__le__(mission.to_date):
+                        is_in_same = True
+        elif self.mission_type == 'd':
+            for mission in missions:
+                if mission.mission_type == 'h':
+                    if mission.date.__ge__(self.from_date) and mission.date.__le__(self.to_date):
+                        is_in_same = True
+                elif mission.mission_type == 'd':
+                    if self.from_date.__ge__(mission.from_date) and self.from_date.__le__(mission.to_date):
+                        is_in_same = True
+                    elif self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                        is_in_same = True
+
+        return is_in_same
+
+    @property
+    def check_with_same_leave(self):
+
+        leaves = LeaveOrAbsence.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_same = False
+
+        if self.mission_type == 'h':
+            for leave in leaves:
+                if leave.entitlement_leave_type == 'h' and leave.date == self.date:
+                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                elif leave.entitlement_leave_type == 'd' or leave.leave_type != 'e':
+                    if self.date.__ge__(leave.from_date) and self.date.__le__(leave.to_date):
+                        is_in_same = True
+        elif self.mission_type == 'd':
+            for leave in leaves:
+                if leave.entitlement_leave_type == 'h':
+                    if leave.date.__ge__(self.from_date) and leave.date.__le__(self.to_date):
+                        is_in_same = True
+                elif leave.entitlement_leave_type == 'd' or leave.leave_type != 'e':
+                    if self.from_date.__ge__(leave.from_date) and self.from_date.__le__(leave.to_date):
+                        is_in_same = True
+                    elif self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                        is_in_same = True
+
+        return is_in_same
+
+
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Mission'
@@ -2500,8 +2635,6 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
 
 class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
-
-
     workshop = models.ForeignKey(Workshop, related_name="list_of_pay", on_delete=models.CASCADE,
                                  null=True, blank=True)
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -2517,7 +2650,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     pay_done = models.BooleanField(default=False)
     pay_form_create_date = jmodels.jDateField(blank=True, null=True)
     bank_pay_date = jmodels.jDateField(blank=True, null=True)
-
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPay'
@@ -2611,7 +2743,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             raise ValidationError('قراردادی در این زمان ثبت نشده')
         else:
             return filtered_contracts
-
 
     @property
     def data_for_insurance(self):
@@ -2806,11 +2937,9 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             response.append(item.bank_report)
         return response
 
-
     @property
     def get_items(self):
         return self.list_of_pay_item.all()
-
 
     @property
     def month_tax(self):
@@ -2823,7 +2952,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     def sign_date(self):
         date = jdatetime.date(self.year, self.month, self.month_days)
         return date.__str__().replace('-', ''),
-
 
     def __str__(self):
         return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' + \
@@ -2838,7 +2966,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         (YES, 'بله'),
         (NO, 'خیر'),
     )
-
 
     list_of_pay = models.ForeignKey(ListOfPay, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                     blank=True, null=True)
@@ -2925,8 +3052,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     mazaya_gheyr_mostamar = DECIMAL(default=0)
     calculate_payment = models.BooleanField(default=False)
 
-
-
     # tax kosoorat
     hazine_made_137 = models.IntegerField(default=0)
     kosoorat_insurance = models.IntegerField(default=0)
@@ -2964,7 +3089,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             Q(workshop_personnel=self.workshop_personnel)
         )
         return len(items)
-
 
     def set_info_from_workshop(self):
         hr = self.get_hr_letter
@@ -3107,7 +3231,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         month_day = self.list_of_pay.month_days
         if self.total_insurance_month >= 24:
             aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
-            Decimal(self.real_worktime) / Decimal(month_day)
+                         Decimal(self.real_worktime) / Decimal(month_day)
             self.aele_mandi = aele_mandi
             return aele_mandi
         else:
@@ -3159,7 +3283,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.hoghoogh_mahane
         total += self.sanavat_mahane
         total += self.mission_total
-
 
         total += self.get_aele_mandi
         self.aele_mandi = round(self.get_aele_mandi)
@@ -3272,12 +3395,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total -= self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
         return total
 
-
     @property
     def gheyre_naghdi_pension(self):
         hr = self.get_hr_letter
         return self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
-
 
     @property
     def un_pension_payment(self):
@@ -3351,16 +3472,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def total_gheyre_naghdi(self):
         hr = self.get_hr_letter
-        return round(self.mazaya_gheyr_mostamar, 2) +\
+        return round(self.mazaya_gheyr_mostamar, 2) + \
                round(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
-
 
     @property
     def payable(self):
-        payable_amount = Decimal(round(self.total_payment) -\
-                         round(self.calculate_month_tax) -\
-                         self.check_and_get_optional_deduction_episode - \
-                         self.check_and_get_loan_episode)
+        payable_amount = Decimal(round(self.total_payment) - \
+                                 round(self.calculate_month_tax) - \
+                                 self.check_and_get_optional_deduction_episode - \
+                                 self.check_and_get_loan_episode)
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
@@ -3429,7 +3549,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         self.haghe_sanavat_total = round(sanavat)
         return sanavat
 
-
     @property
     def calculate_save_leave(self):
         hr = self.get_hr_letter
@@ -3466,8 +3585,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         return save_leave, round(save_leave_amount), round(pay_base)
 
-
-
     @property
     def get_save_leave_day(self):
         day, amount, day_amount = self.calculate_save_leave
@@ -3498,7 +3615,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_hagh_sanavat_and_save_leaves(self):
         return self.get_hagh_sanavat + self.get_save_leave
 
-
     @property
     def unpaid(self):
         return round(self.payable - self.paid_amount) + self.get_unpaid_of_year
@@ -3521,7 +3637,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def unpaid_till_this_month(self):
         return round(self.get_unpaid_of_year) + round(self.payable) - self.paid_amount
-
 
     @property
     def calculate_yearly_eydi(self):
@@ -3558,7 +3673,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             padash = self.calculate_yearly_eydi
         self.padash_total = round(padash)
         return padash
-
 
     '''report'''
 
@@ -3624,7 +3738,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     month_episode += deduction.get_pay_episode
         return month_episode
 
-
     @property
     def get_payslip(self):
         hr = self.get_hr_letter
@@ -3665,7 +3778,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         payslip['additions'] = additions
         payslip['deduction'] = deduction
         return payslip
-
 
     '''insurance'''
 
@@ -3769,7 +3881,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         }
         return DSKWOR
 
-
     '''tax'''
 
     @property
@@ -3779,7 +3890,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def haghe_bime_moafiat(self):
         return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
-
 
     @property
     def ezafe_kari_nakhales(self):
@@ -3863,7 +3973,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.hr_tax_not_included
         return total
 
-
     @property
     def moaf_sum(self):
         total = 0
@@ -3876,7 +3985,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.ejtenab_maliat_mozaaf
 
         return round(total)
-
 
     @property
     def tax_included_payment(self):
@@ -3920,7 +4028,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
 
-
     @property
     def calculate_month_tax(self):
         year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
@@ -3955,7 +4062,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         return round(tax) - round(self.get_last_tax)
         return round(tax) - round(self.get_last_tax)
 
-
     @property
     def calculate_monthly_eydi_tax(self):
         hr = self.get_hr_letter
@@ -3975,7 +4081,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
-
     @property
     def calculate_yearly_eydi_tax(self):
         hr = self.get_hr_letter
@@ -3994,7 +4099,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return eydi_tax
         else:
             return 0
-
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -4018,6 +4122,3 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 self.contract_row.use_in_insurance_list = True
         self.calculate_payment = False
         super().save(*args, **kwargs)
-
-
-

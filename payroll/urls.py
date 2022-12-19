@@ -29,11 +29,15 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView, WorkshopPersonnelVerifyApi, \
     WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi, WorkshopVerifyApi, WorkshopUnVerifyApi, \
     LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi, MissionVerifyApi, MissionUnVerifyApi, ContractVerifyApi, \
-    ContractUnVerifyApi
+    ContractUnVerifyApi, PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
+    WorkshopGetDefaultApiView
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
     path('workshop/<int:pk>/', WorkshopDetail.as_view(), name='workshopDetail'),
+    path('workshop/default/', WorkshopGetDefaultApiView.as_view(), name='workshopGetDefaultApiView'),
+    path('workshop/default/<int:pk>/', WorkshopDefaultApiView.as_view(), name='workshopDefaultApiView'),
+    path('workshop/undefault/<int:pk>/', WorkshopUnDefaultApiView.as_view(), name='workshopUnDefaultApiView'),
     path('workshop/workshop_personnel/<int:pk>/', WorkshopAllPersonnelDetail.as_view(), name='workshopAllPersonnelDetail'),
     path('workshop/setting/<int:pk>/', WorkshopSettingDetail.as_view(), name='workshopSettingDetail'),
     path('workshop/contract/row/<int:pk>/', WorkshopContractRowsDetail.as_view(), name='workshopContractRowsDetail'),
@@ -47,6 +51,7 @@ urlpatterns = [
     path('loan/<int:pk>/', LoanDetail.as_view(), name='loanDetail'),
     path('loan/item/<int:pk>/', LoanItemDetail.as_view(), name='loanItemDetail'),
     path('personnel/loan/<int:pk>/', PersonnelLoanDetail.as_view(), name='personnelLoanDetail'),
+    path('personnel/not/workshop/<int:pk>/', PersonneNotInWorkshoplApiView.as_view(), name='personneNotInWorkshoplApiView'),
 
     path('deduction/', DeductionApiView.as_view(), name='deductionApiView'),
     path('deduction/<int:pk>/', DeductionDetail.as_view(), name='deductionDetail'),

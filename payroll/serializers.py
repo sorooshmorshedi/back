@@ -151,6 +151,7 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     person_name = serializers.CharField(source='personnel_name', read_only=True)
     by_hour = serializers.CharField(source='hour', read_only=True)
+    workshop = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
 
 
     class Meta:
@@ -186,6 +187,7 @@ class MissionSerializer(serializers.ModelSerializer):
     mission_type_display = serializers.CharField(source='get_mission_type_display', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     by_hour = serializers.CharField(source='hour', read_only=True)
+    workshop = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
 
 
     class Meta:

@@ -3,6 +3,7 @@ from django.db import models
 
 class VerifyMixin(models.Model):
     is_verified = models.BooleanField(default=False)
+    un_editable = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -15,3 +16,12 @@ class VerifyMixin(models.Model):
             return 'نهایی'
         else:
             return 'اولیه'
+
+    @property
+    def edit_display(self):
+        if self.un_editable == None:
+            return ' - '
+        elif self.un_editable:
+            return 'غیر قابل ویرایش'
+        else:
+            return 'قابل ویرایش'
