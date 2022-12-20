@@ -132,12 +132,23 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        other = self.company.workshop.all()
+        if len(other) == 0:
+            self.is_default = True
         if self.is_default:
             for workshop in self.company.workshop.all():
                 if workshop.id != self.id:
                     workshop.is_default = False
                     workshop.save()
         super().save(*args, **kwargs)
+
+
+    @property
+    def default_display(self):
+        if self.is_default:
+            return 'پیشفرض'
+        else:
+            return ' - '
 
     @property
     def workshop_title(self):
@@ -386,6 +397,49 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
     @property
     def monthly_to_amount(self):
         return round(self.to_amount / Decimal(12), 2)
+
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def monthly_from_amount_with_comma(self):
+        if self.monthly_from_amount:
+            return self.with_comma(self.monthly_from_amount)
+        else:
+            return 0
+
+    @property
+    def monthly_to_amount_with_comma(self):
+        if self.monthly_to_amount:
+            return self.with_comma(self.monthly_to_amount)
+        else:
+            return 0
+
+    @property
+    def to_amount_with_comma(self):
+        if self.to_amount:
+            return self.with_comma(self.to_amount)
+        else:
+            return 0
+    @property
+    def from_amount_with_comma(self):
+        if self.from_amount:
+            return self.with_comma(self.from_amount)
+        else:
+            return 0
 
     def __str__(self):
         return 'از ' + str(round(self.from_amount)) + ' تا ' + str(round(self.to_amount)) + ' : ' \
@@ -1568,6 +1622,10 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return ''
 
     @property
+    def title(self):
+        return 'قرارداد ' + self.code + ' برای ' + self.workshop_personnel_display
+
+    @property
     def find_hr(self):
         return self.hr_letter.first()
 
@@ -1869,12 +1927,15 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                                           minutes=self.to_hour.minute - self.from_hour.minute)
             hour = (duration.seconds / 60) / 60
             minute = (duration.seconds / 60) % 60
-            minute = round(minute)
-            if minute == 0:
+            minute = str(round(minute))
+            if minute == '0':
                 minute = '00'
             elif len(str(minute)) == 1:
-                minute = '0' + str(minute)
-            return '0' + str(round(hour)) + ':' + str(minute)
+                minute = '0' + minute
+            hour = str(round(hour))
+            if len(hour) < 2:
+                hour = '0' + hour
+            return hour + ':' + minute
         elif self.final_by_day > 0:
             hour = self.final_by_day * 24
         else:
@@ -2200,7 +2261,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
     employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
 
-    is_calculated = models.BooleanField(default=False)
+    is_calculated = models.BooleanField(default=True)
 
     @property
     def get_aele_mandi_amount(self):
@@ -2208,6 +2269,12 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
             return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.hoghooghe_roozane_amount
         else:
             return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.daily_pay_base
+    @property
+    def calculated(self):
+        if self.is_calculated:
+            return 'غیرقابل تغییر'
+        else:
+            return ' - '
 
     @property
     def contract_info(self):
@@ -3276,7 +3343,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_total_payment(self):
         hr = self.get_hr_letter
-        hr.is_calculated = True
+        hr.is_calculated = False
         hr.save()
         total = Decimal(0)
 

@@ -1,0 +1,42 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    <table class="table table-bordered table-striped">
+        {% for form in forms %}
+            {% for item in items %}
+
+                <tr>
+                    <th colspan="2" class="text-center">نام</th>
+                    <th colspan="2" class="text-center">از تاریخ</th>
+                    <th colspan="2" class="text-center">تا تاریخ</th>
+
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-center">{{ form.name }}</td>
+                    <td colspan="2" class="text-center">{{ form.from_date }}</td>
+                    <td colspan="2" class="text-center">{{ form.to_date }}</td>
+                </tr>
+                <tr>
+                    <th class="text-center">ردیف</th>
+                    <th class="text-center">از مبلغ (سالانه)</th>
+                    <th class="text-center">تا مبلغ (سالانه)</th>
+                    <th class="text-center">درصد معافیت</th>
+                    <th class="text-center">از مبلغ (ماهانه)</th>
+                    <th class="text-center">تا مبلغ (ماهانه)</th>
+
+                </tr>
+                {% for row in item %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="text-center">{{ row.from_amount_with_comma }}</td>
+                        <td class="text-center">{{ row.to_amount_with_comma }}</td>
+                        <td class="text-center">{{ row.ratio }} %</td>
+                        <td class="text-center">{{ row.monthly_from_amount_with_comma }}</td>
+                        <td class="text-center">{{ row.monthly_to_amount_with_comma }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            {% endfor %}
+        {% endfor %}
+
+</div>

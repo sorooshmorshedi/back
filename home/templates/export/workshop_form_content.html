@@ -12,6 +12,7 @@
             <th>کد شعبه</th>
             <th>نام شعبه</th>
             <th>وضعییت</th>
+            <th>پیشفرض</th>
             <th>نهایی</th>
 
         </tr>
@@ -67,6 +68,7 @@
                 {% endif %}
 
                 <td>{{ form.active_display }}</td>
+                <td>{{ form.default_display }}</td>
                 <td>{{ form.verify_display }}</td>
             </tr>
         {% endfor %}

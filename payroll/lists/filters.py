@@ -25,6 +25,7 @@ class WorkshopFilter(filters.FilterSet):
             'branch_code': BASE_FIELD_FILTERS,
             'branch_name': BASE_FIELD_FILTERS,
             'is_active': BASE_FIELD_FILTERS,
+            'is_default': BASE_FIELD_FILTERS,
             'is_verified': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
@@ -289,6 +290,7 @@ class HRLetterFilter(filters.FilterSet):
             'contract': ('exact',),
             'name': BASE_FIELD_FILTERS,
             'is_template': BASE_FIELD_FILTERS,
+            'is_calculated': BASE_FIELD_FILTERS,
         }
 
 
@@ -419,4 +421,19 @@ class WorkshopTaxFilter(filters.FilterSet):
         model = ListOfPay
         fields = {
             'id': BASE_FIELD_FILTERS,
+        }
+
+
+class TaxRowFilter(filters.FilterSet):
+    class Meta:
+        model = WorkshopTax
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'from_date': BASE_FIELD_FILTERS,
+            'to_date': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
         }

@@ -1094,7 +1094,7 @@ class ContractApiView(APIView):
         company = request.user.active_company
         workshop = company.workshop.all()
         workshop_personnel = WorkshopPersonnel.objects.filter(workshop__in=workshop)
-        query = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
+        query = Contract.objects.filter(Q(workshop_personnel__in=workshop_personnel) & Q(is_verified=True))
         serializers = ContractSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -1182,7 +1182,11 @@ class ContractVerifyApi(APIView):
             if contract.insurance_add_date and contract.contract_from_date:
                 if contract.contract_from_date.__gt__(contract.insurance_add_date):
                     self.validate_status = False
-                    self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید بعد تاریخ از شروع قرارداد باشد')
+                    self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید بعد از تاریخ شروع قرارداد باشد')
+            if contract.insurance_add_date and contract.contract_from_date:
+                if contract.insurance_add_date.__gt__(contract.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید قبل از تاریخ پایان قرارداد باشد')
             if contract.workshop_personnel.personnel.insurance == False:
                 if not contract.insurance_number:
                     self.validate_status = False

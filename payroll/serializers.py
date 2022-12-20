@@ -67,7 +67,8 @@ class PersonnelSerializer(serializers.ModelSerializer):
 class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='personnel.full_name', read_only=True)
     personnel_last_name = serializers.CharField(source='personnel.last_name', read_only=True)
-    personnel_identity_code = serializers.CharField(source='personnel.identity_code', read_only=True)
+    personnel_identity_code = serializers.CharField(source='personnel.national_code', read_only=True)
+    personnel_father = serializers.CharField(source='personnel.father_name', read_only=True)
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     job_location_status_display = serializers.CharField(source='get_job_location_status_display', read_only=True)
     marital_display = serializers.CharField(source='personnel.get_marital_status_display', read_only=True)
@@ -132,6 +133,7 @@ class ContractSerializer(serializers.ModelSerializer):
     workshop_name = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
+    workshop_id = serializers.CharField(source='workshop_personnel.workshop.id', read_only=True)
 
     class Meta:
         model = Contract
@@ -140,7 +142,10 @@ class ContractSerializer(serializers.ModelSerializer):
 
 class HRLetterSerializer(serializers.ModelSerializer):
     is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
+    contract_detail = serializers.CharField(source='contract.title', read_only=True)
     get_aele_mandi_sum = serializers.IntegerField(source='aele_mandi_sum', read_only=True)
+    in_calculate = serializers.CharField(source='calculated', read_only=True)
+
     class Meta:
         model = HRLetter
         fields = '__all__'
@@ -152,6 +157,7 @@ class LeaveOrAbsenceSerializer(serializers.ModelSerializer):
     person_name = serializers.CharField(source='personnel_name', read_only=True)
     by_hour = serializers.CharField(source='hour', read_only=True)
     workshop = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
+    workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
 
 
     class Meta:
@@ -188,6 +194,7 @@ class MissionSerializer(serializers.ModelSerializer):
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     by_hour = serializers.CharField(source='hour', read_only=True)
     workshop = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
+    workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
 
 
     class Meta:

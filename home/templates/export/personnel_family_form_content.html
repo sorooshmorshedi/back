@@ -14,24 +14,96 @@
             <th>خدمت سربازی</th>
             <th>وضعیت تحصیل</th>
             <th>وضعیت جسمی</th>
-            <th>وضعیت </th>
+            <th>وضعیت</th>
             <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
             <tr>
-                <td>{{ form.personnel.full_name }}</td>
-                <td>{{ form.name }}</td>
-                <td>{{ form.last_name }}</td>
-                <td>{{ form.date_of_birth }}</td>
-                <td>{{ form.national_code }}</td>
-                <td>{{ form.get_relative_display }}</td>
-                <td>{{ form.get_marital_status_display }}</td>
-                <td>{{ form.get_military_service_display }}</td>
-                <td>{{ form.get_study_status_display }}</td>
-                <td>{{ form.get_physical_condition_display }}</td>
-                <td>{{ form.active_display }}</td>
-                <td>{{ form.verify_display }}</td>
+                {% if form.personnel %}
+                    <td>{{ form.personnel.full_name }}</td>
+                {% endif %}
+                {% if not form.personnel %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.name %}
+                    <td>{{ form.name }}</td>
+                {% endif %}
+                {% if not form.name %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.last_name %}
+                    <td>{{ form.last_name }}</td>
+                {% endif %}
+                {% if not form.last_name %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.date_of_birth %}
+                    <td>{{ form.date_of_birth }}</td>
+                {% endif %}
+                {% if not form.date_of_birth %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.national_code %}
+                    <td>{{ form.national_code }}</td>
+                {% endif %}
+                {% if not form.national_code %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.get_relative_display %}
+                    <td>{{ form.get_relative_display }}</td>
+                {% endif %}
+                {% if not form.get_relative_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.get_marital_status_display %}
+                    <td>{{ form.get_marital_status_display }}</td>
+                {% endif %}
+                {% if not form.get_marital_status_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.get_military_service_display %}
+                    <td>{{ form.get_military_service_display }}</td>
+                {% endif %}
+                {% if not form.get_military_service_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.get_study_status_display %}
+                    <td>{{ form.get_study_status_display }}</td>
+                {% endif %}
+                {% if not form.get_study_status_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.get_physical_condition_display %}
+                    <td>{{ form.get_physical_condition_display }}</td>
+                {% endif %}
+                {% if not form.get_physical_condition_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.active_display %}
+                    <td>{{ form.active_display }}</td>
+                {% endif %}
+                {% if not form.active_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
+                {% if form.verify_display %}
+                    <td>{{ form.verify_display }}</td>
+                {% endif %}
+                {% if not form.verify_display %}
+                    <td class="text-center">-</td>
+                {% endif %}
+
             </tr>
         {% endfor %}
     </table>

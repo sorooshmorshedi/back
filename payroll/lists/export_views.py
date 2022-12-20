@@ -12,7 +12,7 @@ from payroll.lists.views import WorkshopListView, PersonnelListView, PersonnelFa
     ContractListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     LoanListView, DeductionListView, ListOfPayItemListView, ListOfPayListView, LoanItemListView, \
     ListOfPayInsuranceListView, ListOfPayItemInsuranceListView, PersonTaxListView, TaxListView, WorkshopAbsenceListView, \
-    AdjustmentListView
+    AdjustmentListView, TaxRowListView
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, Contract, \
     LeaveOrAbsence, Mission, Loan, OptionalDeduction, HRLetter, LoanItem, ListOfPayItem, ListOfPay, Adjustment
 from reports.lists.export_views import BaseExportView, BaseListExportView
@@ -390,7 +390,7 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
             ],
             ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
              'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', ' مبلغ اولیه پیمان', ' مبلغ فعلی پیمان',
-             'شعبه', 'وضعییت', 'نهایی']
+             'شعبه', 'وضعییت','پیشفرض', 'نهایی']
         ]
         for form in contract_row:
             data.append([
@@ -407,6 +407,7 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
                 form.round_now_amount_with_comma,
                 form.branch,
                 form.status_display,
+                form.default_display,
                 form.verify_display
 
             ])
@@ -3502,3 +3503,42 @@ class AdjustmentExportView(AdjustmentListView, BaseExportView):
                 form.explanation,
             ])
         return data
+
+
+class TaxExportView(TaxRowListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'contract'
+
+    context = {
+        'title': 'جدول معافیت مالیاتی',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+        items = []
+        for item in qs.all():
+            items.append(item.tax_row.all())
+        context = {
+            'forms': qs,
+            'items': items,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user,
+            'print_document': print_document
+        }
+
+        template_prefix = self.get_template_prefix()
+        context['form_content_template'] = 'export/tax_row_content.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+

@@ -676,3 +676,18 @@ class WorkshopAbsenceListView(generics.ListAPIView):
         user = self.request.user
         return Workshop.objects.hasAccess('get', self.permission_codename)\
             .filter(company=user.active_company).distinct('pk')
+
+
+class TaxRowListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.workshop_tax"
+    serializer_class = WorkShopTaxSerializer
+    filterset_class = TaxRowFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        company = self.request.user.active_company
+        return WorkshopTax.objects.hasAccess('get', self.permission_codename)\
+            .filter(company=company)
