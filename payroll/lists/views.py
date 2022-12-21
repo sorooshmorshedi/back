@@ -610,17 +610,9 @@ class DeductionListView(generics.ListAPIView):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        company = self.request.user.active_company
-        workhops = company.workshop.all()
-        workhops_personnel, workhops_personnel_id = [], []
-        for workshop in workhops:
-            workhops_personnel.append(workshop.workshop_personnel.all())
-        for workshop in workhops_personnel:
-            for person in workshop:
-                if person.id not in workhops_personnel_id:
-                    workhops_personnel_id.append(person.id)
-        return OptionalDeduction.objects.hasAccess('get', self.permission_codename)\
-            .filter(workshop_personnel_id__in=workhops_personnel_id).distinct('pk')
+        user = self.request.user
+        return OptionalDeduction.objects.hasAccess('get', self.permission_codename).filter(company=user.active_company)\
+            .distinct('pk')
 
 
 class PersonTaxListView(generics.ListAPIView):

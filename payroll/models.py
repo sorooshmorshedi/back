@@ -142,7 +142,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                     workshop.save()
         super().save(*args, **kwargs)
 
-
     @property
     def default_display(self):
         if self.is_default:
@@ -331,9 +330,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return 'غیر فعال'
 
 
-
 class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
-
     company = models.ForeignKey(Company, related_name='tax', on_delete=models.CASCADE, blank=True, null=True)
 
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -434,6 +431,7 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
             return self.with_comma(self.to_amount)
         else:
             return 0
+
     @property
     def from_amount_with_comma(self):
         if self.from_amount:
@@ -458,7 +456,6 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
 
 
 class ContractRow(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
-
     workshop = models.ForeignKey(Workshop, related_name='contract_rows', on_delete=models.CASCADE)
     contract_row = models.CharField(max_length=255, blank=True, null=True)
     contract_number = models.CharField(max_length=100, blank=True, null=True)
@@ -1622,6 +1619,19 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return ''
 
     @property
+    def check_with_same(self):
+        validate_status = False
+        contracts = Contract.objects.filter(Q(is_verified=True) & Q(workshop_personnel=self.workshop_personnel))
+        for contract in contracts:
+            if self.contract_from_date.__ge__(contract.contract_from_date) and \
+                    self.contract_from_date.__le__(contract.contract_to_date):
+                validate_status = True
+            elif self.contract_to_date.__ge__(contract.contract_from_date) and \
+                    self.contract_to_date.__le__(contract.contract_to_date):
+                validate_status = True
+        return validate_status
+
+    @property
     def title(self):
         return 'قرارداد ' + self.code + ' برای ' + self.workshop_personnel_display
 
@@ -1643,7 +1653,7 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return str(self.id) + ' برای ' + self.workshop_personnel_display
 
 
-class Loan(BaseModel, LockableMixin, DefinableMixin):
+class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     LOAN = 'l'
     DEPT = 'd'
 
@@ -1651,11 +1661,12 @@ class Loan(BaseModel, LockableMixin, DefinableMixin):
         (LOAN, 'وام'),
         (DEPT, 'مساعده'),
     )
-    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='loan', on_delete=models.CASCADE)
-    amount = DECIMAL(default=0)
-    episode = models.IntegerField(default=1)
+    workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='loan', on_delete=models.CASCADE,
+                                           blank=True, null=True)
+    amount = DECIMAL(blank=True, null=True)
+    episode = models.IntegerField(blank=True, null=True)
     pay_date = jmodels.jDateField(blank=True, null=True)
-    loan_type = models.CharField(max_length=1, choices=LOAN_TYPES, default=DEPT)
+    loan_type = models.CharField(max_length=1, choices=LOAN_TYPES, blank=True)
     explanation = EXPLANATION()
     episode_payed = models.IntegerField(default=0)
     pay_done = models.BooleanField(default=False)
@@ -1675,50 +1686,98 @@ class Loan(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def __str__(self):
-        return str(self.amount) + ' به ' + self.workshop_personnel.my_title
+        if self.amount and self.workshop_personnel:
+            return str(self.amount) + ' به ' + self.workshop_personnel.my_title
+        else:
+            return str(self.id)
 
     @property
     def get_pay_episode(self):
-        return self.amount / Decimal(self.episode)
+        if self.amount and self.episode:
+            return self.amount / Decimal(self.episode)
+        else:
+            return 0
 
     @property
     def settlement(self):
-        total = self.amount
-        for item in self.item.all():
-            total -= item.payed_amount
-        return total
+        if self.amount:
+            total = self.amount
+            for item in self.item.all():
+                total -= item.payed_amount
+            return total
+        else:
+            return 0
 
     @property
     def get_pay_month(self):
-        months = []
-        month_base = 1
-        for i in range(0, self.episode):
-            if self.pay_date.month + i > 12:
-                pay_date = jdatetime.date(self.pay_date.year + int((self.pay_date.month + i) / 12), month_base, 1)
-                month_base += 1
-                if month_base > 12:
-                    month_base = 1
-            else:
-                pay_date = jdatetime.date(self.pay_date.year, self.pay_date.month + i, self.pay_date.day)
-            months.append(pay_date)
-        return {'months': months}
+        if self.pay_date and self.episode:
+            months = []
+            month_base = 1
+            for i in range(0, self.episode):
+                if self.pay_date.month + i > 12:
+                    pay_date = jdatetime.date(self.pay_date.year + int((self.pay_date.month + i) / 12), month_base, 1)
+                    month_base += 1
+                    if month_base > 12:
+                        month_base = 1
+                else:
+                    pay_date = jdatetime.date(self.pay_date.year, self.pay_date.month + i, self.pay_date.day)
+                months.append(pay_date)
+            return {'months': months}
+        else:
+            return {'months': []}
 
     @property
     def end_date(self):
-        end = self.get_pay_month['months'][-1]
-        return str(end.year) + '-' + str(end.month)
+        if self.get_pay_month['months']:
+            end = self.get_pay_month['months'][-1]
+            return str(end.year) + '-' + str(end.month)
+        else:
+            return ''
+
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def round_amount_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.amount)
+        else:
+            return 0
 
     def save(self, *args, **kwargs):
-        if self.loan_type == 'd':
-            self.episode = 1
-        super().save(*args, **kwargs)
+        if not self.workshop_personnel:
+            raise ValidationError('برای ثبت اولیه انتخاب پرسنل اجباری است')
+        if self.is_verified:
+            if self.loan_type == 'd':
+                self.episode = 1
+            super().save(*args, **kwargs)
 
-        for date in self.get_pay_month['months']:
-            LoanItem.objects.create(
-                loan=self,
-                amount=self.get_pay_episode,
-                date=date,
-            )
+            for date in self.get_pay_month['months']:
+                LoanItem.objects.create(
+                    loan=self,
+                    amount=self.get_pay_episode,
+                    date=date,
+                )
+        elif not self.is_verified:
+            for item in self.item.all():
+                item.delete()
+            super().save(*args, **kwargs)
+
+        else:
+            super().save(*args, **kwargs)
 
 
 class LoanItem(BaseModel, LockableMixin, DefinableMixin):
@@ -1740,6 +1799,50 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
             ('updateOwn.loan_item', 'ویرایش وام قسط خود'),
             ('deleteOwn.loan_item', 'حذف وام قسط خود'),
         )
+
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def round_amount_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.amount)
+        else:
+            return 0
+
+    @property
+    def round_bed_or_bes_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.bed_or_bes)
+        else:
+            return 0
+
+    @property
+    def round_balance_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.cumulative_balance)
+        else:
+            return 0
+
+    @property
+    def round_payed_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.payed_amount)
+        else:
+            return 0
 
     @property
     def un_paid(self):
@@ -1782,13 +1885,15 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
         return months[self.date.month]
 
 
-class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin):
+class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
+    company = models.ForeignKey(Company, related_name='deduction', on_delete=models.CASCADE,
+                                blank=True, null=True)
     workshop_personnel = models.ForeignKey(WorkshopPersonnel, related_name='deduction',
                                            on_delete=models.CASCADE, blank=True, null=True)
-    is_template = models.BooleanField(default=False)
+    is_template = models.BooleanField(default=False, blank=True, null=True)
     template_name = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
-    amount = DECIMAL(default=0)
+    amount = DECIMAL(blank=True, null=True)
     episode = models.IntegerField(default=1)
     start_date = jmodels.jDateField(blank=True, null=True)
     explanation = EXPLANATION()
@@ -1810,43 +1915,96 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def __str__(self):
-        return str(self.amount) + ' از ' + self.workshop_personnel.my_title
+        if self.amount and self.workshop_personnel:
+            return str(self.amount) + ' به ' + self.workshop_personnel.my_title
+        else:
+            return str(self.id)
 
     @property
     def get_pay_episode(self):
-        return self.amount / Decimal(self.episode)
+        if self.amount and self.episode:
+            return self.amount / Decimal(self.episode)
+        else:
+            return 0
 
     @property
     def settlement(self):
-        return round(self.amount) - (round(self.episode_payed) * self.get_pay_episode)
+        if self.amount and self.episode_payed and self.get_pay_episode:
+            return round(self.amount) - (round(self.episode_payed) * self.get_pay_episode)
+        else:
+            return 0
 
     @property
     def get_pay_month(self):
-        months = []
-        month_base = 1
-        for i in range(0, self.episode):
-            if self.start_date.month + i > 12:
-                pay_date = jdatetime.date(self.start_date.year + int((self.start_date.month + i) / 12),
-                                          month_base, self.start_date.day)
-                month_base += 1
-                if month_base > 12:
-                    month_base = 1
-            else:
-                pay_date = jdatetime.date(self.start_date.year, self.start_date.month + i, self.start_date.day)
-            months.append(pay_date)
-        return {'months': months}
+        if self.start_date and self.episode:
+            months = []
+            month_base = 1
+            for i in range(0, self.episode):
+                if self.start_date.month + i > 12:
+                    pay_date = jdatetime.date(self.start_date.year + int((self.start_date.month + i) / 12),
+                                              month_base, self.start_date.day)
+                    month_base += 1
+                    if month_base > 12:
+                        month_base = 1
+                else:
+                    pay_date = jdatetime.date(self.start_date.year, self.start_date.month + i, self.start_date.day)
+                months.append(pay_date)
+            return {'months': months}
+        else:
+            return {'months': []}
 
     @property
     def end_date(self):
-        end = self.get_pay_month['months'][-1]
-        return str(end.year) + '-' + str(end.month)
+        if self.get_pay_month['months']:
+            end = self.get_pay_month['months'][-1]
+            return str(end.year) + '-' + str(end.month)
+        else:
+            return ''
+
+
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def round_amount_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.amount)
+        else:
+            return 0
+
+    @property
+    def round_pay_episode_with_comma(self):
+        if self.amount:
+            return self.with_comma(self.get_pay_episode)
+        else:
+            return 0
+
+    @property
+    def is_template_display(self):
+        if self.is_template == None:
+            return ' - '
+        elif self.is_template:
+            return 'قالب'
+        else:
+            return 'شخصی'
+
 
     def save(self, *args, **kwargs):
-        if not self.is_template and not self.workshop_personnel:
-            raise ValidationError('پرسنل در کارگاه را انتخاب کنید')
-        if self.workshop_personnel:
-            self.is_template = False
-            self.template_name = None
+        if self.is_template == None:
+            raise ValidationError('برای ثبت اولیه انتخاب نوع الزامی است')
         super().save(*args, **kwargs)
 
 
@@ -2046,7 +2204,7 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         return str(self.final_by_day) + 'روز برای ' + self.workshop_personnel.personnel.full_name
 
 
-class HRLetter(BaseModel, LockableMixin, DefinableMixin):
+class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     BASE_PAY = 'b'
     PENSION = 'p'
     UN_PENSION = 'u'
@@ -2070,7 +2228,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
     contract = models.ForeignKey(Contract, related_name='hr_letter', on_delete=models.CASCADE,
                                  blank=True, null=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    is_template = models.CharField(max_length=1, choices=HRLETTER_TYPES)
+    is_template = models.CharField(max_length=1, choices=HRLETTER_TYPES, blank=True, null=True)
 
     pay_done = models.BooleanField(default=False)
     daily_pay_base = models.IntegerField(default=0)
@@ -2269,6 +2427,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
             return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.hoghooghe_roozane_amount
         else:
             return self.contract.workshop_personnel.workshop.aele_mandi_nerkh * self.daily_pay_base
+
     @property
     def calculated(self):
         if self.is_calculated:
@@ -2540,13 +2699,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin):
         self.insurance_pay_day = self.calculate_insurance_pay_base
         self.insurance_benefit = self.calculate_insurance_benefit
         self.insurance_not_included = self.calculate_insurance_not_included
-        if self.is_template == 't':
-            self.contract, self.pay_done = None, False
-            if not self.name:
-                raise ValidationError(message='برای قالب حکم کارگزینی خود نام وارد کنید')
-        else:
-            if not self.contract:
-                raise ValidationError(message='قرارداد را وارد کنید')
         super().save(*args, **kwargs)
 
 
@@ -2676,8 +2828,6 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                         is_in_same = True
 
         return is_in_same
-
-
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Mission'
@@ -3762,6 +3912,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         month_episode = 0
         personnel_loans = Loan.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
                                               Q(pay_date__lte=self.list_of_pay.end_date) &
+                                              Q(is_verified=True) &
                                               Q(pay_done=False) &
                                               Q(loan_type='l'))
         for loan in personnel_loans:
@@ -3780,6 +3931,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         month_episode = 0
         personnel_loans = Loan.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
                                               Q(pay_date__lte=self.list_of_pay.end_date) &
+                                              Q(is_verified=True) &
                                               Q(pay_done=False) &
                                               Q(loan_type='d'))
         for loan in personnel_loans:
@@ -3796,7 +3948,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def check_and_get_optional_deduction_episode(self):
         month_episode = 0
-        personnel_deductions = OptionalDeduction.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
+        personnel_deductions = OptionalDeduction.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                                &Q(is_verified=True) &
                                                                 Q(start_date__lte=self.list_of_pay.end_date) &
                                                                 Q(pay_done=False))
         for deduction in personnel_deductions:

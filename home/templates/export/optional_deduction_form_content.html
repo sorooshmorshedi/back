@@ -4,9 +4,9 @@
     <table class="table table-bordered table-striped">
         <tr>
             <th>پرسنل در کارگاه</th>
-            <th>قالب است؟</th>
-            <th>نام قالب </th>
-            <th>عنوان </th>
+            <th>نوع</th>
+            <th>نام قالب</th>
+            <th>عنوان</th>
             <th>مبلغ</th>
             <th>تعداد قسط</th>
             <th>مبلغ قسط</th>
@@ -14,26 +14,95 @@
             <th>تاربخ سررسید</th>
             <th>اقساط پرداخت شده</th>
             <th>تصفیه شد</th>
+            <th>نهایی</th>
 
         </tr>
         {% for form in forms %}
             <tr>
-                <td class="text-center">{{ form.workshop_personnel.my_title }}</td>
-                <td class="text-center">{{ form.is_template }}</td>
-                <td class="text-center">{{ form.template_name }}</td>
-                <td class="text-center">{{ form.name }}</td>
-                <td class="text-center">{{ form.amount }}</td>
-                <td class="text-center">{{ form.episode }}</td>
-                <td class="text-center">{{ form.get_pay_episode }}</td>
-                <td class="text-center">{{ form.start_date }}</td>
-                <td class="text-center">{{ form.end_date }} </td>
-                <td class="text-center">{{ form.episode_payed }}</td>
+                {% if form.workshop_personnel %}
+                    <td>{{ form.workshop_personnel.my_title }}</td>
+                {% endif %}
+                {% if not form.workshop_personnel %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.is_template_display %}
+                    <td>{{ form.is_template_display }}</td>
+                {% endif %}
+                {% if not form.is_template_display %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.template_name %}
+                    <td>{{ form.template_name }}</td>
+                {% endif %}
+                {% if not form.template_name %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.name %}
+                    <td>{{ form.name }}</td>
+                {% endif %}
+                {% if not form.name %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.round_amount_with_comma %}
+                    <td>{{ form.round_amount_with_comma }}</td>
+                {% endif %}
+                {% if not form.round_amount_with_comma %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.episode %}
+                    <td>{{ form.episode }}</td>
+                {% endif %}
+                {% if not form.episode %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.round_pay_episode_with_comma %}
+                    <td>{{ form.round_pay_episode_with_comma }}</td>
+                {% endif %}
+                {% if not form.round_pay_episode_with_comma %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.start_date %}
+                    <td>{{ form.start_date }}</td>
+                {% endif %}
+                {% if not form.start_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.end_date %}
+                    <td>{{ form.end_date }}</td>
+                {% endif %}
+                {% if not form.end_date %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
+                {% if form.episode_payed %}
+                    <td>{{ form.episode_payed }}</td>
+                {% endif %}
+                {% if not form.episode_payed %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
                 {% if form.pay_done %}
-                    <td >بله</td>
+                    <td>بله</td>
                 {% endif %}
                 {% if not form.pay_done %}
-                    <td >خیر</td>
+                    <td class="text-center"> -</td>
                 {% endif %}
+
+                {% if form.verify_display %}
+                    <td>{{ form.verify_display }}</td>
+                {% endif %}
+                {% if not form.verify_display %}
+                    <td class="text-center"> -</td>
+                {% endif %}
+
 
             </tr>
         {% endfor %}

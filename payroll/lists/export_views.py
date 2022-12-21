@@ -1188,8 +1188,8 @@ class HRLetterExportView(HRLetterListView, BaseExportView):
                 form.mazaya_mostamar_gheyre_naghdi_amount,
             ])
             data.append([
-                '',
-                '',
+                'نهایی',
+                form.verify_display,
             ])
         return data
 
@@ -1266,7 +1266,7 @@ class LoanExportView(LoanListView, BaseExportView):
                 'لیست وام یا مساعده ها'
             ],
             ['پرسنل در کارگاه', 'نوع', 'مبلغ', 'تعداد قسط',
-             'مبلغ قسط', ' تاربخ پرداخت', 'تاربخ سررسید', ' اقساط پرداخت شده', 'تصفیه شد']
+             'مبلغ قسط', ' تاربخ پرداخت', 'تاربخ سررسید', ' اقساط پرداخت شده', 'تصفیه شد', 'نهایی']
         ]
         for form in loan:
             data.append([
@@ -1279,6 +1279,7 @@ class LoanExportView(LoanListView, BaseExportView):
                 form.end_date,
                 form.episode_payed,
                 form.pay_done,
+                form.verify_display,
             ])
         return data
 
@@ -1442,21 +1443,22 @@ class DeductionExportView(DeductionListView, BaseExportView):
             [
                 'لیست کسورات اختیاری'
             ],
-            ['پرسنل در کارگاه', 'قالب است ؟', 'نام قالب', 'عنوان', 'مبلغ', 'تعداد قسظ',
-             'مبلغ قسظ', ' تاربخ پرداخت', ' اقساط پرداخت شده', 'تصفیه شد']
+            ['پرسنل در کارگاه', 'نوع', 'نام قالب', 'عنوان', 'مبلغ', 'تعداد قسظ',
+             'مبلغ قسظ', ' تاربخ پرداخت', ' اقساط پرداخت شده', 'تصفیه شد', 'نهایی']
         ]
         for form in deduction:
             data.append([
                 form.workshop_personnel,
-                form.is_template,
+                form.is_template_display,
                 form.template_name,
                 form.name,
-                form.amount,
+                form.round_amount_with_comma,
                 form.episode,
-                form.get_pay_episode,
+                form.round_pay_episode_with_comma,
                 form.start_date,
                 form.episode_payed,
                 form.pay_done,
+                form.verify_display,
             ])
         return data
 
@@ -1563,7 +1565,7 @@ class LoanRequestExportView(LoanListView, BaseExportView):
                 'لیست وام یا مساعده ها'
             ],
             ['پرسنل در کارگاه', 'نوع', 'مبلغ', 'تعداد قسط',
-             'مبلغ قسط', ' تاربخ پرداخت', 'تاربخ سررسید', ' اقساط پرداخت شده', 'تصفیه شد']
+             'مبلغ قسط', ' تاربخ پرداخت', 'تاربخ سررسید', ' اقساط پرداخت شده', 'تصفیه شد', 'نهایی']
         ]
         for form in loan:
             data.append([
@@ -1576,6 +1578,7 @@ class LoanRequestExportView(LoanListView, BaseExportView):
                 form.end_date,
                 form.episode_payed,
                 form.pay_done,
+                form.verify_display,
             ])
         return data
 

@@ -1174,7 +1174,6 @@ class ContractVerifyApi(APIView):
                 if contract.quit_job_date.__ge__(contract.contract_to_date):
                     self.validate_status = False
                     self.error_messages.append('تاریخ ترک کار باید قبل از  تاریخ پایان قرارداد باشد')
-
         if contract.insurance == True:
             if not contract.insurance_add_date:
                 self.validate_status = False
@@ -1205,30 +1204,9 @@ class ContractVerifyApi(APIView):
                 contract.workshop_personnel.personnel.insurance_code = contract.insurance_number
                 contract.workshop_personnel.personnel.save()
 
-        if self.validate_status:
-            sames = Contract.objects.filter(Q(is_verified=True) & Q(workshop_personnel=contract.workshop_personnel))
-            for same in sames:
-                if contract.contract_from_date.__ge__(same.contract_from_date) \
-                        and contract.contract_to_date.__le__(same.contract_to_date):
-                    self.validate_status = False
-                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
-
-                elif contract.contract_from_date.__le__(same.contract_from_date) and\
-                        contract.contract_to_date.__ge__(same.contract_from_date) and\
-                        contract.contract_from_date.__le__(same.contract_to_date):
-                    self.validate_status = False
-                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
-
-                elif contract.contract_from_date.__ge__(same.contract_from_date) and\
-                        contract.contract_from_date.__le__(same.contract_to_date) and\
-                        contract.contract_to_date.__ge__(same.contract_to_date):
-                    self.validate_status = False
-                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
-
-                elif contract.contract_from_date.__le__(same.contract_from_date) and\
-                        contract.contract_to_date.__ge__(same.contract_to_date):
-                    self.validate_status = False
-                    self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت شده")
+        if self.validate_status and contract.check_with_same:
+            self.validate_status = False
+            self.error_messages.append('در این زمان برای پرسنل قرارداد دیگری ثبت شده')
 
         if self.validate_status:
             contract.is_verified = True
@@ -1310,6 +1288,55 @@ class GetHRLetterTemplatesApi(APIView):
         serializers = HRLetterSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
+class HRLVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        hr = HRLetter.objects.get(pk=pk)
+        if not hr.is_template:
+            self.validate_status = False
+            self.error_messages.append('نوع حکم کارگزینی را  وارد کنید')
+
+        elif hr.is_template == 't':
+            hr.contract, hr.pay_done = None, False
+            if not hr.name:
+                self.validate_status = False
+                self.error_messages.append('برای قالب حکم کارگزینی خود نام وارد کنید')
+        else:
+            if not hr.contract:
+                self.validate_status = False
+                self.error_messages.append('قرارداد را وارد کنید')
+
+        if self.validate_status:
+            hr.is_verified = True
+            hr.save()
+            return Response({'وضعییت': 'ثبت نهایی حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class HRLUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get(self, request, pk):
+        hr = HRLetter.objects.get(pk=pk)
+        hr.is_verified = False
+        hr.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
 
 # Leave Or Absence APIs
 
@@ -1688,6 +1715,62 @@ class LoanItemDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class LoanVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        loan = Loan.objects.get(pk=pk)
+        if not loan.loan_type:
+            self.validate_status = False
+            self.error_messages.append('نوع را وارد کنید')
+        if not loan.pay_date:
+            self.validate_status = False
+            self.error_messages.append('تاریخ را وارد کنید')
+        if not loan.amount:
+            self.validate_status = False
+            self.error_messages.append('مبلغ را وارد کنید')
+        if loan.amount == 0:
+            self.validate_status = False
+            self.error_messages.append('مبلغ  باید بزرگتر از صفر باشد ')
+        if not loan.episode:
+            self.validate_status = False
+            self.error_messages.append('تعداد اقساط را وارد کنید')
+        if loan.episode == 0:
+            self.validate_status = False
+            self.error_messages.append('تعداد اقساط بزرگتر از صفر باشد ')
+
+
+        if self.validate_status:
+            loan.is_verified = True
+            loan.save()
+            return Response({'وضعییت': 'ثبت نهایی مساعده یا وام انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoanUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'loan'
+
+    def get(self, request, pk):
+        loan = Loan.objects.get(pk=pk)
+        loan.is_verified = False
+        loan.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن مساعده یا وام انجام شد'}, status=status.HTTP_200_OK)
+
 # Deduction APIs
 
 
@@ -1695,13 +1778,20 @@ class DeductionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'deductions'
 
+
     def get(self, request):
-        query = OptionalDeduction.objects.all()
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
+        query = OptionalDeduction.objects.filter(company=company)
         serializers = DeductionSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = DeductionSerializer(data=request.data)
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
+        serializer = DeductionSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -1762,6 +1852,77 @@ class PersonnelDeductionDetail(APIView):
         serializers = DeductionSerializer(query, many=True)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
+
+class DeductionVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+    validate_status = True
+    error_messages = []
+
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
+    def get(self, request, pk):
+        deductions = OptionalDeduction.objects.get(pk=pk)
+        if deductions.is_template == None:
+            self.validate_status = False
+            self.error_messages.append('نوع را وارد کنید')
+
+        if deductions.is_template:
+            deductions.workshop_personnel = None
+            if not deductions.template_name:
+                self.validate_status = False
+                self.error_messages.append('نام قالب را وارد کنید')
+
+        if not deductions.is_template:
+            deductions.template_name = None
+            if not deductions.workshop_personnel:
+                self.validate_status = False
+                self.error_messages.append('پرسنل  را وارد کنید')
+        if not deductions.name:
+            self.validate_status = False
+            self.error_messages.append('نام کسورات  را وارد کنید')
+        if not deductions.amount:
+            self.validate_status = False
+            self.error_messages.append('مبلغ  را وارد کنید')
+        if deductions.amount == 0:
+            self.validate_status = False
+            self.error_messages.append('مبلغ  باید بزرگتر از صفر باشد ')
+        if not deductions.episode:
+            self.validate_status = False
+            self.error_messages.append('تعداد ماه  را وارد کنید')
+        if deductions.episode == 0:
+            self.validate_status = False
+            self.error_messages.append('تعداد ماه  باید بزرگتر از صفر باشد ')
+
+        if not deductions.start_date and not deductions.is_template:
+            self.validate_status = False
+            self.error_messages.append('تاریخ  را وارد کنید')
+
+        if self.validate_status:
+            deductions.is_verified = True
+            deductions.save()
+            return Response({'وضعییت': 'ثبت نهایی کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
+        else:
+            counter = 1
+            response = []
+            for error in self.error_messages:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeductionUnVerifyApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request, pk):
+        deductions = OptionalDeduction.objects.get(pk=pk)
+        deductions.is_verified = False
+        deductions.save()
+        return Response({'وضعییت': 'غیر نهایی  کردن کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
 
 # payroll APIs
 

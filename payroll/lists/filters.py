@@ -137,8 +137,19 @@ class WorkshopPersonnelFilter(filters.FilterSet):
             },
         }
 
+def Workshop_personnel_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.workshop_personnel:
+            if value in item.workshop_personnel.personnel.full_name:
+                query.append(item.id)
+            if value in item.workshop_personnel.workshop.name:
+                query.append(item.id)
+    return queryset.filter(id__in=query)
+
 
 class ContractFilter(filters.FilterSet):
+    workshop_personnel_display = filters.CharFilter(method=Workshop_personnel_filter)
     class Meta:
         model = Contract
         fields = {
@@ -222,6 +233,7 @@ def absence_type_filter(queryset, name, value):
 
 class LeaveOrAbsenceFilter(filters.FilterSet):
     leave_type_display = filters.CharFilter(method=absence_type_filter)
+    workshop_personnel_display = filters.CharFilter(method=Workshop_personnel_filter)
 
     class Meta:
         model = LeaveOrAbsence
@@ -262,6 +274,7 @@ def mission_type_filter(queryset, name, value):
 
 class MissionFilter(filters.FilterSet):
     mission_type_display = filters.CharFilter(method=mission_type_filter)
+    workshop_personnel_display = filters.CharFilter(method=Workshop_personnel_filter)
 
     class Meta:
         model = Mission
@@ -291,6 +304,7 @@ class HRLetterFilter(filters.FilterSet):
             'name': BASE_FIELD_FILTERS,
             'is_template': BASE_FIELD_FILTERS,
             'is_calculated': BASE_FIELD_FILTERS,
+            'is_verified': BASE_FIELD_FILTERS,
         }
 
 
@@ -352,6 +366,7 @@ class TaxMoafFilter(filters.FilterSet):
 
 
 class LoanFilter(filters.FilterSet):
+    workshop_personnel_display = filters.CharFilter(method=Workshop_personnel_filter)
     class Meta:
         model = Loan
         fields = {
@@ -362,6 +377,7 @@ class LoanFilter(filters.FilterSet):
             'episode': ('exact',),
             'loan_type': ('exact',),
             'pay_date': BASE_FIELD_FILTERS,
+            'is_verified': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
@@ -388,6 +404,7 @@ class LoanItemFilter(filters.FilterSet):
 
 
 class DeductionFilter(filters.FilterSet):
+    workshop_personnel_display = filters.CharFilter(method=Workshop_personnel_filter)
     class Meta:
         model = OptionalDeduction
         fields = {
@@ -400,6 +417,7 @@ class DeductionFilter(filters.FilterSet):
             'name': BASE_FIELD_FILTERS,
             'template_name': BASE_FIELD_FILTERS,
             'is_template': ('exact',),
+            'is_verified': BASE_FIELD_FILTERS,
         }
         filter_overrides = {
             jmodels.jDateField: {
