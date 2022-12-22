@@ -3667,15 +3667,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def payable(self):
-        payable_amount = Decimal(round(self.total_payment) - \
-                                 round(self.calculate_month_tax) - \
-                                 self.check_and_get_optional_deduction_episode - \
-                                 self.check_and_get_loan_episode)
+        payable_amount = Decimal(round(self.total_payment) -\
+                                 round(self.calculate_month_tax) -\
+                                 round(self.check_and_get_optional_deduction_episode) -\
+                                 round(self.check_and_get_loan_episode))
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
         if self.get_hr_letter.contract.insurance:
-            payable_amount = payable_amount - round(self.data_for_insurance['DSW_BIME'])
+            payable_amount = round(payable_amount) - round(self.data_for_insurance['DSW_BIME'])
         return round(payable_amount)
 
     '''calculate'''
@@ -3897,7 +3897,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         if item.date.month == self.list_of_pay.month:
                             item.payed_amount = item.amount
                             item.save()
-        return month_episode
+        return round(month_episode)
 
     @property
     def check_and_get_dept_episode(self):
@@ -3916,7 +3916,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         if item.date.month == self.list_of_pay.month:
                             item.payed_amount = item.amount
                             item.save()
-        return month_episode
+        return round(month_episode)
 
     @property
     def check_and_get_optional_deduction_episode(self):
@@ -3929,7 +3929,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             for episode_date in deduction.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
                     month_episode += deduction.get_pay_episode
-        return month_episode
+        return round(month_episode)
 
     @property
     def get_payslip(self):
