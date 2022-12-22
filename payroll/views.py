@@ -2003,8 +2003,6 @@ class PaymentVerifyApiView(APIView):
         workshop = Workshop.objects.get(pk=pk)
         verify_tax_row = workshop.get_tax_row(date)
         verify_personnel = workshop.get_personnel
-        verify_cotract = workshop.get_contract
-        verify_hr = workshop.get_hr_letter
         error = False
         error_response = {}
         if not verify_tax_row:
@@ -2013,9 +2011,6 @@ class PaymentVerifyApiView(APIView):
         if len(verify_personnel) == 0:
             error = True
             error_response['پرسنل فعال'] = 'موجود نیست'
-        if verify_cotract == 0:
-            error = True
-            error_response['قرارداد'] = 'موجود نیست'
         if error:
             return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
         else:

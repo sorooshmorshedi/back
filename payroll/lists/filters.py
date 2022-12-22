@@ -19,8 +19,8 @@ class WorkshopFilter(filters.FilterSet):
             'code': BASE_FIELD_FILTERS,
             'name': BASE_FIELD_FILTERS,
             'employer_name': BASE_FIELD_FILTERS,
-            'address': ['icontains'],
-            'employer_insurance_contribution': ('exact',),
+            'address': BASE_FIELD_FILTERS,
+            'employer_insurance_contribution': BASE_FIELD_FILTERS,
             'postal_code': BASE_FIELD_FILTERS,
             'branch_code': BASE_FIELD_FILTERS,
             'branch_name': BASE_FIELD_FILTERS,
@@ -46,22 +46,22 @@ class PersonnelFilter(filters.FilterSet):
             'father_name': BASE_FIELD_FILTERS,
             'country': BASE_FIELD_FILTERS,
             'nationality': ('exact',),
-            'personnel_code': ('exact',),
+            'personnel_code': BASE_FIELD_FILTERS,
             'gender': ('exact',),
             'military_service': ('exact',),
-            'national_code': ('exact',),
-            'identity_code': ('exact',),
+            'national_code': BASE_FIELD_FILTERS,
+            'identity_code': BASE_FIELD_FILTERS,
             'date_of_birth': BASE_FIELD_FILTERS,
             'date_of_exportation': BASE_FIELD_FILTERS,
-            'location_of_birth': ('exact',),
-            'location_of_exportation': ('exact',),
-            'sector_of_exportation': ('exact',),
+            'location_of_birth': BASE_FIELD_FILTERS,
+            'location_of_exportation': BASE_FIELD_FILTERS,
+            'sector_of_exportation': BASE_FIELD_FILTERS,
             'marital_status': ('exact',),
             'number_of_childes': ('exact',),
-            'city_phone_code': ('exact',),
-            'phone_number': ('exact',),
-            'mobile_number_1': ('exact',),
-            'mobile_number_2': ('exact',),
+            'city_phone_code': BASE_FIELD_FILTERS,
+            'phone_number': BASE_FIELD_FILTERS,
+            'mobile_number_1': BASE_FIELD_FILTERS,
+            'mobile_number_2': BASE_FIELD_FILTERS,
             'address': BASE_FIELD_FILTERS,
             'postal_code': BASE_FIELD_FILTERS,
             'insurance': BASE_FIELD_FILTERS,
@@ -69,10 +69,11 @@ class PersonnelFilter(filters.FilterSet):
             'degree_education': ('exact',),
             'field_of_study': BASE_FIELD_FILTERS,
             'university_type': ('exact',),
-            'university_name': ('exact',),
-            'account_bank_name': BASE_FIELD_FILTERS,
-            'account_bank_number': ('exact',),
-            'sheba_number': ('exact',),
+            'university_name': BASE_FIELD_FILTERS,
+            'account_bank_name': ('exact',),
+            'account_bank_number': BASE_FIELD_FILTERS,
+            'bank_cart_number': BASE_FIELD_FILTERS,
+            'sheba_number': BASE_FIELD_FILTERS,
             'is_personnel_active': ('exact',),
             'is_personnel_verified': ('exact',),
 
@@ -84,7 +85,17 @@ class PersonnelFilter(filters.FilterSet):
         }
 
 
+def personnel_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.personnel and value in item.personnel.full_name:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
 class PersonnelFamilyFilter(filters.FilterSet):
+    personnel_name = filters.CharFilter(method=personnel_filter)
+
     class Meta:
         model = PersonnelFamily
         fields = {
@@ -92,7 +103,7 @@ class PersonnelFamilyFilter(filters.FilterSet):
             'personnel': ('exact',),
             'name': BASE_FIELD_FILTERS,
             'last_name': BASE_FIELD_FILTERS,
-            'national_code': ('exact',),
+            'national_code': BASE_FIELD_FILTERS,
             'date_of_birth': BASE_FIELD_FILTERS,
             'relative': ('exact',),
             'marital_status': ('exact',),
@@ -109,22 +120,85 @@ class PersonnelFamilyFilter(filters.FilterSet):
         }
 
 
+def workshop_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.workshop and value in item.workshop.workshop_title:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
+def employment_type_filter(queryset, name, value):
+    types = {
+        'پیمانی': 4,
+        'قراردادی': 1,
+        'َشرکتی': 2,
+        'مامور': 5,
+        'رسمی': 3,
+        'سایر': 6,
+    }
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(employment_type=types[type])
+    return query
+
+def job_group_filter(queryset, name, value):
+    types = {}
+    for item in WorkshopPersonnel.JOB_GROUP_TYPES:
+        types[item[1]] = item[0]
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(job_group=types[type])
+    return query
+
+def contract_type_filter(queryset, name, value):
+    types = {}
+    for item in WorkshopPersonnel.CONTRACT_TYPES:
+        types[item[1]] = item[0]
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(contract_type=types[type])
+    return query
+
+def employee_status_filter(queryset, name, value):
+    types = {}
+    for item in WorkshopPersonnel.EMPLOYEE_TYPES:
+        types[item[1]] = item[0]
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(employee_status=types[type])
+    return query
+
+
 class WorkshopPersonnelFilter(filters.FilterSet):
+
+    personnel_name = filters.CharFilter(method=personnel_filter)
+    workshop_name = filters.CharFilter(method=workshop_filter)
+    employment_type_display = filters.CharFilter(method=employment_type_filter)
+    job_group_display = filters.CharFilter(method=job_group_filter)
+    contract_type_display = filters.CharFilter(method=contract_type_filter)
+    employee_status_display = filters.CharFilter(method=employee_status_filter)
+
     class Meta:
         model = WorkshopPersonnel
         fields = {
             'id': ('exact',),
             'personnel': ('exact',),
             'workshop': ('exact',),
-            'work_title': ['icontains'],
-            'previous_insurance_history_out_workshop': ('exact',),
-            'previous_insurance_history_in_workshop': ('exact',),
-            'current_insurance_history_in_workshop': ('exact',),
-            'insurance_history_totality': ('exact',),
+            'work_title': BASE_FIELD_FILTERS,
+            'previous_insurance_history_out_workshop': BASE_FIELD_FILTERS,
+            'previous_insurance_history_in_workshop': BASE_FIELD_FILTERS,
+            'current_insurance_history_in_workshop': BASE_FIELD_FILTERS,
+            'insurance_history_totality': BASE_FIELD_FILTERS,
             'job_position': BASE_FIELD_FILTERS,
             'job_group': BASE_FIELD_FILTERS,
             'job_location': BASE_FIELD_FILTERS,
             'job_location_status': BASE_FIELD_FILTERS,
+            'employment_date': BASE_FIELD_FILTERS,
             'employment_type': ('exact',),
             'contract_type': ('exact',),
             'employee_status': ('exact',),
@@ -136,6 +210,7 @@ class WorkshopPersonnelFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
+
 
 def Workshop_personnel_filter(queryset, name, value):
     query = []
@@ -159,6 +234,7 @@ class ContractFilter(filters.FilterSet):
             'insurance': BASE_FIELD_FILTERS,
             'insurance_add_date': BASE_FIELD_FILTERS,
             'contract_from_date': BASE_FIELD_FILTERS,
+            'insurance_number': BASE_FIELD_FILTERS,
             'contract_to_date': BASE_FIELD_FILTERS,
             'quit_job_date': BASE_FIELD_FILTERS,
             'is_verified': ('exact',),
@@ -172,19 +248,21 @@ class ContractFilter(filters.FilterSet):
 
 
 class ContractRowFilter(filters.FilterSet):
+    workshop_name = filters.CharFilter(method=workshop_filter)
+
     class Meta:
         model = ContractRow
         fields = {
             'id': ('exact',),
             'workshop': ('exact',),
-            'contract_row': ('exact',),
-            'contract_number': ('exact',),
+            'contract_row': BASE_FIELD_FILTERS,
+            'contract_number': BASE_FIELD_FILTERS,
             'registration_date': BASE_FIELD_FILTERS,
             'from_date': BASE_FIELD_FILTERS,
             'to_date': BASE_FIELD_FILTERS,
             'assignor_name': BASE_FIELD_FILTERS,
-            'assignor_national_code': ('exact',),
-            'assignor_workshop_code': ('exact',),
+            'assignor_national_code': BASE_FIELD_FILTERS,
+            'assignor_workshop_code': BASE_FIELD_FILTERS,
             'contract_initial_amount': BASE_FIELD_FILTERS,
             'branch': BASE_FIELD_FILTERS,
             'status': ('exact',),
@@ -247,7 +325,7 @@ class LeaveOrAbsenceFilter(filters.FilterSet):
             'date': BASE_FIELD_FILTERS,
             'from_hour': BASE_FIELD_FILTERS,
             'to_hour': BASE_FIELD_FILTERS,
-            'explanation': ('exact',),
+            'explanation': BASE_FIELD_FILTERS,
             'is_verified': BASE_FIELD_FILTERS,
 
         }
@@ -259,7 +337,6 @@ class LeaveOrAbsenceFilter(filters.FilterSet):
 
 
 def mission_type_filter(queryset, name, value):
-    print(value)
     types = {
         'ساعتی': 'h',
         'روزانه': 'd',
@@ -284,7 +361,7 @@ class MissionFilter(filters.FilterSet):
             'mission_type': ('exact',),
             'from_date': BASE_FIELD_FILTERS,
             'to_date': BASE_FIELD_FILTERS,
-            'explanation': ('exact',),
+            'explanation': BASE_FIELD_FILTERS,
             'is_verified': BASE_FIELD_FILTERS,
 
         }
@@ -295,7 +372,43 @@ class MissionFilter(filters.FilterSet):
         }
 
 
+def is_template_filter(queryset, name, value):
+    types = {
+        'قالب': 't',
+        'شخصی': 'p',
+    }
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(is_template=types[type])
+    return query
+
+
+def contract_code_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.contract:
+            if value in item.contract.code:
+                query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
+def contract_workshop_personnel_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.contract:
+            if value in item.contract.workshop_personnel.personnel.full_name:
+                query.append(item.id)
+            if value in item.contract.workshop_personnel.workshop.name:
+                query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
 class HRLetterFilter(filters.FilterSet):
+    is_template_display = filters.CharFilter(method=is_template_filter)
+    contract_code = filters.CharFilter(method=contract_code_filter)
+    contract_detail = filters.CharFilter(method=contract_workshop_personnel_filter)
+
     class Meta:
         model = HRLetter
         fields = {

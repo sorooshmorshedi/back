@@ -54,9 +54,6 @@ class PersonnelSerializer(serializers.ModelSerializer):
     is_insurance = serializers.CharField(source='insurance_display', read_only=True)
     is_verify = serializers.CharField(source='verify_display', read_only=True)
     is_active = serializers.CharField(source='active_display', read_only=True)
-    birth_city = serializers.CharField(source='location_of_birth', read_only=True)
-    exportation_city = serializers.CharField(source='location_of_exportation', read_only=True)
-    exportation_sector = serializers.CharField(source='sector_of_exportation', read_only=True)
     get_child_number = serializers.IntegerField(source='child_number', read_only=True)
 
     class Meta:
@@ -76,6 +73,8 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     mobile_number = serializers.CharField(source='personnel.mobile_number_1', read_only=True)
     employment_type_display = serializers.CharField(source='get_employment_type_display', read_only=True)
     contract_type_display = serializers.CharField(source='get_contract_type_display', read_only=True)
+    get_current_insurance = serializers.CharField(source='current_insurance', read_only=True)
+    get_insurance_history_total = serializers.CharField(source='insurance_history_total', read_only=True)
     employee_status_display = serializers.CharField(source='get_employee_status_display', read_only=True)
     job_group_display = serializers.CharField(source='get_job_group_display', read_only=True)
     total_insurance_month = serializers.IntegerField(source='insurance_history_total', read_only=True)
@@ -142,7 +141,8 @@ class ContractSerializer(serializers.ModelSerializer):
 
 class HRLetterSerializer(serializers.ModelSerializer):
     is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
-    contract_detail = serializers.CharField(source='contract.title', read_only=True)
+    contract_detail = serializers.CharField(source='contract.workshop_personnel_display', read_only=True)
+    contract_code = serializers.CharField(source='contract.code', read_only=True)
     get_aele_mandi_sum = serializers.IntegerField(source='aele_mandi_sum', read_only=True)
     in_calculate = serializers.CharField(source='calculated', read_only=True)
 

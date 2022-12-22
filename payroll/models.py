@@ -164,7 +164,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def get_personnel(self):
         active_personnel = Personnel.objects.filter(Q(company=self.company) & Q(is_personnel_active=True) &
                                                     Q(is_personnel_verified=True))
-        personnel = self.workshop_personnel.filter(personnel__in=active_personnel)
+        personnel = self.workshop_personnel.filter(Q(personnel__in=active_personnel) & Q(is_verified=True))
         if len(personnel) != 0:
             return personnel
         else:
@@ -184,30 +184,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         else:
             raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
 
-    @property
-    def get_contract(self):
-        person_contract = []
-        contracts = []
-        for person in self.get_personnel:
-            contract = person.contract.all()
-            if len(contract) != 0:
-                person_contract.append(person)
-                contracts.append(contract)
-        if len(person_contract) == 0:
-            raise ValidationError('برای پرسنل های این کارگاه قراردادی ثبت نشده')
-        return contracts
-
-    @property
-    def get_hr_letter(self):
-        hr = []
-        for person in self.get_contract:
-            for contract in person:
-                contract_hr = contract.hr_letter.all()
-                if len(contract_hr) == 0:
-                    raise ValidationError('برای قراردادی در این کارگاه حکم کارگزینی ثبت نشده')
-                else:
-                    hr.append(contract_hr)
-        return hr
 
     @staticmethod
     def month_display(month):
@@ -1164,14 +1140,14 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     OTHER = 0
 
     JOB_GROUP_TYPES = (
-        (STUDY, 'آموزشي و فرهنگي'),
-        (FINANCIAL, 'اداري و مالي'),
-        (SOCIAL, 'اموراجتماعي'),
-        (HEALTH, 'درماني و بهداشتي'),
-        (IT, 'اطلاعات فناوري'),
+        (STUDY, 'آموزشی و فرهنگی'),
+        (FINANCIAL, 'اداری و مالی'),
+        (SOCIAL, 'اموراجتماعی'),
+        (HEALTH, 'درمانی و بهداشتی'),
+        (IT, 'اطلاعات فناوری'),
         (SERVICES, 'خدمات'),
-        (ENGINEER, 'فني و مهندسي'),
-        (ARGI, 'كشاورزي ومحيط زيست'),
+        (ENGINEER, 'فنی و مهندسي'),
+        (ARGI, 'كشاورزی ومحيط زيست'),
         (PRODUCT, 'تولیدی'),
         (SEARCH, 'تحقیقاتی'),
         (WORKER, 'کارگری'),
@@ -1630,10 +1606,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                     self.contract_to_date.__le__(contract.contract_to_date):
                 validate_status = True
         return validate_status
-
-    @property
-    def title(self):
-        return 'قرارداد ' + self.code + ' برای ' + self.workshop_personnel_display
 
     @property
     def find_hr(self):
@@ -2931,13 +2903,14 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_contracts(self):
         contracts = []
-        personnel = Personnel.objects.filter(Q(is_personnel_active=True) & Q(is_personnel_verified=True))
-        workshop_personnel = WorkshopPersonnel.objects.filter(Q(workshop=self.workshop) & Q(personnel__in=personnel))
-        if len(workshop_personnel) == 0:
-            raise ValidationError('پرسنل فعال و نهایی برای کارگاه ثبت نشده')
-        workshop_contracts = Contract.objects.filter(workshop_personnel__in=workshop_personnel)
-        if len(workshop_contracts) == 0:
-            raise ValidationError('قراردادی  برای پرسنل فعال ثبت نشده')
+        workshop_personnel = self.workshop.get_personnel
+        print(workshop_personnel)
+        workshop_contracts_id = []
+        for person in workshop_personnel:
+            for item in person.contract.all():
+                workshop_contracts_id.append(item.id)
+        print(workshop_contracts_id)
+        workshop_contracts = Contract.objects.filter(id__in=workshop_contracts_id)
 
         for contract in workshop_contracts:
             if not contract.quit_job_date:
