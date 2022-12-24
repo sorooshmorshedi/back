@@ -1451,18 +1451,9 @@ class LeaveOrAbsenceVerifyApi(APIView):
             self.error_messages.append("تاریخ شروع نمیتواند از تاریخ پایان بزرگتر باشد")
 
         if self.validate_status and leave.entitlement_leave_type == 'h':
-            strat = leave.from_hour
-            end = leave.to_hour
-
-            if strat.hour < 8 and strat.hour > 3:
+            if leave.to_hou.hour < 8 and leave.to_hou.hour > 0:
                 self.validate_status = False
-                self.error_messages.append("ساعت شروع باید قبل 3 بامداد بعد از 8 صبح باشد")
-            if end.hour < 8 and end.hour > 3:
-                self.validate_status = False
-                self.error_messages.append("ساعت پایان باید قبل 3 بامداد بعد از 8 صبح باشد")
-
-
-
+                self.error_messages.append("ساعت پایان باید قبل 00:00 بامداد بعد از 08:00 صبح باشد")
 
         if self.validate_status:
             is_same = leave.check_with_same
