@@ -57,17 +57,17 @@
                     <td> -</td>
                 {% endif %}
 
-                {% if form.current_insurance_history_in_workshop %}
-                    <td>{{ form.current_insurance_history_in_workshop }}</td>
+                {% if form.current_insurance %}
+                    <td>{{ form.current_insurance }}</td>
                 {% endif %}
-                {% if not form.current_insurance_history_in_workshop %}
+                {% if not form.current_insurance %}
                     <td> -</td>
                 {% endif %}
 
-                {% if form.insurance_history_totality %}
-                    <td>{{ form.insurance_history_totality }}</td>
+                {% if form.insurance_history_total %}
+                    <td>{{ form.insurance_history_total }}</td>
                 {% endif %}
-                {% if not form.insurance_history_totality %}
+                {% if not form.insurance_history_total %}
                     <td> -</td>
                 {% endif %}
 

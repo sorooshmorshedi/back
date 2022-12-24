@@ -90,7 +90,7 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
                 'لیست کارگاه ها'
             ],
             ['کد کارگاه', 'نام کارگاه', 'نام کارفرما', 'آدرس', 'کد پستی',
-             'کد شعبه','نام شعبه', 'وضعییت', 'نهایی']
+             'کد شعبه','نام شعبه', 'وضعیت', 'نهایی', 'پیشفرض']
         ]
         for form in workshop:
             data.append([
@@ -103,6 +103,7 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
                 form.branch_name,
                 form.active_display,
                 form.verify_display,
+                form.default_display,
             ])
         return data
 
@@ -182,7 +183,7 @@ class PersonnelExportview(PersonnelListView, BaseExportView):
              'کد ملی', 'شماره شناسنامه', 'تاریخ تولد', 'تاریخ صدور شناسنامه', 'محل تولد', 'محل صدور شناسنامه',
              'بخش محل صدور', 'وضعیت تاهل', 'تعداد فرزندان', 'پیش شماره', 'تلفن', 'موبایل یک', 'موبایل دو',
              'آدرس', 'کد پستی', 'بیمه تامین اجتماعی', 'شماره بیمه', 'مدرک تحصیلی', 'رشته تحصیلی', 'نوع دانشگاه',
-             'نام دانشگاه', 'نام بانک', 'شماره حساب حقوق', 'َشماره شبا', 'وضعییت', 'نهایی']
+             'نام دانشگاه', 'نام بانک', 'شماره حساب حقوق', 'َشماره شبا', 'وضعیت', 'نهایی']
         ]
         for form in personnel:
             data.append([
@@ -297,7 +298,7 @@ class PersonnelFamilyExportview(PersonnelFamilyListView, BaseExportView):
                 'لیست خانواده پرسنل'
             ],
             ['پرسنل', 'نام', 'نام خانوادگی', 'کد ملی', 'تاریخ تولد', 'نسبت', 'وضعیت تاهل',
-             'خدمت سربازی', 'وضعیت تحصیل', 'وضعیت جسمی', 'وضعییت', 'نهایی']
+             'خدمت سربازی', 'وضعیت تحصیل', 'وضعیت جسمی', 'وضعیت', 'نهایی']
         ]
         for form in personnel_family:
             data.append([
@@ -311,8 +312,9 @@ class PersonnelFamilyExportview(PersonnelFamilyListView, BaseExportView):
                 form.get_military_service_display(),
                 form.get_study_status_display(),
                 form.get_physical_condition_display(),
-                form.is_verified,
                 form.active_display,
+                form.verify_display,
+
             ])
         return data
 
@@ -390,7 +392,7 @@ class ContractRowExportview(ContractRowListView, BaseExportView):
             ],
             ['کارگاه', 'ردیف پیمان', 'شماره پیمان', 'تاریخ پیمان', 'تاریخ شروع', 'تاریخ پایان', 'نام واگذار کننده',
              'کد ملی واگذار کننده', 'کد کارگاه واگذار کننده', ' مبلغ اولیه پیمان', ' مبلغ فعلی پیمان',
-             'شعبه', 'وضعییت','پیشفرض', 'نهایی']
+             'شعبه', 'وضعیت', 'پیشفرض', 'نهایی']
         ]
         for form in contract_row:
             data.append([
@@ -487,8 +489,8 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
             ],
             ['کارگاه', 'پرسنل', 'تاریخ استخدام', 'عنوان شغلی',
              'سابقه بیمه قبلی خارچ از کارگاه', 'سابقه بیمه قبلی در این کارگاه', 'سابقه سابقه بیمه جاری در این کارگاه',
-             'مجموع سوابق بیمه ای', 'سمت', 'رسته شغلی', 'محل خدمت', ' وضعییت محل خدمت', 'نوع استخدام',
-             'نوع قرارداد', 'وضعییت کارمند', 'نهایی']
+             'مجموع سوابق بیمه ای', 'سمت', 'رسته شغلی', 'محل خدمت', ' وضعیت محل خدمت', 'نوع استخدام',
+             'نوع قرارداد', 'وضعیت کارمند', 'نهایی']
         ]
         for form in workshop_personnel:
             data.append([
@@ -583,14 +585,19 @@ class ContractExportView(ContractListView, BaseExportView):
             [
                 'لیست قرارداد ها'
             ],
-            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار']
+            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار',
+             'بیمه میشود؟', 'شماره بیمه', 'تاریخ اضافه شدن به لیست بیمه', 'نهایی']
         ]
         for form in contract:
             data.append([
                 form.workshop_personnel.my_title,
                 form.contract_from_date,
                 form.contract_to_date,
-                form.quit_job_date
+                form.quit_job_date,
+                form.is_insurance_display,
+                form.insurance_number,
+                form.insurance_add_date,
+                form.verify_display,
             ])
         return data
 

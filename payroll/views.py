@@ -144,7 +144,7 @@ class WorkshopVerifyApi(APIView):
             self.error_messages.append('آدرس کارگاه را وارد کنید')
         if workshop.is_active == None:
             self.validate_status = False
-            self.error_messages.append('وضعییت را وارد کنید')
+            self.error_messages.append('وضعیت را وارد کنید')
 
         if self.validate_status:
             workshop.is_verified = True
@@ -1449,6 +1449,20 @@ class LeaveOrAbsenceVerifyApi(APIView):
         if self.validate_status and leave.entitlement_leave_type != 'h' and leave.from_date.__gt__(leave.to_date):
             self.validate_status = False
             self.error_messages.append("تاریخ شروع نمیتواند از تاریخ پایان بزرگتر باشد")
+
+        if self.validate_status and leave.entitlement_leave_type == 'h':
+            strat = leave.from_hour
+            end = leave.to_hour
+
+            if strat.hour < 8 and strat.hour > 3:
+                self.validate_status = False
+                self.error_messages.append("ساعت شروع باید قبل 3 بامداد بعد از 8 صبح باشد")
+            if end.hour < 8 and end.hour > 3:
+                self.validate_status = False
+                self.error_messages.append("ساعت پایان باید قبل 3 بامداد بعد از 8 صبح باشد")
+
+
+
 
         if self.validate_status:
             is_same = leave.check_with_same

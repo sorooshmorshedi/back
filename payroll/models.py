@@ -74,7 +74,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     name = models.CharField(max_length=100, blank=True, null=True)
     employer_name = models.CharField(max_length=100, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    postal_code = models.CharField(max_length=10, blank=True, null=True)
+    postal_code = models.CharField(max_length=100, blank=True, null=True)
     employer_insurance_contribution = models.IntegerField(default=3, blank=True, null=True)
     branch_code = models.CharField(max_length=100, blank=True, null=True)
     branch_name = models.CharField(max_length=100, blank=True, null=True)
@@ -296,7 +296,10 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         )
 
     def __str__(self):
-        return self.name + ' ' + self.company.name
+        if self.name:
+            return self.name + ' ' + self.company.name
+        elif not self.name:
+            return str(self.id) + ' ' + self.company.name
 
     @property
     def active_display(self):
@@ -1028,7 +1031,7 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     physical_condition = models.CharField(max_length=1, choices=PHYSICAL_TYPE, blank=True, null=True)
 
     gender = models.CharField(max_length=1, choices=GENDER_TYPE, blank=True, null=True)
-    is_active = models.BooleanField()
+    is_active = models.BooleanField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'PersonnelFamily'
@@ -1549,8 +1552,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     def save(self, *args, **kwargs):
         if self.sanavat_btn == False:
-            self.sanavat_previous_amount = 0
-            self.sanavat_previuos_days = 0
+            self.sanavat_previous_amount = None
+            self.sanavat_previuos_days = None
         if not self.id:
             self.current_insurance_history_in_workshop = 0
         super().save(*args, **kwargs)
@@ -2094,11 +2097,15 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if self.entitlement_leave_type == 'h':
             for leave in leaves:
                 if leave.entitlement_leave_type == 'h' and leave.date == self.date:
-                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__ge__(leave.to_hour):
+                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__le__(leave.to_hour):
                         is_in_same = True
-                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__le__(leave.to_hour):
                         is_in_same = True
-                elif leave.mission_type == 'd':
+                    if self.from_hour.__le__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__ge__(leave.from_hour) and self.to_hour.__le__(leave.to_hour):
+                        is_in_same = True
+                elif leave.entitlement_leave_type != 'h':
                     if self.date.__ge__(leave.from_date) and self.date.__le__(leave.to_date):
                         is_in_same = True
         elif self.entitlement_leave_type != 'h' or self.leave_type != 'e':
@@ -2109,7 +2116,11 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 elif leave.entitlement_leave_type != 'h' or leave.leave_type != 'e':
                     if self.from_date.__ge__(leave.from_date) and self.from_date.__le__(leave.to_date):
                         is_in_same = True
-                    elif self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                    if self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                        is_in_same = True
+                    if self.from_date.__le__(leave.from_date) and self.to_date.__ge__(leave.to_date):
+                        is_in_same = True
+                    if self.from_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
                         is_in_same = True
 
         return is_in_same
@@ -2121,9 +2132,13 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if self.entitlement_leave_type == 'h':
             for mission in missions:
                 if mission.mission_type == 'h' and mission.date == self.date:
-                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__ge__(mission.to_hour):
+                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__le__(mission.to_hour):
                         is_in_same = True
-                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__le__(mission.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__le__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__ge__(mission.from_hour) and self.to_hour.__le__(mission.to_hour):
                         is_in_same = True
                 elif mission.mission_type == 'd':
                     if self.date.__ge__(mission.from_date) and self.date.__le__(mission.to_date):
@@ -2136,7 +2151,11 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 elif mission.mission_type == 'd':
                     if self.from_date.__ge__(mission.from_date) and self.from_date.__le__(mission.to_date):
                         is_in_same = True
-                    elif self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                    if self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                        is_in_same = True
+                    if self.from_date.__le__(mission.from_date) and self.to_date.__ge__(mission.to_date):
+                        is_in_same = True
+                    if self.from_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
                         is_in_same = True
 
         return is_in_same
@@ -2752,9 +2771,13 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if self.mission_type == 'h':
             for mission in missions:
                 if mission.mission_type == 'h' and mission.date == self.date:
-                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__ge__(mission.to_hour):
+                    if self.from_hour.__ge__(mission.from_hour) and self.from_hour.__le__(mission.to_hour):
                         is_in_same = True
-                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                    if self.to_hour.__ge__(mission.from_hour) and self.to_hour.__le__(mission.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__le__(mission.from_hour) and self.to_hour.__ge__(mission.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__ge__(mission.from_hour) and self.to_hour.__le__(mission.to_hour):
                         is_in_same = True
                 elif mission.mission_type == 'd':
                     if self.date.__ge__(mission.from_date) and self.date.__le__(mission.to_date):
@@ -2767,7 +2790,11 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 elif mission.mission_type == 'd':
                     if self.from_date.__ge__(mission.from_date) and self.from_date.__le__(mission.to_date):
                         is_in_same = True
-                    elif self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                    if self.to_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
+                        is_in_same = True
+                    if self.from_date.__le__(mission.from_date) and self.to_date.__ge__(mission.to_date):
+                        is_in_same = True
+                    if self.from_date.__ge__(mission.from_date) and self.to_date.__le__(mission.to_date):
                         is_in_same = True
 
         return is_in_same
@@ -2781,9 +2808,13 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if self.mission_type == 'h':
             for leave in leaves:
                 if leave.entitlement_leave_type == 'h' and leave.date == self.date:
-                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__ge__(leave.to_hour):
+                    if self.from_hour.__ge__(leave.from_hour) and self.from_hour.__le__(leave.to_hour):
                         is_in_same = True
-                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                    if self.to_hour.__ge__(leave.from_hour) and self.to_hour.__le__(leave.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__le__(leave.from_hour) and self.to_hour.__ge__(leave.to_hour):
+                        is_in_same = True
+                    if self.from_hour.__ge__(leave.from_hour) and self.to_hour.__le__(leave.to_hour):
                         is_in_same = True
                 elif leave.entitlement_leave_type == 'd' or leave.leave_type != 'e':
                     if self.date.__ge__(leave.from_date) and self.date.__le__(leave.to_date):
@@ -2796,7 +2827,11 @@ class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 elif leave.entitlement_leave_type == 'd' or leave.leave_type != 'e':
                     if self.from_date.__ge__(leave.from_date) and self.from_date.__le__(leave.to_date):
                         is_in_same = True
-                    elif self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                    if self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
+                        is_in_same = True
+                    if self.from_date.__le__(leave.from_date) and self.to_date.__ge__(leave.to_date):
+                        is_in_same = True
+                    if self.to_date.__ge__(leave.from_date) and self.to_date.__le__(leave.to_date):
                         is_in_same = True
 
         return is_in_same

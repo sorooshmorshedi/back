@@ -132,7 +132,7 @@ class ContractSerializer(serializers.ModelSerializer):
     workshop_name = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
-    workshop_id = serializers.CharField(source='workshop_personnel.workshop.id', read_only=True)
+    workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
 
     class Meta:
         model = Contract

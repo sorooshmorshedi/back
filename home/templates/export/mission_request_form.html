@@ -11,7 +11,7 @@
                         ({{ form.workshop_personnel.personnel.personnel_code }}) مشغول در واحد
                         ({{ form.workshop_personnel.get_job_group_display }}) به منظور
                         ({{ form.topic }})
-                         نیاز به صدور حکم ماموریت {{ form.get_mission_type_display  }}
+                        نیاز به صدور حکم ماموریت {{ form.get_mission_type_display }}
                         را به شرح ذیل دارم
 
                     </h6>
@@ -20,41 +20,68 @@
             <tr>
                 {% if form.mission_type == 'h' %}
                     <td class="text-center">
+                        <span>
+                            به مدت
+                        </span>
+
                         <h5>
-                            به مدت {{ form.hour }} ساعت
+                            {{ form.hour }} ساعت
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                            در تاریخ
+                        </span>
+
                         <h5>
-                            در تاریخ {{ form.date }}
+                            {{ form.date }}
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                            از ساعت
+                        </span>
+
                         <h5>
-                            از ساعت {{ form.from_hour }}
+                            {{ form.from_hour }}
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                            تا ساعت
+                        </span>
+
                         <h5>
-                            تا ساعت {{ form.to_hour }}
+                            {{ form.to_hour }}
                         </h5>
                     </td>
                 {% endif %}
 
                 {% if form.mission_type == 'd' %}
                     <td class="text-center">
+                        <span>
+                            به مدت
+                        </span>
+
                         <h5>
-                            به مدت {{ form.time_period }} روز
+                            {{ form.time_period }} روز
                         </h5>
                     </td>
                     <td class="text-center">
+                        <span>
+                            از تاریخ
+                        </span>
                         <h5>
-                            از تاریخ {{ form.from_date }}
+                            {{ form.from_date }}
                         </h5>
                     </td>
                     <td class="text-center">
+                    <span>
+                            تا تاریخ
+                        </span>
+
                     <h5>
-                        تا تاریخ {{ form.to_date }}
+                        {{ form.to_date }}
                     </h5>
                 {% endif %}
             </tr>
