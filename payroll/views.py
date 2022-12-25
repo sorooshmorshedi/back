@@ -1374,11 +1374,6 @@ class HRUnActiveApi(APIView):
         hr = HRLetter.objects.get(pk=pk)
         hr.is_active = False
         hr.save()
-        for hr_letter in HRLetter.objects.filter(contract=hr.contract):
-            if hr_letter.id != hr.id:
-                hr_letter.is_active = True
-                hr_letter.save()
-                break
         return Response({'وضعیت': 'غیر فعال  کردن ردیف حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
 
 # Leave Or Absence APIs
@@ -2094,7 +2089,7 @@ class PaymentList(APIView):
                                                     month_days=month_days, start_date=start_date, end_date=end_date)
         contract = payroll_list.get_contracts
         if len(contract) == 0:
-            raise ValidationError('no contract')
+            raise ValidationError('قراردادی ثبت نشده')
         else:
             payroll_list.save()
             response = payroll_list.info_for_items
