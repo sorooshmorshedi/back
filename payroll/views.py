@@ -1326,11 +1326,7 @@ class HRLVerifyApi(APIView):
             if not hr.contract:
                 self.validate_status = False
                 self.error_messages.append('قرارداد را وارد کنید')
-            if self.validate_status:
-                for hr_letter in HRLetter.objects.filter(contract=hr.contract):
-                    hr_letter.is_active = False
-                    hr_letter.save()
-                hr.is_active = True
+
         if self.validate_status:
             hr.is_verified = True
             hr.save()
