@@ -3402,7 +3402,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_hr_letter(self):
         hr = self.contract.hr_letter.filter(is_active=True)
         if len(hr) == 0:
-            raise ValidationError('حکم کارگزینی ثبت فعال نشده')
+            raise ValidationError('حکم کارگزینی ثبت نشده')
         else:
             return hr.first()
 
@@ -3417,36 +3417,36 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi_info(self):
-        if self.workshop_personnel.personnel.insurance:
-            personnel_family = self.workshop_personnel.personnel.childs
-            aele_mandi_child = 0
+        personnel_family = self.workshop_personnel.personnel.childs
+        aele_mandi_child = 0
+        if self.workshop_personnel.insurance_history_total:
             self.total_insurance_month = self.workshop_personnel.insurance_history_total
-            for person in personnel_family:
-                if person.marital_status == 's':
-                    person_age = self.list_of_pay.year - person.date_of_birth.year
-                    if person_age <= 18:
-                        aele_mandi_child += 1
-                    elif person.study_status == 's' or person.physical_condition != 'h':
-                        aele_mandi_child += 1
-            self.aele_mandi_child = aele_mandi_child
-            return aele_mandi_child
         else:
-            return 0
+            self.total_insurance_month = 0
+        for person in personnel_family:
+            if person.marital_status == 's':
+                person_age = self.list_of_pay.year - person.date_of_birth.year
+                if person_age <= 18:
+                    aele_mandi_child += 1
+                elif person.study_status == 's' or person.physical_condition != 'h':
+                    aele_mandi_child += 1
+        self.aele_mandi_child = aele_mandi_child
+        return aele_mandi_child
 
     @property
     def get_sanavt_info(self):
-        if self.workshop_personnel.personnel.insurance:
-            hr = self.get_hr_letter
-            sanavat_base = hr.paye_sanavat_amount
-            sanavat_month = 0
-            if self.workshop_personnel.workshop.sanavat_type == 'c':
+        hr = self.get_hr_letter
+        sanavat_base = hr.paye_sanavat_amount
+        sanavat_month = 0
+        if self.workshop_personnel.workshop.sanavat_type == 'c':
+            if self.workshop_personnel.total_insurance:
                 sanavat_month = self.workshop_personnel.total_insurance
-            elif self.workshop_personnel.workshop.sanavat_type == 'n':
-                sanavat_month = self.workshop_personnel.total_insurance + \
-                                self.workshop_personnel.previous_insurance_history_in_workshop
-            return sanavat_base, sanavat_month
-        else:
-            return 0, 0
+            else:
+                sanavat_month = 0
+        elif self.workshop_personnel.workshop.sanavat_type == 'n':
+            if self.workshop_personnel.insurance_history_total:
+                sanavat_month = self.workshop_personnel.insurance_history_total
+        return sanavat_base, sanavat_month
 
     @property
     def hoghoogh_mahane(self):
