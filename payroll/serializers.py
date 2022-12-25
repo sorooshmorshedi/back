@@ -97,6 +97,8 @@ class ContractRowSerializer(serializers.ModelSerializer):
     have_ads = serializers.BooleanField(source='have_adjustment', read_only=True)
     round_initial_amount = serializers.CharField(source='round_amount_with_comma', read_only=True)
     round_amount = serializers.CharField(source='round_now_amount_with_comma', read_only=True)
+    get_status_display = serializers.CharField(source='status_display', read_only=True)
+    get_verify_display = serializers.CharField(source='verify_display', read_only=True)
     get_now_date = serializers.DateField(source='now_date', read_only=True)
     get_now_amount = serializers.IntegerField(source='now_amount', read_only=True)
 
@@ -143,8 +145,13 @@ class HRLetterSerializer(serializers.ModelSerializer):
     is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
     contract_detail = serializers.CharField(source='contract.workshop_personnel_display', read_only=True)
     contract_code = serializers.CharField(source='contract.code', read_only=True)
-    get_aele_mandi_sum = serializers.IntegerField(source='aele_mandi_sum', read_only=True)
+    get_aele_mandi_sum = serializers.CharField(source='aele_mandi_sum', read_only=True)
     in_calculate = serializers.CharField(source='calculated', read_only=True)
+    father_name = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
+    workshop_id = serializers.IntegerField(source='contract.workshop_personnel.workshop.id', read_only=True)
+    personnel_id = serializers.IntegerField(source='contract.workshop_personnel.id', read_only=True)
+    personnel_father = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
+    personnel_identity = serializers.CharField(source='contract.workshop_personnel.personnel.national_code', read_only=True)
 
     class Meta:
         model = HRLetter

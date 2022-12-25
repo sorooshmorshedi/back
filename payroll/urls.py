@@ -31,7 +31,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi, MissionVerifyApi, MissionUnVerifyApi, ContractVerifyApi, \
     ContractUnVerifyApi, PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, HRLVerifyApi, HRLUnVerifyApi, LoanVerifyApi, LoanUnVerifyApi, DeductionVerifyApi, \
-    DeductionUnVerifyApi
+    DeductionUnVerifyApi, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -79,6 +79,9 @@ urlpatterns = [
 
     path('workshop/personnel/', WorkshopPersonnelApiView.as_view(), name='workshopPersonnelApi'),
     path('workshop/personnel/<int:pk>/', WorkshopPersonnelDetail.as_view(), name='workshopPersonnelDetail'),
+    path('workshop/personnel/contract/<int:pk>/', WorkshopPersonnelContractDetail.as_view(),
+         name='workshopPersonnelContractDetail'),
+
     path('workshopPersonnel/verify/<int:pk>/', WorkshopPersonnelVerifyApi.as_view(),
          name='workshopPersonnelVerifyApi'),
     path('workshopPersonnel/unverify/<int:pk>/', WorkshopPersonnelUnVerifyApi.as_view(),
@@ -104,6 +107,8 @@ urlpatterns = [
     path('hrletter/<int:pk>/', HRLetterDetail.as_view(), name='hRLetterDetail'),
     path('hrletter/verify/<int:pk>/', HRLVerifyApi.as_view(), name='hRLVerifyApi'),
     path('hrletter/unverify/<int:pk>/', HRLUnVerifyApi.as_view(), name='hRLUnVerifyApi'),
+    path('hrletter/active/<int:pk>/', HRActiveApi.as_view(), name='hRActiveApi'),
+    path('hrletter/unactive/<int:pk>/', HRUnActiveApi.as_view(), name='hRUnActiveApi'),
 
     path('absence/', LeaveOrAbsenceApiView.as_view(), name='leaveOrAbsenceApiView'),
     path('absence/<int:pk>/', LeaveOrAbsenceDetail.as_view(), name='leaveOrAbsenceDetail'),

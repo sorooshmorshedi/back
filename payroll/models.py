@@ -2411,6 +2411,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
 
     is_calculated = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
 
     @property
     def get_aele_mandi_amount(self):
@@ -2423,6 +2424,13 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def calculated(self):
         if self.is_calculated:
             return 'غیرقابل تغییر'
+        else:
+            return ' - '
+
+    @property
+    def active_display(self):
+        if self.is_active:
+            return 'فعال'
         else:
             return ' - '
 
@@ -3394,7 +3402,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.first()
+        hr = self.contract.hr_letter.get(is_active=True)
         if hr == None:
             raise ValidationError('حکم کارگزینی ثبت نشده')
         else:

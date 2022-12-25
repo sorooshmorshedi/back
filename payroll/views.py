@@ -149,7 +149,7 @@ class WorkshopVerifyApi(APIView):
         if self.validate_status:
             workshop.is_verified = True
             workshop.save()
-            return Response({'وضعییت': 'ثبت نهایی کارگاه انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی کارگاه انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -157,7 +157,7 @@ class WorkshopVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkshopUnVerifyApi(APIView):
@@ -168,7 +168,7 @@ class WorkshopUnVerifyApi(APIView):
         workshop = Workshop.objects.get(pk=pk)
         workshop.is_verified = False
         workshop.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن کارگاه انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن کارگاه انجام شد'}, status=status.HTTP_200_OK)
 
 
 class WorkshopContractRowsDetail(APIView):
@@ -538,11 +538,11 @@ class PersonnelVerifyApi(APIView):
             self.error_messages.append("طول شماره شبا باید 24 رقم باشد")
         if personnel.is_personnel_active == None:
             self.validate_status = False
-            self.error_messages.append("وضعییت پرسنل را وارد کنید")
+            self.error_messages.append("وضعیت پرسنل را وارد کنید")
         if self.validate_status:
             personnel.is_personnel_verified = True
             personnel.save()
-            return Response({'وضعییت': 'ثبت نهایی پرسنل  انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': ''}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -550,7 +550,7 @@ class PersonnelVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonnelUnVerifyApi(APIView):
@@ -561,7 +561,7 @@ class PersonnelUnVerifyApi(APIView):
         personnel = Personnel.objects.get(pk=pk)
         personnel.is_personnel_verified = False
         personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن پرسنل  انجام شد'}, status=status.HTTP_200_OK)
 
 
 # personnel family APIs
@@ -647,16 +647,19 @@ class PersonnelFamilyVerifyApi(APIView):
             self.error_messages.append("تاریخ تولد را وارد کنید")
         if not personnel.marital_status:
             self.validate_status = False
-            self.error_messages.append("وضعییت تاهل را وارد کنید")
+            self.error_messages.append("وضعیت تاهل را وارد کنید")
         if not personnel.study_status:
             self.validate_status = False
-            self.error_messages.append("وضعییت تحصیل را وارد کنید")
+            self.error_messages.append("وضعیت تحصیل را وارد کنید")
         if not personnel.military_service:
             self.validate_status = False
             self.error_messages.append("خدمت سربازی را وارد کنید")
         if not personnel.physical_condition:
             self.validate_status = False
-            self.error_messages.append("وضعییت جسمی را وارد کنید")
+            self.error_messages.append("وضعیت جسمی را وارد کنید")
+        if  personnel.is_active == None:
+            self.validate_status = False
+            self.error_messages.append("وضعیت را وارد کنید")
         if personnel.relative == 'f' or personnel.relative == 'm':
             same = PersonnelFamily.objects.filter(Q(personnel=personnel.personnel) & Q(relative=personnel.relative) &
                                                   Q(is_verified=True))
@@ -667,7 +670,7 @@ class PersonnelFamilyVerifyApi(APIView):
         if self.validate_status:
             personnel.is_verified = True
             personnel.save()
-            return Response({'وضعییت': 'ثبت نهایی خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -675,7 +678,7 @@ class PersonnelFamilyVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonnelFamilyUnVerifyApi(APIView):
@@ -685,7 +688,7 @@ class PersonnelFamilyUnVerifyApi(APIView):
         personnel = PersonnelFamily.objects.get(pk=pk)
         personnel.is_verified = False
         personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی شدن خانواده پرسنل  انجام شد'}, status=status.HTTP_200_OK)
 
 
 # contract row APIs
@@ -806,11 +809,11 @@ class ContractRowVerifyApi(APIView):
             self.error_messages.append('مبلغ اولیه قرارداد را وارد کنید')
         if contract_row.status == None:
             self.validate_status = False
-            self.error_messages.append('وضعییت را وارد کنید')
+            self.error_messages.append('وضعیت را وارد کنید')
         if self.validate_status:
             contract_row.is_verified = True
             contract_row.save()
-            return Response({'وضعییت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -818,7 +821,7 @@ class ContractRowVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractRowUnVerifyApi(APIView):
@@ -828,7 +831,7 @@ class ContractRowUnVerifyApi(APIView):
         row = ContractRow.objects.get(pk=pk)
         row.is_verified = False
         row.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
 
 
 class ContractRowActiveApi(APIView):
@@ -839,7 +842,7 @@ class ContractRowActiveApi(APIView):
         row = ContractRow.objects.get(pk=pk)
         row.status = True
         row.save()
-        return Response({'وضعییت': ' فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': ' فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
 
 
 class ContractRowUnActiveApi(APIView):
@@ -850,7 +853,7 @@ class ContractRowUnActiveApi(APIView):
         row = ContractRow.objects.get(pk=pk)
         row.status = False
         row.save()
-        return Response({'وضعییت': 'غیر فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر فعال  کردن ردیف پیمان انجام شد'}, status=status.HTTP_200_OK)
 
 
 class AdjustmentApiView(APIView):
@@ -964,6 +967,16 @@ class WorkshopAllPersonnelDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
+class WorkshopPersonnelContractDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract'
+
+    def get(self, request, pk):
+        query = Contract.objects.filter(Q(workshop_personnel=pk) & Q(is_verified=True))
+        serializers = ContractSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
 class WorkshopPersonnelVerifyApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'workshop_personnel'
@@ -1040,7 +1053,7 @@ class WorkshopPersonnelVerifyApi(APIView):
         if self.validate_status:
             personnel.is_verified = True
             personnel.save()
-            return Response({'وضعییت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی پرسنل کارگاه انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -1048,7 +1061,7 @@ class WorkshopPersonnelVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkshopPersonnelUnVerifyApi(APIView):
@@ -1059,7 +1072,7 @@ class WorkshopPersonnelUnVerifyApi(APIView):
         personnel = WorkshopPersonnel.objects.get(pk=pk)
         personnel.is_verified = False
         personnel.save()
-        return Response({'status': 'personnel un verify done'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'personnel un verify done'}, status=status.HTTP_200_OK)
 
 
 class SearchPersonnelByCode(APIView):
@@ -1211,7 +1224,7 @@ class ContractVerifyApi(APIView):
         if self.validate_status:
             contract.is_verified = True
             contract.save()
-            return Response({'وضعییت': 'ثبت نهایی قرارداد انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی قرارداد انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -1219,7 +1232,7 @@ class ContractVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractUnVerifyApi(APIView):
@@ -1229,7 +1242,7 @@ class ContractUnVerifyApi(APIView):
         contract = Contract.objects.get(pk=pk)
         contract.is_verified = False
         contract.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن قرارداد انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن قرارداد انجام شد'}, status=status.HTTP_200_OK)
 
 # Human Resource letter
 
@@ -1313,11 +1326,15 @@ class HRLVerifyApi(APIView):
             if not hr.contract:
                 self.validate_status = False
                 self.error_messages.append('قرارداد را وارد کنید')
-
+            if self.validate_status:
+                for hr_letter in HRLetter.objects.filter(contract=hr.contract):
+                    hr_letter.is_active = False
+                    hr_letter.save()
+                hr.is_active = True
         if self.validate_status:
             hr.is_verified = True
             hr.save()
-            return Response({'وضعییت': 'ثبت نهایی حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -1325,7 +1342,7 @@ class HRLVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class HRLUnVerifyApi(APIView):
@@ -1336,7 +1353,37 @@ class HRLUnVerifyApi(APIView):
         hr = HRLetter.objects.get(pk=pk)
         hr.is_verified = False
         hr.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+
+
+class HRActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'hr_letter'
+
+    def get(self, request, pk):
+        hr = HRLetter.objects.get(pk=pk)
+        for hr_letter in HRLetter.objects.filter(contract=hr.contract):
+            hr_letter.is_active = False
+            hr_letter.save()
+        hr.is_active = True
+        hr.save()
+        return Response({'وضعیت': ' فعال  کردن حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+
+
+class HRUnActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract_row'
+
+    def get(self, request, pk):
+        hr = HRLetter.objects.get(pk=pk)
+        hr.is_active = False
+        hr.save()
+        for hr_letter in HRLetter.objects.filter(contract=hr.contract):
+            if hr_letter.id != hr.id:
+                hr_letter.is_active = True
+                hr_letter.save()
+                break
+        return Response({'وضعیت': 'غیر فعال  کردن ردیف حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
 
 # Leave Or Absence APIs
 
@@ -1451,7 +1498,7 @@ class LeaveOrAbsenceVerifyApi(APIView):
             self.error_messages.append("تاریخ شروع نمیتواند از تاریخ پایان بزرگتر باشد")
 
         if self.validate_status and leave.entitlement_leave_type == 'h':
-            if leave.to_hou.hour < 8 and leave.to_hou.hour > 0:
+            if leave.to_hour.hour < 8 and leave.to_hour.hour > 0:
                 self.validate_status = False
                 self.error_messages.append("ساعت پایان باید قبل 00:00 بامداد بعد از 08:00 صبح باشد")
 
@@ -1478,7 +1525,7 @@ class LeaveOrAbsenceVerifyApi(APIView):
         if self.validate_status:
             leave.is_verified = True
             leave.save()
-            return Response({'وضعییت': 'ثبت نهایی مرخصی انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی مرخصی انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -1486,7 +1533,7 @@ class LeaveOrAbsenceVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LeaveOrAbsenceUnVerifyApi(APIView):
@@ -1615,7 +1662,7 @@ class MissionVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MissionUnVerifyApi(APIView):
@@ -1626,7 +1673,7 @@ class MissionUnVerifyApi(APIView):
         mission = Mission.objects.get(pk=pk)
         mission.is_verified = False
         mission.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن ماموریت انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن ماموریت انجام شد'}, status=status.HTTP_200_OK)
 
 
 
@@ -1765,7 +1812,7 @@ class LoanVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoanUnVerifyApi(APIView):
@@ -1776,7 +1823,7 @@ class LoanUnVerifyApi(APIView):
         loan = Loan.objects.get(pk=pk)
         loan.is_verified = False
         loan.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن مساعده یا وام انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن مساعده یا وام انجام شد'}, status=status.HTTP_200_OK)
 
 # Deduction APIs
 
@@ -1910,7 +1957,7 @@ class DeductionVerifyApi(APIView):
         if self.validate_status:
             deductions.is_verified = True
             deductions.save()
-            return Response({'وضعییت': 'ثبت نهایی کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
+            return Response({'وضعیت': 'ثبت نهایی کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
         else:
             counter = 1
             response = []
@@ -1918,7 +1965,7 @@ class DeductionVerifyApi(APIView):
                 error = str(counter) + '-' + error
                 counter += 1
                 response.append(error)
-            return Response({'وضعییت': response}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeductionUnVerifyApi(APIView):
@@ -1929,7 +1976,7 @@ class DeductionUnVerifyApi(APIView):
         deductions = OptionalDeduction.objects.get(pk=pk)
         deductions.is_verified = False
         deductions.save()
-        return Response({'وضعییت': 'غیر نهایی  کردن کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر نهایی  کردن کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
 
 # payroll APIs
 

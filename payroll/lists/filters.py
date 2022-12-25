@@ -418,6 +418,11 @@ class HRLetterFilter(filters.FilterSet):
             'is_template': BASE_FIELD_FILTERS,
             'is_calculated': BASE_FIELD_FILTERS,
             'is_verified': BASE_FIELD_FILTERS,
+            'hoghooghe_roozane_amount': BASE_FIELD_FILTERS,
+            'paye_sanavat_amount': BASE_FIELD_FILTERS,
+            'haghe_maskan_amount': BASE_FIELD_FILTERS,
+            'bon_kharo_bar_amount': BASE_FIELD_FILTERS,
+            'is_active': ('exact',),
         }
 
 
