@@ -3400,11 +3400,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.filter(is_active=True).first()
+        hr = self.contract.hr_letter.filter(is_active=True)
         if len(hr) == 0:
-            raise ValidationError('حکم کارگزینی ثبت نشده')
+            raise ValidationError('حکم کارگزینی ثبت فعال نشده')
         else:
-            return hr
+            return hr.first()
 
     def calculate_hr_item_in_real_work_time(self, item):
         total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
@@ -3446,7 +3446,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                 self.workshop_personnel.previous_insurance_history_in_workshop
             return sanavat_base, sanavat_month
         else:
-            return 0
+            return 0, 0
 
     @property
     def hoghoogh_mahane(self):
