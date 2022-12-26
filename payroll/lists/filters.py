@@ -426,7 +426,35 @@ class HRLetterFilter(filters.FilterSet):
         }
 
 
+def month_filter(queryset, name, value):
+    types = {}
+    months = {
+        1: 'فروردین',
+        2: 'اردیبهشت',
+        3: 'خرداد',
+        4: 'تیر',
+        5: 'مرداد',
+        6: 'شهریور',
+        7: 'مهر',
+        8: 'آبان',
+        9: 'آذر',
+        10: 'دی',
+        11: 'بهمن',
+        12: 'اسفند',
+    }
+    for item in months:
+        types[months[item]] = item
+    query = queryset.filter(pk=None)
+    for type in types:
+        if value in type:
+            query = queryset.filter(month=types[type])
+    return query
+
+
 class ListOfPayFilter(filters.FilterSet):
+    month_name = filters.CharFilter(method=month_filter)
+    workshop_display = filters.CharFilter(method=workshop_filter)
+
     class Meta:
         model = ListOfPay
         fields = {

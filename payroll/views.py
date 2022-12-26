@@ -2211,10 +2211,77 @@ class ListOfPayItemsCalculate(APIView):
 
     def put(self, request, pk):
         query = self.get_object(pk)
-        serializer = ListOfPayItemsAddInfoSerializer(query, data=request.data)
+        data = request.data
+        try:
+            if data['ezafe_kari']:
+                ezafe_kari = data['ezafe_kari']
+                ezafe_kari = ezafe_kari.split(':')
+                ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 2)
+                data['ezafe_kari'] = ezafe_kari
+        except:
+            raise ValidationError('برای اضافه کاری یک ساعت صحیح وارد کنید')
+        try:
+            if data['tatil_kari']:
+                tatil_kari = data['tatil_kari']
+                tatil_kari = tatil_kari.split(':')
+                tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 2)
+                data['tatil_kari'] = tatil_kari
+        except:
+            raise ValidationError('برای تعطیل کاری یک ساعت صحیح وارد کنید')
+        try:
+            if data['kasre_kar']:
+                kasre_kar = data['kasre_kar']
+                kasre_kar = kasre_kar.split(':')
+                kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 2)
+                data['kasre_kar'] = kasre_kar
+        except:
+            raise ValidationError('برای کسر کار یک ساعت صحیح وارد کنید')
+        try:
+            if data['shab_kari']:
+                shab_kari = data['shab_kari']
+                shab_kari = shab_kari.split(':')
+                shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 2)
+                data['shab_kari'] = shab_kari
+        except:
+            raise ValidationError('برای شب کاری یک ساعت صحیح وارد کنید')
+        try:
+            if data['nobat_kari_sob_asr']:
+                nobat_kari_sob_asr = data['nobat_kari_sob_asr']
+                nobat_kari_sob_asr = nobat_kari_sob_asr.split(':')
+                nobat_kari_sob_asr = round((int(nobat_kari_sob_asr[0]) + (int(nobat_kari_sob_asr[1]) / 60)), 2)
+                data['nobat_kari_sob_asr'] = nobat_kari_sob_asr
+        except:
+            raise ValidationError('برای نوبت کاری صبح و عصر یک ساعت صحیح وارد کنید')
+        try:
+            if data['nobat_kari_sob_shab']:
+                nobat_kari_sob_shab = data['nobat_kari_sob_shab']
+                nobat_kari_sob_shab = nobat_kari_sob_shab.split(':')
+                nobat_kari_sob_shab = round((int(nobat_kari_sob_shab[0]) + (int(nobat_kari_sob_shab[1]) / 60)), 2)
+                data['nobat_kari_sob_shab'] = nobat_kari_sob_shab
+        except:
+            raise ValidationError('برای نوبت کاری صبح و شب یک ساعت صحیح وارد کنید')
+        try:
+            if data['nobat_kari_asr_shab']:
+                nobat_kari_asr_shab = data['nobat_kari_asr_shab']
+                nobat_kari_asr_shab = nobat_kari_asr_shab.split(':')
+                nobat_kari_asr_shab = round((int(nobat_kari_asr_shab[0]) + (int(nobat_kari_asr_shab[1]) / 60)), 2)
+                data['nobat_kari_asr_shab'] = nobat_kari_asr_shab
+        except:
+            raise ValidationError('برای نوبت کاری عصر و شب یک ساعت صحیح وارد کنید')
+        try:
+            if data['nobat_kari_sob_asr_shab']:
+                nobat_kari_sob_asr_shab = data['nobat_kari_sob_asr_shab']
+                nobat_kari_sob_asr_shab = nobat_kari_sob_asr_shab.split(':')
+                nobat_kari_sob_asr_shab = round((int(nobat_kari_sob_asr_shab[0]) + (int(nobat_kari_sob_asr_shab[1]) / 60)), 2)
+                data['nobat_kari_sob_asr_shab'] = nobat_kari_sob_asr_shab
+        except:
+            raise ValidationError('برای نوبت کاری صبح، عصر و شب یک ساعت صحیح وارد کنید')
+
+        serializer = ListOfPayItemsAddInfoSerializer(query, data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -2326,3 +2393,17 @@ class ListOfPayCopy(APIView):
             new_item.list_of_pay = ListOfPay.objects.get(pk=new_list_of_pay.id)
             new_item.save()
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
+
+
+class ListOfPayUltimateApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+
+    def post(self, request, pk):
+        use_in_calculate = request.data['use_in_calculate']
+        ultimate = request.data['ultimate']
+        list_of_pay = ListOfPay.objects.get(pk=pk)
+        list_of_pay.ultimate = ultimate
+        list_of_pay.use_in_calculate = use_in_calculate
+        list_of_pay.save()
+        return Response({'وضعیت': 'قطعی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)

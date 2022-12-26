@@ -31,7 +31,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi, MissionVerifyApi, MissionUnVerifyApi, ContractVerifyApi, \
     ContractUnVerifyApi, PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, HRLVerifyApi, HRLUnVerifyApi, LoanVerifyApi, LoanUnVerifyApi, DeductionVerifyApi, \
-    DeductionUnVerifyApi, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi
+    DeductionUnVerifyApi, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -152,6 +152,7 @@ urlpatterns = [
     path('listOfPay/workshop/<int:pk>/<int:month>/<str:year>/', WorkshopListOfPayApiView.as_view(),
          name='workshopListOfPayApiView'),
     path('listOfPay/copy/<int:pk>/', ListOfPayCopy.as_view(), name='listOfPayCopy'),
+    path('listOfPay/ultimate/<int:pk>/', ListOfPayUltimateApi.as_view(), name='listOfPayUltimateApi'),
 
 ]
 

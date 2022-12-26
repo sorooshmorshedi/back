@@ -3,6 +3,7 @@ from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from mypy.server.update import is_verbose
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company
@@ -1548,7 +1549,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def get_insurance_in_workshop(self):
-        return self.previous_insurance_history_in_workshop + self.current_insurance_history_in_workshop
+        return self.total_insurance
 
     def save(self, *args, **kwargs):
         if self.sanavat_btn == False:
@@ -2932,9 +2933,9 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     @property
     def is_ultimate(self):
         if self.ultimate:
-            return 'نهایی'
+            return 'قطعی'
         else:
-            return 'غیر نهایی'
+            return 'غیر قطعی'
 
     @property
     def is_use_in_calculate(self):
@@ -2949,15 +2950,16 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         workshop_personnel = self.workshop.get_personnel
         workshop_contracts_id = []
         for person in workshop_personnel:
-            for item in person.contract.all():
-                workshop_contracts_id.append(item.id)
+            for contract in Contract.objects.filter(Q(is_verified=True) & Q(workshop_personnel_id=person.id)):
+                workshop_contracts_id.append(contract.id)
         workshop_contracts = Contract.objects.filter(id__in=workshop_contracts_id)
-
         for contract in workshop_contracts:
+
             if not contract.quit_job_date:
                 end = contract.contract_to_date
             else:
                 end = contract.quit_job_date
+
             if contract.contract_from_date.__le__(self.start_date) and end.__ge__(self.end_date):
                 contracts.append(contract.id)
             if contract.contract_from_date.__ge__(self.start_date) and end.__le__(self.end_date):
@@ -2968,7 +2970,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             if contract.contract_from_date.__ge__(self.start_date) and end.__ge__(self.end_date) and \
                     contract.contract_from_date.__lt__(self.end_date):
                 contracts.append(contract.id)
-
         filtered_contracts = Contract.objects.filter(pk__in=contracts)
         if len(filtered_contracts) == 0:
             raise ValidationError('قراردادی در این زمان ثبت نشده')
@@ -3086,9 +3087,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             is_insurance = contract.insurance
             filtered_absence = LeaveOrAbsence.objects.filter(workshop_personnel=workshop_personnel)
             filtered_mission = Mission.objects.filter(workshop_personnel=workshop_personnel)
-            print(contract_start)
-            print(contract_end)
-            print(filtered_contracts)
             for absence in filtered_absence.all():
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \
@@ -3320,6 +3318,30 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             Q(workshop_personnel=self.workshop_personnel)
         )
         return len(items)
+
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def hoghoogh_mahane_with_comma(self):
+        return self.with_comma(self.hoghoogh_mahane)
+
+    @property
+    def hoghoogh_roozane_with_comma(self):
+        return self.with_comma(self.hoghoogh_roozane)
 
     def set_info_from_workshop(self):
         hr = self.get_hr_letter

@@ -239,6 +239,15 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_employer_tax = serializers.CharField(source='employer_insurance', read_only=True)
     get_un_employer_tax = serializers.CharField(source='un_employer_insurance', read_only=True)
 
+    get_nobat_kari_sob_shab_total = serializers.DecimalField(source='nobat_kari_sob_shab_total',
+                                                                decimal_places=2, max_digits=24, read_only=True)
+    get_nobat_kari_sob_asr_total = serializers.DecimalField(source='nobat_kari_sob_asr_total',
+                                                                decimal_places=2, max_digits=24, read_only=True)
+    get_nobat_kari_asr_shab_total = serializers.DecimalField(source='nobat_kari_asr_shab_total',
+                                                                decimal_places=2, max_digits=24, read_only=True)
+    get_nobat_kari_sob_asr_shab_total = serializers.DecimalField(source='nobat_kari_sob_asr_shab_total',
+                                                                decimal_places=2, max_digits=24, read_only=True)
+
     get_tax_included = serializers.CharField(source='tax_included_payment', read_only=True)
     get_month_tax = serializers.CharField(source='calculate_month_tax', read_only=True)
     get_moaf_sum = serializers.CharField(source='moaf_sum', read_only=True)
@@ -316,7 +325,7 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
-                 'end_date', 'pay_done', 'calculate_display', 'ultimate_display', 'name'
+                'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
