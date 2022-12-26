@@ -4220,16 +4220,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def total_sayer_moafiat(self):
-        total = 0
-        total += self.sayer_moafiat
-        if self.list_of_pay.workshop.eydi_padash_identification == 'm':
-            total += self.calculate_monthly_eydi_tax
-        elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
-            total += self.calculate_yearly_eydi_tax
-        if self.workshop_personnel.job_location_status == 2:
-            total += (self.calculate_month_tax / 2)
-        total += self.hr_tax_not_included
-        return total
+
+        return 0
 
     @property
     def moaf_sum(self):
