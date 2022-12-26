@@ -3,7 +3,6 @@ from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
-from mypy.server.update import is_verbose
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company
