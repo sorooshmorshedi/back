@@ -3421,11 +3421,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.filter(is_active=True)
-        if len(hr) == 0:
-            raise ValidationError('حکم کارگزینی ثبت نشده')
-        else:
-            return hr.first()
+        hr = self.contract.hr_letter.filter(is_active=True).first()
+        return hr
 
     def calculate_hr_item_in_real_work_time(self, item):
         total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
