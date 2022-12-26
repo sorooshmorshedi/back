@@ -4226,6 +4226,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.calculate_monthly_eydi_tax
         elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
             total += self.calculate_yearly_eydi_tax
+        total += self.hr_tax_not_included
         return total
 
     @property
