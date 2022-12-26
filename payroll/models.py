@@ -3421,7 +3421,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.filter(is_active=True).first()
+        hr = self.contract.hr_letter.first()
         return hr
 
     def calculate_hr_item_in_real_work_time(self, item):
