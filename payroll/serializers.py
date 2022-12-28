@@ -85,6 +85,7 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     personnel_marital = serializers.CharField(source='personnel.marital_status', read_only=True)
     personnel_insurance = serializers.BooleanField(source='personnel.insurance', read_only=True)
     personnel_insurance_code = serializers.CharField(source='personnel.insurance_code', read_only=True)
+    personnel_nationality = serializers.IntegerField(source='personnel.nationality', read_only=True)
 
     class Meta:
         model = WorkshopPersonnel
@@ -152,6 +153,7 @@ class HRLetterSerializer(serializers.ModelSerializer):
     personnel_id = serializers.IntegerField(source='contract.workshop_personnel.id', read_only=True)
     personnel_father = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
     personnel_identity = serializers.CharField(source='contract.workshop_personnel.personnel.national_code', read_only=True)
+    personnel_nationality = serializers.IntegerField(source='contract.workshop_personnel.personnel.nationality', read_only=True)
 
     class Meta:
         model = HRLetter

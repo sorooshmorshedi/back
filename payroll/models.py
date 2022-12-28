@@ -2232,133 +2232,133 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     hoghooghe_roozane_use_tax = models.BooleanField(default=True)
     hoghooghe_roozane_use_insurance = models.BooleanField(default=True)
-    hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     hoghooghe_roozane_amount = DECIMAL(default=0)
     hoghooghe_roozane_base = models.BooleanField(default=False)
 
     paye_sanavat_use_tax = models.BooleanField(default=True)
     paye_sanavat_use_insurance = models.BooleanField(default=True)
-    paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     paye_sanavat_amount = DECIMAL(default=0)
     paye_sanavat_base = models.BooleanField(default=False)
 
     haghe_sarparasti_use_tax = models.BooleanField(default=True)
     haghe_sarparasti_use_insurance = models.BooleanField(default=True)
-    haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_sarparasti_amount = DECIMAL(default=0)
     haghe_sarparasti_base = models.BooleanField(default=False)
 
     haghe_modiriyat_use_tax = models.BooleanField(default=True)
     haghe_modiriyat_use_insurance = models.BooleanField(default=True)
-    haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_modiriyat_amount = DECIMAL(default=0)
     haghe_modiriyat_base = models.BooleanField(default=False)
 
     haghe_jazb_use_tax = models.BooleanField(default=True)
     haghe_jazb_use_insurance = models.BooleanField(default=True)
-    haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_jazb_amount = DECIMAL(default=0)
     haghe_jazb_base = models.BooleanField(default=False)
 
     fogholade_shoghl_use_tax = models.BooleanField(default=True)
     fogholade_shoghl_use_insurance = models.BooleanField(default=True)
-    fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     fogholade_shoghl_amount = DECIMAL(default=0)
     fogholade_shoghl_base = models.BooleanField(default=False)
 
     haghe_tahsilat_use_tax = models.BooleanField(default=True)
     haghe_tahsilat_use_insurance = models.BooleanField(default=True)
-    haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_tahsilat_amount = DECIMAL(default=0)
     haghe_tahsilat_base = models.BooleanField(default=False)
 
     fogholade_sakhti_kar_use_tax = models.BooleanField(default=True)
     fogholade_sakhti_kar_use_insurance = models.BooleanField(default=True)
-    fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     fogholade_sakhti_kar_amount = DECIMAL(default=0)
     fogholade_sakhti_kar_base = models.BooleanField(default=False)
 
     haghe_ankal_use_tax = models.BooleanField(default=True)
     haghe_ankal_use_insurance = models.BooleanField(default=True)
-    haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_ankal_amount = DECIMAL(default=0)
     haghe_ankal_base = models.BooleanField(default=False)
 
     fogholade_badi_abohava_use_tax = models.BooleanField(default=True)
     fogholade_badi_abohava_use_insurance = models.BooleanField(default=True)
-    fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     fogholade_badi_abohava_amount = DECIMAL(default=0)
     fogholade_badi_abohava_base = models.BooleanField(default=False)
 
     mahroomiat_tashilat_zendegi_use_tax = models.BooleanField(default=True)
     mahroomiat_tashilat_zendegi_use_insurance = models.BooleanField(default=True)
-    mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     mahroomiat_tashilat_zendegi_amount = DECIMAL(default=0)
     mahroomiat_tashilat_zendegi_base = models.BooleanField(default=False)
 
     fogholade_mahal_khedmat_use_tax = models.BooleanField(default=True)
     fogholade_mahal_khedmat_use_insurance = models.BooleanField(default=True)
-    fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     fogholade_mahal_khedmat_amount = DECIMAL(default=0)
     fogholade_mahal_khedmat_base = models.BooleanField(default=False)
 
     fogholade_sharayet_mohit_kar_use_tax = models.BooleanField(default=True)
     fogholade_sharayet_mohit_kar_use_insurance = models.BooleanField(default=True)
-    fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     fogholade_sharayet_mohit_kar_amount = DECIMAL(default=0)
     fogholade_sharayet_mohit_kar_base = models.BooleanField(default=False)
 
     haghe_maskan_use_tax = models.BooleanField(default=True)
     haghe_maskan_use_insurance = models.BooleanField(default=True)
-    haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_maskan_amount = DECIMAL(default=0)
     haghe_maskan_base = models.BooleanField(default=False)
 
     ayabo_zahab_use_tax = models.BooleanField(default=True)
     ayabo_zahab_use_insurance = models.BooleanField(default=True)
-    ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     ayabo_zahab_amount = DECIMAL(default=0)
     ayabo_zahab_base = models.BooleanField(default=False)
 
     bon_kharo_bar_use_tax = models.BooleanField(default=True)
     bon_kharo_bar_use_insurance = models.BooleanField(default=True)
-    bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     bon_kharo_bar_amount = DECIMAL(default=0)
     bon_kharo_bar_base = models.BooleanField(default=False)
 
     yarane_ghaza_use_tax = models.BooleanField(default=True)
     yarane_ghaza_use_insurance = models.BooleanField(default=True)
-    yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     yarane_ghaza_amount = DECIMAL(default=0)
     yarane_ghaza_base = models.BooleanField(default=False)
 
     haghe_shir_use_tax = models.BooleanField(default=True)
     haghe_shir_use_insurance = models.BooleanField(default=True)
-    haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_shir_amount = DECIMAL(default=0)
     haghe_shir_base = models.BooleanField(default=False)
 
     haghe_taahol_use_tax = models.BooleanField(default=True)
     haghe_taahol_use_insurance = models.BooleanField(default=True)
-    haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     haghe_taahol_amount = DECIMAL(default=0)
     haghe_taahol_base = models.BooleanField(default=False)
 
     komakhazine_mahdekoodak_use_tax = models.BooleanField(default=True)
     komakhazine_mahdekoodak_use_insurance = models.BooleanField(default=True)
-    komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     komakhazine_mahdekoodak_amount = DECIMAL(default=0)
     komakhazine_mahdekoodak_base = models.BooleanField(default=False)
 
     komakhazine_varzesh_use_tax = models.BooleanField(default=True)
     komakhazine_varzesh_use_insurance = models.BooleanField(default=True)
-    komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     komakhazine_varzesh_amount = DECIMAL(default=0)
     komakhazine_varzesh_base = models.BooleanField(default=False)
 
     komakhazine_mobile_use_tax = models.BooleanField(default=True)
     komakhazine_mobile_use_insurance = models.BooleanField(default=True)
-    komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=BASE_PAY)
+    komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
     komakhazine_mobile_amount = DECIMAL(default=0)
     komakhazine_mobile_base = models.BooleanField(default=False)
 
@@ -2609,17 +2609,20 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def aele_mandi_sum(self):
-        if self.contract:
-            personnel_family = self.contract.workshop_personnel.personnel.childs
-            aele_mandi_child = 0
-            for person in personnel_family:
-                if person.marital_status == 's':
-                    person_age = self.contract.contract_to_date.year - person.date_of_birth.year
-                    if person_age <= 18:
-                        aele_mandi_child += 1
-                    elif person.study_status == 's' or person.physical_condition != 'h':
-                        aele_mandi_child += 1
-            return aele_mandi_child
+        if self.contract and self.contract.workshop_personnel.insurance_history_total:
+            if self.contract.workshop_personnel.insurance_history_total >= 24:
+                personnel_family = self.contract.workshop_personnel.personnel.childs
+                aele_mandi_child = 0
+                for person in personnel_family:
+                    if person.marital_status == 's':
+                        person_age = self.contract.contract_to_date.year - person.date_of_birth.year
+                        if person_age <= 18:
+                            aele_mandi_child += 1
+                        elif person.study_status == 's' or person.physical_condition != 'h':
+                            aele_mandi_child += 1
+                return aele_mandi_child
+            else:
+                return 0
         else:
             return 0
 

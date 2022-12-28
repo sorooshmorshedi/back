@@ -1348,6 +1348,7 @@ class HRLUnVerifyApi(APIView):
     def get(self, request, pk):
         hr = HRLetter.objects.get(pk=pk)
         hr.is_verified = False
+        hr.is_active = False
         hr.save()
         return Response({'وضعیت': 'غیر نهایی  کردن حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
 
