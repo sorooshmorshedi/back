@@ -65,7 +65,7 @@
                             بله
                         {% endif %}
                     </td>
-                    <td class="text-center">{{ item.workshop_personnel.get_insurance_in_workshop }}</td>
+                    <td class="text-center">{{ item.workshop_personnel.current_insurance }}</td>
                     <td class="text-center">{{ item.contract_row.contract_row }}</td>
                     <td class="text-center">{{ item.normal_worktime }}</td>
                     <td class="text-center">{{ item.hourly_entitlement_leave_day }}</td>
@@ -78,12 +78,12 @@
                     <td class="text-center">{{ item.real_worktime }}</td>
                     <td class="text-center">{{ item.hoghoogh_roozane_with_comma }}</td>
                     <td class="text-center">{{ item.hoghoogh_mahane_with_comma }}</td>
-                    <td class="text-center">{{ item.sanavat_base }}</td>
-                    <td class="text-center">{{ item.sanavat_mahane }}</td>
+                    <td class="text-center">{{ item.sanavat_base_with_comma }}</td>
+                    <td class="text-center">{{ item.sanavat_mahane_with_comma }}</td>
                     <td class="text-center">{{ item.ezafe_kari }}</td>
-                    <td class="text-center">{{ item.ezafe_kari_total }}</td>
+                    <td class="text-center">{{ item.ezafe_kari_total_with_comma }}</td>
                     <td class="text-center">{{ item.tatil_kari }}</td>
-                    <td class="text-center">{{ item.tatil_kari_total }}</td>
+                    <td class="text-center">{{ item.tatil_kari_total_with_comma }}</td>
                 </tr>
             {% endfor %}
         </table>
@@ -120,19 +120,19 @@
 
                 <tr>
                     <td class="text-center">{{ item.shab_kari }}</td>
-                    <td class="text-center">{{ item.shab_kari_total }}</td>
+                    <td class="text-center">{{ item.shab_kari_total_with_comma }}</td>
                     <td class="text-center">{{ item.kasre_kar }}</td>
-                    <td class="text-center">{{ item.kasre_kar_total }}</td>
+                    <td class="text-center">{{ item.kasre_kar_total_with_comma }}</td>
                     <td class="text-center">{{ item.mission_day }}</td>
-                    <td class="text-center">{{ item.mission_total }}</td>
+                    <td class="text-center">{{ item.mission_total_with_comma }}</td>
                     <td class="text-center">{{ item.get_payslip.additions.kharo_bar }}</td>
                     <td class="text-center">{{ item.get_payslip.additions.hagh_maskan }}</td>
                     <td class="text-center">{{ item.aele_mandi_child }}</td>
-                    <td class="text-center">{{ item.aele_mandi }}</td>
+                    <td class="text-center">{{ item.aele_mandi_with_comma }}</td>
                     <td class="text-center">{{ item.get_payslip.additions.hagh_jazb }}</td>
                     <td></td>
-                    <td class="text-center">{{ item.sayer_ezafat }}</td>
-                    <td class="text-center">{{ item.total_payment }}</td>
+                    <td class="text-center">{{ item.sayer_ezafat_with_comma }}</td>
+                    <td class="text-center">{{ item.total_payment_with_comma }}</td>
                 </tr>
             {% endfor %}
         </table>
@@ -169,20 +169,20 @@
             {% for item in form.get_items %}
 
                 <tr>
-                    <td class="text-center">{{ item.data_for_insurance.DSW_MAH}}</td>
-                    <td class="text-center">{{ item.data_for_insurance.DSW_MAZ}}</td>
-                    <td class="text-center">{{ item.data_for_insurance.DSW_MASH}}</td>
-                    <td class="text-center">{{ item.data_for_insurance.DSW_TOTL}}</td>
-                    <td class="text-center">{{ item.data_for_insurance.DSW_BIME}}</td>
-                    <td class="text-center" >{{ item.moaf_sum }}</td>
-                    <td>{{ item.tax_included_payment }}</td>
-                    <td>{{ item.calculate_month_tax }}</td>
-                    <td class="text-center">{{ item.check_and_get_dept_episode }}</td>
-                    <td class="text-center">{{ item.check_and_get_loan_episode }}</td>
-                    <td class="text-center">{{ item.check_and_get_optional_deduction_episode }}</td>
-                    <td class="text-center">{{ item.payable }}</td>
-                    <td class="text-center">{{ item.employer_insurance }}</td>
-                    <td class="text-center">{{ item.un_employer_insurance }}</td>
+                    <td class="text-center">{{ item.DSW_MAH_with_comma}}</td>
+                    <td class="text-center">{{ item.DSW_MAZ_with_comma}}</td>
+                    <td class="text-center">{{ item.DSW_MASH_with_comma}}</td>
+                    <td class="text-center">{{ item.DSW_TOTL_with_comma}}</td>
+                    <td class="text-center">{{ item.DSW_BIME_with_comma}}</td>
+                    <td class="text-center" >{{ item.moaf_sum_with_comma }}</td>
+                    <td>{{ item.tax_included_payment_with_comma }}</td>
+                    <td>{{ item.calculate_month_tax_with_comma }}</td>
+                    <td class="text-center">{{ item.check_and_get_dept_episode_with_comma }}</td>
+                    <td class="text-center">{{ item.check_and_get_loan_episode_with_comma }}</td>
+                    <td class="text-center">{{ item.check_and_get_optional_deduction_episode_with_comma }}</td>
+                    <td class="text-center">{{ item.payable_with_comma }}</td>
+                    <td class="text-center">{{ item.employer_insurance_with_comma }}</td>
+                    <td class="text-center">{{ item.un_employer_insurance_with_comma }}</td>
 
                 </tr>
             {% endfor %}

@@ -3323,27 +3323,166 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @staticmethod
     def with_comma(input_amount):
-        amount = str(round(input_amount))[::-1]
-        loop = int(len(amount) / 3)
-        if len(amount) < 4:
-            return str(round(input_amount))
+        if input_amount != 0:
+            amount = str(round(input_amount))[::-1]
+            loop = int(len(amount) / 3)
+            if len(amount) < 4:
+                return str(round(input_amount))
+            else:
+                counter = 0
+                for i in range(1, loop + 1):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            if amount[-1] == ',':
+                amount = amount[:-1]
+            return amount[::-1]
         else:
-            counter = 0
-            for i in range(1, loop + 1):
-                index = (i * 3) + counter
-                counter += 1
-                amount = amount[:index] + ',' + amount[index:]
-        if amount[-1] == ',':
-            amount = amount[:-1]
-        return amount[::-1]
+            return 0
 
     @property
     def hoghoogh_mahane_with_comma(self):
         return self.with_comma(self.hoghoogh_mahane)
 
     @property
+    def sayer_kosoorat_with_comma(self):
+        return self.with_comma(self.sayer_kosoorat)
+
+    @property
+    def sayer_ezafat_with_comma(self):
+        return self.with_comma(self.sayer_ezafat)
+
+    @property
     def hoghoogh_roozane_with_comma(self):
         return self.with_comma(self.hoghoogh_roozane)
+
+    @property
+    def sanavat_base_with_comma(self):
+        return self.with_comma(self.sanavat_base)
+
+    @property
+    def sanavat_mahane_with_comma(self):
+        return self.with_comma(self.sanavat_mahane)
+
+    @property
+    def kasre_kar_total_with_comma(self):
+        return self.with_comma(self.kasre_kar_total)
+
+    @property
+    def ezafe_kari_total_with_comma(self):
+        return self.with_comma(self.ezafe_kari_total)
+
+    @property
+    def tatil_kari_total_with_comma(self):
+        return self.with_comma(self.tatil_kari_total)
+
+    @property
+    def shab_kari_total_with_comma(self):
+        return self.with_comma(self.shab_kari_total)
+
+    @property
+    def mission_total_with_comma(self):
+        return self.with_comma(self.mission_total)
+
+    @property
+    def nobat_kari_sob_shab_total_with_comma(self):
+        return self.with_comma(self.nobat_kari_sob_shab_total)
+
+    @property
+    def nobat_kari_sob_asr_total_with_comma(self):
+        return self.with_comma(self.nobat_kari_sob_asr_total)
+
+    @property
+    def nobat_kari_asr_shab_total_with_comma(self):
+        return self.with_comma(self.nobat_kari_asr_shab_total)
+
+    @property
+    def nobat_kari_sob_asr_shab_total_with_comma(self):
+        return self.with_comma(self.nobat_kari_sob_asr_shab_total)
+
+    @property
+    def padash_total_with_comma(self):
+        return self.with_comma(self.padash_total)
+
+    @property
+    def haghe_sanavat_total_with_comma(self):
+        return self.with_comma(self.haghe_sanavat_total)
+
+    @property
+    def aele_mandi_with_comma(self):
+        return self.with_comma(self.aele_mandi)
+
+    @property
+    def total_payment_with_comma(self):
+        return self.with_comma(self.total_payment)
+
+    @property
+    def sayer_ezafat_with_comma(self):
+        return self.with_comma(self.sayer_ezafat)
+
+    @property
+    def DSW_MAH_with_comma(self):
+        return self.with_comma(self.data_for_insurance['DSW_MAH'])
+
+    @property
+    def DSW_MAZ_with_comma(self):
+        return self.with_comma(self.data_for_insurance['DSW_MAZ'])
+
+    @property
+    def DSW_MASH_with_comma(self):
+        return self.with_comma(self.data_for_insurance['DSW_MASH'])
+
+    @property
+    def DSW_TOTL_with_comma(self):
+        return self.with_comma(self.data_for_insurance['DSW_TOTL'])
+
+    @property
+    def DSW_BIME_with_comma(self):
+        return self.with_comma(self.data_for_insurance['DSW_BIME'])
+
+    @property
+    def moaf_sum_with_comma(self):
+        return self.with_comma(self.moaf_sum)
+
+    @property
+    def haghe_bime_bime_shavande_with_comma(self):
+        return self.with_comma(self.haghe_bime_bime_shavande)
+
+    @property
+    def calculate_month_tax_with_comma(self):
+        return self.with_comma(self.calculate_month_tax)
+
+    @property
+    def payable_with_comma(self):
+        return self.with_comma(self.payable)
+
+    @property
+    def employer_insurance_with_comma(self):
+        return self.with_comma(self.employer_insurance)
+
+    @property
+    def un_employer_insurance_with_comma(self):
+        return self.with_comma(self.un_employer_insurance)
+
+    @property
+    def tax_included_payment_with_comma(self):
+        return self.with_comma(self.tax_included_payment)
+
+    @property
+    def calculate_month_tax_with_comma(self):
+        return self.with_comma(self.calculate_month_tax)
+
+    @property
+    def check_and_get_dept_episode_with_comma(self):
+        return self.with_comma(self.check_and_get_dept_episode)
+
+    @property
+    def check_and_get_loan_episode_with_comma(self):
+        return self.with_comma(self.check_and_get_loan_episode)
+
+    @property
+    def check_and_get_optional_deduction_episode_with_comma(self):
+        return self.with_comma(self.check_and_get_optional_deduction_episode)
 
     def set_info_from_workshop(self):
         hr = self.get_hr_letter
@@ -4005,36 +4144,36 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         payslip = {}
         deduction = {}
         additions = {}
-        additions['hagh_maskan'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount))
-        additions['kharo_bar'] = round(self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount))
+        additions['hagh_maskan'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount))
+        additions['kharo_bar'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount))
 
-        additions['hagh_sarparasti'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
-        additions['hagh_modiriat'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
-        additions['hagh_jazb'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount))
-        additions['fogholade_shoghl'] = round(self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
-        additions['haghe_tahsilat'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
+        additions['hagh_sarparasti'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
+        additions['hagh_modiriat'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
+        additions['hagh_jazb'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount))
+        additions['fogholade_shoghl'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
+        additions['haghe_tahsilat'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
         additions['fogholade_sakhti_kar'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount))
-        additions['haghe_ankal'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount))
+        additions['haghe_ankal'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount))
         additions['fogholade_badi_abohava'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount))
         additions['mahroomiat_tashilat_zendegi'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount))
         additions['fogholade_mahal_khedmat'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount))
         additions['fogholade_sharayet_mohit_kar'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount))
-        additions['ayabo_zahab'] = round(self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount))
-        additions['yarane_ghaza'] = round(self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount))
-        additions['haghe_shir'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount))
-        additions['haghe_taahol'] = round(self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount))
+        additions['ayabo_zahab'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount))
+        additions['yarane_ghaza'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount))
+        additions['haghe_shir'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount))
+        additions['haghe_taahol'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount))
         additions['komakhazine_mahdekoodak'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount))
-        additions['komakhazine_varzesh'] = round(
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount))
+        additions['komakhazine_varzesh'] = self.with_comma(
             self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount))
-        additions['komakhazine_mobile'] = round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
+        additions['komakhazine_mobile'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
         additions['mazaya_mostamar_gheyre_naghdi'] = \
-            round(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
+            self.with_comma(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
 
         payslip['additions'] = additions
         payslip['deduction'] = deduction
