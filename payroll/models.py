@@ -112,9 +112,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
     mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
-    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=24)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=6)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=6)
+    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=6)
 
     haghe_sanavat_type = models.CharField(max_length=1, choices=HAGHE_SANAVAT_TYPES, default=CERTAIN)
     hade_aghal_hoghoogh = DECIMAL(default=1400000)
@@ -2424,9 +2424,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     otomobil = models.BooleanField(default=False)
     include_made_86 = models.BooleanField(default=False)
 
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
-    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=24)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=6)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=6)
+    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=6)
 
     is_calculated = models.BooleanField(default=True)
     is_active = models.BooleanField(default=False)
