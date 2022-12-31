@@ -2459,11 +2459,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         response['workshop_name'] = self.contract.workshop_personnel.workshop.workshop_title
         return response
 
-    def __str__(self):
-        if self.contract:
-            return ' حکم کارگزینی ' + self.contract.workshop_personnel_display
-        else:
-            return 'قالب حکم کارگزینی ' + self.name
+
 
     class Meta(BaseModel.Meta):
         verbose_name = 'HRLetter'
