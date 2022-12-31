@@ -1297,7 +1297,7 @@ class GetHRLetterTemplatesApi(APIView):
 
     def get(self, request):
         company = request.user.active_company.pk
-        query = HRLetter.objects.filter(Q(is_template='t') & Q(company=company))
+        query = HRLetter.objects.filter(Q(is_template='t') & Q(company=company) & Q(is_verified=True))
         serializers = HRLetterSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -1326,6 +1326,94 @@ class HRLVerifyApi(APIView):
             if not hr.contract:
                 self.validate_status = False
                 self.error_messages.append('قرارداد را وارد کنید')
+
+        if hr.hoghooghe_roozane_amount and not hr.hoghooghe_roozane_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حداقل مزد روزانه، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.paye_sanavat_amount and not hr.paye_sanavat_nature:
+            self.validate_status = False
+            self.error_messages.append('برای پایه سنوات روزانه، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_maskan_amount and not hr.haghe_maskan_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق مسکن ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.bon_kharo_bar_amount and not hr.bon_kharo_bar_nature:
+            self.validate_status = False
+            self.error_messages.append('برای بن خوار و بار  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_sarparasti_amount and not hr.haghe_sarparasti_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق سرپرستی  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_modiriyat_amount and not hr.haghe_modiriyat_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق مدیریت  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_jazb_amount and not hr.haghe_jazb_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق جذب  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.fogholade_shoghl_amount and not hr.fogholade_shoghl_nature:
+            self.validate_status = False
+            self.error_messages.append('برای فوق العاده شغل  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_tahsilat_amount and not hr.haghe_tahsilat_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق تحصیلات  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.fogholade_sakhti_kar_amount and not hr.fogholade_sakhti_kar_nature:
+            self.validate_status = False
+            self.error_messages.append('برای فوق العاده سختی کار  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_ankal_amount and not hr.haghe_ankal_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق آنکال  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.fogholade_badi_abohava_amount and not hr.fogholade_badi_abohava_nature:
+            self.validate_status = False
+            self.error_messages.append('برای فوق العاده بدی هوا  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.mahroomiat_tashilat_zendegi_amount and not hr.mahroomiat_tashilat_zendegi_nature:
+            self.validate_status = False
+            self.error_messages.append('برای محرومیت از تسهیلات  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.fogholade_mahal_khedmat_amount and not hr.fogholade_mahal_khedmat_nature:
+            self.validate_status = False
+            self.error_messages.append('برای فوق العاده محل خدمت  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.fogholade_sharayet_mohit_kar_amount and not hr.fogholade_sharayet_mohit_kar_nature:
+            self.validate_status = False
+            self.error_messages.append('برای فوق العاده محیط کار  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.ayabo_zahab_amount and not hr.ayabo_zahab_nature:
+            self.validate_status = False
+            self.error_messages.append('برای ایاب و ذهاب  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.yarane_ghaza_amount and not hr.yarane_ghaza_nature:
+            self.validate_status = False
+            self.error_messages.append('برای یارانه غذا  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_shir_amount and not hr.haghe_shir_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق شیر  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.haghe_taahol_amount and not hr.haghe_taahol_nature:
+            self.validate_status = False
+            self.error_messages.append('برای حق تاهل  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.komakhazine_mahdekoodak_amount and not hr.komakhazine_mahdekoodak_nature:
+            self.validate_status = False
+            self.error_messages.append('برای کمک هزینه مهدکودک  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.komakhazine_varzesh_amount and not hr.komakhazine_varzesh_nature:
+            self.validate_status = False
+            self.error_messages.append('برای کمک هزینه ورزش  ، ماهیت عناوین شغلی را وارد کنید')
+
+        if hr.komakhazine_mobile_amount and not hr.komakhazine_mobile_nature:
+            self.validate_status = False
+            self.error_messages.append('برای کمک هزینه موبایل  ، ماهیت عناوین شغلی را وارد کنید')
 
         if self.validate_status:
             hr.is_verified = True
@@ -1792,6 +1880,11 @@ class LoanVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('تعداد اقساط بزرگتر از صفر باشد ')
 
+        if self.validate_status:
+            check_with_contract = loan.check_with_contract
+            if not check_with_contract:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
 
         if self.validate_status:
             loan.is_verified = True
@@ -1945,6 +2038,13 @@ class DeductionVerifyApi(APIView):
         if not deductions.start_date and not deductions.is_template:
             self.validate_status = False
             self.error_messages.append('تاریخ  را وارد کنید')
+
+        if self.validate_status:
+            check_with_contract = deductions.check_with_contract
+            if not check_with_contract:
+                self.validate_status = False
+                self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
+
 
         if self.validate_status:
             deductions.is_verified = True

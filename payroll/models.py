@@ -112,9 +112,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
     mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
+    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=24)
 
     haghe_sanavat_type = models.CharField(max_length=1, choices=HAGHE_SANAVAT_TYPES, default=CERTAIN)
     hade_aghal_hoghoogh = DECIMAL(default=1400000)
@@ -1705,7 +1705,7 @@ class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def end_date(self):
         if self.get_pay_month['months']:
             end = self.get_pay_month['months'][-1]
-            return str(end.year) + '-' + str(end.month)
+            return str(end.year) + '-' + str(end.month) + '-1'
         else:
             return ''
 
@@ -1731,6 +1731,15 @@ class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return self.with_comma(self.amount)
         else:
             return 0
+
+    @property
+    def check_with_contract(self):
+        contracts = Contract.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_contract = False
+        for contract in contracts:
+            if self.pay_date.__ge__(contract.contract_from_date) and self.pay_date.__le__(contract.contract_to_date):
+                is_in_contract = True
+        return is_in_contract
 
     def save(self, *args, **kwargs):
         if not self.workshop_personnel:
@@ -1888,6 +1897,15 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             ('updateOwn.contract', 'ویرایش وام کسورات اختیاری'),
             ('deleteOwn.contract', 'حذف وام کسورات اختیاری'),
         )
+
+    @property
+    def check_with_contract(self):
+        contracts = Contract.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
+        is_in_contract = False
+        for contract in contracts:
+            if self.start_date.__ge__(contract.contract_from_date) and self.start_date.__le__(contract.contract_to_date):
+                is_in_contract = True
+        return is_in_contract
 
     def __str__(self):
         if self.amount and self.workshop_personnel:
@@ -2232,140 +2250,140 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     hoghooghe_roozane_use_tax = models.BooleanField(default=True)
     hoghooghe_roozane_use_insurance = models.BooleanField(default=True)
-    hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    hoghooghe_roozane_amount = DECIMAL(default=0)
+    hoghooghe_roozane_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    hoghooghe_roozane_amount = DECIMAL(default=0, blank=True, null=True)
     hoghooghe_roozane_base = models.BooleanField(default=False)
 
     paye_sanavat_use_tax = models.BooleanField(default=True)
     paye_sanavat_use_insurance = models.BooleanField(default=True)
-    paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    paye_sanavat_amount = DECIMAL(default=0)
+    paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    paye_sanavat_amount = DECIMAL(default=0, blank=True, null=True)
     paye_sanavat_base = models.BooleanField(default=False)
 
     haghe_sarparasti_use_tax = models.BooleanField(default=True)
     haghe_sarparasti_use_insurance = models.BooleanField(default=True)
-    haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_sarparasti_amount = DECIMAL(default=0)
+    haghe_sarparasti_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_sarparasti_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_sarparasti_base = models.BooleanField(default=False)
 
     haghe_modiriyat_use_tax = models.BooleanField(default=True)
     haghe_modiriyat_use_insurance = models.BooleanField(default=True)
-    haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_modiriyat_amount = DECIMAL(default=0)
+    haghe_modiriyat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_modiriyat_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_modiriyat_base = models.BooleanField(default=False)
 
     haghe_jazb_use_tax = models.BooleanField(default=True)
     haghe_jazb_use_insurance = models.BooleanField(default=True)
-    haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_jazb_amount = DECIMAL(default=0)
+    haghe_jazb_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_jazb_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_jazb_base = models.BooleanField(default=False)
 
     fogholade_shoghl_use_tax = models.BooleanField(default=True)
     fogholade_shoghl_use_insurance = models.BooleanField(default=True)
-    fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    fogholade_shoghl_amount = DECIMAL(default=0)
+    fogholade_shoghl_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    fogholade_shoghl_amount = DECIMAL(default=0, blank=True, null=True)
     fogholade_shoghl_base = models.BooleanField(default=False)
 
     haghe_tahsilat_use_tax = models.BooleanField(default=True)
     haghe_tahsilat_use_insurance = models.BooleanField(default=True)
-    haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_tahsilat_amount = DECIMAL(default=0)
+    haghe_tahsilat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_tahsilat_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_tahsilat_base = models.BooleanField(default=False)
 
     fogholade_sakhti_kar_use_tax = models.BooleanField(default=True)
     fogholade_sakhti_kar_use_insurance = models.BooleanField(default=True)
-    fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    fogholade_sakhti_kar_amount = DECIMAL(default=0)
+    fogholade_sakhti_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    fogholade_sakhti_kar_amount = DECIMAL(default=0, blank=True, null=True)
     fogholade_sakhti_kar_base = models.BooleanField(default=False)
 
     haghe_ankal_use_tax = models.BooleanField(default=True)
     haghe_ankal_use_insurance = models.BooleanField(default=True)
-    haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_ankal_amount = DECIMAL(default=0)
+    haghe_ankal_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_ankal_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_ankal_base = models.BooleanField(default=False)
 
     fogholade_badi_abohava_use_tax = models.BooleanField(default=True)
     fogholade_badi_abohava_use_insurance = models.BooleanField(default=True)
-    fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    fogholade_badi_abohava_amount = DECIMAL(default=0)
+    fogholade_badi_abohava_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    fogholade_badi_abohava_amount = DECIMAL(default=0, blank=True, null=True)
     fogholade_badi_abohava_base = models.BooleanField(default=False)
 
     mahroomiat_tashilat_zendegi_use_tax = models.BooleanField(default=True)
     mahroomiat_tashilat_zendegi_use_insurance = models.BooleanField(default=True)
-    mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    mahroomiat_tashilat_zendegi_amount = DECIMAL(default=0)
+    mahroomiat_tashilat_zendegi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    mahroomiat_tashilat_zendegi_amount = DECIMAL(default=0, blank=True, null=True)
     mahroomiat_tashilat_zendegi_base = models.BooleanField(default=False)
 
     fogholade_mahal_khedmat_use_tax = models.BooleanField(default=True)
     fogholade_mahal_khedmat_use_insurance = models.BooleanField(default=True)
-    fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    fogholade_mahal_khedmat_amount = DECIMAL(default=0)
+    fogholade_mahal_khedmat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    fogholade_mahal_khedmat_amount = DECIMAL(default=0, blank=True, null=True)
     fogholade_mahal_khedmat_base = models.BooleanField(default=False)
 
     fogholade_sharayet_mohit_kar_use_tax = models.BooleanField(default=True)
     fogholade_sharayet_mohit_kar_use_insurance = models.BooleanField(default=True)
-    fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    fogholade_sharayet_mohit_kar_amount = DECIMAL(default=0)
+    fogholade_sharayet_mohit_kar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    fogholade_sharayet_mohit_kar_amount = DECIMAL(default=0, blank=True, null=True)
     fogholade_sharayet_mohit_kar_base = models.BooleanField(default=False)
 
     haghe_maskan_use_tax = models.BooleanField(default=True)
     haghe_maskan_use_insurance = models.BooleanField(default=True)
-    haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_maskan_amount = DECIMAL(default=0)
+    haghe_maskan_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_maskan_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_maskan_base = models.BooleanField(default=False)
 
     ayabo_zahab_use_tax = models.BooleanField(default=True)
     ayabo_zahab_use_insurance = models.BooleanField(default=True)
-    ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    ayabo_zahab_amount = DECIMAL(default=0)
+    ayabo_zahab_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    ayabo_zahab_amount = DECIMAL(default=0, blank=True, null=True)
     ayabo_zahab_base = models.BooleanField(default=False)
 
     bon_kharo_bar_use_tax = models.BooleanField(default=True)
     bon_kharo_bar_use_insurance = models.BooleanField(default=True)
-    bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    bon_kharo_bar_amount = DECIMAL(default=0)
+    bon_kharo_bar_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    bon_kharo_bar_amount = DECIMAL(default=0, blank=True, null=True)
     bon_kharo_bar_base = models.BooleanField(default=False)
 
     yarane_ghaza_use_tax = models.BooleanField(default=True)
     yarane_ghaza_use_insurance = models.BooleanField(default=True)
-    yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    yarane_ghaza_amount = DECIMAL(default=0)
+    yarane_ghaza_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    yarane_ghaza_amount = DECIMAL(default=0, blank=True, null=True)
     yarane_ghaza_base = models.BooleanField(default=False)
 
     haghe_shir_use_tax = models.BooleanField(default=True)
     haghe_shir_use_insurance = models.BooleanField(default=True)
-    haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_shir_amount = DECIMAL(default=0)
+    haghe_shir_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_shir_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_shir_base = models.BooleanField(default=False)
 
     haghe_taahol_use_tax = models.BooleanField(default=True)
     haghe_taahol_use_insurance = models.BooleanField(default=True)
-    haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    haghe_taahol_amount = DECIMAL(default=0)
+    haghe_taahol_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    haghe_taahol_amount = DECIMAL(default=0, blank=True, null=True)
     haghe_taahol_base = models.BooleanField(default=False)
 
     komakhazine_mahdekoodak_use_tax = models.BooleanField(default=True)
     komakhazine_mahdekoodak_use_insurance = models.BooleanField(default=True)
-    komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    komakhazine_mahdekoodak_amount = DECIMAL(default=0)
+    komakhazine_mahdekoodak_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    komakhazine_mahdekoodak_amount = DECIMAL(default=0, blank=True, null=True)
     komakhazine_mahdekoodak_base = models.BooleanField(default=False)
 
     komakhazine_varzesh_use_tax = models.BooleanField(default=True)
     komakhazine_varzesh_use_insurance = models.BooleanField(default=True)
-    komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    komakhazine_varzesh_amount = DECIMAL(default=0)
+    komakhazine_varzesh_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    komakhazine_varzesh_amount = DECIMAL(default=0, blank=True, null=True)
     komakhazine_varzesh_base = models.BooleanField(default=False)
 
     komakhazine_mobile_use_tax = models.BooleanField(default=True)
     komakhazine_mobile_use_insurance = models.BooleanField(default=True)
-    komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES)
-    komakhazine_mobile_amount = DECIMAL(default=0)
+    komakhazine_mobile_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
+    komakhazine_mobile_amount = DECIMAL(default=0, blank=True, null=True)
     komakhazine_mobile_base = models.BooleanField(default=False)
 
     mazaya_mostamar_gheyre_naghdi_use_tax = models.BooleanField(default=True)
     mazaya_mostamar_gheyre_naghdi_use_insurance = models.BooleanField(default=True)
     mazaya_mostamar_gheyre_naghdi_nature = models.CharField(max_length=1, choices=NATURE_TYPES, default=PENSION)
-    mazaya_mostamar_gheyre_naghdi_amount = DECIMAL(default=0)
+    mazaya_mostamar_gheyre_naghdi_amount = DECIMAL(default=0, blank=True, null=True)
     mazaya_mostamar_gheyre_naghdi_base = models.BooleanField(default=False)
 
     ezafe_kari_use_tax = models.BooleanField(default=True)
@@ -2406,9 +2424,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     otomobil = models.BooleanField(default=False)
     include_made_86 = models.BooleanField(default=False)
 
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=24)
+    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=24)
 
     is_calculated = models.BooleanField(default=True)
     is_active = models.BooleanField(default=False)
@@ -2463,146 +2481,145 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def get_hr_items(self):
-
         hr_letter_items = []
 
         hr_letter_items.append({
             'insurance': self.hoghooghe_roozane_use_insurance,
             'nature': self.hoghooghe_roozane_nature,
             'base': self.hoghooghe_roozane_base,
-            'amount': self.hoghooghe_roozane_amount
+            'amount': self.hoghooghe_roozane_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.paye_sanavat_use_insurance,
             'nature': self.paye_sanavat_nature,
             'base': self.paye_sanavat_base,
-            'amount': self.paye_sanavat_amount
+            'amount': self.paye_sanavat_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_sarparasti_use_insurance,
             'nature': self.haghe_sarparasti_nature,
             'base': self.haghe_sarparasti_base,
-            'amount': self.haghe_sarparasti_amount
+            'amount': self.haghe_sarparasti_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_modiriyat_use_insurance,
             'nature': self.haghe_modiriyat_nature,
             'base': self.haghe_modiriyat_base,
-            'amount': self.haghe_modiriyat_amount
+            'amount': self.haghe_modiriyat_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_jazb_use_insurance,
             'nature': self.haghe_jazb_nature,
             'base': self.haghe_jazb_base,
-            'amount': self.haghe_jazb_amount
+            'amount': self.haghe_jazb_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.fogholade_shoghl_use_insurance,
             'nature': self.fogholade_shoghl_nature,
             'base': self.fogholade_shoghl_base,
-            'amount': self.fogholade_shoghl_amount
+            'amount': self.fogholade_shoghl_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_tahsilat_use_insurance,
             'nature': self.haghe_tahsilat_nature,
             'base': self.haghe_tahsilat_base,
-            'amount': self.haghe_tahsilat_amount
+            'amount': self.haghe_tahsilat_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.fogholade_sakhti_kar_use_insurance,
             'nature': self.fogholade_sakhti_kar_nature,
             'base': self.fogholade_sakhti_kar_base,
-            'amount': self.fogholade_sakhti_kar_amount
+            'amount': self.fogholade_sakhti_kar_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_ankal_use_insurance,
             'nature': self.haghe_ankal_nature,
             'base': self.haghe_ankal_base,
-            'amount': self.haghe_ankal_amount
+            'amount': self.haghe_ankal_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.fogholade_badi_abohava_use_insurance,
             'nature': self.fogholade_badi_abohava_nature,
             'base': self.fogholade_badi_abohava_base,
-            'amount': self.fogholade_badi_abohava_amount
+            'amount': self.fogholade_badi_abohava_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.mahroomiat_tashilat_zendegi_use_insurance,
             'nature': self.mahroomiat_tashilat_zendegi_nature,
             'base': self.mahroomiat_tashilat_zendegi_base,
-            'amount': self.mahroomiat_tashilat_zendegi_amount
+            'amount': self.mahroomiat_tashilat_zendegi_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.fogholade_mahal_khedmat_use_insurance,
             'nature': self.fogholade_mahal_khedmat_nature,
             'base': self.fogholade_mahal_khedmat_base,
-            'amount': self.fogholade_mahal_khedmat_amount
+            'amount': self.fogholade_mahal_khedmat_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.fogholade_sharayet_mohit_kar_use_insurance,
             'nature': self.fogholade_sharayet_mohit_kar_nature,
             'base': self.fogholade_sharayet_mohit_kar_base,
-            'amount': self.fogholade_sharayet_mohit_kar_amount
+            'amount': self.fogholade_sharayet_mohit_kar_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_maskan_use_insurance,
             'nature': self.haghe_maskan_nature,
             'base': self.haghe_maskan_base,
-            'amount': self.haghe_maskan_base
+            'amount': self.haghe_maskan_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.ayabo_zahab_use_insurance,
             'nature': self.ayabo_zahab_nature,
             'base': self.ayabo_zahab_base,
-            'amount': self.ayabo_zahab_amount
+            'amount': self.ayabo_zahab_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.bon_kharo_bar_use_insurance,
             'nature': self.bon_kharo_bar_nature,
             'base': self.bon_kharo_bar_base,
-            'amount': self.bon_kharo_bar_amount
+            'amount': self.bon_kharo_bar_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.yarane_ghaza_use_insurance,
             'nature': self.yarane_ghaza_nature,
             'base': self.yarane_ghaza_base,
-            'amount': self.yarane_ghaza_amount
+            'amount': self.yarane_ghaza_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_shir_use_insurance,
             'nature': self.haghe_shir_nature,
             'base': self.haghe_shir_base,
-            'amount': self.haghe_shir_amount
+            'amount': self.haghe_shir_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.haghe_taahol_use_insurance,
             'nature': self.haghe_taahol_nature,
             'base': self.haghe_taahol_base,
-            'amount': self.haghe_taahol_amount
+            'amount': self.haghe_taahol_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.komakhazine_mahdekoodak_use_insurance,
             'nature': self.komakhazine_mahdekoodak_nature,
             'base': self.komakhazine_mahdekoodak_base,
-            'amount': self.komakhazine_mahdekoodak_amount
+            'amount': self.komakhazine_mahdekoodak_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.komakhazine_varzesh_use_insurance,
             'nature': self.komakhazine_varzesh_nature,
             'base': self.komakhazine_varzesh_base,
-            'amount': self.komakhazine_varzesh_amount
+            'amount': self.komakhazine_varzesh_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.komakhazine_mobile_use_insurance,
             'nature': self.komakhazine_mobile_nature,
             'base': self.komakhazine_mobile_base,
-            'amount': self.komakhazine_mobile_amount
+            'amount': self.komakhazine_mobile_amount or 0
         })
         hr_letter_items.append({
             'insurance': self.mazaya_mostamar_gheyre_naghdi_use_insurance,
             'nature': self.mazaya_mostamar_gheyre_naghdi_nature,
             'base': self.mazaya_mostamar_gheyre_naghdi_base,
-            'amount': self.mazaya_mostamar_gheyre_naghdi_amount
+            'amount': self.mazaya_mostamar_gheyre_naghdi_amount or 0
         })
 
         return hr_letter_items
@@ -2695,7 +2712,117 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                     insurance_not_included += round(hr_letter_items[i]['amount'])
         return insurance_not_included
 
+    @staticmethod
+    def with_comma(input_amount):
+        amount = str(round(input_amount))[::-1]
+        loop = int(len(amount) / 3)
+        if len(amount) < 4:
+            return str(round(input_amount))
+        else:
+            counter = 0
+            for i in range(1, loop + 1):
+                index = (i * 3) + counter
+                counter += 1
+                amount = amount[:index] + ',' + amount[index:]
+        if amount[-1] == ',':
+            amount = amount[:-1]
+        return amount[::-1]
+
+    @property
+    def hoghooghe_roozane_amount_with_comma(self):
+        return self.with_comma(self.hoghooghe_roozane_amount)
+
+    @property
+    def paye_sanavat_amount_with_comma(self):
+        return self.with_comma(self.paye_sanavat_amount)
+
+    @property
+    def haghe_maskan_amount_with_comma(self):
+        return self.with_comma(self.haghe_maskan_amount)
+
+    @property
+    def bon_kharo_bar_amount_with_comma(self):
+        return self.with_comma(self.bon_kharo_bar_amount)
+
+    @property
+    def haghe_sarparasti_amount_with_comma(self):
+        return self.with_comma(self.haghe_sarparasti_amount)
+
+    @property
+    def haghe_modiriyat_amount_with_comma(self):
+        return self.with_comma(self.haghe_modiriyat_amount)
+
+    @property
+    def haghe_jazb_amount_with_comma(self):
+        return self.with_comma(self.haghe_jazb_amount)
+
+    @property
+    def fogholade_shoghl_amount_with_comma(self):
+        return self.with_comma(self.fogholade_shoghl_amount)
+
+    @property
+    def haghe_tahsilat_amount_with_comma(self):
+        return self.with_comma(self.haghe_tahsilat_amount)
+
+    @property
+    def fogholade_sakhti_kar_amount_with_comma(self):
+        return self.with_comma(self.fogholade_sakhti_kar_amount)
+
+    @property
+    def haghe_ankal_amount_with_comma(self):
+        return self.with_comma(self.haghe_ankal_amount)
+
+    @property
+    def fogholade_badi_abohava_amount_with_comma(self):
+        return self.with_comma(self.fogholade_badi_abohava_amount)
+
+    @property
+    def mahroomiat_tashilat_zendegi_amount_with_comma(self):
+        return self.with_comma(self.mahroomiat_tashilat_zendegi_amount)
+
+    @property
+    def fogholade_mahal_khedmat_amount_with_comma(self):
+        return self.with_comma(self.fogholade_mahal_khedmat_amount)
+
+    @property
+    def fogholade_sharayet_mohit_kar_amount_with_comma(self):
+        return self.with_comma(self.fogholade_sharayet_mohit_kar_amount)
+
+    @property
+    def ayabo_zahab_amount_with_comma(self):
+        return self.with_comma(self.ayabo_zahab_amount)
+
+    @property
+    def yarane_ghaza_amount_with_comma(self):
+        return self.with_comma(self.yarane_ghaza_amount)
+
+    @property
+    def haghe_shir_amount_with_comma(self):
+        return self.with_comma(self.haghe_shir_amount)
+
+    @property
+    def haghe_taahol_amount_with_comma(self):
+        return self.with_comma(self.haghe_taahol_amount)
+
+    @property
+    def komakhazine_mahdekoodak_amount_with_comma(self):
+        return self.with_comma(self.komakhazine_mahdekoodak_amount)
+
+    @property
+    def komakhazine_varzesh_amount_with_comma(self):
+        return self.with_comma(self.komakhazine_varzesh_amount)
+
+    @property
+    def komakhazine_mobile_amount_with_comma(self):
+        return self.with_comma(self.komakhazine_mobile_amount)
+
+    @property
+    def mazaya_mostamar_gheyre_naghdi_amount_with_comma(self):
+        return self.with_comma(self.mazaya_mostamar_gheyre_naghdi_amount)
+
     def save(self, *args, **kwargs):
+        if self.is_template == 'p' and not self.name:
+            self.name = 'شخصی'
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
