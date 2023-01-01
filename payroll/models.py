@@ -6,9 +6,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company
-from helpers.models import BaseModel, LockableMixin, DefinableMixin, DECIMAL, \
-    is_valid_melli_code, EXPLANATION
-from payroll.functions import is_shenase_meli
+from helpers.models import BaseModel, LockableMixin, DefinableMixin, DECIMAL, EXPLANATION
 from payroll.verify_model import VerifyMixin
 from users.models import City
 import datetime
@@ -101,20 +99,20 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     sanavat_type = models.CharField(max_length=1, choices=SANAVAT_TYPES, default=CONTINUOUS)
 
-    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
-    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
-    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
-    shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
-    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
-    nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
-    jome_kari_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
-    nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
-    nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
-    nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
-    mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
+    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=12)
+    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=12)
+    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=12)
+    shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=12)
+    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=12)
+    nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=12)
+    jome_kari_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=12)
+    nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=12)
+    nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=12)
+    nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=12)
+    mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=12)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=12)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.07, decimal_places=12)
+    employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=12)
 
     haghe_sanavat_type = models.CharField(max_length=1, choices=HAGHE_SANAVAT_TYPES, default=CERTAIN)
     hade_aghal_hoghoogh = DECIMAL(default=1400000)
@@ -2424,9 +2422,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     otomobil = models.BooleanField(default=False)
     include_made_86 = models.BooleanField(default=False)
 
-    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=2)
-    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=2)
+    unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=12)
+    worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.07, decimal_places=12)
+    employer_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=12)
 
     is_calculated = models.BooleanField(default=True)
     is_active = models.BooleanField(default=False)
@@ -3684,7 +3682,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.first()
+        hr = self.contract.hr_letter.all()
+        hr = hr.filter(Q(is_verified=True) & Q(is_active=True))
+        hr = hr.first()
+        if not hr:
+            raise ValidationError('حکم کارگزینی فعال موجود نیست')
         return hr
 
     def calculate_hr_item_in_real_work_time(self, item):
@@ -3699,18 +3701,19 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_aele_mandi_info(self):
         personnel_family = self.workshop_personnel.personnel.childs
-        aele_mandi_child = 0
         if self.workshop_personnel.insurance_history_total:
             self.total_insurance_month = self.workshop_personnel.insurance_history_total
         else:
             self.total_insurance_month = 0
-        for person in personnel_family:
-            if person.marital_status == 's':
-                person_age = self.list_of_pay.year - person.date_of_birth.year
-                if person_age <= 18:
-                    aele_mandi_child += 1
-                elif person.study_status == 's' or person.physical_condition != 'h':
-                    aele_mandi_child += 1
+        aele_mandi_child = 0
+        if self.total_insurance_month >= 24:
+            for person in personnel_family:
+                if person.marital_status == 's':
+                    person_age = self.list_of_pay.year - person.date_of_birth.year
+                    if person_age <= 18:
+                        aele_mandi_child += 1
+                    elif person.study_status == 's' or person.physical_condition != 'h':
+                        aele_mandi_child += 1
         self.aele_mandi_child = aele_mandi_child
         return aele_mandi_child
 

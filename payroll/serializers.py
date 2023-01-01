@@ -37,7 +37,7 @@ class WorkShopSettingSerializer(serializers.ModelSerializer):
                  'aele_mandi_nerkh', 'nobat_kari_sob_asr_nerkh', 'nobat_kari_sob_shab_nerkh',\
                  'nobat_kari_asr_shab_nerkh', 'nobat_kari_sob_asr_shab_nerkh', 'mission_pay_nerkh',\
                  'worker_insurance_nerkh', 'employee_insurance_nerkh', 'made_86', 'hade_aksar_mashmool_bime',\
-                 'moafial_maliat_haghe_bime_sahme_bime_shavande', 'unemployed_insurance_nerkh',
+                 'moafial_maliat_haghe_bime_sahme_bime_shavande', 'unemployed_insurance_nerkh', 'is_verified'
 
 
 
