@@ -79,17 +79,18 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     # Workshop settings
     base_pay_type = models.CharField(max_length=1, choices=BASE_PAY_TYPES, default=DAILY)
+
     ezafe_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     tatil_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     kasre_kar_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     shab_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     aele_mandi_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
-    jome_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     nobat_kari_sob_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
     mission_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+
     leave_save_pay_type = models.CharField(max_length=1, choices=LEAVE_SAVE_PAY_TYPES, default=DAILY_PAY)
 
     haghe_sanavat_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
@@ -110,6 +111,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=12)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=12)
     mission_pay_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=12)
+
     unemployed_insurance_nerkh = models.DecimalField(max_digits=24, default=0.03, decimal_places=12)
     worker_insurance_nerkh = models.DecimalField(max_digits=24, default=0.07, decimal_places=12)
     employee_insurance_nerkh = models.DecimalField(max_digits=24, default=0.2, decimal_places=12)
@@ -428,6 +430,9 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
         else:
             self.from_amount = self.auto_from_amount
         if self.from_amount >= self.to_amount:
+            print(self)
+            print(self.from_amount)
+            print(self.to_amount)
             raise ValidationError('مقدار مبلغ پایان باید بزرگتر از مبلغ شروع باشد')
         super().save(*args, **kwargs)
 
@@ -1992,7 +1997,6 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         else:
             return 'شخصی'
 
-
     def save(self, *args, **kwargs):
         if self.is_template == None:
             raise ValidationError('برای ثبت اولیه انتخاب نوع الزامی است')
@@ -2212,7 +2216,14 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
 
 class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
+    DAILY_PAY = 'd'
     BASE_PAY = 'b'
+
+    PAY_TYPES = (
+        (DAILY_PAY, 'حداقل حقوق روزانه'),
+        (BASE_PAY, 'مزد مبنا')
+    )
+
     PENSION = 'p'
     UN_PENSION = 'u'
 
@@ -2428,6 +2439,46 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     is_calculated = models.BooleanField(default=True)
     is_active = models.BooleanField(default=False)
+
+    haghe_sanavat_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    eydi_padash_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    ezafe_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    tatil_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    kasre_kar_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    shab_kari_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    aele_mandi_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    nobat_kari_sob_asr_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    nobat_kari_sob_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    nobat_kari_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    nobat_kari_sob_asr_shab_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+    mission_pay_type = models.CharField(max_length=1, choices=PAY_TYPES, default=BASE_PAY)
+
+    def save(self, *args, **kwargs):
+        if self.is_template == 'p' and not self.name:
+            self.name = 'شخصی'
+        self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
+            self.calculate_pay_bases
+        self.insurance_pay_day = self.calculate_insurance_pay_base
+        self.insurance_benefit = self.calculate_insurance_benefit
+        self.insurance_not_included = self.calculate_insurance_not_included
+
+        if not self.id and self.is_template == 'p' and self.contract:
+            self.set_default_pay_types()
+        super().save(*args, **kwargs)
+
+    def set_default_pay_types(self):
+        self.haghe_sanavat_pay_type = self.contract.workshop_personnel.workshop.haghe_sanavat_pay_type
+        self.eydi_padash_pay_type = self.contract.workshop_personnel.workshop.eydi_padash_pay_type
+        self.ezafe_kari_pay_type = self.contract.workshop_personnel.workshop.ezafe_kari_pay_type
+        self.tatil_kari_pay_type = self.contract.workshop_personnel.workshop.tatil_kari_pay_type
+        self.kasre_kar_pay_type = self.contract.workshop_personnel.workshop.kasre_kar_pay_type
+        self.shab_kari_pay_type = self.contract.workshop_personnel.workshop.shab_kari_pay_type
+        self.aele_mandi_pay_type = self.contract.workshop_personnel.workshop.aele_mandi_pay_type
+        self.nobat_kari_sob_asr_pay_type = self.contract.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type
+        self.nobat_kari_sob_shab_pay_type = self.contract.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type
+        self.nobat_kari_asr_shab_pay_type = self.contract.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type
+        self.nobat_kari_sob_asr_shab_pay_type = self.contract.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type
+        self.mission_pay_type = self.contract.workshop_personnel.workshop.mission_pay_type
 
     @property
     def get_aele_mandi_amount(self):
@@ -2812,15 +2863,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def mazaya_mostamar_gheyre_naghdi_amount_with_comma(self):
         return self.with_comma(self.mazaya_mostamar_gheyre_naghdi_amount)
 
-    def save(self, *args, **kwargs):
-        if self.is_template == 'p' and not self.name:
-            self.name = 'شخصی'
-        self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
-            self.calculate_pay_bases
-        self.insurance_pay_day = self.calculate_insurance_pay_base
-        self.insurance_benefit = self.calculate_insurance_benefit
-        self.insurance_not_included = self.calculate_insurance_not_included
-        super().save(*args, **kwargs)
 
 
 class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
@@ -3615,69 +3657,63 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.hourly_pay_base = hr.month_hourly_pay_base
 
         self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh
-        if self.workshop_personnel.workshop.ezafe_kari_pay_type == 'd':
+        if self.get_hr_letter.ezafe_kari_pay_type == 'd':
             self.ezafe_kari_amount = hourly_pay
-        elif self.workshop_personnel.workshop.ezafe_kari_pay_type == 'b':
+        elif self.get_hr_letter.ezafe_kari_pay_type == 'b':
             self.ezafe_kari_amount = self.hourly_pay_base
 
         self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh
-        if self.workshop_personnel.workshop.tatil_kari_pay_type == 'd':
+        if self.get_hr_letter.tatil_kari_pay_type == 'd':
             self.tatil_kari_amount = hourly_pay
-        elif self.workshop_personnel.workshop.tatil_kari_pay_type == 'b':
+        elif self.get_hr_letter.tatil_kari_pay_type == 'b':
             self.tatil_kari_amount = self.hourly_pay_base
 
         self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh
-        if self.workshop_personnel.workshop.kasre_kar_pay_type == 'd':
+        if self.get_hr_letter.kasre_kar_pay_type == 'd':
             self.kasre_kar_amount = hourly_pay
-        elif self.workshop_personnel.workshop.kasre_kar_pay_type == 'b':
+        elif self.get_hr_letter.kasre_kar_pay_type == 'b':
             self.kasre_kar_amount = self.hourly_pay_base
 
         self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh
-        if self.workshop_personnel.workshop.shab_kari_pay_type == 'd':
+        if self.get_hr_letter.shab_kari_pay_type == 'd':
             self.shab_kari_amount = hourly_pay
-        elif self.workshop_personnel.workshop.shab_kari_pay_type == 'b':
+        elif self.get_hr_letter.shab_kari_pay_type == 'b':
             self.shab_kari_amount = self.hourly_pay_base
 
-        self.jome_kar_nerkh = self.workshop_personnel.workshop.jome_kari_nerkh
-        if self.workshop_personnel.workshop.jome_kari_pay_type == 'd':
-            self.jome_kar_amount = hourly_pay
-        elif self.workshop_personnel.workshop.jome_kari_pay_type == 'b':
-            self.jome_kar_amount = self.hourly_pay_base
-
         self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'd':
+        if self.get_hr_letter.nobat_kari_sob_asr_pay_type == 'd':
             self.nobat_kari_sob_asr_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.nobat_kari_sob_asr_pay_type == 'b':
+        elif self.get_hr_letter.nobat_kari_sob_asr_pay_type == 'b':
             self.nobat_kari_sob_asr_amount = self.pay_base
 
         self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'd':
+        if self.get_hr_letter.nobat_kari_sob_shab_pay_type == 'd':
             self.nobat_kari_sob_shab_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.nobat_kari_sob_shab_pay_type == 'b':
+        elif self.get_hr_letter.nobat_kari_sob_shab_pay_type == 'b':
             self.nobat_kari_sob_shab_amount = self.pay_base
 
         self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'd':
+        if self.get_hr_letter.nobat_kari_asr_shab_pay_type == 'd':
             self.nobat_kari_asr_shab_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.nobat_kari_asr_shab_pay_type == 'b':
+        elif self.get_hr_letter.nobat_kari_asr_shab_pay_type == 'b':
             self.nobat_kari_asr_shab_amount = self.pay_base
 
         self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh
-        if self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'd':
+        if self.get_hr_letter.nobat_kari_sob_asr_shab_pay_type == 'd':
             self.nobat_kari_sob_asr_shab_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_pay_type == 'b':
+        elif self.get_hr_letter.nobat_kari_sob_asr_shab_pay_type == 'b':
             self.nobat_kari_sob_asr_shab_amount = self.pay_base
 
         self.aele_mandi_nerkh = self.workshop_personnel.workshop.aele_mandi_nerkh
-        if self.workshop_personnel.workshop.aele_mandi_pay_type == 'd':
+        if self.get_hr_letter.aele_mandi_pay_type == 'd':
             self.aele_mandi_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.aele_mandi_pay_type == 'b':
+        elif self.get_hr_letter.aele_mandi_pay_type == 'b':
             self.aele_mandi_amount = self.pay_base
 
         self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh
-        if self.workshop_personnel.workshop.mission_pay_type == 'd':
+        if self.get_hr_letter.mission_pay_type == 'd':
             self.mission_amount = self.hoghoogh_roozane
-        elif self.workshop_personnel.workshop.mission_pay_type == 'b':
+        elif self.get_hr_letter.mission_pay_type == 'b':
             self.mission_amount = self.pay_base
 
     @property
@@ -4005,7 +4041,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
-        if self.get_hr_letter.contract.insurance:
+        if self.contract.insurance:
             payable_amount = round(payable_amount) - round(self.data_for_insurance['DSW_BIME'])
         return round(payable_amount)
 
@@ -4307,59 +4343,80 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def haghe_bime_bime_shavande(self):
-        hr = self.get_hr_letter
-        return round(self.insurance_total_included * hr.worker_insurance_nerkh)
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            return round(self.insurance_total_included * hr.worker_insurance_nerkh)
+        else:
+            return 0
 
     @property
     def employer_insurance(self):
-        hr = self.get_hr_letter
-        return round(self.insurance_total_included * hr.employer_insurance_nerkh)
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            return round(self.insurance_total_included * hr.employer_insurance_nerkh)
+        else:
+            return 0
 
     @property
     def un_employer_insurance(self):
-        hr = self.get_hr_letter
-        return round(self.insurance_total_included * hr.unemployed_insurance_nerkh)
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            return round(self.insurance_total_included * hr.unemployed_insurance_nerkh)
+        else:
+            return 0
 
     @property
     def insurance_monthly_benefit(self):
-        hr = self.get_hr_letter
-        benefit = Decimal(hr.insurance_benefit)
-        if hr.ezafe_kari_use_insurance:
-            benefit = benefit + Decimal(self.ezafe_kari_total)
-        if hr.haghe_owlad_use_insurance:
-            benefit = benefit + Decimal(self.aele_mandi)
-        if hr.shab_kari_use_insurance:
-            benefit = benefit + Decimal(self.shab_kari_total)
-        if hr.tatil_kari_use_insurance:
-            benefit = benefit + Decimal(self.tatil_kari_total)
-        if hr.nobat_kari_use_insurance:
-            benefit = benefit + self.nobat_kari_sob_shab_total
-            benefit = benefit + self.nobat_kari_sob_asr_total
-            benefit = benefit + self.nobat_kari_asr_shab_total
-            benefit = benefit + self.nobat_kari_sob_asr_shab_total
-        if hr.haghe_maamooriat_use_insurance:
-            benefit = benefit + Decimal(self.mission_total)
-        if hr.haghe_sanavat_use_insurance:
-            benefit = benefit + Decimal(self.haghe_sanavat_total)
-        if hr.eydi_padash_use_insurance:
-            benefit = benefit + Decimal(self.padash_total)
-        return benefit
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            benefit = Decimal(hr.insurance_benefit)
+            if hr.ezafe_kari_use_insurance:
+                benefit = benefit + Decimal(self.ezafe_kari_total)
+            if hr.haghe_owlad_use_insurance:
+                benefit = benefit + Decimal(self.aele_mandi)
+            if hr.shab_kari_use_insurance:
+                benefit = benefit + Decimal(self.shab_kari_total)
+            if hr.tatil_kari_use_insurance:
+                benefit = benefit + Decimal(self.tatil_kari_total)
+            if hr.nobat_kari_use_insurance:
+                benefit = benefit + self.nobat_kari_sob_shab_total
+                benefit = benefit + self.nobat_kari_sob_asr_total
+                benefit = benefit + self.nobat_kari_asr_shab_total
+                benefit = benefit + self.nobat_kari_sob_asr_shab_total
+            if hr.haghe_maamooriat_use_insurance:
+                benefit = benefit + Decimal(self.mission_total)
+            if hr.haghe_sanavat_use_insurance:
+                benefit = benefit + Decimal(self.haghe_sanavat_total)
+            if hr.eydi_padash_use_insurance:
+                benefit = benefit + Decimal(self.padash_total)
+            return benefit
+        else:
+            return 0
 
     @property
     def insurance_monthly_payment(self):
-        hr = self.get_hr_letter
-        return hr.insurance_pay_day * self.list_of_pay.personnel_insurance_worktime(
-            self.workshop_personnel.personnel.id)
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            return hr.insurance_pay_day * self.list_of_pay.personnel_insurance_worktime(
+                self.workshop_personnel.personnel.id)
+        else:
+            return 0
 
     @property
     def insurance_worktime(self):
-        return self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)
+        if self.contract.insurance:
+            return self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)
+        else:
+            return 0
 
     @property
     def insurance_total_included(self):
-        hr = self.get_hr_letter
-        total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
-        return total
+        if self.contract.insurance:
+            hr = self.get_hr_letter
+            total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
+            return total
+        else:
+            return 0
 
     @property
     def data_for_insurance(self):
