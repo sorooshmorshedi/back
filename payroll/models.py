@@ -38,7 +38,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     )
 
     TYPE1 = 1
-    TYPE2 = 3 / 7
+    TYPE2 = 2
     TAX_EMPLOYER_TYPES = (
         (TYPE1, '7/7'),
         (TYPE2, '2/7')
@@ -106,7 +106,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=12)
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=12)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=12)
-    jome_kari_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=12)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=12)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=12)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=12)
@@ -4466,7 +4465,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def tamin_ejtemaee_moafiat(self):
-        return self.haghe_bime_bime_shavande * self.workshop_personnel.workshop.tax_employer_type
+        if self.workshop_personnel.workshop.tax_employer_type == 1:
+            return self.haghe_bime_bime_shavande
+        elif self.workshop_personnel.workshop.tax_employer_type == 2:
+            return (self.haghe_bime_bime_shavande * 2) / 7
 
     @property
     def haghe_bime_moafiat(self):
@@ -4574,7 +4576,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                              Q(list_of_pay__month__lt=self.list_of_pay.month) &
                                              Q(workshop_personnel=self.workshop_personnel) &
-                                             Q(list_of_pay__ultimate=True)).all()
+                                             Q(list_of_pay__ultimate=True) &
+                                             Q(list_of_pay__use_in_calculate=True))
         year_payment = Decimal(0)
         for item in items:
             year_payment = year_payment + Decimal(item.tax_included_payment)
@@ -4585,7 +4588,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                              Q(list_of_pay__month__lt=self.list_of_pay.month) &
                                              Q(workshop_personnel=self.workshop_personnel) &
-                                             Q(list_of_pay__ultimate=True))
+                                             Q(list_of_pay__ultimate=True) &
+                                             Q(list_of_pay__use_in_calculate=True))
         tax = Decimal(0)
         for item in items:
             tax += item.calculate_month_tax
@@ -4609,7 +4613,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_month_tax(self):
-        year, month, month_day = self.list_of_pay.year, self.list_of_pay.month, self.list_of_pay.month_days
         hr = self.get_hr_letter
         if hr.include_made_86:
             tax = self.tax_included_payment / 10
@@ -4617,7 +4620,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                                  Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                                  Q(workshop_personnel=self.workshop_personnel) &
-                                                 Q(list_of_pay__ultimate=True))
+                                                 Q(list_of_pay__ultimate=True) &
+                                                 Q(list_of_pay__use_in_calculate=True))
             tax = Decimal(0)
             year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
             mytax = self.get_tax_row
@@ -4645,11 +4649,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_monthly_eydi_tax(self):
         hr = self.get_hr_letter
         if hr.eydi_padash_use_tax:
-            mytax = WorkshopTax.objects.first()
-            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
             moafiat_limit = tax_row.to_amount / 12 / 12
-            eydi = self.calculate_monthly_eydi
+            eydi = self.padash_total
             moaf = moafiat_limit - Decimal(eydi)
             if moaf <= 0:
                 eydi_tax = -moaf
@@ -4664,11 +4668,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_yearly_eydi_tax(self):
         hr = self.get_hr_letter
         if hr.eydi_padash_use_tax:
-            mytax = WorkshopTax.objects.first()
-            tax_rows = WorkshopTaxRow.objects.filter(workshop_tax=mytax)
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
             moafiat_limit = tax_row.to_amount / 12
-            eydi = self.calculate_yearly_eydi
+            eydi = self.padash_total
             moaf = round(moafiat_limit) - round(eydi)
             if moaf <= 0:
                 eydi_tax = -moaf

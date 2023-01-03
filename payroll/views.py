@@ -146,6 +146,60 @@ class WorkshopVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('وضعیت را وارد کنید')
 
+        # workshop setting verify
+
+        if not workshop.worker_insurance_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ حق بیمه سهم بیمه شده را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.employee_insurance_nerkh:
+            self.validate_status = False
+            self.error_messages.append(' نرخ حق بیمه سهم کارفرما را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.unemployed_insurance_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ حق بیمه سهم بیکاری را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.ezafe_kari_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ اضافه کاری را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.tatil_kari_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ تعطیل کاری را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.kasre_kar_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ کسر کار را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.shab_kari_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ شب کاری را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.aele_mandi_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ عائله مندی را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.nobat_kari_sob_asr_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ نوبت کاری صبح و عصر را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.nobat_kari_sob_shab_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ نوبت کاری صبح و شب را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.nobat_kari_asr_shab_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ نوبت کاری عصر و شب را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.nobat_kari_sob_asr_shab_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ نوبت کاری صبح و عصر و شب را تنظیمات کارگاه وارد کنید')
+
+        if not workshop.nobat_kari_sob_asr_shab_nerkh:
+            self.validate_status = False
+            self.error_messages.append('نرخ نوبت کاری صبح و عصر و شب را تنظیمات کارگاه وارد کنید')
+
         if self.validate_status:
             workshop.is_verified = True
             workshop.save()
