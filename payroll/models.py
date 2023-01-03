@@ -909,7 +909,16 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def full_name(self):
-        return self.name + ' ' + self.last_name
+        if self.name and self.last_name:
+            return self.name + ' ' + self.last_name
+        elif self.name:
+            return self.name
+        elif self.last_name:
+            return self.last_name
+        else:
+            return str(self.id)
+
+
 
     @property
     def insurance_for_tax(self):
