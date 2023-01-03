@@ -1067,10 +1067,14 @@ class PersonnelFamily(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def full_name(self):
-        return self.name + ' ' + self.last_name
-
-    def __str__(self):
-        return self.full_name + ' ' + self.get_relative_display() + ' ' + self.personnel.full_name
+        if self.name and self.last_name:
+            return self.name + ' ' + self.last_name
+        elif self.name:
+            return self.name
+        elif self.last_name:
+            return self.last_name
+        else:
+            return str(self.id)
 
 
 class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
