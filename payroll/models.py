@@ -308,7 +308,7 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return 'غیر فعال'
 
 
-class WorkshopTax(BaseModel, LockableMixin, DefinableMixin):
+class WorkshopTax(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     company = models.ForeignKey(Company, related_name='tax', on_delete=models.CASCADE, blank=True, null=True)
 
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -2474,6 +2474,8 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         self.insurance_benefit = self.calculate_insurance_benefit
         self.insurance_not_included = self.calculate_insurance_not_included
 
+        if not self.id and self.is_template == 'p' and not self.contract:
+            raise ValidationError('برای ثبت اولیه حکم شخصی وارد کردن قرارداد الزامی است')
         if not self.id and self.is_template == 'p' and self.contract:
             self.set_default_pay_types()
         super().save(*args, **kwargs)
@@ -3172,7 +3174,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             if contract.workshop_personnel.personnel.id not in personnel_count:
                 personnel_count.append(contract.workshop_personnel.personnel.id)
         DSKKAR = {
-            'DSK_ID': str(self.workshop.code),
+            'DSK_ID': str(self.workshop.workshop_code),
             'DSK_NAME': self.workshop.name,
             'DSK_FARM': self.workshop.employer_name,
             'DSK_ADRS': self.workshop.address[:100],
@@ -3427,19 +3429,19 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
     shab_kari_total = models.IntegerField(default=0)
 
-    nobat_kari_sob_asr = models.IntegerField(default=0)
+    nobat_kari_sob_asr = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     nobat_kari_sob_asr_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
 
-    nobat_kari_sob_shab = models.IntegerField(default=0)
+    nobat_kari_sob_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     nobat_kari_sob_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
 
-    nobat_kari_asr_shab = models.IntegerField(default=0)
+    nobat_kari_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     nobat_kari_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
 
-    nobat_kari_sob_asr_shab = models.IntegerField(default=0)
+    nobat_kari_sob_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
     nobat_kari_sob_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
 
@@ -3516,6 +3518,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def hoghoogh_mahane_with_comma(self):
         return self.with_comma(self.hoghoogh_mahane)
+
+    @property
+    def mazaya_gheyr_mostamar_with_comma(self):
+        return self.with_comma(self.mazaya_gheyr_mostamar)
 
     @property
     def sayer_kosoorat_with_comma(self):
@@ -3965,9 +3971,17 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return total
 
     @property
+    def naghdi_pension_whit_comma(self):
+        return self.with_comma(self.naghdi_pension)
+
+    @property
     def gheyre_naghdi_pension(self):
         hr = self.get_hr_letter
         return self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+
+    @property
+    def gheyre_naghdi_pension_whit_comma(self):
+        return self.with_comma(self.gheyre_naghdi_pension)
 
     @property
     def un_pension_payment(self):
@@ -4033,6 +4047,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def naghdi_un_pension(self):
         return self.un_pension_payment - self.mazaya_gheyr_mostamar
+
+    @property
+    def naghdi_un_pension_whit_comma(self):
+        return self.with_comma(self.naghdi_un_pension)
 
     @property
     def total_naghdi(self):
@@ -4441,7 +4459,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             quit_job_date = '000000'
 
         DSKWOR = {
-            'DSW_ID': str(self.workshop_personnel.workshop.code),
+            'DSW_ID': str(self.workshop_personnel.workshop.workshop_code),
             'DSW_YY': int(str(self.list_of_pay.year)[2:]),
             'DSW_MM': self.list_of_pay.month,
             'DSW_LISTNO': '0',
@@ -4464,9 +4482,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_MAZ': self.insurance_monthly_benefit,
             'DSW_MASH': self.insurance_total_included,
             'DSW_TOTL': self.total_payment,
-            'DSW_BIME': (self.insurance_monthly_benefit + hr.insurance_pay_day *
-                         self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)) *
-                        self.workshop_personnel.workshop.worker_insurance_nerkh,
+            'DSW_BIME': self.haghe_bime_bime_shavande,
             'DSW_PRATE': 0,
             'DSW_JOB': 0,
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
@@ -4488,8 +4504,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
 
     @property
+    def haghe_bime_moafiat_with_comma(self):
+        return self.with_comma(self.haghe_bime_moafiat)
+
+    @property
     def ezafe_kari_nakhales(self):
         return self.ezafe_kari_total + self.tatil_kari_total
+
+    @property
+    def ezafe_kari_nakhales_with_comma(self):
+        return self.with_comma(self.ezafe_kari_nakhales)
 
     @property
     def hr_tax_not_included(self):
@@ -4574,7 +4598,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.total_sayer_moafiat
         total += self.mission_total
         total += Decimal(self.get_hagh_sanavat_and_save_leaves)
-        total += self.haghe_bime_moafiat
+        total += Decimal(self.haghe_bime_moafiat)
         total += self.manategh_tejari_moafiat
         total += self.ejtenab_maliat_mozaaf
 

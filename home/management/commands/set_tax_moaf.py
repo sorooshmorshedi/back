@@ -17,6 +17,7 @@ class Command(BaseCommand):
                 name='system_default',
                 from_date='1400-01-01',
                 to_date='1403-01-01',
+                is_verified=True
             )
             WorkshopTaxRow.objects.create(
                 workshop_tax=tax,

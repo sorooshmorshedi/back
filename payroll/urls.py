@@ -15,23 +15,26 @@ from payroll.lists.views import WorkshopListView, ContractListView, PersonnelLis
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
     write_person_insurance_diskette, \
     write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, AdjustmentListView
+from payroll.verify_views import WorkshopVerifyApi, WorkshopUnVerifyApi, WorkshopTaxRowVerifyApi, \
+    WorkshopTaxRowUnVerifyApi, PersonnelVerifyApi, PersonnelUnVerifyApi, PersonnelFamilyVerifyApi, \
+    PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, WorkshopPersonnelVerifyApi, \
+    WorkshopPersonnelUnVerifyApi, ContractVerifyApi, ContractUnVerifyApi, HRLVerifyApi, HRLUnVerifyApi, \
+    LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi, MissionVerifyApi, MissionUnVerifyApi, LoanVerifyApi, \
+    LoanUnVerifyApi, DeductionVerifyApi, DeductionUnVerifyApi
 from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, PersonnelDetail, \
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
-    WorkshopPersonnelApiView, WorkshopPersonnelDetail, PersonnelVerifyApi, HRLetterApiView, HRLetterDetail, \
+    WorkshopPersonnelApiView, WorkshopPersonnelDetail, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
-    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
+    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi,\
     ListOfPayItemDetail, WorkshopContractRowsDetail, WorkshopTaxRowApiView, \
     WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail, \
     LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
     TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
-    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, PersonnelUnVerifyApi, \
-    PersonnelFamilyVerifyApi, PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, \
-    AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView, WorkshopPersonnelVerifyApi, \
-    WorkshopPersonnelUnVerifyApi, ContractRowUnActiveApi, ContractRowActiveApi, WorkshopVerifyApi, WorkshopUnVerifyApi, \
-    LeaveOrAbsenceVerifyApi, LeaveOrAbsenceUnVerifyApi, MissionVerifyApi, MissionUnVerifyApi, ContractVerifyApi, \
-    ContractUnVerifyApi, PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
-    WorkshopGetDefaultApiView, HRLVerifyApi, HRLUnVerifyApi, LoanVerifyApi, LoanUnVerifyApi, DeductionVerifyApi, \
-    DeductionUnVerifyApi, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi
+    ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, \
+    AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView,\
+    ContractRowUnActiveApi, ContractRowActiveApi,\
+    PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
+    WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -47,6 +50,8 @@ urlpatterns = [
 
     path('tax/', WorkshopTaxApiView.as_view(), name='workshopTaxApiView'),
     path('tax/<int:pk>/', WorkshopTaxDetail.as_view(), name='workshopTaxDetail'),
+    path('tax/verify/<int:pk>/', WorkshopTaxRowVerifyApi.as_view(), name='workshopTaxRowVerifyApi'),
+    path('tax/unverify/<int:pk>/', WorkshopTaxRowUnVerifyApi.as_view(), name='workshopTaxRowUnVerifyApi'),
 
     path('loan/', LoanApiView.as_view(), name='loanApiView'),
     path('loan/<int:pk>/', LoanDetail.as_view(), name='loanDetail'),
@@ -81,7 +86,6 @@ urlpatterns = [
     path('workshop/personnel/<int:pk>/', WorkshopPersonnelDetail.as_view(), name='workshopPersonnelDetail'),
     path('workshop/personnel/contract/<int:pk>/', WorkshopPersonnelContractDetail.as_view(),
          name='workshopPersonnelContractDetail'),
-
     path('workshopPersonnel/verify/<int:pk>/', WorkshopPersonnelVerifyApi.as_view(),
          name='workshopPersonnelVerifyApi'),
     path('workshopPersonnel/unverify/<int:pk>/', WorkshopPersonnelUnVerifyApi.as_view(),
