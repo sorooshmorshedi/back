@@ -497,7 +497,7 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
                 form.workshop.workshop_title,
                 form.personnel.full_name,
                 form.employment_date,
-                form.work_title,
+                form.title.name + ' ' + form.title.code,
                 form.previous_insurance_history_out_workshop,
                 form.previous_insurance_history_in_workshop,
                 form.current_insurance_history_in_workshop,

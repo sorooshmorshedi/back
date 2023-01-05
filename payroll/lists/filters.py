@@ -174,6 +174,20 @@ def employee_status_filter(queryset, name, value):
     return query
 
 
+def title_name_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.title and value in item.title.name:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
+def title_code_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.title and value in item.title.code:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
 class WorkshopPersonnelFilter(filters.FilterSet):
 
     personnel_name = filters.CharFilter(method=personnel_filter)
@@ -182,6 +196,8 @@ class WorkshopPersonnelFilter(filters.FilterSet):
     job_group_display = filters.CharFilter(method=job_group_filter)
     contract_type_display = filters.CharFilter(method=contract_type_filter)
     employee_status_display = filters.CharFilter(method=employee_status_filter)
+    title_name = filters.CharFilter(method=title_name_filter)
+    title_code = filters.CharFilter(method=title_code_filter)
 
     class Meta:
         model = WorkshopPersonnel

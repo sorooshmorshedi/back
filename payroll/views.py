@@ -7,21 +7,45 @@ from rest_framework.views import APIView
 import datetime
 
 from helpers.auth import BasicCRUDPermission
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
 
 from payroll.functions import is_shenase_meli, is_valid_melli_code
 from payroll.models import Workshop, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, HRLetter, Contract, \
     LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem, \
-    Adjustment
+    Adjustment, WorkTitle
 from payroll.serializers import WorkShopSerializer, PersonnelSerializer, PersonnelFamilySerializer, \
     ContractRowSerializer, WorkshopPersonnelSerializer, HRLetterSerializer, ContractSerializer, \
     LeaveOrAbsenceSerializer, MissionSerializer, ListOfPaySerializer, ListOfPayItemsAddInfoSerializer, \
     ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
     WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
     ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer, \
-    ListOfPayCopyPaySerializer, AdjustmentSerializer
+    ListOfPayCopyPaySerializer, AdjustmentSerializer, WorkTitleSerializer
+from users.models import City
 
+
+class WorkTitleListCreateView(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'work_title'
+    queryset = WorkTitle.objects.all()
+    serializer_class = WorkTitleSerializer
+
+
+class WorkTitleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'work_title'
+    queryset = WorkTitle.objects.all()
+    serializer_class = WorkTitleSerializer
+
+class WorkTitleSearchApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'work_title'
+
+    def get(self, request, search):
+        print(search)
+        query = WorkTitle.objects.filter(Q(code__icontains=search) | Q(name__icontains=search))
+        serializers = WorkTitleSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
 
 # workshop APIs
 

@@ -14,6 +14,29 @@ from decimal import Decimal
 import jdatetime
 
 
+class WorkTitle(BaseModel):
+    code = models.CharField(max_length=25)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name + ' ' + self.code
+
+    class Meta(BaseModel.Meta):
+        verbose_name = 'WorkTitle'
+        permission_basename = 'work_title'
+        permissions = (
+            ('create.city', 'تعریف عناوین شغلی'),
+
+            ('get.city', 'مشاهده عناوین شغلی'),
+            ('update.city', 'ویرایش عناوین شغلی'),
+            ('delete.city', 'حذف عناوین شغلی'),
+
+            ('getOwn.city', 'مشاهده عناوین شغلی های خود'),
+            ('updateOwn.city', 'ویرایش شهر عناوین شغلی خود'),
+            ('deleteOwn.city', 'حذف شهر عناوین شغلی خود'),
+        )
+
+
 class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     DAILY = 'd'
     MONTHLY = 'm'
@@ -1184,6 +1207,9 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     employment_date = jmodels.jDateField(blank=True, null=True)
     insurance_add_date = jmodels.jDateField(blank=True, null=True)
+
+    title = models.ForeignKey(WorkTitle, related_name='workshop_personnel', on_delete=models.SET_NULL,
+                              blank=True, null=True)
     work_title = models.CharField(max_length=100, blank=True, null=True)
     work_title_code = models.CharField(max_length=10, blank=True, null=True)
 
@@ -2261,13 +2287,13 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     is_template = models.CharField(max_length=1, choices=HRLETTER_TYPES, blank=True, null=True)
 
     pay_done = models.BooleanField(default=False)
-    daily_pay_base = models.IntegerField(default=0)
-    monthly_pay_base = models.IntegerField(default=0)
-    day_hourly_pay_base = models.IntegerField(default=0)
-    month_hourly_pay_base = models.IntegerField(default=0)
-    insurance_pay_day = models.IntegerField(default=0)
-    insurance_benefit = models.IntegerField(default=0)
-    insurance_not_included = models.IntegerField(default=0)
+    daily_pay_base = DECIMAL(default=0)
+    monthly_pay_base = DECIMAL(default=0)
+    day_hourly_pay_base = DECIMAL(default=0)
+    month_hourly_pay_base = DECIMAL(default=0)
+    insurance_pay_day = DECIMAL(default=0)
+    insurance_benefit = DECIMAL(default=0)
+    insurance_not_included = DECIMAL(default=0)
 
     hoghooghe_roozane_use_tax = models.BooleanField(default=True)
     hoghooghe_roozane_use_insurance = models.BooleanField(default=True)
@@ -2707,18 +2733,18 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         for i in range(0, 23):
             if hr_letter_items[i]['base'] and hr_letter_items[i]['amount']:
                 if i < 2:
-                    daily += round(hr_letter_items[i]['amount'])
-                    monthly += round(hr_letter_items[i]['amount'] * 30)
+                    daily +=hr_letter_items[i]['amount']
+                    monthly += hr_letter_items[i]['amount'] * Decimal(30)
                 else:
-                    daily += round(hr_letter_items[i]['amount'] / 30)
-                    monthly += round(hr_letter_items[i]['amount'])
-        month_hourly = monthly / 220
-        day_hourly = daily / 7.33
+                    daily += hr_letter_items[i]['amount'] / Decimal(30)
+                    monthly += hr_letter_items[i]['amount']
+        month_hourly = monthly / Decimal(220)
+        day_hourly = daily / Decimal(7.33)
         return daily, monthly, day_hourly, month_hourly
 
     @property
     def hoghoogh_mahanae(self):
-        return round(self.hoghooghe_roozane_amount * Decimal(30))
+        return self.hoghooghe_roozane_amount * Decimal(30)
 
     @property
     def calculate_save_leave_base(self):
@@ -3388,7 +3414,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     cumulative_without_salary = models.IntegerField(default=0)
 
     hoghoogh_roozane = DECIMAL()
-    pay_base = models.IntegerField(default=0)
+    pay_base = DECIMAL(default=0)
     sanavat_base = DECIMAL(default=0)
     sanavat_month = models.IntegerField(default=0)
     aele_mandi_child = models.IntegerField(default=0)
@@ -3409,39 +3435,39 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     mission_amount = DECIMAL(default=0, blank=True, null=True)
     mission_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
 
-    ezafe_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    ezafe_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     ezafe_kari_amount = DECIMAL(default=0)
     ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
     ezafe_kari_total = models.IntegerField(default=0)
 
-    tatil_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    tatil_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     tatil_kari_amount = DECIMAL(default=0)
     tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
     tatil_kari_total = models.IntegerField(default=0)
 
-    kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     kasre_kar_amount = DECIMAL(default=0)
     kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
     kasre_kar_total = models.IntegerField(default=0)
 
-    shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     shab_kari_amount = DECIMAL(default=0)
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
     shab_kari_total = models.IntegerField(default=0)
 
-    nobat_kari_sob_asr = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    nobat_kari_sob_asr = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_asr_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
 
-    nobat_kari_sob_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    nobat_kari_sob_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
 
-    nobat_kari_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    nobat_kari_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
 
-    nobat_kari_sob_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=2)
+    nobat_kari_sob_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_asr_shab_amount = DECIMAL(default=0)
     nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
 
@@ -4473,7 +4499,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_BDATE': self.workshop_personnel.personnel.location_of_birth.__str__().replace('-', ''),
             'DSW_SEX': self.workshop_personnel.personnel.get_gender_display(),
             'DSW_NAT': self.workshop_personnel.personnel.get_nationality_display(),
-            'DSW_OCP': self.workshop_personnel.work_title,
+            'DSW_OCP': self.workshop_personnel.title.name,
             'DSW_SDATE': contract.insurance_add_date.__str__().replace('-', ''),
             'DSW_EDATE': quit_job_date,
             'DSW_DD': self.insurance_worktime,

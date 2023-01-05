@@ -1,8 +1,14 @@
 
 from payroll.models import Workshop, WorkshopPersonnel, Personnel, PersonnelFamily, ContractRow, HRLetter, Contract, \
     LeaveOrAbsence, Mission, ListOfPay, ListOfPayItem, WorkshopTaxRow, WorkshopTax, Loan, OptionalDeduction, LoanItem, \
-    Adjustment
+    Adjustment, WorkTitle
 from rest_framework import serializers
+
+
+class WorkTitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkTitle
+        fields = 'id', 'code', 'name'
 
 
 class WorkShopSerializer(serializers.ModelSerializer):
@@ -86,6 +92,8 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     personnel_insurance = serializers.BooleanField(source='personnel.insurance', read_only=True)
     personnel_insurance_code = serializers.CharField(source='personnel.insurance_code', read_only=True)
     personnel_nationality = serializers.IntegerField(source='personnel.nationality', read_only=True)
+    title_name = serializers.CharField(source='title.name', read_only=True)
+    title_code = serializers.CharField(source='title.code', read_only=True)
 
     class Meta:
         model = WorkshopPersonnel

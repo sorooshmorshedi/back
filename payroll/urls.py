@@ -25,16 +25,17 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     PersonnelFamilyApiView, PersonnelFamilyDetail, ContractRowApiView, ContractRowDetail, \
     WorkshopPersonnelApiView, WorkshopPersonnelDetail, HRLetterApiView, HRLetterDetail, \
     ContractApiView, ContractDetail, LeaveOrAbsenceApiView, LeaveOrAbsenceDetail, SearchPersonnelByCode, PaymentList, \
-    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi,\
+    MissionApiView, MissionDetail, ListOfPayApiView, ListOfPayDetail, ListOfPayItemsCalculate, GetHRLetterTemplatesApi, \
     ListOfPayItemDetail, WorkshopContractRowsDetail, WorkshopTaxRowApiView, \
     WorkshopTaxRowDetail, WorkshopSettingDetail, WorkshopTaxApiView, WorkshopTaxDetail, WorkshopAllPersonnelDetail, \
     LoanApiView, LoanDetail, PersonnelLoanDetail, DeductionApiView, DeductionDetail, PersonnelDeductionDetail, \
     TemplateDeductionDetail, LoanItemDetail, ListOfPayLessDetail, PayItemDetail, ListOfPayBankDetail, PayAPI, \
     ListOfPayPaymentAPI, ListOfPayItemPaymentAPI, WorkshopListOfPayApiView, ListOfPayCopy, \
-    AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView,\
-    ContractRowUnActiveApi, ContractRowActiveApi,\
+    AdjustmentApiView, AdjustmentDetail, ContractRowAdjustmentDetail, PaymentVerifyApiView, \
+    ContractRowUnActiveApi, ContractRowActiveApi, \
     PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
-    WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi
+    WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi, \
+    WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -157,6 +158,10 @@ urlpatterns = [
          name='workshopListOfPayApiView'),
     path('listOfPay/copy/<int:pk>/', ListOfPayCopy.as_view(), name='listOfPayCopy'),
     path('listOfPay/ultimate/<int:pk>/', ListOfPayUltimateApi.as_view(), name='listOfPayUltimateApi'),
+
+    path('workTitle/', WorkTitleListCreateView.as_view(), name='workTitleListCreateView'),
+    path('workTitle/<int:pk>/', WorkTitleDetailView.as_view(), name='workTitleDetailView'),
+    path('workTitleSearch/<str:search>/', WorkTitleSearchApiView.as_view(), name='workTitleSearchApiView'),
 
 ]
 

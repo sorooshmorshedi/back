@@ -36,10 +36,10 @@
                     <td> -</td>
                 {% endif %}
 
-                {% if form.work_title %}
-                    <td>{{ form.work_title }}</td>
+                {% if form.title %}
+                    <td>{{ form.title.name }} {{ form.title.code }}</td>
                 {% endif %}
-                {% if not form.work_title %}
+                {% if not form.title %}
                     <td> -</td>
                 {% endif %}
 
