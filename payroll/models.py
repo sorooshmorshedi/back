@@ -2716,7 +2716,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                         person_age = self.contract.contract_to_date.year - person.date_of_birth.year
                         if person_age <= 18:
                             aele_mandi_child += 1
-                        elif person.study_status == 's' or person.physical_condition != 'h':
+                        elif person.physical_condition != 'h':
                             aele_mandi_child += 1
                 return aele_mandi_child
             else:
@@ -3792,7 +3792,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     person_age = self.list_of_pay.year - person.date_of_birth.year
                     if person_age <= 18:
                         aele_mandi_child += 1
-                    elif person.study_status == 's' or person.physical_condition != 'h':
+                    elif person.physical_condition != 'h':
                         aele_mandi_child += 1
         self.aele_mandi_child = aele_mandi_child
         return aele_mandi_child

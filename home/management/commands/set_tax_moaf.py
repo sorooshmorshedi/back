@@ -22,24 +22,24 @@ class Command(BaseCommand):
             WorkshopTaxRow.objects.create(
                 workshop_tax=tax,
                 from_amount=0,
-                to_amount=600000000,
+                to_amount=672000000,
                 ratio=0,
             )
             WorkshopTaxRow.objects.create(
                 workshop_tax=tax,
-                from_amount=600000001,
-                to_amount=900000000,
+                from_amount=672000001,
+                to_amount=1800000000,
                 ratio=10,
             )
             WorkshopTaxRow.objects.create(
                 workshop_tax=tax,
-                from_amount=900000001,
-                to_amount=1200000000,
+                from_amount=1800000001,
+                to_amount=3000000000,
                 ratio=15,
             )
             WorkshopTaxRow.objects.create(
                 workshop_tax=tax,
-                from_amount=1200000001,
-                to_amount=1500000000,
+                from_amount=3000000001,
+                to_amount=4200000000,
                 ratio=20,
             )
