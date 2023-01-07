@@ -232,6 +232,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     insurance_workshop = serializers.CharField(source='workshop_personnel.current_insurance_history_in_workshop',
                                                read_only=True)
     total_mission = serializers.IntegerField(source='mission_total', read_only=True)
+    hr = serializers.IntegerField(source='get_hr_letter.id', read_only=True)
     montly_pay = serializers.IntegerField(source='hoghoogh_mahane', read_only=True)
     sanavat_montly_pay = serializers.IntegerField(source='sanavat_mahane', read_only=True)
     contract_row_title = serializers.IntegerField(source='contract_row.contract_row', read_only=True)

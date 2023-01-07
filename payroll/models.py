@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models import Q
 from django_jalali.db import models as jmodels
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from rest_framework.exceptions import ValidationError
 
@@ -1235,7 +1234,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def current_insurance(self):
-        if self.list_of_pay_item:
+        if self.list_of_pay_item and self.personnel.insurance:
             lists = self.workshop.list_of_pay.filter(ultimate=True)
             items = self.list_of_pay_item.filter(list_of_pay__in=lists)
             total = 0
@@ -2222,11 +2221,10 @@ class LeaveOrAbsence(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if not self.workshop_personnel:
             raise ValidationError('انتخاب پرسنل در کارگاه برای ثبت اولیه الزامیست')
         self.time_period = self.final_by_day
-        if self.leave_type == 'm':
-            if self.from_date and self.to_date:
-                duration = datetime.timedelta(days=2)
-                if self.to_date.day - self.from_date.day > 2:
-                    self.to_date = self.from_date + duration
+        if self.leave_type == 'm' and self.from_date and self.to_date:
+            duration = datetime.timedelta(days=2)
+            if (self.to_date - self.from_date).days > 2:
+                self.to_date = self.from_date + duration
         if self.entitlement_leave_type == 'h' and self.leave_type == 'e':
             self.from_date, self.to_date, self.cause_of_incident = None, None, ' '
         elif self.entitlement_leave_type == 'd' and self.leave_type == 'e':
@@ -3291,12 +3289,12 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             filtered_absence = LeaveOrAbsence.objects.filter(Q(workshop_personnel=workshop_personnel) &
                                                              Q(is_verified=True))
             filtered_mission = Mission.objects.filter(Q(workshop_personnel=workshop_personnel) &
-                                                      Q(is_in_payment=True)  & Q(is_verified=True))
+                                                      Q(is_in_payment=True) & Q(is_verified=True))
             for absence in filtered_absence.all():
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \
-                            absence.date.__ge__(contract_start[contract.id]) and absence.date.__le__(
-                        contract_end[contract.id]):
+                            absence.date.__ge__(contract_start[contract.id]) and\
+                            absence.date.__le__(contract_end[contract.id]):
                         absence_types['eh'] += absence.to_hour.hour - absence.from_hour.hour
                     if absence.leave_type == 'e' and absence.entitlement_leave_type != 'h':
                         if absence.from_date.__ge__(contract_start[contract.id]) and absence.to_date.__le__(
@@ -3694,7 +3692,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def set_info_from_workshop(self):
         hr = self.get_hr_letter
         self.hoghoogh_roozane = hr.hoghooghe_roozane_amount
-        hourly_pay = round(self.hoghoogh_roozane / Decimal(7.33))
+        hourly_pay = round((self.hoghoogh_roozane / Decimal(7.33)), 6)
         if self.workshop_personnel.workshop.base_pay_type == 'd':
             self.pay_base = hr.daily_pay_base
             self.hourly_pay_base = hr.day_hourly_pay_base
@@ -3783,7 +3781,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_aele_mandi_info(self):
         personnel_family = self.workshop_personnel.personnel.childs
-        if self.workshop_personnel.insurance_history_total:
+        if self.workshop_personnel.personnel.insurance:
             self.total_insurance_month = self.workshop_personnel.insurance_history_total
         else:
             self.total_insurance_month = 0

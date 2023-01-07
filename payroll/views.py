@@ -1290,51 +1290,6 @@ class ListOfPayItemsCalculate(APIView):
         except:
             raise ValidationError('برای شب کاری یک ساعت صحیح وارد کنید')
 
-        try:
-            if data['nobat_kari_sob_asr'] and data['nobat_kari_sob_asr'] != '':
-                nobat_kari_sob_asr = data['nobat_kari_sob_asr']
-                nobat_kari_sob_asr = nobat_kari_sob_asr.split(':')
-                nobat_kari_sob_asr = round((int(nobat_kari_sob_asr[0]) + (int(nobat_kari_sob_asr[1]) / 60)), 6)
-                data['nobat_kari_sob_asr'] = nobat_kari_sob_asr
-            elif data['nobat_kari_sob_asr'] == '':
-                data['nobat_kari_sob_asr'] = 0
-        except:
-            raise ValidationError('برای نوبت کاری صبح و عصر یک ساعت صحیح وارد کنید')
-
-        try:
-            if data['nobat_kari_sob_shab'] and data['nobat_kari_sob_shab'] != '':
-                nobat_kari_sob_shab = data['nobat_kari_sob_shab']
-                nobat_kari_sob_shab = nobat_kari_sob_shab.split(':')
-                nobat_kari_sob_shab = round((int(nobat_kari_sob_shab[0]) + (int(nobat_kari_sob_shab[1]) / 60)), 6)
-                data['nobat_kari_sob_shab'] = nobat_kari_sob_shab
-            elif data['nobat_kari_sob_shab'] == '':
-                data['nobat_kari_sob_shab'] = 0
-        except:
-            raise ValidationError('برای نوبت کاری صبح و شب یک ساعت صحیح وارد کنید')
-
-        try:
-            if data['nobat_kari_asr_shab'] and data['nobat_kari_asr_shab'] != '':
-                nobat_kari_asr_shab = data['nobat_kari_asr_shab']
-                nobat_kari_asr_shab = nobat_kari_asr_shab.split(':')
-                nobat_kari_asr_shab = round((int(nobat_kari_asr_shab[0]) + (int(nobat_kari_asr_shab[1]) / 60)), 6)
-                data['nobat_kari_asr_shab'] = nobat_kari_asr_shab
-            elif data['nobat_kari_asr_shab'] == '':
-                data['nobat_kari_asr_shab'] = 0
-
-        except:
-            raise ValidationError('برای نوبت کاری عصر و شب یک ساعت صحیح وارد کنید')
-
-        try:
-            if data['nobat_kari_sob_asr_shab'] and data['nobat_kari_sob_asr_shab'] != '':
-                nobat_kari_sob_asr_shab = data['nobat_kari_sob_asr_shab']
-                nobat_kari_sob_asr_shab = nobat_kari_sob_asr_shab.split(':')
-                nobat_kari_sob_asr_shab = round((int(nobat_kari_sob_asr_shab[0]) + (int(nobat_kari_sob_asr_shab[1]) / 60)), 6)
-                data['nobat_kari_sob_asr_shab'] = nobat_kari_sob_asr_shab
-            elif data['nobat_kari_sob_asr_shab'] == '':
-                data['nobat_kari_sob_asr_shab'] = 0
-        except:
-            raise ValidationError('برای نوبت کاری صبح، عصر و شب یک ساعت صحیح وارد کنید')
-
         serializer = ListOfPayItemsAddInfoSerializer(query, data)
         if serializer.is_valid():
             serializer.save()
