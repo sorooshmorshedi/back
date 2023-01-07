@@ -3288,8 +3288,10 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             contract = Contract.objects.get(pk=contract)
             workshop_personnel = contract.workshop_personnel
             is_insurance = contract.insurance
-            filtered_absence = LeaveOrAbsence.objects.filter(workshop_personnel=workshop_personnel)
-            filtered_mission = Mission.objects.filter(workshop_personnel=workshop_personnel)
+            filtered_absence = LeaveOrAbsence.objects.filter(Q(workshop_personnel=workshop_personnel) &
+                                                             Q(is_verified=True))
+            filtered_mission = Mission.objects.filter(Q(workshop_personnel=workshop_personnel) &
+                                                      Q(is_in_payment=True)  & Q(is_verified=True))
             for absence in filtered_absence.all():
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \

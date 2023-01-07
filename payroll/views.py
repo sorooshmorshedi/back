@@ -1250,7 +1250,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['ezafe_kari'] and data['ezafe_kari'] != '':
                 ezafe_kari = data['ezafe_kari']
                 ezafe_kari = ezafe_kari.split(':')
-                ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 2)
+                ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 6)
                 data['ezafe_kari'] = ezafe_kari
             elif data['ezafe_kari'] == '':
                 data['ezafe_kari'] = 0
@@ -1261,7 +1261,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['tatil_kari'] and data['tatil_kari'] != '':
                 tatil_kari = data['tatil_kari']
                 tatil_kari = tatil_kari.split(':')
-                tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 2)
+                tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 6)
                 data['tatil_kari'] = tatil_kari
             elif data['tatil_kari'] == '':
                 data['tatil_kari'] = 0
@@ -1272,7 +1272,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['kasre_kar'] and data['kasre_kar'] != '':
                 kasre_kar = data['kasre_kar']
                 kasre_kar = kasre_kar.split(':')
-                kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 2)
+                kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 6)
                 data['kasre_kar'] = kasre_kar
             elif data['kasre_kar'] == '':
                 data['kasre_kar'] = 0
@@ -1283,7 +1283,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['shab_kari'] and data['shab_kari'] != '':
                 shab_kari = data['shab_kari']
                 shab_kari = shab_kari.split(':')
-                shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 2)
+                shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 6)
                 data['shab_kari'] = shab_kari
             elif data['shab_kari'] == '':
                 data['shab_kari'] = 0
@@ -1294,7 +1294,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['nobat_kari_sob_asr'] and data['nobat_kari_sob_asr'] != '':
                 nobat_kari_sob_asr = data['nobat_kari_sob_asr']
                 nobat_kari_sob_asr = nobat_kari_sob_asr.split(':')
-                nobat_kari_sob_asr = round((int(nobat_kari_sob_asr[0]) + (int(nobat_kari_sob_asr[1]) / 60)), 2)
+                nobat_kari_sob_asr = round((int(nobat_kari_sob_asr[0]) + (int(nobat_kari_sob_asr[1]) / 60)), 6)
                 data['nobat_kari_sob_asr'] = nobat_kari_sob_asr
             elif data['nobat_kari_sob_asr'] == '':
                 data['nobat_kari_sob_asr'] = 0
@@ -1305,7 +1305,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['nobat_kari_sob_shab'] and data['nobat_kari_sob_shab'] != '':
                 nobat_kari_sob_shab = data['nobat_kari_sob_shab']
                 nobat_kari_sob_shab = nobat_kari_sob_shab.split(':')
-                nobat_kari_sob_shab = round((int(nobat_kari_sob_shab[0]) + (int(nobat_kari_sob_shab[1]) / 60)), 2)
+                nobat_kari_sob_shab = round((int(nobat_kari_sob_shab[0]) + (int(nobat_kari_sob_shab[1]) / 60)), 6)
                 data['nobat_kari_sob_shab'] = nobat_kari_sob_shab
             elif data['nobat_kari_sob_shab'] == '':
                 data['nobat_kari_sob_shab'] = 0
@@ -1316,7 +1316,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['nobat_kari_asr_shab'] and data['nobat_kari_asr_shab'] != '':
                 nobat_kari_asr_shab = data['nobat_kari_asr_shab']
                 nobat_kari_asr_shab = nobat_kari_asr_shab.split(':')
-                nobat_kari_asr_shab = round((int(nobat_kari_asr_shab[0]) + (int(nobat_kari_asr_shab[1]) / 60)), 2)
+                nobat_kari_asr_shab = round((int(nobat_kari_asr_shab[0]) + (int(nobat_kari_asr_shab[1]) / 60)), 6)
                 data['nobat_kari_asr_shab'] = nobat_kari_asr_shab
             elif data['nobat_kari_asr_shab'] == '':
                 data['nobat_kari_asr_shab'] = 0
@@ -1328,7 +1328,7 @@ class ListOfPayItemsCalculate(APIView):
             if data['nobat_kari_sob_asr_shab'] and data['nobat_kari_sob_asr_shab'] != '':
                 nobat_kari_sob_asr_shab = data['nobat_kari_sob_asr_shab']
                 nobat_kari_sob_asr_shab = nobat_kari_sob_asr_shab.split(':')
-                nobat_kari_sob_asr_shab = round((int(nobat_kari_sob_asr_shab[0]) + (int(nobat_kari_sob_asr_shab[1]) / 60)), 2)
+                nobat_kari_sob_asr_shab = round((int(nobat_kari_sob_asr_shab[0]) + (int(nobat_kari_sob_asr_shab[1]) / 60)), 6)
                 data['nobat_kari_sob_asr_shab'] = nobat_kari_sob_asr_shab
             elif data['nobat_kari_sob_asr_shab'] == '':
                 data['nobat_kari_sob_asr_shab'] = 0
