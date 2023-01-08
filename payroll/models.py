@@ -3782,11 +3782,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_aele_mandi_info(self):
         self.total_insurance_month = self.workshop_personnel.insurance_history_total
-        if not self.workshop_personnel.personnel.insurance:
-            self.total_insurance_month = 0
-            self.aele_mandi_child = 0
-            return 0
-        elif self.total_insurance_month >= 24:
+        if self.total_insurance_month >= 24 and self.workshop_personnel.personnel.insurance:
             children = self.workshop_personnel.personnel.childs
             aele_mandi_child = 0
             for child in children:
@@ -3796,6 +3792,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         aele_mandi_child += 1
             self.aele_mandi_child = aele_mandi_child
             return aele_mandi_child
+        else:
+            self.aele_mandi_child = 0
+            self.total_insurance_month = 0
+            return 0
 
     @property
     def get_sanavt_info(self):
