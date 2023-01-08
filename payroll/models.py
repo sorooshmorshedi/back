@@ -1209,13 +1209,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     title = models.ForeignKey(WorkTitle, related_name='workshop_personnel', on_delete=models.SET_NULL,
                               blank=True, null=True)
-    work_title = models.CharField(max_length=100, blank=True, null=True)
-    work_title_code = models.CharField(max_length=10, blank=True, null=True)
-
     previous_insurance_history_out_workshop = models.IntegerField(blank=True, null=True)
     previous_insurance_history_in_workshop = models.IntegerField(blank=True, null=True)
-    current_insurance_history_in_workshop = models.IntegerField(default=0)
-    insurance_history_totality = models.IntegerField(default=0)
 
     job_position = models.CharField(max_length=100, blank=True, null=True)
     job_group = models.IntegerField(choices=JOB_GROUP_TYPES, blank=True, null=True)
@@ -1234,7 +1229,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def current_insurance(self):
-        if self.list_of_pay_item and self.personnel.insurance:
+        if self.personnel.insurance:
             lists = self.workshop.list_of_pay.filter(ultimate=True)
             items = self.list_of_pay_item.filter(list_of_pay__in=lists)
             total = 0
@@ -1247,20 +1242,14 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     @property
     def total_insurance(self):
         if self.personnel.insurance:
-            if self.previous_insurance_history_in_workshop:
-                return self.current_insurance + self.previous_insurance_history_in_workshop
-            else:
-                return self.current_insurance
+            return self.current_insurance + self.previous_insurance_history_in_workshop
         else:
             return 0
 
     @property
     def insurance_history_total(self):
         if self.personnel.insurance:
-            if self.previous_insurance_history_out_workshop:
-                return self.total_insurance + self.previous_insurance_history_out_workshop
-            else:
-                self.total_insurance
+            return self.total_insurance + self.previous_insurance_history_out_workshop
         else:
             return 0
 
@@ -3792,41 +3781,31 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi_info(self):
+        self.total_insurance_month = self.workshop_personnel.insurance_history_total
         if not self.workshop_personnel.personnel.insurance:
             self.total_insurance_month = 0
+            self.aele_mandi_child = 0
             return 0
-        elif self.workshop_personnel.personnel.insurance:
-            personnel_family = self.workshop_personnel.personnel.childs
-            if self.workshop_personnel.personnel.insurance:
-                self.total_insurance_month = self.workshop_personnel.insurance_history_total
-            else:
-                self.total_insurance_month = 0
+        elif self.total_insurance_month >= 24:
+            children = self.workshop_personnel.personnel.childs
             aele_mandi_child = 0
-            if self.total_insurance_month >= 24:
-                for person in personnel_family:
-                    if person.marital_status == 's':
-                        person_age = self.list_of_pay.year - person.date_of_birth.year
-                        if person_age <= 18:
-                            aele_mandi_child += 1
-                        elif person.physical_condition != 'h':
-                            aele_mandi_child += 1
+            for child in children:
+                if child.marital_status == 's':
+                    person_age = self.list_of_pay.year - child.date_of_birth.year
+                    if person_age <= 18 or child.physical_condition != 'h':
+                        aele_mandi_child += 1
             self.aele_mandi_child = aele_mandi_child
             return aele_mandi_child
 
     @property
     def get_sanavt_info(self):
         hr = self.get_hr_letter
-        sanavat_base = hr.paye_sanavat_amount
         sanavat_month = 0
         if self.workshop_personnel.workshop.sanavat_type == 'c':
-            if self.workshop_personnel.total_insurance:
-                sanavat_month = self.workshop_personnel.total_insurance
-            else:
-                sanavat_month = 0
+            sanavat_month = self.workshop_personnel.total_insurance
         elif self.workshop_personnel.workshop.sanavat_type == 'n':
-            if self.workshop_personnel.insurance_history_total:
-                sanavat_month = self.workshop_personnel.insurance_history_total
-        return sanavat_base, sanavat_month
+            sanavat_month = self.workshop_personnel.insurance_history_total
+        return hr.paye_sanavat_amount, sanavat_month
 
     @property
     def hoghoogh_mahane(self):
@@ -3845,13 +3824,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi(self):
-        month_day = self.list_of_pay.month_days
-        if self.total_insurance_month >= 24:
+        if self.aele_mandi_child != 0:
+            month_day = self.list_of_pay.month_days
             aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
                          Decimal(self.real_worktime) / Decimal(month_day)
             self.aele_mandi = aele_mandi
             return aele_mandi
         else:
+            self.aele_mandi = 0
             return 0
 
     @property
