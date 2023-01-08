@@ -478,6 +478,7 @@ class ListOfPayFilter(filters.FilterSet):
             'month': BASE_FIELD_FILTERS,
             'ultimate': BASE_FIELD_FILTERS,
             'use_in_calculate': BASE_FIELD_FILTERS,
+            'use_in_bime': BASE_FIELD_FILTERS,
             'pay_done': BASE_FIELD_FILTERS,
             'pay_form_create_date': BASE_FIELD_FILTERS,
             'bank_pay_date': BASE_FIELD_FILTERS,

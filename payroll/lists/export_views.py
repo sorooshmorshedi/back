@@ -500,8 +500,8 @@ class WorkshopPersonnelExportView(WorkshopPersonnelListView, BaseExportView):
                 form.title.name + ' ' + form.title.code,
                 form.previous_insurance_history_out_workshop,
                 form.previous_insurance_history_in_workshop,
-                form.current_insurance_history_in_workshop,
-                form.insurance_history_totality,
+                form.current_insurance,
+                form.insurance_history_total,
                 form.job_position,
                 form.get_job_group_display(),
                 form.job_location,
@@ -2148,7 +2148,7 @@ class PayrollExportView(ListOfPayListView, BaseExportView):
         for form in list_of_pay.first().get_items:
             data.append(
             [counter, form.workshop_personnel.personnel.full_name, form.contract.contract_from_date,
-             '', form.workshop_personnel.work_title, form.contract.insurance, form.workshop_personnel.get_insurance_in_workshop,
+             '', form.workshop_personnel.title.name, form.contract.insurance, form.workshop_personnel.current_insurance,
              '', form.normal_worktime, form.hourly_entitlement_leave_day, form.daily_entitlement_leave_day,
              form.entitlement_leave_day, form.illness_leave_day, form.matter_47_leave_day, form.without_salary_leave_day,
              form.absence_day, form.real_worktime, form.hoghoogh_roozane, form.hoghoogh_mahane,  form.sanavat_base, form.sanavat_mahane,

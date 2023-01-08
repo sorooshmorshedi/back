@@ -1112,48 +1112,77 @@ class PaymentList(APIView):
         12: 29,
     }
 
+    def __init__(self):
+        self.validate_status = True
+        self.error_message = []
+
     def post(self, request, year, month, pk):
         month_days = self.months_day[month]
         start_date = jdatetime.date(year, month, 1, locale='fa_IR')
         end_date = jdatetime.date(year, month, month_days, locale='fa_IR')
         workshop = Workshop.objects.get(pk=pk)
         data = request.data
-        payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
-                                                use_in_calculate=data['use_in_calculate'], ultimate=data['ultimate'],
-                                                    month_days=month_days, start_date=start_date, end_date=end_date)
-        contract = payroll_list.get_contracts
-        if len(contract) == 0:
-            raise ValidationError('قراردادی ثبت نشده')
-        else:
 
-            payroll_list.save()
-            response = payroll_list.info_for_items
-            for item in response:
-                if item['insurance']:
-                    insurance = 'y'
-                else:
-                    insurance = 'n'
+        if not data['name']:
+            self.validate_status = False
+            self.error_message.append('نام را وارد کنید')
+        if data['use_in_calculate'] == None:
+            self.validate_status = False
+            self.error_message.append('وضعیت محاسبه مالیات را وارد کنید')
+        if data['use_in_bime'] == None:
+            self.validate_status = False
+            self.error_message.append('وضعیت محاسبه بیمه را وارد کنید')
 
-                payroll_list_item = ListOfPayItem.objects.create(
-                    list_of_pay=payroll_list,
-                    workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
-                    contract=Contract.objects.get(pk=item['contract']),
-                    normal_worktime=item['normal_work'],
-                    real_worktime=item['real_work'],
-                    mission_day=item['mission'],
-                    is_insurance=insurance,
-                    absence_day=item['leaves']['a'],
-                    entitlement_leave_day=item['leaves']['e'],
-                    daily_entitlement_leave_day=item['leaves']['ed'],
-                    hourly_entitlement_leave_day=item['leaves']['eh'],
-                    illness_leave_day=item['leaves']['i']+item['leaves']['c'],
-                    without_salary_leave_day=item['leaves']['w'],
-                    matter_47_leave_day=item['leaves']['m']
-                )
-                payroll_list_item.save()
-            list_of_pay = payroll_list
-            list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
-            return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
+        if self.validate_status:
+            payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
+                                                    use_in_calculate=data['use_in_calculate'],
+                                                    use_in_bime=data['use_in_bime'], month_days=month_days,
+                                                    start_date=start_date, end_date=end_date)
+
+            contracts = payroll_list.get_contracts
+            if contracts == 0:
+                self.validate_status = False
+                self.error_message.append('در این کارگاه و این زمان قراردادی ثبت نشده')
+                payroll_list.delete()
+            else:
+                response = payroll_list.info_for_items
+                for item in response:
+                    if item['insurance']:
+                        insurance = 'y'
+                    else:
+                        insurance = 'n'
+
+                    payroll_list_item = ListOfPayItem.objects.create(
+                        list_of_pay=payroll_list,
+                        workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
+                        contract=Contract.objects.get(pk=item['contract']),
+                        normal_worktime=item['normal_work'],
+                        real_worktime=item['real_work'],
+                        mission_day=item['mission'],
+                        is_insurance=insurance,
+                        absence_day=item['leaves']['a'],
+                        entitlement_leave_day=item['leaves']['e'],
+                        daily_entitlement_leave_day=item['leaves']['ed'],
+                        hourly_entitlement_leave_day=item['leaves']['eh'],
+                        illness_leave_day=item['leaves']['i']+item['leaves']['c'],
+                        without_salary_leave_day=item['leaves']['w'],
+                        matter_47_leave_day=item['leaves']['m']
+                    )
+                    payroll_list_item.save()
+                list_of_pay = payroll_list
+                list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
+                return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
+        if not self.validate_status:
+            counter = 1
+            response = []
+            for error in self.error_message:
+                error = str(counter) + '-' + error
+                counter += 1
+                response.append(error)
+            return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 class CalculationsPayrollDetail(APIView):
@@ -1416,8 +1445,18 @@ class ListOfPayUltimateApi(APIView):
     def post(self, request, pk):
         use_in_calculate = request.data['use_in_calculate']
         ultimate = request.data['ultimate']
+        bime = request.data['bime']
         list_of_pay = ListOfPay.objects.get(pk=pk)
+        same_lists = ListOfPay.objects.filter(Q(year=list_of_pay.year) & Q(month=list_of_pay.month)
+                                              & Q(workshop=list_of_pay.workshop))
+        if ultimate:
+            for same_list in same_lists:
+                same_list.ultimate = False
+                same_list.save()
         list_of_pay.ultimate = ultimate
         list_of_pay.use_in_calculate = use_in_calculate
+        list_of_pay.use_in_bime = bime
+
+
         list_of_pay.save()
         return Response({'وضعیت': 'قطعی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)

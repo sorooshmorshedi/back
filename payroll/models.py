@@ -1241,14 +1241,14 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def total_insurance(self):
-        if self.personnel.insurance:
+        if self.personnel.insurance and self.previous_insurance_history_in_workshop:
             return self.current_insurance + self.previous_insurance_history_in_workshop
         else:
             return 0
 
     @property
     def insurance_history_total(self):
-        if self.personnel.insurance:
+        if self.personnel.insurance and self.previous_insurance_history_out_workshop:
             return self.total_insurance + self.previous_insurance_history_out_workshop
         else:
             return 0
@@ -3074,6 +3074,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     end_date = jmodels.jDateField()
     ultimate = models.BooleanField(default=False)
     use_in_calculate = models.BooleanField(default=False)
+    use_in_bime = models.BooleanField(default=False)
 
     '''for payment'''
     pay_done = models.BooleanField(default=False)
@@ -3168,7 +3169,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                 contracts.append(contract.id)
         filtered_contracts = Contract.objects.filter(pk__in=contracts)
         if len(filtered_contracts) == 0:
-            raise ValidationError('قراردادی در این زمان ثبت نشده')
+            return 0
         else:
             return filtered_contracts
 

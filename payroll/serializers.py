@@ -318,10 +318,13 @@ class ListOfPayItemNormalSerializer(serializers.ModelSerializer):
 class ListOfPayItemLessSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
     is_insurance_display = serializers.CharField(source='get_is_insurance_display', read_only=True)
+    title = serializers.CharField(source='workshop_personnel.title.name', read_only=True)
+    get_payable = serializers.IntegerField(source='payable', read_only=True)
 
     class Meta:
         model = ListOfPayItem
-        fields = 'total_payment', 'normal_worktime', 'real_worktime', 'personnel_name', 'is_insurance_display', 'id'
+        fields = 'total_payment', 'normal_worktime', 'real_worktime', 'personnel_name', 'is_insurance_display', 'id',\
+                 'title', 'get_payable'
 
 class ListOfPaySerializer(serializers.ModelSerializer):
     list_of_pay_item = ListOfPayItemNormalSerializer(many=True)
@@ -342,7 +345,7 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
-                'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate'
+                'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
@@ -385,7 +388,7 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
 class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPayItem
-        fields = 'id' , 'sayer_kosoorat', 'cumulative_absence ', \
+        fields = 'id', 'sayer_kosoorat', 'cumulative_absence ', \
                         'cumulative_mission ', 'cumulative_entitlement ',\
                         'cumulative_illness ', 'cumulative_without_salary '
 
