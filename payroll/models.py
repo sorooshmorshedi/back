@@ -1246,17 +1246,23 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def total_insurance(self):
-        if self.previous_insurance_history_in_workshop:
-            return self.current_insurance + self.previous_insurance_history_in_workshop
+        if self.personnel.insurance:
+            if self.previous_insurance_history_in_workshop:
+                return self.current_insurance + self.previous_insurance_history_in_workshop
+            else:
+                return self.current_insurance
         else:
-            return self.current_insurance
+            return 0
 
     @property
     def insurance_history_total(self):
-        if self.previous_insurance_history_out_workshop:
-            return self.total_insurance + self.previous_insurance_history_out_workshop
+        if self.personnel.insurance:
+            if self.previous_insurance_history_out_workshop:
+                return self.total_insurance + self.previous_insurance_history_out_workshop
+            else:
+                self.total_insurance
         else:
-            self.total_insurance
+            return 0
 
     @property
     def quit_job_date(self):
@@ -3540,6 +3546,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return amount[::-1]
         else:
             return 0
+
+    @property
+    def kasre_kar_time(self):
+        kasre_kar_hour = int(self.kasre_kar)
+        kasre_kar_min = (self.kasre_kar - Decimal(kasre_kar_hour)) * Decimal(60)
+        return str(kasre_kar_hour) + ':' + str(round(kasre_kar_min))
 
     @property
     def hoghoogh_mahane_with_comma(self):

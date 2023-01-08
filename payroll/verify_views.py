@@ -543,7 +543,7 @@ class WorkshopPersonnelVerifyApi(APIView):
 
     def get(self, request, pk):
         personnel = WorkshopPersonnel.objects.get(pk=pk)
-        if not personnel.work_title:
+        if not personnel.title:
             self.validate_status = False
             self.error_messages.append('عنوان شغلی(بیمه) را وارد کنید')
         if not personnel.job_location:
@@ -1161,7 +1161,7 @@ class DeductionVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('تاریخ  را وارد کنید')
 
-        if self.validate_status:
+        if self.validate_status and not deductions.is_template:
             check_with_contract = deductions.check_with_contract
             if not check_with_contract:
                 self.validate_status = False

@@ -162,6 +162,11 @@ class HRLetterSerializer(serializers.ModelSerializer):
     personnel_father = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
     personnel_identity = serializers.CharField(source='contract.workshop_personnel.personnel.national_code', read_only=True)
     personnel_nationality = serializers.IntegerField(source='contract.workshop_personnel.personnel.nationality', read_only=True)
+    get_day_hourly_pay_base = serializers.IntegerField(source='day_hourly_pay_base', read_only=True)
+    get_daily_pay_base = serializers.IntegerField(source='daily_pay_base', read_only=True)
+    get_monthly_pay_base = serializers.IntegerField(source='monthly_pay_base', read_only=True)
+    get_insurance_pay_day = serializers.IntegerField(source='insurance_pay_day', read_only=True)
+
 
     class Meta:
         model = HRLetter
@@ -262,6 +267,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_tax_included = serializers.CharField(source='tax_included_payment', read_only=True)
     get_month_tax = serializers.CharField(source='calculate_month_tax', read_only=True)
     get_moaf_sum = serializers.CharField(source='moaf_sum', read_only=True)
+    get_kasre_kar = serializers.CharField(source='kasre_kar_time', read_only=True)
 
     get_insurance_monthly_payment = serializers.CharField(source='insurance_monthly_payment', read_only=True)
     get_insurance_monthly_benefit = serializers.CharField(source='insurance_monthly_benefit', read_only=True)

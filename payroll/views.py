@@ -1125,6 +1125,7 @@ class PaymentList(APIView):
         if len(contract) == 0:
             raise ValidationError('قراردادی ثبت نشده')
         else:
+
             payroll_list.save()
             response = payroll_list.info_for_items
             for item in response:
