@@ -3792,22 +3792,26 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi_info(self):
-        personnel_family = self.workshop_personnel.personnel.childs
-        if self.workshop_personnel.personnel.insurance:
-            self.total_insurance_month = self.workshop_personnel.insurance_history_total
-        else:
+        if not self.workshop_personnel.personnel.insurance:
             self.total_insurance_month = 0
-        aele_mandi_child = 0
-        if self.total_insurance_month >= 24:
-            for person in personnel_family:
-                if person.marital_status == 's':
-                    person_age = self.list_of_pay.year - person.date_of_birth.year
-                    if person_age <= 18:
-                        aele_mandi_child += 1
-                    elif person.physical_condition != 'h':
-                        aele_mandi_child += 1
-        self.aele_mandi_child = aele_mandi_child
-        return aele_mandi_child
+            return 0
+        elif self.workshop_personnel.personnel.insurance:
+            personnel_family = self.workshop_personnel.personnel.childs
+            if self.workshop_personnel.personnel.insurance:
+                self.total_insurance_month = self.workshop_personnel.insurance_history_total
+            else:
+                self.total_insurance_month = 0
+            aele_mandi_child = 0
+            if self.total_insurance_month >= 24:
+                for person in personnel_family:
+                    if person.marital_status == 's':
+                        person_age = self.list_of_pay.year - person.date_of_birth.year
+                        if person_age <= 18:
+                            aele_mandi_child += 1
+                        elif person.physical_condition != 'h':
+                            aele_mandi_child += 1
+            self.aele_mandi_child = aele_mandi_child
+            return aele_mandi_child
 
     @property
     def get_sanavt_info(self):
