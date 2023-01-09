@@ -148,6 +148,8 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     save_absence_limit = models.BooleanField(default=True)
     save_absence_transfer_next_year = models.BooleanField(default=False)
 
+    illness_absence_in_real_work = models.BooleanField(default=False)
+
     is_active = models.BooleanField(blank=True, null=True)
 
     is_default = models.BooleanField(default=False)
@@ -1234,7 +1236,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             items = self.list_of_pay_item.filter(list_of_pay__in=lists)
             total = 0
             for item in items:
-                total += round((item.real_worktime / item.list_of_pay.month_days), 2)
+                total += round(((item.real_worktime + item.illness_leave_day) / item.list_of_pay.month_days), 2)
             return total
         else:
             return 0
@@ -1243,6 +1245,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def total_insurance(self):
         if self.personnel.insurance and self.previous_insurance_history_in_workshop:
             return self.current_insurance + self.previous_insurance_history_in_workshop
+        elif self.personnel.insurance and  not self.previous_insurance_history_in_workshop:
+            return self.current_insurance
         else:
             return 0
 
@@ -1250,6 +1254,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def insurance_history_total(self):
         if self.personnel.insurance and self.previous_insurance_history_out_workshop:
             return self.total_insurance + self.previous_insurance_history_out_workshop
+        elif self.personnel.insurance and not self.previous_insurance_history_out_workshop:
+            return self.total_insurance
         else:
             return 0
 
@@ -1607,6 +1613,9 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     contract_from_date = jmodels.jDateField(blank=True, null=True)
     contract_to_date = jmodels.jDateField(blank=True, null=True)
     quit_job_date = jmodels.jDateField(blank=True, null=True)
+
+    tax = models.BooleanField(default=False)
+    tax_add_date = jmodels.jDateField(blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'Contract'
@@ -3097,16 +3106,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         )
 
     def save(self, *args, **kwargs):
-        same = ListOfPay.objects.filter(Q(workshop=self.workshop)
-                                        & Q(year=self.year)
-                                        & Q(month=self.month)
-                                        & Q(ultimate=True))
-        if len(same) == 0:
-            self.ultimate = True
-        elif self.ultimate:
-            for list_of_pay in same:
-                list_of_pay.ultimate = False
-                list_of_pay.save()
         super().save(*args, **kwargs)
 
     @property
@@ -3537,11 +3536,28 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
+    @staticmethod
+    def decimal_to_time(number):
+        hour = int(number)
+        minute = (number - Decimal(hour)) * Decimal(60)
+        return str(hour) + ':' + str(round(minute))
+
     @property
     def kasre_kar_time(self):
-        kasre_kar_hour = int(self.kasre_kar)
-        kasre_kar_min = (self.kasre_kar - Decimal(kasre_kar_hour)) * Decimal(60)
-        return str(kasre_kar_hour) + ':' + str(round(kasre_kar_min))
+        return self.decimal_to_time(self.kasre_kar)
+
+    @property
+    def ezafe_kari_time(self):
+        return self.decimal_to_time(self.ezafe_kari)
+
+    @property
+    def tatil_kari_time(self):
+        return self.decimal_to_time(self.tatil_kari)
+
+    @property
+    def shab_kari_time(self):
+        return self.decimal_to_time(self.shab_kari)
+
 
     @property
     def hoghoogh_mahane_with_comma(self):
@@ -3825,10 +3841,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_aele_mandi(self):
+        work_time = self.real_worktime
+        if self.workshop_personnel.workshop.illness_absence_in_real_work:
+            work_time += self.illness_leave_day
         if self.aele_mandi_child != 0:
             month_day = self.list_of_pay.month_days
             aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
-                         Decimal(self.real_worktime) / Decimal(month_day)
+                         Decimal(work_time) / Decimal(month_day)
             self.aele_mandi = aele_mandi
             return aele_mandi
         else:
@@ -4396,7 +4415,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def haghe_bime_bime_shavande(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.worker_insurance_nerkh)
         else:
@@ -4404,7 +4423,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def employer_insurance(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.employer_insurance_nerkh)
         else:
@@ -4412,7 +4431,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def un_employer_insurance(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.unemployed_insurance_nerkh)
         else:
@@ -4420,7 +4439,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_monthly_benefit(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
             benefit = Decimal(hr.insurance_benefit)
             if hr.ezafe_kari_use_insurance:
@@ -4448,23 +4467,39 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_monthly_payment(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
-            return hr.insurance_pay_day * self.list_of_pay.personnel_insurance_worktime(
-                self.workshop_personnel.personnel.id)
+            return hr.insurance_pay_day * self.insurance_worktime
         else:
             return 0
 
     @property
+    def absence_and_days(self):
+        return self.absence_day + self.illness_leave_day + self.without_salary_leave_day
+
+    @property
     def insurance_worktime(self):
-        if self.contract.insurance:
-            return self.list_of_pay.personnel_insurance_worktime(self.workshop_personnel.personnel.id)
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+            month_start = self.list_of_pay.start_date
+            month_end = self.list_of_pay.end_date
+            start_date = self.contract.insurance_add_date
+            end_date = self.contract.contract_to_date
+            if self.contract.quit_job_date:
+                end_date = self.contract.quit_job_date
+            if start_date.__ge__(month_start) and end_date.__le__(month_end):
+                return end_date.day - start_date.day + self.real_worktime - self.normal_worktime
+            elif start_date.__lt__(month_start) and end_date.__gt__(month_end):
+                return self.list_of_pay.month_days + self.real_worktime - self.normal_worktime
+            elif start_date.__le__(month_start) and end_date.__gt__(month_start) and end_date.__le__(month_end):
+                return end_date.day + self.real_worktime - self.normal_worktime
+            elif start_date.__ge__(month_start) and start_date.__lt__(month_end) and end_date.__ge__(month_end):
+                return month_end.day + self.real_worktime - self.normal_worktime
         else:
             return 0
 
     @property
     def insurance_total_included(self):
-        if self.contract.insurance:
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
             hr = self.get_hr_letter
             total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
             return total
@@ -4517,22 +4552,34 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def tamin_ejtemaee_moafiat(self):
-        if self.workshop_personnel.workshop.tax_employer_type == 1:
-            return self.haghe_bime_bime_shavande
-        elif self.workshop_personnel.workshop.tax_employer_type == 2:
-            return (self.haghe_bime_bime_shavande * 2) / 7
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            if self.workshop_personnel.workshop.tax_employer_type == 1:
+                return self.haghe_bime_bime_shavande
+            elif self.workshop_personnel.workshop.tax_employer_type == 2:
+                return (self.haghe_bime_bime_shavande * 2) / 7
+        else:
+            return 0
 
     @property
     def haghe_bime_moafiat(self):
-        return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
+        else:
+            return 0
 
     @property
     def haghe_bime_moafiat_with_comma(self):
-        return self.with_comma(self.haghe_bime_moafiat)
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            return self.with_comma(self.haghe_bime_moafiat)
+        else:
+            return 0
 
     @property
     def ezafe_kari_nakhales(self):
-        return self.ezafe_kari_total + self.tatil_kari_total
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            return self.ezafe_kari_total + self.tatil_kari_total
+        else:
+            return 0
 
     @property
     def ezafe_kari_nakhales_with_comma(self):
@@ -4605,31 +4652,40 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def total_sayer_moafiat(self):
-        total = 0
-        total += self.sayer_moafiat
-        if self.list_of_pay.workshop.eydi_padash_identification == 'm':
-            total += self.calculate_monthly_eydi_tax
-        elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
-            total += self.calculate_yearly_eydi_tax
-        total += self.hr_tax_not_included
-        return total
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            total = 0
+            total += self.sayer_moafiat
+            if self.list_of_pay.workshop.eydi_padash_identification == 'm':
+                total += self.calculate_monthly_eydi_tax
+            elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
+                total += self.calculate_yearly_eydi_tax
+            total += self.hr_tax_not_included
+            return total
+        else:
+            return 0
 
     @property
     def moaf_sum(self):
-        total = 0
-        total += self.hazine_made_137
-        total += self.total_sayer_moafiat
-        total += self.mission_total
-        total += Decimal(self.get_hagh_sanavat_and_save_leaves)
-        total += Decimal(self.haghe_bime_moafiat)
-        total += self.manategh_tejari_moafiat
-        total += self.ejtenab_maliat_mozaaf
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            total = 0
+            total += self.hazine_made_137
+            total += self.total_sayer_moafiat
+            total += self.mission_total
+            total += Decimal(self.get_hagh_sanavat_and_save_leaves)
+            total += Decimal(self.haghe_bime_moafiat)
+            total += self.manategh_tejari_moafiat
+            total += self.ejtenab_maliat_mozaaf
 
-        return round(total)
+            return round(total)
+        else:
+            return 0
 
     @property
     def tax_included_payment(self):
-        return round(self.get_total_payment) - self.moaf_sum
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            return round(self.get_total_payment) - self.moaf_sum
+        else:
+            return 0
 
     @property
     def get_year_payment(self):
@@ -4645,15 +4701,18 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_last_tax(self):
-        items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
-                                             Q(workshop_personnel=self.workshop_personnel) &
-                                             Q(list_of_pay__ultimate=True) &
-                                             Q(list_of_pay__use_in_calculate=True))
-        tax = Decimal(0)
-        for item in items:
-            tax += item.calculate_month_tax
-        return tax
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                                 Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                                 Q(workshop_personnel=self.workshop_personnel) &
+                                                 Q(list_of_pay__ultimate=True) &
+                                                 Q(list_of_pay__use_in_calculate=True))
+            tax = Decimal(0)
+            for item in items:
+                tax += item.calculate_month_tax
+            return tax
+        else:
+            return 0
 
     @property
     def get_tax_row(self):
@@ -4673,73 +4732,82 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_month_tax(self):
-        hr = self.get_hr_letter
-        if hr.include_made_86:
-            tax = self.tax_included_payment / 10
-        else:
-            items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                                 Q(list_of_pay__month__lte=self.list_of_pay.month) &
-                                                 Q(workshop_personnel=self.workshop_personnel) &
-                                                 Q(list_of_pay__ultimate=True) &
-                                                 Q(list_of_pay__use_in_calculate=True))
-            tax = Decimal(0)
-            year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
-            mytax = self.get_tax_row
-            tax_rows = mytax.tax_row.all()
-            tax_row = tax_rows.get(from_amount=Decimal(0))
-            start = 0
-            while year_amount >= Decimal(0):
-                if year_amount + start <= (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
-                    tax += (year_amount * tax_row.ratio / 100)
-                    print('tax :', tax)
-                    return round(tax) - round(self.get_last_tax)
-                elif year_amount + start > (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
-                    tax += ((tax_row.to_amount * Decimal(len(items)) / Decimal(12))
-                            - (tax_row.from_amount * Decimal(len(items)) / Decimal(12))) * tax_row.ratio / 100
-                    year_amount -= ((tax_row.to_amount * Decimal(len(items)) / Decimal(12)) -
-                                    (tax_row.from_amount * Decimal(len(items)) / Decimal(12)))
-                    try:
-                        tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
-                        start = tax_row.from_amount * Decimal(len(items)) / Decimal(12)
-                    except:
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            hr = self.get_hr_letter
+            if hr.include_made_86:
+                tax = self.tax_included_payment / 10
+            else:
+                items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                                     Q(list_of_pay__month__lte=self.list_of_pay.month) &
+                                                     Q(workshop_personnel=self.workshop_personnel) &
+                                                     Q(list_of_pay__ultimate=True) &
+                                                     Q(list_of_pay__use_in_calculate=True))
+                tax = Decimal(0)
+                year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
+                mytax = self.get_tax_row
+                tax_rows = mytax.tax_row.all()
+                tax_row = tax_rows.get(from_amount=Decimal(0))
+                start = 0
+                while year_amount >= Decimal(0):
+                    if year_amount + start <= (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
+                        tax += (year_amount * tax_row.ratio / 100)
+                        print('tax :', tax)
                         return round(tax) - round(self.get_last_tax)
-        return round(tax) - round(self.get_last_tax)
+                    elif year_amount + start > (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
+                        tax += ((tax_row.to_amount * Decimal(len(items)) / Decimal(12))
+                                - (tax_row.from_amount * Decimal(len(items)) / Decimal(12))) * tax_row.ratio / 100
+                        year_amount -= ((tax_row.to_amount * Decimal(len(items)) / Decimal(12)) -
+                                        (tax_row.from_amount * Decimal(len(items)) / Decimal(12)))
+                        try:
+                            tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
+                            start = tax_row.from_amount * Decimal(len(items)) / Decimal(12)
+                        except:
+                            return round(tax) - round(self.get_last_tax)
+            return round(tax) - round(self.get_last_tax)
+        else:
+            return 0
 
     @property
     def calculate_monthly_eydi_tax(self):
-        hr = self.get_hr_letter
-        if hr.eydi_padash_use_tax:
-            mytax = self.get_tax_row
-            tax_rows = mytax.tax_row.all()
-            tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12 / 12
-            eydi = self.padash_total
-            moaf = moafiat_limit - Decimal(eydi)
-            if moaf <= 0:
-                eydi_tax = -moaf
-            else:
-                eydi_tax = 0
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            hr = self.get_hr_letter
+            if hr.eydi_padash_use_tax:
+                mytax = self.get_tax_row
+                tax_rows = mytax.tax_row.all()
+                tax_row = tax_rows.get(from_amount=Decimal(0))
+                moafiat_limit = tax_row.to_amount / 12 / 12
+                eydi = self.padash_total
+                moaf = moafiat_limit - Decimal(eydi)
+                if moaf <= 0:
+                    eydi_tax = -moaf
+                else:
+                    eydi_tax = 0
 
-            return eydi_tax
+                return eydi_tax
+            else:
+                return 0
         else:
             return 0
 
     @property
     def calculate_yearly_eydi_tax(self):
-        hr = self.get_hr_letter
-        if hr.eydi_padash_use_tax:
-            mytax = self.get_tax_row
-            tax_rows = mytax.tax_row.all()
-            tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12
-            eydi = self.padash_total
-            moaf = round(moafiat_limit) - round(eydi)
-            if moaf <= 0:
-                eydi_tax = -moaf
-            else:
-                eydi_tax = 0
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            hr = self.get_hr_letter
+            if hr.eydi_padash_use_tax:
+                mytax = self.get_tax_row
+                tax_rows = mytax.tax_row.all()
+                tax_row = tax_rows.get(from_amount=Decimal(0))
+                moafiat_limit = tax_row.to_amount / 12
+                eydi = self.padash_total
+                moaf = round(moafiat_limit) - round(eydi)
+                if moaf <= 0:
+                    eydi_tax = -moaf
+                else:
+                    eydi_tax = 0
 
-            return eydi_tax
+                return eydi_tax
+            else:
+                return 0
         else:
             return 0
 

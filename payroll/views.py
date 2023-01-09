@@ -1030,6 +1030,11 @@ class ListOfPayDetail(APIView):
         serializers = ListOfPaySerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
+    def delete(self, request, pk):
+        query = self.get_object(pk)
+        query.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ListOfPayItemDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -1129,9 +1134,6 @@ class PaymentList(APIView):
         if data['use_in_calculate'] == None:
             self.validate_status = False
             self.error_message.append('وضعیت محاسبه مالیات را وارد کنید')
-        if data['use_in_bime'] == None:
-            self.validate_status = False
-            self.error_message.append('وضعیت محاسبه بیمه را وارد کنید')
 
         if self.validate_status:
             payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
@@ -1180,9 +1182,6 @@ class PaymentList(APIView):
                 counter += 1
                 response.append(error)
             return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 class CalculationsPayrollDetail(APIView):
@@ -1276,56 +1275,61 @@ class ListOfPayItemsCalculate(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         data = request.data
-        try:
-            if data['ezafe_kari'] and data['ezafe_kari'] != '':
-                ezafe_kari = data['ezafe_kari']
-                ezafe_kari = ezafe_kari.split(':')
-                ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 6)
-                data['ezafe_kari'] = ezafe_kari
-            elif data['ezafe_kari'] == '':
-                data['ezafe_kari'] = 0
-        except:
-            raise ValidationError('برای اضافه کاری یک ساعت صحیح وارد کنید')
+        is_in = request.data['is_in']
+        del(data['is_in'])
+        if is_in:
+            try:
+                if data['ezafe_kari'] and data['ezafe_kari'] != '':
+                    ezafe_kari = data['ezafe_kari']
+                    ezafe_kari = ezafe_kari.split(':')
+                    ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 6)
+                    data['ezafe_kari'] = ezafe_kari
+                elif data['ezafe_kari'] == '':
+                    data['ezafe_kari'] = 0
+            except:
+                raise ValidationError('برای اضافه کاری یک ساعت صحیح وارد کنید')
 
-        try:
-            if data['tatil_kari'] and data['tatil_kari'] != '':
-                tatil_kari = data['tatil_kari']
-                tatil_kari = tatil_kari.split(':')
-                tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 6)
-                data['tatil_kari'] = tatil_kari
-            elif data['tatil_kari'] == '':
-                data['tatil_kari'] = 0
-        except:
-            raise ValidationError('برای تعطیل کاری یک ساعت صحیح وارد کنید')
+            try:
+                if data['tatil_kari'] and data['tatil_kari'] != '':
+                    tatil_kari = data['tatil_kari']
+                    tatil_kari = tatil_kari.split(':')
+                    tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 6)
+                    data['tatil_kari'] = tatil_kari
+                elif data['tatil_kari'] == '':
+                    data['tatil_kari'] = 0
+            except:
+                raise ValidationError('برای تعطیل کاری یک ساعت صحیح وارد کنید')
 
-        try:
-            if data['kasre_kar'] and data['kasre_kar'] != '':
-                kasre_kar = data['kasre_kar']
-                kasre_kar = kasre_kar.split(':')
-                kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 6)
-                data['kasre_kar'] = kasre_kar
-            elif data['kasre_kar'] == '':
-                data['kasre_kar'] = 0
-        except:
-            raise ValidationError('برای کسر کار یک ساعت صحیح وارد کنید')
+            try:
+                if data['kasre_kar'] and data['kasre_kar'] != '':
+                    kasre_kar = data['kasre_kar']
+                    kasre_kar = kasre_kar.split(':')
+                    kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 6)
+                    data['kasre_kar'] = kasre_kar
+                elif data['kasre_kar'] == '':
+                    data['kasre_kar'] = 0
+            except:
+                raise ValidationError('برای کسر کار یک ساعت صحیح وارد کنید')
 
-        try:
-            if data['shab_kari'] and data['shab_kari'] != '':
-                shab_kari = data['shab_kari']
-                shab_kari = shab_kari.split(':')
-                shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 6)
-                data['shab_kari'] = shab_kari
-            elif data['shab_kari'] == '':
-                data['shab_kari'] = 0
-        except:
-            raise ValidationError('برای شب کاری یک ساعت صحیح وارد کنید')
+            try:
+                if data['shab_kari'] and data['shab_kari'] != '':
+                    shab_kari = data['shab_kari']
+                    shab_kari = shab_kari.split(':')
+                    shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 6)
+                    data['shab_kari'] = shab_kari
+                elif data['shab_kari'] == '':
+                    data['shab_kari'] = 0
+            except:
+                raise ValidationError('برای شب کاری یک ساعت صحیح وارد کنید')
 
-        serializer = ListOfPayItemsAddInfoSerializer(query, data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer = ListOfPayItemsAddInfoSerializer(query, data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            query.delete()
+            return Response({'status': 'deleted'}, status=status.HTTP_200_OK)
 
 
 class ListOfPayBankDetail(APIView):
@@ -1386,6 +1390,8 @@ class ListOfPayItemPaymentAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 class ListOfPayCopy(APIView):
     months_day = {
         1: 31,
@@ -1442,21 +1448,34 @@ class ListOfPayUltimateApi(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
 
+    def __init__(self):
+        self.validate_status = True
+        self.response_message = ''
+
     def post(self, request, pk):
-        use_in_calculate = request.data['use_in_calculate']
         ultimate = request.data['ultimate']
-        bime = request.data['bime']
         list_of_pay = ListOfPay.objects.get(pk=pk)
         same_lists = ListOfPay.objects.filter(Q(year=list_of_pay.year) & Q(month=list_of_pay.month)
                                               & Q(workshop=list_of_pay.workshop))
         if ultimate:
-            for same_list in same_lists:
-                same_list.ultimate = False
-                same_list.save()
-        list_of_pay.ultimate = ultimate
-        list_of_pay.use_in_calculate = use_in_calculate
-        list_of_pay.use_in_bime = bime
+            if list_of_pay.use_in_calculate:
+                for same_list in same_lists:
+                    if same_list.use_in_calculate and same_list.ultimate:
+                        self.validate_status = False
+                        self.response_message = 'ابتدا تمام لیست های با بیمه و مالیات این ماه را غیر نهایی کنید'
+            elif not list_of_pay.use_in_calculate:
+                for same_list in same_lists:
+                    if not same_list.use_in_calculate and same_list.ultimate:
+                        self.validate_status = False
+                        self.response_message = 'ابتدا تمام لیست های بدون بیمه و مالیات این ماه را غیر نهایی کنید'
 
-
-        list_of_pay.save()
-        return Response({'وضعیت': 'قطعی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)
+            if self.validate_status:
+                list_of_pay.ultimate = ultimate
+                list_of_pay.save()
+                return Response({'وضعیت': 'نهایی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'وضعیت': self.response_message}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            list_of_pay.ultimate = False
+            list_of_pay.save()
+            return Response({'وضعیت': 'غیر نهایی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)

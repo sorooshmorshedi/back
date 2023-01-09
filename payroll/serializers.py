@@ -43,9 +43,8 @@ class WorkShopSettingSerializer(serializers.ModelSerializer):
                  'aele_mandi_nerkh', 'nobat_kari_sob_asr_nerkh', 'nobat_kari_sob_shab_nerkh',\
                  'nobat_kari_asr_shab_nerkh', 'nobat_kari_sob_asr_shab_nerkh', 'mission_pay_nerkh',\
                  'worker_insurance_nerkh', 'employee_insurance_nerkh', 'made_86', 'hade_aksar_mashmool_bime',\
-                 'moafial_maliat_haghe_bime_sahme_bime_shavande', 'unemployed_insurance_nerkh', 'is_verified'
-
-
+                 'moafial_maliat_haghe_bime_sahme_bime_shavande', 'unemployed_insurance_nerkh', 'is_verified', \
+                 'illness_absence_in_real_work'
 
 
 class PersonnelSerializer(serializers.ModelSerializer):
@@ -243,7 +242,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     contract_row_title = serializers.IntegerField(source='contract_row.contract_row', read_only=True)
     haghe_bime = serializers.IntegerField(source='haghe_bime_bime_shavande', read_only=True)
     start_date = serializers.CharField(source='contract.contract_from_date.__str__', read_only=True)
-    work_title = serializers.CharField(source='workshop_personnel.work_title', read_only=True)
+    work_title = serializers.CharField(source='workshop_personnel.title.name', read_only=True)
     get_insurance_in_workshop = serializers.CharField(source='workshop_personnel.get_insurance_in_workshop', read_only=True)
     sanavat_mahane_real_work = serializers.CharField(source='sanavat_mahane', read_only=True)
     hoghoogh_mahane_real_work = serializers.CharField(source='hoghoogh_mahane', read_only=True)
@@ -267,7 +266,10 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_tax_included = serializers.CharField(source='tax_included_payment', read_only=True)
     get_month_tax = serializers.CharField(source='calculate_month_tax', read_only=True)
     get_moaf_sum = serializers.CharField(source='moaf_sum', read_only=True)
-    get_kasre_kar = serializers.CharField(source='kasre_kar_time', read_only=True)
+    get_kasre_kar_time = serializers.CharField(source='kasre_kar_time', read_only=True)
+    get_ezafe_kari_time = serializers.CharField(source='ezafe_kari_time', read_only=True)
+    get_tatil_kari_time = serializers.CharField(source='tatil_kari_time', read_only=True)
+    get_shab_kari_time = serializers.CharField(source='shab_kari_time', read_only=True)
 
     get_insurance_monthly_payment = serializers.CharField(source='insurance_monthly_payment', read_only=True)
     get_insurance_monthly_benefit = serializers.CharField(source='insurance_monthly_benefit', read_only=True)
