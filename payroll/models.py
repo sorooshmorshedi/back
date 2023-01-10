@@ -4494,6 +4494,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 return end_date.day + self.real_worktime - self.normal_worktime
             elif start_date.__ge__(month_start) and start_date.__lt__(month_end) and end_date.__ge__(month_end):
                 return month_end.day + self.real_worktime - self.normal_worktime
+            else:
+                return 0
         else:
             return 0
 

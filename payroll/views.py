@@ -37,14 +37,30 @@ class WorkTitleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = WorkTitle.objects.all()
     serializer_class = WorkTitleSerializer
 
+
 class WorkTitleSearchApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'work_title'
 
     def get(self, request, search):
-        print(search)
         query = WorkTitle.objects.filter(Q(code__icontains=search) | Q(name__icontains=search))
         serializers = WorkTitleSerializer(query, many=True, context={'request': request})
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class WorkTitleApiView(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'work_title'
+
+    def get_object(self, pk):
+        try:
+            return WorkTitle.objects.get(pk=pk)
+        except WorkTitle.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = WorkTitleSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 # workshop APIs
@@ -1130,10 +1146,10 @@ class PaymentList(APIView):
 
         if not data['name']:
             self.validate_status = False
-            self.error_message.append('نام را وارد کنید')
+            self.error_message.append('نام لیست را وارد کنید')
         if data['use_in_calculate'] == None:
             self.validate_status = False
-            self.error_message.append('وضعیت محاسبه مالیات را وارد کنید')
+            self.error_message.append('وضعیت محاسبه بیمه و مالیات را وارد کنید')
 
         if self.validate_status:
             payroll_list = ListOfPay.objects.create(workshop=workshop, year=year, month=month, name=data['name'],
@@ -1278,6 +1294,40 @@ class ListOfPayItemsCalculate(APIView):
         is_in = request.data['is_in']
         del(data['is_in'])
         if is_in:
+            if not data['nobat_kari_sob_asr']:
+                data['nobat_kari_sob_asr'] = 0
+            if not data['nobat_kari_sob_shab']:
+                data['nobat_kari_sob_shab'] = 0
+            if not data['nobat_kari_asr_shab']:
+                data['nobat_kari_asr_shab'] = 0
+            if not data['nobat_kari_sob_asr_shab']:
+                data['nobat_kari_sob_asr_shab'] = 0
+            if not data['sayer_ezafat']:
+                data['sayer_ezafat'] = 0
+            if not data['mazaya_gheyr_mostamar']:
+                data['mazaya_gheyr_mostamar'] = 0
+            if not data['hazine_made_137']:
+                data['hazine_made_137'] = 0
+            if not data['kosoorat_insurance']:
+                data['kosoorat_insurance'] = 0
+            if not data['sayer_moafiat']:
+                data['sayer_moafiat'] = 0
+            if not data['manategh_tejari_moafiat']:
+                data['manategh_tejari_moafiat'] = 0
+            if not data['ejtenab_maliat_mozaaf']:
+                data['ejtenab_maliat_mozaaf'] = 0
+            if not data['sayer_kosoorat']:
+                data['sayer_kosoorat'] = 0
+            if not data['cumulative_absence']:
+                data['cumulative_absence'] = 0
+            if not data['cumulative_mission']:
+                data['cumulative_mission'] = 0
+            if not data['cumulative_entitlement']:
+                data['cumulative_entitlement'] = 0
+            if not data['cumulative_illness']:
+                data['cumulative_illness'] = 0
+            if not data['cumulative_without_salary']:
+                data['cumulative_without_salary'] = 0
             try:
                 if data['ezafe_kari'] and data['ezafe_kari'] != '':
                     ezafe_kari = data['ezafe_kari']

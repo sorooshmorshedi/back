@@ -314,7 +314,8 @@ class ListOfPayItemNormalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ListOfPayItem
-        fields = 'id', 'normal_worktime', 'real_worktime', 'personnel_name'
+        fields = 'id', 'normal_worktime', 'real_worktime', 'personnel_name', 'mission_day', 'entitlement_leave_day',\
+                 'absence_day', 'illness_leave_day', 'without_salary_leave_day'
 
 
 class ListOfPayItemLessSerializer(serializers.ModelSerializer):

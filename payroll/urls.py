@@ -35,7 +35,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     ContractRowUnActiveApi, ContractRowActiveApi, \
     PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi, \
-    WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView
+    WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView, WorkTitleApiView
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -161,6 +161,7 @@ urlpatterns = [
 
     path('workTitle/', WorkTitleListCreateView.as_view(), name='workTitleListCreateView'),
     path('workTitle/<int:pk>/', WorkTitleDetailView.as_view(), name='workTitleDetailView'),
+    path('workTitle/name/<int:pk>/', WorkTitleApiView.as_view(), name='workTitleApiView'),
     path('workTitleSearch/<str:search>/', WorkTitleSearchApiView.as_view(), name='workTitleSearchApiView'),
 
 ]
