@@ -1749,7 +1749,12 @@ class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def end_date(self):
         if self.get_pay_month['months']:
             end = self.get_pay_month['months'][-1]
-            return str(end.year) + '-' + str(end.month) + '-1'
+            if end.month <= 6:
+                return str(end.year) + '-' + str(end.month) + '31'
+            elif end.month == 12:
+                return str(end.year) + '-' + str(end.month) + '29'
+            elif end.month > 6 and end.month != 12:
+                return str(end.year) + '-' + str(end.month) + '30'
         else:
             return ''
 

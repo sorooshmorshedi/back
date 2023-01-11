@@ -143,6 +143,7 @@ class ContractSerializer(serializers.ModelSerializer):
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
     workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
+    personnel_insurance_month = serializers.IntegerField(source='workshop_personnel.current_insurance', read_only=True)
 
     class Meta:
         model = Contract
@@ -160,6 +161,7 @@ class HRLetterSerializer(serializers.ModelSerializer):
     personnel_id = serializers.IntegerField(source='contract.workshop_personnel.id', read_only=True)
     personnel_father = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
     personnel_identity = serializers.CharField(source='contract.workshop_personnel.personnel.national_code', read_only=True)
+    personnel_insurance_month = serializers.IntegerField(source='contract.workshop_personnel.current_insurance', read_only=True)
     personnel_nationality = serializers.IntegerField(source='contract.workshop_personnel.personnel.nationality', read_only=True)
     get_day_hourly_pay_base = serializers.IntegerField(source='day_hourly_pay_base', read_only=True)
     get_daily_pay_base = serializers.IntegerField(source='daily_pay_base', read_only=True)
@@ -228,11 +230,15 @@ class MissionSerializer(serializers.ModelSerializer):
 
 class ListOfPayItemSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
+    personnel_national_code = serializers.CharField(source='workshop_personnel.personnel.national_code', read_only=True)
+    hr_name = serializers.CharField(source='get_hr_letter.name', read_only=True)
     year = serializers.CharField(source='list_of_pay.year', read_only=True)
     month = serializers.CharField(source='list_of_pay.month', read_only=True)
     month_display = serializers.CharField(source='list_of_pay.month_display', read_only=True)
     workshop_display = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
-    is_insurance_display = serializers.CharField(source='get_is_insurance_display', read_only=True)
+    is_insurance_display = serializers.CharField(source='contract.is_insurance_display', read_only=True)
+    insurance_date = serializers.DateField(source='contract.insurance_add_date', read_only=True)
+    tax_date = serializers.CharField(source='contract.tax_add_date', read_only=True)
     insurance_workshop = serializers.CharField(source='workshop_personnel.current_insurance_history_in_workshop',
                                                read_only=True)
     total_mission = serializers.IntegerField(source='mission_total', read_only=True)
@@ -281,6 +287,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPayItem
         fields = '__all__'
+
 
 class ListOfPayItemBankSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
