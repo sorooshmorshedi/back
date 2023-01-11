@@ -43,3 +43,9 @@ class Command(BaseCommand):
                 to_amount=4200000000,
                 ratio=20,
             )
+            WorkshopTaxRow.objects.create(
+                workshop_tax=tax,
+                from_amount=4200000001,
+                to_amount=0,
+                ratio=30,
+            )

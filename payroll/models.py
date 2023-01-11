@@ -450,13 +450,6 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
         if len(query) < 1:
             self.from_amount = 0
             self.ratio = 0
-        else:
-            self.from_amount = self.auto_from_amount
-        if self.from_amount >= self.to_amount:
-            print(self)
-            print(self.from_amount)
-            print(self.to_amount)
-            raise ValidationError('مقدار مبلغ پایان باید بزرگتر از مبلغ شروع باشد')
         super().save(*args, **kwargs)
 
 
