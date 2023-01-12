@@ -3541,6 +3541,26 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return str(hour) + ':' + str(round(minute))
 
     @property
+    def absence_sum(self):
+        return int(self.absence_day) + int(self.cumulative_absence)
+
+    @property
+    def illness_sum(self):
+        return int(self.illness_leave_day) + int(self.cumulative_illness)
+
+    @property
+    def without_salary_sum(self):
+        return int(self.without_salary_leave_day) + int(self.cumulative_without_salary)
+
+    @property
+    def entitlement_sum(self):
+        return int(self.entitlement_leave_day) + int(self.cumulative_entitlement)
+
+    @property
+    def mission_sum(self):
+        return int(self.mission_day) + int(self.cumulative_mission)
+
+    @property
     def kasre_kar_time(self):
         return self.decimal_to_time(self.kasre_kar)
 
@@ -3835,7 +3855,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def mission_total(self):
-        return round(Decimal(self.mission_day) * self.mission_nerkh * self.mission_amount)
+        return round(Decimal(self.mission_sum) * self.mission_nerkh * self.mission_amount)
 
     @property
     def get_aele_mandi(self):
@@ -4817,17 +4837,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
-            self.entitlement_leave_day += Decimal(self.cumulative_entitlement)
-            self.daily_entitlement_leave_day += Decimal(self.cumulative_entitlement)
-            self.absence_day += Decimal(self.cumulative_absence)
-            self.without_salary_leave_day += Decimal(self.cumulative_without_salary)
-            self.illness_leave_day += Decimal(self.cumulative_illness)
-            self.mission_day += Decimal(self.cumulative_mission)
-
-            self.real_worktime -= self.cumulative_absence
-            self.real_worktime -= self.cumulative_without_salary
-            self.real_worktime -= self.cumulative_illness
-
+            self.real_worktime = self.normal_worktime - self.absence_sum - self.without_salary_sum - self.illness_sum
             self.total_payment = round(self.get_total_payment)
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True

@@ -35,7 +35,8 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     ContractRowUnActiveApi, ContractRowActiveApi, \
     PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi, \
-    WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView, WorkTitleApiView
+    WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView, WorkTitleApiView, ListOfPayEditDetail, \
+    ListOfPayEditItems
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -131,6 +132,7 @@ urlpatterns = [
 
     path('pay/<int:pk>/', PayAPI.as_view(), name='payAPI'),
     path('paylist/item/<int:pk>/', ListOfPayItemsCalculate.as_view(), name='listOfPayItemsCalculate'),
+    path('paylist/edit/item/<int:pk>/', ListOfPayEditItems.as_view(), name='listOfPayEditItems'),
     path('paylist/bank/<int:pk>/', ListOfPayBankDetail.as_view(), name='listOfPayBankDetail'),
     path('paylist/items/<int:pk>/', ListOfPayItemDetail.as_view(), name='listOfPayItemDetail'),
     path('paylist/item/detail/<int:pk>/', PayItemDetail.as_view(), name='payItemDetail'),
@@ -152,6 +154,7 @@ urlpatterns = [
     path('settlement/<int:personnel>/<str:export_type>', SettlementExportView.as_view()),
 
     path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),
+    path('listOfPay/edit/<int:pk>/', ListOfPayEditDetail.as_view(), name='listOfPayEditDetail'),
     path('listOfPayItem/pay/<int:pk>/', ListOfPayItemPaymentAPI.as_view(), name='listOfPayItemPaymentAPI'),
 
     path('listOfPay/workshop/<int:pk>/<int:month>/<str:year>/', WorkshopListOfPayApiView.as_view(),

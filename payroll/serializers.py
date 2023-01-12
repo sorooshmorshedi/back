@@ -284,6 +284,12 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
 
     info = serializers.JSONField(source='get_payslip', read_only=True)
 
+    get_absence_sum = serializers.IntegerField(source='absence_sum', read_only=True)
+    get_illness_sum = serializers.IntegerField(source='illness_sum', read_only=True)
+    get_entitlement_sum = serializers.IntegerField(source='entitlement_sum', read_only=True)
+    get_without_salary_sum = serializers.IntegerField(source='without_salary_sum', read_only=True)
+    get_mission_sum = serializers.IntegerField(source='mission_sum', read_only=True)
+
     class Meta:
         model = ListOfPayItem
         fields = '__all__'
@@ -386,14 +392,32 @@ class LoanItemSerializer(serializers.ModelSerializer):
 
 
 class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
+    get_kasre_kar_time = serializers.CharField(source='kasre_kar_time', read_only=True)
+    personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
+    get_ezafe_kari_time = serializers.CharField(source='ezafe_kari_time', read_only=True)
+    get_tatil_kari_time = serializers.CharField(source='tatil_kari_time', read_only=True)
+    get_shab_kari_time = serializers.CharField(source='shab_kari_time', read_only=True)
+    get_absence = serializers.IntegerField(source='absence_day', read_only=True)
+    get_entitlement = serializers.IntegerField(source='entitlement_leave_day', read_only=True)
+    get_illness = serializers.IntegerField(source='illness_leave_day', read_only=True)
+    get_with_out_salary = serializers.IntegerField(source='without_salary_leave_day', read_only=True)
+    get_mission = serializers.IntegerField(source='mission_day', read_only=True)
+    get_sob_asr = serializers.IntegerField(source='nobat_kari_sob_asr', read_only=True)
+    get_sob_shab = serializers.IntegerField(source='nobat_kari_sob_shab', read_only=True)
+    get_asr_shab = serializers.IntegerField(source='nobat_kari_asr_shab', read_only=True)
+    get_sob_asr_shab = serializers.IntegerField(source='nobat_kari_sob_asr_shab', read_only=True)
     class Meta:
         model = ListOfPayItem
-        fields = 'id', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', \
+        fields = 'id', 'personnel_name', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', \
                  'nobat_kari_sob_shab', 'nobat_kari_asr_shab', 'nobat_kari_sob_asr_shab', 'sayer_ezafat', \
                  'list_of_pay', 'calculate_payment', 'contract_row', 'mazaya_gheyr_mostamar',\
                  'hazine_made_137', 'kosoorat_insurance', 'sayer_moafiat', 'manategh_tejari_moafiat', \
                  'ejtenab_maliat_mozaaf', 'naghdi_gheye_naghdi_tax', 'cumulative_illness', 'cumulative_without_salary',\
-                 'cumulative_entitlement', 'cumulative_mission', 'cumulative_absence', 'sayer_kosoorat'
+                 'get_ezafe_kari_time', 'get_tatil_kari_time', 'get_shab_kari_time', 'get_absence', 'get_entitlement',\
+                 'get_with_out_salary', 'get_illness', 'get_mission', 'get_kasre_kar_time', 'cumulative_absence',\
+                 'cumulative_mission', 'cumulative_entitlement', 'get_sob_asr', 'get_sob_shab', 'get_asr_shab',\
+                 'get_sob_asr_shab', 'sayer_kosoorat'
+
 
 class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -439,3 +463,11 @@ class ListOfPayCopyPaySerializer(serializers.ModelSerializer):
         fields = 'name', 'id'
 
 
+class ListOfPayEditSerializer(serializers.ModelSerializer):
+    get_month_display = serializers.CharField(source='month_display', read_only=True)
+    get_year = serializers.CharField(source='year', read_only=True)
+    workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
+
+    class Meta:
+        model = ListOfPay
+        fields = 'id', 'name', 'use_in_calculate', 'get_month_display', 'get_year', 'workshop_name'

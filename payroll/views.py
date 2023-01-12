@@ -20,7 +20,7 @@ from payroll.serializers import WorkShopSerializer, PersonnelSerializer, Personn
     ListOfPayItemSerializer, WorkshopTaxRowSerializer, WorkShopSettingSerializer, \
     WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
     ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer, \
-    ListOfPayCopyPaySerializer, AdjustmentSerializer, WorkTitleSerializer
+    ListOfPayCopyPaySerializer, AdjustmentSerializer, WorkTitleSerializer, ListOfPayEditSerializer
 from users.models import City
 
 
@@ -1529,3 +1529,42 @@ class ListOfPayUltimateApi(APIView):
             list_of_pay.ultimate = False
             list_of_pay.save()
             return Response({'وضعیت': 'غیر نهایی  کردن لیست حقوق انجام شد'}, status=status.HTTP_200_OK)
+
+
+class ListOfPayEditDetail(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay'
+    def get_object(self, pk):
+        try:
+            return ListOfPay.objects.get(pk=pk)
+        except ListOfPay.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayEditSerializer(query)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        serializer = ListOfPayEditSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListOfPayEditItems(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'list_of_pay_item'
+
+    def get_object(self, pk):
+        try:
+            return ListOfPayItem.objects.filter(list_of_pay=pk)
+        except ListOfPayItem.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ListOfPayItemsAddInfoSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
