@@ -3091,7 +3091,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPay'
         permission_basename = 'list_of_pay'
-        ordering = ('month',)
+        ordering = ('-id',)
         permissions = (
             ('get.list_of_pay', 'مشاهده حقوق و دستمزد'),
             ('create.list_of_pay', 'تعریف حقوق و دستمزد'),
