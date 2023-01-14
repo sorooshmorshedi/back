@@ -1238,7 +1238,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def total_insurance(self):
         if self.personnel.insurance and self.previous_insurance_history_in_workshop:
             return self.current_insurance + self.previous_insurance_history_in_workshop
-        elif self.personnel.insurance and  not self.previous_insurance_history_in_workshop:
+        elif self.personnel.insurance and not self.previous_insurance_history_in_workshop:
             return self.current_insurance
         else:
             return 0
@@ -1254,7 +1254,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def quit_job_date(self):
-        for contract in self.contract.all():
+        for contract in self.contract.filter(is_verified=True):
             if contract.quit_job_date:
                 return True
         return False
@@ -3105,6 +3105,21 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
+    @property
+    def is_editable(self):
+        future_lists = ListOfPay.objects.filter(
+            Q(workshop=self.workshop) &
+            Q(use_in_calculate=self.use_in_calculate) &
+            Q(year=self.year) &
+            Q(month__gt=self.month) &
+            Q(ultimate=True)
+        )
+        if len(future_lists) > 0:
+            return False
+        else:
+            return True
+
 
     @property
     def month_display(self):

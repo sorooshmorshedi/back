@@ -1231,10 +1231,10 @@ class CalculationsPayrollDetail(APIView):
                 if contract.quit_job_date and contract.quit_job_date.__gt__(from_date)\
                         and contract.quit_job_date.__lt__(to_date):
                     if contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__ge__(to_date):
-                        normal_job_time = contract.quit_job_date.day
+                        normal_job_time = contract.quit_job_date.day - 1
                     elif contract.contract_from_date.__ge__(from_date) and contract.contract_to_date.__ge__(to_date)\
                             and contract.contract_from_date.__le__(to_date):
-                        normal_job_time =contract.quit_job_date.day - contract.contract_from_date.day
+                        normal_job_time = contract.quit_job_date.day - contract.contract_from_date.day
                     elif contract.contract_from_date.__le__(from_date) and contract.contract_to_date.__le__(to_date)\
                             and contract.contract_to_date.__gt__(from_date):
                         normal_job_time = contract.quit_job_date.day

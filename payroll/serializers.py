@@ -277,10 +277,10 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_tatil_kari_time = serializers.CharField(source='tatil_kari_time', read_only=True)
     get_shab_kari_time = serializers.CharField(source='shab_kari_time', read_only=True)
 
-    get_insurance_monthly_payment = serializers.CharField(source='insurance_monthly_payment', read_only=True)
-    get_insurance_monthly_benefit = serializers.CharField(source='insurance_monthly_benefit', read_only=True)
-    get_insurance_total_included = serializers.CharField(source='insurance_total_included', read_only=True)
-    get_haghe_bime_bime_shavande = serializers.CharField(source='haghe_bime_bime_shavande', read_only=True)
+    get_insurance_monthly_payment = serializers.IntegerField(source='insurance_monthly_payment', read_only=True)
+    get_insurance_monthly_benefit = serializers.IntegerField(source='insurance_monthly_benefit', read_only=True)
+    get_insurance_total_included = serializers.IntegerField(source='insurance_total_included', read_only=True)
+    get_haghe_bime_bime_shavande = serializers.IntegerField(source='haghe_bime_bime_shavande', read_only=True)
 
     info = serializers.JSONField(source='get_payslip', read_only=True)
 
@@ -289,6 +289,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_entitlement_sum = serializers.IntegerField(source='entitlement_sum', read_only=True)
     get_without_salary_sum = serializers.IntegerField(source='without_salary_sum', read_only=True)
     get_mission_sum = serializers.IntegerField(source='mission_sum', read_only=True)
+    get_is_editable = serializers.BooleanField(source='is_editable', read_only=True)
 
     class Meta:
         model = ListOfPayItem
@@ -324,11 +325,12 @@ class ListOfPayBankSerializer(serializers.ModelSerializer):
 
 class ListOfPayItemNormalSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
+    get_matter_47_leave_day = serializers.IntegerField(source='matter_47_leave_day', read_only=True)
 
     class Meta:
         model = ListOfPayItem
         fields = 'id', 'normal_worktime', 'real_worktime', 'personnel_name', 'mission_day', 'entitlement_leave_day',\
-                 'absence_day', 'illness_leave_day', 'without_salary_leave_day'
+                 'absence_day', 'illness_leave_day', 'without_salary_leave_day', 'get_matter_47_leave_day'
 
 
 class ListOfPayItemLessSerializer(serializers.ModelSerializer):
@@ -357,11 +359,13 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
     month_name = serializers.CharField(source='month_display', read_only=True)
     ultimate_display = serializers.CharField(source='is_ultimate', read_only=True)
     calculate_display = serializers.CharField(source='is_use_in_calculate', read_only=True)
+    get_is_editable = serializers.BooleanField(source='is_editable', read_only=True)
 
     class Meta:
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
-                'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime'
+                'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime',\
+                 'get_is_editable'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
@@ -470,4 +474,4 @@ class ListOfPayEditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ListOfPay
-        fields = 'id', 'name', 'use_in_calculate', 'get_month_display', 'get_year', 'workshop_name'
+        fields = 'id', 'name', 'use_in_calculate', 'get_month_display', 'get_year', 'workshop_name', 'workshop'

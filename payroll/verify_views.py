@@ -661,10 +661,10 @@ class ContractVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('تاریخ شروع قرارداد باید قبل از  تاریخ پایان قرارداد باشد')
         if self.validate_status and contract.quit_job_date:
-            if contract.contract_from_date.__ge__(contract.quit_job_date):
+            if contract.contract_from_date.__gt__(contract.quit_job_date):
                 self.validate_status = False
                 self.error_messages.append('تاریخ ترک کار باید بعد از  تاریخ شروع قرارداد باشد')
-            if contract.quit_job_date.__ge__(contract.contract_to_date):
+            if contract.quit_job_date.__gt__(contract.contract_to_date):
                 self.validate_status = False
                 self.error_messages.append('تاریخ ترک کار باید قبل از  تاریخ پایان قرارداد باشد')
         if contract.insurance == True:
@@ -675,7 +675,7 @@ class ContractVerifyApi(APIView):
                 if contract.contract_from_date.__gt__(contract.insurance_add_date):
                     self.validate_status = False
                     self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید بعد از تاریخ شروع قرارداد باشد')
-            if contract.insurance_add_date and contract.contract_from_date:
+            if contract.insurance_add_date and contract.contract_to_date:
                 if contract.insurance_add_date.__gt__(contract.contract_to_date):
                     self.validate_status = False
                     self.error_messages.append('تاریخ اضافه شدن به لیست بیمه باید قبل از تاریخ پایان قرارداد باشد')
@@ -696,6 +696,20 @@ class ContractVerifyApi(APIView):
                 contract.workshop_personnel.personnel.insurance = True
                 contract.workshop_personnel.personnel.insurance_code = contract.insurance_number
                 contract.workshop_personnel.personnel.save()
+
+        if contract.tax == True:
+            if not contract.tax_add_date:
+                self.validate_status = False
+                self.error_messages.append('تاریخ اضافه شدن به لیست مالیات حقوق را وارد کنید')
+            if contract.tax_add_date and contract.contract_from_date:
+                if contract.contract_from_date.__gt__(contract.tax_add_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ اضافه شدن به لیست مالیات حقوق باید بعد از تاریخ شروع قرارداد باشد')
+            if contract.tax_add_date and contract.contract_to_date:
+                if contract.tax_add_date.__gt__(contract.contract_to_date):
+                    self.validate_status = False
+                    self.error_messages.append('تاریخ اضافه شدن به لیست مالیات حقوق باید قبل از تاریخ پایان قرارداد باشد')
+
 
         if self.validate_status and contract.check_with_same:
             self.validate_status = False
