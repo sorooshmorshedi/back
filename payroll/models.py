@@ -1665,6 +1665,16 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return str(self.id) + ' برای ' + self.workshop_personnel_display
 
 
+    @property
+    def check_hr_letter(self):
+        hr = self.hr_letter.all()
+        hr = hr.filter(Q(is_verified=True) & Q(is_active=True))
+        hr = hr.first()
+        if not hr:
+            return False
+        return True
+
+
 class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     LOAN = 'l'
     DEPT = 'd'
@@ -2494,6 +2504,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def save(self, *args, **kwargs):
         if self.is_template == 'p' and not self.name:
             self.name = 'شخصی'
+        if self.is_template == 'p' and self.contract:
+            if self.contract.workshop_personnel.total_insurance < 12:
+                self.paye_sanavat_amount, self.paye_sanavat_base = 0, False
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
@@ -3820,6 +3833,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             raise ValidationError('حکم کارگزینی فعال موجود نیست')
         return hr
 
+
     def calculate_hr_item_in_real_work_time(self, item):
         total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
         return total
@@ -4445,10 +4459,25 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return payslip
 
     '''insurance'''
+    @property
+    def check_insurance(self):
+        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+            insurance_start = self.contract.insurance_add_date
+            if insurance_start.__le__(self.list_of_pay.start_date):
+                return True, self.real_worktime
+            elif insurance_start.__gt__(self.list_of_pay.start_date) and \
+                    insurance_start.__lt__(self.list_of_pay.end_date):
+                return True, self.real_worktime - insurance_start.day + 1
+            elif insurance_start.__ge__(self.list_of_pay.end_date):
+                return False, 0
+        else:
+            return False, 0
+
 
     @property
     def haghe_bime_bime_shavande(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.worker_insurance_nerkh)
         else:
@@ -4456,7 +4485,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def employer_insurance(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.employer_insurance_nerkh)
         else:
@@ -4464,7 +4494,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def un_employer_insurance(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
             return round(self.insurance_total_included * hr.unemployed_insurance_nerkh)
         else:
@@ -4472,9 +4503,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_monthly_benefit(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
-            benefit = Decimal(hr.insurance_benefit)
+            benefit = Decimal(hr.insurance_benefit) * Decimal(insurance_worktime)
             if hr.ezafe_kari_use_insurance:
                 benefit = benefit + Decimal(self.ezafe_kari_total)
             if hr.haghe_owlad_use_insurance:
@@ -4500,7 +4532,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_monthly_payment(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
             return hr.insurance_pay_day * self.insurance_worktime
         else:
@@ -4512,7 +4545,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_worktime(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             month_start = self.list_of_pay.start_date
             month_end = self.list_of_pay.end_date
             start_date = self.contract.insurance_add_date
@@ -4534,7 +4568,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def insurance_total_included(self):
-        if self.contract.insurance and self.list_of_pay.use_in_calculate:
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
             hr = self.get_hr_letter
             total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
             return total
@@ -4584,10 +4619,24 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return DSKWOR
 
     '''tax'''
+    @property
+    def check_tax(self):
+        if self.contract.tax and self.list_of_pay.use_in_calculate:
+            tax_start = self.contract.tax_add_date
+            if tax_start.__le__(self.list_of_pay.start_date):
+                return True, self.real_worktime
+            elif tax_start.__gt__(self.list_of_pay.start_date) and \
+                    tax_start.__lt__(self.list_of_pay.end_date):
+                return True, self.real_worktime - tax_start.day + 1
+            elif tax_start.__ge__(self.list_of_pay.end_date):
+                return False, 0
+        else:
+            return False, 0
 
     @property
     def tamin_ejtemaee_moafiat(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             if self.workshop_personnel.workshop.tax_employer_type == 1:
                 return self.haghe_bime_bime_shavande
             elif self.workshop_personnel.workshop.tax_employer_type == 2:
@@ -4597,97 +4646,108 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def haghe_bime_moafiat(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             return self.tamin_ejtemaee_moafiat + self.kosoorat_insurance
         else:
             return 0
 
     @property
     def haghe_bime_moafiat_with_comma(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             return self.with_comma(self.haghe_bime_moafiat)
         else:
             return 0
 
     @property
     def ezafe_kari_nakhales(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             return self.ezafe_kari_total + self.tatil_kari_total
         else:
             return 0
 
     @property
     def ezafe_kari_nakhales_with_comma(self):
-        return self.with_comma(self.ezafe_kari_nakhales)
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            return self.with_comma(self.ezafe_kari_nakhales)
+        else:
+            return 0
 
     @property
     def hr_tax_not_included(self):
-        hr = self.get_hr_letter
-        total = Decimal(0)
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            hr = self.get_hr_letter
+            total = Decimal(0)
+            if not hr.hoghooghe_roozane_use_tax:
+                total += self.hoghoogh_mahane
+            if not hr.paye_sanavat_use_tax:
+                total += self.sanavat_mahane
+            if not hr.haghe_owlad_use_tax:
+                total += self.get_aele_mandi
+            if not hr.ezafe_kari_use_tax:
+                total += self.get_ezafe_kari
+            if not hr.tatil_kari_use_tax:
+                total += self.get_tatil_kari
+            if not hr.shab_kari_use_tax:
+                total += self.get_shab_kari
+            if not hr.nobat_kari_use_tax:
+                total += self.nobat_kari_sob_asr_total
+                total += self.nobat_kari_sob_shab_total
+                total += self.nobat_kari_asr_shab_total
+                total += self.nobat_kari_sob_asr_shab_total
+            if not hr.haghe_sarparasti_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
+            if not hr.haghe_modiriyat_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
+            if not hr.haghe_jazb_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+            if not hr.fogholade_shoghl_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
+            if not hr.haghe_tahsilat_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+            if not hr.fogholade_sakhti_kar_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
+            if not hr.haghe_ankal_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
+            if not hr.fogholade_badi_abohava_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
+            if not hr.mahroomiat_tashilat_zendegi_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
+            if not hr.fogholade_mahal_khedmat_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
+            if not hr.fogholade_sharayet_mohit_kar_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
+            if not hr.haghe_maskan_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+            if not hr.ayabo_zahab_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
+            if not hr.bon_kharo_bar_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+            if not hr.yarane_ghaza_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
+            if not hr.haghe_taahol_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
+            if not hr.haghe_shir_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
+            if not hr.komakhazine_mahdekoodak_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
+            if not hr.komakhazine_varzesh_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
+            if not hr.komakhazine_mobile_use_tax:
+                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
 
-        if not hr.hoghooghe_roozane_use_tax:
-            total += self.hoghoogh_mahane
-        if not hr.paye_sanavat_use_tax:
-            total += self.sanavat_mahane
-        if not hr.haghe_owlad_use_tax:
-            total += self.get_aele_mandi
-        if not hr.ezafe_kari_use_tax:
-            total += self.get_ezafe_kari
-        if not hr.tatil_kari_use_tax:
-            total += self.get_tatil_kari
-        if not hr.shab_kari_use_tax:
-            total += self.get_shab_kari
-        if not hr.nobat_kari_use_tax:
-            total += self.nobat_kari_sob_asr_total
-            total += self.nobat_kari_sob_shab_total
-            total += self.nobat_kari_asr_shab_total
-            total += self.nobat_kari_sob_asr_shab_total
-        if not hr.haghe_sarparasti_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
-        if not hr.haghe_modiriyat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
-        if not hr.haghe_jazb_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
-        if not hr.fogholade_shoghl_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
-        if not hr.haghe_tahsilat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
-        if not hr.fogholade_sakhti_kar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
-        if not hr.haghe_ankal_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
-        if not hr.fogholade_badi_abohava_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
-        if not hr.mahroomiat_tashilat_zendegi_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
-        if not hr.fogholade_mahal_khedmat_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
-        if not hr.fogholade_sharayet_mohit_kar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
-        if not hr.haghe_maskan_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
-        if not hr.ayabo_zahab_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
-        if not hr.bon_kharo_bar_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
-        if not hr.yarane_ghaza_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
-        if not hr.haghe_taahol_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
-        if not hr.haghe_shir_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
-        if not hr.komakhazine_mahdekoodak_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
-        if not hr.komakhazine_varzesh_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
-        if not hr.komakhazine_mobile_use_tax:
-            total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
-
-        return total
+            return total
+        else:
+            return self.total_payment
 
     @property
     def total_sayer_moafiat(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             total = 0
             total += self.sayer_moafiat
             if self.list_of_pay.workshop.eydi_padash_identification == 'm':
@@ -4701,7 +4761,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def moaf_sum(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             total = 0
             total += self.hazine_made_137
             total += self.total_sayer_moafiat
@@ -4717,7 +4778,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def tax_included_payment(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             return round(self.get_total_payment) - self.moaf_sum
         else:
             return 0
@@ -4736,7 +4798,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_last_tax(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                                  Q(list_of_pay__month__lt=self.list_of_pay.month) &
                                                  Q(workshop_personnel=self.workshop_personnel) &
@@ -4765,9 +4828,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
 
+
     @property
     def calculate_month_tax(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             hr = self.get_hr_letter
             if hr.include_made_86:
                 tax = self.tax_included_payment / 10
@@ -4804,7 +4869,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_monthly_eydi_tax(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             hr = self.get_hr_letter
             if hr.eydi_padash_use_tax:
                 mytax = self.get_tax_row
@@ -4826,7 +4892,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_yearly_eydi_tax(self):
-        if self.contract.tax and self.list_of_pay.use_in_calculate:
+        is_tax, tax_day = self.check_tax
+        if is_tax:
             hr = self.get_hr_letter
             if hr.eydi_padash_use_tax:
                 mytax = self.get_tax_row

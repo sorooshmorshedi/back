@@ -143,7 +143,7 @@ class ContractSerializer(serializers.ModelSerializer):
     workshop_personnel_display = serializers.CharField(source='workshop_personnel.my_title', read_only=True)
     insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
     workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
-    personnel_insurance_month = serializers.IntegerField(source='workshop_personnel.current_insurance', read_only=True)
+    personnel_insurance_month = serializers.IntegerField(source='workshop_personnel.total_insurance', read_only=True)
 
     class Meta:
         model = Contract
@@ -161,7 +161,7 @@ class HRLetterSerializer(serializers.ModelSerializer):
     personnel_id = serializers.IntegerField(source='contract.workshop_personnel.id', read_only=True)
     personnel_father = serializers.CharField(source='contract.workshop_personnel.personnel.father_name', read_only=True)
     personnel_identity = serializers.CharField(source='contract.workshop_personnel.personnel.national_code', read_only=True)
-    personnel_insurance_month = serializers.IntegerField(source='contract.workshop_personnel.current_insurance', read_only=True)
+    personnel_insurance_month = serializers.IntegerField(source='contract.workshop_personnel.total_insurance', read_only=True)
     personnel_nationality = serializers.IntegerField(source='contract.workshop_personnel.personnel.nationality', read_only=True)
     get_day_hourly_pay_base = serializers.IntegerField(source='day_hourly_pay_base', read_only=True)
     get_daily_pay_base = serializers.IntegerField(source='daily_pay_base', read_only=True)
@@ -410,6 +410,7 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
     get_sob_shab = serializers.IntegerField(source='nobat_kari_sob_shab', read_only=True)
     get_asr_shab = serializers.IntegerField(source='nobat_kari_asr_shab', read_only=True)
     get_sob_asr_shab = serializers.IntegerField(source='nobat_kari_sob_asr_shab', read_only=True)
+    get_matter_47_leave_day = serializers.IntegerField(source='matter_47_leave_day', read_only=True)
     class Meta:
         model = ListOfPayItem
         fields = 'id', 'personnel_name', 'ezafe_kari', 'tatil_kari', 'kasre_kar', 'shab_kari', 'nobat_kari_sob_asr', \
@@ -420,7 +421,7 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
                  'get_ezafe_kari_time', 'get_tatil_kari_time', 'get_shab_kari_time', 'get_absence', 'get_entitlement',\
                  'get_with_out_salary', 'get_illness', 'get_mission', 'get_kasre_kar_time', 'cumulative_absence',\
                  'cumulative_mission', 'cumulative_entitlement', 'get_sob_asr', 'get_sob_shab', 'get_asr_shab',\
-                 'get_sob_asr_shab', 'sayer_kosoorat'
+                 'get_sob_asr_shab', 'sayer_kosoorat', 'get_matter_47_leave_day'
 
 
 class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):

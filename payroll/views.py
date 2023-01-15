@@ -998,7 +998,11 @@ class TemplateDeductionDetail(APIView):
     permission_basename = 'deductions'
 
     def get(self, request):
-        query = OptionalDeduction.objects.filter(is_template=True)
+        company = request.user.active_company.pk
+        data = request.data
+        data['company'] = company
+
+        query = OptionalDeduction.objects.filter(Q(is_template=True) & Q(company=company))
         serializers = DeductionSerializer(query, many=True, context={'request': request})
         return Response(serializers.data, status=status.HTTP_200_OK)
 
@@ -1164,32 +1168,37 @@ class PaymentList(APIView):
                 payroll_list.delete()
             else:
                 response = payroll_list.info_for_items
-                for item in response:
-                    if item['insurance']:
-                        insurance = 'y'
-                    else:
-                        insurance = 'n'
-
-                    payroll_list_item = ListOfPayItem.objects.create(
-                        list_of_pay=payroll_list,
-                        workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
-                        contract=Contract.objects.get(pk=item['contract']),
-                        normal_worktime=item['normal_work'],
-                        real_worktime=item['real_work'],
-                        mission_day=item['mission'],
-                        is_insurance=insurance,
-                        absence_day=item['leaves']['a'],
-                        entitlement_leave_day=item['leaves']['e'],
-                        daily_entitlement_leave_day=item['leaves']['ed'],
-                        hourly_entitlement_leave_day=item['leaves']['eh'],
-                        illness_leave_day=item['leaves']['i']+item['leaves']['c'],
-                        without_salary_leave_day=item['leaves']['w'],
-                        matter_47_leave_day=item['leaves']['m']
-                    )
-                    payroll_list_item.save()
-                list_of_pay = payroll_list
-                list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
-                return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
+                for person in response:
+                    contract = Contract.objects.get(pk=person['contract']),
+                    if not contract[0].check_hr_letter:
+                        self.validate_status = False
+                        self.error_message.append('برای حداقل یک قرارداد حکم کارگزینی فعال موجود نیست')
+                if self.validate_status:
+                    for item in response:
+                        if item['insurance']:
+                            insurance = 'y'
+                        else:
+                            insurance = 'n'
+                        payroll_list_item = ListOfPayItem.objects.create(
+                            list_of_pay=payroll_list,
+                            workshop_personnel=WorkshopPersonnel.objects.filter(Q(workshop=pk) & Q(personnel_id=item['pk'])).first(),
+                            contract=Contract.objects.get(pk=item['contract']),
+                            normal_worktime=item['normal_work'],
+                            real_worktime=item['real_work'],
+                            mission_day=item['mission'],
+                            is_insurance=insurance,
+                            absence_day=item['leaves']['a'],
+                            entitlement_leave_day=item['leaves']['e'],
+                            daily_entitlement_leave_day=item['leaves']['ed'],
+                            hourly_entitlement_leave_day=item['leaves']['eh'],
+                            illness_leave_day=item['leaves']['i']+item['leaves']['c'],
+                            without_salary_leave_day=item['leaves']['w'],
+                            matter_47_leave_day=item['leaves']['m']
+                        )
+                        payroll_list_item.save()
+                    list_of_pay = payroll_list
+                    list_of_pay_serializers = ListOfPaySerializer(list_of_pay)
+                    return Response(list_of_pay_serializers.data, status=status.HTTP_200_OK)
         if not self.validate_status:
             counter = 1
             response = []
