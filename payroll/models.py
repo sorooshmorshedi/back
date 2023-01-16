@@ -1225,11 +1225,13 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     @property
     def current_insurance(self):
         if self.personnel.insurance:
-            lists = self.workshop.list_of_pay.filter(ultimate=True)
+            lists = self.workshop.list_of_pay.filter(Q(ultimate=True) & Q(use_in_calculate=True))
             items = self.list_of_pay_item.filter(list_of_pay__in=lists)
             total = 0
             for item in items:
-                total += round(((item.real_worktime + item.illness_leave_day) / item.list_of_pay.month_days), 2)
+                is_insurance, worktime = item.check_insurance
+                if is_insurance:
+                    total += round(((item.real_worktime + item.illness_leave_day) / item.list_of_pay.month_days), 2)
             return total
         else:
             return 0
@@ -1258,6 +1260,15 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             if contract.quit_job_date:
                 return True
         return False
+
+    @property
+    def un_verifiable(self):
+        contracts = self.contract.filter(is_verified=True)
+        if len(contracts) == 0:
+            return False
+        else:
+            return True
+
 
     @property
     def payment_balance(self):
@@ -1633,6 +1644,40 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return self.workshop_personnel.my_title
         else:
             return ''
+
+    @property
+    def is_insurance_editable(self):
+        lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) & Q(list_of_pay__use_in_calculate=True))
+        is_in = []
+        for list in lists:
+            check, day = list.check_insurance
+            if check:
+                is_in.append(list.id)
+        if len(is_in) > 0:
+            return False
+        else:
+            return True
+
+    @property
+    def is_tax_editable(self):
+        lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) & Q(list_of_pay__use_in_calculate=True))
+        is_in = []
+        for list in lists:
+            check, day = list.check_tax
+            if check:
+                is_in.append(list.id)
+        if len(is_in) > 0:
+            return False
+        else:
+            return True
+
+    @property
+    def un_verifiable(self):
+        lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True))
+        if len(lists) > 0:
+            return False
+        else:
+            return True
 
     @property
     def check_with_same(self):
@@ -3569,6 +3614,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return str(hour) + ':' + str(round(minute))
 
     @property
+    def quit_job(self):
+        if self.contract.quit_job_date:
+            return self.contract.quit_job_date
+        else:
+            return ' - '
+
+    @property
     def absence_sum(self):
         return int(self.absence_day) + int(self.cumulative_absence)
 
@@ -3582,7 +3634,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def entitlement_sum(self):
-        return int(self.entitlement_leave_day) + int(self.cumulative_entitlement)
+        return round(self.entitlement_leave_day, 2) + round(self.cumulative_entitlement, 2)
 
     @property
     def mission_sum(self):

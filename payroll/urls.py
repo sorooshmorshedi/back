@@ -36,7 +36,7 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi, \
     WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView, WorkTitleApiView, ListOfPayEditDetail, \
-    ListOfPayEditItems
+    ListOfPayEditItems, ContractEditApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -107,6 +107,7 @@ urlpatterns = [
     path('contract/<int:pk>/', ContractDetail.as_view(), name='contractDetail'),
     path('contract/verify/<int:pk>/', ContractVerifyApi.as_view(), name='contractVerifyApi'),
     path('contract/unverify/<int:pk>/', ContractUnVerifyApi.as_view(), name='contractUnVerifyApi'),
+    path('contract/edit/<int:pk>/', ContractEditApi.as_view(), name='contractEditApi'),
 
     path('hrletter/', HRLetterApiView.as_view(), name='HRLetterApiView'),
     path('hrletter/templates/', GetHRLetterTemplatesApi.as_view(), name='getHRLetterTemplatesApi'),

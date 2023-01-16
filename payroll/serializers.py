@@ -93,6 +93,8 @@ class WorkshopPersonnelSerializer(serializers.ModelSerializer):
     personnel_nationality = serializers.IntegerField(source='personnel.nationality', read_only=True)
     title_name = serializers.CharField(source='title.name', read_only=True)
     title_code = serializers.CharField(source='title.code', read_only=True)
+    unverifiable = serializers.BooleanField(source='un_verifiable', read_only=True)
+
 
     class Meta:
         model = WorkshopPersonnel
@@ -144,6 +146,9 @@ class ContractSerializer(serializers.ModelSerializer):
     insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
     workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
     personnel_insurance_month = serializers.IntegerField(source='workshop_personnel.total_insurance', read_only=True)
+    unverifiable = serializers.BooleanField(source='un_verifiable', read_only=True)
+    insurance_editable = serializers.BooleanField(source='is_insurance_editable', read_only=True)
+    tax_editable = serializers.BooleanField(source='is_tax_editable', read_only=True)
 
     class Meta:
         model = Contract
@@ -286,10 +291,12 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
 
     get_absence_sum = serializers.IntegerField(source='absence_sum', read_only=True)
     get_illness_sum = serializers.IntegerField(source='illness_sum', read_only=True)
-    get_entitlement_sum = serializers.IntegerField(source='entitlement_sum', read_only=True)
+    get_entitlement_sum = serializers.DecimalField(source='entitlement_sum', read_only=True, max_digits=24,
+                                                   decimal_places=2)
     get_without_salary_sum = serializers.IntegerField(source='without_salary_sum', read_only=True)
     get_mission_sum = serializers.IntegerField(source='mission_sum', read_only=True)
     get_is_editable = serializers.BooleanField(source='is_editable', read_only=True)
+    get_quit_job = serializers.CharField(source='quit_job', read_only=True)
 
     class Meta:
         model = ListOfPayItem
@@ -476,3 +483,11 @@ class ListOfPayEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListOfPay
         fields = 'id', 'name', 'use_in_calculate', 'get_month_display', 'get_year', 'workshop_name', 'workshop'
+
+
+class ContractEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contract
+        fields = 'id', 'insurance', 'insurance_add_date', 'quit_job_date', 'tax', 'tax_add_date'
+
+
