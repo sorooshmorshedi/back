@@ -1649,7 +1649,7 @@ class ListOfPayEditDetail(APIView):
                         'nobat_kari_asr_shab': 0,
                         'nobat_kari_sob_asr_shab': 0,
                         'sayer_ezafat': 0,
-                        'contract_row': 0,
+                        'contract_row': None,
                         'mazaya_gheyr_mostamar': 0,
                         'hazine_made_137': 0,
                         'kosoorat_insurance': 0,
