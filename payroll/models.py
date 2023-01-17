@@ -1646,6 +1646,18 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return ''
 
     @property
+    def quit_job_editable(self):
+        if self.quit_job_date:
+            lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) &
+                                                 Q(list_of_pay__month=self.quit_job_date.month))
+            if len(lists) == 0:
+                return True
+            else:
+                return False
+        else:
+            return True
+
+    @property
     def is_insurance_editable(self):
         lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) & Q(list_of_pay__use_in_calculate=True))
         is_in = []
@@ -1673,7 +1685,7 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def un_verifiable(self):
-        lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True))
+        lists = self.list_of_pay_item.all()
         if len(lists) > 0:
             return False
         else:
@@ -3333,11 +3345,15 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                     contract_end[contract.id] = self.end_date
                 if contract.contract_from_date.__ge__(self.start_date) and end.__le__(self.end_date):
                     personnel_normal_worktime[contract.id] = end.day - contract.contract_from_date.day
+                    if contract.quit_job_date:
+                        personnel_normal_worktime[contract.id] = personnel_normal_worktime[contract.id] - 1
                     contract_start[contract.id] = contract.contract_from_date
                     contract_end[contract.id] = end
                 if contract.contract_from_date.__le__(self.start_date) and end.__gt__(self.start_date) and \
                         end.__lt__(self.end_date):
                     personnel_normal_worktime[contract.id] = end.day
+                    if contract.quit_job_date:
+                        personnel_normal_worktime[contract.id] = personnel_normal_worktime[contract.id] - 1
                     contract_start[contract.id] = self.start_date
                     contract_end[contract.id] = end
                 if contract.contract_from_date.__ge__(self.start_date) and end.__ge__(self.end_date) and \
@@ -3912,6 +3928,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.aele_mandi_child = 0
             self.total_insurance_month = 0
             return 0
+
+    @property
+    def is_insurance_display(self):
+        if self.contract.insurance:
+            if self.contract.insurance_add_date.__le__(self.list_of_pay.end_date):
+                return 'بیمه شده'
+            else:
+                return 'بیمه نشده'
+        else:
+            return 'بیمه نشده'
 
     @property
     def get_sanavt_info(self):

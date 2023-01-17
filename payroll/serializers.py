@@ -149,6 +149,7 @@ class ContractSerializer(serializers.ModelSerializer):
     unverifiable = serializers.BooleanField(source='un_verifiable', read_only=True)
     insurance_editable = serializers.BooleanField(source='is_insurance_editable', read_only=True)
     tax_editable = serializers.BooleanField(source='is_tax_editable', read_only=True)
+    is_quit_job_editable = serializers.BooleanField(source='quit_job_editable', read_only=True)
 
     class Meta:
         model = Contract
@@ -241,7 +242,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     month = serializers.CharField(source='list_of_pay.month', read_only=True)
     month_display = serializers.CharField(source='list_of_pay.month_display', read_only=True)
     workshop_display = serializers.CharField(source='workshop_personnel.workshop.workshop_title', read_only=True)
-    is_insurance_display = serializers.CharField(source='contract.is_insurance_display', read_only=True)
+    insurance_display = serializers.CharField(source='is_insurance_display', read_only=True)
     insurance_date = serializers.DateField(source='contract.insurance_add_date', read_only=True)
     tax_date = serializers.CharField(source='contract.tax_add_date', read_only=True)
     insurance_workshop = serializers.CharField(source='workshop_personnel.current_insurance_history_in_workshop',

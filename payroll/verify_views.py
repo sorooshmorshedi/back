@@ -624,6 +624,9 @@ class WorkshopPersonnelUnVerifyApi(APIView):
     def get(self, request, pk):
         personnel = WorkshopPersonnel.objects.get(pk=pk)
         personnel.is_verified = False
+        for contract in personnel.contract.all():
+            contract.is_verified = False
+            contract.save()
         personnel.save()
         return Response({'وضعیت': 'personnel un verify done'}, status=status.HTTP_200_OK)
 
@@ -640,10 +643,12 @@ class ContractVerifyApi(APIView):
 
     def get(self, request, pk):
         contract = Contract.objects.get(pk=pk)
-
         if not contract.workshop_personnel:
             self.validate_status = False
             self.error_messages.append('پرسنل در کارگاه نمی تواند خالی باشد')
+        if contract.workshop_personnel.is_verified == False:
+            self.validate_status = False
+            self.error_messages.append('پرسنل در کارگاه نهایی نیست')
         if not contract.code:
             self.validate_status = False
             self.error_messages.append('شماره قرارداد نمی تواند خالی باشد')

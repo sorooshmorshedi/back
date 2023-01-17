@@ -1292,6 +1292,10 @@ class ListOfPayItemsCalculate(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay_item'
 
+    def __init__(self):
+        self.error_messages = []
+        self.validate_status = True
+
     def get_object(self, pk):
         try:
             return ListOfPayItem.objects.get(pk=pk)
@@ -1339,7 +1343,9 @@ class ListOfPayItemsCalculate(APIView):
             if not data['cumulative_without_salary']:
                 data['cumulative_without_salary'] = 0
             try:
-                if data['ezafe_kari'] and data['ezafe_kari'] != '':
+                if ':' not in data['ezafe_kari']:
+                    data['ezafe_kari'] = int(data['ezafe_kari'])
+                elif data['ezafe_kari'] and data['ezafe_kari'] != '':
                     ezafe_kari = data['ezafe_kari']
                     ezafe_kari = ezafe_kari.split(':')
                     ezafe_kari = round((int(ezafe_kari[0]) + (int(ezafe_kari[1]) / 60)), 6)
@@ -1347,10 +1353,13 @@ class ListOfPayItemsCalculate(APIView):
                 elif data['ezafe_kari'] == '':
                     data['ezafe_kari'] = 0
             except:
-                raise ValidationError('برای اضافه کاری یک ساعت صحیح وارد کنید')
+                self.validate_status = False
+                self.error_messages.append('برای اضافه کاری یک ساعت صحیح وارد کنید')
 
             try:
-                if data['tatil_kari'] and data['tatil_kari'] != '':
+                if ':' not in data['tatil_kari']:
+                    data['tatil_kari'] = int(data['tatil_kari'])
+                elif data['tatil_kari'] and data['tatil_kari'] != '':
                     tatil_kari = data['tatil_kari']
                     tatil_kari = tatil_kari.split(':')
                     tatil_kari = round((int(tatil_kari[0]) + (int(tatil_kari[1]) / 60)), 6)
@@ -1358,10 +1367,13 @@ class ListOfPayItemsCalculate(APIView):
                 elif data['tatil_kari'] == '':
                     data['tatil_kari'] = 0
             except:
-                raise ValidationError('برای تعطیل کاری یک ساعت صحیح وارد کنید')
+                self.validate_status = False
+                self.error_messages.append('برای تعطیل کاری یک ساعت صحیح وارد کنید')
 
             try:
-                if data['kasre_kar'] and data['kasre_kar'] != '':
+                if ':' not in data['kasre_kar']:
+                    data['kasre_kar'] = int(data['kasre_kar'])
+                elif data['kasre_kar'] and data['kasre_kar'] != '':
                     kasre_kar = data['kasre_kar']
                     kasre_kar = kasre_kar.split(':')
                     kasre_kar = round((int(kasre_kar[0]) + (int(kasre_kar[1]) / 60)), 6)
@@ -1369,10 +1381,13 @@ class ListOfPayItemsCalculate(APIView):
                 elif data['kasre_kar'] == '':
                     data['kasre_kar'] = 0
             except:
-                raise ValidationError('برای کسر کار یک ساعت صحیح وارد کنید')
+                self.validate_status = False
+                self.error_messages.append('برای کسر کار یک ساعت صحیح وارد کنید')
 
             try:
-                if data['shab_kari'] and data['shab_kari'] != '':
+                if ':' not in data['shab_kari']:
+                    data['shab_kari'] = int(data['shab_kari'])
+                elif data['shab_kari'] and data['shab_kari'] != '':
                     shab_kari = data['shab_kari']
                     shab_kari = shab_kari.split(':')
                     shab_kari = round((int(shab_kari[0]) + (int(shab_kari[1]) / 60)), 6)
@@ -1380,13 +1395,24 @@ class ListOfPayItemsCalculate(APIView):
                 elif data['shab_kari'] == '':
                     data['shab_kari'] = 0
             except:
-                raise ValidationError('برای شب کاری یک ساعت صحیح وارد کنید')
+                self.validate_status = False
+                self.error_messages.append('برای شب کاری یک ساعت صحیح وارد کنید')
 
-            serializer = ListOfPayItemsAddInfoSerializer(query, data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            if self.validate_status:
+                serializer = ListOfPayItemsAddInfoSerializer(query, data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                counter = 1
+                response = []
+                for error in self.error_messages:
+                    error = str(counter) + '-' + error
+                    counter += 1
+                    response.append(error)
+                return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             query.delete()
             return Response({'status': 'deleted'}, status=status.HTTP_200_OK)
@@ -1502,6 +1528,15 @@ class ListOfPayCopy(APIView):
             new_item = item
             new_item.id = None
             new_item.list_of_pay = ListOfPay.objects.get(pk=new_list_of_pay.id)
+            new_item.entitlement_leave_day = 0
+            new_item.matter_47_leave_day = 0
+            new_item.daily_entitlement_leave_day = 0
+            new_item.hourly_entitlement_leave_day = 0
+            new_item.absence_day = 0
+            new_item.illness_leave_day = 0
+            new_item.without_salary_leave_day = 0
+            new_item.mission_day = 0
+
             new_item.save()
         return Response({'id': list_of_pay.id}, status=status.HTTP_201_CREATED)
 
@@ -1546,6 +1581,7 @@ class ListOfPayUltimateApi(APIView):
 class ListOfPayEditDetail(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
     permission_basename = 'list_of_pay'
+
     def get_object(self, pk):
         try:
             return ListOfPay.objects.get(pk=pk)
@@ -1562,6 +1598,112 @@ class ListOfPayEditDetail(APIView):
         serializer = ListOfPayEditSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            cumulative = {}
+            for item in query.list_of_pay_item.all():
+                item.delete()
+                cumulative[item.workshop_personnel.id] = {
+                    'cumulative_absence': item.cumulative_absence,
+                    'cumulative_mission': item.cumulative_mission,
+                    'cumulative_entitlement': item.cumulative_entitlement,
+                    'cumulative_illness': item.cumulative_illness,
+                    'cumulative_without_salary': item.cumulative_without_salary,
+                    'ezafe_kari': item.ezafe_kari,
+                    'tatil_kari': item.tatil_kari,
+                    'kasre_kar': item.kasre_kar,
+                    'sayer_kosoorat': item.sayer_kosoorat,
+                    'shab_kari': item.shab_kari,
+                    'nobat_kari_sob_asr': item.nobat_kari_sob_asr,
+                    'nobat_kari_sob_shab': item.nobat_kari_sob_shab,
+                    'nobat_kari_asr_shab': item.nobat_kari_asr_shab,
+                    'nobat_kari_sob_asr_shab': item.nobat_kari_sob_asr_shab,
+                    'sayer_ezafat': item.sayer_ezafat,
+                    'contract_row': item.contract_row,
+                    'mazaya_gheyr_mostamar': item.mazaya_gheyr_mostamar,
+                    'hazine_made_137': item.hazine_made_137,
+                    'kosoorat_insurance': item.kosoorat_insurance,
+                    'sayer_moafiat': item.sayer_moafiat,
+                    'manategh_tejari_moafiat': item.manategh_tejari_moafiat,
+                    'ejtenab_maliat_mozaaf': item.ejtenab_maliat_mozaaf,
+                }
+            response = query.info_for_items
+            print(cumulative)
+            for item in response:
+                workshop_personnel = WorkshopPersonnel.objects.filter(
+                        Q(workshop=query.workshop) & Q(personnel_id=item['pk'])).first()
+                try:
+                    print(cumulative[workshop_personnel.id])
+                except:
+                    cumulative[workshop_personnel.id] = {
+                        'cumulative_absence': 0,
+                        'cumulative_mission': 0,
+                        'cumulative_entitlement': 0,
+                        'cumulative_illness': 0,
+                        'cumulative_without_salary': 0,
+                        'ezafe_kari': 0,
+                        'tatil_kari': 0,
+                        'kasre_kar': 0,
+                        'sayer_kosoorat': 0,
+                        'shab_kari': 0,
+                        'nobat_kari_sob_asr': 0,
+                        'nobat_kari_sob_shab': 0,
+                        'nobat_kari_asr_shab': 0,
+                        'nobat_kari_sob_asr_shab': 0,
+                        'sayer_ezafat': 0,
+                        'contract_row': 0,
+                        'mazaya_gheyr_mostamar': 0,
+                        'hazine_made_137': 0,
+                        'kosoorat_insurance': 0,
+                        'sayer_moafiat': 0,
+                        'manategh_tejari_moafiat': 0,
+                        'ejtenab_maliat_mozaaf': 0,
+
+                    }
+
+                if item['insurance']:
+                    insurance = 'y'
+                else:
+                    insurance = 'n'
+
+                payroll_list_item = ListOfPayItem.objects.create(
+                    list_of_pay=query,
+                    workshop_personnel=workshop_personnel,
+                    contract=Contract.objects.get(pk=item['contract']),
+                    normal_worktime=item['normal_work'],
+                    real_worktime=item['real_work'],
+                    mission_day=item['mission'],
+                    is_insurance=insurance,
+                    absence_day=item['leaves']['a'],
+                    entitlement_leave_day=item['leaves']['e'],
+                    daily_entitlement_leave_day=item['leaves']['ed'],
+                    hourly_entitlement_leave_day=item['leaves']['eh'],
+                    illness_leave_day=item['leaves']['i'] + item['leaves']['c'],
+                    without_salary_leave_day=item['leaves']['w'],
+                    matter_47_leave_day=item['leaves']['m'],
+                    cumulative_absence=cumulative[workshop_personnel.id]['cumulative_absence'],
+                    cumulative_mission=cumulative[workshop_personnel.id]['cumulative_mission'],
+                    cumulative_entitlement=cumulative[workshop_personnel.id]['cumulative_entitlement'],
+                    cumulative_illness=cumulative[workshop_personnel.id]['cumulative_illness'],
+                    cumulative_without_salary=cumulative[workshop_personnel.id]['cumulative_without_salary'],
+                    ezafe_kari=cumulative[workshop_personnel.id]['ezafe_kari'],
+                    tatil_kari=cumulative[workshop_personnel.id]['tatil_kari'],
+                    kasre_kar=cumulative[workshop_personnel.id]['kasre_kar'],
+                    sayer_kosoorat=cumulative[workshop_personnel.id]['sayer_kosoorat'],
+                    shab_kari=cumulative[workshop_personnel.id]['shab_kari'],
+                    nobat_kari_sob_asr=cumulative[workshop_personnel.id]['nobat_kari_sob_asr'],
+                    nobat_kari_sob_shab=cumulative[workshop_personnel.id]['nobat_kari_sob_shab'],
+                    nobat_kari_asr_shab=cumulative[workshop_personnel.id]['nobat_kari_asr_shab'],
+                    nobat_kari_sob_asr_shab=cumulative[workshop_personnel.id]['nobat_kari_sob_asr_shab'],
+                    sayer_ezafat=cumulative[workshop_personnel.id]['sayer_ezafat'],
+                    contract_row=cumulative[workshop_personnel.id]['contract_row'],
+                    mazaya_gheyr_mostamar=cumulative[workshop_personnel.id]['mazaya_gheyr_mostamar'],
+                    hazine_made_137=cumulative[workshop_personnel.id]['hazine_made_137'],
+                    kosoorat_insurance=cumulative[workshop_personnel.id]['kosoorat_insurance'],
+                    sayer_moafiat=cumulative[workshop_personnel.id]['sayer_moafiat'],
+                    manategh_tejari_moafiat=cumulative[workshop_personnel.id]['manategh_tejari_moafiat'],
+                    ejtenab_maliat_mozaaf=cumulative[workshop_personnel.id]['ejtenab_maliat_mozaaf'],
+                )
+                print(payroll_list_item.cumulative_mission)
+                payroll_list_item.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
