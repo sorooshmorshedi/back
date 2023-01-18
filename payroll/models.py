@@ -3243,8 +3243,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                 contracts.append(contract.id)
             if contract.contract_from_date.__ge__(self.start_date) and end.__le__(self.end_date):
                 contracts.append(contract.id)
-            if contract.contract_from_date.__le__(self.start_date) and end.__gt__(self.start_date) and \
-                    end.__lt__(self.end_date):
+            if contract.contract_from_date.__le__(self.start_date) and end.__ge__(self.start_date) and \
+                    end.__le__(self.end_date):
                 contracts.append(contract.id)
             if contract.contract_from_date.__ge__(self.start_date) and end.__ge__(self.end_date) and \
                     contract.contract_from_date.__lt__(self.end_date):
@@ -3349,8 +3349,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                         personnel_normal_worktime[contract.id] = personnel_normal_worktime[contract.id] - 1
                     contract_start[contract.id] = contract.contract_from_date
                     contract_end[contract.id] = end
-                if contract.contract_from_date.__le__(self.start_date) and end.__gt__(self.start_date) and \
-                        end.__lt__(self.end_date):
+                if contract.contract_from_date.__le__(self.start_date) and end.__ge__(self.start_date) and \
+                        end.__le__(self.end_date):
                     personnel_normal_worktime[contract.id] = end.day
                     if contract.quit_job_date:
                         personnel_normal_worktime[contract.id] = personnel_normal_worktime[contract.id] - 1

@@ -21,7 +21,7 @@ from payroll.serializers import WorkShopSerializer, PersonnelSerializer, Personn
     WorkShopTaxSerializer, LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayLessSerializer, \
     ListOfPayBankSerializer, ListOfPayItemPaySerializer, ListOfPayPaySerializer, ListOfPayItemAddPaySerializer, \
     ListOfPayCopyPaySerializer, AdjustmentSerializer, WorkTitleSerializer, ListOfPayEditSerializer, \
-    ContractEditSerializer
+    ContractEditSerializer, ContractEditInsuranceSerializer, ContractEditTaxSerializer
 from users.models import City
 
 
@@ -1736,12 +1736,81 @@ class ContractEditApi(APIView):
 
     def get(self, request, pk):
         query = self.get_object(pk)
-        serializers = ContractEditSerializer(query, many=True)
+        serializers = ContractEditSerializer(query)
         return Response(serializers.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
         query = self.get_object(pk)
+        data = request.data
+        list_of_pays = query.list_of_pay_item.all()
+        if data['quit_job_date']:
+            quit_job_month = int(data['quit_job_date'].split('-')[1])
+            for item in list_of_pays:
+                if item.list_of_pay.month >= quit_job_month:
+                    raise ValidationError('در این تاریخ ترک کار، لیست حقوق صادر شده')
         serializer = ContractEditSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractInsuranceEditApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract'
+
+    def get_object(self, pk):
+        try:
+            return Contract.objects.get(pk=pk)
+        except Contract.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ContractEditInsuranceSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        data = request.data
+        list_of_pays = query.list_of_pay_item.all()
+        if data['insurance_add_date']:
+            insurance_add_date = int(data['insurance_add_date'].split('-')[1])
+            for item in list_of_pays:
+                if item.list_of_pay.month >= insurance_add_date:
+                    raise ValidationError('در این تاریخ اضافه شدن به لیست بیمه، لیست حقوق صادر شده')
+        serializer = ContractEditInsuranceSerializer(query, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContractTaxEditApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'contract'
+
+    def get_object(self, pk):
+        try:
+            return Contract.objects.get(pk=pk)
+        except Contract.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        query = self.get_object(pk)
+        serializers = ContractEditTaxSerializer(query, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        query = self.get_object(pk)
+        data = request.data
+        list_of_pays = query.list_of_pay_item.all()
+        if data['tax_add_date']:
+            tax_add_date = int(data['tax_add_date'].split('-')[1])
+            for item in list_of_pays:
+                if item.list_of_pay.month >= tax_add_date:
+                    raise ValidationError('در این تاریخ اضافه شدن به لیست مالیات، لیست حقوق صادر شده')
+        serializer = ContractEditTaxSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

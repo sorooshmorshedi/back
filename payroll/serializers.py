@@ -489,6 +489,18 @@ class ListOfPayEditSerializer(serializers.ModelSerializer):
 class ContractEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
-        fields = 'id', 'insurance', 'insurance_add_date', 'quit_job_date', 'tax', 'tax_add_date'
+        fields = 'id', 'quit_job_date', 'insurance', 'insurance_add_date', 'insurance_number', 'tax', 'tax_add_date'
+
+
+class ContractEditInsuranceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contract
+        fields = 'id', 'insurance', 'insurance_add_date', 'insurance_number'
+
+
+class ContractEditTaxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contract
+        fields = 'id', 'tax', 'tax_add_date'
 
 
