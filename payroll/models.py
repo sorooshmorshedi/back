@@ -2864,9 +2864,9 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         for i in range(0, 22):
             if hr_letter_items[i]['insurance'] and hr_letter_items[i]['nature'] != 'b':
                 if i < 2:
-                    insurance_benefit += round(hr_letter_items[i]['amount'] * 30)
+                    insurance_benefit += hr_letter_items[i]['amount'] * 30
                 else:
-                    insurance_benefit += round(hr_letter_items[i]['amount'])
+                    insurance_benefit += hr_letter_items[i]['amount']
 
         return insurance_benefit
 
@@ -4601,7 +4601,21 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
             hr = self.get_hr_letter
-            benefit = Decimal(hr.insurance_benefit) * Decimal(insurance_worktime)
+            benefit = 0
+            hr_letter_items = hr.get_hr_items
+
+            if hr.hoghooghe_roozane_nature != 'b' and hr.hoghooghe_roozane_use_insurance:
+                benefit += self.hoghoogh_mahane
+            if hr.paye_sanavat_nature != 'b' and hr.paye_sanavat_use_insurance:
+                benefit += self.sanavat_mahane
+
+            for i in range(0, 22):
+                if hr_letter_items[i]['insurance'] and hr_letter_items[i]['nature'] != 'b':
+                    if i < 2:
+                        benefit += 0
+                    else:
+                        benefit += self.calculate_hr_item_in_real_work_time(hr_letter_items[i]['amount'])
+
             if hr.ezafe_kari_use_insurance:
                 benefit = benefit + Decimal(self.ezafe_kari_total)
             if hr.haghe_owlad_use_insurance:
@@ -4621,6 +4635,10 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 benefit = benefit + Decimal(self.haghe_sanavat_total)
             if hr.eydi_padash_use_insurance:
                 benefit = benefit + Decimal(self.padash_total)
+
+            if self.sayer_ezafat:
+                benefit += self.sayer_ezafat
+
             return benefit
         else:
             return 0
