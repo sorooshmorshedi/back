@@ -1231,8 +1231,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             for item in items:
                 is_insurance, worktime = item.check_insurance
                 if is_insurance:
-                    total += round(((item.real_worktime + item.illness_leave_day) / item.list_of_pay.month_days), 2)
-            return total
+                    total += (item.real_worktime + item.illness_leave_day) / item.list_of_pay.month_days
+            return round(total, 2)
         else:
             return 0
 
@@ -1635,7 +1635,18 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             ('deleteOwn.contract', 'حذف قرارداد خود'),
         )
 
+
     def save(self, *args, **kwargs):
+        if self.insurance:
+            self.workshop_personnel.personnel.insurance = True
+            self.workshop_personnel.personnel.insurance_code = self.insurance_number
+            self.workshop_personnel.personnel.save()
+        if self.is_verified and self.quit_job_date and self.quit_job_date.__le__(self.contract_from_date):
+            raise ValidationError('تاریخ ترک کار باید بعد از تاریخ شروع قرارداد باشد')
+        if self.is_verified and self.insurance_add_date and self.insurance_add_date.__lt__(self.contract_from_date):
+            raise ValidationError('تاریخ اضافه شدن به لیست بیمه باید بعد از تاریخ شروع قرارداد باشد')
+        if self.is_verified and self.tax_add_date and self.tax_add_date.__lt__(self.contract_from_date):
+            raise ValidationError('تاریخ اضافه شدن به لیست مالیات باید بعد از تاریخ شروع قرارداد باشد')
         super().save(*args, **kwargs)
 
     @property
@@ -1696,11 +1707,17 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         validate_status = False
         contracts = Contract.objects.filter(Q(is_verified=True) & Q(workshop_personnel=self.workshop_personnel))
         for contract in contracts:
+            end = contract.contract_to_date
+            if contract.quit_job_date:
+                end = contract.quit_job_date
             if self.contract_from_date.__ge__(contract.contract_from_date) and \
-                    self.contract_from_date.__le__(contract.contract_to_date):
+                    self.contract_from_date.__le__(end):
                 validate_status = True
             elif self.contract_to_date.__ge__(contract.contract_from_date) and \
-                    self.contract_to_date.__le__(contract.contract_to_date):
+                    self.contract_to_date.__le__(end):
+                validate_status = True
+            elif self.contract_from_date.__le__(contract.contract_from_date) and \
+                    self.contract_to_date.__ge__(end):
                 validate_status = True
         return validate_status
 
