@@ -1637,12 +1637,23 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
 
     def save(self, *args, **kwargs):
+        if self.is_verified and self.insurance != None and self.insurance:
+            if not self.insurance_add_date:
+                raise ValidationError('تاریخ اضافه شدن به لیست بیمه را وارد کنید')
+            if not self.insurance_number:
+                raise ValidationError('شماره بیمه را وارد کنید')
         if self.insurance:
             self.workshop_personnel.personnel.insurance = True
             self.workshop_personnel.personnel.insurance_code = self.insurance_number
             self.workshop_personnel.personnel.save()
+
+        if self.is_verified and self.tax != None and self.tax:
+            if not self.tax_add_date:
+                raise ValidationError('تاریخ اضافه شدن به لیست مالیات را وارد کنید')
+
         if self.is_verified and self.quit_job_date and self.quit_job_date.__le__(self.contract_from_date):
             raise ValidationError('تاریخ ترک کار باید بعد از تاریخ شروع قرارداد باشد')
+
         if self.is_verified and self.insurance_add_date and self.insurance_add_date.__lt__(self.contract_from_date):
             raise ValidationError('تاریخ اضافه شدن به لیست بیمه باید بعد از تاریخ شروع قرارداد باشد')
         if self.is_verified and self.tax_add_date and self.tax_add_date.__lt__(self.contract_from_date):
@@ -4950,11 +4961,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if hr.include_made_86:
                 tax = self.tax_included_payment / 10
             else:
+                contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(insurance=True))
                 items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                                      Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                                      Q(workshop_personnel=self.workshop_personnel) &
                                                      Q(list_of_pay__ultimate=True) &
-                                                     Q(list_of_pay__use_in_calculate=True))
+                                                     Q(list_of_pay__use_in_calculate=True) &
+                                                     Q(contract__in=contracts))
                 tax = Decimal(0)
                 year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
                 mytax = self.get_tax_row
