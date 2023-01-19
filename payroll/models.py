@@ -2860,7 +2860,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def calculate_insurance_pay_base(self):
         insurance_pay_base = 0
         hr_letter_items = self.get_hr_items
-        for i in range(0, 22):
+        for i in range(0, 23):
             if hr_letter_items[i]['insurance'] and hr_letter_items[i]['nature'] == 'b':
                 if i < 2:
                     insurance_pay_base += round(hr_letter_items[i]['amount'])
@@ -2872,7 +2872,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def calculate_insurance_benefit(self):
         insurance_benefit = 0
         hr_letter_items = self.get_hr_items
-        for i in range(0, 22):
+        for i in range(0, 23):
             if hr_letter_items[i]['insurance'] and hr_letter_items[i]['nature'] != 'b':
                 if i < 2:
                     insurance_benefit += hr_letter_items[i]['amount'] * 30
@@ -2885,7 +2885,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def calculate_insurance_not_included(self):
         insurance_not_included = 0
         hr_letter_items = self.get_hr_items
-        for i in range(0, 22):
+        for i in range(0, 23):
             if not hr_letter_items[i]['insurance']:
                 if i < 2:
                     insurance_not_included += round(hr_letter_items[i]['amount'] * 30)
@@ -3607,6 +3607,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     '''for payment'''
     payment_done = models.BooleanField(default=False)
     paid_amount = models.IntegerField(default=0)
+
+    total_tax = DECIMAL(default=0)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
@@ -4620,7 +4622,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if hr.paye_sanavat_nature != 'b' and hr.paye_sanavat_use_insurance:
                 benefit += self.sanavat_mahane
 
-            for i in range(0, 22):
+            for i in range(0, 23):
                 if hr_letter_items[i]['insurance'] and hr_letter_items[i]['nature'] != 'b':
                     if i < 2:
                         benefit += 0
