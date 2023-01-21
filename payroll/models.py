@@ -3515,6 +3515,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                            on_delete=models.CASCADE, blank=True, null=True)
     contract = models.ForeignKey(Contract, related_name="list_of_pay_item",
                                  on_delete=models.CASCADE, blank=True, null=True)
+    hr_letter = models.ForeignKey(HRLetter, related_name='list_of_pay_item', on_delete=models.CASCADE, blank=True, null=True)
     contract_row = models.ForeignKey(ContractRow, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                      blank=True, null=True)
     cumulative_absence = models.IntegerField(default=0)
@@ -3924,12 +3925,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hr_letter(self):
-        hr = self.contract.hr_letter.all()
-        hr = hr.filter(Q(is_verified=True) & Q(is_active=True))
-        hr = hr.first()
-        if not hr:
-            raise ValidationError('حکم کارگزینی فعال موجود نیست')
-        return hr
+        if self.hr_letter:
+            return self.hr_letter
+        else:
+            hr = self.contract.hr_letter.all()
+            hr = hr.filter(Q(is_verified=True) & Q(is_active=True))
+            hr = hr.first()
+            if not hr:
+                raise ValidationError('حکم کارگزینی فعال موجود نیست')
+            return hr
 
 
     def calculate_hr_item_in_real_work_time(self, item):
@@ -4047,9 +4051,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_total_payment(self):
-        hr = self.get_hr_letter
-        hr.is_calculated = False
-        hr.save()
+        self.hr_letter = self.get_hr_letter
+        self.hr_letter.is_calculated = False
+        self.hr_letter.save()
         total = Decimal(0)
 
         total += self.hoghoogh_mahane
@@ -4073,27 +4077,27 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.nobat_kari_asr_shab_total
         total += self.nobat_kari_sob_asr_shab_total
 
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_sarparasti_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_modiriyat_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_jazb_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.fogholade_shoghl_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_tahsilat_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.fogholade_sakhti_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_ankal_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.fogholade_badi_abohava_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.fogholade_mahal_khedmat_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_maskan_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.ayabo_zahab_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.bon_kharo_bar_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.yarane_ghaza_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_taahol_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.haghe_shir_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.komakhazine_mahdekoodak_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.komakhazine_varzesh_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.komakhazine_mobile_amount)
+        total += self.calculate_hr_item_in_real_work_time(self.hr_letter.mazaya_mostamar_gheyre_naghdi_amount)
 
         total += self.mazaya_gheyr_mostamar
         total += self.sayer_ezafat
@@ -4933,7 +4937,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                                  Q(list_of_pay__use_in_calculate=True))
             tax = Decimal(0)
             for item in items:
-                tax += item.calculate_month_tax
+                tax += item.total_tax
             return tax
         else:
             return 0
