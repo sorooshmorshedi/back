@@ -4109,6 +4109,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total -= self.get_kasre_kar
         total -= self.sayer_kosoorat
         self.kasre_kar_total = round(self.get_kasre_kar)
+        self.total_tax = self.calculate_month_tax
 
         return total
 
@@ -4910,7 +4911,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def tax_included_payment(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            return round(self.get_total_payment) - self.moaf_sum
+            return round(self.total_payment) - self.moaf_sum
         else:
             return 0
 
