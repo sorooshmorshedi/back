@@ -4917,11 +4917,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_year_payment(self):
+        contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(tax=True))
         items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                             Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                             Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                              Q(workshop_personnel=self.workshop_personnel) &
                                              Q(list_of_pay__ultimate=True) &
-                                             Q(list_of_pay__use_in_calculate=True))
+                                             Q(list_of_pay__use_in_calculate=True) &
+                                             Q(contract__in=contracts))
         year_payment = Decimal(0)
         for item in items:
             year_payment = year_payment + Decimal(item.tax_included_payment)
@@ -4931,11 +4933,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_last_tax(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
+            contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(tax=True))
             items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                                 Q(list_of_pay__month__lt=self.list_of_pay.month) &
+                                                 Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                                  Q(workshop_personnel=self.workshop_personnel) &
                                                  Q(list_of_pay__ultimate=True) &
-                                                 Q(list_of_pay__use_in_calculate=True))
+                                                 Q(list_of_pay__use_in_calculate=True) &
+                                                 Q(contract__in=contracts))
             tax = Decimal(0)
             for item in items:
                 tax += item.total_tax
@@ -4962,43 +4966,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_month_tax(self):
-        is_tax, tax_day = self.check_tax
-        if is_tax:
-            hr = self.get_hr_letter
-            if hr.include_made_86:
-                tax = self.tax_included_payment / 10
-            else:
-                contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(insurance=True))
-                items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
-                                                     Q(list_of_pay__month__lte=self.list_of_pay.month) &
-                                                     Q(workshop_personnel=self.workshop_personnel) &
-                                                     Q(list_of_pay__ultimate=True) &
-                                                     Q(list_of_pay__use_in_calculate=True) &
-                                                     Q(contract__in=contracts))
-                tax = Decimal(0)
-                year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
-                mytax = self.get_tax_row
-                tax_rows = mytax.tax_row.all()
-                tax_row = tax_rows.get(from_amount=Decimal(0))
-                start = 0
-                while year_amount >= Decimal(0):
-                    if year_amount + start <= (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
-                        tax += (year_amount * tax_row.ratio / 100)
-                        print('tax :', tax)
-                        return round(tax) - round(self.get_last_tax)
-                    elif year_amount + start > (tax_row.to_amount * Decimal(len(items)) / Decimal(12)):
-                        tax += ((tax_row.to_amount * Decimal(len(items)) / Decimal(12))
-                                - (tax_row.from_amount * Decimal(len(items)) / Decimal(12))) * tax_row.ratio / 100
-                        year_amount -= ((tax_row.to_amount * Decimal(len(items)) / Decimal(12)) -
-                                        (tax_row.from_amount * Decimal(len(items)) / Decimal(12)))
-                        try:
-                            tax_row = tax_rows.get(from_amount=tax_row.to_amount + Decimal(1))
-                            start = tax_row.from_amount * Decimal(len(items)) / Decimal(12)
-                        except:
-                            return round(tax) - round(self.get_last_tax)
-            return round(tax) - round(self.get_last_tax)
-        else:
-            return 0
+        return 0
 
     @property
     def calculate_monthly_eydi_tax(self):
