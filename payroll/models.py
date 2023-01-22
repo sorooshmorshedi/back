@@ -4917,13 +4917,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_year_payment(self):
-        contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(tax=True))
         items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                              Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                              Q(workshop_personnel=self.workshop_personnel) &
                                              Q(list_of_pay__ultimate=True) &
-                                             Q(list_of_pay__use_in_calculate=True) &
-                                             Q(contract__in=contracts))
+                                             Q(list_of_pay__use_in_calculate=True))
         year_payment = Decimal(0)
         for item in items:
             year_payment = year_payment + Decimal(item.tax_included_payment)
@@ -4933,13 +4931,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def get_last_tax(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            contracts = self.workshop_personnel.contract.filter(Q(is_verified=True) & Q(tax=True))
             items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
                                                  Q(list_of_pay__month__lte=self.list_of_pay.month) &
                                                  Q(workshop_personnel=self.workshop_personnel) &
                                                  Q(list_of_pay__ultimate=True) &
-                                                 Q(list_of_pay__use_in_calculate=True) &
-                                                 Q(contract__in=contracts))
+                                                 Q(list_of_pay__use_in_calculate=True))
             tax = Decimal(0)
             for item in items:
                 tax += item.total_tax
@@ -4966,7 +4962,54 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_month_tax(self):
-        return 0
+        hr = self.get_hr_letter
+        if hr.include_made_86:
+            tax = self.tax_included_payment / 10
+        else:
+            items = ListOfPayItem.objects.filter(Q(list_of_pay__year=self.list_of_pay.year) &
+                                                 Q(list_of_pay__month__lte=self.list_of_pay.month) &
+                                                 Q(workshop_personnel=self.workshop_personnel) &
+                                                 Q(list_of_pay__ultimate=True) &
+                                                 Q(list_of_pay__use_in_calculate=True))
+            tax_items = []
+
+            for item in items:
+                is_tax, tax_day = item.check_tax
+                if is_tax:
+                    tax_items.append(item)
+
+            month_count = Decimal((len(tax_items) + 1) / 12)
+
+
+            tax = 0
+            year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            start = year_amount
+
+            while start >= Decimal(0):
+                from_amount = tax_row.from_amount * month_count
+                if tax_row.from_amount == 0:
+                    from_amount = 0
+
+                if year_amount <= (tax_row.to_amount * month_count):
+                    tax += round(round(year_amount - from_amount) * tax_row.ratio / 100)
+                    start = 0
+                    return round(tax) - round(self.get_last_tax)
+
+                elif year_amount > (tax_row.to_amount * month_count):
+                    part_tax = ((tax_row.to_amount * month_count) - from_amount) \
+                               * tax_row.ratio / 100
+                    if from_amount == 0:
+                        part_tax = 0
+                    tax += round(part_tax)
+                    start -= ((tax_row.to_amount * month_count) - from_amount)
+
+                    next_from_amount = tax_row.to_amount + Decimal(1)
+                    tax_row = tax_rows.get(from_amount=next_from_amount)
+
+        return round(tax) - round(self.get_last_tax)
 
     @property
     def calculate_monthly_eydi_tax(self):
@@ -5024,5 +5067,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.total_payment = round(self.get_total_payment)
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
+            self.total_tax = self.calculate_month_tax
         self.calculate_payment = False
         super().save(*args, **kwargs)
