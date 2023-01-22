@@ -1555,6 +1555,10 @@ class ListOfPayUltimateApi(APIView):
         same_lists = ListOfPay.objects.filter(Q(year=list_of_pay.year) & Q(month=list_of_pay.month)
                                               & Q(workshop=list_of_pay.workshop))
         if ultimate:
+            if len(list_of_pay.list_of_pay_item.all()) == 0:
+                self.validate_status = False
+                self.response_message = 'در این لیست پرسنلی موجود نیست'
+
             if list_of_pay.use_in_calculate:
                 for same_list in same_lists:
                     if same_list.use_in_calculate and same_list.ultimate:
@@ -1626,7 +1630,6 @@ class ListOfPayEditDetail(APIView):
                     'ejtenab_maliat_mozaaf': item.ejtenab_maliat_mozaaf,
                 }
             response = query.info_for_items
-            print(cumulative)
             for item in response:
                 workshop_personnel = WorkshopPersonnel.objects.filter(
                         Q(workshop=query.workshop) & Q(personnel_id=item['pk'])).first()
