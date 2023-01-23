@@ -3937,8 +3937,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
 
     def calculate_hr_item_in_real_work_time(self, item):
-        total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
-        return total
+        if item:
+            total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
+            return total
+        else:
+            return 0
 
     @property
     def get_pension_gheyre_naghdi(self):
