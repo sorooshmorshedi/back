@@ -1978,6 +1978,13 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
         return self.payed_amount - self.amount
 
     @property
+    def is_last(self):
+        for item in self.loan.item.all():
+            if item.date.__gt__(self.date):
+                return False
+        return True
+
+    @property
     def cumulative_balance(self):
         items = LoanItem.objects.filter(
             Q(loan=self.loan) & Q(date__lte=self.date)
@@ -4496,14 +4503,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                               Q(loan_type='l'))
         month_episode = 0
         for loan in personnel_loans:
-            for episode_date in loan.get_pay_month['months']:
-                if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
-                    month_episode += loan.get_pay_episode
-                    items = loan.item.all()
-                    for item in items:
-                        if item.date.month == self.list_of_pay.month:
-                            item.payed_amount = item.amount
-                            item.save()
+            for episode in personnel_loans.item.all():
+                if episode.date.__ge__(self.list_of_pay.start_date) and episode.date.__le__(self.list_of_pay.end_date):
+                    if episode.is_last:
+                        month_episode += episode.cumulative_balance
+                        episode.payed_amount = episode.cumulative_balance
+                    else:
+                        month_episode += loan.get_pay_episode
+                        episode.payed_amount = episode.amount
+                    episode.save()
+
         return round(month_episode)
 
     @property
