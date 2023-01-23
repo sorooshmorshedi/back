@@ -3612,6 +3612,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     paid_amount = models.IntegerField(default=0)
 
     total_tax = DECIMAL(default=0)
+    save_leave = DECIMAL(default=0)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
@@ -4359,7 +4360,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                                           & Q(list_of_pay__ultimate=True)
                                                           )
             for item in previous_years:
-                save_leaves = item.calculate_save_leave
+                save_leaves = item.save_leave
                 leave_available += save_leaves
 
         for item in items:
@@ -4397,6 +4398,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def get_save_leave(self):
         if self.list_of_pay.month == 12 and not self.workshop_personnel.workshop.save_absence_transfer_next_year:
+            self.save_leave = self.get_save_leave_amount
             return self.get_save_leave_amount
         elif self.list_of_pay.month == 12 and self.workshop_personnel.workshop.save_absence_transfer_next_year:
             self.workshop_personnel.save_leaave += self.get_save_leave_day
