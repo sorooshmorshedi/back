@@ -4494,10 +4494,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                               Q(is_verified=True) &
                                               Q(pay_done=False) &
                                               Q(loan_type='l'))
+        month_episode = 0
         for loan in personnel_loans:
             for episode_date in loan.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
-                    month_episode = loan.get_pay_episode
+                    month_episode += loan.get_pay_episode
                     items = loan.item.all()
                     for item in items:
                         if item.date.month == self.list_of_pay.month:
@@ -4513,10 +4514,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                               Q(is_verified=True) &
                                               Q(pay_done=False) &
                                               Q(loan_type='d'))
+        month_episode = 0
         for loan in personnel_loans:
             for episode_date in loan.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
-                    month_episode = loan.get_pay_episode
+                    month_episode += loan.get_pay_episode
                     items = loan.item.all()
                     for item in items:
                         if item.date.month == self.list_of_pay.month:
@@ -4527,14 +4529,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def check_and_get_optional_deduction_episode(self):
         month_episode = 0
-        personnel_deductions = OptionalDeduction.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                                &Q(is_verified=True) &
+        personnel_deductions = OptionalDeduction.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
+                                                                Q(is_verified=True) &
+                                                                Q(is_active=True) &
                                                                 Q(start_date__lte=self.list_of_pay.end_date) &
                                                                 Q(pay_done=False))
         for deduction in personnel_deductions:
             for episode_date in deduction.get_pay_month['months']:
                 if episode_date.__ge__(self.list_of_pay.start_date) and episode_date.__le__(self.list_of_pay.end_date):
                     month_episode += deduction.get_pay_episode
+
         return round(month_episode)
 
     @property
