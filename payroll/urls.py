@@ -36,7 +36,8 @@ from payroll.views import WorkshopApiView, WorkshopDetail, PersonnelApiView, Per
     PersonneNotInWorkshoplApiView, WorkshopDefaultApiView, WorkshopUnDefaultApiView, \
     WorkshopGetDefaultApiView, WorkshopPersonnelContractDetail, HRActiveApi, HRUnActiveApi, ListOfPayUltimateApi, \
     WorkTitleListCreateView, WorkTitleDetailView, WorkTitleSearchApiView, WorkTitleApiView, ListOfPayEditDetail, \
-    ListOfPayEditItems, ContractEditApi, ContractInsuranceEditApi, ContractTaxEditApi
+    ListOfPayEditItems, ContractEditApi, ContractInsuranceEditApi, ContractTaxEditApi, DeductionActiveApi, \
+    DeductionUnActiveApi
 
 urlpatterns = [
     path('workshop/', WorkshopApiView.as_view(), name='workshopApi'),
@@ -69,6 +70,8 @@ urlpatterns = [
     path('personnel/deduction/<int:pk>/', PersonnelDeductionDetail.as_view(), name='personnelDeductionDetail'),
     path('deduction/verify/<int:pk>/', DeductionVerifyApi.as_view(), name='deductionVerifyApi'),
     path('deduction/unverify/<int:pk>/', DeductionUnVerifyApi.as_view(), name='deductionUnVerifyApi'),
+    path('deduction/active/<int:pk>/', DeductionActiveApi.as_view(), name='deductionActiveApi'),
+    path('deduction/unactive/<int:pk>/', DeductionUnActiveApi.as_view(), name='deductionUnActiveApi'),
 
     path('tax/row/', WorkshopTaxRowApiView.as_view(), name='workshopTaxRowApiView'),
     path('tax/row/<int:pk>/', WorkshopTaxRowDetail.as_view(), name='workshopTaxRowDetail'),

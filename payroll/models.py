@@ -2021,6 +2021,8 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     pay_done = models.BooleanField(default=False)
     episode_payed = models.IntegerField(default=0)
 
+    is_active = models.BooleanField(default=True)
+
     class Meta(BaseModel.Meta):
         verbose_name = 'Deductions'
         permission_basename = 'deductions'
@@ -2087,7 +2089,7 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def end_date(self):
         if self.get_pay_month['months']:
             end = self.get_pay_month['months'][-1]
-            return str(end.year) + '-' + str(end.month)
+            return str(end.year) + '-' + str(end.month) + '-1'
         else:
             return ''
 

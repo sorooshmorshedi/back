@@ -1024,6 +1024,27 @@ class PersonnelDeductionDetail(APIView):
         return Response(serializers.data, status=status.HTTP_200_OK)
 
 
+class DeductionActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request, pk):
+        deduction = OptionalDeduction.objects.get(pk=pk)
+        deduction.is_active = True
+        deduction.save()
+        return Response({'وضعیت': ' فعال  کردن کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
+
+
+class DeductionUnActiveApi(APIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+    permission_basename = 'deductions'
+
+    def get(self, request, pk):
+        deduction = OptionalDeduction.objects.get(pk=pk)
+        deduction.is_active = False
+        deduction.save()
+        return Response({'وضعیت': 'غیر فعال  کردن کسورات اختیاری انجام شد'}, status=status.HTTP_200_OK)
+
 # payroll APIs
 
 class ListOfPayApiView(APIView):

@@ -1160,9 +1160,9 @@ class DeductionVerifyApi(APIView):
             if not deductions.workshop_personnel:
                 self.validate_status = False
                 self.error_messages.append('پرسنل  را وارد کنید')
-        if not deductions.name:
-            self.validate_status = False
-            self.error_messages.append('نام کسورات  را وارد کنید')
+            if not deductions.name:
+                self.validate_status = False
+                self.error_messages.append('نام کسورات  را وارد کنید')
         if not deductions.amount:
             self.validate_status = False
             self.error_messages.append('مبلغ  را وارد کنید')

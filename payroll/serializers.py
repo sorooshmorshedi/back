@@ -215,6 +215,8 @@ class DeductionSerializer(serializers.ModelSerializer):
     last_dept_date = serializers.CharField(source='end_date', read_only=True)
     monthly_pay = serializers.DecimalField(source='get_pay_episode', read_only=True, max_digits=24, decimal_places=6)
     months_of_pay = serializers.ListField(source='get_pay_month', read_only=True)
+    workshop = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
+    workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
 
     class Meta:
         model = OptionalDeduction

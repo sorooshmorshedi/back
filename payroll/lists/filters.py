@@ -578,6 +578,7 @@ class DeductionFilter(filters.FilterSet):
             'template_name': BASE_FIELD_FILTERS,
             'is_template': ('exact',),
             'is_verified': BASE_FIELD_FILTERS,
+            'is_active': BASE_FIELD_FILTERS
         }
         filter_overrides = {
             jmodels.jDateField: {

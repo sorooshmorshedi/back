@@ -498,7 +498,7 @@ class ListOfPayItemLessListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
 
     permission_codename = "get.list_of_pay_item"
-    serializer_class = ListOfPayItemSerializer
+    serializer_class = ListOfPayItemLessSerializer
     filterset_class = ListOfPayItemFilter
     ordering_fields = '__all__'
     pagination_class = LimitOffsetPagination
