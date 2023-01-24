@@ -4503,7 +4503,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                               Q(loan_type='l'))
         month_episode = 0
         for loan in personnel_loans:
-            for episode in personnel_loans.item.all():
+            for episode in loan.item.all():
                 if episode.date.__ge__(self.list_of_pay.start_date) and episode.date.__le__(self.list_of_pay.end_date):
                     if episode.is_last:
                         month_episode += episode.cumulative_balance
