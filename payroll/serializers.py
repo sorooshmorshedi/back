@@ -202,8 +202,7 @@ class LoanSerializer(serializers.ModelSerializer):
     months_of_pay = serializers.ListField(source='get_pay_month', read_only=True)
     workshop = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
     workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
-
-
+    editable = serializers.BooleanField(source='is_editable', read_only=True)
 
     class Meta:
         model = Loan
@@ -217,6 +216,7 @@ class DeductionSerializer(serializers.ModelSerializer):
     months_of_pay = serializers.ListField(source='get_pay_month', read_only=True)
     workshop = serializers.CharField(source='workshop_personnel.workshop.name', read_only=True)
     workshop_id = serializers.IntegerField(source='workshop_personnel.workshop.id', read_only=True)
+    editable = serializers.BooleanField(source='is_editable', read_only=True)
 
     class Meta:
         model = OptionalDeduction

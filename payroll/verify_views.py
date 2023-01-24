@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from helpers.auth import BasicCRUDPermission
 from payroll.functions import is_valid_melli_code, is_shenase_meli
 from payroll.models import Workshop, WorkshopTax, Personnel, PersonnelFamily, ContractRow, WorkshopPersonnel, Contract, \
-    HRLetter, LeaveOrAbsence, Mission, Loan, OptionalDeduction
+    HRLetter, LeaveOrAbsence, Mission, Loan, OptionalDeduction, ListOfPayItem
 
 
 class WorkshopVerifyApi(APIView):
@@ -709,12 +709,13 @@ class ContractVerifyApi(APIView):
             if contract.tax_add_date and contract.contract_from_date:
                 if contract.contract_from_date.__gt__(contract.tax_add_date):
                     self.validate_status = False
-                    self.error_messages.append('تاریخ اضافه شدن به لیست مالیات حقوق باید بعد از تاریخ شروع قرارداد باشد')
+                    self.error_messages.append(
+                        'تاریخ اضافه شدن به لیست مالیات حقوق باید بعد از تاریخ شروع قرارداد باشد')
             if contract.tax_add_date and contract.contract_to_date:
                 if contract.tax_add_date.__gt__(contract.contract_to_date):
                     self.validate_status = False
-                    self.error_messages.append('تاریخ اضافه شدن به لیست مالیات حقوق باید قبل از تاریخ پایان قرارداد باشد')
-
+                    self.error_messages.append(
+                        'تاریخ اضافه شدن به لیست مالیات حقوق باید قبل از تاریخ پایان قرارداد باشد')
 
         if self.validate_status and contract.check_with_same:
             self.validate_status = False
@@ -966,6 +967,29 @@ class LeaveOrAbsenceVerifyApi(APIView):
                 self.error_messages.append("در این زمان برای این پرسنل ماموریت ثبت شده است")
 
         if self.validate_status:
+            if leave.entitlement_leave_type == 'h':
+                list_of_pay_item = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=leave.date.year) &
+                    Q(list_of_pay__month=leave.date.month)
+                )
+            else:
+                list_of_pay_item = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=leave.from_date.year) &
+                    Q(list_of_pay__month=leave.from_date.month)
+                )
+                list_of_pay_items = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=leave.to_date.year) &
+                    Q(list_of_pay__month=leave.to_date.month)
+                )
+                list_of_pay_item = list_of_pay_item.union(list_of_pay_items)
+            if len(list_of_pay_item) > 0:
+                self.validate_status = False
+                self.error_messages.append("برای این ماه لیست حقوق نهایی صادر شده")
+
+        if self.validate_status:
             check_with_contract = leave.check_with_contract
             if not check_with_contract:
                 self.validate_status = False
@@ -1045,6 +1069,29 @@ class MissionVerifyApi(APIView):
                 self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
 
         if self.validate_status:
+            if mission.mission_type == 'h':
+                list_of_pay_item = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=mission.date.year) &
+                    Q(list_of_pay__month=mission.date.month)
+                )
+            else:
+                list_of_pay_item = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=mission.from_date.year) &
+                    Q(list_of_pay__month=mission.from_date.month)
+                )
+                list_of_pay_items = ListOfPayItem.objects.filter(
+                    Q(list_of_pay__ultimate=True) &
+                    Q(list_of_pay__year=mission.to_date.year) &
+                    Q(list_of_pay__month=mission.to_date.month)
+                )
+                list_of_pay_item = list_of_pay_item.union(list_of_pay_items)
+            if len(list_of_pay_item) > 0:
+                self.validate_status = False
+                self.error_messages.append("برای این ماه لیست حقوق نهایی صادر شده")
+
+        if self.validate_status:
             mission.is_verified = True
             mission.save()
             return Response({'وضعییت': 'ثبت نهایی ماموریت انجام شد'}, status=status.HTTP_200_OK)
@@ -1107,6 +1154,17 @@ class LoanVerifyApi(APIView):
             if not check_with_contract:
                 self.validate_status = False
                 self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
+
+        if self.validate_status:
+            list_of_pays = ListOfPayItem.objects.filter(Q(workshop_personnel=loan.workshop_personnel))
+            for item in list_of_pays:
+                if item.list_of_pay.year == loan.pay_date.year and \
+                        item.list_of_pay.month >= loan.pay_date.month and self.validate_status:
+                    self.validate_status = False
+                    self.error_messages.append("برای این پرسنل، برای این ماه به بعد لیست حقوق صادر شده")
+                elif item.list_of_pay.year > loan.pay_date.year and self.validate_status:
+                    self.validate_status = False
+                    self.error_messages.append("برای این پرسنل، برای این ماه به بعد لیست حقوق صادر شده")
 
         if self.validate_status:
             loan.is_verified = True
@@ -1176,7 +1234,7 @@ class DeductionVerifyApi(APIView):
             self.validate_status = False
             self.error_messages.append('تعداد ماه  باید بزرگتر از صفر باشد ')
 
-        if not deductions.start_date and not deductions.is_template:
+        if not deductions.start_date:
             self.validate_status = False
             self.error_messages.append('تاریخ  را وارد کنید')
 
@@ -1185,6 +1243,17 @@ class DeductionVerifyApi(APIView):
             if not check_with_contract:
                 self.validate_status = False
                 self.error_messages.append("در این زمان برای این پرسنل قرارداد ثبت نشده است")
+
+        if self.validate_status and not deductions.is_template:
+            list_of_pays = ListOfPayItem.objects.filter(Q(workshop_personnel=deductions.workshop_personnel))
+            for item in list_of_pays:
+                if item.list_of_pay.year == deductions.start_date.year and \
+                        item.list_of_pay.month >= deductions.start_date.month and self.validate_status:
+                    self.validate_status = False
+                    self.error_messages.append("برای این پرسنل، برای این ماه به بعد لیست حقوق صادر شده")
+                elif item.list_of_pay.year > deductions.start_date.year and self.validate_status:
+                    self.validate_status = False
+                    self.error_messages.append("برای این پرسنل، برای این ماه به بعد لیست حقوق صادر شده")
 
         if self.validate_status:
             deductions.is_verified = True

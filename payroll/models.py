@@ -1799,6 +1799,17 @@ class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return str(self.id)
 
     @property
+    def is_editable(self):
+        pays = ListOfPayItem.objects.filter(
+            Q(workshop_personnel=self.workshop_personnel) &
+            Q(list_of_pay__ultimate=True)
+        )
+        for pay in pays:
+            if pay.list_of_pay.start_date in self.get_pay_month['months']:
+                return False
+        return True
+
+    @property
     def get_pay_episode(self):
         if self.amount and self.episode:
             return self.amount / Decimal(self.episode)
@@ -2043,6 +2054,21 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             ('updateOwn.contract', 'ویرایش وام کسورات اختیاری'),
             ('deleteOwn.contract', 'حذف وام کسورات اختیاری'),
         )
+
+    @property
+    def is_editable(self):
+        if self.is_template:
+            return True
+        else:
+            pays = ListOfPayItem.objects.filter(
+                Q(workshop_personnel=self.workshop_personnel) &
+                Q(list_of_pay__ultimate=True)
+            )
+            for pay in pays:
+                if pay.list_of_pay.start_date in self.get_pay_month['months']:
+                    return False
+            return True
+
 
     @property
     def check_with_contract(self):
