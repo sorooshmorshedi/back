@@ -1838,11 +1838,11 @@ class Loan(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         if self.get_pay_month['months']:
             end = self.get_pay_month['months'][-1]
             if end.month <= 6:
-                return str(end.year) + '-' + str(end.month) + '31'
+                return str(end.year) + '-' + str(end.month) + '-31'
             elif end.month == 12:
-                return str(end.year) + '-' + str(end.month) + '29'
+                return str(end.year) + '-' + str(end.month) + '-29'
             elif end.month > 6 and end.month != 12:
-                return str(end.year) + '-' + str(end.month) + '30'
+                return str(end.year) + '-' + str(end.month) + '-30'
         else:
             return ''
 
@@ -2141,6 +2141,8 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return 'شخصی'
 
     def save(self, *args, **kwargs):
+        if not self.episode:
+            self.episode = 0
         if self.is_template == None:
             raise ValidationError('برای ثبت اولیه انتخاب نوع الزامی است')
         super().save(*args, **kwargs)

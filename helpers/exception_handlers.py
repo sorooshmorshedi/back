@@ -73,7 +73,8 @@ labels = {
     #payroll
     'company': 'شرکت',
     'employer_name': 'نام کارفرما',
-    'workshop': 'کارگاه'
+    'workshop': 'کارگاه',
+    'episode': 'tedad mah'
 }
 
 

@@ -938,8 +938,8 @@ class LoanItemDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Deduction APIs
 
+# Deduction APIs
 
 class DeductionApiView(APIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)
@@ -958,6 +958,8 @@ class DeductionApiView(APIView):
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
+        if not data['episode']:
+            data['episode'] = 0
         serializer = DeductionSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -982,7 +984,10 @@ class DeductionDetail(APIView):
 
     def put(self, request, pk):
         query = self.get_object(pk)
-        serializer = DeductionSerializer(query, data=request.data)
+        data = request.data
+        if not data['episode']:
+            data['episode'] = 0
+        serializer = DeductionSerializer(query, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

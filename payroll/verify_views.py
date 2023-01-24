@@ -1095,7 +1095,7 @@ class LoanVerifyApi(APIView):
             self.error_messages.append('مبلغ  باید بزرگتر از صفر باشد ')
         if loan.loan_type == 'd':
             loan.episode = 1
-        if not loan.episode and loan.loan_type == 't':
+        if not loan.episode:
             self.validate_status = False
             self.error_messages.append('تعداد اقساط را وارد کنید')
         if loan.episode == 0:
