@@ -157,6 +157,8 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 class HRLetterSerializer(serializers.ModelSerializer):
+    personnel_name = serializers.CharField(source='contract.workshop_personnel.personnel.full_name', read_only=True)
+    workshop_name = serializers.CharField(source='contract.workshop_personnel.workshop.workshop_title', read_only=True)
     is_template_display = serializers.CharField(source='get_is_template_display', read_only=True)
     contract_detail = serializers.CharField(source='contract.workshop_personnel_display', read_only=True)
     contract_code = serializers.CharField(source='contract.code', read_only=True)

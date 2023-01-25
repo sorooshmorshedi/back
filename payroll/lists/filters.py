@@ -417,10 +417,32 @@ def contract_workshop_personnel_filter(queryset, name, value):
     return queryset.filter(id__in=query)
 
 
+def contract_personnel_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.contract:
+            if value in item.contract.workshop_personnel.personnel.full_name:
+                query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
+def contract_workshop_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.contract:
+            if value in item.contract.workshop_personnel.workshop.name:
+                query.append(item.id)
+            if value in item.contract.workshop_personnel.workshop.workshop_code:
+                query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
 class HRLetterFilter(filters.FilterSet):
     is_template_display = filters.CharFilter(method=is_template_filter)
     contract_code = filters.CharFilter(method=contract_code_filter)
     contract_detail = filters.CharFilter(method=contract_workshop_personnel_filter)
+    personnel_name = filters.CharFilter(method=contract_personnel_filter)
+    workshop_name = filters.CharFilter(method=contract_workshop_filter)
 
     class Meta:
         model = HRLetter

@@ -1950,8 +1950,13 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def round_amount_with_comma(self):
+        previous_unpaid = 0
+        for item in self.loan.item.all():
+            if item.date.__lt__(self.date):
+                unpaid = item.amount - item.payed_amount
+                previous_unpaid += unpaid
         if self.amount:
-            return self.with_comma(self.amount)
+            return self.with_comma(self.amount + previous_unpaid)
         else:
             return 0
 
@@ -1986,7 +1991,7 @@ class LoanItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def bed_or_bes(self):
-        return self.payed_amount - self.amount
+        return self.amount - self.payed_amount
 
     @property
     def is_last(self):
@@ -3536,6 +3541,16 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' + \
                self.workshop.workshop_title
 
+    def delete(self, *args, **kwargs):
+        print('itemd deleted')
+        for my_list in self.list_of_pay_item.all():
+            for loan in my_list.workshop_personnel.loan.all():
+                for item in loan.item.all():
+                    if item.date == self.start_date:
+                        item.payed_amount = 0
+                        item.save()
+        super().delete()
+
 
 class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     YES = 'y'
@@ -3648,6 +3663,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     total_tax = DECIMAL(default=0)
     save_leave = DECIMAL(default=0)
+    loan_amount = DECIMAL(default=0)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
@@ -3981,6 +3997,21 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
+    def calculate_hr_item_in_insurance_time(self, item):
+        is_insurance, insurance_worktime = self.check_insurance
+        if item and is_insurance:
+            total = Decimal(self.insurance_worktime) * item / Decimal(self.list_of_pay.month_days)
+            return total
+        else:
+            return 0
+
+    def calculate_hr_item_in_tax_time(self, item):
+        if item:
+            total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
+            return total
+        else:
+            return 0
+
     @property
     def get_pension_gheyre_naghdi(self):
         hr = self.get_hr_letter
@@ -4151,7 +4182,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total -= self.sayer_kosoorat
         self.kasre_kar_total = round(self.get_kasre_kar)
         self.total_tax = self.calculate_month_tax
-
+        self.loan_amount = self.check_and_get_loan_episode
         return total
 
     @property
@@ -4308,9 +4339,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def payable(self):
         payable_amount = Decimal(round(self.total_payment) -\
-                                 round(self.calculate_month_tax) -\
+                                 round(self.total_tax) -\
                                  round(self.check_and_get_optional_deduction_episode) -\
-                                 round(self.check_and_get_loan_episode))
+                                 round(self.loan_amount))
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
@@ -4523,7 +4554,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def check_and_get_loan_episode(self):
-        month_episode = 0
         personnel_loans = Loan.objects.filter(Q(workshop_personnel=self.workshop_personnel) &
                                               Q(pay_date__lte=self.list_of_pay.end_date) &
                                               Q(is_verified=True) &
@@ -4536,10 +4566,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     if episode.is_last:
                         month_episode += episode.cumulative_balance
                         episode.payed_amount = episode.cumulative_balance
+                        episode.save()
                     else:
                         month_episode += loan.get_pay_episode
                         episode.payed_amount = episode.amount
-                    episode.save()
+                        episode.save()
 
         return round(month_episode)
 
@@ -4680,7 +4711,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     if i < 2:
                         benefit += 0
                     else:
-                        benefit += self.calculate_hr_item_in_real_work_time(hr_letter_items[i]['amount'])
+                        benefit += self.calculate_hr_item_in_insurance_time(hr_letter_items[i]['amount'])
 
             if hr.ezafe_kari_use_insurance:
                 benefit = benefit + Decimal(self.ezafe_kari_total)
@@ -4714,7 +4745,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
             hr = self.get_hr_letter
-            return hr.insurance_pay_day * self.insurance_worktime
+            return hr.insurance_pay_day * insurance_worktime
         else:
             return 0
 
@@ -4750,7 +4781,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
             hr = self.get_hr_letter
-            total = self.insurance_monthly_benefit + (hr.insurance_pay_day * self.insurance_worktime)
+            total = self.insurance_monthly_benefit + self.insurance_monthly_payment
             return total
         else:
             return 0
@@ -5118,3 +5149,4 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.total_tax = self.calculate_month_tax
         self.calculate_payment = False
         super().save(*args, **kwargs)
+
