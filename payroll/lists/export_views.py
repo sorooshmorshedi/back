@@ -2757,6 +2757,10 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
                 form.hazine_made_137,
             ])
             data.append([
+                'سایر حق بیمه پرداختی موضوع ماده 37 ق.م.م.',
+                form.kosoorat_insurance,
+            ])
+            data.append([
                 'حق بیمه پرداختی موضوع ماده 37 ق.م.م.',
                 form.haghe_bime_moafiat,
             ])
@@ -2775,6 +2779,10 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
             data.append([
                 'سایر پرداختهای غیر مستمر نقدی ماه جاری',
                 form.tax_naghdi_un_pension,
+            ])
+            data.append([
+                'حق ماموریت',
+                form.mission_total,
             ])
             data.append([
                 'پاداش های مورد یماه جاری',
