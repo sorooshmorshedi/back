@@ -4659,7 +4659,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 return True, self.real_worktime
             elif insurance_start.__gt__(self.list_of_pay.start_date) and \
                     insurance_start.__lt__(self.list_of_pay.end_date):
-                return True, self.real_worktime - insurance_start.day + 1
+                print(self.list_of_pay.end_date.day - insurance_start.day + 1)
+                return True, self.list_of_pay.end_date.day - insurance_start.day + 1
             elif insurance_start.__ge__(self.list_of_pay.end_date):
                 return False, 0
         else:
