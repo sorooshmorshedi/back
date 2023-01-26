@@ -3665,6 +3665,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     save_leave = DECIMAL(default=0)
     loan_amount = DECIMAL(default=0)
 
+    insurance = models.BooleanField(default=False)
+    insurance_day = models.IntegerField(default=0)
+
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
         permission_basename = 'list_of_pay_item'
@@ -4183,6 +4186,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         self.kasre_kar_total = round(self.get_kasre_kar)
         self.total_tax = self.calculate_month_tax
         self.loan_amount = self.check_and_get_loan_episode
+
+        self.insurance, self.insurance_day = self.check_insurance
+
         return total
 
     @property
@@ -4659,12 +4665,41 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 return True, self.real_worktime
             elif insurance_start.__gt__(self.list_of_pay.start_date) and \
                     insurance_start.__lt__(self.list_of_pay.end_date):
-                print(self.list_of_pay.end_date.day - insurance_start.day + 1)
-                return True, self.list_of_pay.end_date.day - insurance_start.day + 1
+                insurance_day = self.list_of_pay.end_date.day - insurance_start.day + 1
+                absences = self.absence_not_included(insurance_start)
+                insurance_day = insurance_day - absences - int(self.cumulative_absence) -\
+                                int(self.cumulative_illness) - int(self.cumulative_without_salary)
+                return True, insurance_day
             elif insurance_start.__ge__(self.list_of_pay.end_date):
                 return False, 0
         else:
             return False, 0
+
+
+    def absence_not_included(self, start_date):
+        end_date = self.list_of_pay.end_date
+        leaves = self.workshop_personnel.leave.filter(
+            Q(is_verified=True) &
+            Q(leave_type__in=['i', 'w', 'a'])
+        )
+        leave_count = 0
+        for leave in leaves:
+            if leave.from_date.__ge__(start_date) and leave.to_date.__le__(end_date):
+                leave_count += leave.final_by_day
+            elif leave.from_date.__le__(start_date) and leave.to_date.__ge__(end_date):
+                duration = end_date.day - start_date.day
+                leave_count += duration
+            elif leave.from_date.__le__(start_date) and leave.to_date.__ge__(start_date) and \
+                leave.to_date.__le__(end_date):
+                duration = leave.to_date.day - start_date.day + 1
+                leave_count += duration
+            elif leave.from_date.__ge__(start_date) and leave.from_date.__le__(end_date) and \
+                leave.to_date.__ge__(end_date):
+                duration = end_date.day - leave.from_date.day + 1
+                leave_count += duration
+
+        return leave_count
+
 
 
     @property
