@@ -5147,11 +5147,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def gheyre_naghdi_moafiat(self):
+        is_tax, tax_day = self.check_tax
         total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
         mytax = self.get_tax_row
         tax_rows = mytax.tax_row.all()
         tax_row = tax_rows.get(from_amount=Decimal(0))
-        tax_moaf = tax_row.to_amount / 6 / 12
+        tax_moaf = tax_row.to_amount / 6 / 12 * tax_day / self.list_of_pay.month_days
         if tax_moaf >= total_gheyre_naghdi:
             return total_gheyre_naghdi
         elif tax_moaf < total_gheyre_naghdi:
