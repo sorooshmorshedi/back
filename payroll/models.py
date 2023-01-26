@@ -4003,14 +4003,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_hr_item_in_insurance_time(self, item):
         is_insurance, insurance_worktime = self.check_insurance
         if item and is_insurance:
-            total = Decimal(self.insurance_worktime) * item / Decimal(self.list_of_pay.month_days)
+            total = Decimal(insurance_worktime) * item / Decimal(self.list_of_pay.month_days)
             return total
         else:
             return 0
 
     def calculate_hr_item_in_tax_time(self, item):
-        if item:
-            total = Decimal(self.real_worktime) * item / Decimal(self.list_of_pay.month_days)
+        is_tax, tax_day = self.check_tax
+        if item and is_tax:
+            total = Decimal(tax_day) * item / Decimal(self.list_of_pay.month_days)
             return total
         else:
             return 0
@@ -4251,8 +4252,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return total
 
     @property
-    def naghdi_pension_whit_comma(self):
-        return self.with_comma(self.naghdi_pension)
+    def naghdi_pension_with_comma(self):
+        return self.with_comma(self.tax_naghdi_pension)
 
     @property
     def gheyre_naghdi_pension(self):
@@ -4260,8 +4261,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
 
     @property
+    def gheyre_naghdi_tax_pension(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_tax_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+
+    @property
     def gheyre_naghdi_pension_whit_comma(self):
-        return self.with_comma(self.gheyre_naghdi_pension)
+        return self.with_comma(self.gheyre_naghdi_tax_pension)
 
     @property
     def un_pension_payment(self):
@@ -4325,12 +4331,68 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return total
 
     @property
-    def naghdi_un_pension(self):
-        return self.un_pension_payment - self.mazaya_gheyr_mostamar
+    def tax_naghdi_un_pension(self):
+        hr = self.get_hr_letter
+        total = Decimal(0)
+
+        total += self.get_aele_mandi
+        total += self.mission_total
+        total += self.ezafe_kari_total
+        total += self.shab_kari_total
+        total += self.tatil_kari_total
+        total += self.nobat_kari_sob_asr_total
+        total += self.nobat_kari_sob_shab_total
+        total += self.nobat_kari_asr_shab_total
+        total += self.nobat_kari_sob_asr_shab_total
+
+        if hr.haghe_sarparasti_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_sarparasti_amount)
+        if hr.haghe_modiriyat_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_modiriyat_amount)
+        if hr.haghe_jazb_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_jazb_amount)
+        if hr.fogholade_shoghl_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_shoghl_amount)
+        if hr.haghe_tahsilat_nature == 'u':
+            total += Decimal(self.calculate_hr_item_in_tax_time(hr.haghe_tahsilat_amount))
+        if hr.fogholade_sakhti_kar_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_sakhti_kar_amount)
+        if hr.haghe_ankal_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_ankal_amount)
+        if hr.fogholade_badi_abohava_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_badi_abohava_amount)
+        if hr.mahroomiat_tashilat_zendegi_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.mahroomiat_tashilat_zendegi_amount)
+        if hr.fogholade_mahal_khedmat_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_mahal_khedmat_amount)
+        if hr.fogholade_sharayet_mohit_kar_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_sharayet_mohit_kar_amount)
+        if hr.haghe_maskan_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_maskan_amount)
+        if hr.ayabo_zahab_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.ayabo_zahab_amount)
+        if hr.bon_kharo_bar_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.bon_kharo_bar_amount)
+        if hr.yarane_ghaza_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.yarane_ghaza_amount)
+        if hr.haghe_shir_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_shir_amount)
+        if hr.haghe_taahol_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_taahol_amount)
+        if hr.komakhazine_mahdekoodak_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mahdekoodak_amount)
+        if hr.komakhazine_varzesh_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_varzesh_amount)
+        if hr.komakhazine_mobile_nature == 'u':
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mobile_amount)
+
+        total += Decimal(self.sayer_ezafat)
+
+        return total
 
     @property
     def naghdi_un_pension_whit_comma(self):
-        return self.with_comma(self.naghdi_un_pension)
+        return self.with_comma(self.tax_naghdi_un_pension)
 
     @property
     def total_naghdi(self):
@@ -4873,11 +4935,72 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 return True, self.real_worktime
             elif tax_start.__gt__(self.list_of_pay.start_date) and \
                     tax_start.__lt__(self.list_of_pay.end_date):
-                return True, self.real_worktime - tax_start.day + 1
+                tax_day = self.list_of_pay.end_date.day - tax_start.day + 1
+                absences = self.absence_not_included(tax_start)
+                tax_day = tax_day - absences - int(self.cumulative_absence) -\
+                                int(self.cumulative_illness) - int(self.cumulative_without_salary)
+                return True, tax_day
             elif tax_start.__ge__(self.list_of_pay.end_date):
                 return False, 0
         else:
             return False, 0
+
+
+    @property
+    def tax_naghdi_pension(self):
+        is_tax, tax_day = self.check_tax
+        total = 0
+        total += (self.hoghoogh_roozane * tax_day)
+
+        if self.sanavat_month >= 12:
+            total += (self.sanavat_base * tax_day)
+
+        total += self.aele_mandi
+
+
+        hr = self.hr_letter
+        if hr.haghe_sarparasti_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_sarparasti_amount)
+        if hr.haghe_modiriyat_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_modiriyat_amount)
+        if hr.haghe_jazb_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_jazb_amount)
+        if hr.fogholade_shoghl_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_shoghl_amount)
+        if hr.haghe_tahsilat_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_tahsilat_amount)
+        if hr.fogholade_sakhti_kar_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_sakhti_kar_amount)
+        if hr.haghe_ankal_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_ankal_amount)
+        if hr.fogholade_badi_abohava_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_badi_abohava_amount)
+        if hr.mahroomiat_tashilat_zendegi_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
+        if hr.fogholade_mahal_khedmat_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_mahal_khedmat_amount)
+        if hr.fogholade_sharayet_mohit_kar_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
+        if hr.haghe_maskan_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_maskan_amount)
+        if hr.ayabo_zahab_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.ayabo_zahab_amount)
+        if hr.bon_kharo_bar_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.bon_kharo_bar_amount)
+        if hr.yarane_ghaza_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.yarane_ghaza_amount)
+        if hr.haghe_taahol_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_taahol_amount)
+        if hr.haghe_shir_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_shir_amount)
+        if hr.komakhazine_mahdekoodak_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mahdekoodak_amount)
+        if hr.komakhazine_varzesh_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_varzesh_amount)
+        if hr.komakhazine_mobile_nature == 'p':
+            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mobile_amount)
+
+        return total
 
     @property
     def tamin_ejtemaee_moafiat(self):
@@ -4929,9 +5052,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             hr = self.get_hr_letter
             total = Decimal(0)
             if not hr.hoghooghe_roozane_use_tax:
-                total += self.hoghoogh_mahane
+                total += (self.hoghoogh_roozane * tax_day)
             if not hr.paye_sanavat_use_tax:
-                total += self.sanavat_mahane
+                total += (self.sanavat_base * tax_day)
             if not hr.haghe_owlad_use_tax:
                 total += self.get_aele_mandi
             if not hr.ezafe_kari_use_tax:
@@ -4946,45 +5069,45 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 total += self.nobat_kari_asr_shab_total
                 total += self.nobat_kari_sob_asr_shab_total
             if not hr.haghe_sarparasti_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_sarparasti_amount)
             if not hr.haghe_modiriyat_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_modiriyat_amount)
             if not hr.haghe_jazb_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_jazb_amount)
             if not hr.fogholade_shoghl_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.fogholade_shoghl_amount)
             if not hr.haghe_tahsilat_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_tahsilat_amount)
             if not hr.fogholade_sakhti_kar_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.fogholade_sakhti_kar_amount)
             if not hr.haghe_ankal_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_ankal_amount)
             if not hr.fogholade_badi_abohava_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.fogholade_badi_abohava_amount)
             if not hr.mahroomiat_tashilat_zendegi_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.mahroomiat_tashilat_zendegi_amount)
             if not hr.fogholade_mahal_khedmat_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.fogholade_mahal_khedmat_amount)
             if not hr.fogholade_sharayet_mohit_kar_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.fogholade_sharayet_mohit_kar_amount)
             if not hr.haghe_maskan_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_maskan_amount)
             if not hr.ayabo_zahab_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.ayabo_zahab_amount)
             if not hr.bon_kharo_bar_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.bon_kharo_bar_amount)
             if not hr.yarane_ghaza_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.yarane_ghaza_amount)
             if not hr.haghe_taahol_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_taahol_amount)
             if not hr.haghe_shir_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.haghe_shir_amount)
             if not hr.komakhazine_mahdekoodak_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mahdekoodak_amount)
             if not hr.komakhazine_varzesh_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.komakhazine_varzesh_amount)
             if not hr.komakhazine_mobile_use_tax:
-                total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
+                total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mobile_amount)
 
             return total
         else:
@@ -5023,10 +5146,30 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return 0
 
     @property
+    def gheyre_naghdi_moafiat(self):
+        total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
+        mytax = self.get_tax_row
+        tax_rows = mytax.tax_row.all()
+        tax_row = tax_rows.get(from_amount=Decimal(0))
+        tax_moaf = tax_row.to_amount / 6 / 12
+        if tax_moaf >= total_gheyre_naghdi:
+            return total_gheyre_naghdi
+        elif tax_moaf < total_gheyre_naghdi:
+            return tax_moaf
+
+    @property
+    def moafiat_sum(self):
+        return self.moaf_sum + self.gheyre_naghdi_moafiat
+
+    @property
     def tax_included_payment(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            return round(self.total_payment) - self.moaf_sum
+            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension
+            included_naghdi = total_naghdi - self.moaf_sum
+            total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
+            included_gheyre_naghdi = total_gheyre_naghdi - self.gheyre_naghdi_moafiat
+            return included_naghdi + included_gheyre_naghdi
         else:
             return 0
 

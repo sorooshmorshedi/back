@@ -2774,7 +2774,7 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
             ])
             data.append([
                 'سایر پرداختهای غیر مستمر نقدی ماه جاری',
-                form.naghdi_un_pension,
+                form.tax_naghdi_un_pension,
             ])
             data.append([
                 'پاداش های مورد یماه جاری',

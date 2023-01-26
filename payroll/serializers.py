@@ -281,7 +281,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
 
     get_tax_included = serializers.CharField(source='tax_included_payment', read_only=True)
     get_month_tax = serializers.IntegerField(source='total_tax', read_only=True)
-    get_moaf_sum = serializers.CharField(source='moaf_sum', read_only=True)
+    get_moaf_sum = serializers.CharField(source='moafiat_sum', read_only=True)
     get_kasre_kar_time = serializers.CharField(source='kasre_kar_time', read_only=True)
     get_ezafe_kari_time = serializers.CharField(source='ezafe_kari_time', read_only=True)
     get_tatil_kari_time = serializers.CharField(source='tatil_kari_time', read_only=True)

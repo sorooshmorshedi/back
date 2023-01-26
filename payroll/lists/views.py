@@ -171,7 +171,7 @@ def write_tax_diskette(request, pk):
         content += ','
         content += str(round(item.ezafe_kari_nakhales))
         content += ','
-        content += str(round(item.naghdi_un_pension))
+        content += str(round(item.tax_naghdi_un_pension))
         content += ',0,0,'
         content += str(round(item.mission_total))
         content += ','
