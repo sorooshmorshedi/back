@@ -4178,10 +4178,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.mazaya_gheyr_mostamar
         total += self.sayer_ezafat
 
-        total += Decimal(self.get_padash)
         self.padash_total = round(self.get_padash)
-        total += Decimal(self.get_hagh_sanavat)
-        total += Decimal(self.get_save_leave)
+        total += Decimal(self.padash_total)
+
+        self.haghe_sanavat_total = round(self.get_hagh_sanavat)
+        total += Decimal(self.haghe_sanavat_total)
+
+        self.saved_leaves_total = round(self.get_save_leave)
+        total += Decimal(self.saved_leaves_total)
 
         self.kasre_kar_total = round(self.get_kasre_kar)
 
@@ -4335,7 +4339,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         hr = self.get_hr_letter
         total = Decimal(0)
 
-        total += self.get_aele_mandi
         total += self.mission_total
         total += self.shab_kari_total
         total += self.nobat_kari_sob_asr_total
@@ -4408,8 +4411,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                  round(self.total_tax) -\
                                  round(self.check_and_get_optional_deduction_episode) -\
                                  round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
-        payable_amount += Decimal(self.get_padash)
-        payable_amount += Decimal(self.get_hagh_sanavat)
+        payable_amount += Decimal(self.padash_total)
+        payable_amount += Decimal(self.haghe_sanavat_total)
         payable_amount += Decimal(self.get_save_leave)
         if self.contract.insurance:
             payable_amount = round(payable_amount) - round(self.data_for_insurance['DSW_BIME'])
@@ -4471,9 +4474,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.list_of_pay.workshop.haghe_sanavat_identification == 'm':
             sanavat += self.calculate_monthly_haghe_sanavat
 
-        if self.list_of_pay.workshop.haghe_sanavat_identification == 'y' and self.list_of_pay.month == 12:
+        elif self.list_of_pay.workshop.haghe_sanavat_identification == 'y' and self.list_of_pay.month == 12:
             sanavat += self.calculate_yearly_haghe_sanavat
-        self.haghe_sanavat_total = round(sanavat)
         return sanavat
 
     @property
@@ -4541,7 +4543,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def get_hagh_sanavat_and_save_leaves(self):
-        return self.get_hagh_sanavat + self.get_save_leave
+        return self.haghe_sanavat_total + self.saved_leaves_total
 
     @property
     def unpaid(self):
@@ -4581,7 +4583,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         for item in items:
             year_worktime += item.real_worktime
             year_worktime += item.illness_leave_day
-        return round(base_pay) * 60 * year_worktime / 365
+        padash = round(base_pay) * 60 * year_worktime / 365
+        padash_limit = round(self.list_of_pay.workshop.hade_aghal_hoghoogh) * 90 * year_worktime / 365
+
+        if padash > padash_limit:
+            return padash_limit
+        else:
+            return padash
 
     @property
     def calculate_monthly_eydi(self):
@@ -4590,11 +4598,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             base_pay = hr.daily_pay_base
         else:
             base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
-        return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
+        padash = round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
+        padash_limit = round(self.list_of_pay.workshop.hade_aghal_hoghoogh) * 90 * (self.real_worktime + self.illness_leave_day) / 365
+
+        if padash > padash_limit:
+            return padash_limit
+        else:
+            return padash
 
     @property
     def get_padash(self):
-        padash = 0
         if self.list_of_pay.workshop.eydi_padash_identification == 'm':
             padash = self.calculate_monthly_eydi
         elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
@@ -5000,6 +5013,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if hr.komakhazine_mobile_nature == 'p':
             total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mobile_amount)
 
+        total += self.aele_mandi
         return total
 
     @property
@@ -5120,9 +5134,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total = 0
             total += self.sayer_moafiat
             if self.list_of_pay.workshop.eydi_padash_identification == 'm':
-                total += self.calculate_monthly_eydi_tax
+                total += self.calculate_monthly_eydi_moafiat
             elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
-                total += self.calculate_yearly_eydi_tax
+                total += self.calculate_yearly_eydi_moafiat
             total += self.hr_tax_not_included
             return total
         else:
@@ -5313,6 +5327,44 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 return eydi_tax
             else:
                 return 0
+        else:
+            return 0
+
+    @property
+    def calculate_yearly_eydi_moafiat(self):
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            hr = self.get_hr_letter
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = tax_row.to_amount / 12
+            eydi = self.padash_total
+            moaf = round(eydi) - round(moafiat_limit)
+            if moaf <= 0:
+                return round(eydi)
+            else:
+                return round(moaf)
+        else:
+            return 0
+
+
+    @property
+    def calculate_monthly_eydi_moafiat(self):
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            hr = self.get_hr_letter
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = tax_row.to_amount / 12 / 12
+            eydi = self.padash_total
+            moaf = round(eydi) - round(moafiat_limit)
+            if moaf <= 0:
+                return round(eydi)
+            else:
+                return round(moaf)
+            return eydi_tax
         else:
             return 0
 
