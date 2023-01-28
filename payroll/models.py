@@ -4182,8 +4182,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += Decimal(self.get_hagh_sanavat)
         total += Decimal(self.get_save_leave)
 
-        total -= self.get_kasre_kar
-        total -= self.sayer_kosoorat
         self.kasre_kar_total = round(self.get_kasre_kar)
         self.total_tax = self.calculate_month_tax
         self.loan_amount = self.check_and_get_loan_episode
@@ -4337,9 +4335,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         total += self.get_aele_mandi
         total += self.mission_total
-        total += self.ezafe_kari_total
         total += self.shab_kari_total
-        total += self.tatil_kari_total
         total += self.nobat_kari_sob_asr_total
         total += self.nobat_kari_sob_shab_total
         total += self.nobat_kari_asr_shab_total
@@ -4409,7 +4405,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         payable_amount = Decimal(round(self.total_payment) -\
                                  round(self.total_tax) -\
                                  round(self.check_and_get_optional_deduction_episode) -\
-                                 round(self.loan_amount))
+                                 round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
         payable_amount += Decimal(self.get_padash)
         payable_amount += Decimal(self.get_hagh_sanavat)
         payable_amount += Decimal(self.get_save_leave)
@@ -4810,7 +4806,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         benefit += 0
                     else:
                         benefit += self.calculate_hr_item_in_insurance_time(hr_letter_items[i]['amount'])
-
+            if hr.mazaya_mostamar_gheyre_naghdi_use_insurance:
+                benefit = benefit + Decimal(self.mazaya_gheyr_mostamar)
             if hr.ezafe_kari_use_insurance:
                 benefit = benefit + Decimal(self.ezafe_kari_total)
             if hr.haghe_owlad_use_insurance:
