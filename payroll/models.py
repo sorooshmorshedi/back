@@ -4179,10 +4179,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.sayer_ezafat
 
         total += Decimal(self.get_padash)
+        self.padash_total = round(self.get_padash)
         total += Decimal(self.get_hagh_sanavat)
         total += Decimal(self.get_save_leave)
 
         self.kasre_kar_total = round(self.get_kasre_kar)
+
         self.total_tax = self.calculate_month_tax
         self.loan_amount = self.check_and_get_loan_episode
 
@@ -4571,7 +4573,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
             base_pay = hr.daily_pay_base
         else:
-            base_pay = hr.hoghooghe_roozane_amount
+            base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
 
         items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
                                              & Q(list_of_pay__year=self.list_of_pay.year)
@@ -4587,7 +4589,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.eydi_padash_pay_type == 'b':
             base_pay = hr.daily_pay_base
         else:
-            base_pay = hr.hoghooghe_roozane_amount
+            base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
         return round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
 
     @property
@@ -4597,7 +4599,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             padash = self.calculate_monthly_eydi
         elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
             padash = self.calculate_yearly_eydi
-        self.padash_total = round(padash)
+        else:
+            padash = 0
         return padash
 
     '''report'''
