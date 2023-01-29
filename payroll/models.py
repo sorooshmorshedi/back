@@ -207,7 +207,6 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         else:
             raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
 
-
     @staticmethod
     def month_display(month):
         months = {
@@ -935,8 +934,6 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
         else:
             return str(self.id)
 
-
-
     @property
     def insurance_for_tax(self):
         if self.insurance:
@@ -1268,7 +1265,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return False
         else:
             return True
-
 
     @property
     def payment_balance(self):
@@ -1635,7 +1631,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             ('deleteOwn.contract', 'حذف قرارداد خود'),
         )
 
-
     def save(self, *args, **kwargs):
         if self.is_verified and self.insurance != None and self.insurance:
             if not self.insurance_add_date:
@@ -1748,7 +1743,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return str(self.code) + ' برای ' + self.workshop_personnel_display
         else:
             return str(self.id) + ' برای ' + self.workshop_personnel_display
-
 
     @property
     def check_hr_letter(self):
@@ -2074,13 +2068,13 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                     return False
             return True
 
-
     @property
     def check_with_contract(self):
         contracts = Contract.objects.filter(Q(workshop_personnel=self.workshop_personnel) & Q(is_verified=True))
         is_in_contract = False
         for contract in contracts:
-            if self.start_date.__ge__(contract.contract_from_date) and self.start_date.__le__(contract.contract_to_date):
+            if self.start_date.__ge__(contract.contract_from_date) and self.start_date.__le__(
+                    contract.contract_to_date):
                 is_in_contract = True
         return is_in_contract
 
@@ -2130,7 +2124,6 @@ class OptionalDeduction(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return str(end.year) + '-' + str(end.month) + '-1'
         else:
             return ''
-
 
     @staticmethod
     def with_comma(input_amount):
@@ -2873,7 +2866,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         for i in range(0, 23):
             if hr_letter_items[i]['base'] and hr_letter_items[i]['amount']:
                 if i < 2:
-                    daily +=hr_letter_items[i]['amount']
+                    daily += hr_letter_items[i]['amount']
                     monthly += hr_letter_items[i]['amount'] * Decimal(30)
                 else:
                     daily += hr_letter_items[i]['amount'] / Decimal(30)
@@ -3042,7 +3035,6 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     @property
     def mazaya_mostamar_gheyre_naghdi_amount_with_comma(self):
         return self.with_comma(self.mazaya_mostamar_gheyre_naghdi_amount)
-
 
 
 class Mission(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
@@ -3260,7 +3252,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         else:
             return True
 
-
     @property
     def month_display(self):
         months = {
@@ -3445,7 +3436,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             for absence in filtered_absence.all():
                 if absence.workshop_personnel == workshop_personnel:
                     if absence.leave_type == 'e' and absence.entitlement_leave_type == 'h' and \
-                            absence.date.__ge__(contract_start[contract.id]) and\
+                            absence.date.__ge__(contract_start[contract.id]) and \
                             absence.date.__le__(contract_end[contract.id]):
                         absence_types['eh'] += absence.to_hour.hour - absence.from_hour.hour
                     if absence.leave_type == 'e' and absence.entitlement_leave_type != 'h':
@@ -3567,7 +3558,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                            on_delete=models.CASCADE, blank=True, null=True)
     contract = models.ForeignKey(Contract, related_name="list_of_pay_item",
                                  on_delete=models.CASCADE, blank=True, null=True)
-    hr_letter = models.ForeignKey(HRLetter, related_name='list_of_pay_item', on_delete=models.CASCADE, blank=True, null=True)
+    hr_letter = models.ForeignKey(HRLetter, related_name='list_of_pay_item', on_delete=models.CASCADE, blank=True,
+                                  null=True)
     contract_row = models.ForeignKey(ContractRow, related_name="list_of_pay_item", on_delete=models.CASCADE,
                                      blank=True, null=True)
     cumulative_absence = models.IntegerField(default=0)
@@ -3762,7 +3754,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def shab_kari_time(self):
         return self.decimal_to_time(self.shab_kari)
 
-
     @property
     def hoghoogh_mahane_with_comma(self):
         return self.with_comma(self.hoghoogh_mahane)
@@ -3919,7 +3910,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.tax_employer_type == 1:
             self.taamin_ejtemaee = 1
         elif self.workshop_personnel.workshop.tax_employer_type == 2:
-            self.taamin_ejtemaee = 2/7
+            self.taamin_ejtemaee = 2 / 7
         if self.workshop_personnel.workshop.base_pay_type == 'd':
             self.pay_base = hr.daily_pay_base
             self.hourly_pay_base = hr.day_hourly_pay_base
@@ -3998,7 +3989,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if not hr:
                 raise ValidationError('حکم کارگزینی فعال موجود نیست')
             return hr
-
 
     def calculate_hr_item_in_real_work_time(self, item):
         if item:
@@ -4414,9 +4404,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def payable(self):
-        payable_amount = Decimal(round(self.total_payment) -\
-                                 round(self.total_tax) -\
-                                 round(self.check_and_get_optional_deduction_episode) -\
+        payable_amount = Decimal(round(self.total_payment) - \
+                                 round(self.total_tax) - \
+                                 round(self.check_and_get_optional_deduction_episode) - \
                                  round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
         payable_amount += Decimal(self.padash_total)
         payable_amount += Decimal(self.haghe_sanavat_total)
@@ -4606,7 +4596,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
         padash = round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
-        padash_limit = round(self.list_of_pay.workshop.hade_aghal_hoghoogh) * 90 * (self.real_worktime + self.illness_leave_day) / 365
+        padash_limit = round(self.list_of_pay.workshop.hade_aghal_hoghoogh) * 90 * (
+                    self.real_worktime + self.illness_leave_day) / 365
 
         if padash > padash_limit:
             return padash_limit
@@ -4705,11 +4696,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         additions['hagh_maskan'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount))
         additions['kharo_bar'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount))
 
-        additions['hagh_sarparasti'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
-        additions['hagh_modiriat'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
+        additions['hagh_sarparasti'] = self.with_comma(
+            self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
+        additions['hagh_modiriat'] = self.with_comma(
+            self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
         additions['hagh_jazb'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount))
-        additions['fogholade_shoghl'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
-        additions['haghe_tahsilat'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
+        additions['fogholade_shoghl'] = self.with_comma(
+            self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
+        additions['haghe_tahsilat'] = self.with_comma(
+            self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
         additions['fogholade_sakhti_kar'] = \
             self.with_comma(self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount))
         additions['haghe_ankal'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount))
@@ -4729,7 +4724,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.with_comma(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount))
         additions['komakhazine_varzesh'] = self.with_comma(
             self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount))
-        additions['komakhazine_mobile'] = self.with_comma(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
+        additions['komakhazine_mobile'] = self.with_comma(
+            self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
         additions['mazaya_mostamar_gheyre_naghdi'] = \
             self.with_comma(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
 
@@ -4738,6 +4734,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return payslip
 
     '''insurance'''
+
     @property
     def check_insurance(self):
         if self.contract.insurance and self.list_of_pay.use_in_calculate:
@@ -4748,14 +4745,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     insurance_start.__lt__(self.list_of_pay.end_date):
                 insurance_day = self.list_of_pay.end_date.day - insurance_start.day + 1
                 absences = self.absence_not_included(insurance_start)
-                insurance_day = insurance_day - absences - int(self.cumulative_absence) -\
+                insurance_day = insurance_day - absences - int(self.cumulative_absence) - \
                                 int(self.cumulative_illness) - int(self.cumulative_without_salary)
                 return True, insurance_day
             elif insurance_start.__ge__(self.list_of_pay.end_date):
                 return False, 0
         else:
             return False, 0
-
 
     def absence_not_included(self, start_date):
         end_date = self.list_of_pay.end_date
@@ -4771,17 +4767,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 duration = end_date.day - start_date.day
                 leave_count += duration
             elif leave.from_date.__le__(start_date) and leave.to_date.__ge__(start_date) and \
-                leave.to_date.__le__(end_date):
+                    leave.to_date.__le__(end_date):
                 duration = leave.to_date.day - start_date.day + 1
                 leave_count += duration
             elif leave.from_date.__ge__(start_date) and leave.from_date.__le__(end_date) and \
-                leave.to_date.__ge__(end_date):
+                    leave.to_date.__ge__(end_date):
                 duration = end_date.day - leave.from_date.day + 1
                 leave_count += duration
 
         return leave_count
-
-
 
     @property
     def haghe_bime_bime_shavande(self):
@@ -4947,6 +4941,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         return DSKWOR
 
     '''tax'''
+
     @property
     def check_tax(self):
         if self.contract.tax and self.list_of_pay.use_in_calculate:
@@ -4957,14 +4952,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     tax_start.__lt__(self.list_of_pay.end_date):
                 tax_day = self.list_of_pay.end_date.day - tax_start.day + 1
                 absences = self.absence_not_included(tax_start)
-                tax_day = tax_day - absences - int(self.cumulative_absence) -\
-                                int(self.cumulative_illness) - int(self.cumulative_without_salary)
+                tax_day = tax_day - absences - int(self.cumulative_absence) - \
+                          int(self.cumulative_illness) - int(self.cumulative_without_salary)
                 return True, tax_day
             elif tax_start.__ge__(self.list_of_pay.end_date):
                 return False, 0
         else:
             return False, 0
-
 
     @property
     def tax_naghdi_pension(self):
@@ -5016,7 +5010,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_varzesh_amount)
         if hr.komakhazine_mobile_nature == 'p':
             total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mobile_amount)
-        total += self.padash_total
         return total
 
     @property
@@ -5180,7 +5173,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def tax_included_payment(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales
+            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales +\
+                           self.padash_total
+
             included_naghdi = total_naghdi - self.moaf_sum
             total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
             included_gheyre_naghdi = total_gheyre_naghdi - self.gheyre_naghdi_moafiat
@@ -5232,7 +5227,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             raise ValidationError('جدول معافیت مالیات در این تاریخ موجود نیست')
 
-
     @property
     def calculate_month_tax(self):
         hr = self.get_hr_letter
@@ -5252,7 +5246,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     tax_items.append(item)
 
             month_count = Decimal((len(tax_items) + 1) / 12)
-
 
             tax = 0
             year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
@@ -5348,7 +5341,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
-
     @property
     def calculate_monthly_eydi_moafiat(self):
         is_tax, tax_day = self.check_tax
@@ -5383,4 +5375,3 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.total_tax = self.calculate_month_tax
         self.calculate_payment = False
         super().save(*args, **kwargs)
-
