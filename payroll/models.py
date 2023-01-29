@@ -3668,6 +3668,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     insurance = models.BooleanField(default=False)
     insurance_day = models.IntegerField(default=0)
 
+    taamin_ejtemaee = DECIMAL(default=0)
+
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPayItem'
         permission_basename = 'list_of_pay_item'
@@ -3913,6 +3915,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         hr = self.get_hr_letter
         self.hoghoogh_roozane = hr.hoghooghe_roozane_amount
         hourly_pay = round((self.hoghoogh_roozane / Decimal(7.33)), 6)
+
+        if self.workshop_personnel.workshop.tax_employer_type == 1:
+            self.taamin_ejtemaee = 1
+        elif self.workshop_personnel.workshop.tax_employer_type == 2:
+            self.taamin_ejtemaee = 2/7
         if self.workshop_personnel.workshop.base_pay_type == 'd':
             self.pay_base = hr.daily_pay_base
             self.hourly_pay_base = hr.day_hourly_pay_base
@@ -5020,10 +5027,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def tamin_ejtemaee_moafiat(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            if self.workshop_personnel.workshop.tax_employer_type == 1:
-                return self.haghe_bime_bime_shavande
-            elif self.workshop_personnel.workshop.tax_employer_type == 2:
-                return (self.haghe_bime_bime_shavande * 2) / 7
+            return round(Decimal(self.haghe_bime_bime_shavande) * Decimal(self.taamin_ejtemaee))
         else:
             return 0
 
@@ -5374,6 +5378,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
         if self.calculate_payment:
+            self.set_info_from_workshop()
+            self.aele_mandi_child = self.get_aele_mandi_info
             self.real_worktime = self.normal_worktime - self.absence_sum - self.without_salary_sum - self.illness_sum
             self.total_payment = round(self.get_total_payment)
             if self.contract_row:

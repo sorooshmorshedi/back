@@ -1331,6 +1331,7 @@ class ListOfPayItemsCalculate(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         data = request.data
+        days = query.list_of_pay.month_days
         is_in = request.data['is_in']
         del(data['is_in'])
         if is_in:
@@ -1342,6 +1343,10 @@ class ListOfPayItemsCalculate(APIView):
                 data['nobat_kari_asr_shab'] = 0
             if not data['nobat_kari_sob_asr_shab']:
                 data['nobat_kari_sob_asr_shab'] = 0
+
+            nobat_kari = int(data['nobat_kari_sob_asr']) + int(data['nobat_kari_sob_shab']) +\
+                         int(data['nobat_kari_asr_shab']) + int(data['nobat_kari_sob_asr_shab'])
+
             if not data['sayer_ezafat']:
                 data['sayer_ezafat'] = 0
             if not data['mazaya_gheyr_mostamar']:
@@ -1368,6 +1373,25 @@ class ListOfPayItemsCalculate(APIView):
                 data['cumulative_illness'] = 0
             if not data['cumulative_without_salary']:
                 data['cumulative_without_salary'] = 0
+
+            cumulative = int(data['cumulative_without_salary']) + int(data['cumulative_illness']) + \
+                         int(data['cumulative_entitlement']) + int(data['cumulative_absence']) +\
+                         int(data['cumulative_mission'])
+
+            cumulative += int(query.mission_day)
+            cumulative += int(query.without_salary_leave_day)
+            cumulative += int(query.illness_leave_day)
+            cumulative += int(query.absence_day)
+            cumulative += int(query.entitlement_leave_day)
+
+            if nobat_kari > days:
+                self.validate_status = False
+                self.error_messages.append('جمع نوبت کاری نمیتواند بزرگتر از تعداد روز های ماه باشد')
+
+            if cumulative > days:
+                self.validate_status = False
+                self.error_messages.append('جمع موارد تجمیعی نمیتواند بزرگتر از تعداد روز های ماه باشد')
+
             try:
                 if ':' not in data['ezafe_kari']:
                     data['ezafe_kari'] = int(data['ezafe_kari'])
@@ -1595,6 +1619,9 @@ class ListOfPayUltimateApi(APIView):
                     if not same_list.use_in_calculate and same_list.ultimate:
                         self.validate_status = False
                         self.response_message = 'ابتدا تمام لیست های بدون بیمه و مالیات این ماه را غیر نهایی کنید'
+            if not list_of_pay.workshop.is_verified:
+                self.validate_status = False
+                self.response_message = 'ابتدا کارگاه این لیست را نهایی کنید'
 
             if self.validate_status:
                 list_of_pay.ultimate = ultimate
@@ -1731,7 +1758,6 @@ class ListOfPayEditDetail(APIView):
                     manategh_tejari_moafiat=cumulative[workshop_personnel.id]['manategh_tejari_moafiat'],
                     ejtenab_maliat_mozaaf=cumulative[workshop_personnel.id]['ejtenab_maliat_mozaaf'],
                 )
-                print(payroll_list_item.cumulative_mission)
                 payroll_list_item.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
