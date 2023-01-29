@@ -5138,9 +5138,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total = 0
             total += self.sayer_moafiat
             if self.list_of_pay.workshop.eydi_padash_identification == 'm':
-                total += self.calculate_monthly_eydi_tax
+                total += self.calculate_monthly_eydi_moafiat
             elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
-                total += self.calculate_yearly_eydi_tax
+                total += self.calculate_yearly_eydi_moafiat
             total += self.hr_tax_not_included
             return total
         else:
@@ -5348,7 +5348,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if moaf <= 0:
                 return round(eydi)
             else:
-                return round(moaf)
+                return round(moafiat_limit)
         else:
             return 0
 
@@ -5367,7 +5367,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if moaf <= 0:
                 return round(eydi)
             else:
-                return round(moaf)
+                return round(moafiat_limit)
             return eydi_tax
         else:
             return 0
