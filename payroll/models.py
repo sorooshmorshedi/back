@@ -5180,7 +5180,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def tax_included_payment(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension
+            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales
             included_naghdi = total_naghdi - self.moaf_sum
             total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
             included_gheyre_naghdi = total_gheyre_naghdi - self.gheyre_naghdi_moafiat
