@@ -122,9 +122,9 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     sanavat_type = models.CharField(max_length=1, choices=SANAVAT_TYPES, default=CONTINUOUS)
 
-    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=12)
-    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=12)
-    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=12)
+    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=0.4, decimal_places=12)
+    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=0.96, decimal_places=12)
+    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=0.4, decimal_places=12)
     shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=12)
     aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=12)
     nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=12)
@@ -192,6 +192,14 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             return personnel
         else:
             raise ValidationError('در این کارگاه پرسنلی ثبت نشده')
+
+    @property
+    def have_list(self):
+        list_of_pays = self.list_of_pay.filter(ultimate=False)
+        if len(list_of_pays) == 0:
+            return False
+        else:
+            return True
 
     def get_tax_row(self, date):
         company_id = self.company.id
@@ -3918,49 +3926,49 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.pay_base = hr.monthly_pay_base
             self.hourly_pay_base = hr.month_hourly_pay_base
 
-        self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh
+        self.ezafe_kari_nerkh = self.workshop_personnel.workshop.ezafe_kari_nerkh + Decimal(1)
         if self.get_hr_letter.ezafe_kari_pay_type == 'd':
             self.ezafe_kari_amount = hourly_pay
         elif self.get_hr_letter.ezafe_kari_pay_type == 'b':
             self.ezafe_kari_amount = self.hourly_pay_base
 
-        self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh
+        self.tatil_kari_nerkh = self.workshop_personnel.workshop.tatil_kari_nerkh + Decimal(1)
         if self.get_hr_letter.tatil_kari_pay_type == 'd':
             self.tatil_kari_amount = hourly_pay
         elif self.get_hr_letter.tatil_kari_pay_type == 'b':
             self.tatil_kari_amount = self.hourly_pay_base
 
-        self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh
+        self.kasre_kar_nerkh = self.workshop_personnel.workshop.kasre_kar_nerkh + Decimal(1)
         if self.get_hr_letter.kasre_kar_pay_type == 'd':
             self.kasre_kar_amount = hourly_pay
         elif self.get_hr_letter.kasre_kar_pay_type == 'b':
             self.kasre_kar_amount = self.hourly_pay_base
 
-        self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh
+        self.shab_kari_nerkh = self.workshop_personnel.workshop.shab_kari_nerkh + Decimal(1)
         if self.get_hr_letter.shab_kari_pay_type == 'd':
             self.shab_kari_amount = hourly_pay
         elif self.get_hr_letter.shab_kari_pay_type == 'b':
             self.shab_kari_amount = self.hourly_pay_base
 
-        self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh
+        self.nobat_kari_sob_asr_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_nerkh + Decimal(1)
         if self.get_hr_letter.nobat_kari_sob_asr_pay_type == 'd':
             self.nobat_kari_sob_asr_amount = self.hoghoogh_roozane
         elif self.get_hr_letter.nobat_kari_sob_asr_pay_type == 'b':
             self.nobat_kari_sob_asr_amount = self.pay_base
 
-        self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh
+        self.nobat_kari_sob_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_shab_nerkh + Decimal(1)
         if self.get_hr_letter.nobat_kari_sob_shab_pay_type == 'd':
             self.nobat_kari_sob_shab_amount = self.hoghoogh_roozane
         elif self.get_hr_letter.nobat_kari_sob_shab_pay_type == 'b':
             self.nobat_kari_sob_shab_amount = self.pay_base
 
-        self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh
+        self.nobat_kari_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_asr_shab_nerkh + Decimal(1)
         if self.get_hr_letter.nobat_kari_asr_shab_pay_type == 'd':
             self.nobat_kari_asr_shab_amount = self.hoghoogh_roozane
         elif self.get_hr_letter.nobat_kari_asr_shab_pay_type == 'b':
             self.nobat_kari_asr_shab_amount = self.pay_base
 
-        self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh
+        self.nobat_kari_sob_asr_shab_nerkh = self.workshop_personnel.workshop.nobat_kari_sob_asr_shab_nerkh + Decimal(1)
         if self.get_hr_letter.nobat_kari_sob_asr_shab_pay_type == 'd':
             self.nobat_kari_sob_asr_shab_amount = self.hoghoogh_roozane
         elif self.get_hr_letter.nobat_kari_sob_asr_shab_pay_type == 'b':
@@ -3972,7 +3980,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         elif self.get_hr_letter.aele_mandi_pay_type == 'b':
             self.aele_mandi_amount = self.pay_base
 
-        self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh
+        self.mission_nerkh = self.workshop_personnel.workshop.mission_pay_nerkh + Decimal(1)
         if self.get_hr_letter.mission_pay_type == 'd':
             self.mission_amount = self.hoghoogh_roozane
         elif self.get_hr_letter.mission_pay_type == 'b':
@@ -4424,7 +4432,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
             base_pay = hr.daily_pay_base
         else:
-            base_pay = hr.hoghooghe_roozane_amount
+            base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
 
         previous_items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
                                                       & Q(list_of_pay__year__lt=self.list_of_pay.year)
@@ -4462,7 +4470,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.workshop_personnel.workshop.haghe_sanavat_pay_type == 'b':
             base_pay = hr.daily_pay_base
         else:
-            base_pay = hr.hoghooghe_roozane_amount
+            base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
         return round(base_pay) * 30 * (self.real_worktime + self.illness_leave_day) / 365
 
     @property
@@ -5174,7 +5182,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         is_tax, tax_day = self.check_tax
         if is_tax:
             total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales +\
-                           self.padash_total
+                           self.padash_total + self.saved_leaves_total + self.haghe_sanavat_total
 
             included_naghdi = total_naghdi - self.moaf_sum
             total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension

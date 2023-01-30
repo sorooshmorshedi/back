@@ -11,6 +11,7 @@ class WorkTitleSerializer(serializers.ModelSerializer):
 
 
 class WorkShopSerializer(serializers.ModelSerializer):
+    no_edit = serializers.BooleanField(source='have_list', read_only=True)
     class Meta:
         model = Workshop
         fields = '__all__'
