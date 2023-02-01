@@ -5377,6 +5377,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.set_info_from_workshop()
             self.aele_mandi_child = self.get_aele_mandi_info
             self.real_worktime = self.normal_worktime - self.absence_sum - self.without_salary_sum - self.illness_sum
+            self.hr_letter = self.get_hr_letter
             self.total_payment = round(self.get_total_payment)
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
