@@ -4977,7 +4977,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.sanavat_month >= 12:
             total += (self.sanavat_base * tax_day)
 
-        hr = self.hr_letter
+        hr = self.get_hr_letter
         if hr.haghe_sarparasti_nature == 'p':
             total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_sarparasti_amount)
         if hr.haghe_modiriyat_nature == 'p':
