@@ -284,9 +284,9 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_nobat_kari_sob_asr_shab_total = serializers.DecimalField(source='nobat_kari_sob_asr_shab_total',
                                                                  decimal_places=2, max_digits=24, read_only=True)
 
-    get_tax_included = serializers.CharField(source='tax_included_payment', read_only=True)
+    get_tax_included = serializers.IntegerField(source='tax_included_payment', read_only=True)
     get_month_tax = serializers.IntegerField(source='total_tax', read_only=True)
-    get_moaf_sum = serializers.CharField(source='moafiat_sum', read_only=True)
+    get_moaf_sum = serializers.IntegerField(source='moafiat_sum', read_only=True)
     get_kasre_kar_time = serializers.CharField(source='kasre_kar_time', read_only=True)
     get_ezafe_kari_time = serializers.CharField(source='ezafe_kari_time', read_only=True)
     get_tatil_kari_time = serializers.CharField(source='tatil_kari_time', read_only=True)
@@ -384,12 +384,13 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
     ultimate_display = serializers.CharField(source='is_ultimate', read_only=True)
     calculate_display = serializers.CharField(source='is_use_in_calculate', read_only=True)
     get_is_editable = serializers.BooleanField(source='is_editable', read_only=True)
+    is_workshop_verified = serializers.BooleanField(source='workshop.is_verified', read_only=True)
 
     class Meta:
         model = ListOfPay
-        fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date', \
+        fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
                  'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime', \
-                 'get_is_editable'
+                 'get_is_editable', 'is_workshop_verified'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):

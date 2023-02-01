@@ -3596,46 +3596,46 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     real_worktime = models.IntegerField(default=0)
 
     mission_amount = DECIMAL(default=0, blank=True, null=True)
-    mission_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=2)
+    mission_nerkh = models.DecimalField(max_digits=24, default=1, decimal_places=4)
 
     ezafe_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     ezafe_kari_amount = DECIMAL(default=0)
-    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+    ezafe_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=4)
     ezafe_kari_total = models.IntegerField(default=0)
 
     tatil_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     tatil_kari_amount = DECIMAL(default=0)
-    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=2)
+    tatil_kari_nerkh = models.DecimalField(max_digits=24, default=1.96, decimal_places=4)
     tatil_kari_total = models.IntegerField(default=0)
 
     kasre_kar = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     kasre_kar_amount = DECIMAL(default=0)
-    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=2)
+    kasre_kar_nerkh = models.DecimalField(max_digits=24, default=1.4, decimal_places=4)
     kasre_kar_total = models.IntegerField(default=0)
 
     shab_kari = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     shab_kari_amount = DECIMAL(default=0)
-    shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=2)
+    shab_kari_nerkh = models.DecimalField(max_digits=24, default=0.35, decimal_places=4)
     shab_kari_total = models.IntegerField(default=0)
 
     nobat_kari_sob_asr = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_asr_amount = DECIMAL(default=0)
-    nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=2)
+    nobat_kari_sob_asr_nerkh = models.DecimalField(max_digits=24, default=0.1, decimal_places=4)
 
     nobat_kari_sob_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_shab_amount = DECIMAL(default=0)
-    nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=2)
+    nobat_kari_sob_shab_nerkh = models.DecimalField(max_digits=24, default=0.225, decimal_places=4)
 
     nobat_kari_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_asr_shab_amount = DECIMAL(default=0)
-    nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=2)
+    nobat_kari_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.025, decimal_places=4)
 
     nobat_kari_sob_asr_shab = models.DecimalField(default=0, max_digits=24, decimal_places=6)
     nobat_kari_sob_asr_shab_amount = DECIMAL(default=0)
-    nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=2)
+    nobat_kari_sob_asr_shab_nerkh = models.DecimalField(max_digits=24, default=0.15, decimal_places=4)
 
     aele_mandi_amount = DECIMAL(default=0)
-    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=2)
+    aele_mandi_nerkh = models.DecimalField(max_digits=24, default=3, decimal_places=4)
     aele_mandi = models.IntegerField(default=0)
 
     haghe_sanavat_total = models.IntegerField(default=0)
