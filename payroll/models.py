@@ -4979,45 +4979,45 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         hr = self.get_hr_letter
         if hr.haghe_sarparasti_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_sarparasti_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_sarparasti_amount)
         if hr.haghe_modiriyat_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_modiriyat_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_modiriyat_amount)
         if hr.haghe_jazb_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_jazb_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_jazb_amount)
         if hr.fogholade_shoghl_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_shoghl_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_shoghl_amount)
         if hr.haghe_tahsilat_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_tahsilat_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_tahsilat_amount)
         if hr.fogholade_sakhti_kar_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_sakhti_kar_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_sakhti_kar_amount)
         if hr.haghe_ankal_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_ankal_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_ankal_amount)
         if hr.fogholade_badi_abohava_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_badi_abohava_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_badi_abohava_amount)
         if hr.mahroomiat_tashilat_zendegi_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.mahroomiat_tashilat_zendegi_amount)
         if hr.fogholade_mahal_khedmat_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_mahal_khedmat_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_mahal_khedmat_amount)
         if hr.fogholade_sharayet_mohit_kar_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.fogholade_sharayet_mohit_kar_amount)
         if hr.haghe_maskan_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_maskan_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_maskan_amount)
         if hr.ayabo_zahab_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.ayabo_zahab_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.ayabo_zahab_amount)
         if hr.bon_kharo_bar_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.bon_kharo_bar_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.bon_kharo_bar_amount)
         if hr.yarane_ghaza_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.yarane_ghaza_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.yarane_ghaza_amount)
         if hr.haghe_taahol_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_taahol_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_taahol_amount)
         if hr.haghe_shir_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.haghe_shir_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.haghe_shir_amount)
         if hr.komakhazine_mahdekoodak_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mahdekoodak_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mahdekoodak_amount)
         if hr.komakhazine_varzesh_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_varzesh_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_varzesh_amount)
         if hr.komakhazine_mobile_nature == 'p':
-            total += self.calculate_hr_item_in_tax_time(self.hr_letter.komakhazine_mobile_amount)
+            total += self.calculate_hr_item_in_tax_time(hr.komakhazine_mobile_amount)
         return total
 
     @property
