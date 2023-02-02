@@ -154,6 +154,8 @@ class Workshop(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     is_default = models.BooleanField(default=False)
 
+    save_leave_limit = models.IntegerField(default=26)
+
     def save(self, *args, **kwargs):
         other = self.company.workshop.all()
         if len(other) == 0:
@@ -1226,6 +1228,8 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     sanavat_btn = models.BooleanField(default=False)
     sanavat_previuos_days = models.CharField(max_length=100, blank=True, null=True)
     sanavat_previous_amount = models.CharField(max_length=100, blank=True, null=True)
+
+    save_leave_limit = models.IntegerField(default=26)
 
     @property
     def current_insurance(self):
@@ -3724,7 +3728,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.contract.quit_job_date:
             return self.contract.quit_job_date
         else:
-            return ' - '
+            return ''
 
     @property
     def absence_sum(self):
@@ -3773,6 +3777,46 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def sayer_kosoorat_with_comma(self):
         return self.with_comma(self.sayer_kosoorat)
+
+    @property
+    def haghe_maskan(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+
+    @property
+    def haghe_jazb(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+
+    @property
+    def kharo_bar(self):
+        hr = self.get_hr_letter
+        return self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+
+    @property
+    def sayer_hr(self):
+        hr = self.get_hr_letter
+        total = 0
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
+        return total
 
     @property
     def sayer_ezafat_with_comma(self):
@@ -4487,37 +4531,40 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_save_leave(self):
         hr = self.get_hr_letter
         year_worktime = 0
+        save_leave_days = 0
         items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
                                              & Q(list_of_pay__year=self.list_of_pay.year)
                                              & Q(list_of_pay__ultimate=True))
-        leave_available = 29
 
-        if self.workshop_personnel.workshop.save_absence_transfer_next_year:
-            previous_years = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
-                                                          & Q(list_of_pay__year__lte=self.list_of_pay.year)
-                                                          & Q(list_of_pay__month=12)
-                                                          & Q(list_of_pay__ultimate=True)
-                                                          )
-            for item in previous_years:
-                save_leaves = item.save_leave
-                leave_available += save_leaves
+        for item in items:
+            year_worktime += item.real_worktime
+            year_worktime -= item.matter_47_leave_day
+
+        leave_available = self.workshop_personnel.save_leave_limit * year_worktime / 365
+        leave_limit_available = 9 * year_worktime / 365
+
+        leave_available += self.workshop_personnel.save_leaave
 
         for item in items:
             leave_available -= item.entitlement_leave_day
-            leave_available -= item.matter_47_leave_day
-            year_worktime += item.real_worktime
-        if leave_available >= 9 and self.workshop_personnel.workshop.save_absence_limit:
-            save_leave = 9
+
+        if self.workshop_personnel.workshop.save_absence_limit:
+            if leave_available > leave_limit_available:
+                save_leave_days = leave_limit_available
+            elif leave_available <= leave_limit_available:
+                save_leave_days = leave_available
         else:
-            save_leave = leave_available
+            save_leave_days = leave_available
+
         if self.workshop_personnel.workshop.leave_save_pay_type == 'h':
             pay_base = hr.calculate_save_leave_base
         else:
             pay_base = self.workshop_personnel.workshop.hade_aghal_hoghoogh
 
-        save_leave_amount = save_leave * pay_base * year_worktime / 365
+        save_leave_amount = save_leave_days * pay_base
 
-        return save_leave, round(save_leave_amount), round(pay_base)
+        return save_leave_days, round(save_leave_amount), round(pay_base)
+
 
     @property
     def get_save_leave_day(self):
@@ -5335,7 +5382,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_yearly_eydi_moafiat(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            hr = self.get_hr_letter
             mytax = self.get_tax_row
             tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))

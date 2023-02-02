@@ -308,6 +308,11 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_is_editable = serializers.BooleanField(source='is_editable', read_only=True)
     get_quit_job = serializers.CharField(source='quit_job', read_only=True)
 
+    get_haghe_maskan = serializers.IntegerField(source='haghe_maskan', read_only=True)
+    get_haghe_jazb = serializers.IntegerField(source='haghe_jazb', read_only=True)
+    get_kharo_bar = serializers.IntegerField(source='kharo_bar', read_only=True)
+    get_sayer_hr = serializers.IntegerField(source='sayer_hr', read_only=True)
+
     class Meta:
         model = ListOfPayItem
         fields = '__all__'
