@@ -83,6 +83,9 @@ class WorkshopApiView(APIView):
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
+        save_leave_limit = data['save_leave_limit']
+        if not save_leave_limit:
+            data['save_leave_limit'] = 0
         serializer = WorkShopSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -141,7 +144,11 @@ class WorkshopDetail(APIView):
 
     def put(self, request, pk):
         query = self.get_object(pk)
-        serializer = WorkShopSerializer(query, data=request.data)
+        data = request.data
+        save_leave_limit = data['save_leave_limit']
+        if not save_leave_limit:
+            data['save_leave_limit'] = 0
+        serializer = WorkShopSerializer(query, data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -573,7 +580,11 @@ class WorkshopPersonnelDetail(APIView):
 
     def put(self, request, pk):
         query = self.get_object(pk)
-        serializer = WorkshopPersonnelSerializer(query, data=request.data)
+        data = request.data
+        save_leave_limit = data['save_leave_limit']
+        if not save_leave_limit:
+            data['save_leave_limit'] = 0
+        serializer = WorkshopPersonnelSerializer(query, data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

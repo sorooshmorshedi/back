@@ -50,6 +50,10 @@ class WorkshopVerifyApi(APIView):
 
         # workshop setting verify
 
+        if not workshop.save_leave_limit or workshop.save_leave_limit < 1:
+            self.validate_status = False
+            self.error_messages.append("حد نصاب مرخصی سالانه در تنظیمات کارگاه، باید بزرگتر از صفر باشد")
+
         if not workshop.worker_insurance_nerkh:
             self.validate_status = False
             self.error_messages.append('نرخ حق بیمه سهم بیمه شده را تنظیمات کارگاه وارد کنید')
@@ -101,6 +105,7 @@ class WorkshopVerifyApi(APIView):
         if not workshop.nobat_kari_sob_asr_shab_nerkh:
             self.validate_status = False
             self.error_messages.append('نرخ نوبت کاری صبح و عصر و شب را تنظیمات کارگاه وارد کنید')
+
 
         if self.validate_status:
             workshop.is_verified = True
@@ -582,6 +587,9 @@ class WorkshopPersonnelVerifyApi(APIView):
         if not personnel.contract_type:
             self.validate_status = False
             self.error_messages.append("نوع قرارداد را وارد کنید")
+        if not personnel.save_leave_limit or personnel.save_leave_limit < 1:
+            self.validate_status = False
+            self.error_messages.append("حد نصاب مرخصی سالانه باید بزرگتر از صفر باشد")
         if not personnel.employment_date:
             self.validate_status = False
             self.error_messages.append("تاریخ استخدام را وارد کنید")
