@@ -4540,8 +4540,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             year_worktime += item.real_worktime
             year_worktime -= item.matter_47_leave_day
 
+        year_worktime += self.real_worktime
+        year_worktime -= self.matter_47_leave_day
+        print('year worktime  :  ', year_worktime)
+
         leave_available = self.workshop_personnel.save_leave_limit * year_worktime / 365
+        print('leave available  :  ', leave_available)
         leave_limit_available = 9 * year_worktime / 365
+        print('leave limit available  :  ', leave_limit_available)
 
         leave_available += self.workshop_personnel.save_leaave
 
