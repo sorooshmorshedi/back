@@ -262,6 +262,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     contract_row_title = serializers.IntegerField(source='contract_row.contract_row', read_only=True)
     haghe_bime = serializers.IntegerField(source='haghe_bime_bime_shavande', read_only=True)
     start_date = serializers.CharField(source='contract.contract_from_date.__str__', read_only=True)
+    work_start_date = serializers.CharField(source='contract.contract_from_date', read_only=True)
     work_title = serializers.CharField(source='workshop_personnel.title.name', read_only=True)
     get_insurance_in_workshop = serializers.CharField(source='workshop_personnel.get_insurance_in_workshop',
                                                       read_only=True)

@@ -512,7 +512,17 @@ class ListOfPayFilter(filters.FilterSet):
         }
 
 
+def list_personnel_filter(queryset, name, value):
+    query = []
+    for item in queryset:
+        if item.workshop_personnel.personnel and value in item.workshop_personnel.personnel.full_name:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
 class ListOfPayItemFilter(filters.FilterSet):
+    personnel_name = filters.CharFilter(method=list_personnel_filter)
+
     class Meta:
         model = ListOfPayItem
         fields = {

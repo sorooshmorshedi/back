@@ -5235,7 +5235,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         is_tax, tax_day = self.check_tax
         if is_tax:
             total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales +\
-                           self.padash_total + self.saved_leaves_total + self.haghe_sanavat_total
+                           self.padash_total + self.get_hagh_sanavat_and_save_leaves
 
             included_naghdi = total_naghdi - self.moaf_sum
             total_gheyre_naghdi = self.mazaya_gheyr_mostamar + self.gheyre_naghdi_tax_pension
@@ -5405,7 +5405,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def calculate_monthly_eydi_moafiat(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            hr = self.get_hr_letter
             mytax = self.get_tax_row
             tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
