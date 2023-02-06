@@ -1751,6 +1751,15 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                     '',
                     '',
                 ])
+            if form.aele_mandi != 0:
+                data.append([
+                    'تعداد اولاد مشمول',
+                    form.aele_mandi_child,
+                    'حق اولاد',
+                    form.aele_mandi,
+                    '',
+                    '',
+                ])
             if form.nobat_kari_sob_shab_total != 0:
                 data.append([
                     ' نوبت کاری صبح و شب(روز)',
