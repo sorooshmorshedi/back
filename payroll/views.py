@@ -1840,11 +1840,22 @@ class ContractInsuranceEditApi(APIView):
         query = self.get_object(pk)
         data = request.data
         list_of_pays = query.list_of_pay_item.all()
-        if data['insurance_add_date']:
-            insurance_add_date = int(data['insurance_add_date'].split('-')[1])
-            for item in list_of_pays:
-                if item.list_of_pay.month >= insurance_add_date:
-                    raise ValidationError('در این تاریخ اضافه شدن به لیست بیمه، لیست حقوق صادر شده')
+        if data['insurance']:
+            if not data['insurance_add_date']:
+                raise ValidationError(' تاریخ اضافه شدن به لیست بیمه را وارد کنید')
+            if data['insurance_add_date']:
+                insurance_add_date = int(data['insurance_add_date'].split('-')[1])
+                for item in list_of_pays:
+                    if item.list_of_pay.month >= insurance_add_date:
+                        raise ValidationError('در این تاریخ اضافه شدن به لیست بیمه، لیست حقوق صادر شده')
+            if data['insurance_number']:
+                if len(data['insurance_number']) != 10:
+                    raise ValidationError('طول شماره بیمه باید 10 رقم باشد')
+                elif data['insurance_number'][:2] != '00':
+                    raise ValidationError(' شماره بیمه باید با 00 شروع شود')
+            elif not data['insurance_number']:
+                raise ValidationError(' شماره بیمه را وارد کنید')
+
         serializer = ContractEditInsuranceSerializer(query, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -1871,6 +1882,8 @@ class ContractTaxEditApi(APIView):
         query = self.get_object(pk)
         data = request.data
         list_of_pays = query.list_of_pay_item.all()
+        if data['tax'] and not data['tax_add_date']:
+            raise ValidationError(' تاریخ اضافه شدن به لیست مالیات را وارد کنید')
         if data['tax_add_date']:
             tax_add_date = int(data['tax_add_date'].split('-')[1])
             for item in list_of_pays:
