@@ -5030,6 +5030,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.sanavat_month >= 12:
             total += (self.sanavat_base * tax_day)
 
+        total += self.aele_mandi
+
         hr = self.get_hr_letter
         if hr.haghe_sarparasti_nature == 'p':
             total += self.calculate_hr_item_in_tax_time(hr.haghe_sarparasti_amount)
@@ -5184,6 +5186,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def total_sayer_moafiat(self):
         is_tax, tax_day = self.check_tax
+        hr = self.get_hr_letter
         if is_tax:
             total = 0
             total += self.sayer_moafiat
@@ -5192,6 +5195,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
                 total += self.calculate_yearly_eydi_moafiat
             total += self.hr_tax_not_included
+            if not hr.haghe_owlad_use_tax:
+                total += self.aele_mandi
+
             return total
         else:
             return 0
