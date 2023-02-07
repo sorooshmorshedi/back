@@ -5420,8 +5420,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if is_tax:
             mytax = self.get_tax_row
             tax_rows = mytax.tax_row.all()
-            tax_row = tax_rows.get(ratio=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12 / 12
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = 5600
             eydi = self.padash_total
             moaf = round(eydi) - round(moafiat_limit)
             if moaf <= 0:
