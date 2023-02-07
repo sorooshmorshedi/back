@@ -764,7 +764,7 @@ class HRUnActiveApi(APIView):
         hr = HRLetter.objects.get(pk=pk)
         hr.is_active = False
         hr.save()
-        return Response({'وضعیت': 'غیر فعال  کردن ردیف حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
+        return Response({'وضعیت': 'غیر فعال کردن ردیف حکم کارگزینی انجام شد'}, status=status.HTTP_200_OK)
 
 # Leave Or Absence APIs
 

@@ -377,6 +377,7 @@ class WorkshopTaxRow(BaseModel, LockableMixin, DefinableMixin):
     from_amount = DECIMAL(default=0)
     to_amount = DECIMAL(default=0)
     ratio = models.IntegerField(default=0)
+    is_last = models.BooleanField(default=False)
 
     class Meta(BaseModel.Meta):
         ordering = ['-pk']
@@ -5332,15 +5333,21 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     return round(tax) - round(self.get_last_tax)
 
                 elif year_amount > (tax_row.to_amount * month_count):
-                    part_tax = ((tax_row.to_amount * month_count) - from_amount) \
-                               * tax_row.ratio / 100
-                    if from_amount == 0:
-                        part_tax = 0
-                    tax += round(part_tax)
-                    start -= ((tax_row.to_amount * month_count) - from_amount)
+                    if tax_row.is_last:
+                        part_tax = (year_amount - from_amount) * tax_row.ratio / 100
+                        start = 0
+                        tax += round(part_tax)
 
-                    next_from_amount = tax_row.to_amount + Decimal(1)
-                    tax_row = tax_rows.get(from_amount=next_from_amount)
+                    else:
+                        part_tax = ((tax_row.to_amount * month_count) - from_amount) \
+                                   * tax_row.ratio / 100
+                        if from_amount == 0:
+                            part_tax = 0
+                        tax += round(part_tax)
+                        start -= ((tax_row.to_amount * month_count) - from_amount)
+
+                        next_from_amount = tax_row.to_amount + Decimal(1)
+                        tax_row = tax_rows.get(from_amount=next_from_amount)
 
         return round(tax) - round(self.get_last_tax)
 

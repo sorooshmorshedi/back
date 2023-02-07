@@ -48,4 +48,5 @@ class Command(BaseCommand):
                 from_amount=4200000001,
                 to_amount=0,
                 ratio=30,
+                is_last=True
             )
