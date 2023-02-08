@@ -354,11 +354,13 @@ class ListOfPayBankSerializer(serializers.ModelSerializer):
 class ListOfPayItemNormalSerializer(serializers.ModelSerializer):
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
     get_matter_47_leave_day = serializers.IntegerField(source='matter_47_leave_day', read_only=True)
+    get_sanavat_notice = serializers.BooleanField(source='sanavat_notice', read_only=True)
 
     class Meta:
         model = ListOfPayItem
         fields = 'id', 'normal_worktime', 'real_worktime', 'personnel_name', 'mission_day', 'entitlement_leave_day', \
-                 'absence_day', 'illness_leave_day', 'without_salary_leave_day', 'get_matter_47_leave_day'
+                 'absence_day', 'illness_leave_day', 'without_salary_leave_day', 'get_matter_47_leave_day', \
+                 'get_sanavat_notice'
 
 
 class ListOfPayItemLessSerializer(serializers.ModelSerializer):
@@ -428,6 +430,7 @@ class LoanItemSerializer(serializers.ModelSerializer):
 
 
 class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
+    get_sanavat_notice = serializers.BooleanField(source='sanavat_notice', read_only=True)
     get_kasre_kar_time = serializers.CharField(source='kasre_kar_time', read_only=True)
     personnel_name = serializers.CharField(source='workshop_personnel.personnel.full_name', read_only=True)
     get_ezafe_kari_time = serializers.CharField(source='ezafe_kari_time', read_only=True)
@@ -454,7 +457,7 @@ class ListOfPayItemsAddInfoSerializer(serializers.ModelSerializer):
                  'get_ezafe_kari_time', 'get_tatil_kari_time', 'get_shab_kari_time', 'get_absence', 'get_entitlement', \
                  'get_with_out_salary', 'get_illness', 'get_mission', 'get_kasre_kar_time', 'cumulative_absence', \
                  'cumulative_mission', 'cumulative_entitlement', 'get_sob_asr', 'get_sob_shab', 'get_asr_shab', \
-                 'get_sob_asr_shab', 'sayer_kosoorat', 'get_matter_47_leave_day'
+                 'get_sob_asr_shab', 'sayer_kosoorat', 'get_matter_47_leave_day', 'get_sanavat_notice'
 
 
 class ListOfPayItemsAddSayerSerializer(serializers.ModelSerializer):

@@ -1737,6 +1737,14 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
             data.append([
                 'جمع مرخصی استعلاجی',
                 form.illness_leave_day,
+                'حق سنوات',
+                form.haghe_sanavat_total,
+                '',
+                '',
+            ])
+            data.append([
+                'روز ماموریت',
+                form.mission_sum,
                 'مبلغ ماموریت',
                 form.mission_total,
                 '',
@@ -1802,15 +1810,6 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                     '',
                     'عیدی یا پاداش',
                     form.padash_total,
-                    '',
-                    '',
-                ])
-            if form.haghe_sanavat_total != 0:
-                data.append([
-                    '',
-                    '',
-                    'حق سنوات',
-                    form.haghe_sanavat_total,
                     '',
                     '',
                 ])

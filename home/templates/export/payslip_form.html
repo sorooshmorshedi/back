@@ -114,6 +114,15 @@
             <tr>
                 <th class="text-center"> جمع مرخصی استعلاجی</th>
                 <th class="text-center"> {{ form.illness_leave_day }} </th>
+                <th class="text-center">حق سنوات</th>
+                <th class="text-center"> {{ form.haghe_sanavat_total_with_comma }}</th>
+                <th class="text-center"></th>
+                <th class="text-center"></th>
+
+            </tr>
+            <tr>
+                <th class="text-center"> روز ماموریت</th>
+                <th class="text-center"> {{ form.mission_sum }} </th>
                 <th class="text-center">مبلغ ماموریت</th>
                 <th class="text-center"> {{ form.mission_total_with_comma }}</th>
                 <th class="text-center"></th>
@@ -176,16 +185,6 @@
                     <th class="text-center"></th>
                     <th class="text-center">عیدی یا پاداش</th>
                     <th class="text-center"> {{ form.padash_total_with_comma }}</th>
-                    <th class="text-center"></th>
-                    <th class="text-center"></th>
-                </tr>
-            {% endif %}
-            {% if form.haghe_sanavat_total != 0 %}
-                <tr>
-                    <th class="text-center"></th>
-                    <th class="text-center"></th>
-                    <th class="text-center">حق سنوات</th>
-                    <th class="text-center"> {{ form.haghe_sanavat_total_with_comma }}</th>
                     <th class="text-center"></th>
                     <th class="text-center"></th>
                 </tr>

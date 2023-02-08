@@ -3699,6 +3699,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         )
         return len(items)
 
+    @property
+    def sanavat_notice(self):
+        if self.get_hr_letter.paye_sanavat_amount == 0 and self.workshop_personnel.total_insurance >= 12:
+            return True
+        else:
+            return False
+
     @staticmethod
     def with_comma(input_amount):
         if input_amount != 0:
