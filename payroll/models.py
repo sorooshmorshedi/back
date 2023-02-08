@@ -5333,9 +5333,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
                 elif year_amount > (tax_row.to_amount * month_count):
                     if tax_row.is_last:
+                        print('is last')
                         part_tax = (year_amount - from_amount) * tax_row.ratio / 100
-                        start = 0
                         tax += round(part_tax)
+                        start = 0
+
+                        next_from_amount = tax_row.to_amount + Decimal(1)
+                        tax_row = tax_rows.get(from_amount=next_from_amount)
 
                     else:
                         part_tax = ((tax_row.to_amount * month_count) - from_amount) \
@@ -5447,6 +5451,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
+
+            self.total_tax = self.calculate_month_tax
 
         self.calculate_payment = False
         super().save(*args, **kwargs)
