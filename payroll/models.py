@@ -5421,7 +5421,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             mytax = self.get_tax_row
             tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = 5600
+            moafiat_limit = tax_row.to_amount / 12 / 12
             eydi = self.padash_total
             moaf = round(eydi) - round(moafiat_limit)
             if moaf <= 0:
@@ -5442,9 +5442,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.aele_mandi_child = self.get_aele_mandi_info
             self.real_worktime = self.normal_worktime - self.absence_sum - self.without_salary_sum - self.illness_sum
             self.hr_letter = self.get_hr_letter
+            print(' go to calculate all')
             self.total_payment = round(self.get_total_payment)
+            print(' total_payment calculated  : ', self.total_payment )
+
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
+            print(' go to tax all')
             self.total_tax = self.calculate_month_tax
+            print(' total_tax calculated  :  ', self.total_tax)
+
         self.calculate_payment = False
         super().save(*args, **kwargs)
