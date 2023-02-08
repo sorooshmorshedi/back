@@ -4239,7 +4239,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         self.kasre_kar_total = round(self.get_kasre_kar)
 
-        self.total_tax = self.calculate_month_tax
         self.loan_amount = self.check_and_get_loan_episode
 
         self.insurance, self.insurance_day = self.check_insurance
@@ -5450,7 +5449,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 self.contract_row.use_in_insurance_list = True
             print(' go to tax all')
             self.total_tax = self.calculate_month_tax
-            print(' total_tax calculated  :  ', self.total_tax)
 
         self.calculate_payment = False
         super().save(*args, **kwargs)
