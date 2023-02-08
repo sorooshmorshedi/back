@@ -5321,7 +5321,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             tax_row = tax_rows.get(from_amount=Decimal(0))
             start = year_amount
 
-            while start >= Decimal(0):
+            while start > Decimal(0):
                 from_amount = tax_row.from_amount * month_count
                 if tax_row.from_amount == 0:
                     from_amount = 0
