@@ -2639,7 +2639,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             self.name = 'شخصی'
         if self.is_template == 'p' and self.contract:
             if self.contract.workshop_personnel.total_insurance < 12:
-                self.paye_sanavat_amount, self.paye_sanavat_base = 0, False
+                self.paye_sanavat_amount, self.paye_sanavat_base = None, False
         self.daily_pay_base, self.monthly_pay_base, self.day_hourly_pay_base, self.month_hourly_pay_base = \
             self.calculate_pay_bases
         self.insurance_pay_day = self.calculate_insurance_pay_base
