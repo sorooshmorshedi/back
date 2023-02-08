@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django_jalali.db import models as jmodels
 from django.core.exceptions import ValidationError
+from pygments.lexer import default
 from rest_framework.exceptions import ValidationError
 
 from companies.models import Company
@@ -2447,7 +2448,7 @@ class HRLetter(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     paye_sanavat_use_tax = models.BooleanField(default=True)
     paye_sanavat_use_insurance = models.BooleanField(default=True)
     paye_sanavat_nature = models.CharField(max_length=1, choices=NATURE_TYPES, blank=True, null=True)
-    paye_sanavat_amount = DECIMAL(default=0, blank=True, null=True)
+    paye_sanavat_amount = DECIMAL(default=None, blank=True, null=True)
     paye_sanavat_base = models.BooleanField(default=False)
 
     haghe_sarparasti_use_tax = models.BooleanField(default=True)
@@ -3701,7 +3702,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def sanavat_notice(self):
-        if self.get_hr_letter.paye_sanavat_amount == 0 and self.workshop_personnel.total_insurance >= 12:
+        if not self.get_hr_letter.paye_sanavat_amount and self.workshop_personnel.total_insurance >= 12:
             return True
         else:
             return False
@@ -4114,7 +4115,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             sanavat_month = self.workshop_personnel.total_insurance
         elif self.workshop_personnel.workshop.sanavat_type == 'n':
             sanavat_month = self.workshop_personnel.insurance_history_total
-        return hr.paye_sanavat_amount, sanavat_month
+        return hr.paye_sanavat_amount or 0, sanavat_month
 
     @property
     def hoghoogh_mahane(self):

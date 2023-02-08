@@ -1344,8 +1344,10 @@ class ListOfPayItemsCalculate(APIView):
         data = request.data
         days = query.list_of_pay.month_days
         is_in = request.data['is_in']
+        notice = request.data['notice']
         del(data['is_in'])
-        if is_in:
+        del(data['notice'])
+        if is_in or notice:
             if not data['nobat_kari_sob_asr']:
                 data['nobat_kari_sob_asr'] = 0
             if not data['nobat_kari_sob_shab']:
@@ -1473,7 +1475,6 @@ class ListOfPayItemsCalculate(APIView):
                     counter += 1
                     response.append(error)
                 return Response({'وضعیت': response}, status=status.HTTP_400_BAD_REQUEST)
-
         else:
             query.delete()
             return Response({'status': 'deleted'}, status=status.HTTP_200_OK)
@@ -1619,6 +1620,11 @@ class ListOfPayUltimateApi(APIView):
             if len(list_of_pay.list_of_pay_item.all()) == 0:
                 self.validate_status = False
                 self.response_message = 'در این لیست پرسنلی موجود نیست'
+                response = list_of_pay.info_for_items
+            for item in list_of_pay.list_of_pay_item.all():
+                if item.sanavat_notice:
+                    self.validate_status = False
+                    self.response_message = 'یکی از پرسنل مشمول پایه سنوات شده است لطفا حکم جدید صادر کنید'
 
             if list_of_pay.use_in_calculate:
                 for same_list in same_lists:
@@ -1668,7 +1674,6 @@ class ListOfPayEditDetail(APIView):
             serializer.save()
             cumulative = {}
             for item in query.list_of_pay_item.all():
-                item.delete()
                 cumulative[item.workshop_personnel.id] = {
                     'cumulative_absence': item.cumulative_absence,
                     'cumulative_mission': item.cumulative_mission,
@@ -1693,6 +1698,7 @@ class ListOfPayEditDetail(APIView):
                     'manategh_tejari_moafiat': item.manategh_tejari_moafiat,
                     'ejtenab_maliat_mozaaf': item.ejtenab_maliat_mozaaf,
                 }
+                item.delete()
             response = query.info_for_items
             for item in response:
                 workshop_personnel = WorkshopPersonnel.objects.filter(
