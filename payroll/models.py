@@ -5447,8 +5447,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
-            print(' go to tax all')
-            self.total_tax = self.calculate_month_tax
 
         self.calculate_payment = False
         super().save(*args, **kwargs)
