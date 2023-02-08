@@ -520,8 +520,18 @@ def list_personnel_filter(queryset, name, value):
     return queryset.filter(id__in=query)
 
 
+def get_sanavat_verify_filter(queryset, name, value):
+    query = []
+    for item in queryset.all():
+        if item.sanavat_verify == value:
+            query.append(item.id)
+    print(value)
+    return queryset.filter(id__in=query)
+
+
 class ListOfPayItemFilter(filters.FilterSet):
     personnel_name = filters.CharFilter(method=list_personnel_filter)
+    get_sanavat_verify = filters.BooleanFilter(method=get_sanavat_verify_filter)
 
     class Meta:
         model = ListOfPayItem

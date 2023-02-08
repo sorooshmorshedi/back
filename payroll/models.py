@@ -3706,6 +3706,13 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return False
 
+    @property
+    def sanavat_verify(self):
+        if not self.get_hr_letter.paye_sanavat_amount and self.workshop_personnel.total_insurance >= 12:
+            return False
+        else:
+            return True
+
     @staticmethod
     def with_comma(input_amount):
         if input_amount != 0:
