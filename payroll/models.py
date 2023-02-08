@@ -5337,10 +5337,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                         part_tax = (year_amount - from_amount) * tax_row.ratio / 100
                         tax += round(part_tax)
                         start = 0
-
-                        next_from_amount = tax_row.to_amount + Decimal(1)
-                        tax_row = tax_rows.get(from_amount=next_from_amount)
-
                     else:
                         part_tax = ((tax_row.to_amount * month_count) - from_amount) \
                                    * tax_row.ratio / 100
