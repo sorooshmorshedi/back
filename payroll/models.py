@@ -4155,6 +4155,28 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return 0
 
     @property
+    def aele_mandi_in_tax(self):
+        is_tax, work_time = self.check_tax
+        if self.aele_mandi_child != 0:
+            month_day = self.list_of_pay.month_days
+            aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
+                         Decimal(work_time) / Decimal(month_day)
+            return aele_mandi
+        else:
+            return 0
+
+    @property
+    def aele_mandi_in_insurance(self):
+        is_insurance, work_time = self.check_insurance
+        if self.aele_mandi_child != 0:
+            month_day = self.list_of_pay.month_days
+            aele_mandi = Decimal(self.aele_mandi_child) * self.aele_mandi_amount * self.aele_mandi_nerkh * \
+                         Decimal(work_time) / Decimal(month_day)
+            return aele_mandi
+        else:
+            return 0
+
+    @property
     def get_ezafe_kari(self):
         return self.ezafe_kari_amount * Decimal(self.ezafe_kari_nerkh) * Decimal(self.ezafe_kari)
 
@@ -4257,8 +4279,59 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         self.loan_amount = self.check_and_get_loan_episode
         self.dept_amount = self.check_and_get_dept_episode
 
-        self.insurance, self.insurance_day = self.check_insurance
+        return total
 
+    @property
+    def get_insurance_total_payment(self):
+        self.hr_letter = self.get_hr_letter
+        total = Decimal(0)
+        is_insurance, insurance_worktime = self.check_insurance
+
+        total += round(self.hoghoogh_roozane * insurance_worktime)
+        total += round(self.sanavat_base * insurance_worktime)
+        total += self.mission_total
+
+        total += self.aele_mandi_in_insurance
+        total += self.get_ezafe_kari
+        total += self.get_tatil_kari
+        total += self.get_shab_kari
+        total += self.nobat_kari_sob_asr_total
+        total += self.nobat_kari_sob_shab_total
+        total += self.nobat_kari_asr_shab_total
+        total += self.nobat_kari_sob_asr_shab_total
+
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_sarparasti_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_modiriyat_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_jazb_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_shoghl_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_tahsilat_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sakhti_kar_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_ankal_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_badi_abohava_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_mahal_khedmat_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_maskan_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.ayabo_zahab_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.bon_kharo_bar_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.yarane_ghaza_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_taahol_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_shir_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mahdekoodak_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_varzesh_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mobile_amount)
+        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mazaya_mostamar_gheyre_naghdi_amount)
+
+        total += self.mazaya_gheyr_mostamar
+        total += self.sayer_ezafat
+
+        total += Decimal(self.padash_total)
+
+        total += Decimal(self.haghe_sanavat_total)
+
+        total += Decimal(self.saved_leaves_total)
+
+        total -= Decimal(self.get_kasre_kar)
         return total
 
     @property
@@ -4475,9 +4548,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         payable_amount = Decimal(round(self.total_payment) - round(self.total_tax) - round(self.dept_amount) - \
                                  round(self.check_and_get_optional_deduction_episode) - round(self.haghe_bime_bime_shavande) - \
                                  round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
-        payable_amount += Decimal(self.padash_total)
-        payable_amount += Decimal(self.haghe_sanavat_total)
-        payable_amount += Decimal(self.get_save_leave)
         return round(payable_amount)
 
     '''calculate'''
@@ -4902,7 +4972,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if hr.ezafe_kari_use_insurance:
                 benefit = benefit + Decimal(self.ezafe_kari_total)
             if hr.haghe_owlad_use_insurance:
-                benefit = benefit + Decimal(self.aele_mandi)
+                benefit = benefit + Decimal(self.aele_mandi_in_insurance)
             if hr.shab_kari_use_insurance:
                 benefit = benefit + Decimal(self.shab_kari_total)
             if hr.tatil_kari_use_insurance:
@@ -4938,6 +5008,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def absence_and_days(self):
         return self.absence_day + self.illness_leave_day + self.without_salary_leave_day
+
 
     @property
     def insurance_worktime(self):
@@ -5043,7 +5114,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         if self.sanavat_month >= 12:
             total += (self.sanavat_base * tax_day)
 
-        total += self.aele_mandi
+        total += self.aele_mandi_in_tax
 
         hr = self.get_hr_letter
         if hr.haghe_sarparasti_nature == 'p':
@@ -5209,7 +5280,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 total += self.calculate_yearly_eydi_moafiat
             total += self.hr_tax_not_included
             if not hr.haghe_owlad_use_tax:
-                total += self.aele_mandi
+                total += self.aele_mandi_in_tax
 
             return total
         else:

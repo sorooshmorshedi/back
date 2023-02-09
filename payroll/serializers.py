@@ -272,6 +272,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_loan = serializers.IntegerField(source='loan_amount', read_only=True)
     get_deduction = serializers.IntegerField(source='check_and_get_optional_deduction_episode', read_only=True)
     get_dept = serializers.IntegerField(source='dept_amount', read_only=True)
+    insurance_total_payment = serializers.IntegerField(source='get_insurance_total_payment', read_only=True)
     get_payable = serializers.CharField(source='payable', read_only=True)
     get_employer_tax = serializers.CharField(source='employer_insurance', read_only=True)
     get_un_employer_tax = serializers.CharField(source='un_employer_insurance', read_only=True)
