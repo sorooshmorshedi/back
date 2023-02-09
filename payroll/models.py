@@ -3669,6 +3669,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     total_tax = DECIMAL(default=0)
     save_leave = DECIMAL(default=0)
     loan_amount = DECIMAL(default=0)
+    dept_amount = DECIMAL(default=0)
 
     insurance = models.BooleanField(default=False)
     insurance_day = models.IntegerField(default=0)
@@ -4254,6 +4255,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         self.kasre_kar_total = round(self.get_kasre_kar)
 
         self.loan_amount = self.check_and_get_loan_episode
+        self.dept_amount = self.check_and_get_dept_episode
 
         self.insurance, self.insurance_day = self.check_insurance
 
@@ -4470,15 +4472,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def payable(self):
-        payable_amount = Decimal(round(self.total_payment) - \
-                                 round(self.total_tax) - \
-                                 round(self.check_and_get_optional_deduction_episode) - \
+        payable_amount = Decimal(round(self.total_payment) - round(self.total_tax) - round(self.dept_amount) - \
+                                 round(self.check_and_get_optional_deduction_episode) - round(self.haghe_bime_bime_shavande) - \
                                  round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
         payable_amount += Decimal(self.padash_total)
         payable_amount += Decimal(self.haghe_sanavat_total)
         payable_amount += Decimal(self.get_save_leave)
-        if self.contract.insurance:
-            payable_amount = round(payable_amount) - round(self.data_for_insurance['DSW_BIME'])
         return round(payable_amount)
 
     '''calculate'''
@@ -5319,14 +5318,16 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                                  Q(workshop_personnel=self.workshop_personnel) &
                                                  Q(list_of_pay__ultimate=True) &
                                                  Q(list_of_pay__use_in_calculate=True))
-            tax_items = []
+            month_is_tax, month_tax_day = self.check_tax
+            tax_worktime = month_tax_day / self.list_of_pay.month_days
 
             for item in items:
                 is_tax, tax_day = item.check_tax
                 if is_tax:
-                    tax_items.append(item)
+                    tax_worktime += (tax_day / item.list_of_pay.month_days)
 
-            month_count = Decimal((len(tax_items) + 1) / 12)
+            month_count = Decimal(tax_worktime / 12)
+            print('tax_worktime   :   ', tax_worktime)
 
             tax = 0
             year_amount = Decimal(self.get_year_payment) + Decimal(self.tax_included_payment)
@@ -5455,10 +5456,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             self.aele_mandi_child = self.get_aele_mandi_info
             self.real_worktime = self.normal_worktime - self.absence_sum - self.without_salary_sum - self.illness_sum
             self.hr_letter = self.get_hr_letter
-            print(' go to calculate all')
             self.total_payment = round(self.get_total_payment)
-            print(' total_payment calculated  : ', self.total_payment )
-
             if self.contract_row:
                 self.contract_row.use_in_insurance_list = True
 
