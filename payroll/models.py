@@ -4287,8 +4287,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total = Decimal(0)
         is_insurance, insurance_worktime = self.check_insurance
 
-        total += round(self.hoghoogh_roozane * insurance_worktime)
-        total += round(self.sanavat_base * insurance_worktime)
+        total += self.hoghoogh_roozane * insurance_worktime
+        total += self.sanavat_base * insurance_worktime
         total += self.mission_total
 
         total += self.aele_mandi_in_insurance

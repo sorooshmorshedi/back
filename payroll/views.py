@@ -83,9 +83,6 @@ class WorkshopApiView(APIView):
         company = request.user.active_company.pk
         data = request.data
         data['company'] = company
-        save_leave_limit = data['save_leave_limit']
-        if not save_leave_limit:
-            data['save_leave_limit'] = 0
         serializer = WorkShopSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
