@@ -5430,6 +5430,64 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         return round(tax) - round(self.get_last_tax)
 
+
+    @property
+    def calculate_yearly_eydi_tax(self):
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            hr = self.get_hr_letter
+            if hr.eydi_padash_use_tax:
+                year_worktime = 0
+                items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                     & Q(list_of_pay__year=self.list_of_pay.year)
+                                                     & Q(list_of_pay__ultimate=True)
+                                                     & Q(list_of_pay__use_in_calculate=True))
+                for item in items:
+                    tax, day = item.check_tax
+                    year_worktime += day
+                mytax = self.get_tax_row
+                tax_rows = mytax.tax_row.all()
+                tax_row = tax_rows.get(from_amount=Decimal(0))
+                moafiat_limit = tax_row.to_amount / 12 * year_worktime / 365
+                eydi = self.padash_total
+                moaf = round(moafiat_limit) - round(eydi)
+                if moaf <= 0:
+                    eydi_tax = -moaf
+                else:
+                    eydi_tax = 0
+
+                return eydi_tax
+            else:
+                return 0
+        else:
+            return 0
+
+    @property
+    def calculate_yearly_eydi_moafiat(self):
+        is_tax, tax_day = self.check_tax
+        if is_tax:
+            year_worktime = 0
+            items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
+                                                 & Q(list_of_pay__year=self.list_of_pay.year)
+                                                 & Q(list_of_pay__ultimate=True)
+                                                 & Q(list_of_pay__use_in_calculate=True))
+            for item in items:
+                tax, day = item.check_tax
+                year_worktime += day
+
+            mytax = self.get_tax_row
+            tax_rows = mytax.tax_row.all()
+            tax_row = tax_rows.get(from_amount=Decimal(0))
+            moafiat_limit = tax_row.to_amount / 12 * year_worktime / 365
+            eydi = self.padash_total
+            moaf = round(eydi) - round(moafiat_limit)
+            if moaf <= 0:
+                return round(eydi)
+            else:
+                return round(moafiat_limit)
+        else:
+            return 0
+
     @property
     def calculate_monthly_eydi_tax(self):
         is_tax, tax_day = self.check_tax
@@ -5453,45 +5511,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
-    @property
-    def calculate_yearly_eydi_tax(self):
-        is_tax, tax_day = self.check_tax
-        if is_tax:
-            hr = self.get_hr_letter
-            if hr.eydi_padash_use_tax:
-                mytax = self.get_tax_row
-                tax_rows = mytax.tax_row.all()
-                tax_row = tax_rows.get(from_amount=Decimal(0))
-                moafiat_limit = tax_row.to_amount / 12
-                eydi = self.padash_total
-                moaf = round(moafiat_limit) - round(eydi)
-                if moaf <= 0:
-                    eydi_tax = -moaf
-                else:
-                    eydi_tax = 0
-
-                return eydi_tax
-            else:
-                return 0
-        else:
-            return 0
-
-    @property
-    def calculate_yearly_eydi_moafiat(self):
-        is_tax, tax_day = self.check_tax
-        if is_tax:
-            mytax = self.get_tax_row
-            tax_rows = mytax.tax_row.all()
-            tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12
-            eydi = self.padash_total
-            moaf = round(eydi) - round(moafiat_limit)
-            if moaf <= 0:
-                return round(eydi)
-            else:
-                return round(moafiat_limit)
-        else:
-            return 0
 
     @property
     def calculate_monthly_eydi_moafiat(self):
@@ -5500,7 +5519,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             mytax = self.get_tax_row
             tax_rows = mytax.tax_row.all()
             tax_row = tax_rows.get(from_amount=Decimal(0))
-            moafiat_limit = tax_row.to_amount / 12 / 12
+            moafiat_limit = tax_row.to_amount / 12 / 12 / self.list_of_pay.month_days * tax_day
             eydi = self.padash_total
             moaf = round(eydi) - round(moafiat_limit)
             if moaf <= 0:
