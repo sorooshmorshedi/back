@@ -4323,6 +4323,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mazaya_mostamar_gheyre_naghdi_amount)
 
         total += self.mazaya_gheyr_mostamar
+
         total += self.sayer_ezafat
 
         total += Decimal(self.padash_total)
@@ -4332,6 +4333,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += Decimal(self.saved_leaves_total)
 
         total -= Decimal(self.get_kasre_kar)
+        total -= Decimal(self.sayer_kosoorat)
+
         return total
 
     @property
@@ -4580,7 +4583,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             until_this_year = round(base_pay) * 30 * total_worktime / (len(work_years) + 1)
             list_of_pay_item = ListOfPayItem.objects.filter(list_of_pay__year=work_years[0]).first()
             return until_this_year - list_of_pay_item.calculate_yearly_haghe_sanavat
-
 
         elif self.workshop_personnel.workshop.haghe_sanavat_type == 'c':
             items = ListOfPayItem.objects.filter(Q(workshop_personnel=self.workshop_personnel)
@@ -5037,7 +5039,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def insurance_total_included(self):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
-            hr = self.get_hr_letter
             total = self.insurance_monthly_benefit + self.insurance_monthly_payment
             return total
         else:
@@ -5293,7 +5294,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total = 0
             total += self.hazine_made_137
             total += self.total_sayer_moafiat
-            total += self.mission_total
             total += Decimal(self.get_hagh_sanavat_and_save_leaves)
             total += Decimal(self.haghe_bime_moafiat)
             total += self.manategh_tejari_moafiat
