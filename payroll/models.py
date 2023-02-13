@@ -4960,7 +4960,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_TOTL': self.total_payment,
             'DSW_BIME': self.haghe_bime_bime_shavande,
             'DSW_PRATE': 0,
-            'DSW_JOB': 0,
+            'DSW_JOB': self.workshop_personnel.title.code,
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
 
         }
