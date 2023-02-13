@@ -1692,7 +1692,7 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                 'مبلغ اضافه کاری',
                 form.ezafe_kari_total,
                 'مالیات',
-                form.calculate_month_tax,
+                form.total_tax,
             ])
             data.append([
                 'تعطیل کاری (ساعت)',
@@ -1706,7 +1706,7 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                 'کسر کار (ساعت)',
                 form.kasre_kar,
                 'حق مسکن',
-                form.get_payslip['additions']['hagh_maskan'],
+                form.haghe_maskan,
                 'مبلغ کسر کار',
                 form.kasre_kar_total,
             ])
@@ -1714,7 +1714,7 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                 'غیبت',
                 form.absence_day,
                 'حق خارو بار (بن کارگری)',
-                form.get_payslip['additions']['kharo_bar'],
+                form.kharo_bar,
                 'سایر کسورات',
                 form.sayer_kosoorat,
             ])
@@ -1722,7 +1722,7 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                 'کارکرد واقعی',
                 form.real_worktime,
                 'حق جذب',
-                form.get_payslip['additions']['hagh_jazb'],
+                form.haghe_jazb,
                 'مساعده یا وام',
                 form.check_and_get_loan_episode,
             ])
@@ -1813,165 +1813,165 @@ class PayslipExportView(ListOfPayItemListView, BaseExportView):
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['hagh_sarparasti'] != 0:
+            if form.haghe_sarparasti != 0:
                 data.append([
                     '',
                     '',
                     'حق سرپرستی',
-                    form.get_payslip['additions']['hagh_sarparasti'],
+                    form.haghe_sarparasti,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['hagh_modiriat'] != 0:
+            if form.haghe_modiriyat != 0:
                 data.append([
                     '',
                     '',
                     'حق مدیریت',
-                    form.get_payslip['additions']['hagh_modiriat'],
+                    form.haghe_modiriyat,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['fogholade_shoghl'] != 0:
+            if form.fogholade_shoghl != 0:
                 data.append([
                     '',
                     '',
                     'فوق العاده شفل',
-                    form.get_payslip['additions']['fogholade_shoghl'],
+                    form.fogholade_shoghl,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['haghe_tahsilat'] != 0:
+            if form.haghe_tahsilat != 0:
                 data.append([
                     '',
                     '',
                     'حق تحصیلات',
-                    form.get_payslip['additions']['haghe_tahsilat'],
+                    form.haghe_tahsilat,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['fogholade_sakhti_kar'] != 0:
+            if form.fogholade_sakhti_kar != 0:
                 data.append([
                     '',
                     '',
-                    'حق تحصیلات',
-                    form.get_payslip['additions']['fogholade_sakhti_kar'],
+                    'فوق العاده سختی کار',
+                    form.fogholade_sakhti_kar,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['haghe_ankal'] != 0:
+            if form.haghe_ankal != 0:
                 data.append([
                     '',
                     '',
                     'حق آنکال',
-                    form.get_payslip['additions']['haghe_ankal'],
+                    form.haghe_ankal,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['fogholade_badi_abohava'] != 0:
+            if form.fogholade_badi != 0:
                 data.append([
                     '',
                     '',
                     'فوق العاده بدی آب و هوا',
-                    form.get_payslip['additions']['fogholade_badi_abohava'],
+                    form.fogholade_badi,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['mahroomiat_tashilat_zendegi'] != 0:
+            if form.mahroomiat_tashilat_zendegi != 0:
                 data.append([
                     '',
                     '',
                     'فوق العاده محرومیت از تسهیلات زندگی',
-                    form.get_payslip['additions']['mahroomiat_tashilat_zendegi'],
+                    form.mahroomiat_tashilat_zendegi,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['fogholade_mahal_khedmat'] != 0:
+            if form.fogholade_mahal_khedmat != 0:
                 data.append([
                     '',
                     '',
                     'فوق العاده محل خدمت',
-                    form.get_payslip['additions']['fogholade_mahal_khedmat'],
+                    form.fogholade_mahal_khedmat,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['fogholade_sharayet_mohit_kar'] != 0:
+            if form.fogholade_sharayet_mohit_kar != 0:
                 data.append([
                     '',
                     '',
                     'فوق العاده محیط کار',
-                    form.get_payslip['additions']['fogholade_sharayet_mohit_kar'],
+                    form.fogholade_sharayet_mohit_kar,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['ayabo_zahab'] != 0:
+            if form.ayabo_zahab != 0:
                 data.append([
                     '',
                     '',
                     'ایاب و ذهاب',
-                    form.get_payslip['additions']['ayabo_zahab'],
+                    form.ayabo_zahab,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['yarane_ghaza'] != 0:
+            if form.yarane_ghaza != 0:
                 data.append([
                     '',
                     '',
                     'یارانه غذا',
-                    form.get_payslip['additions']['yarane_ghaza'],
+                    form.yarane_ghaza,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['haghe_shir'] != 0:
+            if form.haghe_shir != 0:
                 data.append([
                     '',
                     '',
                     'حق شیر',
-                    form.get_payslip['additions']['haghe_shir'],
+                    form.haghe_shir,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['haghe_taahol'] != 0:
+            if form.haghe_taahol != 0:
                 data.append([
                     '',
                     '',
                     'حق تاهل',
-                    form.get_payslip['additions']['haghe_taahol'],
+                    form.haghe_taahol,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['komakhazine_mahdekoodak'] != 0:
+            if form.komakhazine_mahdekoodak != 0:
                 data.append([
                     '',
                     '',
                     'کمک هزینه مهدکودک',
-                    form.get_payslip['additions']['komakhazine_mahdekoodak'],
+                    form.komakhazine_mahdekoodak,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['komakhazine_varzesh'] != 0:
+            if form.komakhazine_varzesh != 0:
                 data.append([
                     '',
                     '',
                     'کمک هزینه ورزش',
-                    form.get_payslip['additions']['komakhazine_varzesh'],
+                    form.komakhazine_varzesh,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['komakhazine_mobile'] != 0:
+            if form.komakhazine_mobile != 0:
                 data.append([
                     '',
                     '',
                     'کمک هزینه موبایل',
-                    form.get_payslip['additions']['komakhazine_mobile'],
+                    form.komakhazine_mobile,
                     '',
                     '',
                 ])
-            if form.get_payslip['additions']['mazaya_mostamar_gheyre_naghdi'] != 0:
+            if form.mazaya_mostamar_gheyre_naghdi != 0:
                 data.append([
                     '',
                     '',
                     'مزایای مستمر غیر نقدی',
-                    form.get_payslip['additions']['mazaya_mostamar_gheyre_naghdi'],
+                    form.mazaya_mostamar_gheyre_naghdi,
                     '',
                     '',
                 ])

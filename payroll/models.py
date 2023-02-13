@@ -3797,17 +3797,107 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def haghe_maskan(self):
         hr = self.get_hr_letter
-        return self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount)
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_maskan_amount))
 
     @property
     def haghe_jazb(self):
         hr = self.get_hr_letter
-        return self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount)
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_jazb_amount))
 
     @property
     def kharo_bar(self):
         hr = self.get_hr_letter
-        return self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount)
+        return round(self.calculate_hr_item_in_real_work_time(hr.bon_kharo_bar_amount))
+
+    @property
+    def haghe_sarparasti(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_sarparasti_amount))
+
+    @property
+    def haghe_modiriyat(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_modiriyat_amount))
+
+    @property
+    def fogholade_shoghl(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.fogholade_shoghl_amount))
+
+    @property
+    def haghe_tahsilat(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_tahsilat_amount))
+
+    @property
+    def fogholade_sakhti_kar(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sakhti_kar_amount))
+
+    @property
+    def haghe_ankal(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_ankal_amount))
+
+    @property
+    def fogholade_badi(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.fogholade_badi_abohava_amount))
+
+    @property
+    def mahroomiat_tashilat_zendegi(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.mahroomiat_tashilat_zendegi_amount))
+
+    @property
+    def fogholade_mahal_khedmat(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.fogholade_mahal_khedmat_amount))
+
+    @property
+    def fogholade_sharayet_mohit_kar(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.fogholade_sharayet_mohit_kar_amount))
+
+    @property
+    def ayabo_zahab(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.ayabo_zahab_amount))
+
+    @property
+    def yarane_ghaza(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.yarane_ghaza_amount))
+
+    @property
+    def haghe_shir(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_shir_amount))
+
+    @property
+    def haghe_taahol(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.haghe_taahol_amount))
+
+    @property
+    def komakhazine_mahdekoodak(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount))
+
+    @property
+    def komakhazine_varzesh(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount))
+
+    @property
+    def komakhazine_mobile(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount))
+
+    @property
+    def mazaya_mostamar_gheyre_naghdi(self):
+        hr = self.get_hr_letter
+        return round(self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount))
 
     @property
     def sayer_hr(self):
@@ -3830,7 +3920,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mahdekoodak_amount)
         total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_varzesh_amount)
         total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
-        total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
         total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
         return total
 
@@ -4286,54 +4375,57 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         self.hr_letter = self.get_hr_letter
         total = Decimal(0)
         is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
+            total += self.hoghoogh_roozane * insurance_worktime
+            total += self.sanavat_base * insurance_worktime
+            total += self.mission_total
 
-        total += self.hoghoogh_roozane * insurance_worktime
-        total += self.sanavat_base * insurance_worktime
-        total += self.mission_total
+            total += self.aele_mandi_in_insurance
+            total += self.get_ezafe_kari
+            total += self.get_tatil_kari
+            total += self.get_shab_kari
+            total += self.nobat_kari_sob_asr_total
+            total += self.nobat_kari_sob_shab_total
+            total += self.nobat_kari_asr_shab_total
+            total += self.nobat_kari_sob_asr_shab_total
 
-        total += self.aele_mandi_in_insurance
-        total += self.get_ezafe_kari
-        total += self.get_tatil_kari
-        total += self.get_shab_kari
-        total += self.nobat_kari_sob_asr_total
-        total += self.nobat_kari_sob_shab_total
-        total += self.nobat_kari_asr_shab_total
-        total += self.nobat_kari_sob_asr_shab_total
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_sarparasti_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_modiriyat_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_jazb_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_shoghl_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_tahsilat_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sakhti_kar_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_ankal_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_badi_abohava_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_mahal_khedmat_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_maskan_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.ayabo_zahab_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.bon_kharo_bar_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.yarane_ghaza_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_taahol_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_shir_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mahdekoodak_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_varzesh_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mobile_amount)
+            total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mazaya_mostamar_gheyre_naghdi_amount)
 
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_sarparasti_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_modiriyat_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_jazb_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_shoghl_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_tahsilat_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sakhti_kar_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_ankal_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_badi_abohava_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mahroomiat_tashilat_zendegi_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_mahal_khedmat_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.fogholade_sharayet_mohit_kar_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_maskan_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.ayabo_zahab_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.bon_kharo_bar_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.yarane_ghaza_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_taahol_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.haghe_shir_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mahdekoodak_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_varzesh_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.komakhazine_mobile_amount)
-        total += self.calculate_hr_item_in_insurance_time(self.hr_letter.mazaya_mostamar_gheyre_naghdi_amount)
+            total += self.mazaya_gheyr_mostamar
 
-        total += self.mazaya_gheyr_mostamar
+            total += self.sayer_ezafat
 
-        total += self.sayer_ezafat
+            total += Decimal(self.padash_total)
 
-        total += Decimal(self.padash_total)
+            total += Decimal(self.haghe_sanavat_total)
 
-        total += Decimal(self.haghe_sanavat_total)
+            total += Decimal(self.saved_leaves_total)
 
-        total += Decimal(self.saved_leaves_total)
+            return total
+        else:
+            return 0
 
-        return total
-
+        
     @property
     def pension_payment(self):
         hr = self.get_hr_letter
@@ -5548,3 +5640,4 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         self.calculate_payment = False
         super().save(*args, **kwargs)
+
