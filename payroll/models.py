@@ -4332,9 +4332,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         total += Decimal(self.saved_leaves_total)
 
-        total -= Decimal(self.get_kasre_kar)
-        total -= Decimal(self.sayer_kosoorat)
-
         return total
 
     @property
@@ -4383,7 +4380,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             total += self.calculate_hr_item_in_real_work_time(hr.komakhazine_mobile_amount)
         total += self.calculate_hr_item_in_real_work_time(hr.mazaya_mostamar_gheyre_naghdi_amount)
 
-        total -= self.get_kasre_kar
 
         return total
 
