@@ -5207,7 +5207,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             if not hr.paye_sanavat_use_tax:
                 total += (self.sanavat_base * tax_day)
             if not hr.haghe_owlad_use_tax:
-                total += self.get_aele_mandi
+                total += self.aele_mandi_in_tax
             if not hr.ezafe_kari_use_tax:
                 total += self.get_ezafe_kari
             if not hr.tatil_kari_use_tax:
@@ -5276,8 +5276,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             elif self.list_of_pay.workshop.eydi_padash_identification == 'y' and self.list_of_pay.month == 12:
                 total += self.calculate_yearly_eydi_moafiat
             total += self.hr_tax_not_included
-            if not hr.haghe_owlad_use_tax:
-                total += self.aele_mandi_in_tax
 
             return total
         else:
@@ -5441,7 +5439,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                 mytax = self.get_tax_row
                 tax_rows = mytax.tax_row.all()
                 tax_row = tax_rows.get(from_amount=Decimal(0))
-                moafiat_limit = tax_row.to_amount / 12 / 12
+                moafiat_limit = tax_row.to_amount / 12 / 12 / self.list_of_pay.month_days * tax_day
                 eydi = self.padash_total
                 moaf = moafiat_limit - Decimal(eydi)
                 if moaf <= 0:
