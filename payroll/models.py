@@ -4932,11 +4932,19 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return 0
 
     @property
+    def insurance_included_limit(self):
+        return self.workshop_personnel.workshop.hade_aghal_hoghoogh * 7 * self.list_of_pay.month_days
+
+
+    @property
     def insurance_total_included(self):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
             total = self.insurance_monthly_benefit + self.insurance_monthly_payment
-            return total
+            if total <= self.insurance_included_limit:
+                return total
+            else:
+                return round(self.insurance_included_limit)
         else:
             return 0
 
