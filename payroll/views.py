@@ -1510,6 +1510,7 @@ class ListOfPayPaymentAPI(APIView):
     def put(self, request, pk):
         query = self.get_object(pk)
         serializer = ListOfPayPaySerializer(query, data=request.data)
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

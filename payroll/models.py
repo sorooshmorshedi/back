@@ -3232,6 +3232,9 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     pay_done = models.BooleanField(default=False)
     pay_form_create_date = jmodels.jDateField(blank=True, null=True)
     bank_pay_date = jmodels.jDateField(blank=True, null=True)
+    bank_pay_code = models.CharField(max_length=50, blank=True, null=True)
+    bank_pay_explanation = EXPLANATION()
+    bank_pay_name = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta(BaseModel.Meta):
         verbose_name = 'ListOfPay'
@@ -3259,6 +3262,21 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             Q(year=self.year) &
             Q(month__gt=self.month) &
             Q(ultimate=True)
+        )
+        if len(future_lists) > 0 or self.bank_pay_date:
+            return False
+        else:
+            return True
+
+    @property
+    def is_pay_editable(self):
+        future_lists = ListOfPay.objects.filter(
+            Q(workshop=self.workshop) &
+            Q(use_in_calculate=self.use_in_calculate) &
+            Q(year=self.year) &
+            Q(month__gt=self.month) &
+            Q(ultimate=True) &
+            Q(pay_done=True)
         )
         if len(future_lists) > 0:
             return False

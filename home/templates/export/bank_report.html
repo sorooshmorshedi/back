@@ -12,14 +12,16 @@
                 <th class="text-center">شماره شبا</th>
             </tr>
             {% for item in form.bank_report %}
-                <tr>
-                    <td class="text-center">{{ forloop.counter }}</td>
-                    <td class="text-center">{{ item.name}}</td>
-                    <td class="text-center">{{ item.paid}}</td>
-                    <td class="text-center">{{ item.card}}</td>
-                    <td class="text-center">{{ item.account}}</td>
-                    <td class="text-center">{{ item.sheba}}</td>
-                </tr>
+                {% if item.paid != 0 %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="text-center">{{ item.name }}</td>
+                        <td class="text-center">{{ item.paid }}</td>
+                        <td class="text-center">{{ item.card }}</td>
+                        <td class="text-center">{{ item.account }}</td>
+                        <td class="text-center">{{ item.sheba }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
     {% endfor %}

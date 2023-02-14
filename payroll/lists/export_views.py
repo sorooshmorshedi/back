@@ -1473,9 +1473,7 @@ class DeductionExportView(DeductionListView, BaseExportView):
 class LoanRequestExportView(LoanListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'loan_request'
-
     context = {
-        'title': ' در خواست وام یا مساعده',
     }
     pagination_class = None
 
@@ -1487,14 +1485,25 @@ class LoanRequestExportView(LoanListView, BaseExportView):
 
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.get_queryset()
+        if qs.first().loan_type == 'd':
+            context = {
+                'title': 'فرم درخواست مساعده',
+                'forms': qs,
+                'company': user.active_company,
+                'financial_year': user.active_financial_year,
+                'user': user.get_full_name(),
+                'print_document': print_document
+            }
+        else:
+            context = {
+                'title': 'فرم درخواست وام',
+                'forms': qs,
+                'company': user.active_company,
+                'financial_year': user.active_financial_year,
+                'user': user.get_full_name(),
+                'print_document': print_document
+            }
 
-        context = {
-            'forms': qs,
-            'company': user.active_company,
-            'financial_year': user.active_financial_year,
-            'user': user.get_full_name(),
-            'print_document': print_document
-        }
 
         context['form_content_template'] = 'export/loan_request_form.html'
         context['right_header_template'] = 'export/sample_head.html'
@@ -2029,6 +2038,59 @@ class BankReportExportView(ListOfPayListView, BaseExportView):
 
         return context
 
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        data = [
+            [
+                'خروجی بانک جهت پرداخت حقوق '
+            ],
+            ['نام و نام خانوادگی', 'مبلغ پرداختی', 'شماره کارت', 'شماره حساب', 'شماره شبا']
+        ]
+        for forms in list_of_pay:
+            for form in forms.bank_report:
+                if form['paid'] != 0:
+                    data.append([
+                        form['name'],
+                        form['paid'],
+                        form['card'],
+                        form['account'],
+                        form['sheba'],
+                    ])
+        return data
+
+
+
 
 class PayFormExportView(ListOfPayListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
@@ -2062,6 +2124,58 @@ class PayFormExportView(ListOfPayListView, BaseExportView):
         context.update(self.context)
 
         return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        data = [
+            [
+                'فرم پرداخت حقوق '
+            ],
+            ['نام و نام خانوادگی', 'حقوق معوقه', 'حقوق قابل پرداخت ماه جاری', 'جمع حقوق قابل پرداخت تا ماه',
+             'مبلغ پرداختی', 'حقوق پرداخت نشده']
+        ]
+        for forms in list_of_pay:
+            for form in forms.bank_report:
+                data.append([
+                    form['name'],
+                    form['previous'],
+                    form['payable'],
+                    form['total'],
+                    form['paid'],
+                    form['unpaid'],
+                ])
+        return data
 
 
 class PayrollExportView(ListOfPayListView, BaseExportView):

@@ -402,7 +402,7 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
                  'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime', \
-                 'get_is_editable', 'is_workshop_verified'
+                 'get_is_editable', 'is_workshop_verified', 'bank_pay_date'
 
 
 class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
@@ -492,11 +492,13 @@ class ListOfPayPaySerializer(serializers.ModelSerializer):
     list_of_pay_item = ListOfPayItemBankSerializer(many=True, read_only=True)
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     month_name = serializers.CharField(source='month_display', read_only=True)
+    get_is_editable = serializers.BooleanField(source='is_pay_editable', read_only=True)
+
 
     class Meta:
         model = ListOfPay
         fields = 'pay_done', 'id', 'bank_pay_date', 'pay_form_create_date', 'list_of_pay_item', 'workshop_name', \
-                 'month_name', 'year'
+                 'month_name', 'year', 'bank_pay_explanation', 'bank_pay_code', 'bank_pay_name', 'get_is_editable'
 
 
 class ListOfPayItemAddPaySerializer(serializers.ModelSerializer):
