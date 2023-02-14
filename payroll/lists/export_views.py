@@ -2879,17 +2879,22 @@ class MonthTaxReportExportView(TaxListView, BaseExportView):
     }
     pagination_class = None
 
+    def __init__(self):
+        self.list_of_pay = []
+
     def get_queryset(self):
         return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
 
     def get(self, request, export_type, *args, **kwargs):
+        self.list_of_pay.append(ListOfPay.objects.get(id=request.query_params.get('id')))
+
         return self.export(request, export_type, *args, **kwargs)
 
     def get_context_data(self, user, print_document=False, **kwargs):
         qs = self.get_queryset()
 
         context = {
-            'forms': qs,
+            'forms': self.list_of_pay,
             'company': user.active_company,
             'financial_year': user.active_financial_year,
             'user': user.get_full_name(),

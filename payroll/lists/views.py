@@ -159,9 +159,9 @@ def write_tax_diskette(request, pk):
         content += ','
         content += str(item.workshop_personnel.job_location_status)
         content += ','
-        content += str(round(item.naghdi_pension))
+        content += str(round(item.tax_naghdi_pension))
         content += ',0,1,0,1,0,'
-        content += str(round(item.gheyre_naghdi_pension))
+        content += str(round(item.gheyre_naghdi_tax_pension))
         content += ','
         content += str(round(item.hazine_made_137))
         content += ','
@@ -236,7 +236,7 @@ def write_new_person_diskette(request, pk):
     content += ','
     content += str(workshop_personnel.personnel.degree_education)
     content += ','
-    content += str(workshop_personnel.work_title)
+    content += str(workshop_personnel.title.code)
     content += ','
     content += str(workshop_personnel.personnel.insurance_for_tax)
     content += ',,'

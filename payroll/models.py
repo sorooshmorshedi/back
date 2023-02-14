@@ -3539,14 +3539,13 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     @property
     def sign_date(self):
         date = jdatetime.date(self.year, self.month, self.month_days)
-        return date.__str__().replace('-', ''),
+        return str(date.__str__().replace('-', ''))
 
     def __str__(self):
         return 'حقوق و دستمزد ' + ' ' + str(self.year) + '/' + str(self.month) + ' کارگاه ' + \
                self.workshop.workshop_title
 
     def delete(self, *args, **kwargs):
-        print('itemd deleted')
         for my_list in self.list_of_pay_item.all():
             for loan in my_list.workshop_personnel.loan.all():
                 for item in loan.item.all():
@@ -4759,7 +4758,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return total
         else:
             return 0
-
 
     @property
     def check_insurance(self):
