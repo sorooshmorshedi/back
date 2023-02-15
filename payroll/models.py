@@ -1288,7 +1288,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 month['amount'] = item.payable
                 month['paid'] = item.paid_amount
                 month['upaid'] = item.unpaid
-                month['date'] = item.list_of_pay.end_date
+                month['date'] = item.list_of_pay.bank_pay_date
                 month['bank_date'] = item.list_of_pay.bank_pay_date
                 month['total'] = item.total_unpaid
                 month['explanation'] = 'پرداخت حقوق'
@@ -1598,6 +1598,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     class Meta(BaseModel.Meta):
         verbose_name = 'WorkshopPersonnel'
         permission_basename = 'workshop_personnel'
+
         permissions = (
             ('get.workshop_personnel', 'مشاهده پرسنل کارگاه'),
             ('create.workshop_personnel', 'تعریف پرسنل کارگاه'),
@@ -3452,12 +3453,12 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_DISC': '',
             'DSK_NUM': len(personnel_count),
             'DSK_TDD': total_worktime,
-            'DSK_TROOZ': total_day_pay,
-            'DSK_TMAH': total_month_pay,
-            'DSK_TMAZ': total_benefit,
-            'DSK_TMASH': total_benefit + total_month_pay,
-            'DSK_TTOTL': total_base,
-            'DSK_TBIME': total_insurance,
+            'DSK_TROOZ': round(total_day_pay),
+            'DSK_TMAH': round(total_month_pay),
+            'DSK_TMAZ': round(total_benefit),
+            'DSK_TMASH': round(total_benefit + total_month_pay),
+            'DSK_TTOTL': round(total_base),
+            'DSK_TBIME': round(total_insurance),
             'DSK_TKOSO': round((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh),
             'DSK_TBIC': round((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh),
             'DSK_RATE': self.workshop.employer_insurance_contribution,

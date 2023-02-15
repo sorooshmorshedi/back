@@ -15,7 +15,7 @@ from payroll.lists.views import WorkshopListView, ContractListView, PersonnelLis
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
     write_person_insurance_diskette, \
     write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, \
-    AdjustmentListView, PayListView
+    AdjustmentListView, PayListView, workshop_person_insurance_diskette
 from payroll.verify_views import WorkshopVerifyApi, WorkshopUnVerifyApi, WorkshopTaxRowVerifyApi, \
     WorkshopTaxRowUnVerifyApi, PersonnelVerifyApi, PersonnelUnVerifyApi, PersonnelFamilyVerifyApi, \
     PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, WorkshopPersonnelVerifyApi, \
@@ -153,6 +153,7 @@ urlpatterns = [
 
     path('diskette/insurance/<int:pk>/', write_insurance_diskette),
     path('diskette/insurance/person/<int:pk>/', write_person_insurance_diskette),
+    path('diskette/insurance/workshopPerson/<int:pk>/', workshop_person_insurance_diskette),
 
     path('absence/report/<int:year>/<str:month>/', AbsenceReportExportView.as_view()),
     path('saveLeave/report/<int:year>/<str:month>/', SaveLeaveReportExportView.as_view()),
