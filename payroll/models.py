@@ -1281,20 +1281,29 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def payment_balance(self):
-
         response = []
-        for item in self.list_of_pay_item.all():
+        for item in self.list_of_pay_item.filter(list_of_pay__ultimate=True):
+            if item.list_of_pay.pay_done:
+                month = {}
+                month['amount'] = item.payable
+                month['paid'] = item.paid_amount
+                month['upaid'] = item.unpaid
+                month['date'] = item.list_of_pay.end_date
+                month['bank_date'] = item.list_of_pay.bank_pay_date
+                month['total'] = item.total_unpaid
+                month['explanation'] = 'پرداخت حقوق'
+                response.append(month)
             month = {}
             month['amount'] = item.payable
-            month['paid'] = item.paid_amount
-            month['upaid'] = item.unpaid
-            month['month'] = item.list_of_pay.month
-            month['year'] = item.list_of_pay.year
-            month['bank_date'] = item.list_of_pay.bank_pay_date
+            month['paid'] = 0
+            month['upaid'] = item.payable
+            month['date'] = item.list_of_pay.end_date
+            month['bank_date'] = ' ----  '
             month['total'] = item.total_unpaid
+            month['explanation'] = 'شناسایی حقوق پرداختنی {}'.format(item.list_of_pay.month_display)
             response.append(month)
+        print(response.reverse())
         return response
-
     @property
     def real_work(self):
         total = 0
@@ -4612,7 +4621,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                              Q(list_of_pay__ultimate=True)).all()
         unpaid = 0
         for item in items:
-            unpaid += item.unpaid
+            unpaid += (item.payable - item.paid_amount)
         return round(unpaid)
 
     @property

@@ -26,15 +26,20 @@
                 سال حقوق
             </th>
             <th class="text-center">
-                ماه حقوق
+                تاریخ
             </th>
             <th class="text-center">
-                مبلغ حقوق
+                شرح
             </th>
             <th class="text-center">
-                مبلغ پرداخت شده
+                پرداخت
+            </th>
+
             <th class="text-center">
-                مبلغ باقیمانده
+                شناسایی
+            </th>
+            <th class="text-center">
+                مانده
             </th>
             <th class="text-center">
                 تاریخ پرداخت بانک
@@ -44,16 +49,19 @@
             <tr>
             <tr>
                 <td class="text-center">
-                    {{ item.year }}
+                    {{ forloop.counter }}
                 </td>
                 <td class="text-center">
-                    {{ item.month }}
+                    {{ item.date }}
                 </td>
                 <td class="text-center">
-                    {{ item.amount }}
+                    {{ item.explanation }}
                 </td>
                 <td class="text-center">
                     {{ item.paid }}
+                </td>
+                <td class="text-center">
+                    {{ item.amount }}
                 </td>
                 <td class="text-center">
                     {{ item.upaid }}
