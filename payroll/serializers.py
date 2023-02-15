@@ -493,12 +493,22 @@ class ListOfPayPaySerializer(serializers.ModelSerializer):
     workshop_name = serializers.CharField(source='workshop.workshop_title', read_only=True)
     month_name = serializers.CharField(source='month_display', read_only=True)
     get_is_editable = serializers.BooleanField(source='is_pay_editable', read_only=True)
+    get_not_done_pay = serializers.BooleanField(source='not_done_pay', read_only=True)
+    is_pay_verify = serializers.BooleanField(source='pay_verify', read_only=True)
+    get_total_paid = serializers.IntegerField(source='total_paid', read_only=True)
+    get_total_payable = serializers.IntegerField(source='total_payable', read_only=True)
+    get_total_un_paid_of_year = serializers.IntegerField(source='total_un_paid_of_year', read_only=True)
+    get_total_un_paid = serializers.IntegerField(source='total_un_paid', read_only=True)
+    get_un_paid = serializers.IntegerField(source='un_paid', read_only=True)
+
 
 
     class Meta:
         model = ListOfPay
         fields = 'pay_done', 'id', 'bank_pay_date', 'pay_form_create_date', 'list_of_pay_item', 'workshop_name', \
-                 'month_name', 'year', 'bank_pay_explanation', 'bank_pay_code', 'bank_pay_name', 'get_is_editable'
+                 'month_name', 'year', 'bank_pay_explanation', 'bank_pay_code', 'bank_pay_name', 'get_is_editable',\
+                 'get_not_done_pay', 'name', 'year', 'is_pay_verify', 'get_total_paid', 'get_total_payable',\
+                 'get_total_un_paid_of_year', 'get_total_un_paid', 'get_un_paid'
 
 
 class ListOfPayItemAddPaySerializer(serializers.ModelSerializer):

@@ -6,7 +6,7 @@ from helpers.auth import BasicCRUDPermission
 from payroll.lists.filters import WorkshopFilter, PersonnelFilter, PersonnelFamilyFilter, WorkshopPersonnelFilter, \
     ContractRowFilter, LeaveOrAbsenceFilter, ContractFilter, MissionFilter, HRLetterFilter, TaxRowFilter, TaxFilter, \
     ListOfPayFilter, ListOfPayItemFilter, LoanFilter, DeductionFilter, LoanItemFilter, WorkshopTaxFilter, TaxMoafFilter, \
-    AdjustmentFilter
+    AdjustmentFilter, PayFilter
 from payroll.models import Workshop, Personnel, PersonnelFamily, WorkshopPersonnel, ContractRow, Contract, \
     LeaveOrAbsence, Mission, HRLetter, WorkshopTaxRow, WorkshopTax, ListOfPay, ListOfPayItem, Loan, OptionalDeduction, \
     LoanItem, Adjustment
@@ -15,7 +15,7 @@ from payroll.serializers import WorkShopSerializer, PersonnelSerializer, Personn
     HRLetterSerializer, WorkshopTaxRowSerializer, WorkShopTaxSerializer, ListOfPaySerializer, ListOfPayItemSerializer, \
     LoanSerializer, DeductionSerializer, LoanItemSerializer, ListOfPayItemLessSerializer, ListOfPayLessSerializer, \
     ListOfPayInsuranceSerializer, ListOfPayItemInsuranceSerializer, PersonTaxSerializer, TaxSerializer, \
-    AdjustmentSerializer
+    AdjustmentSerializer, ListOfPayPaySerializer
 
 from django.http import HttpResponse
 
@@ -683,3 +683,19 @@ class TaxRowListView(generics.ListAPIView):
         company = self.request.user.active_company
         return WorkshopTax.objects.hasAccess('get', self.permission_codename)\
             .filter(company=company)
+
+
+class PayListView(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, BasicCRUDPermission)
+
+    permission_codename = "get.list_of_pay"
+    serializer_class = ListOfPayPaySerializer
+    filterset_class = PayFilter
+    ordering_fields = '__all__'
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        company = self.request.user.active_company
+        workhops = company.workshop.all()
+        return ListOfPay.objects.hasAccess('get', self.permission_codename)\
+            .filter(workshop__in=workhops)

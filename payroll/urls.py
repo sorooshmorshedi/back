@@ -14,7 +14,8 @@ from payroll.lists.views import WorkshopListView, ContractListView, PersonnelLis
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
     write_person_insurance_diskette, \
-    write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, AdjustmentListView
+    write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, \
+    AdjustmentListView, PayListView
 from payroll.verify_views import WorkshopVerifyApi, WorkshopUnVerifyApi, WorkshopTaxRowVerifyApi, \
     WorkshopTaxRowUnVerifyApi, PersonnelVerifyApi, PersonnelUnVerifyApi, PersonnelFamilyVerifyApi, \
     PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, WorkshopPersonnelVerifyApi, \
@@ -194,6 +195,8 @@ urlpatterns += [
     url(r'^loan/item/all$', LoanItemListView.as_view(), name='loanItemListView'),
     url(r'^loan/all$', LoanListView.as_view(), name='loanListView'),
     url(r'^deduction/all$', DeductionListView.as_view(), name='deductionListView'),
+    url(r'^deduction/all$', DeductionListView.as_view(), name='deductionListView'),
+    url(r'^pay/all$', PayListView.as_view(), name='payListView'),
 
     url(r'^workshop/all/(?P<export_type>\S+)', WorkshopExportview.as_view(), name=''),
     url(r'^personnel/all/(?P<export_type>\S+)', PersonnelExportview.as_view(), name=''),

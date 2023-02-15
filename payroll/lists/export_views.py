@@ -2175,6 +2175,15 @@ class PayFormExportView(ListOfPayListView, BaseExportView):
                     form['paid'],
                     form['unpaid'],
                 ])
+            data.append([
+                'جمع',
+                forms.total_un_paid_of_year,
+                forms.total_payable,
+                forms.total_un_paid,
+                forms.total_paid,
+                forms.un_paid,
+            ])
+
         return data
 
 

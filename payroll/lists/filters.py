@@ -658,3 +658,41 @@ class TaxRowFilter(filters.FilterSet):
                 'filter_class': django_filters.CharFilter,
             },
         }
+
+
+
+def get_pay_verify(queryset, name, value):
+    query = []
+    for item in queryset.all():
+        print(item.not_done_pay)
+        print(value)
+        if item.not_done_pay == value:
+            query.append(item.id)
+    return queryset.filter(id__in=query)
+
+
+class PayFilter(filters.FilterSet):
+    month_name = filters.CharFilter(method=month_filter)
+    workshop_name = filters.CharFilter(method=workshop_filter)
+    is_pay_verify = filters.BooleanFilter(method=get_pay_verify)
+
+    class Meta:
+        model = ListOfPay
+        fields = {
+            'id': BASE_FIELD_FILTERS,
+            'name': BASE_FIELD_FILTERS,
+            'workshop': ('exact',),
+            'year': BASE_FIELD_FILTERS,
+            'month': BASE_FIELD_FILTERS,
+            'ultimate': BASE_FIELD_FILTERS,
+            'use_in_calculate': BASE_FIELD_FILTERS,
+            'use_in_bime': BASE_FIELD_FILTERS,
+            'pay_done': BASE_FIELD_FILTERS,
+            'pay_form_create_date': BASE_FIELD_FILTERS,
+            'bank_pay_date': BASE_FIELD_FILTERS,
+        }
+        filter_overrides = {
+            jmodels.jDateField: {
+                'filter_class': django_filters.CharFilter,
+            },
+        }

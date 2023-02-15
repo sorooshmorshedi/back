@@ -7,22 +7,31 @@
                 <th class="text-center">ردیف</th>
                 <th class="text-center">نام و نام خانوادگی</th>
                 <th class="text-center">حقوق معوقه</th>
-                <th class="text-center"> حقوق قابل پرداخت ماه جاری </th>
-                <th class="text-center">  جمع حقوق قابل پرداخت تا ماه  </th>
+                <th class="text-center"> حقوق قابل پرداخت ماه جاری</th>
+                <th class="text-center"> جمع حقوق قابل پرداخت تا ماه</th>
                 <th class="text-center"> مبلغ پرداختی</th>
                 <th class="text-center"> حقوق پرداخت نشده</th>
             </tr>
-            {% for item in form.bank_report %}
+            {% for item in form.bank_report_with_comma %}
                 <tr>
                     <td class="text-center">{{ forloop.counter }}</td>
-                    <td class="text-center">{{ item.name}}</td>
-                    <td class="text-center">{{ item.previous}}</td>
-                    <td class="text-center">{{ item.payable}}</td>
-                    <td class="text-center">{{ item.total}}</td>
-                    <td class="text-center">{{ item.paid}}</td>
-                    <td class="text-center">{{ item.unpaid}}</td>
+                    <td class="text-center">{{ item.name }}</td>
+                    <td class="text-center">{{ item.previous }}</td>
+                    <td class="text-center">{{ item.payable }}</td>
+                    <td class="text-center">{{ item.total }}</td>
+                    <td class="text-center">{{ item.paid }}</td>
+                    <td class="text-center">{{ item.unpaid }}</td>
                 </tr>
             {% endfor %}
+            <tr>
+                <td class="text-center" colspan="2">جمع</td>
+                <td class="text-center">{{ form.total_un_paid_of_year }}</td>
+                <td class="text-center">{{ form.total_payable }}</td>
+                <td class="text-center">{{ form.total_un_paid }}</td>
+                <td class="text-center">{{ form.total_paid }}</td>
+                <td class="text-center">{{ form.un_paid }}</td>
+            </tr>
+
         </table>
     {% endfor %}
 

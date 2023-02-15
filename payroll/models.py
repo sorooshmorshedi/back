@@ -3255,6 +3255,55 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         super().save(*args, **kwargs)
 
     @property
+    def pay_verify(self):
+        if self.bank_pay_date and self.ultimate:
+            return True
+        else:
+            return False
+
+    @property
+    def total_paid(self):
+        total = 0
+        list_items = self.list_of_pay_item.all()
+        for item in list_items:
+            total += item.paid_amount
+        return total
+
+    @property
+    def total_payable(self):
+        total = 0
+        list_items = self.list_of_pay_item.all()
+        for item in list_items:
+            total += item.payable
+        return total
+
+    @property
+    def total_un_paid_of_year(self):
+        total = 0
+        list_items = self.list_of_pay_item.all()
+        for item in list_items:
+            total += item.get_unpaid_of_year
+        return total
+
+    @property
+    def total_un_paid(self):
+        total = 0
+        list_items = self.list_of_pay_item.all()
+        for item in list_items:
+            total += item.total_unpaid
+        return total
+
+
+    @property
+    def un_paid(self):
+        total = 0
+        list_items = self.list_of_pay_item.all()
+        for item in list_items:
+            total += item.unpaid
+        return total
+
+
+    @property
     def is_editable(self):
         future_lists = ListOfPay.objects.filter(
             Q(workshop=self.workshop) &
@@ -3278,10 +3327,25 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             Q(ultimate=True) &
             Q(pay_done=True)
         )
-        if len(future_lists) > 0:
-            return False
-        else:
-            return True
+        for item in future_lists:
+            if item.bank_pay_date:
+                return False
+        return True
+
+    @property
+    def not_done_pay(self):
+        previous_lists = ListOfPay.objects.filter(
+            Q(workshop=self.workshop) &
+            Q(use_in_calculate=self.use_in_calculate) &
+            Q(year=self.year) &
+            Q(month__lt=self.month) &
+            Q(ultimate=True) &
+            Q(pay_done=True)
+        )
+        for item in previous_lists:
+            if not item.bank_pay_date:
+                return False
+        return True
 
     @property
     def month_display(self):
@@ -3541,6 +3605,13 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         response = []
         for item in self.list_of_pay_item.all():
             response.append(item.bank_report)
+        return response
+
+    @property
+    def bank_report_with_comma(self):
+        response = []
+        for item in self.list_of_pay_item.all():
+            response.append(item.bank_report_with_comma)
         return response
 
     @property
@@ -4541,7 +4612,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                                              Q(list_of_pay__ultimate=True)).all()
         unpaid = 0
         for item in items:
-            unpaid = item.unpaid
+            unpaid += item.unpaid
         return round(unpaid)
 
     @property
@@ -4612,6 +4683,20 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         response['unpaid'] = self.unpaid
         response['total'] = self.total_unpaid
         response['paid'] = self.paid_amount
+        response['card'] = self.workshop_personnel.personnel.bank_cart_number
+        response['account'] = self.workshop_personnel.personnel.account_bank_number
+        response['sheba'] = self.workshop_personnel.personnel.sheba_number
+        return response
+
+    @property
+    def bank_report_with_comma(self):
+        response = {}
+        response['name'] = self.workshop_personnel.personnel.full_name
+        response['previous'] = self.with_comma(self.get_unpaid_of_year)
+        response['payable'] = self.with_comma(self.payable)
+        response['unpaid'] = self.with_comma(self.unpaid)
+        response['total'] = self.with_comma(self.total_unpaid)
+        response['paid'] = self.with_comma(self.paid_amount)
         response['card'] = self.workshop_personnel.personnel.bank_cart_number
         response['account'] = self.workshop_personnel.personnel.account_bank_number
         response['sheba'] = self.workshop_personnel.personnel.sheba_number
@@ -5241,7 +5326,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def total_sayer_moafiat(self):
         is_tax, tax_day = self.check_tax
-        hr = self.get_hr_letter
         if is_tax:
             total = 0
             total += self.sayer_moafiat
