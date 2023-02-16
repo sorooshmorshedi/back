@@ -405,20 +405,22 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
                  'get_is_editable', 'is_workshop_verified', 'bank_pay_date'
 
 
-class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
-    get_data_for_insurance = serializers.JSONField(source='data_for_insurance', read_only=True)
-
-    class Meta:
-        model = ListOfPay
-        fields = 'get_data_for_insurance'
-
-
 class ListOfPayItemInsuranceSerializer(serializers.ModelSerializer):
     get_data_for_insurance = serializers.JSONField(source='data_for_insurance', read_only=True)
 
     class Meta:
         model = ListOfPayItem
         fields = 'get_data_for_insurance'
+
+
+class ListOfPayInsuranceSerializer(serializers.ModelSerializer):
+    get_data_for_insurance = serializers.JSONField(source='data_for_insurance', read_only=True)
+    list_of_pay_item = ListOfPayItemInsuranceSerializer()
+    month_name = serializers.CharField(source='month_display', read_only=True)
+
+    class Meta:
+        model = ListOfPay
+        fields = 'get_data_for_insurance', 'list_of_pay_item', 'year', 'month_name'
 
 
 class WorkshopTaxRowSerializer(serializers.ModelSerializer):

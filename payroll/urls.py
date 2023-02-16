@@ -8,7 +8,8 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PayrollExportView, LoanItemExportView, PersonInsuranceReportExportView, WorkshopInsuranceReportExportView, \
     PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
     NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
-    AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView, AdjustmentExportView, TaxExportView
+    AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView, AdjustmentExportView, TaxExportView, \
+    InsuranceCardexExportview
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
@@ -228,5 +229,6 @@ urlpatterns += [
     url(r'^diskette/person/(?P<export_type>\S+)', NewPersonTaxReportExportView.as_view(), name=''),
     url(r'^payroll/(?P<export_type>\S+)', PayrollExportView.as_view(), name=''),
     url(r'^balance/(?P<export_type>\S+)', AccountBalanceReportExportView.as_view(), name=''),
+    url(r'^insuranceCardex/(?P<export_type>\S+)', InsuranceCardexExportview.as_view(), name=''),
 
 ]

@@ -16,11 +16,14 @@
                 {{ forms.personnel.national_code }}
             </td>
             <th class="text-center">
-                کارگاه
+                کد پرسنلی
             <td class="text-center">
-                {{ forms.workshop.workshop_title }}
+                {{ forms.personnel.personnel_code }}
             </td>
         </tr>
+
+    </table>
+    <table class="table table-bordered table-striped mt-5">
         <tr>
             <th class="text-center">
                 سال حقوق
@@ -55,16 +58,30 @@
                     {{ item.explanation }}
                 </td>
                 <td class="text-center">
-                    {{ item.paid }}
+                    {{ item.paid_comma }} {% if item.paid < 0 %} - {% endif %}
                 </td>
                 <td class="text-center">
-                    {{ item.amount }}
+                    {{ item.amount_comma }} {% if item.amount < 0 %} - {% endif %}
                 </td>
                 <td class="text-center">
-                    {{ item.upaid }}
+                    {{ item.unpaid_comma }} {% if item.upaid < 0 %} - {% endif %}
             </tr>
 
         {% endfor %}
+    <tr>
+        <td colspan="3" class="text-center">
+            جمع
+        </td>
+        <td class="text-center">
+            {{ forms.balance_total.paid_total }}
+        </td>
+        <td class="text-center">
+            {{ forms.balance_total.amount_total }}
+        </td>
+        <td class="text-center">
+            {{ forms.balance_total.mande }}
+        </td>
+    </tr>
     </table>
 
 </div>

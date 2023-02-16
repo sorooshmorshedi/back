@@ -90,7 +90,7 @@ class WorkshopExportview(WorkshopListView, BaseExportView):
                 'لیست کارگاه ها'
             ],
             ['کد کارگاه', 'نام کارگاه', 'نام کارفرما', 'آدرس', 'کد پستی',
-             'کد شعبه','نام شعبه', 'وضعیت', 'نهایی', 'پیشفرض']
+             'کد شعبه', 'نام شعبه', 'وضعیت', 'نهایی', 'پیشفرض']
         ]
         for form in workshop:
             data.append([
@@ -674,7 +674,7 @@ class LeaveOrAbsenceExportView(LeaveOrAbsenceListView, BaseExportView):
                 'لیست مرخصی و غیبت ها'
             ],
             ['پرسنل در کارگاه', 'نوع مرخصی', 'نوع  ', 'نوع  ', 'از تاربخ',
-             'تا تاربخ ',' تاربخ ', 'از ساعت', 'تا ساعت', 'علت مرخصی', 'توضیحات', 'نهایی']
+             'تا تاربخ ', ' تاربخ ', 'از ساعت', 'تا ساعت', 'علت مرخصی', 'توضیحات', 'نهایی']
         ]
         for form in absence:
             data.append([
@@ -1002,7 +1002,7 @@ class ContractFormExportView(ContractListView, BaseExportView):
             [
                 'لیست قرارداد ها'
             ],
-            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار', 'نهایی' ]
+            ['پرسنل در کارگاه', 'تاریخ شروع قرارداد', 'تاریخ پایان قرارداد', 'تاریخ ترک کار', 'نهایی']
         ]
         for form in contract:
             data.append([
@@ -1503,7 +1503,6 @@ class LoanRequestExportView(LoanListView, BaseExportView):
                 'user': user.get_full_name(),
                 'print_document': print_document
             }
-
 
         context['form_content_template'] = 'export/loan_request_form.html'
         context['right_header_template'] = 'export/sample_head.html'
@@ -2090,8 +2089,6 @@ class BankReportExportView(ListOfPayListView, BaseExportView):
         return data
 
 
-
-
 class PayFormExportView(ListOfPayListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'pay_form'
@@ -2278,19 +2275,27 @@ class PayrollExportView(ListOfPayListView, BaseExportView):
         ]
         for form in list_of_pay.first().get_items:
             data.append(
-            [counter, form.workshop_personnel.personnel.full_name, form.contract.contract_from_date,
-             '', form.workshop_personnel.title.name, form.contract.insurance, form.workshop_personnel.current_insurance,
-             '', form.normal_worktime, form.hourly_entitlement_leave_day, form.daily_entitlement_leave_day,
-             form.entitlement_leave_day, form.illness_leave_day, form.matter_47_leave_day, form.without_salary_leave_day,
-             form.absence_day, form.real_worktime, form.hoghoogh_roozane, form.hoghoogh_mahane,  form.sanavat_base, form.sanavat_mahane,
-             form.ezafe_kari, form.ezafe_kari_total, form.tatil_kari, form.tatil_kari_total, form.shab_kari, form.shab_kari_total,
-             form.kasre_kar, form.kasre_kar_total, form.mission_day, form.mission_total, form.get_payslip['additions']['kharo_bar'],
-             form.get_payslip['additions']['hagh_maskan'], form.aele_mandi_child, form.aele_mandi, form.get_payslip['additions']['hagh_jazb'], '',
-             form.sayer_ezafat, form.total_payment,  form.data_for_insurance['DSW_MAH'], form.data_for_insurance['DSW_MAZ'],
-             form.data_for_insurance['DSW_MASH'], form.data_for_insurance['DSW_TOTL'], form.data_for_insurance['DSW_BIME'],
-             form.moaf_sum, form.tax_included_payment, form.calculate_month_tax, form.check_and_get_dept_episode,
-             form.check_and_get_loan_episode, form.check_and_get_optional_deduction_episode, form.payable,
-             form.employer_insurance, form.un_employer_insurance]
+                [counter, form.workshop_personnel.personnel.full_name, form.contract.contract_from_date,
+                 '', form.workshop_personnel.title.name, form.contract.insurance,
+                 form.workshop_personnel.current_insurance,
+                 '', form.normal_worktime, form.hourly_entitlement_leave_day, form.daily_entitlement_leave_day,
+                 form.entitlement_leave_day, form.illness_leave_day, form.matter_47_leave_day,
+                 form.without_salary_leave_day,
+                 form.absence_day, form.real_worktime, form.hoghoogh_roozane, form.hoghoogh_mahane, form.sanavat_base,
+                 form.sanavat_mahane,
+                 form.ezafe_kari, form.ezafe_kari_total, form.tatil_kari, form.tatil_kari_total, form.shab_kari,
+                 form.shab_kari_total,
+                 form.kasre_kar, form.kasre_kar_total, form.mission_day, form.mission_total,
+                 form.get_payslip['additions']['kharo_bar'],
+                 form.get_payslip['additions']['hagh_maskan'], form.aele_mandi_child, form.aele_mandi,
+                 form.get_payslip['additions']['hagh_jazb'], '',
+                 form.sayer_ezafat, form.total_payment, form.data_for_insurance['DSW_MAH'],
+                 form.data_for_insurance['DSW_MAZ'],
+                 form.data_for_insurance['DSW_MASH'], form.data_for_insurance['DSW_TOTL'],
+                 form.data_for_insurance['DSW_BIME'],
+                 form.moaf_sum, form.tax_included_payment, form.calculate_month_tax, form.check_and_get_dept_episode,
+                 form.check_and_get_loan_episode, form.check_and_get_optional_deduction_episode, form.payable,
+                 form.employer_insurance, form.un_employer_insurance]
 
             )
             counter += 1
@@ -3241,6 +3246,7 @@ class SaveLeaveReportExportView(WorkshopAbsenceListView, BaseExportView):
 
         return context
 
+
 class EydiReportExportView(WorkshopAbsenceListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'eydi_report'
@@ -3696,3 +3702,123 @@ class TaxExportView(TaxRowListView, BaseExportView):
 
         return context
 
+
+class InsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'InsuranceCardex'
+
+    context = {
+        'title': 'کاردکس بیمه',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+
+        context = {
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user,
+            'print_document': print_document
+        }
+
+        template_prefix = self.get_template_prefix()
+        context['form_content_template'] = 'export/insurance_cardex.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pays: ListOfPay):
+        for list_of_pay in list_of_pays:
+            data = [
+                [
+                    'کاردکس بیمه'
+                ],
+
+                [
+                    'شماره کارگاه',
+                    list_of_pay.workshop.workshop_code,
+                    'نام کارفرما',
+                    list_of_pay.workshop.employer_name,
+                    'نشانی کارگاه',
+                    list_of_pay.workshop.address,
+                ],
+                ['ردیف', 'شماره بیمه', 'نام و نام خانوادگی', 'شغل', 'کد ملی',
+                 'کارکرد', 'دستمزد روزانه', 'دستمزد ماهانه', 'مزایای ماهانه',
+                 'مجموع دستمزد و مزایای مشمول', 'مجموع کل دستمزد و مزایای ماهانه', 'حق بیمه سهم بیمه شده']
+            ]
+            counter = 1
+            for item in list_of_pay.list_of_pay_item.all():
+                if item.is_month_insurance:
+                    data.append([
+                        counter,
+                        item.workshop_personnel.personnel.insurance_code,
+                        item.workshop_personnel.personnel.full_name,
+                        item.workshop_personnel.title.name,
+                        item.workshop_personnel.personnel.identity_code,
+                        item.insurance_worktime,
+                        item.data_for_insurance['DSW_ROOZ'],
+                        item.data_for_insurance['DSW_MAH'],
+                        item.data_for_insurance['DSW_MAZ'],
+                        item.data_for_insurance['DSW_MASH'],
+                        item.data_for_insurance['DSW_TOTL'],
+                        item.data_for_insurance['DSW_BIME'],
+                    ])
+                    counter += 1
+            form = list_of_pay
+            data.append([
+                '', '', '', '', 'جمع',
+                form.data_for_insurance['DSK_TDD'],
+                form.data_for_insurance['DSK_TROOZ'],
+                form.data_for_insurance['DSK_TMAH'],
+                form.data_for_insurance['DSK_TMAZ'],
+                form.data_for_insurance['DSK_TMASH'],
+                form.data_for_insurance['DSK_TTOTL'],
+                form.data_for_insurance['DSK_TBIME'],
+            ])
+            data.append([
+                'حق بیمه سهم کارفرما',
+                form.data_for_insurance['DSK_TKOSO']
+            ])
+        return data

@@ -904,6 +904,27 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.personnel', 'حذف پرسنل خود'),
         )
 
+    @staticmethod
+    def with_comma(input_amount, no_minus=False):
+        if input_amount != 0:
+            amount = str(round(input_amount))[::-1]
+            loop = int(len(amount) / 3)
+            if len(amount) < 4:
+                return str(round(input_amount))
+            else:
+                counter = 0
+                for i in range(1, loop + 1):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            if amount[-1] == ',':
+                amount = amount[:-1]
+            if no_minus:
+                return amount[::-1].replace('-', '')
+            return amount[::-1]
+        else:
+            return 0
+
     def is_in_workshop(self, pk):
         workshop_personnel = WorkshopPersonnel.objects.filter(Q(personnel_id=self.id) & Q(is_verified=True)
                                                               & Q(workshop=pk))
@@ -1285,25 +1306,51 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
         for item in self.list_of_pay_item.filter(list_of_pay__ultimate=True):
             if item.list_of_pay.pay_done:
                 month = {}
-                month['amount'] = item.payable
+                month['amount'] = 0
+                month['amount_comma'] = 0
                 month['paid'] = item.paid_amount
+                month['paid_comma'] = self.with_comma(item.paid_amount, True)
                 month['upaid'] = item.unpaid
+                month['unpaid_comma'] = self.with_comma(item.unpaid, True)
                 month['date'] = item.list_of_pay.bank_pay_date
                 month['bank_date'] = item.list_of_pay.bank_pay_date
                 month['total'] = item.total_unpaid
+                month['total_comma'] = self.with_comma(item.total_unpaid, True)
                 month['explanation'] = 'پرداخت حقوق'
                 response.append(month)
             month = {}
             month['amount'] = item.payable
+            month['amount_comma'] = self.with_comma(item.payable, True)
             month['paid'] = 0
+            month['paid_comma'] = 0
             month['upaid'] = item.payable
+            month['upaid_comma'] = self.with_comma(item.payable, True)
             month['date'] = item.list_of_pay.end_date
-            month['bank_date'] = ' ----  '
+            month['bank_date'] = ' ---- '
             month['total'] = item.total_unpaid
-            month['explanation'] = 'شناسایی حقوق پرداختنی {}'.format(item.list_of_pay.month_display)
+            month['explanation'] = 'شناسایی حقوق پرداختنی {} سال {}'.format(item.list_of_pay.month_display,
+                                                                            item.list_of_pay.year )
             response.append(month)
         print(response.reverse())
         return response
+
+
+    @property
+    def balance_total(self):
+        paid = 0
+        amount = 0
+        for item in self.payment_balance:
+            paid += item['paid']
+            amount += item['amount']
+        mande = round(amount - paid)
+        total = {
+            'paid_total': self.with_comma(paid),
+            'amount_total': self.with_comma(amount),
+            'mande': self.with_comma(mande),
+        }
+        return total
+
+
     @property
     def real_work(self):
         total = 0
@@ -3464,7 +3511,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     @property
     def data_for_insurance(self):
         contracts = self.get_contracts
-        personnel_count = []
+        personnel_count = 0
         items = self.list_of_pay_item
         total_worktime = 0
         total_day_pay = 0
@@ -3473,14 +3520,14 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         total_base = 0
         total_insurance = 0
         for item in items.all():
-            total_day_pay += item.insurance_worktime
-            total_month_pay += item.insurance_monthly_payment
-            total_benefit += item.insurance_monthly_benefit
-            total_base += item.insurance_total_included
-            total_insurance += item.haghe_bime_bime_shavande
-        for contract in contracts:
-            if contract.workshop_personnel.personnel.id not in personnel_count:
-                personnel_count.append(contract.workshop_personnel.personnel.id)
+            if item.is_month_insurance:
+                total_worktime += item.insurance_worktime
+                total_day_pay += item.insurance_daily_payment
+                total_month_pay += item.insurance_monthly_payment
+                total_benefit += item.insurance_monthly_benefit
+                total_base += item.insurance_total_included
+                total_insurance += item.haghe_bime_bime_shavande
+                personnel_count += 1
         DSKKAR = {
             'DSK_ID': str(self.workshop.workshop_code),
             'DSK_NAME': self.workshop.name,
@@ -3491,7 +3538,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_MM': self.month,
             'DSK_LISTNO': '0000',
             'DSK_DISC': '',
-            'DSK_NUM': len(personnel_count),
+            'DSK_NUM': personnel_count,
             'DSK_TDD': total_worktime,
             'DSK_TROOZ': round(total_day_pay),
             'DSK_TMAH': round(total_month_pay),
@@ -5039,6 +5086,15 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return 0
 
     @property
+    def insurance_daily_payment(self):
+        is_insurance, insurance_worktime = self.check_insurance
+        if is_insurance:
+            hr = self.get_hr_letter
+            return hr.insurance_pay_day
+        else:
+            return 0
+
+    @property
     def insurance_monthly_payment(self):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
@@ -5056,24 +5112,14 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def insurance_worktime(self):
         is_insurance, insurance_worktime = self.check_insurance
         if is_insurance:
-            month_start = self.list_of_pay.start_date
-            month_end = self.list_of_pay.end_date
-            start_date = self.contract.insurance_add_date
-            end_date = self.contract.contract_to_date
-            if self.contract.quit_job_date:
-                end_date = self.contract.quit_job_date
-            if start_date.__ge__(month_start) and end_date.__le__(month_end):
-                return end_date.day - start_date.day + self.real_worktime - self.normal_worktime
-            elif start_date.__lt__(month_start) and end_date.__gt__(month_end):
-                return self.list_of_pay.month_days + self.real_worktime - self.normal_worktime
-            elif start_date.__le__(month_start) and end_date.__gt__(month_start) and end_date.__le__(month_end):
-                return end_date.day + self.real_worktime - self.normal_worktime
-            elif start_date.__ge__(month_start) and start_date.__lt__(month_end) and end_date.__ge__(month_end):
-                return month_end.day + self.real_worktime - self.normal_worktime
-            else:
-                return 0
+            return insurance_worktime
         else:
             return 0
+
+    @property
+    def is_month_insurance(self):
+        is_insurance, insurance_worktime = self.check_insurance
+        return is_insurance
 
     @property
     def insurance_included_limit(self):
@@ -5121,12 +5167,12 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_SDATE': contract.insurance_add_date.__str__().replace('-', ''),
             'DSW_EDATE': quit_job_date,
             'DSW_DD': self.insurance_worktime,
-            'DSW_ROOZ': round(hr.insurance_pay_day),
+            'DSW_ROOZ': round(self.insurance_daily_payment),
             'DSW_MAH': round(self.insurance_monthly_payment),
             'DSW_MAZ': round(self.insurance_monthly_benefit),
             'DSW_MASH': round(self.insurance_total_included),
-            'DSW_TOTL': self.total_payment,
-            'DSW_BIME': self.haghe_bime_bime_shavande,
+            'DSW_TOTL': round(self.insurance_total_included),
+            'DSW_BIME': round(self.haghe_bime_bime_shavande),
             'DSW_PRATE': 0,
             'DSW_JOB': self.workshop_personnel.title.code,
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),

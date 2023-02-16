@@ -1,0 +1,111 @@
+{% load report_filters %}
+{% for form in forms %}
+
+    <div class="col-sm-12 mt-3">
+    <span class="text-center">
+        صورت دستمزد و حقوق و مزایای کارکنان در ماه {{ form.month_display }} سال {{ form.year }}
+    </span>
+        <table class="table table-bordered table-striped mt-5">
+            <tr>
+                <th class="text-center">شماره کارگاه</th>
+                <th class="text-center">{{ form.workshop.workshop_code }}</th>
+                <th class="text-center"> نام کارفرما</th>
+                <th class="text-center">{{ form.workshop.employer_name }}</th>
+                <th class="text-center">نشانی کارگاه</th>
+                <th class="text-center">{{ form.workshop.address }}</th>
+            </tr>
+        </table>
+        <table class="table table-bordered table-striped mt-1">
+            <tr>
+                <th class="text-center">ردیف</th>
+                <th class="text-center">شماره بیمه</th>
+                <th class="text-center"> نام و نام خانوادگی</th>
+                <th class="text-center">شغل</th>
+                <th class="text-center">کد ملی</th>
+                <th class="text-center">کارکرد</th>
+                <th class="text-center">دستمزد روزانه</th>
+                <th class="text-center">دستمزد ماهانه</th>
+                <th class="text-center">مزایای ماهانه</th>
+                <th class="text-center">مجموع دستمزد و مزایای مشمول</th>
+                <th class="text-center">مجموع کل دستمزد و مزایای ماهانه</th>
+                <th class="text-center">حق بیمه سهم بیمه شده</th>
+            </tr>
+            {% for item in form.list_of_pay_item.all %}
+                {% if item.is_month_insurance %}
+                <tr>
+                    <td>
+                        {{ forloop.counter }}
+                    </td>
+                    <td>
+                        {{ item.workshop_personnel.personnel.insurance_code }}
+                    </td>
+                    <td>
+                        {{ item.workshop_personnel.personnel.full_name }}
+                    </td>
+                    <td>
+                        {{ item.workshop_personnel.title.name }}
+                    </td>
+                    <td>
+                        {{ item.workshop_personnel.personnel.identity_code }}
+                    </td>
+                    <td>
+                        {{ item.insurance_worktime }}
+                    </td>
+                    <td>
+                        {{ item.data_for_insurance.DSW_ROOZ }}
+                    </td>
+                    <td>
+                        {{ item.data_for_insurance.DSW_MAH }}
+                    </td>
+                    <td>
+                        {{ item.data_for_insurance.DSW_MAZ }}
+                    </td>
+                    <td>
+                        {{ item.data_for_insurance.DSW_MASH }}
+                    </td>
+                    <td>
+                        {{ item.data_for_insurance.DSW_TOTL }}
+                    </td>
+                    <td>
+                        {{ item.haghe_bime_bime_shavande_with_comma }}
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <td class="text-center" colspan="5">
+                    جمع
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TDD }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TROOZ }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TMAH }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TMAZ }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TMASH }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TTOTL }}
+                </td>
+                <td>
+                    {{ form.data_for_insurance.DSK_TBIME }}
+                </td>
+
+            </tr>
+
+        </table>
+        <span class="text-center">
+            حق بیمه سهم کارفرما :  {{ form.data_for_insurance.DSK_TKOSO }}
+    </span>
+
+    </div>
+{% endfor %}
+
+
