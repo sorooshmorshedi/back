@@ -8,7 +8,7 @@
                 <th class="text-center">نام و نام خانوادگی</th>
                 <th class="text-center">حقوق معوقه</th>
                 <th class="text-center"> حقوق قابل پرداخت ماه جاری</th>
-                <th class="text-center"> جمع حقوق قابل پرداخت تا ماه</th>
+                <th class="text-center"> جمع حقوق قابل پرداخت تا این ماه</th>
                 <th class="text-center"> مبلغ پرداختی</th>
                 <th class="text-center"> حقوق پرداخت نشده</th>
             </tr>
@@ -16,20 +16,20 @@
                 <tr>
                     <td class="text-center">{{ forloop.counter }}</td>
                     <td class="text-center">{{ item.name }}</td>
-                    <td class="text-center">{{ item.previous }}</td>
-                    <td class="text-center">{{ item.payable }}</td>
-                    <td class="text-center">{{ item.total }}</td>
-                    <td class="text-center">{{ item.paid }}</td>
-                    <td class="text-center">{{ item.unpaid }}</td>
+                    <td class="text-center">{{ item.previous }} {% if item.previous_amount < 0 %} - {% endif %} </td>
+                    <td class="text-center">{{ item.payable }} {% if item.payable_amount < 0 %} - {% endif %} </td>
+                    <td class="text-center">{{ item.total }} {% if item.total_amount < 0 %} - {% endif %} </td>
+                    <td class="text-center">{{ item.paid }} {% if item.paid_amount < 0 %} - {% endif %} </td>
+                    <td class="text-center">{{ item.unpaid }} {% if item.unpaid_amount < 0 %} - {% endif %} </td>
                 </tr>
             {% endfor %}
             <tr>
                 <td class="text-center" colspan="2">جمع</td>
-                <td class="text-center">{{ form.total_un_paid_of_year }}</td>
-                <td class="text-center">{{ form.total_payable }}</td>
-                <td class="text-center">{{ form.total_un_paid }}</td>
-                <td class="text-center">{{ form.total_paid }}</td>
-                <td class="text-center">{{ form.un_paid }}</td>
+                <td class="text-center"> {{ form.total_un_paid_of_year_with_comma }} {% if form.total_un_paid_of_year < 0 %} - {% endif %} </td>
+                <td class="text-center">{{ form.total_payable_with_comma }} {% if form.total_payable < 0 %} - {% endif %} </td>
+                <td class="text-center">{{ form.total_un_paid_with_comma }} {% if form.total_un_paid < 0 %} - {% endif %} </td>
+                <td class="text-center">{{ form.total_paid_with_comma }} {% if form.total_paid < 0 %} - {% endif %} </td>
+                <td class="text-center">{{ form.un_paid_with_comma }} {% if form.un_paid < 0 %} - {% endif %} </td>
             </tr>
 
         </table>

@@ -3264,6 +3264,27 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
+    @staticmethod
+    def with_comma(input_amount):
+        if input_amount != 0:
+            amount = str(round(input_amount))[::-1]
+            loop = int(len(amount) / 3)
+            if len(amount) < 4:
+                return str(round(input_amount))
+            else:
+                counter = 0
+                for i in range(1, loop + 1):
+                    index = (i * 3) + counter
+                    counter += 1
+                    amount = amount[:index] + ',' + amount[index:]
+            if amount[-1] == ',':
+                amount = amount[:-1]
+            res = amount[::-1]
+            res = res.replace('-', '')
+            return res
+        else:
+            return 0
+
     @property
     def pay_verify(self):
         if self.bank_pay_date and self.ultimate:
@@ -3278,6 +3299,27 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         for item in list_items:
             total += item.paid_amount
         return total
+
+    @property
+    def total_paid_with_comma(self):
+        return self.with_comma(self.total_paid)
+
+    @property
+    def total_un_paid_of_year_with_comma(self):
+        return self.with_comma(self.total_un_paid_of_year)
+
+    @property
+    def total_payable_with_comma(self):
+        return self.with_comma(self.total_payable)
+
+    @property
+    def total_un_paid_with_comma(self):
+        return self.with_comma(self.total_un_paid)
+
+    @property
+    def un_paid_with_comma(self):
+        return self.with_comma(self.un_paid)
+
 
     @property
     def total_payable(self):
@@ -3347,13 +3389,11 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         previous_lists = ListOfPay.objects.filter(
             Q(workshop=self.workshop) &
             Q(use_in_calculate=self.use_in_calculate) &
-            Q(year=self.year) &
-            Q(month__lt=self.month) &
             Q(ultimate=True) &
             Q(pay_done=True)
         )
         for item in previous_lists:
-            if not item.bank_pay_date:
+            if not item.bank_pay_date and item.id != self.id:
                 return False
         return True
 
@@ -3614,7 +3654,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     def bank_report(self):
         response = []
         for item in self.list_of_pay_item.all():
-            response.append(item.bank_report)
+            if item.payable > 0:
+                response.append(item.bank_report)
         return response
 
     @property
@@ -3813,7 +3854,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             return True
 
     @staticmethod
-    def with_comma(input_amount):
+    def with_comma(input_amount, no_minus=False):
         if input_amount != 0:
             amount = str(round(input_amount))[::-1]
             loop = int(len(amount) / 3)
@@ -3827,6 +3868,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
                     amount = amount[:index] + ',' + amount[index:]
             if amount[-1] == ',':
                 amount = amount[:-1]
+            if no_minus:
+                return amount[::-1].replace('-', '')
             return amount[::-1]
         else:
             return 0
@@ -4702,14 +4745,20 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def bank_report_with_comma(self):
         response = {}
         response['name'] = self.workshop_personnel.personnel.full_name
-        response['previous'] = self.with_comma(self.get_unpaid_of_year)
-        response['payable'] = self.with_comma(self.payable)
-        response['unpaid'] = self.with_comma(self.unpaid)
-        response['total'] = self.with_comma(self.total_unpaid)
-        response['paid'] = self.with_comma(self.paid_amount)
+        response['previous'] = self.with_comma(self.get_unpaid_of_year, True)
+        response['payable'] = self.with_comma(self.payable, True)
+        response['unpaid'] = self.with_comma(self.unpaid, True)
+        response['total'] = self.with_comma(self.total_unpaid, True)
+        response['paid'] = self.with_comma(self.paid_amount, True)
         response['card'] = self.workshop_personnel.personnel.bank_cart_number
         response['account'] = self.workshop_personnel.personnel.account_bank_number
         response['sheba'] = self.workshop_personnel.personnel.sheba_number
+        response['previous_amount'] = self.get_unpaid_of_year
+        response['payable_amount'] = self.payable
+        response['unpaid_amount'] = self.unpaid
+        response['total_amount'] = self.total_unpaid
+        response['paid_amount'] = self.paid_amount
+
         return response
 
     @property
