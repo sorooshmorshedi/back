@@ -2163,7 +2163,7 @@ class PayFormExportView(ListOfPayListView, BaseExportView):
              'مبلغ پرداختی', 'حقوق پرداخت نشده']
         ]
         for forms in list_of_pay:
-            for form in forms.bank_report:
+            for form in forms.form_bank_report:
                 data.append([
                     form['name'],
                     form['previous'],

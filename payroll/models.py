@@ -3426,9 +3426,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             Q(ultimate=True) &
             Q(pay_done=True)
         )
-        for item in future_lists:
-            if item.bank_pay_date:
-                return False
+        if len(future_lists) > 0:
+            return False
         return True
 
     @property
@@ -3703,6 +3702,13 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         for item in self.list_of_pay_item.all():
             if item.payable > 0:
                 response.append(item.bank_report)
+        return response
+
+    @property
+    def form_bank_report(self):
+        response = []
+        for item in self.list_of_pay_item.all():
+            response.append(item.bank_report)
         return response
 
     @property
