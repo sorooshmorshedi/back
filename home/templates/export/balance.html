@@ -1,24 +1,24 @@
 {% load report_filters %}
 
 <div class="col-sm-12 mt-3">
-    <table class="table table-bordered table-striped">
+    <table class="center-block">
         <tr>
             <th class="text-center">
-                نام و نام خانوادگی
+                نام و نام خانوادگی : {{ forms.personnel.full_name }}
             </th>
             <td class="text-center">
-                {{ forms.personnel.full_name }}
+
             </td>
             <th class="text-center">
-                کد ملی
+                کد ملی : {{ forms.personnel.national_code }}
             </th>
             <td class="text-center">
-                {{ forms.personnel.national_code }}
+
             </td>
             <th class="text-center">
-                کد پرسنلی
+                کد پرسنلی : {{ forms.personnel.personnel_code }}
             <td class="text-center">
-                {{ forms.personnel.personnel_code }}
+
             </td>
         </tr>
 
@@ -26,7 +26,7 @@
     <table class="table table-bordered table-striped mt-5">
         <tr>
             <th class="text-center">
-                سال حقوق
+                ردیف
             </th>
             <th class="text-center">
                 تاریخ
@@ -46,42 +46,40 @@
             </th>
         </tr>
         {% for item in form %}
-            <tr>
-            <tr>
-                <td class="text-center">
-                    {{ forloop.counter }}
-                </td>
-                <td class="text-center">
-                    {{ item.date }}
-                </td>
-                <td class="text-center">
-                    {{ item.explanation }}
-                </td>
-                <td class="text-center">
-                    {{ item.paid_comma }} {% if item.paid < 0 %} - {% endif %}
-                </td>
-                <td class="text-center">
-                    {{ item.amount_comma }} {% if item.amount < 0 %} - {% endif %}
-                </td>
-                <td class="text-center">
-                    {{ item.unpaid_comma }} {% if item.upaid < 0 %} - {% endif %}
-            </tr>
-
+                <tr>
+                    <td class="text-center">
+                        {{ forloop.counter }}
+                    </td>
+                    <td class="text-center">
+                        {{ item.date }}
+                    </td>
+                    <td class="text-center">
+                        {{ item.explanation }}
+                    </td>
+                    <td class="text-center">
+                        {{ item.paid_comma }} {% if item.paid < 0 %} - {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {{ item.amount_comma }} {% if item.amount < 0 %} - {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {{ item.total_comma }} {% if item.total < 0 %} - {% endif %}
+                </tr>
         {% endfor %}
-    <tr>
-        <td colspan="3" class="text-center">
-            جمع
-        </td>
-        <td class="text-center">
-            {{ forms.balance_total.paid_total }}
-        </td>
-        <td class="text-center">
-            {{ forms.balance_total.amount_total }}
-        </td>
-        <td class="text-center">
-            {{ forms.balance_total.mande }}
-        </td>
-    </tr>
+        <tr>
+            <td colspan="3" class="text-center">
+                جمع
+            </td>
+            <td class="text-center">
+                {{ forms.balance_total.paid_total }}
+            </td>
+            <td class="text-center">
+                {{ forms.balance_total.amount_total }}
+            </td>
+            <td class="text-center">
+                {{ forms.balance_total.mande }}
+            </td>
+        </tr>
     </table>
 
 </div>

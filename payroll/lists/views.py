@@ -74,6 +74,61 @@ def write_insurance_diskette(request, pk):
     return response
 
 
+def write_row_insurance_diskette(request, pk1, pk2):
+    item = ListOfPay.objects.get(pk=pk1)
+    data = item.data_for_insurance_row(pk2)
+    filename = "DSKKAR.txt"
+    content = ''
+    content += str(data['DSK_ID'])
+    content += ','
+    content += str(data['DSK_NAME'])
+    content += ','
+    content += str(data['DSK_FARM'])
+    content += ','
+    content += str(data['DSK_ADRS'])
+    content += ','
+    content += str(data['DSK_KIND'])
+    content += ','
+    content += str(data['DSK_YY'])
+    content += ','
+    content += str(data['DSK_MM'])
+    content += ','
+    content += str(data['DSK_LISTNO'])
+    content += ','
+    content += str(data['DSK_DISC'])
+    content += ','
+    content += str(data['DSK_NUM'])
+    content += ','
+    content += str(data['DSK_TDD'])
+    content += ','
+    content += str(data['DSK_TROOZ'])
+    content += ','
+    content += str(data['DSK_TMAH'])
+    content += ','
+    content += str(data['DSK_TMAZ'])
+    content += ','
+    content += str(data['DSK_TMASH'])
+    content += ','
+    content += str(data['DSK_TTOTL'])
+    content += ','
+    content += str(data['DSK_TBIME'])
+    content += ','
+    content += str(data['DSK_TKOSO'])
+    content += ','
+    content += str(data['DSK_TBIC'])
+    content += ','
+    content += str(data['DSK_RATE'])
+    content += ','
+    content += str(data['DSK_PRATE'])
+    content += ','
+    content += str(data['DSK_BIMH'])
+    content += ','
+    content += str(data['DSK_PYM'])
+    response = HttpResponse(content, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+    return response
+
+
 def write_person_insurance_diskette(request, pk):
     item = ListOfPayItem.objects.get(pk=pk)
     data = item.data_for_insurance
@@ -202,6 +257,71 @@ def workshop_person_insurance_diskette(request, pk):
     return response
 
 
+def row_person_insurance_diskette(request, pk1, pk2):
+    items = ListOfPay.objects.get(pk=pk1)
+    filename = "DSKWOR.txt"
+    content = ''
+    for item in items.list_of_pay_item.filter(contract_row__id=pk2):
+        if item.is_month_insurance:
+            data = item.data_for_insurance
+            content += str(data['DSW_ID'])
+            content += ','
+            content += str(data['DSW_YY'])
+            content += ','
+            content += str(data['DSW_MM'])
+            content += ','
+            content += str(data['DSW_LISTNO'])
+            content += ','
+            content += str(data['DSW_ID1'])
+            content += ','
+            content += str(data['DSW_FNAME'])
+            content += ','
+            content += str(data['DSW_LNAME'])
+            content += ','
+            content += str(data['DSW_DNAME'])
+            content += ','
+            content += str(data['DSW_IDNO'])
+            content += ','
+            content += str(data['DSW_IDPLC'])
+            content += ','
+            content += str(data['DSW_IDATE'])
+            content += ','
+            content += str(data['DSW_BDATE'])
+            content += ','
+            content += str(data['DSW_SEX'])
+            content += ','
+            content += str(data['DSW_NAT'])
+            content += ','
+            content += str(data['DSW_OCP'])
+            content += ','
+            content += str(data['DSW_SDATE'])
+            content += ','
+            content += str(data['DSW_EDATE'])
+            content += ','
+            content += str(data['DSW_DD'])
+            content += ','
+            content += str(round(data['DSW_ROOZ']))
+            content += ','
+            content += str(round(data['DSW_MAH']))
+            content += ','
+            content += str(round(data['DSW_MAZ']))
+            content += ','
+            content += str(round(data['DSW_MASH']))
+            content += ','
+            content += str(round(data['DSW_TOTL']))
+            content += ','
+            content += str(round(data['DSW_BIME']))
+            content += ','
+            content += str(data['DSW_PRATE'])
+            content += ','
+            content += str(data['DSW_JOB'])
+            content += ','
+            content += str(data['PER_NATCOD'])
+    response = HttpResponse(content, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+    return response
+
+
 def write_tax_diskette(request, pk):
     item = ListOfPay.objects.get(pk=pk)
     items = item.list_of_pay_item.all()
@@ -257,7 +377,7 @@ def write_tax_diskette(request, pk):
 
 def write_summary_tax_diskette(request, pk):
     item = ListOfPay.objects.get(pk=pk)
-    filename = "WH"
+    filename = "WK"
     filename += str(item.year)
     month = str(item.month)
     if len(month) < 2:
@@ -577,6 +697,7 @@ class ListOfPayItemLessListView(generics.ListAPIView):
                 items.append(item)
         return ListOfPayItem.objects.hasAccess('get', self.permission_codename)\
             .filter(list_of_pay__in=items)
+
 
 class ListOfPayItemListView(generics.ListAPIView):
     permission_classes = (IsAuthenticated, BasicCRUDPermission)

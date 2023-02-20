@@ -1304,7 +1304,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
     def payment_balance(self):
         response = []
         for item in self.list_of_pay_item.filter(list_of_pay__ultimate=True):
-            if item.list_of_pay.pay_done:
+            if item.list_of_pay.pay_done and item.paid_amount > 0:
                 month = {}
                 month['amount'] = 0
                 month['amount_comma'] = 0
@@ -1315,7 +1315,7 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 month['date'] = item.list_of_pay.bank_pay_date
                 month['bank_date'] = item.list_of_pay.bank_pay_date
                 month['total'] = item.total_unpaid
-                month['total_comma'] = self.with_comma(item.total_unpaid, True)
+                month['total_comma'] = self.with_comma((item.total_unpaid - item.paid_amount), True)
                 month['explanation'] = 'پرداخت حقوق'
                 response.append(month)
             month = {}
@@ -1328,12 +1328,13 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             month['date'] = item.list_of_pay.end_date
             month['bank_date'] = ' ---- '
             month['total'] = item.total_unpaid
+            month['total_comma'] = self.with_comma(item.total_unpaid, True)
+
             month['explanation'] = 'شناسایی حقوق پرداختنی {} سال {}'.format(item.list_of_pay.month_display,
-                                                                            item.list_of_pay.year )
+                                                                            item.list_of_pay.year)
             response.append(month)
         print(response.reverse())
         return response
-
 
     @property
     def balance_total(self):
@@ -1349,7 +1350,6 @@ class WorkshopPersonnel(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             'mande': self.with_comma(mande),
         }
         return total
-
 
     @property
     def real_work(self):
@@ -1746,12 +1746,12 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
 
     @property
     def is_insurance_editable(self):
-        lists = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) & Q(list_of_pay__use_in_calculate=True))
+        list_of_pays = self.list_of_pay_item.filter(Q(list_of_pay__ultimate=True) & Q(list_of_pay__use_in_calculate=True))
         is_in = []
-        for list in lists:
-            check, day = list.check_insurance
+        for list_of_pay in list_of_pays:
+            check, day = list_of_pay.check_insurance
             if check:
-                is_in.append(list.id)
+                is_in.append(list_of_pay.id)
         if len(is_in) > 0:
             return False
         else:
@@ -3308,6 +3308,14 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             ('deleteOwn.list_of_pay', 'حذف حقوق و دستمزد خود'),
         )
 
+    @property
+    def contract_rows(self):
+        contract_row_ids = []
+        for item in self.list_of_pay_item.all():
+            if item.contract_row:
+                contract_row_ids.append(item.contract_row.id)
+        return contract_row_ids
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
@@ -3367,7 +3375,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     def un_paid_with_comma(self):
         return self.with_comma(self.un_paid)
 
-
     @property
     def total_payable(self):
         total = 0
@@ -3392,7 +3399,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             total += item.total_unpaid
         return total
 
-
     @property
     def un_paid(self):
         total = 0
@@ -3400,7 +3406,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         for item in list_items:
             total += item.unpaid
         return total
-
 
     @property
     def is_editable(self):
@@ -3468,6 +3473,9 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 'غیر قطعی'
 
+    def row_list(self, pk):
+        return self.list_of_pay_item.filter(contract_row__id=pk)
+
     @property
     def is_use_in_calculate(self):
         if self.use_in_calculate:
@@ -3509,7 +3517,6 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def data_for_insurance(self):
-        contracts = self.get_contracts
         personnel_count = 0
         items = self.list_of_pay_item
         total_worktime = 0
@@ -3551,6 +3558,54 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_PRATE': 0,
             'DSK_BIMH': 0,
             'DSK_PYM': '000',
+        }
+        return DSKKAR
+
+    def data_for_insurance_row(self, pk):
+        contract_row = ContractRow.objects.get(pk=pk)
+        personnel_count = 0
+        items = self.list_of_pay_item
+        total_worktime = 0
+        total_day_pay = 0
+        total_month_pay = 0
+        total_benefit = 0
+        total_base = 0
+        total_insurance = 0
+        for item in items.filter(contract_row=contract_row):
+            if item.is_month_insurance:
+                total_worktime += item.insurance_worktime
+                total_day_pay += item.insurance_daily_payment
+                total_month_pay += item.insurance_monthly_payment
+                total_benefit += item.insurance_monthly_benefit
+                total_base += item.insurance_total_included
+                total_insurance += item.haghe_bime_bime_shavande
+                personnel_count += 1
+        DSKKAR = {
+            'list_of_pays': self.list_of_pay_item.filter(contract_row=contract_row),
+            'workshop': self.workshop,
+            'DSK_ID': str(self.workshop.workshop_code),
+            'DSK_NAME': self.workshop.name,
+            'DSK_FARM': self.workshop.employer_name,
+            'DSK_ADRS': self.workshop.address[:100],
+            'DSK_KIND': 0,
+            'DSK_YY': int(str(self.year)[2:]),
+            'DSK_MM': self.month,
+            'DSK_LISTNO': '0000',
+            'DSK_DISC': '',
+            'DSK_NUM': personnel_count,
+            'DSK_TDD': total_worktime,
+            'DSK_TROOZ': round(total_day_pay),
+            'DSK_TMAH': round(total_month_pay),
+            'DSK_TMAZ': round(total_benefit),
+            'DSK_TMASH': round(total_benefit + total_month_pay),
+            'DSK_TTOTL': round(total_base),
+            'DSK_TBIME': round(total_insurance),
+            'DSK_TKOSO': round((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh),
+            'DSK_TBIC': round((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh),
+            'DSK_RATE': self.workshop.employer_insurance_contribution,
+            'DSK_PRATE': 0,
+            'DSK_BIMH': 0,
+            'DSK_PYM': contract_row.contract_row,
         }
         return DSKKAR
 
@@ -3728,6 +3783,63 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         for item in self.list_of_pay_item.all():
             tax += item.calculate_month_tax
         return tax
+
+    @property
+    def total(self):
+        response = {
+            'normal_worktime': 0,
+            'real_worktime': 0,
+            'hoghoogh_mahane': 0,
+            'sanavat_mahane': 0,
+            'ezafe_kari_total': 0,
+            'tatil_kari_total': 0,
+            'shab_kari_total': 0,
+            'mission_total': 0,
+            'aele_mandi': 0,
+            'haghe_maskan': 0,
+            'haghe_jazb': 0,
+            'kharo_bar': 0,
+            'sayer_hr': 0,
+            'haghe_sanavat_total': 0,
+            'padash_total': 0,
+            'sayer_ezafat': 0,
+            'total_payment': 0,
+            'haghe_bime_bime_shavande': 0,
+            'total_tax': 0,
+            'dept_amount': 0,
+            'loan_amount': 0,
+            'check_and_get_optional_deduction_episode': 0,
+            'kasre_kar_total': 0,
+            'sayer_kosoorat': 0,
+            'payable': 0,
+                    }
+        for item in self.list_of_pay_item.all():
+            response['normal_worktime'] += item.normal_worktime
+            response['real_worktime'] += item.real_worktime
+            response['hoghoogh_mahane'] += item.hoghoogh_mahane
+            response['sanavat_mahane'] += item.sanavat_mahane
+            response['ezafe_kari_total'] += item.ezafe_kari_total
+            response['tatil_kari_total'] += item.tatil_kari_total
+            response['shab_kari_total'] += item.shab_kari_total
+            response['mission_total'] += item.mission_total
+            response['aele_mandi'] += item.aele_mandi
+            response['haghe_maskan'] += item.haghe_maskan
+            response['haghe_jazb'] += item.haghe_jazb
+            response['kharo_bar'] += item.kharo_bar
+            response['sayer_hr'] += item.sayer_hr
+            response['haghe_sanavat_total'] += item.haghe_sanavat_total
+            response['padash_total'] += item.padash_total
+            response['sayer_ezafat'] += item.sayer_ezafat
+            response['total_payment'] += item.total_payment
+            response['haghe_bime_bime_shavande'] += item.haghe_bime_bime_shavande
+            response['total_tax'] += item.total_tax
+            response['dept_amount'] += item.dept_amount
+            response['loan_amount'] += item.loan_amount
+            response['check_and_get_optional_deduction_episode'] += item.check_and_get_optional_deduction_episode
+            response['kasre_kar_total'] += item.kasre_kar_total
+            response['sayer_kosoorat'] += item.sayer_kosoorat
+            response['payable'] += item.payable
+        return response
 
     @property
     def sign_date(self):
@@ -4566,11 +4678,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def gheyre_naghdi_pension_whit_comma(self):
         return self.with_comma(self.gheyre_naghdi_tax_pension)
 
-
     @property
     def payable(self):
         payable_amount = Decimal(round(self.total_payment) - round(self.total_tax) - round(self.dept_amount) - \
-                                 round(self.check_and_get_optional_deduction_episode) - round(self.haghe_bime_bime_shavande) - \
+                                 round(self.check_and_get_optional_deduction_episode) - round(
+            self.haghe_bime_bime_shavande) - \
                                  round(self.loan_amount)) - round(self.kasre_kar_total) - round(self.sayer_kosoorat)
         return round(payable_amount)
 
@@ -4674,7 +4786,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         return save_leave_days, round(save_leave_amount), round(pay_base)
 
-
     @property
     def get_save_leave_day(self):
         day, amount, day_amount = self.calculate_save_leave
@@ -4761,7 +4872,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             base_pay = self.list_of_pay.workshop.hade_aghal_hoghoogh
         padash = round(base_pay) * 60 * (self.real_worktime + self.illness_leave_day) / 365
         padash_limit = round(self.list_of_pay.workshop.hade_aghal_hoghoogh) * 90 * (
-                    self.real_worktime + self.illness_leave_day) / 365
+                self.real_worktime + self.illness_leave_day) / 365
 
         if padash > padash_limit:
             return padash_limit
@@ -5113,7 +5224,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def absence_and_days(self):
         return self.absence_day + self.illness_leave_day + self.without_salary_leave_day
 
-
     @property
     def insurance_worktime(self):
         is_insurance, insurance_worktime = self.check_insurance
@@ -5130,7 +5240,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def insurance_included_limit(self):
         return self.workshop_personnel.workshop.hade_aghal_hoghoogh * 7 * self.list_of_pay.month_days
-
 
     @property
     def insurance_total_included(self):
@@ -5325,7 +5434,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def naghdi_pension_with_comma(self):
         return self.with_comma(self.tax_naghdi_pension)
 
-
     @property
     def tamin_ejtemaee_moafiat(self):
         is_tax, tax_day = self.check_tax
@@ -5487,7 +5595,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def tax_included_payment(self):
         is_tax, tax_day = self.check_tax
         if is_tax:
-            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales +\
+            total_naghdi = self.tax_naghdi_un_pension + self.tax_naghdi_pension + self.ezafe_kari_nakhales + \
                            self.padash_total + self.get_hagh_sanavat_and_save_leaves
 
             included_naghdi = total_naghdi - self.moaf_sum
@@ -5593,9 +5701,8 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
                         next_from_amount = tax_row.to_amount + Decimal(1)
                         tax_row = tax_rows.get(from_amount=next_from_amount)
-
-        return round(tax) - round(self.get_last_tax)
-
+        final_tax = round(tax) - round(self.get_last_tax)
+        return final_tax if final_tax >= 0 else 0
 
     @property
     def calculate_yearly_eydi_tax(self):
@@ -5677,7 +5784,6 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
         else:
             return 0
 
-
     @property
     def calculate_monthly_eydi_moafiat(self):
         is_tax, tax_day = self.check_tax
@@ -5714,4 +5820,3 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
         self.calculate_payment = False
         super().save(*args, **kwargs)
-

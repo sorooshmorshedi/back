@@ -9,14 +9,15 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
     NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
     AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView, AdjustmentExportView, TaxExportView, \
-    InsuranceCardexExportview
+    InsuranceCardexExportview, ContractRowInsuranceReportExportView, RowInsuranceCardexExportview
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
     write_person_insurance_diskette, \
     write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, \
-    AdjustmentListView, PayListView, workshop_person_insurance_diskette
+    AdjustmentListView, PayListView, workshop_person_insurance_diskette, row_person_insurance_diskette, \
+    write_row_insurance_diskette
 from payroll.verify_views import WorkshopVerifyApi, WorkshopUnVerifyApi, WorkshopTaxRowVerifyApi, \
     WorkshopTaxRowUnVerifyApi, PersonnelVerifyApi, PersonnelUnVerifyApi, PersonnelFamilyVerifyApi, \
     PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, WorkshopPersonnelVerifyApi, \
@@ -153,13 +154,17 @@ urlpatterns = [
     path('diskette/tax/summary/<int:pk>/', write_summary_tax_diskette),
 
     path('diskette/insurance/<int:pk>/', write_insurance_diskette),
+    path('diskette/contractRowInsurance/<int:pk1>/<int:pk2>/', write_row_insurance_diskette),
     path('diskette/insurance/person/<int:pk>/', write_person_insurance_diskette),
     path('diskette/insurance/workshopPerson/<int:pk>/', workshop_person_insurance_diskette),
+    path('diskette/insurance/contractRowPerson/<int:pk1>/<int:pk2>/', row_person_insurance_diskette),
 
     path('absence/report/<int:year>/<str:month>/', AbsenceReportExportView.as_view()),
     path('saveLeave/report/<int:year>/<str:month>/', SaveLeaveReportExportView.as_view()),
     path('eydi/report/<int:year>/<str:month>/', EydiReportExportView.as_view()),
     path('sanavat/report/<int:year>/<str:month>/', SanavatReportExportView.as_view()),
+    path('rowInsurance/<str:export_type>/<int:pk>/', ContractRowInsuranceReportExportView.as_view()),
+    path('rowCardex/<str:export_type>/<int:pk>/', RowInsuranceCardexExportview.as_view()),
     path('settlement/<int:personnel>/<str:export_type>', SettlementExportView.as_view()),
 
     path('listOfPay/pay/<int:pk>/', ListOfPayPaymentAPI.as_view(), name='listOfPayPaymentAPI'),

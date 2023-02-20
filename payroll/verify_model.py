@@ -44,6 +44,7 @@ class VerifyMixin(models.Model):
                 amount = amount[:-1]
             if no_minus:
                 return amount[::-1].replace('-', '')
-            return amount[::-1]
+            res = amount[::-1]
+            return res
         else:
             return 0

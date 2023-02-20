@@ -30,7 +30,7 @@
                 <th class="text-center">مجموع کل دستمزد و مزایای ماهانه</th>
                 <th class="text-center">حق بیمه سهم بیمه شده</th>
             </tr>
-            {% for item in form.list_of_pay_item.all %}
+            {% for item in items %}
                 {% if item.is_month_insurance %}
                 <tr>
                     <td>
@@ -77,25 +77,25 @@
                     جمع
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TDD }}
+                    {{ datas.DSK_TDD }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TROOZ }}
+                    {{ datas.DSK_TROOZ }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TMAH }}
+                    {{ datas.DSK_TMAH }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TMAZ }}
+                    {{ datas.DSK_TMAZ }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TMASH }}
+                    {{ datas.DSK_TMASH }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TTOTL }}
+                    {{ datas.DSK_TTOTL }}
                 </td>
                 <td>
-                    {{ form.data_for_insurance.DSK_TBIME }}
+                    {{ datas.DSK_TBIME }}
                 </td>
 
             </tr>
@@ -104,11 +104,11 @@
             <table class="table table-bordered table-striped mt-5">
             <tr>
                 <th class="text-center">جمع حق بیمه سهم کارفرما</th>
-                <th class="text-center">{{ form.data_for_insurance.DSK_TKOSO }}</th>
+                <th class="text-center">{{ datas.DSK_TKOSO }}</th>
                 <th class="text-center">جمع بیمه بیکاری</th>
-                <th class="text-center">{{ form.data_for_insurance.DSK_TBIC }}</th>
+                <th class="text-center">{{ datas.DSK_TBIC }}</th>
                 <th class="text-center">جمع کل حق بیمه کارگر</th>
-                <th class="text-center">{{ form.data_for_insurance.DSK_TBIME }}</th>
+                <th class="text-center">{{ datas.DSK_TBIME }}</th>
             </tr>
         </table>
 

@@ -1,0 +1,102 @@
+{% load report_filters %}
+
+<div class="col-sm-12 mt-3">
+    {% for form in forms %}
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th>کد کارگاه</th>
+                <td class="text-center">{{ datas.DSK_ID }}</td>
+            </tr>
+            <tr>
+                <th>نام کارگاه</th>
+                <td class="text-center">{{ datas.DSK_NAME }}</td>
+            </tr>
+            <tr>
+                <th>نام کارفرما</th>
+                <td class="text-center">{{ datas.DSK_FARM }}</td>
+            </tr>
+            <tr>
+                <th>آدرس کارگاه</th>
+                <td class="text-center">{{ datas.DSK_ADRS }}</td>
+            </tr>
+            <tr>
+                <th>نوع لیست</th>
+                <td class="text-center">{{ datas.DSK_KIND }}</td>
+            </tr>
+            <tr>
+                <th>سال عملکرد</th>
+                <td class="text-center">{{ datas.DSK_YY }}</td>
+            </tr>
+            <tr>
+                <th>ماه عملکرد</th>
+                <td class="text-center">{{ datas.DSK_MM }} </td>
+            </tr>
+            <tr>
+                <th>شماره لیست</th>
+                <td class="text-center">{{ datas.DSK_LISTNO }}</td>
+            </tr>
+            <tr>
+                <th>شرح لیست</th>
+                <td class="text-center">{{ datas.DSK_DISC }}</td>
+            </tr>
+            <tr>
+                <th>تعداد کارکنان</th>
+                <td class="text-center">{{ datas.DSK_NUM }}</td>
+            </tr>
+            <tr>
+                <th>مجموع روز های کارکرد</th>
+                <td class="text-center">{{ datas.DSK_TDD }}</td>
+            </tr>
+            <tr>
+                <th>مجموع دستمزد روزانه</th>
+                <td class="text-center">{{ datas.DSK_TROOZ }}</td>
+            </tr>
+            <tr>
+                <th>مجموع دستمزد ماهانه</th>
+                <td class="text-center">{{ datas.DSK_TMAH }}</td>
+            </tr>
+            <tr>
+                <th>مجموع مزایای ماهانه مشمول</th>
+                <td class="text-center">{{ datas.DSK_TMAZ }}</td>
+            </tr>
+            <tr>
+                <th>مجموع دستمزد و مزایای ماهانه مشمول</th>
+                <td class="text-center">{{ datas.DSK_TMASH }}</td>
+            </tr>
+            <tr>
+                <th>مجموع کل دستمزد و مزایای ماهانه</th>
+                <td class="text-center">{{ datas.DSK_TTOTL }}</td>
+            </tr>
+            <tr>
+                <th>مجموع حق بیمه سهم بیمه شده</th>
+                <td class="text-center">{{ datas.DSK_TBIME }}</td>
+            </tr>
+            <tr>
+                <th>مجموع حق بیمه سهم کارفرما</th>
+                <td class="text-center">{{ datas.DSK_TKOSO }}</td>
+            </tr>
+            <tr>
+                <th>مجموع حق بیمه بیکاری</th>
+                <td class="text-center">{{ datas.DSK_TBIC }}</td>
+            </tr>
+            <tr>
+                <th>نرخ حق بیمه</th>
+                <td class="text-center">{{ datas.DSK_RATE }}</td>
+            </tr>
+            <tr>
+                <th>نرخ پورسانتاژ</th>
+                <td class="text-center">{{ datas.DSK_PRATE }}</td>
+            </tr>
+            <tr>
+                <th>نرخ مشاغل زیان آور</th>
+                <td class="text-center">{{ datas.DSK_BIMH }}</td>
+            </tr>
+            <tr>
+                <th>ردیف پیمان</th>
+                <td class="text-center">{{ datas.DSK_PYM }}</td>
+            </tr>
+            <tr>
+            </tr>
+        </table>
+    {% endfor %}
+</div>

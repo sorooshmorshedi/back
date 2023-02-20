@@ -2557,6 +2557,179 @@ class WorkshopInsuranceReportExportView(ListOfPayInsuranceListView, BaseExportVi
         return data
 
 
+class ContractRowInsuranceReportExportView(ListOfPayInsuranceListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'contract_row_insurance_report'
+
+    context = {
+        'title': 'گزارش بیمه',
+    }
+    pagination_class = None
+
+    def __init__(self):
+        self.contract_row = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, pk,  *args, **kwargs):
+        self.contract_row = pk
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+        datas = qs.first().data_for_insurance_row(self.contract_row)
+        context = {
+            'datas': datas,
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user.get_full_name(),
+            'print_document': print_document
+        }
+
+        context['form_content_template'] = 'export/row_insurance_report_form_content.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['datas'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    @staticmethod
+    def get_xlsx_data(list_of_pay: ListOfPay):
+        data = [
+            [
+                'گزارش بیمه '
+            ],
+        ]
+        form = list_of_pay
+        data.append([
+            'کد کارگاه',
+            form['DSK_ID'],
+        ])
+        data.append([
+            'نام کارگاه',
+            form['DSK_NAME'],
+        ])
+        data.append([
+            'نام کارفرما',
+            form['DSK_FARM'],
+        ])
+        data.append([
+            'آدرس کارگاه',
+            form['DSK_ADRS'],
+        ])
+        data.append([
+            'سال عملکرد',
+            form['DSK_YY'],
+        ])
+        data.append([
+            'ماه عملکرد',
+            form['DSK_MM'],
+        ])
+        data.append([
+            'شماره لیست',
+            form['DSK_LISTNO'],
+        ])
+        data.append([
+            'شرح لیست',
+            form['DSK_DISC'],
+        ])
+        data.append([
+            'تعداد کارکنان',
+            form['DSK_NUM'],
+        ])
+        data.append([
+            'مجموع روز های کارکرد',
+            form['DSK_TDD'],
+        ])
+        data.append([
+            'مجموع دستمزد روزانه',
+            form['DSK_TROOZ'],
+        ])
+        data.append([
+            'مجموع دستمزد ماهانه',
+            form['DSK_TMAH'],
+        ])
+        data.append([
+            'مجموع مزایای ماهانه مشمول',
+            form['DSK_TMAZ'],
+        ])
+        data.append([
+            'مجموع دستمزد و مزایای ماهانه مشمول',
+            form['DSK_TMASH'],
+        ])
+        data.append([
+            'مجموع دستمزد و مزایای ماهانه مشمول',
+            form['DSK_TMASH'],
+        ])
+        data.append([
+            'مجموع کل دستمزد و مزایای ماهانه',
+            form['DSK_TTOTL'],
+        ])
+        data.append([
+            'مجموع حق بیمه سهم بیمه شده',
+            form['DSK_TBIME'],
+        ])
+        data.append([
+            'مجموع حق بیمه سهم کارفرما',
+            form['DSK_TKOSO'],
+        ])
+        data.append([
+            'مجموع حق بیمه بیکاری',
+            form['DSK_TBIC'],
+        ])
+        data.append([
+            'نرخ حق بیمه',
+            form['DSK_RATE'],
+        ])
+        data.append([
+            'نرخ پورسانتاژ',
+            form['DSK_PRATE'],
+        ])
+        data.append([
+            'نرخ مشاغل زیان آور',
+            form['DSK_BIMH'],
+        ])
+        data.append([
+            'ردیف پیمان',
+            form['DSK_PYM'],
+        ])
+
+        return data
+
+
 class PersonInsuranceReportExportView(ListOfPayItemInsuranceListView, BaseExportView):
     template_name = 'export/sample_form_export.html'
     filename = 'insurance_report'
@@ -3819,6 +3992,140 @@ class InsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
             ])
             data.append([
                 'حق بیمه سهم کارفرما',
-                form.data_for_insurance['DSK_TKOSO']
+                form.data_for_insurance['DSK_TKOSO'],
+                'جمع بیمه بیکاری',
+                form.data_for_insurance['DSK_TBIC'],
+                'جمع کل حق بیمه کارگر',
+                form.data_for_insurance['DSK_TBIME'],
             ])
         return data
+
+
+class RowInsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'InsuranceCardex'
+
+    context = {
+        'title': 'کاردکس بیمه',
+    }
+    pagination_class = None
+
+    def __init__(self):
+        self.contract_row = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, pk,  *args, **kwargs):
+        self.contract_row = pk
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+        datas = qs.first().data_for_insurance_row(self.contract_row)
+        items = qs.first().row_list(self.contract_row)
+        context = {
+            'items': items,
+            'datas': datas,
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user.get_full_name(),
+            'print_document': print_document
+        }
+
+        context['form_content_template'] = 'export/row_cardex.html'
+        context['right_header_template'] = 'export/sample_head.html'
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['datas'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+    def get_xlsx_data(self, list_of_pays: ListOfPay):
+        list_of_pay = list_of_pays
+        data = [
+            [
+                'کاردکس بیمه'
+            ],
+            [
+                'شماره کارگاه',
+                list_of_pay['workshop'].workshop_code,
+                'نام کارفرما',
+                list_of_pay['workshop'].employer_name,
+                'نشانی کارگاه',
+                list_of_pay['workshop'].address,
+            ],
+            ['ردیف', 'شماره بیمه', 'نام و نام خانوادگی', 'شغل', 'کد ملی',
+             'کارکرد', 'دستمزد روزانه', 'دستمزد ماهانه', 'مزایای ماهانه',
+             'مجموع دستمزد و مزایای مشمول', 'مجموع کل دستمزد و مزایای ماهانه', 'حق بیمه سهم بیمه شده']
+        ]
+        counter = 1
+        for item in list_of_pay['list_of_pays']:
+            if item.is_month_insurance:
+                data.append([
+                    counter,
+                    item.workshop_personnel.personnel.insurance_code,
+                    item.workshop_personnel.personnel.full_name,
+                    item.workshop_personnel.title.name,
+                    item.workshop_personnel.personnel.identity_code,
+                    item.insurance_worktime,
+                    item.data_for_insurance['DSW_ROOZ'],
+                    item.data_for_insurance['DSW_MAH'],
+                    item.data_for_insurance['DSW_MAZ'],
+                    item.data_for_insurance['DSW_MASH'],
+                    item.data_for_insurance['DSW_TOTL'],
+                    item.data_for_insurance['DSW_BIME'],
+                ])
+                counter += 1
+        form = list_of_pay
+        data.append([
+            '', '', '', '', 'جمع',
+            form['DSK_TDD'],
+            form['DSK_TROOZ'],
+            form['DSK_TMAH'],
+            form['DSK_TMAZ'],
+            form['DSK_TMASH'],
+            form['DSK_TTOTL'],
+            form['DSK_TBIME'],
+        ])
+        data.append([
+            'حق بیمه سهم کارفرما',
+            form['DSK_TKOSO'],
+            'جمع بیمه بیکاری',
+            form['DSK_TBIC'],
+            'جمع کل حق بیمه کارگر',
+            form['DSK_TBIME'],
+        ])
+        return data
+
