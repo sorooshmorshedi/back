@@ -1,0 +1,130 @@
+{% load report_filters %}
+{% for form in forms %}
+
+    <div class="col-sm-12 mt-3">
+    <span class="text-center center-block">
+        گزارش مالیات کارکنان در ماه {{ form.month_display }} سال {{ form.year }}
+    </span>
+        <table class="center-block mt-5 mb-3">
+            <tr>
+                <th class="text-center">شماره کارگاه : {{ form.workshop.workshop_code }}</th>
+                <th class="text-center"> تاریخ ثبت در دفتر روزنامه : {{ form.sign_date }}</th>
+            </tr>
+
+        </table>
+        <table class="table table-bordered table-striped mt-1">
+            <tr>
+                <th class="text-center">ردیف</th>
+                <th class="text-center">کد ملی/کد فراگیر</th>
+                <th class="text-center"> نام و نام خانوادگی</th>
+                <th class="text-center">تعداد ماههای کارکرد واقعی از ابتدای سال جاری</th>
+                <th class="text-center">تاریخ شروع به کار</th>
+                <th class="text-center">وضعیت کارمند</th>
+                <th class="text-center">وضعیت محل خدمت</th>
+                <th class="text-center">ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی</th>
+                <th class="text-center">پرداخت مزایای مستمر غیر نقدی ماه جاری</th>
+                <th class="text-center"> هزینه های درمانی موضوع ماده 37 ق.م.م.</th>
+                <th class="text-center"> حق بیمه پرداختی موضوع ماده 37 ق.م.م.</th>
+                <th class="text-center"> سایر معافیتها</th>
+                <th class="text-center"> ناخالص اضافه کاری ماه جاری</th>
+                <th class="text-center"> سایر پرداختهای غیر مستمر نقدی ماه جاری</th>
+                <th class="text-center"> کسر میشود:معافیت های غیر مستمر نقدی(شامل بند6ماده91)</th>
+                <th class="text-center"> پرداخت مزایای غیر مستمر غیر نقدی ماه جاری</th>
+                <th class="text-center"> عیدی و مزایای پایان سال</th>
+                <th class="text-center"> بازخرید مرخصی و بازخرید سنوات-ریالی</th>
+                <th class="text-center"> کسر میشود:معافیت(فقط برای بند5ماده91)</th>
+                <th class="text-center"> معافیت مربوط به مناطق آزاد تجاری</th>
+                <th class="text-center"> معافیت موضوع قانون اجتناب از اخذ مالیات مضاعف</th>
+                <th class="text-center"> مالیات متعلّقه حقوق و دستمزد</th>
+            </tr>
+            {% for item in form.list_of_pay_item.all %}
+                {% if item.is_month_tax %}
+                    <tr>
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.personnel.national_code }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.personnel.full_name }}
+                        </td>
+                        <td>
+                            {{ item.year_real_work_month }}
+                        </td>
+                        <td>
+                            {{ item.contract.tax_add_date }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.employee_status }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.job_location_status }}
+                        </td>
+                        <td>
+                            {{ item.naghdi_pension_with_comma }}
+                        </td>
+                        <td>
+                            {{ item.gheyre_naghdi_pension_whit_comma }}
+                        </td>
+                        <td>
+                            {{ item.hazine_made_137 }}
+                        </td>
+                        <td>
+                            {{ item.haghe_bime_moafiat_with_comma }}
+                        </td>
+                        <td>
+                            {{ item.total_sayer_moafiat }}
+                        </td>
+                        <td>
+                            {{ item.ezafe_kari_nakhales_with_comma }}
+                        </td>
+                        <td>
+                            {{ item.naghdi_un_pension_whit_comma }}
+                        </td>
+                        <td>
+                            {{ item.mission_total }}
+                        </td>
+                        <td>
+                            {{ item.mazaya_gheyr_mostamar_with_comma }}
+                        </td>
+                        <td>
+                            {{ item.padash_total }}
+                        </td>
+                        <td>
+                            {{ item.get_hagh_sanavat_and_save_leaves }}
+                        </td>
+                        <td>
+                            {{ item.get_hagh_sanavat_and_save_leaves }}
+                        </td>
+                        <td>
+                            {{ item.manategh_tejari_moafiat }}
+                        </td>
+                        <td>
+                            {{ item.ejtenab_maliat_mozaaf }}
+                        </td>
+                        <td>
+                            {{ item.total_tax }}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            <tr>
+                <th class="text-center" colspan="21">جمع مالیات متعلّقه حقوق و دستمزد</th>
+                <th class="text-center">{{ form.calculate_month_tax_with_comma }} </th>
+            </tr>
+
+        </table>
+        <table class="center-block">
+
+            <tr>
+                <th class="text-center">نوع پرداخت : 1</th>
+                <th class="text-center">نوع ارز : 85</th>
+                <th class="text-center">نرخ تسعیر : 1</th>
+            </tr>
+
+        </table>
+    </div>
+{% endfor %}
+
+

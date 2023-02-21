@@ -9,7 +9,7 @@ from payroll.lists.export_views import WorkshopExportview, PersonnelExportview, 
     PersonTaxReportExportView, TaxReportExportView, MonthTaxReportExportView, AbsenceReportExportView, \
     NewPersonTaxReportExportView, SaveLeaveReportExportView, PayFormExportView, SettlementExportView, \
     AccountBalanceReportExportView, EydiReportExportView, SanavatReportExportView, AdjustmentExportView, TaxExportView, \
-    InsuranceCardexExportview, ContractRowInsuranceReportExportView, RowInsuranceCardexExportview
+    InsuranceCardexExportview, ContractRowInsuranceReportExportView, RowInsuranceCardexExportview, TaxCardexExportView
 from payroll.lists.views import WorkshopListView, ContractListView, PersonnelListView, ContractRowListView, \
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
@@ -228,6 +228,7 @@ urlpatterns += [
     url(r'^total/insurance/report/(?P<export_type>\S+)', WorkshopInsuranceReportExportView.as_view(), name=''),
     url(r'^person/insurance/report/(?P<export_type>\S+)', PersonInsuranceReportExportView.as_view(), name=''),
     url(r'^tax/report/(?P<export_type>\S+)', TaxReportExportView.as_view(), name=''),
+    url(r'^tax/cardex/(?P<export_type>\S+)', TaxCardexExportView.as_view(), name=''),
     url(r'^tax/(?P<export_type>\S+)', TaxExportView.as_view(), name=''),
     url(r'^personTax/report/(?P<export_type>\S+)', PersonTaxReportExportView.as_view(), name=''),
     url(r'^month/tax/(?P<export_type>\S+)', MonthTaxReportExportView.as_view(), name=''),

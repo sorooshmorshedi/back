@@ -392,6 +392,7 @@ class ListOfPaySerializer(serializers.ModelSerializer):
 
 class ListOfPayLessSerializer(serializers.ModelSerializer):
     workshop_display = serializers.CharField(source='workshop.workshop_title', read_only=True)
+    workshop_code = serializers.CharField(source='workshop.workshop_code', read_only=True)
     month_name = serializers.CharField(source='month_display', read_only=True)
     ultimate_display = serializers.CharField(source='is_ultimate', read_only=True)
     calculate_display = serializers.CharField(source='is_use_in_calculate', read_only=True)
@@ -405,7 +406,8 @@ class ListOfPayLessSerializer(serializers.ModelSerializer):
         model = ListOfPay
         fields = 'year', 'month', 'month_name', 'workshop_display', 'ultimate_display', 'workshop', 'id', 'start_date',\
                  'end_date', 'pay_done', 'calculate_display', 'name', 'ultimate', 'use_in_calculate', 'use_in_bime', \
-                 'get_is_editable', 'is_workshop_verified', 'bank_pay_date', 'contract_row', 'get_total', 'list_of_pay_item'
+                 'get_is_editable', 'is_workshop_verified', 'bank_pay_date', 'contract_row', 'get_total',\
+                 'list_of_pay_item', 'workshop_code'
 
 
 class ListOfPayItemInsuranceSerializer(serializers.ModelSerializer):

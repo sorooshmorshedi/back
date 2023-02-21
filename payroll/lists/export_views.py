@@ -4129,3 +4129,132 @@ class RowInsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
         ])
         return data
 
+
+class TaxCardexExportView(ListOfPayListView, BaseExportView):
+    template_name = 'export/sample_form_export.html'
+    filename = 'Workshop'
+
+    context = {
+        'title': 'گزارش مالیات ماه',
+    }
+    pagination_class = None
+
+    def get_queryset(self):
+        return self.filterset_class(self.request.GET, queryset=super().get_queryset()).qs
+
+    def get(self, request, export_type, *args, **kwargs):
+        return self.export(request, export_type, *args, **kwargs)
+
+    def get_context_data(self, user, print_document=False, **kwargs):
+        qs = self.get_queryset()
+
+        context = {
+            'forms': qs,
+            'company': user.active_company,
+            'financial_year': user.active_financial_year,
+            'user': user,
+            'print_document': print_document
+        }
+
+        template_prefix = self.get_template_prefix()
+        context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
+        context['right_header_template'] = 'export/tax_cardex.html'.format(template_prefix)
+
+        context.update(self.context)
+
+        return context
+
+    def xlsx_response(self, request, *args, **kwargs):
+        sheet_name = '{}.xlsx'.format("".join(self.filename.split('.')[:-1]))
+
+        with BytesIO() as b:
+            writer = pandas.ExcelWriter(b, engine='xlsxwriter')
+            data = []
+
+            bordered_rows = []
+            data += self.get_xlsx_data(self.get_context_data(user=request.user)['forms'])
+            df = pandas.DataFrame(data)
+            df.to_excel(
+                writer,
+                sheet_name=sheet_name,
+                index=False,
+                header=False
+            )
+            workbook = writer.book
+            worksheet = writer.sheets[sheet_name]
+            worksheet.right_to_left()
+
+            border_fmt = workbook.add_format({'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
+
+            for bordered_row in bordered_rows:
+                worksheet.conditional_format(xlsxwriter.utility.xl_range(
+                    bordered_row[0], 0, bordered_row[1], len(df.columns) - 1
+                ), {'type': 'no_errors', 'format': border_fmt})
+            writer.save()
+            response = HttpResponse(b.getvalue(), content_type='application/vnd.ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="{}"'.format(sheet_name)
+            return response
+
+
+    def get_xlsx_data(self, list_of_pays: ListOfPay):
+        list_of_pay = list_of_pays.first()
+        data = [
+            [
+                'گزارش مالیات'
+            ],
+            [
+                'شماره کارگاه',
+                list_of_pay.workshop.workshop_code,
+                'تاریخ ثبت در دفتر روزنامه',
+                list_of_pay.sign_date,
+            ],
+            ['ردیف', 'کد ملی/کد فراگیر', 'نام و نام خانوادگی', 'تعداد ماههای کارکرد واقعی از ابتدای سال جاری', 'تاریخ شروع به کار',
+             'وضعیت کارمند', 'وضعیت محل خدمت', 'ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی', 'پرداخت مزایای مستمر غیر نقدی ماه جاری',
+             'هزینه های درمانی موضوع ماده 37 ق.م.م.', 'حق بیمه پرداختی موضوع ماده 37 ق.م.م.', 'سایر معافیتها', 'ناخالص اضافه کاری ماه جاری',
+             'سایر پرداختهای غیر مستمر نقدی ماه جاری', 'کسر میشود:معافیت های غیر مستمر نقدی(شامل بند6ماده91)',
+             'پرداخت مزایای غیر مستمر غیر نقدی ماه جاری', 'عیدی و مزایای پایان سال', 'بازخرید مرخصی و بازخرید سنوات-ریالی',
+             'کسر میشود:معافیت(فقط برای بند5ماده91)', 'معافیت مربوط به مناطق آزاد تجاری', 'معافیت موضوع قانون اجتناب از اخذ مالیات مضاعف',
+             'مالیات متعلّقه حقوق و دستمزد']
+        ]
+
+        counter = 1
+        for item in list_of_pay.list_of_pay_item.all():
+            if item.is_month_tax:
+                data.append([
+                    counter,
+                    item.workshop_personnel.personnel.national_code,
+                    item.workshop_personnel.personnel.full_name,
+                    item.year_real_work_month,
+                    item.contract.tax_add_date,
+                    item.workshop_personnel.employee_status,
+                    item.workshop_personnel.job_location_status,
+                    item.tax_naghdi_pension,
+                    item.gheyre_naghdi_tax_pension,
+                    item.hazine_made_137,
+                    item.haghe_bime_moafiat,
+                    item.total_sayer_moafiat,
+                    item.ezafe_kari_nakhales,
+                    item.tax_naghdi_un_pension,
+                    item.mission_total,
+                    item.mazaya_gheyr_mostamar,
+                    item.padash_total,
+                    item.get_hagh_sanavat_and_save_leaves,
+                    item.get_hagh_sanavat_and_save_leaves,
+                    item.manategh_tejari_moafiat,
+                    item.ejtenab_maliat_mozaaf,
+                    item.total_tax,
+                ])
+                counter += 1
+        data.append([
+            '', '', '', '',  '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'جمع',
+            list_of_pay.month_tax
+        ])
+        data.append([
+            'نوع پرداخت',
+            1,
+            'نوع ارز',
+            85,
+            'نرخ تسعیر',
+            1,
+        ])
+        return data

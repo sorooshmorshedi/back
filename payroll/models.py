@@ -3781,7 +3781,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
     def month_tax(self):
         tax = 0
         for item in self.list_of_pay_item.all():
-            tax += item.calculate_month_tax
+            tax += item.total_tax
         return tax
 
     @property
@@ -4002,7 +4002,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             Q(list_of_pay__ultimate=True) &
             Q(workshop_personnel=self.workshop_personnel)
         )
-        return len(items)
+        total = 0
+        for item in items:
+            is_tax, tax_day = item.check_tax
+            total += tax_day
+        return round(total, 2)
 
     @property
     def sanavat_notice(self):
@@ -4331,7 +4335,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
 
     @property
     def calculate_month_tax_with_comma(self):
-        return self.with_comma(self.calculate_month_tax)
+        return self.with_comma(self.total_tax)
 
     @property
     def payable_with_comma(self):
@@ -5236,6 +5240,11 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     def is_month_insurance(self):
         is_insurance, insurance_worktime = self.check_insurance
         return is_insurance
+
+    @property
+    def is_month_tax(self):
+        is_tax, tax_worktime = self.check_tax
+        return is_tax
 
     @property
     def insurance_included_limit(self):
