@@ -3782,7 +3782,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         tax = 0
         for item in self.list_of_pay_item.all():
             tax += item.total_tax
-        return tax
+        return round(tax)
 
     @property
     def total(self):
@@ -3842,6 +3842,97 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
         return response
 
     @property
+    def total_tax_naghdi_pension(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.tax_naghdi_pension
+        return round(total)
+
+    @property
+    def total_gheyre_naghdi_tax_pension(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.gheyre_naghdi_tax_pension
+        return round(total)
+
+    @property
+    def total_hazine_made_137(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.hazine_made_137
+        return round(total)
+
+    @property
+    def total_haghe_bime_moafiat(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.haghe_bime_moafiat
+        return round(total)
+
+    @property
+    def total_sayer_moafiat(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.total_sayer_moafiat
+        return round(total)
+
+    @property
+    def total_ezafe_kari_nakhales(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.ezafe_kari_nakhales
+        return round(total)
+
+    @property
+    def total_tax_naghdi_un_pension(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.tax_naghdi_un_pension
+        return round(total)
+
+    @property
+    def mission_total(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.mission_total
+        return round(total)
+
+    @property
+    def padash_total(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.padash_total
+        return round(total)
+
+    @property
+    def total_mazaya_gheyr_mostamar(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.mazaya_gheyr_mostamar
+        return round(total)
+
+    @property
+    def total_hagh_sanavat_and_save_leaves(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.get_hagh_sanavat_and_save_leaves
+        return round(total)
+
+    @property
+    def total_manategh_tejari_moafiat(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.manategh_tejari_moafiat
+        return round(total)
+
+    @property
+    def total_ejtenab_maliat_mozaaf(self):
+        total = 0
+        for item in self.list_of_pay_item.all():
+            total += item.ejtenab_maliat_mozaaf
+        return round(total)
+
+    @property
     def sign_date(self):
         date = jdatetime.date(self.year, self.month, self.month_days)
         return str(date.__str__().replace('-', ''))
@@ -3858,6 +3949,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                         item.payed_amount = 0
                         item.save()
         super().delete()
+
+
 
 
 class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):

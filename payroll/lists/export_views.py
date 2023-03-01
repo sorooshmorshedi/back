@@ -4157,8 +4157,8 @@ class TaxCardexExportView(ListOfPayListView, BaseExportView):
         }
 
         template_prefix = self.get_template_prefix()
-        context['form_content_template'] = 'export/{}_form_content.html'.format(template_prefix)
-        context['right_header_template'] = 'export/tax_cardex.html'.format(template_prefix)
+        context['form_content_template'] = 'export/tax_cardex.html'
+        context['right_header_template'] = 'export/sample_head.html'
 
         context.update(self.context)
 
@@ -4203,10 +4203,15 @@ class TaxCardexExportView(ListOfPayListView, BaseExportView):
                 'گزارش مالیات'
             ],
             [
-                'شماره کارگاه',
-                list_of_pay.workshop.workshop_code,
                 'تاریخ ثبت در دفتر روزنامه',
                 list_of_pay.sign_date,
+                'نوع پرداخت',
+                1,
+                'نوع ارز',
+                85,
+                'نرخ تسعیر',
+                1,
+
             ],
             ['ردیف', 'کد ملی/کد فراگیر', 'نام و نام خانوادگی', 'تعداد ماههای کارکرد واقعی از ابتدای سال جاری', 'تاریخ شروع به کار',
              'وضعیت کارمند', 'وضعیت محل خدمت', 'ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی', 'پرداخت مزایای مستمر غیر نقدی ماه جاری',
@@ -4246,15 +4251,21 @@ class TaxCardexExportView(ListOfPayListView, BaseExportView):
                 ])
                 counter += 1
         data.append([
-            '', '', '', '',  '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'جمع',
-            list_of_pay.month_tax
-        ])
-        data.append([
-            'نوع پرداخت',
-            1,
-            'نوع ارز',
-            85,
-            'نرخ تسعیر',
-            1,
+            '', '', '', '',  '', '',  'جمع',
+            list_of_pay.total_tax_naghdi_pension,
+            list_of_pay.total_gheyre_naghdi_tax_pension,
+            list_of_pay.total_hazine_made_137,
+            list_of_pay.total_haghe_bime_moafiat,
+            list_of_pay.total_sayer_moafiat,
+            list_of_pay.total_ezafe_kari_nakhales,
+            list_of_pay.total_tax_naghdi_un_pension,
+            list_of_pay.mission_total,
+            list_of_pay.total_mazaya_gheyr_mostamar,
+            list_of_pay.padash_total,
+            list_of_pay.total_hagh_sanavat_and_save_leaves,
+            list_of_pay.total_hagh_sanavat_and_save_leaves,
+            list_of_pay.total_manategh_tejari_moafiat,
+            list_of_pay.total_ejtenab_maliat_mozaaf,
+            list_of_pay.month_tax,
         ])
         return data

@@ -7,8 +7,11 @@
     </span>
         <table class="center-block mt-5 mb-3">
             <tr>
-                <th class="text-center">شماره کارگاه : {{ form.workshop.workshop_code }}</th>
                 <th class="text-center"> تاریخ ثبت در دفتر روزنامه : {{ form.sign_date }}</th>
+                <th class="text-center">نوع پرداخت : 1</th>
+                <th class="text-center">نوع ارز : 85</th>
+                <th class="text-center">نرخ تسعیر : 1</th>
+
             </tr>
 
         </table>
@@ -110,17 +113,22 @@
                 {% endif %}
             {% endfor %}
             <tr>
-                <th class="text-center" colspan="21">جمع مالیات متعلّقه حقوق و دستمزد</th>
-                <th class="text-center">{{ form.calculate_month_tax_with_comma }} </th>
-            </tr>
-
-        </table>
-        <table class="center-block">
-
-            <tr>
-                <th class="text-center">نوع پرداخت : 1</th>
-                <th class="text-center">نوع ارز : 85</th>
-                <th class="text-center">نرخ تسعیر : 1</th>
+                <th class="text-center" colspan="7">جمع </th>
+                <th class="text-center">{{ form.total_tax_naghdi_pension }} </th>
+                <th class="text-center">{{ form.total_gheyre_naghdi_tax_pension }} </th>
+                <th class="text-center">{{ form.total_hazine_made_137 }} </th>
+                <th class="text-center">{{ form.total_haghe_bime_moafiat }} </th>
+                <th class="text-center">{{ form.total_sayer_moafiat }} </th>
+                <th class="text-center">{{ form.total_ezafe_kari_nakhales }} </th>
+                <th class="text-center">{{ form.total_tax_naghdi_un_pension }} </th>
+                <th class="text-center">{{ form.mission_total }} </th>
+                <th class="text-center">{{ form.total_mazaya_gheyr_mostamar }} </th>
+                <th class="text-center">{{ form.padash_total }} </th>
+                <th class="text-center">{{ form.total_hagh_sanavat_and_save_leaves }} </th>
+                <th class="text-center">{{ form.total_hagh_sanavat_and_save_leaves }} </th>
+                <th class="text-center">{{ form.total_manategh_tejari_moafiat }} </th>
+                <th class="text-center">{{ form.total_ejtenab_maliat_mozaaf }} </th>
+                <th class="text-center">{{ form.month_tax }} </th>
             </tr>
 
         </table>

@@ -2,16 +2,16 @@
 {% for form in forms %}
 
     <div class="col-sm-12 mt-3">
-    <span class="text-center">
+    <span class="text-center center-block">
         صورت دستمزد و حقوق و مزایای کارکنان در ماه {{ form.month_display }} سال {{ form.year }}
     </span>
-        <table class="table table-bordered table-striped mt-5">
+        <table class="center-block mt-5 mb-3">
             <tr>
-                <th class="text-center">شماره کارگاه</th>
+                <th class="text-center">شماره کارگاه : </th>
                 <th class="text-center">{{ form.workshop.workshop_code }}</th>
-                <th class="text-center"> نام کارفرما</th>
+                <th class="text-center"> نام کارفرما : </th>
                 <th class="text-center">{{ form.workshop.employer_name }}</th>
-                <th class="text-center">نشانی کارگاه</th>
+                <th class="text-center">نشانی کارگاه : </th>
                 <th class="text-center">{{ form.workshop.address }}</th>
             </tr>
         </table>
@@ -101,13 +101,13 @@
             </tr>
 
         </table>
-            <table class="table table-bordered table-striped mt-5">
+        <table class="center-block mt-5 mb-3">
             <tr>
-                <th class="text-center">جمع حق بیمه سهم کارفرما</th>
+                <th class="text-center">جمع حق بیمه سهم کارفرما : </th>
                 <th class="text-center">{{ form.data_for_insurance.DSK_TKOSO }}</th>
-                <th class="text-center">جمع بیمه بیکاری</th>
+                <th class="text-center">جمع بیمه بیکاری : </th>
                 <th class="text-center">{{ form.data_for_insurance.DSK_TBIC }}</th>
-                <th class="text-center">جمع کل حق بیمه کارگر</th>
+                <th class="text-center">جمع کل حق بیمه کارگر : </th>
                 <th class="text-center">{{ form.data_for_insurance.DSK_TBIME }}</th>
             </tr>
         </table>
