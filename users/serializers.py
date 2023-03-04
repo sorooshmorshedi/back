@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
-from companies.models import CompanyUserInvitation, CompanyUser
+from companies.models import CompanyUserInvitation, CompanyUser, Company, FinancialYear
 from companies.serializers import FinancialYearSerializer, CompanySerializer
 from helpers.functions import get_current_user
 from server.settings import DATETIME_FORMAT
@@ -58,7 +58,8 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
     active_company = CompanySerializer()
     active_financial_year = FinancialYearSerializer()
     roles = serializers.SerializerMethodField()
-    financialYears = serializers.SerializerMethodField()
+    financialYears = serializers.SerializerMethodField(method_name='get_financialYears')
+    companies = serializers.SerializerMethodField(method_name='get_companies')
     name = serializers.SerializerMethodField()
     has_two_factor_authentication = serializers.SerializerMethodField()
     modules = serializers.SerializerMethodField()
@@ -85,13 +86,18 @@ class UserListRetrieveSerializer(serializers.ModelSerializer):
         return []
 
     def get_financialYears(self, obj: User):
-        company_user = self.get_company_user(obj)
-        if company_user:
+        if obj.active_company:
             return FinancialYearSerializer(
-                CompanyUser.objects.filter(user=obj, company=obj.active_company).first().financialYears.all(),
+                FinancialYear.objects.filter(company=obj.active_company),
                 many=True
             ).data
         return []
+
+    def get_companies(self, obj: User):
+        return CompanySerializer(
+            Company.objects.filter(superuser=obj),
+            many=True
+        ).data
 
     def get_modules(self, obj: User):
         active_company = obj.active_company

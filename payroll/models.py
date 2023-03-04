@@ -1707,10 +1707,6 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
                 raise ValidationError('تاریخ اضافه شدن به لیست بیمه را وارد کنید')
             if not self.insurance_number:
                 raise ValidationError('شماره بیمه را وارد کنید')
-        if self.insurance:
-            self.workshop_personnel.personnel.insurance = True
-            self.workshop_personnel.personnel.insurance_code = self.insurance_number
-            self.workshop_personnel.personnel.save()
 
         if self.is_verified and self.tax != None and self.tax:
             if not self.tax_add_date:
@@ -1723,6 +1719,10 @@ class Contract(BaseModel, LockableMixin, DefinableMixin, VerifyMixin):
             raise ValidationError('تاریخ اضافه شدن به لیست بیمه باید بعد از تاریخ شروع قرارداد باشد')
         if self.is_verified and self.tax_add_date and self.tax_add_date.__lt__(self.contract_from_date):
             raise ValidationError('تاریخ اضافه شدن به لیست مالیات باید بعد از تاریخ شروع قرارداد باشد')
+        if self.is_verified:
+            self.workshop_personnel.personnel.insurance = self.insurance
+            self.workshop_personnel.personnel.insurance_code = self.insurance_number
+            self.workshop_personnel.personnel.save()
         super().save(*args, **kwargs)
 
     @property
@@ -4111,9 +4111,9 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
     @property
     def sanavat_verify(self):
         if not self.get_hr_letter.paye_sanavat_amount and self.workshop_personnel.total_insurance >= 12:
-            return False
+            return 'حکم جدید صادرشود'
         else:
-            return True
+            return 'تایید'
 
     @staticmethod
     def with_comma(input_amount, no_minus=False):

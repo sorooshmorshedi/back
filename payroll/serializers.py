@@ -316,7 +316,7 @@ class ListOfPayItemSerializer(serializers.ModelSerializer):
     get_sayer_hr = serializers.IntegerField(source='sayer_hr', read_only=True)
 
     get_sanavat_notice = serializers.BooleanField(source='sanavat_notice', read_only=True)
-    get_sanavat_verify = serializers.BooleanField(source='sanavat_verify', read_only=True)
+    get_sanavat_verify = serializers.CharField(source='sanavat_verify', read_only=True)
 
     class Meta:
         model = ListOfPayItem
