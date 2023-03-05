@@ -17,6 +17,7 @@ class WorkshopFilter(filters.FilterSet):
             'id': ('exact',),
             'company': ('exact',),
             'code': BASE_FIELD_FILTERS,
+            'workshop_code': BASE_FIELD_FILTERS,
             'name': BASE_FIELD_FILTERS,
             'employer_name': BASE_FIELD_FILTERS,
             'address': BASE_FIELD_FILTERS,
