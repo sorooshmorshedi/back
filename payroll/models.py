@@ -3532,7 +3532,7 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
                 total_day_pay += item.insurance_daily_payment
                 total_month_pay += item.insurance_monthly_payment
                 total_benefit += item.insurance_monthly_benefit
-                total_base += item.insurance_total_included
+                total_base += item.total_payment
                 total_insurance += item.haghe_bime_bime_shavande
                 personnel_count += 1
         DSKKAR = {
