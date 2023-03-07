@@ -5389,7 +5389,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_MAH': round(self.insurance_monthly_payment),
             'DSW_MAZ': round(self.insurance_monthly_benefit),
             'DSW_MASH': round(self.insurance_total_included),
-            'DSW_TOTL': round(self.insurance_total_included),
+            'DSW_TOTL': round(self.total_payment),
             'DSW_BIME': round(self.haghe_bime_bime_shavande),
             'DSW_PRATE': 0,
             'DSW_JOB': self.workshop_personnel.title.code,
