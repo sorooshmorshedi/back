@@ -14,10 +14,9 @@ from payroll.lists.views import WorkshopListView, ContractListView, PersonnelLis
     PersonnelFamilyListView, WorkshopPersonnelListView, LeaveOrAbsenceListView, MissionListView, HRLetterListView, \
     TaxRowListView, TaxListView, ListOfPayListView, ListOfPayItemListView, LoanListView, DeductionListView, \
     LoanItemListView, ListOfPayItemLessListView, write_tax_diskette, \
-    write_person_insurance_diskette, \
     write_insurance_diskette, write_summary_tax_diskette, TaxMoafListView, write_new_person_diskette, \
     AdjustmentListView, PayListView, workshop_person_insurance_diskette, row_person_insurance_diskette, \
-    write_row_insurance_diskette
+    write_row_insurance_diskette, write_new_persons_diskette
 from payroll.verify_views import WorkshopVerifyApi, WorkshopUnVerifyApi, WorkshopTaxRowVerifyApi, \
     WorkshopTaxRowUnVerifyApi, PersonnelVerifyApi, PersonnelUnVerifyApi, PersonnelFamilyVerifyApi, \
     PersonnelFamilyUnVerifyApi, ContractRowVerifyApi, ContractRowUnVerifyApi, WorkshopPersonnelVerifyApi, \
@@ -151,11 +150,11 @@ urlpatterns = [
 
     path('diskette/tax/<int:pk>/', write_tax_diskette),
     path('diskette/tax/newPerson/<int:pk>/', write_new_person_diskette),
+    path('diskette/tax/newPersons/<str:pks>/', write_new_persons_diskette),
     path('diskette/tax/summary/<int:pk>/', write_summary_tax_diskette),
 
     path('diskette/insurance/<int:pk>/', write_insurance_diskette),
     path('diskette/contractRowInsurance/<int:pk1>/<int:pk2>/', write_row_insurance_diskette),
-    path('diskette/insurance/person/<int:pk>/', write_person_insurance_diskette),
     path('diskette/insurance/workshopPerson/<int:pk>/', workshop_person_insurance_diskette),
     path('diskette/insurance/contractRowPerson/<int:pk1>/<int:pk2>/', row_person_insurance_diskette),
 

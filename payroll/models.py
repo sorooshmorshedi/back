@@ -3556,8 +3556,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_TKOSO': round((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh),
             'DSK_TBIC': round((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh),
             'DSK_RATE': self.workshop.employer_insurance_contribution,
-            'DSK_PRATE': 0,
-            'DSK_BIMH': 0,
+            'DSK_PRATE': 1,
+            'DSK_BIMH': 1,
             'DSK_PYM': '000',
         }
         return DSKKAR
@@ -3604,8 +3604,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_TKOSO': round((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh),
             'DSK_TBIC': round((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh),
             'DSK_RATE': self.workshop.employer_insurance_contribution,
-            'DSK_PRATE': 0,
-            'DSK_BIMH': 0,
+            'DSK_PRATE': 1,
+            'DSK_BIMH': 1,
             'DSK_PYM': contract_row.contract_row,
         }
         return DSKKAR
@@ -5391,7 +5391,7 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             'DSW_MASH': round(self.insurance_total_included),
             'DSW_TOTL': round(self.total_payment),
             'DSW_BIME': round(self.haghe_bime_bime_shavande),
-            'DSW_PRATE': 0,
+            'DSW_PRATE': 1,
             'DSW_JOB': self.workshop_personnel.title.code,
             'PER_NATCOD': str(self.workshop_personnel.personnel.national_code),
 

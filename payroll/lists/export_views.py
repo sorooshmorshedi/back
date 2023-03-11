@@ -3031,7 +3031,7 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
             ])
             data.append([
                 'ناخالص حقوق و دستمزد مستمر نقدی ماه جاری-ریالی',
-                form.naghdi_pension,
+                form.tax_naghdi_pension,
             ])
             data.append([
                 'پرداختهای مستمر معوق که مالیاتی برای آنها محاسبه نشده است',
@@ -3059,7 +3059,7 @@ class PersonTaxReportExportView(PersonTaxListView, BaseExportView):
             ])
             data.append([
                 'پرداخت مزایای مستمر غیر نقدی ماه جاری',
-                form.gheyre_naghdi_pension,
+                form.gheyre_naghdi_tax_pension,
             ])
             data.append([
                 'هزینه های درمانی موضوع ماده 37 ق.م.م.',
