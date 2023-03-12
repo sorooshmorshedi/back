@@ -143,67 +143,47 @@ def workshop_person_insurance_diskette(request, pk):
 
 def row_person_insurance_diskette(request, pk1, pk2):
     items = ListOfPay.objects.get(pk=pk1)
-    filename = "DSKWOR.txt"
-    content = ''
+    new_table = dbf.Table('DSKWOR00.dbf',
+                          'DSW_ID C(10); DSW_YY N(2,0); DSW_MM N(2,0); DSW_LISTNO C(12); DSW_ID1 C(10); DSW_FNAME C(100); DSW_LNAME C(100); DSW_DNAME C(100); DSW_IDNO C(15); DSW_IDPLC C(100); DSW_IDATE C(8); DSW_BDATE C(8); DSW_SEX C(3); DSW_NAT C(10);  DSW_OCP C(100);  DSW_SDATE C(8);  DSW_EDATE C(8);  DSW_DD N(2,0);  DSW_ROOZ N(12,0);  DSW_MAH N(12,0);  DSW_MAZ N(12,0);  DSW_MASH N(12,0);  DSW_TOTL N(12,0);  DSW_BIME N(12,0);  DSW_PRATE N(2,0);  DSW_JOB C(6); PER_NATCOD C(10)', on_disk=True)
+    new_table.open(dbf.READ_WRITE)
+
     for item in items.list_of_pay_item.filter(contract_row__id=pk2):
         if item.is_month_insurance:
             data = item.data_for_insurance
-            content += str(data['DSW_ID'])
-            content += ','
-            content += str(data['DSW_YY'])
-            content += ','
-            content += str(data['DSW_MM'])
-            content += ','
-            content += str(data['DSW_LISTNO'])
-            content += ','
-            content += str(data['DSW_ID1'])
-            content += ','
-            content += str(data['DSW_FNAME'])
-            content += ','
-            content += str(data['DSW_LNAME'])
-            content += ','
-            content += str(data['DSW_DNAME'])
-            content += ','
-            content += str(data['DSW_IDNO'])
-            content += ','
-            content += str(data['DSW_IDPLC'])
-            content += ','
-            content += str(data['DSW_IDATE'])
-            content += ','
-            content += str(data['DSW_BDATE'])
-            content += ','
-            content += str(data['DSW_SEX'])
-            content += ','
-            content += str(data['DSW_NAT'])
-            content += ','
-            content += str(data['DSW_OCP'])
-            content += ','
-            content += str(data['DSW_SDATE'])
-            content += ','
-            content += str(data['DSW_EDATE'])
-            content += ','
-            content += str(data['DSW_DD'])
-            content += ','
-            content += str(round(data['DSW_ROOZ']))
-            content += ','
-            content += str(round(data['DSW_MAH']))
-            content += ','
-            content += str(round(data['DSW_MAZ']))
-            content += ','
-            content += str(round(data['DSW_MASH']))
-            content += ','
-            content += str(round(data['DSW_TOTL']))
-            content += ','
-            content += str(round(data['DSW_BIME']))
-            content += ','
-            content += str(data['DSW_PRATE'])
-            content += ','
-            content += str(data['DSW_JOB'])
-            content += ','
-            content += str(data['PER_NATCOD'])
-    response = HttpResponse(content, content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
-    return response
+            new_table.append({
+                'DSW_ID': data['DSW_ID'],
+                'DSW_YY': data['DSW_YY'],
+                'DSW_MM': data['DSW_MM'],
+                'DSW_LISTNO': data['DSW_LISTNO'],
+                'DSW_ID1': data['DSW_ID1'],
+                'DSW_FNAME': data['DSW_FNAME'],
+                'DSW_LNAME': data['DSW_LNAME'],
+                'DSW_DNAME': data['DSW_DNAME'],
+                'DSW_IDNO': data['DSW_IDNO'],
+                'DSW_IDPLC': data['DSW_IDPLC'],
+                'DSW_IDATE': data['DSW_IDATE'],
+                'DSW_BDATE': data['DSW_BDATE'],
+                'DSW_SEX': data['DSW_SEX'],
+                'DSW_NAT': data['DSW_NAT'],
+                'DSW_OCP': data['DSW_OCP'],
+                'DSW_SDATE': data['DSW_SDATE'],
+                'DSW_EDATE': data['DSW_EDATE'],
+                'DSW_DD': data['DSW_DD'],
+                'DSW_ROOZ': data['DSW_ROOZ'],
+                'DSW_MAH': data['DSW_MAH'],
+                'DSW_MAZ': data['DSW_MAZ'],
+                'DSW_MASH': data['DSW_MASH'],
+                'DSW_TOTL': data['DSW_TOTL'],
+                'DSW_BIME': data['DSW_BIME'],
+                'DSW_PRATE': data['DSW_PRATE'],
+                'DSW_JOB': data['DSW_JOB'],
+                'PER_NATCOD': data['PER_NATCOD'],
+
+            })
+
+        response = HttpResponse(new_table)
+        response['Content-Disposition'] = 'attachment; filename={0}'.format('DSKWOR00.dbf')
+        return response
 
 
 def write_tax_diskette(request, pk):

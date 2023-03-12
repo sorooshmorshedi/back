@@ -5,13 +5,13 @@
     <span class="text-center">
         صورت دستمزد و حقوق و مزایای کارکنان در ماه {{ form.month_display }} سال {{ form.year }}
     </span>
-        <table class="table table-bordered table-striped mt-5">
+        <table class="center-block mt-5 mb-3">
             <tr>
-                <th class="text-center">شماره کارگاه</th>
+                <th class="text-center">شماره کارگاه :</th>
                 <th class="text-center">{{ form.workshop.workshop_code }}</th>
-                <th class="text-center"> نام کارفرما</th>
+                <th class="text-center"> نام کارفرما :</th>
                 <th class="text-center">{{ form.workshop.employer_name }}</th>
-                <th class="text-center">نشانی کارگاه</th>
+                <th class="text-center">نشانی کارگاه :</th>
                 <th class="text-center">{{ form.workshop.address }}</th>
             </tr>
         </table>
@@ -32,44 +32,44 @@
             </tr>
             {% for item in items %}
                 {% if item.is_month_insurance %}
-                <tr>
-                    <td>
-                        {{ forloop.counter }}
-                    </td>
-                    <td>
-                        {{ item.workshop_personnel.personnel.insurance_code }}
-                    </td>
-                    <td>
-                        {{ item.workshop_personnel.personnel.full_name }}
-                    </td>
-                    <td>
-                        {{ item.workshop_personnel.title.name }}
-                    </td>
-                    <td>
-                        {{ item.workshop_personnel.personnel.identity_code }}
-                    </td>
-                    <td>
-                        {{ item.insurance_worktime }}
-                    </td>
-                    <td>
-                        {{ item.data_for_insurance.DSW_ROOZ }}
-                    </td>
-                    <td>
-                        {{ item.data_for_insurance.DSW_MAH }}
-                    </td>
-                    <td>
-                        {{ item.data_for_insurance.DSW_MAZ }}
-                    </td>
-                    <td>
-                        {{ item.data_for_insurance.DSW_MASH }}
-                    </td>
-                    <td>
-                        {{ item.data_for_insurance.DSW_TOTL }}
-                    </td>
-                    <td>
-                        {{ item.haghe_bime_bime_shavande_with_comma }}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.personnel.insurance_code }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.personnel.full_name }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.title.name }}
+                        </td>
+                        <td>
+                            {{ item.workshop_personnel.personnel.identity_code }}
+                        </td>
+                        <td>
+                            {{ item.insurance_worktime }}
+                        </td>
+                        <td>
+                            {{ item.data_for_insurance.DSW_ROOZ }}
+                        </td>
+                        <td>
+                            {{ item.data_for_insurance.DSW_MAH }}
+                        </td>
+                        <td>
+                            {{ item.data_for_insurance.DSW_MAZ }}
+                        </td>
+                        <td>
+                            {{ item.data_for_insurance.DSW_MASH }}
+                        </td>
+                        <td>
+                            {{ item.data_for_insurance.DSW_TOTL }}
+                        </td>
+                        <td>
+                            {{ item.haghe_bime_bime_shavande_with_comma }}
+                        </td>
+                    </tr>
                 {% endif %}
             {% endfor %}
             <tr>
@@ -101,14 +101,17 @@
             </tr>
 
         </table>
-            <table class="table table-bordered table-striped mt-5">
+        <table class="center-block mt-5 mb-3">
             <tr>
-                <th class="text-center">جمع حق بیمه سهم کارفرما</th>
+                <th class="text-center">جمع حق بیمه سهم کارفرما : </th>
                 <th class="text-center">{{ datas.DSK_TKOSO }}</th>
-                <th class="text-center">جمع بیمه بیکاری</th>
+                <th class="text-center">جمع بیمه بیکاری : </th>
                 <th class="text-center">{{ datas.DSK_TBIC }}</th>
-                <th class="text-center">جمع کل حق بیمه کارگر</th>
+                <th class="text-center">جمع حق بیمه کارگر : </th>
                 <th class="text-center">{{ datas.DSK_TBIME }}</th>
+                <th class="text-center">جمع کل حق بیمه پرداختنی : </th>
+                <th class="text-center">{{ datas.insurance_total }}</th>
+
             </tr>
         </table>
 

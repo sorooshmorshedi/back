@@ -2299,6 +2299,31 @@ class PayrollExportView(ListOfPayListView, BaseExportView):
 
             )
             counter += 1
+        item = list_of_pay.first()
+        item = item.total
+        data.append(
+            ['جمع', '', '', '', '', '', '',
+             '', item['normal_worktime'], '', '',
+             '', '', '',
+             '',
+             '', item['real_worktime'], '', item['hoghoogh_mahane'], '',
+             item['sanavat_mahane'],
+             '', item['ezafe_kari_total'], '', item['tatil_kari_total'], '',
+             item['shab_kari_total'],
+             '', item['kharo_bar'], '', item['mission_total'],
+             item['kharo_bar'],
+             item['haghe_maskan'], '', item['aele_mandi'],
+             item['haghe_jazb'], '',
+             item['sayer_ezafat'], item['total_payment'], '',
+             '',
+             '', '',
+             item['haghe_bime_bime_shavande'],
+             '', '', item['total_tax'], item['dept_amount'],
+             item['loan_amount'], item['check_and_get_optional_deduction_episode'], item['payable'],
+             '', '']
+
+        )
+
         return data
 
 
@@ -3995,8 +4020,10 @@ class InsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
                 form.data_for_insurance['DSK_TKOSO'],
                 'جمع بیمه بیکاری',
                 form.data_for_insurance['DSK_TBIC'],
-                'جمع کل حق بیمه کارگر',
+                'جمع  حق بیمه کارگر',
                 form.data_for_insurance['DSK_TBIME'],
+                'جمع کل حق بیمه پرداختنی',
+                form.data_for_insurance['insurance_total'],
             ])
         return data
 
@@ -4124,8 +4151,10 @@ class RowInsuranceCardexExportview(ListOfPayInsuranceListView, BaseExportView):
             form['DSK_TKOSO'],
             'جمع بیمه بیکاری',
             form['DSK_TBIC'],
-            'جمع کل حق بیمه کارگر',
+            'جمع  حق بیمه کارگر',
             form['DSK_TBIME'],
+            'جمع کل حق بیمه پرداختنی',
+            form['insurance_total'],
         ])
         return data
 

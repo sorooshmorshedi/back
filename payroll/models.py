@@ -3559,6 +3559,8 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_PRATE': 1,
             'DSK_BIMH': 1,
             'DSK_PYM': '000',
+            'insurance_total': round(total_insurance + ((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh) +
+                                     ((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh)),
         }
         return DSKKAR
 
@@ -3607,6 +3609,10 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             'DSK_PRATE': 1,
             'DSK_BIMH': 1,
             'DSK_PYM': contract_row.contract_row,
+            'insurance_total': round(
+                total_insurance + ((total_benefit + total_month_pay) * self.workshop.employee_insurance_nerkh) +
+                ((total_benefit + total_month_pay) * self.workshop.unemployed_insurance_nerkh)),
+
         }
         return DSKKAR
 
@@ -3830,16 +3836,16 @@ class ListOfPay(BaseModel, LockableMixin, DefinableMixin):
             response['sayer_hr'] += item.sayer_hr
             response['haghe_sanavat_total'] += item.haghe_sanavat_total
             response['padash_total'] += item.padash_total
-            response['sayer_ezafat'] += item.sayer_ezafat
+            response['sayer_ezafat'] += round(item.sayer_ezafat)
             response['total_payment'] += item.total_payment
             response['haghe_bime_bime_shavande'] += item.haghe_bime_bime_shavande
-            response['total_tax'] += item.total_tax
-            response['dept_amount'] += item.dept_amount
-            response['loan_amount'] += item.loan_amount
-            response['check_and_get_optional_deduction_episode'] += item.check_and_get_optional_deduction_episode
-            response['kasre_kar_total'] += item.kasre_kar_total
-            response['sayer_kosoorat'] += item.sayer_kosoorat
-            response['payable'] += item.payable
+            response['total_tax'] += round(item.total_tax)
+            response['dept_amount'] += round(item.dept_amount)
+            response['loan_amount'] += round(item.loan_amount)
+            response['check_and_get_optional_deduction_episode'] += round(item.check_and_get_optional_deduction_episode)
+            response['kasre_kar_total'] += round(item.kasre_kar_total)
+            response['sayer_kosoorat'] += round(item.sayer_kosoorat)
+            response['payable'] += round(item.payable)
         return response
 
     @property

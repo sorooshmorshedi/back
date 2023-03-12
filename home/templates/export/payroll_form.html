@@ -86,6 +86,22 @@
                     <td class="text-center">{{ item.tatil_kari_total_with_comma }}</td>
                 </tr>
             {% endfor %}
+            <tr>
+
+                <td class="text-center" colspan="8">جمع</td>
+                <td class="text-center">{{ form.total.normal_worktime }}</td>
+                <td class="text-center" colspan="7">جمع</td>
+                <td class="text-center">{{ form.total.real_worktime }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.hoghoogh_mahane }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.sanavat_mahane }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.ezafe_kari_total }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.tatil_kari_total }}</td>
+            </tr>
+
         </table>
         <table class="table table-bordered table-striped">
             <tr>
@@ -117,7 +133,6 @@
                 <td></td>
             </tr>
             {% for item in form.get_items %}
-
                 <tr>
                     <td class="text-center">{{ item.shab_kari }}</td>
                     <td class="text-center">{{ item.shab_kari_total_with_comma }}</td>
@@ -135,6 +150,23 @@
                     <td class="text-center">{{ item.total_payment_with_comma }}</td>
                 </tr>
             {% endfor %}
+            <tr>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.shab_kari_total }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.kasre_kar_total }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.mission_total }}</td>
+                <td class="text-center">{{ form.total.kharo_bar }}</td>
+                <td class="text-center">{{ form.total.haghe_maskan }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.aele_mandi }}</td>
+                <td class="text-center">{{ form.total.haghe_jazb }}</td>
+                <td class="text-center">جمع</td>
+                <td class="text-center">{{ form.total.sayer_ezafat }}</td>
+                <td class="text-center">{{ form.total.total_payment }}</td>
+            </tr>
+
         </table>
         <table class="table table-bordered table-striped">
             <tr>
@@ -150,10 +182,10 @@
 
             </tr>
             <tr>
-                <td class="text-center"> دستمزد ماهانه </td>
+                <td class="text-center"> دستمزد ماهانه</td>
                 <td class="text-center">مزایای ماهانه مشمول مستمر و غیر مستمر</td>
-                <td class="text-center">جمع دستمزد مزایای ماهانه مشمول </td>
-                <td class="text-center">جمع کل دستمزد و مزایای ماهانه </td>
+                <td class="text-center">جمع دستمزد مزایای ماهانه مشمول</td>
+                <td class="text-center">جمع کل دستمزد و مزایای ماهانه</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -169,12 +201,12 @@
             {% for item in form.get_items %}
 
                 <tr>
-                    <td class="text-center">{{ item.DSW_MAH_with_comma}}</td>
-                    <td class="text-center">{{ item.DSW_MAZ_with_comma}}</td>
-                    <td class="text-center">{{ item.DSW_MASH_with_comma}}</td>
-                    <td class="text-center">{{ item.DSW_TOTL_with_comma}}</td>
-                    <td class="text-center">{{ item.DSW_BIME_with_comma}}</td>
-                    <td class="text-center" >{{ item.moaf_sum_with_comma }}</td>
+                    <td class="text-center">{{ item.DSW_MAH_with_comma }}</td>
+                    <td class="text-center">{{ item.DSW_MAZ_with_comma }}</td>
+                    <td class="text-center">{{ item.DSW_MASH_with_comma }}</td>
+                    <td class="text-center">{{ item.DSW_TOTL_with_comma }}</td>
+                    <td class="text-center">{{ item.DSW_BIME_with_comma }}</td>
+                    <td class="text-center">{{ item.moaf_sum_with_comma }}</td>
                     <td>{{ item.tax_included_payment_with_comma }}</td>
                     <td>{{ item.calculate_month_tax_with_comma }}</td>
                     <td class="text-center">{{ item.check_and_get_dept_episode_with_comma }}</td>
@@ -186,6 +218,19 @@
 
                 </tr>
             {% endfor %}
+            <tr>
+                <td class="text-center" colspan="4">جمع</td>
+                <td class="text-center" colspan="1">{{ form.total.haghe_bime_bime_shavande }}</td>
+                <td class="text-center" colspan="2">جمع</td>
+                <td>{{ form.total.total_tax }}</td>
+                <td class="text-center">{{ form.total.dept_amount }}</td>
+                <td class="text-center">{{ form.total.loan_amount }}</td>
+                <td class="text-center">{{ form.total.check_and_get_optional_deduction_episode }}</td>
+                <td class="text-center">{{ form.total.payable }}</td>
+                <td class="text-center" colspan="2"></td>
+
+            </tr>
+
         </table>
     {% endfor %}
 
