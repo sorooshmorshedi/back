@@ -26,7 +26,7 @@ def write_insurance_diskette(request, pk):
     data = item.data_for_insurance
 
     new_table = dbf.Table('DSKKAR00.dbf',
-                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)')
+                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
     new_table.append({
         'DSK_ID': data['DSK_ID'],
@@ -64,7 +64,7 @@ def write_row_insurance_diskette(request, pk1, pk2):
     contract_row = ContractRow.objects.get(pk=pk2)
     data = item.data_for_insurance_row(pk2)
     new_table = dbf.Table('DSKKAR00.dbf',
-                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)')
+                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
     new_table.append({
         'DSK_ID': data['DSK_ID'],
@@ -100,7 +100,7 @@ def write_row_insurance_diskette(request, pk1, pk2):
 def workshop_person_insurance_diskette(request, pk):
     items = ListOfPay.objects.get(pk=pk)
     new_table = dbf.Table('DSKWOR00.dbf',
-                          'DSW_ID C(10); DSW_YY N(2,0); DSW_MM N(2,0); DSW_LISTNO C(12); DSW_ID1 C(10); DSW_FNAME C(100); DSW_LNAME C(100); DSW_DNAME C(100); DSW_IDNO C(15); DSW_IDPLC C(100); DSW_IDATE C(8); DSW_BDATE C(8); DSW_SEX C(3); DSW_NAT C(10);  DSW_OCP C(100);  DSW_SDATE C(8);  DSW_EDATE C(8);  DSW_DD N(2,0);  DSW_ROOZ N(12,0);  DSW_MAH N(12,0);  DSW_MAZ N(12,0);  DSW_MASH N(12,0);  DSW_TOTL N(12,0);  DSW_BIME N(12,0);  DSW_PRATE N(2,0);  DSW_JOB C(6); PER_NATCOD C(10)', on_disk=True)
+                          'DSW_ID C(10); DSW_YY N(2,0); DSW_MM N(2,0); DSW_LISTNO C(12); DSW_ID1 C(10); DSW_FNAME C(100); DSW_LNAME C(100); DSW_DNAME C(100); DSW_IDNO C(15); DSW_IDPLC C(100); DSW_IDATE C(8); DSW_BDATE C(8); DSW_SEX C(6); DSW_NAT C(20);  DSW_OCP C(100);  DSW_SDATE C(8);  DSW_EDATE C(8);  DSW_DD N(2,0);  DSW_ROOZ N(12,0);  DSW_MAH N(12,0);  DSW_MAZ N(12,0);  DSW_MASH N(12,0);  DSW_TOTL N(12,0);  DSW_BIME N(12,0);  DSW_PRATE N(2,0);  DSW_JOB C(6); PER_NATCOD C(10)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
     for item in items.list_of_pay_item.all():
         if item.is_month_insurance:
@@ -144,7 +144,7 @@ def workshop_person_insurance_diskette(request, pk):
 def row_person_insurance_diskette(request, pk1, pk2):
     items = ListOfPay.objects.get(pk=pk1)
     new_table = dbf.Table('DSKWOR00.dbf',
-                          'DSW_ID C(10); DSW_YY N(2,0); DSW_MM N(2,0); DSW_LISTNO C(12); DSW_ID1 C(10); DSW_FNAME C(100); DSW_LNAME C(100); DSW_DNAME C(100); DSW_IDNO C(15); DSW_IDPLC C(100); DSW_IDATE C(8); DSW_BDATE C(8); DSW_SEX C(3); DSW_NAT C(10);  DSW_OCP C(100);  DSW_SDATE C(8);  DSW_EDATE C(8);  DSW_DD N(2,0);  DSW_ROOZ N(12,0);  DSW_MAH N(12,0);  DSW_MAZ N(12,0);  DSW_MASH N(12,0);  DSW_TOTL N(12,0);  DSW_BIME N(12,0);  DSW_PRATE N(2,0);  DSW_JOB C(6); PER_NATCOD C(10)', on_disk=True)
+                        'DSW_ID C(10); DSW_YY N(2,0); DSW_MM N(2,0); DSW_LISTNO C(12); DSW_ID1 C(10); DSW_FNAME C(100); DSW_LNAME C(100); DSW_DNAME C(100); DSW_IDNO C(15); DSW_IDPLC C(100); DSW_IDATE C(8); DSW_BDATE C(8); DSW_SEX C(6); DSW_NAT C(20);  DSW_OCP C(100);  DSW_SDATE C(8);  DSW_EDATE C(8);  DSW_DD N(2,0);  DSW_ROOZ N(12,0);  DSW_MAH N(12,0);  DSW_MAZ N(12,0);  DSW_MASH N(12,0);  DSW_TOTL N(12,0);  DSW_BIME N(12,0);  DSW_PRATE N(2,0);  DSW_JOB C(6); PER_NATCOD C(10)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
 
     for item in items.list_of_pay_item.filter(contract_row__id=pk2):

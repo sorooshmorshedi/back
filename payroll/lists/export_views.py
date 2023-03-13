@@ -2321,7 +2321,6 @@ class PayrollExportView(ListOfPayListView, BaseExportView):
              '', '', item['total_tax'], item['dept_amount'],
              item['loan_amount'], item['check_and_get_optional_deduction_episode'], item['payable'],
              '', '']
-
         )
 
         return data
