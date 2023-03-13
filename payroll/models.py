@@ -975,6 +975,13 @@ class Personnel(BaseModel, LockableMixin, DefinableMixin):
             return 5
 
     @property
+    def insurance_code_for_tax(self):
+        if self.insurance:
+            return self.insurance_code
+        else:
+            return ''
+
+    @property
     def insurance_display(self):
         if self.insurance:
             return 'دارد'
@@ -4100,6 +4107,21 @@ class ListOfPayItem(BaseModel, LockableMixin, DefinableMixin):
             Q(list_of_pay__year=self.list_of_pay.year) &
             Q(list_of_pay__month__lte=self.list_of_pay.month) &
             Q(list_of_pay__ultimate=True) &
+            Q(workshop_personnel=self.workshop_personnel)
+        )
+        total = 0
+        for item in items:
+            is_tax, tax_day = item.check_tax
+            total += tax_day
+        return round(total, 2)
+
+    @property
+    def tax_year_real_work_month(self):
+        items = ListOfPayItem.objects.filter(
+            Q(list_of_pay__year=self.list_of_pay.year) &
+            Q(list_of_pay__month__lte=self.list_of_pay.month) &
+            Q(list_of_pay__ultimate=True) &
+            Q(list_of_pay__use_in_calculate=True) &
             Q(workshop_personnel=self.workshop_personnel)
         )
         total = 0
