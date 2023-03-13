@@ -26,7 +26,7 @@ def write_insurance_diskette(request, pk):
     data = item.data_for_insurance
 
     new_table = dbf.Table('DSKKAR00.dbf',
-                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
+                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(200); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
     new_table.append({
         'DSK_ID': data['DSK_ID'],
@@ -64,7 +64,7 @@ def write_row_insurance_diskette(request, pk1, pk2):
     contract_row = ContractRow.objects.get(pk=pk2)
     data = item.data_for_insurance_row(pk2)
     new_table = dbf.Table('DSKKAR00.dbf',
-                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(100); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
+                          'DSK_ID C(10); DSK_NAME C(100); DSK_FARM C(100); DSK_ADRS C(200); DSK_KIND N(1,0); DSK_YY N(2,0); DSK_MM N(2,0); DSK_LISTNO C(12); ; DSK_DISC C(100); DSK_NUM N(5,0);  DSK_TDD N(6,0);  DSK_TROOZ N(12,0);  DSK_TMAH N(12,0);  DSK_TMAZ N(12,0);  DSK_TMASH N(12,0);  DSK_TTOTL N(12,0);  DSK_TBIME N(12,0);  DSK_TKOSO N(12,0);  DSK_BIC N(12,0);  DSK_RATE N(5,0);  DSK_PRATE N(2,0);  DSK_BIMH N(12,0);  MON_PYM N(3,0)', codepage='utf8')
     new_table.open(dbf.READ_WRITE)
     new_table.append({
         'DSK_ID': data['DSK_ID'],
